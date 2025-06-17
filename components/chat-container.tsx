@@ -14,16 +14,22 @@ interface Message {
 interface ChatContainerProps {
   chatId: string
   initialMessages: Message[]
+  userImageUrl?: string
+  userName?: string
 }
 
-export function ChatContainer({ chatId, initialMessages }: ChatContainerProps) {
+export function ChatContainer({ chatId, initialMessages, userImageUrl, userName }: ChatContainerProps) {
   const { messages, isLoading, input, setInput, sendMessage } = useChat(chatId, initialMessages)
 
   return (
     <>
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden">
-        <ChatMessages messages={messages} />
+        <ChatMessages 
+          messages={messages} 
+          userImageUrl={userImageUrl}
+          userName={userName}
+        />
       </div>
 
       {/* Input Area */}

@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
 import { ChatSidebar } from '@/components/chat-sidebar'
@@ -15,6 +15,9 @@ export default async function ChatPage({ params }: ChatPageProps) {
   if (!userId) {
     redirect('/sign-in')
   }
+
+  // Get current user data from Clerk
+  const user = await currentUser()
 
   // Get the specific chat and verify ownership
   const chat = await prisma.chat.findFirst({
@@ -55,7 +58,12 @@ export default async function ChatPage({ params }: ChatPageProps) {
         </div>
 
         {/* Chat Container with Messages and Input */}
-        <ChatContainer chatId={chat.id} initialMessages={chat.messages} />
+        <ChatContainer 
+          chatId={chat.id} 
+          initialMessages={chat.messages}
+          userImageUrl={user?.imageUrl}
+          userName={user?.firstName || 'User'}
+        />
       </div>
     </div>
   )
