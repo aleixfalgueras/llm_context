@@ -186,7 +186,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
           <Button
             onClick={() => setShowUpload(true)}
             variant="outline"
-            className="w-full"
+            className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200"
           >
             <Plus className="h-4 w-4 mr-2" />
             Upload Notes

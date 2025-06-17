@@ -61,16 +61,25 @@ export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: 
           {onNotesToggle && (
               <Button 
                 onClick={onNotesToggle}
-                variant={notesOpen ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                className="w-full"
+                className={`w-full transition-all duration-200 ${
+                  notesOpen 
+                    ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 shadow-sm' 
+                    : 'hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-200 dark:hover:border-blue-800'
+                }`}
               >
                 <StickyNote className="w-4 h-4 mr-2" />
                 {notesOpen ? "Hide Notes" : "Show Notes"}
               </Button>
             )}
           <form action={() => createChat()}>
-            <Button type="submit" className="w-full" size="sm">
+            <Button 
+              type="submit" 
+              variant="outline"
+              className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200" 
+              size="sm"
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Chat
             </Button>
