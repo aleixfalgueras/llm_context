@@ -1,8 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
-import { ChatSidebar } from '@/components/chat-sidebar'
-import { ChatContainer } from '@/components/chat-container'
+import { ChatPageClient } from '@/components/chat-page-client'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
@@ -49,22 +48,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
   })
 
   return (
-    <div className="flex h-screen">
-      <ChatSidebar chats={chats} />
-      <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
-        <div className="border-b p-4">
-          <h1 className="font-semibold text-lg">{chat.title}</h1>
-        </div>
-
-        {/* Chat Container with Messages and Input */}
-        <ChatContainer 
-          chatId={chat.id} 
-          initialMessages={chat.messages}
-          userImageUrl={user?.imageUrl}
-          userName={user?.firstName || 'User'}
-        />
-      </div>
-    </div>
+    <ChatPageClient
+      chat={chat}
+      chats={chats}
+      userImageUrl={user?.imageUrl}
+      userName={user?.firstName || 'User'}
+    />
   )
 } 

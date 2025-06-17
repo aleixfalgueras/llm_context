@@ -9,6 +9,7 @@ A modern AI-powered chatbot application built with Next.js 14, React 18, and Ope
 - **Chat Management**: Create, view, edit, and delete chat conversations
 - **Real-time Messaging**: Send and receive messages in real-time
 - **Message History**: Persistent chat history stored in database
+- **Notes Management**: Upload, view, and delete markdown/text notes with cloud storage
 
 ### User Experience  
 - **ChatGPT-like Interface**: Clean, minimalistic design similar to ChatGPT
@@ -101,6 +102,12 @@ Create a `.env.local` file with:
 DATABASE_URL="your_supabase_database_url"
 DIRECT_URL="your_supabase_direct_url"
 
+# Supabase Storage (for notes)
+SUPABASE_URL="your_supabase_project_url"
+SUPABASE_KEY="your_supabase_service_role_key"
+NEXT_PUBLIC_SUPABASE_URL="your_supabase_project_url"
+NEXT_PUBLIC_SUPABASE_KEY="your_supabase_anon_key"
+
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_publishable_key"
 CLERK_SECRET_KEY="your_clerk_secret_key"
@@ -136,6 +143,8 @@ npm run dev
 3. **Send Messages**: Type your message and press Enter or click Send
 4. **Manage Chats**: Edit titles or delete chats using the dropdown menu
 5. **View History**: Click on any chat in the sidebar to view conversation
+6. **Upload Notes**: Click the "Notes" button to open the notes sidebar
+7. **Manage Notes**: Upload .md or .txt files, view content, and delete notes as needed
 
 ## Architecture Decisions
 

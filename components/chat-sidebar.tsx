@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2 } from 'lucide-react'
+import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2, StickyNote } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -20,9 +20,11 @@ interface Chat {
 
 interface ChatSidebarProps {
   chats: Chat[]
+  notesOpen?: boolean
+  onNotesToggle?: () => void
 }
 
-export function ChatSidebar({ chats }: ChatSidebarProps) {
+export function ChatSidebar({ chats, notesOpen, onNotesToggle }: ChatSidebarProps) {
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
 
@@ -54,12 +56,25 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
             <UserButton />
           </div>
         </div>
-        <form action={() => createChat()}>
-          <Button type="submit" className="w-full" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            New Chat
-          </Button>
-        </form>
+        <div className="space-y-2">
+          {onNotesToggle && (
+              <Button 
+                onClick={onNotesToggle}
+                variant={notesOpen ? "default" : "outline"}
+                size="sm"
+                className="w-full"
+              >
+                <StickyNote className="w-4 h-4 mr-2" />
+                {notesOpen ? "Hide Notes" : "Show Notes"}
+              </Button>
+            )}
+          <form action={() => createChat()}>
+            <Button type="submit" className="w-full" size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              New Chat
+            </Button>
+          </form>
+        </div>
       </div>
 
       {/* Chat List */}
