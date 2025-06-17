@@ -46,7 +46,8 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
   return (
     <div className="flex h-screen">
       <ChatSidebar 
-        chats={chats} 
+        chats={chats}
+        currentChatId={chat.id}
         notesOpen={notesOpen}
         onNotesToggle={() => setNotesOpen(!notesOpen)}
       />
