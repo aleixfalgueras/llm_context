@@ -127,7 +127,7 @@ export function NotesUpload({ onUploadSuccess }: NotesUploadProps) {
           <Button
             variant="outline"
             size="sm"
-            className="mt-4"
+            className="mt-4 bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200"
             onClick={() => document.getElementById('file-input')?.click()}
           >
             Select Files
@@ -173,7 +173,8 @@ export function NotesUpload({ onUploadSuccess }: NotesUploadProps) {
           <Button
             onClick={handleUpload}
             disabled={uploading}
-            className="w-full"
+            variant="outline"
+            className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200 disabled:opacity-50"
           >
             {uploading ? 'Uploading...' : `Upload ${selectedFiles.length} file(s)`}
           </Button>
