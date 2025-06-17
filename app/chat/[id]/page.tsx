@@ -31,7 +31,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
         },
       },
     },
-  })
+  }) as any
 
   if (!chat) {
     notFound()

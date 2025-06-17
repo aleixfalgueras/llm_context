@@ -17,10 +17,11 @@ interface ChatContainerProps {
   userImageUrl?: string
   userName?: string
   selectedNoteContent?: string | null
+  selectedNoteName?: string | null
   onNoteContextSent?: () => void
 }
 
-export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, selectedNoteContent, onNoteContextSent }: ChatContainerProps) {
+export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, selectedNoteContent, selectedNoteName, onNoteContextSent }: ChatContainerProps) {
   const { messages, isLoading, input, setInput, sendMessage } = useChat(chatId, initialMessages)
 
   return (
@@ -43,6 +44,7 @@ export function ChatContainer({ chatId, initialMessages, userImageUrl, userName,
           sendMessage={sendMessage}
           isLoading={isLoading}
           selectedNoteContent={selectedNoteContent}
+          selectedNoteName={selectedNoteName}
           onNoteContextSent={onNoteContextSent}
         />
       </div>

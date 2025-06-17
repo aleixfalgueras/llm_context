@@ -13,9 +13,11 @@ interface NotesSidebarProps {
   onToggle: () => void
   selectedNote?: string | null
   onNoteSelect?: (noteName: string | null) => void
+  chatId?: string
+  usedNotes?: string[]
 }
 
-export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect }: NotesSidebarProps) {
+export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, chatId, usedNotes = [] }: NotesSidebarProps) {
   const [notes, setNotes] = useState<UserNote[]>([])
   const [loading, setLoading] = useState(true)
   const [showUpload, setShowUpload] = useState(false)
@@ -171,6 +173,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect }: N
                 onNotesChange={handleNotesChange}
                 selectedNote={selectedNote}
                 onNoteSelect={onNoteSelect}
+                usedNotes={usedNotes}
               />
             )}
           </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, FileText, Calendar, Eye, EyeOff, Check, Circle } from 'lucide-react'
+import { Trash2, FileText, Calendar, Eye, EyeOff, Check, Circle, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -13,9 +13,10 @@ interface NotesListProps {
   onNotesChange?: () => void
   selectedNote?: string | null
   onNoteSelect?: (noteName: string | null) => void
+  usedNotes?: string[]
 }
 
-export function NotesList({ notes, onNotesChange, selectedNote, onNoteSelect }: NotesListProps) {
+export function NotesList({ notes, onNotesChange, selectedNote, onNoteSelect, usedNotes = [] }: NotesListProps) {
   const [expandedNote, setExpandedNote] = useState<string | null>(null)
   const [deletingNote, setDeletingNote] = useState<string | null>(null)
   const { toast } = useToast()
@@ -77,15 +78,27 @@ export function NotesList({ notes, onNotesChange, selectedNote, onNoteSelect }: 
       <div className="space-y-3">
         {notes.map((note) => {
           const isSelected = selectedNote === note.name
+          const isUsed = usedNotes.includes(note.name)
           return (
             <Card 
               key={note.name} 
-              className={`p-4 transition-colors ${
+              className={`p-4 transition-colors relative ${
                 isSelected 
                   ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/20' 
                   : ''
+              } ${
+                isUsed 
+                  ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800' 
+                  : ''
               }`}
             >
+              {/* Used Note Watermark */}
+              {isUsed && (
+                <div className="absolute top-2 right-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+                  <MessageSquare className="h-3 w-3" />
+                  <span>Used</span>
+                </div>
+              )}
               <div className="space-y-3">
               {/* Note Header */}
               <div className="flex items-center justify-between">
