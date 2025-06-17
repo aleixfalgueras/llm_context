@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useChat } from '@/hooks/use-chat'
 import { ChatMessages } from './chat-messages'
 import { ChatInput } from './chat-input'
@@ -19,10 +20,18 @@ interface ChatContainerProps {
   selectedNoteContent?: string | null
   selectedNoteName?: string | null
   onNoteContextSent?: () => void
+  onTitleUpdate?: (title: string) => void
 }
 
-export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, selectedNoteContent, selectedNoteName, onNoteContextSent }: ChatContainerProps) {
-  const { messages, isLoading, input, setInput, sendMessage } = useChat(chatId, initialMessages)
+export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, selectedNoteContent, selectedNoteName, onNoteContextSent, onTitleUpdate }: ChatContainerProps) {
+  const { messages, isLoading, input, setInput, sendMessage, setOnTitleUpdate } = useChat(chatId, initialMessages)
+  
+  // Set up title update callback
+  useEffect(() => {
+    if (onTitleUpdate) {
+      setOnTitleUpdate(() => onTitleUpdate)
+    }
+  }, [onTitleUpdate, setOnTitleUpdate])
 
   return (
     <>

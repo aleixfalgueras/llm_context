@@ -22,6 +22,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
   const [notesOpen, setNotesOpen] = useState(true)
   const [selectedNote, setSelectedNote] = useState<string | null>(null)
   const [selectedNoteContent, setSelectedNoteContent] = useState<string | null>(null)
+  const [currentTitle, setCurrentTitle] = useState(chat.title)
 
   // Fetch note content when a note is selected
   useEffect(() => {
@@ -54,7 +55,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
         <div className="border-b p-4">
-          <h1 className="font-semibold text-lg">{chat.title}</h1>
+          <h1 className="font-semibold text-lg">{currentTitle}</h1>
         </div>
 
         {/* Chat Container with Messages and Input */}
@@ -66,6 +67,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
           selectedNoteContent={selectedNoteContent}
           selectedNoteName={selectedNote}
           onNoteContextSent={() => setSelectedNote(null)}
+          onTitleUpdate={setCurrentTitle}
         />
       </div>
       
