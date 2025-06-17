@@ -1,14 +1,14 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
 import { ChatSidebar } from '@/components/chat-sidebar'
 import { ChatInterface } from '@/components/chat-interface'
+import { LandingPage } from '@/components/landing-page'
 
 export default async function Home() {
   const { userId } = await auth()
 
   if (!userId) {
-    redirect('/sign-in')
+    return <LandingPage />
   }
 
   // Get user's chats
