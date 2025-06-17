@@ -1,11 +1,11 @@
 'use client'
 
-import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2, StickyNote } from 'lucide-react'
+import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2, StickyNote, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { createChat, deleteChat, updateChatTitle } from '@/lib/actions'
+import { createChat, deleteChat, updateChatTitle, deleteAllChats } from '@/lib/actions'
 import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -28,6 +28,7 @@ interface ChatSidebarProps {
 export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: ChatSidebarProps) {
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
 
   const handleEditStart = (chat: Chat) => {
     setEditingChatId(chat.id)
@@ -44,6 +45,16 @@ export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: 
   const handleEditCancel = () => {
     setEditingChatId(null)
     setEditTitle('')
+  }
+
+  const handleDeleteAllChats = async () => {
+    if (showDeleteAllConfirm) {
+      await deleteAllChats()
+    } else {
+      setShowDeleteAllConfirm(true)
+      // Reset confirmation after 3 seconds
+      setTimeout(() => setShowDeleteAllConfirm(false), 3000)
+    }
   }
 
   return (
@@ -84,6 +95,21 @@ export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: 
               New Chat
             </Button>
           </form>
+          {chats.length > 0 && (
+            <Button 
+              onClick={handleDeleteAllChats}
+              variant="outline"
+              className={`w-full transition-all duration-200 ${
+                showDeleteAllConfirm 
+                  ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 hover:bg-red-200 dark:hover:bg-red-900/50' 
+                  : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
+              } shadow-sm`}
+              size="sm"
+            >
+              <TrashIcon className="w-4 h-4 mr-2" />
+              {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All Chats'}
+            </Button>
+          )}
         </div>
       </div>
 
