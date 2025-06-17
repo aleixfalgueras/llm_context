@@ -10,6 +10,7 @@ import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 interface Chat {
   id: string
@@ -43,12 +44,15 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
   }
 
   return (
-    <div className="w-80 border-r bg-gray-50 flex flex-col">
+    <div className="w-80 border-r bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold">AI Chat</h1>
-          <UserButton />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserButton />
+          </div>
         </div>
         <form action={() => createChat()}>
           <Button type="submit" className="w-full" size="sm">

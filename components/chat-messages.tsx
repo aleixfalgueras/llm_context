@@ -44,7 +44,7 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
     <ScrollArea className="h-full">
       <div className="p-4 space-y-6">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-20">
+          <div className="text-center text-gray-500 dark:text-gray-400 mt-20">
             <div className="w-12 h-12 mx-auto mb-4 opacity-50">
               <Image
                 src="/openai-logo.svg"
@@ -85,12 +85,12 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
                   <span className="font-medium text-sm">
                     {message.role === 'USER' ? (userName || 'You') : 'ChatGPT'}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(message.createdAt).toLocaleTimeString()}
                   </span>
                 </div>
                 <div className="prose prose-sm max-w-none">
-                  <p className="whitespace-pre-wrap text-gray-800">{message.content}</p>
+                  <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.content}</p>
                 </div>
               </div>
             </div>
