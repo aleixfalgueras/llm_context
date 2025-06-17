@@ -3,6 +3,7 @@
 import { Send, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { addUsedNoteToChat } from '@/lib/actions'
 
 interface ChatInputProps {
   chatId: string
@@ -11,10 +12,11 @@ interface ChatInputProps {
   sendMessage: (content: string) => Promise<void>
   isLoading: boolean
   selectedNoteContent?: string | null
+  selectedNoteName?: string | null
   onNoteContextSent?: () => void
 }
 
-export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, selectedNoteContent, onNoteContextSent }: ChatInputProps) {
+export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, selectedNoteContent, selectedNoteName, onNoteContextSent }: ChatInputProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,8 +30,17 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, sel
         console.log(messageContent)
       }
       
-      sendMessage(messageContent).then(() => {
-        // After successfully sending message with context, deselect the note
+      sendMessage(messageContent).then(async () => {
+        // After successfully sending message with context, track the used note
+        if (hasNoteContext && selectedNoteName) {
+          try {
+            await addUsedNoteToChat(chatId, selectedNoteName)
+          } catch (error) {
+            console.error('Failed to track used note:', error)
+          }
+        }
+        
+        // Deselect the note
         if (hasNoteContext && onNoteContextSent) {
           onNoteContextSent()
         }

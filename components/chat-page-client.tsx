@@ -11,6 +11,7 @@ interface ChatPageClientProps {
     id: string
     title: string
     messages: any[]
+    usedNotes?: string[]
   }
   chats: any[]
   userImageUrl?: string
@@ -62,6 +63,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
           userImageUrl={userImageUrl}
           userName={userName}
           selectedNoteContent={selectedNoteContent}
+          selectedNoteName={selectedNote}
           onNoteContextSent={() => setSelectedNote(null)}
         />
       </div>
@@ -72,6 +74,8 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
         onToggle={() => setNotesOpen(!notesOpen)}
         selectedNote={selectedNote}
         onNoteSelect={setSelectedNote}
+        chatId={chat.id}
+        usedNotes={chat.usedNotes || []}
       />
     </div>
   )
