@@ -13,6 +13,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [isLoading, setIsLoading] = useState(false)
   const [input, setInput] = useState('')
+  const [onTitleUpdate, setOnTitleUpdate] = useState<((title: string) => void) | null>(null)
 
   // Update messages when initialMessages changes (for server-side updates)
   useEffect(() => {
@@ -65,6 +66,11 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
       // Add assistant message to UI
       setMessages(prev => [...prev, assistantMessage])
       
+      // Update title if this was the first message
+      if (data.newTitle && onTitleUpdate) {
+        onTitleUpdate(data.newTitle)
+      }
+      
     } catch (error) {
       console.error('Error sending message:', error)
       // Remove user message on error
@@ -80,5 +86,6 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
     input,
     setInput,
     sendMessage,
+    setOnTitleUpdate,
   }
 } 
