@@ -16,7 +16,8 @@ export function HomePageClient({ chats }: HomePageClientProps) {
   return (
     <div className="flex h-screen">
       <ChatSidebar 
-        chats={chats} 
+        chats={chats}
+        currentChatId={undefined}
         notesOpen={notesOpen}
         onNotesToggle={() => setNotesOpen(!notesOpen)}
       />

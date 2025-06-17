@@ -20,11 +20,12 @@ interface Chat {
 
 interface ChatSidebarProps {
   chats: Chat[]
+  currentChatId?: string
   notesOpen?: boolean
   onNotesToggle?: () => void
 }
 
-export function ChatSidebar({ chats, notesOpen, onNotesToggle }: ChatSidebarProps) {
+export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: ChatSidebarProps) {
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
 
@@ -87,8 +88,17 @@ export function ChatSidebar({ chats, notesOpen, onNotesToggle }: ChatSidebarProp
               <p className="text-sm">Start a new conversation</p>
             </div>
           ) : (
-            chats.map((chat) => (
-              <Card key={chat.id} className="mb-2 p-3 hover:shadow-sm transition-shadow">
+            chats.map((chat) => {
+              const isCurrentChat = currentChatId === chat.id
+              return (
+                <Card 
+                  key={chat.id} 
+                  className={`mb-2 p-3 transition-all duration-200 ${
+                    isCurrentChat 
+                      ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 shadow-md ring-2 ring-blue-500/20' 
+                      : 'hover:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
                 <div className="flex items-center justify-between">
                   <Link 
                     href={`/chat/${chat.id}`} 
@@ -143,7 +153,8 @@ export function ChatSidebar({ chats, notesOpen, onNotesToggle }: ChatSidebarProp
                   )}
                 </div>
               </Card>
-            ))
+            )
+            })
           )}
         </div>
       </ScrollArea>
