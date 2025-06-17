@@ -41,6 +41,23 @@ export async function deleteChat(chatId: string) {
   redirect('/')
 }
 
+export async function deleteAllChats() {
+  const { userId } = await auth()
+  
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  await prisma.chat.deleteMany({
+    where: {
+      userId, // Only delete the user's own chats
+    },
+  })
+
+  revalidatePath('/')
+  redirect('/')
+}
+
 export async function updateChatTitle(chatId: string, title: string) {
   const { userId } = await auth()
   
