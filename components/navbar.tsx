@@ -12,6 +12,7 @@ export function Navbar() {
   const navigation = [
     { name: 'Clients', href: '/clients', icon: '👥' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
+    { name: 'AI Services', href: '/ai-services', icon: '⚡' },
   ]
 
   // Helper function to determine if a nav item is active

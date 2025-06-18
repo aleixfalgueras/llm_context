@@ -58,11 +58,28 @@ model Client {
   
   // Relations
   chats       Chat[]
+  documents   Document[]
 
   @@map("clients")
 }
 
+model Document {
+  id          String   @id @default(cuid())
+  userId      String   // The coach's user ID
+  clientId    String   // The client this document belongs to
+  documentName String  // The name of the document
+  documentPath String  // Path in Supabase storage: user_id/client_id/document_name.md
+  documentType String  // Type of document (e.g., "diet", "workout", "plan")
+  startDate   DateTime? // For time-based documents like diets
+  endDate     DateTime? // For time-based documents like diets
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
+  @@map("documents")
+}
 
 enum Role {
   USER
