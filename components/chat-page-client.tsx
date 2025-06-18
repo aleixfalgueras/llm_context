@@ -54,14 +54,13 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
         selectedClientId={chat.clientId}
       />
       <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
+        {/* Enhanced Chat Header */}
         <div className="border-b p-4">
-          <h1 className="font-semibold text-lg">{currentTitle}</h1>
-          {selectedClient && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Chat with context for: {selectedClient.name}
-            </p>
-          )}
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <h1 className="font-semibold text-lg truncate">{currentTitle}</h1>
+            </div>
+          </div>
         </div>
 
         {/* Chat Container with Messages and Input */}

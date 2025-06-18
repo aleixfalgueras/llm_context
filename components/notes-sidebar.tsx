@@ -119,7 +119,7 @@ export function ClientSidebar({
             <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
               <User className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
               <h2 className="font-semibold text-sm sm:text-base truncate">
-                {chatHasStarted ? 'Chat Client' : 'Select Client'}
+                {chatHasStarted ? 'Client Information' : 'Select Client'}
               </h2>
             </div>
             <div className="flex items-center space-x-1 flex-shrink-0">
@@ -148,10 +148,9 @@ export function ClientSidebar({
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <User className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-900 dark:text-blue-100">Client for this chat</span>
+                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedClient.name}</span>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-lg">{selectedClient.name}</h3>
                     {selectedClient.email && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         📧 {selectedClient.email}
