@@ -100,6 +100,24 @@ The test suite covers all major functionalities of your application:
 - ✅ **Mocking Strategy**: External APIs and dependencies
 - ✅ **Test Utilities**: Reusable helpers and factories
 
+## 🧪 Currently Implemented Tests
+
+### Working Test Files:
+- **`example.test.ts`** - Basic Jest functionality (math, arrays, objects)
+- **`simple.test.ts`** - Core Jest matchers and testing patterns  
+- **`simple-button.test.tsx`** - React component testing (Button UI component)
+
+### Usage:
+```bash
+# Run all working tests
+npm test
+
+# Run specific test
+npm test -- __tests__/example.test.ts
+npm test -- __tests__/simple.test.ts
+npm test -- __tests__/components/simple-button.test.tsx
+```
+
 ## 📋 Current Status
 
 ### ✅ Working Features:

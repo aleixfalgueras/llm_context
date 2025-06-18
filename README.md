@@ -349,6 +349,24 @@ npm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## 🧪 Tests
+
+### Working Test Files:
+- **`example.test.ts`** - Basic Jest functionality (math, arrays, objects)
+- **`simple.test.ts`** - Core Jest matchers and testing patterns  
+- **`simple-button.test.tsx`** - React component testing (Button UI component)
+
+### Usage:
+```bash
+# Run all working tests
+npm test
+
+# Run specific test
+npm test -- __tests__/example.test.ts
+npm test -- __tests__/simple.test.ts
+npm test -- __tests__/components/simple-button.test.tsx
+```
+
 ## Usage
 
 1. **Sign Up/Sign In**: Create an account or sign in with Clerk
