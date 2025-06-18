@@ -115,8 +115,8 @@ Respond naturally and conversationally while keeping this context in mind.`
     // Save the user message to the database
     await createMessage(chatId, lastMessage.content, 'USER')
 
-    // If this is the first user message, update the chat title
-    if (isFirstUserMessage) {
+    // If this is the first user message, update the chat title only if it's still the default
+    if (isFirstUserMessage && chat.title === 'New Chat') {
       const newTitle = generateChatTitleWithClient(client.name)
       
       await prisma.chat.update({
@@ -155,9 +155,12 @@ Respond naturally and conversationally while keeping this context in mind.`
     // Save the assistant's response to the database
     await createMessage(chatId, assistantMessage, 'ASSISTANT')
 
+    // Only include newTitle if we actually updated it
+    const shouldIncludeTitle = isFirstUserMessage && chat.title === 'New Chat'
+    
     return Response.json({ 
       message: assistantMessage,
-      ...(isFirstUserMessage && { newTitle: generateChatTitleWithClient(client.name) })
+      ...(shouldIncludeTitle && { newTitle: generateChatTitleWithClient(client.name) })
     })
   } catch (error) {
     console.error('Error in chat API:', error)

@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from './prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { generateChatTitleWithClient } from './utils'
 
 export async function createChat(title: string = 'New Chat', clientId: string) {
   const { userId } = await auth()
@@ -16,9 +17,25 @@ export async function createChat(title: string = 'New Chat', clientId: string) {
     throw new Error('Client selection is required')
   }
 
+  // Get client name to create a meaningful title
+  const client = await prisma.client.findFirst({
+    where: { 
+      id: clientId,
+      userId 
+    },
+    select: { name: true }
+  })
+
+  if (!client) {
+    throw new Error('Client not found')
+  }
+
+  // Use client name in title if title is the default
+  const chatTitle = title === 'New Chat' ? generateChatTitleWithClient(client.name) : title
+
   const chat = await prisma.chat.create({
     data: {
-      title,
+      title: chatTitle,
       userId,
       clientId,
     } as any,
@@ -26,6 +43,45 @@ export async function createChat(title: string = 'New Chat', clientId: string) {
 
   revalidatePath('/')
   redirect(`/chat/${chat.id}`)
+}
+
+export async function createChatAndReturn(title: string = 'New Chat', clientId: string) {
+  const { userId } = await auth()
+  
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  if (!clientId) {
+    throw new Error('Client selection is required')
+  }
+
+  // Get client name to create a meaningful title
+  const client = await prisma.client.findFirst({
+    where: { 
+      id: clientId,
+      userId 
+    },
+    select: { name: true }
+  })
+
+  if (!client) {
+    throw new Error('Client not found')
+  }
+
+  // Use client name in title if title is the default
+  const chatTitle = title === 'New Chat' ? generateChatTitleWithClient(client.name) : title
+
+  const chat = await prisma.chat.create({
+    data: {
+      title: chatTitle,
+      userId,
+      clientId,
+    } as any,
+  })
+
+  revalidatePath('/')
+  return chat.id
 }
 
 export async function deleteChat(chatId: string) {
