@@ -17,8 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AI Chat Assistant",
-  description: "AI-powered chatbot application",
+  title: "HealthCoach AI",
+  description: "AI-powered assistant for health coaches to manage clients and consultations",
 };
 
 export default function RootLayout({

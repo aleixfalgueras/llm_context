@@ -1,0 +1,158 @@
+'use client'
+
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Zap, FileText, Calendar, User } from 'lucide-react'
+import { DietGeneratorDialog } from './diet-generator-dialog'
+
+interface AIServicesClientProps {
+  clients: any[]
+}
+
+export function AIServicesClient({ clients }: AIServicesClientProps) {
+  const [isDietDialogOpen, setIsDietDialogOpen] = useState(false)
+
+  const services = [
+    {
+      id: 'diet-generator',
+      title: 'Generate Diet Plan',
+      description: 'Create personalized diet plans for your clients based on their goals, medical history, and preferences.',
+      icon: <FileText className="h-8 w-8" />,
+      features: ['Client-specific recommendations', 'Date range planning', 'Editable before saving', 'PDF export'],
+      status: 'available',
+      onClick: () => setIsDietDialogOpen(true)
+    },
+    {
+      id: 'workout-generator',
+      title: 'Generate Workout Plan',
+      description: 'Design custom workout routines tailored to your client\'s fitness level and objectives.',
+      icon: <Calendar className="h-8 w-8" />,
+      features: ['Progressive overload', 'Equipment customization', 'Injury considerations', 'Weekly schedules'],
+      status: 'coming-soon',
+      onClick: () => {}
+    },
+    {
+      id: 'progress-report',
+      title: 'Progress Report',
+      description: 'Generate comprehensive progress reports tracking client achievements and milestones.',
+      icon: <User className="h-8 w-8" />,
+      features: ['Data visualization', 'Goal tracking', 'Improvement suggestions', 'Client-friendly format'],
+      status: 'coming-soon',
+      onClick: () => {}
+    }
+  ]
+
+  return (
+    <>
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Zap className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold">AI Services</h1>
+          </div>
+          <p className="text-lg text-muted-foreground">
+            Leverage AI to create personalized content for your clients
+          </p>
+        </div>
+
+        {/* Services Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.map((service) => (
+            <Card 
+              key={service.id} 
+              className={`transition-all duration-200 ${
+                service.status === 'available' 
+                  ? 'hover:shadow-lg cursor-pointer border-blue-200 dark:border-blue-800' 
+                  : 'opacity-75 cursor-not-allowed'
+              }`}
+              onClick={service.status === 'available' ? service.onClick : undefined}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      service.status === 'available' 
+                        ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' 
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                    }`}>
+                      {service.icon}
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{service.title}</CardTitle>
+                      <Badge 
+                        variant={service.status === 'available' ? 'default' : 'secondary'}
+                        className="mt-1"
+                      >
+                        {service.status === 'available' ? 'Available' : 'Coming Soon'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {service.description}
+                </p>
+                <ul className="space-y-1">
+                  {service.features.map((feature, index) => (
+                    <li key={index} className="text-xs text-muted-foreground flex items-center gap-2">
+                      <div className="w-1 h-1 bg-blue-500 rounded-full" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                {service.status === 'available' && (
+                  <Button className="w-full mt-4" onClick={service.onClick}>
+                    Get Started
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Info Section */}
+        <Card className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+          <CardHeader>
+            <CardTitle className="text-blue-900 dark:text-blue-100">How it works</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                  1
+                </div>
+                <h3 className="font-medium text-blue-900 dark:text-blue-100">Select Client</h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300">Choose which client you want to create content for</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                  2
+                </div>
+                <h3 className="font-medium text-blue-900 dark:text-blue-100">AI Generation</h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300">AI creates personalized content using client context</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                  3
+                </div>
+                <h3 className="font-medium text-blue-900 dark:text-blue-100">Review & Save</h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300">Edit the content and save it to your client's documents</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Diet Generator Dialog */}
+      <DietGeneratorDialog 
+        open={isDietDialogOpen}
+        onOpenChange={setIsDietDialogOpen}
+        clients={clients}
+      />
+    </>
+  )
+} 

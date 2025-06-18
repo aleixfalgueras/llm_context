@@ -18,10 +18,13 @@ model Chat {
   id        String    @id @default(cuid())
   title     String
   userId    String
-  usedNotes String[]  @default([])
+  clientId  String    // Required client association for this chat
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   messages  Message[]
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("chats")
 }
@@ -36,6 +39,46 @@ model Message {
   chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   @@map("messages")
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  userId      String   // The coach's user ID
+  name        String
+  email       String?
+  phone       String?
+  dateOfBirth DateTime?
+  height      Float?   // in centimeters
+  weight      Float?   // in kilograms
+  goals       String?  // Health and fitness goals
+  medicalHistory String? // Medical conditions, allergies, etc.
+  notes       String?  // General notes about the client
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  chats       Chat[]
+  documents   Document[]
+
+  @@map("clients")
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  userId      String   // The coach's user ID
+  clientId    String   // The client this document belongs to
+  documentName String  // The name of the document
+  documentPath String  // Path in Supabase storage: user_id/client_id/document_name.md
+  documentType String  // Type of document (e.g., "diet", "workout", "plan")
+  startDate   DateTime? // For time-based documents like diets
+  endDate     DateTime? // For time-based documents like diets
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
 }
 
 enum Role {

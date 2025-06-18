@@ -1,52 +1,50 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { StickyNote, Plus, X, GripVertical } from 'lucide-react'
+import { User, GripVertical, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { NotesUpload } from './notes-upload'
-import { NotesList } from './notes-list'
-import { getUserNotes, type UserNote } from '@/lib/notes-actions'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { getClients } from '@/lib/client-actions'
 
-interface NotesSidebarProps {
-  isOpen: boolean
-  onToggle: () => void
-  selectedNote?: string | null
-  onNoteSelect?: (noteName: string | null) => void
+interface ClientSidebarProps {
   chatId?: string
-  usedNotes?: string[]
+  selectedClientId?: string | null
+  onClientSelect?: (clientId: string | null) => void
+  clients?: any[]
+  hasActiveChat?: boolean // Whether there's an active chat selected
 }
 
-export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, chatId, usedNotes = [] }: NotesSidebarProps) {
-  const [notes, setNotes] = useState<UserNote[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showUpload, setShowUpload] = useState(false)
-  const [sidebarWidth, setSidebarWidth] = useState(320) // Default 320px (w-80)
+export function ClientSidebar({ 
+  chatId,
+  selectedClientId = null, 
+  onClientSelect,
+  clients = [],
+  hasActiveChat = false
+}: ClientSidebarProps) {
+  const [allClients, setAllClients] = useState<any[]>(clients)
+  const [loading, setLoading] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(320) // Default 320px to match chat sidebar
   const [isResizing, setIsResizing] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
-  const fetchNotes = async () => {
+  const fetchClients = async () => {
     try {
       setLoading(true)
-      const userNotes = await getUserNotes()
-      setNotes(userNotes)
+      const clientList = await getClients()
+      setAllClients(clientList)
     } catch (error) {
-      console.error('Failed to fetch notes:', error)
+      console.error('Failed to fetch clients:', error)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    if (isOpen) {
-      fetchNotes()
+    if (allClients.length === 0) {
+      fetchClients()
     }
-  }, [isOpen])
-
-  const handleNotesChange = () => {
-    fetchNotes()
-    setShowUpload(false)
-  }
+  }, [])
 
   // Handle resize functionality
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -59,7 +57,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
       if (!isResizing) return
       
       const newWidth = window.innerWidth - e.clientX
-      const minWidth = 240 // Minimum 240px
+      const minWidth = 320 // Minimum 320px for better readability
       const maxWidth = 600 // Maximum 600px
       
       const constrainedWidth = Math.min(Math.max(newWidth, minWidth), maxWidth)
@@ -85,9 +83,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
     }
   }, [isResizing])
 
-  if (!isOpen) {
-    return null
-  }
+  const selectedClient = allClients.find(client => client.id === selectedClientId)
 
   return (
     <div 
@@ -109,90 +105,133 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
       
       {/* Sidebar Content */}
       <div className="flex flex-col flex-1 ml-1">
-      {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <StickyNote className="h-5 w-5" />
-            <h2 className="font-semibold">My Notes</h2>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowUpload(!showUpload)}
-              className="h-8 w-8 p-0"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggle}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+        {/* Header */}
+        <div className="p-2 sm:p-4 border-b">
+          <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
+            <User className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <h2 className="font-semibold text-sm sm:text-base truncate">
+              Client Information
+            </h2>
           </div>
         </div>
-        {notes.length > 0 && (
-          <div className="mt-1 space-y-1">
-            <p className="text-sm text-gray-500">
-              {notes.length} note{notes.length !== 1 ? 's' : ''}
-            </p>
-            {selectedNote && (
-              <p className="text-xs text-blue-600 font-medium">
-                📝 "{selectedNote}" selected for AI context
-              </p>
-            )}
-          </div>
-        )}
-      </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
-        {showUpload ? (
-          <div className="p-4">
-            <div className="mb-4">
-              <h3 className="font-medium mb-2">Upload Notes</h3>
-              <p className="text-sm text-gray-500">
-                Upload your .md or .txt files to save them in the cloud
-              </p>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4">
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
             </div>
-            <NotesUpload onUploadSuccess={handleNotesChange} />
-          </div>
-        ) : (
-          <div className="p-4 h-full">
-            {loading ? (
-              <div className="flex items-center justify-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          ) : !hasActiveChat ? (
+            // Show message when no chat is selected
+            <div className="space-y-4">
+              <div className="text-center text-gray-500 mt-8">
+                <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">No Chat Selected</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Select a chat to view the client information associated with that conversation.
+                </p>
               </div>
-            ) : (
-              <NotesList 
-                notes={notes} 
-                onNotesChange={handleNotesChange}
-                selectedNote={selectedNote}
-                onNoteSelect={onNoteSelect}
-                usedNotes={usedNotes}
-              />
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          ) : hasActiveChat && selectedClient ? (
+            // Show selected client information when chat has started
+            <div className="space-y-4">
+              {/* Client Selector Dropdown */}
+              {allClients.length > 0 && onClientSelect && (
+                <div className="mb-4">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-full justify-between">
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 mr-2" />
+                          <span className="truncate">{selectedClient.name}</span>
+                        </div>
+                        <ChevronDown className="w-4 h-4 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-full" align="start">
+                      <DropdownMenuLabel>Switch Client</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {allClients.map((client) => (
+                        <DropdownMenuItem
+                          key={client.id}
+                          onClick={() => onClientSelect(client.id)}
+                          className={selectedClient.id === client.id ? 'bg-blue-50 dark:bg-blue-950/20' : ''}
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium truncate">{client.name}</div>
+                            {client.email && (
+                              <div className="text-xs text-muted-foreground truncate">{client.email}</div>
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
 
-      {/* Footer with Upload Toggle */}
-      {!showUpload && !loading && (
-        <div className="p-4 border-t">
-          <Button
-            onClick={() => setShowUpload(true)}
-            variant="outline"
-            className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Upload Notes
-          </Button>
+              <Card className="p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedClient.name}</span>
+                  </div>
+                  <div className="space-y-2">
+                    {selectedClient.email && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        📧 {selectedClient.email}
+                      </p>
+                    )}
+                    {selectedClient.phone && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        📱 {selectedClient.phone}
+                      </p>
+                    )}
+                    {selectedClient.goals && (
+                      <div className="mt-3">
+                        <h4 className="font-medium text-sm mb-1">Goals:</h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-2 rounded border">
+                          {selectedClient.goals}
+                        </p>
+                      </div>
+                    )}
+                    {selectedClient.medicalHistory && (
+                      <div className="mt-3">
+                        <h4 className="font-medium text-sm mb-1">Medical History:</h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-2 rounded border">
+                          {selectedClient.medicalHistory}
+                        </p>
+                      </div>
+                    )}
+                    {selectedClient.notes && (
+                      <div className="mt-3">
+                        <h4 className="font-medium text-sm mb-1">Notes:</h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-2 rounded border">
+                          {selectedClient.notes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+              <div className="text-xs text-gray-500 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                💡 This client's information is being used as context for the AI to personalize responses.
+              </div>
+            </div>
+          ) : hasActiveChat && !selectedClient ? (
+            // Show message when chat is selected but no client is associated
+            <div className="space-y-4">
+              <div className="text-center text-gray-500 mt-8">
+                <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">No Client Selected</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  This chat doesn't have a client associated with it. Create a new chat with a client for personalized responses.
+                </p>
+              </div>
+            </div>
+          ) : null}
         </div>
-      )}
       </div>
     </div>
   )

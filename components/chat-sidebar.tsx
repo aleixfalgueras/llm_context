@@ -1,16 +1,16 @@
 'use client'
 
-import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2, StickyNote, TrashIcon } from 'lucide-react'
+import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2, User, TrashIcon, ChevronDown, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { createChat, deleteChat, updateChatTitle, deleteAllChats } from '@/lib/actions'
-import { UserButton } from '@clerk/nextjs'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { createChat, createChatAndReturn, deleteChat, updateChatTitle, deleteAllChats } from '@/lib/actions'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { getClients } from '@/lib/client-actions'
+import { useRouter } from 'next/navigation'
 
 interface Chat {
   id: string
@@ -21,14 +21,35 @@ interface Chat {
 interface ChatSidebarProps {
   chats: Chat[]
   currentChatId?: string
-  notesOpen?: boolean
-  onNotesToggle?: () => void
+  selectedClientId?: string | null
 }
 
-export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: ChatSidebarProps) {
+export function ChatSidebar({ chats, currentChatId, selectedClientId }: ChatSidebarProps) {
+  const router = useRouter()
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [clients, setClients] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [newChatDropdownOpen, setNewChatDropdownOpen] = useState(false)
+  const [clientSearchTerm, setClientSearchTerm] = useState('')
+
+  // Fetch clients for the enhanced new chat dropdown
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        setLoading(true)
+        const clientList = await getClients()
+        setClients(clientList)
+      } catch (error) {
+        console.error('Failed to fetch clients:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchClients()
+  }, [])
 
   const handleEditStart = (chat: Chat) => {
     setEditingChatId(chat.id)
@@ -57,44 +78,115 @@ export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: 
     }
   }
 
+  const handleNewChatWithClient = async (clientId: string) => {
+    try {
+      const newChatId = await createChatAndReturn('New Chat', clientId)
+      setNewChatDropdownOpen(false)
+      setClientSearchTerm('')
+      router.push(`/chat/${newChatId}`)
+    } catch (error) {
+      console.error('Failed to create new chat:', error)
+      // Optionally show user feedback here
+    }
+  }
+
+  const selectedClient = clients.find(client => client.id === selectedClientId)
+
+  // Filter clients based on search term
+  const filteredClients = clients.filter(client =>
+    client.name.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+    client.email?.toLowerCase().includes(clientSearchTerm.toLowerCase())
+  )
+
   return (
     <div className="w-80 border-r bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">AI Chat</h1>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserButton />
-          </div>
+          <h1 className="text-xl font-semibold">Chats</h1>
         </div>
         <div className="space-y-2">
-          {onNotesToggle && (
+          {/* Enhanced New Chat Button with Search - always visible */}
+          <DropdownMenu open={newChatDropdownOpen} onOpenChange={(open) => {
+            setNewChatDropdownOpen(open)
+            if (!open) {
+              setClientSearchTerm('')
+            }
+          }}>
+            <DropdownMenuTrigger asChild>
               <Button 
-                onClick={onNotesToggle}
                 variant="outline"
+                disabled={clients.length === 0 || loading}
+                className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100 dark:disabled:hover:bg-blue-900/30" 
                 size="sm"
-                className={`w-full transition-all duration-200 ${
-                  notesOpen 
-                    ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 shadow-sm' 
-                    : 'hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-200 dark:hover:border-blue-800'
-                }`}
               >
-                <StickyNote className="w-4 h-4 mr-2" />
-                {notesOpen ? "Hide Notes" : "Show Notes"}
+                <Plus className="w-4 h-4 mr-2" />
+                New Chat
+                <ChevronDown className="w-3 h-3 ml-2" />
               </Button>
-            )}
-          <form action={() => createChat()}>
-            <Button 
-              type="submit" 
-              variant="outline"
-              className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200" 
-              size="sm"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Chat
-            </Button>
-          </form>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-72" align="start">
+              <DropdownMenuLabel>Start New Chat</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {currentChatId && selectedClientId && selectedClient && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <form action={() => createChat('New Chat', selectedClientId)}>
+                      <button type="submit" className="w-full flex items-center text-left">
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-medium">New chat with {selectedClient.name}</div>
+                          <div className="text-xs text-muted-foreground">Current client</div>
+                        </div>
+                      </button>
+                    </form>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs">Or choose different client:</DropdownMenuLabel>
+                </>
+              )}
+              
+              {/* Search Input */}
+              <div className="flex items-center border-b px-2 sm:px-3 py-2">
+                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                <Input
+                  placeholder="Search clients..."
+                  value={clientSearchTerm}
+                  onChange={(e) => setClientSearchTerm(e.target.value)}
+                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm h-6"
+                />
+              </div>
+              
+              {/* Client List */}
+              <div className="max-h-48 overflow-auto">
+                {filteredClients.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">
+                    {clientSearchTerm ? 'No clients found' : 'No clients available'}
+                  </div>
+                ) : (
+                  filteredClients
+                    .filter(client => !currentChatId || client.id !== selectedClientId)
+                    .map((client) => (
+                                              <DropdownMenuItem
+                          key={client.id}
+                          onClick={() => handleNewChatWithClient(client.id)}
+                          className="px-3 py-2 cursor-pointer"
+                        >
+                        <User className="w-4 h-4 mr-2" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium truncate">{client.name}</div>
+                          {client.email && (
+                            <div className="text-xs text-muted-foreground truncate">{client.email}</div>
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    ))
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           {chats.length > 0 && (
             <Button 
               onClick={handleDeleteAllChats}
@@ -157,9 +249,6 @@ export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: 
                     ) : (
                       <div>
                         <h3 className="font-medium text-sm truncate">{chat.title}</h3>
-                        <p className="text-xs text-gray-500">
-                          {new Date(chat.updatedAt).toLocaleDateString()}
-                        </p>
                       </div>
                     )}
                   </Link>
