@@ -10,15 +10,15 @@ export function Navbar() {
   const pathname = usePathname()
 
   const navigation = [
-    { name: 'AI Assistant', href: '/', icon: '🤖' },
     { name: 'Clients', href: '/clients', icon: '👥' },
+    { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
   ]
 
   // Helper function to determine if a nav item is active
   const isActive = (href: string) => {
-    if (href === '/') {
-      // Home/AI Assistant is active for home page and all chat pages
-      return pathname === '/' || pathname.startsWith('/chat/')
+    if (href === '/assistant') {
+      // AI Assistant is active for assistant page and all chat pages
+      return pathname === '/assistant' || pathname.startsWith('/chat/')
     }
     return pathname === href
   }
@@ -30,7 +30,7 @@ export function Navbar() {
           <div className="flex items-center">
             <div className="flex space-x-8">
               {/* Logo */}
-              <Link href="/" className="flex items-center">
+              <Link href="/clients" className="flex items-center">
                 <span className="text-xl font-bold text-primary">
                   HealthCoach AI
                 </span>

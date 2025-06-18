@@ -19,7 +19,6 @@ interface ChatPageClientProps {
 }
 
 export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPageClientProps) {
-  const [clientSidebarOpen, setClientSidebarOpen] = useState(true)
   const [currentTitle, setCurrentTitle] = useState(chat.title)
   const [clients, setClients] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -49,8 +48,6 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
       <ChatSidebar 
         chats={chats}
         currentChatId={chat.id}
-        clientSidebarOpen={clientSidebarOpen}
-        onClientSidebarToggle={() => setClientSidebarOpen(!clientSidebarOpen)}
         selectedClientId={chat.clientId}
       />
       <div className="flex-1 flex flex-col">
@@ -76,14 +73,12 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
         />
       </div>
       
-      {/* Client Sidebar */}
+      {/* Client Sidebar - Always visible */}
       <ClientSidebar 
-        isOpen={clientSidebarOpen} 
-        onToggle={() => setClientSidebarOpen(!clientSidebarOpen)}
         chatId={chat.id}
         selectedClientId={chat.clientId}
         clients={clients}
-        chatHasStarted={true}
+        hasActiveChat={true}
       />
     </div>
   )
