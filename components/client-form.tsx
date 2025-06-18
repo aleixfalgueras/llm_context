@@ -23,8 +23,8 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
     email: client?.email || '',
     phone: client?.phone || '',
     dateOfBirth: client?.dateOfBirth ? new Date(client.dateOfBirth).toISOString().split('T')[0] : '',
-    height: client?.height || '',
-    weight: client?.weight || '',
+    height: client?.height || undefined,
+    weight: client?.weight || undefined,
     goals: client?.goals || '',
     medicalHistory: client?.medicalHistory || '',
     notes: client?.notes || ''
@@ -130,7 +130,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
                 id="height"
                 type="number"
                 step="0.1"
-                value={formData.height}
+                value={formData.height || ''}
                 onChange={handleChange('height')}
                 placeholder="170.5"
               />
@@ -142,7 +142,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
                 id="weight"
                 type="number"
                 step="0.1"
-                value={formData.weight}
+                value={formData.weight || ''}
                 onChange={handleChange('weight')}
                 placeholder="70.5"
               />

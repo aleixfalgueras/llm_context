@@ -49,43 +49,43 @@ export function ClientSelector({
           variant="outline"
           role="combobox"
           aria-expanded={isOpen}
-          className={cn("w-full justify-between", className)}
+          className={cn("w-full justify-between min-w-0", className)}
         >
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="truncate">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+            <User className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
+            <span className="truncate text-xs sm:text-sm">
               {selectedClient ? selectedClient.name : placeholder}
             </span>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[300px] p-0">
-        <div className="flex items-center border-b px-3">
-          <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <DropdownMenuContent className="w-[240px] sm:w-[300px] p-0">
+        <div className="flex items-center border-b px-2 sm:px-3">
+          <Search className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0 opacity-50" />
           <Input
             placeholder="Search clients..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm"
           />
         </div>
-        <div className="max-h-[200px] overflow-auto">
+        <div className="max-h-[160px] sm:max-h-[200px] overflow-auto">
           <DropdownMenuItem
             onSelect={() => handleSelect(null)}
-            className="px-3 py-2"
+            className="px-2 py-1.5 sm:px-3 sm:py-2"
           >
             <Check
               className={cn(
-                "mr-2 h-4 w-4",
+                "mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4",
                 selectedClientId === null ? "opacity-100" : "opacity-0"
               )}
             />
-            <span>All clients</span>
+            <span className="text-xs sm:text-sm">All clients</span>
           </DropdownMenuItem>
           
           {filteredClients.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-muted-foreground">
+            <div className="px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-muted-foreground">
               {searchTerm ? 'No clients found' : 'No clients available'}
             </div>
           ) : (
@@ -93,18 +93,18 @@ export function ClientSelector({
               <DropdownMenuItem
                 key={client.id}
                 onSelect={() => handleSelect(client.id)}
-                className="px-3 py-2"
+                className="px-2 py-1.5 sm:px-3 sm:py-2"
               >
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4",
+                    "mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4",
                     selectedClientId === client.id ? "opacity-100" : "opacity-0"
                   )}
                 />
-                <div className="flex flex-col">
-                  <span>{client.name}</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs sm:text-sm truncate">{client.name}</span>
                   {client.email && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground truncate">
                       {client.email}
                     </span>
                   )}
