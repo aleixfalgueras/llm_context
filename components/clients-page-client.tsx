@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ClientsList } from './clients-list'
 import { ClientForm } from './client-form'
+import { ClientDocuments } from './client-documents'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface ClientsPageClientProps {
@@ -13,6 +14,8 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
   const [clients, setClients] = useState(initialClients)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<any>(null)
+  const [selectedClient, setSelectedClient] = useState<any>(null)
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
 
   const handleAddClient = () => {
     setEditingClient(null)
@@ -41,6 +44,11 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
     window.location.reload()
   }
 
+  const handleViewDocuments = (client: any) => {
+    setSelectedClient(client)
+    setIsDocumentsOpen(true)
+  }
+
   return (
     <>
       <ClientsList
@@ -48,6 +56,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
         onAddClient={handleAddClient}
         onEditClient={handleEditClient}
         onRefresh={handleRefresh}
+        onViewDocuments={handleViewDocuments}
       />
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -64,6 +73,15 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
           />
         </DialogContent>
       </Dialog>
+
+      {selectedClient && (
+        <ClientDocuments
+          clientId={selectedClient.id}
+          clientName={selectedClient.name}
+          open={isDocumentsOpen}
+          onOpenChange={setIsDocumentsOpen}
+        />
+      )}
     </>
   )
 } 

@@ -108,4 +108,110 @@ export async function getDocumentContent(documentPath: string) {
     console.error('Error getting document content:', error)
     throw new Error('Failed to get document content')
   }
+}
+
+export async function updateDocumentContent(documentId: string, content: string) {
+  const { userId } = await auth()
+  
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    // Get the document to verify ownership and get file path
+    const document = await prisma.document.findFirst({
+      where: { 
+        id: documentId,
+        userId 
+      }
+    })
+
+    if (!document) {
+      throw new Error('Document not found or unauthorized')
+    }
+
+    // Upload the updated content to Supabase storage
+    const { error: uploadError } = await supabaseServer.storage
+      .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+      .upload(document.documentPath, content, {
+        contentType: 'text/markdown',
+        upsert: true // This will overwrite the existing file
+      })
+
+    if (uploadError) {
+      throw new Error('Failed to update document content')
+    }
+
+    // Update the updatedAt timestamp in the database
+    await prisma.document.update({
+      where: { id: documentId },
+      data: { updatedAt: new Date() }
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating document content:', error)
+    throw new Error('Failed to update document content')
+  }
+}
+
+export async function createDocument(
+  clientId: string,
+  documentName: string,
+  documentType: string,
+  content: string,
+  startDate?: Date,
+  endDate?: Date
+) {
+  const { userId } = await auth()
+  
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    // Verify the client belongs to the user
+    const client = await prisma.client.findFirst({
+      where: { 
+        id: clientId,
+        userId 
+      }
+    })
+
+    if (!client) {
+      throw new Error('Client not found or unauthorized')
+    }
+
+    // Create the document path
+    const documentPath = `${userId}/${clientId}/${documentName}.md`
+
+    // Upload content to Supabase storage
+    const { error: uploadError } = await supabaseServer.storage
+      .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+      .upload(documentPath, content, {
+        contentType: 'text/markdown'
+      })
+
+    if (uploadError) {
+      throw new Error('Failed to upload document')
+    }
+
+    // Create document record in database
+    const document = await prisma.document.create({
+      data: {
+        userId,
+        clientId,
+        documentName,
+        documentPath,
+        documentType,
+        startDate,
+        endDate
+      }
+    })
+
+    return { success: true, document }
+  } catch (error) {
+    console.error('Error creating document:', error)
+    throw new Error('Failed to create document')
+  }
 } 
