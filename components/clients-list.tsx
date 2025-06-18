@@ -170,11 +170,6 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh }: C
                     </div>
                   )}
 
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Notes: </span>
-                    <span>{client._count?.clientNotes || 0}</span>
-                  </div>
-
                   {client.goals && (
                     <div className="mt-3 p-2 bg-muted rounded-sm">
                       <p className="text-xs text-muted-foreground mb-1">Goals:</p>

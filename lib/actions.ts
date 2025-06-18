@@ -5,18 +5,23 @@ import { prisma } from './prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function createChat(title: string = 'New Chat') {
+export async function createChat(title: string = 'New Chat', clientId: string) {
   const { userId } = await auth()
   
   if (!userId) {
     throw new Error('Unauthorized')
   }
 
+  if (!clientId) {
+    throw new Error('Client selection is required')
+  }
+
   const chat = await prisma.chat.create({
     data: {
       title,
       userId,
-    },
+      clientId,
+    } as any,
   })
 
   revalidatePath('/')
@@ -109,44 +114,4 @@ export async function createMessage(chatId: string, content: string, role: 'USER
   return message
 }
 
-export async function addUsedNoteToChat(chatId: string, noteName: string) {
-  const { userId } = await auth()
-  
-  if (!userId) {
-    throw new Error('Unauthorized')
-  }
-
-  // Verify the chat belongs to the user
-  const chat = await prisma.chat.findFirst({
-    where: {
-      id: chatId,
-      userId,
-    },
-  })
-
-  if (!chat) {
-    throw new Error('Chat not found')
-  }
-
-  try {
-    // Add note to usedNotes if it's not already there
-    const currentUsedNotes = (chat as any).usedNotes || []
-    if (!currentUsedNotes.includes(noteName)) {
-      await prisma.chat.update({
-        where: {
-          id: chatId,
-        },
-        data: {
-          usedNotes: {
-            push: noteName,
-          },
-        } as any,
-      })
-    }
-  } catch (error) {
-    console.error('Error updating used notes:', error)
-    // Continue without failing - this is a nice-to-have feature
-  }
-
-  revalidatePath(`/chat/${chatId}`)
-} 
+ 

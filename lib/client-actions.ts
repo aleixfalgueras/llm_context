@@ -126,12 +126,7 @@ export async function getClients() {
   try {
     const clients = await prisma.client.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: {
-          select: { clientNotes: true }
-        }
-      }
+      orderBy: { createdAt: 'desc' }
     })
 
     return clients
@@ -150,12 +145,7 @@ export async function getClient(id: string) {
 
   try {
     const client = await prisma.client.findFirst({
-      where: { id, userId },
-      include: {
-        clientNotes: {
-          orderBy: { createdAt: 'desc' }
-        }
-      }
+      where: { id, userId }
     })
 
     if (!client) {

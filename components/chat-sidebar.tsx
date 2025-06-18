@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2, StickyNote, TrashIcon } from 'lucide-react'
+import { Plus, MessageSquare, MoreHorizontal, Trash2, Edit2, User, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -19,11 +19,12 @@ interface Chat {
 interface ChatSidebarProps {
   chats: Chat[]
   currentChatId?: string
-  notesOpen?: boolean
-  onNotesToggle?: () => void
+  clientSidebarOpen?: boolean
+  onClientSidebarToggle?: () => void
+  selectedClientId?: string | null
 }
 
-export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: ChatSidebarProps) {
+export function ChatSidebar({ chats, currentChatId, clientSidebarOpen, onClientSidebarToggle, selectedClientId }: ChatSidebarProps) {
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
@@ -63,30 +64,31 @@ export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: 
           <h1 className="text-xl font-semibold">Chats</h1>
         </div>
         <div className="space-y-2">
-          {onNotesToggle && (
+          {onClientSidebarToggle && (
               <Button 
-                onClick={onNotesToggle}
+                onClick={onClientSidebarToggle}
                 variant="outline"
                 size="sm"
                 className={`w-full transition-all duration-200 ${
-                  notesOpen 
+                  clientSidebarOpen 
                     ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 shadow-sm' 
                     : 'hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-200 dark:hover:border-blue-800'
                 }`}
               >
-                <StickyNote className="w-4 h-4 mr-2" />
-                {notesOpen ? "Hide Notes" : "Show Notes"}
+                <User className="w-4 h-4 mr-2" />
+                {clientSidebarOpen ? "Hide Clients" : "Show Clients"}
               </Button>
             )}
-          <form action={() => createChat()}>
+          <form action={selectedClientId ? () => createChat('New Chat', selectedClientId) : undefined}>
             <Button 
               type="submit" 
               variant="outline"
-              className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200" 
+              disabled={!selectedClientId}
+              className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
               size="sm"
             >
               <Plus className="w-4 h-4 mr-2" />
-              New Chat
+              {selectedClientId ? 'New Chat' : 'Select Client First'}
             </Button>
           </form>
           {chats.length > 0 && (

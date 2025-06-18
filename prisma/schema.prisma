@@ -18,10 +18,13 @@ model Chat {
   id        String    @id @default(cuid())
   title     String
   userId    String
-  usedNotes String[]  @default([])
+  clientId  String    // Required client association for this chat
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   messages  Message[]
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("chats")
 }
@@ -54,27 +57,12 @@ model Client {
   updatedAt   DateTime @updatedAt
   
   // Relations
-  clientNotes Note[]
+  chats       Chat[]
 
   @@map("clients")
 }
 
-model Note {
-  id           String   @id @default(cuid())
-  userId       String   // The coach's user ID
-  clientId     String   // The client this note belongs to
-  fileName     String   // Original file name
-  filePath     String   // Path in Supabase storage
-  type         String   // 'markdown' or 'text'
-  size         Int      // File size in bytes
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  // Relations
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
-  @@map("notes")
-}
 
 enum Role {
   USER
