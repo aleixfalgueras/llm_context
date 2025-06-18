@@ -2,6 +2,7 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
 import { ChatPageClient } from '@/components/chat-page-client'
+import { Navbar } from '@/components/navbar'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
@@ -48,11 +49,16 @@ export default async function ChatPage({ params }: ChatPageProps) {
   })
 
   return (
-    <ChatPageClient
-      chat={chat}
-      chats={chats}
-      userImageUrl={user?.imageUrl}
-      userName={user?.firstName || 'User'}
-    />
+    <div className="h-screen bg-background overflow-hidden flex flex-col">
+      <Navbar />
+      <div className="flex-1 overflow-hidden">
+        <ChatPageClient
+          chat={chat}
+          chats={chats}
+          userImageUrl={user?.imageUrl}
+          userName={user?.firstName || 'User'}
+        />
+      </div>
+    </div>
   )
 } 

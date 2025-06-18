@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Helper function to generate a title from a user prompt
+// Helper function to generate a title from a user prompt (legacy)
 export function generateChatTitle(prompt: string): string {
   // Clean the prompt and truncate it for a title
   const cleaned = prompt.trim()
@@ -26,4 +26,16 @@ export function generateChatTitle(prompt: string): string {
   }
   
   return truncated + '...'
+}
+
+// Generate chat title using client name and current date
+export function generateChatTitleWithClient(clientName: string): string {
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+  
+  return `${clientName} - ${dateStr}`
 }

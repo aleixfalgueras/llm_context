@@ -1,0 +1,385 @@
+'use client'
+
+import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Calendar, FileText, Loader2, User, Wand2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import ReactMarkdown from 'react-markdown'
+
+interface DietGeneratorDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  clients: any[]
+}
+
+interface DietFormData {
+  clientId: string
+  startDate: string
+  endDate: string
+  additionalInfo: string
+  includeClientGoals: boolean
+}
+
+export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGeneratorDialogProps) {
+  const { toast } = useToast()
+  const [step, setStep] = useState<'form' | 'generating' | 'editing'>('form')
+  const [formData, setFormData] = useState<DietFormData>({
+    clientId: '',
+    startDate: '',
+    endDate: '',
+    additionalInfo: '',
+    includeClientGoals: true
+  })
+  const [generatedDiet, setGeneratedDiet] = useState('')
+  const [editedDiet, setEditedDiet] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const selectedClient = clients.find(client => client.id === formData.clientId)
+
+  const handleGenerate = async () => {
+    if (!formData.clientId || !formData.startDate || !formData.endDate) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    if (new Date(formData.startDate) >= new Date(formData.endDate)) {
+      toast({
+        title: 'Invalid Date Range',
+        description: 'End date must be after start date',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setIsGenerating(true)
+    setStep('generating')
+
+    try {
+      const response = await fetch('/api/ai-services/generate-diet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate diet')
+      }
+
+      const data = await response.json()
+      setGeneratedDiet(data.diet)
+      setEditedDiet(data.diet)
+      setStep('editing')
+    } catch (error) {
+      console.error('Error generating diet:', error)
+      toast({
+        title: 'Generation Failed',
+        description: 'Failed to generate diet plan. Please try again.',
+        variant: 'destructive'
+      })
+      setStep('form')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleSave = async () => {
+    if (!editedDiet.trim()) {
+      toast({
+        title: 'Empty Content',
+        description: 'Please provide diet content before saving',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      const response = await fetch('/api/ai-services/save-diet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          dietContent: editedDiet
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save diet')
+      }
+
+      const data = await response.json()
+      
+      toast({
+        title: 'Diet Saved',
+        description: `Diet plan has been saved successfully for ${selectedClient?.name}`,
+      })
+
+      // Reset and close
+      setStep('form')
+      setFormData({ clientId: '', startDate: '', endDate: '', additionalInfo: '', includeClientGoals: true })
+      setGeneratedDiet('')
+      setEditedDiet('')
+      onOpenChange(false)
+    } catch (error) {
+      console.error('Error saving diet:', error)
+      toast({
+        title: 'Save Failed',
+        description: 'Failed to save diet plan. Please try again.',
+        variant: 'destructive'
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleClose = () => {
+    setStep('form')
+    setFormData({ clientId: '', startDate: '', endDate: '', additionalInfo: '', includeClientGoals: true })
+    setGeneratedDiet('')
+    setEditedDiet('')
+    onOpenChange(false)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Generate Diet Plan
+          </DialogTitle>
+        </DialogHeader>
+
+        {step === 'form' && (
+          <div className="space-y-6">
+            {/* Client Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="client">Select Client *</Label>
+              <Select value={formData.clientId} onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>{client.name}</span>
+                        {client.email && <span className="text-sm text-muted-foreground">({client.email})</span>}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date Range */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="startDate">Start Date *</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endDate">End Date *</Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Additional Information Field */}
+            <div className="space-y-2">
+              <Label htmlFor="additionalInfo">Additional information (optional)</Label>
+              <Textarea
+                id="additionalInfo"
+                value={formData.additionalInfo}
+                onChange={(e) => setFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
+                placeholder="e.g., Food allergies, dietary preferences, special requirements, upcoming events..."
+                rows={2}
+              />
+              <p className="text-xs text-muted-foreground">
+                Provide any additional context or requirements for this diet plan beyond the client's profile.
+              </p>
+            </div>
+
+            {/* Include Client Goals Option */}
+            <div className="space-y-2">
+              <Checkbox
+                id="includeClientGoals"
+                checked={formData.includeClientGoals}
+                onChange={(e) => setFormData(prev => ({ ...prev, includeClientGoals: e.target.checked }))}
+                label="Include client's goals in diet generation"
+              />
+              <p className="text-xs text-muted-foreground ml-6">
+                Uncheck this if you want to generate a diet without being influenced by the client's existing goals.
+              </p>
+            </div>
+
+            {/* Selected Client Preview */}
+            {selectedClient && (
+              <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Name:</span> {selectedClient.name}
+                    </div>
+                    {selectedClient.dateOfBirth && (
+                      <div>
+                        <span className="font-medium">Age:</span> {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
+                      </div>
+                    )}
+                    {selectedClient.height && (
+                      <div>
+                        <span className="font-medium">Height:</span> {selectedClient.height}cm
+                      </div>
+                    )}
+                    {selectedClient.weight && (
+                      <div>
+                        <span className="font-medium">Weight:</span> {selectedClient.weight}kg
+                      </div>
+                    )}
+                  </div>
+                  {selectedClient.goals && (
+                    <div className="mt-3">
+                      <span className="font-medium text-sm">Goals:</span>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.goals}</p>
+                    </div>
+                  )}
+                  {selectedClient.medicalHistory && (
+                    <div className="mt-3">
+                      <span className="font-medium text-sm">Medical History:</span>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.medicalHistory}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button onClick={handleGenerate} disabled={!formData.clientId || !formData.startDate || !formData.endDate}>
+                <Wand2 className="h-4 w-4 mr-2" />
+                Generate Diet Plan
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 'generating' && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
+            <h3 className="text-lg font-medium mb-2">Generating Diet Plan</h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              Creating a personalized diet plan for {selectedClient?.name} using their profile information and your specified date range...
+            </p>
+          </div>
+        )}
+
+        {step === 'editing' && (
+          <div className="space-y-6">
+            {/* Header Info */}
+            <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium text-green-900 dark:text-green-100">
+                      Diet Plan for {selectedClient?.name}
+                    </h3>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      {formatDate(formData.startDate)} - {formatDate(formData.endDate)}
+                    </p>
+                  </div>
+                  <Calendar className="h-5 w-5 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Edit Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Editor */}
+              <div className="space-y-2">
+                <Label htmlFor="dietContent">Edit Diet Plan</Label>
+                <Textarea
+                  id="dietContent"
+                  value={editedDiet}
+                  onChange={(e) => setEditedDiet(e.target.value)}
+                  className="min-h-[400px] font-mono text-sm"
+                  placeholder="Diet plan content..."
+                />
+              </div>
+
+              {/* Preview */}
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <Card className="min-h-[400px] overflow-auto">
+                  <CardContent className="pt-4">
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown>{editedDiet}</ReactMarkdown>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setStep('form')}>
+                Back to Form
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Save Diet Plan
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+} 
