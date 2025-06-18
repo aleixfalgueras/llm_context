@@ -38,6 +38,44 @@ model Message {
   @@map("messages")
 }
 
+model Client {
+  id          String   @id @default(cuid())
+  userId      String   // The coach's user ID
+  name        String
+  email       String?
+  phone       String?
+  dateOfBirth DateTime?
+  height      Float?   // in centimeters
+  weight      Float?   // in kilograms
+  goals       String?  // Health and fitness goals
+  medicalHistory String? // Medical conditions, allergies, etc.
+  notes       String?  // General notes about the client
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  clientNotes Note[]
+
+  @@map("clients")
+}
+
+model Note {
+  id           String   @id @default(cuid())
+  userId       String   // The coach's user ID
+  clientId     String   // The client this note belongs to
+  fileName     String   // Original file name
+  filePath     String   // Path in Supabase storage
+  type         String   // 'markdown' or 'text'
+  size         Int      // File size in bytes
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
+
 enum Role {
   USER
   ASSISTANT

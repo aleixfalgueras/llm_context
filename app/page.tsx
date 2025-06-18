@@ -2,6 +2,8 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { LandingPage } from '@/components/landing-page'
 import { HomePageClient } from '@/components/home-page-client'
+import { Navbar } from '@/components/navbar'
+import { getClients } from '@/lib/client-actions'
 
 export default async function Home() {
   const { userId } = await auth()
@@ -10,15 +12,23 @@ export default async function Home() {
     return <LandingPage />
   }
 
-  // Get user's chats
-  const chats = await prisma.chat.findMany({
-    where: {
-      userId,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-  })
+  // Get user's chats and clients
+  const [chats, clients] = await Promise.all([
+    prisma.chat.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    }),
+    getClients()
+  ])
 
-  return <HomePageClient chats={chats} />
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <HomePageClient chats={chats} clients={clients} />
+    </div>
+  )
 }

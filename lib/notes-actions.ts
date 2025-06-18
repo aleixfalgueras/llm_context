@@ -18,7 +18,7 @@ export interface UserNote {
   type: 'markdown' | 'text'
 }
 
-export async function uploadNote(formData: FormData) {
+export async function uploadNote(formData: FormData, clientId?: string) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -39,8 +39,10 @@ export async function uploadNote(formData: FormData) {
     throw new Error('Only .md and .txt files are allowed')
   }
 
-  // Create file path: user-notes/{userId}/{filename}
-  const filePath = `${userId}/${file.name}`
+  // Create file path: user-notes/{userId}/{clientId}/{filename} or user-notes/{userId}/{filename}
+  const filePath = clientId 
+    ? `${userId}/${clientId}/${file.name}`
+    : `${userId}/${file.name}`
 
   try {
     // Upload file to Supabase storage
@@ -54,6 +56,22 @@ export async function uploadNote(formData: FormData) {
       throw new Error(`Upload failed: ${error.message}`)
     }
 
+    // If clientId is provided, also save note metadata to database
+    if (clientId) {
+      const { prisma } = await import('./prisma')
+      
+      await prisma.note.create({
+        data: {
+          userId,
+          clientId,
+          fileName: file.name,
+          filePath,
+          type: fileExtension === '.md' ? 'markdown' : 'text',
+          size: file.size,
+        }
+      })
+    }
+
     revalidatePath('/chat')
     return { success: true, message: 'Note uploaded successfully' }
   } catch (error) {
@@ -62,7 +80,7 @@ export async function uploadNote(formData: FormData) {
   }
 }
 
-export async function getUserNotes(): Promise<UserNote[]> {
+export async function getUserNotes(clientId?: string | null): Promise<UserNote[]> {
   const { userId } = await auth()
   
   if (!userId) {
@@ -70,56 +88,88 @@ export async function getUserNotes(): Promise<UserNote[]> {
   }
 
   try {
-    // List files in user's folder
-    const { data: files, error: listError } = await supabaseAdmin.storage
-      .from('user-notes')
-      .list(userId)
+    const { prisma } = await import('./prisma')
 
-    if (listError) {
-      throw new Error(`Failed to list notes: ${listError.message}`)
-    }
+    if (clientId) {
+      // Get notes for specific client
+      const clientNotes = await prisma.note.findMany({
+        where: { userId, clientId },
+        include: { client: true },
+        orderBy: { createdAt: 'desc' }
+      })
 
-    if (!files || files.length === 0) {
-      return []
-    }
+      const notes: UserNote[] = []
 
-    // Get content for each file
-    const notes: UserNote[] = []
-    
-    for (const file of files) {
-      try {
-        const { data: fileData, error: downloadError } = await supabaseAdmin.storage
-          .from('user-notes')
-          .download(`${userId}/${file.name}`)
+      for (const noteRecord of clientNotes) {
+        try {
+          const { data: fileData, error: downloadError } = await supabaseAdmin.storage
+            .from('user-notes')
+            .download(noteRecord.filePath)
 
-        if (downloadError) {
-          console.error(`Failed to download ${file.name}:`, downloadError)
-          continue
+          if (downloadError) {
+            console.error(`Failed to download ${noteRecord.fileName}:`, downloadError)
+            continue
+          }
+
+          const content = await fileData.text()
+          
+          notes.push({
+            name: noteRecord.fileName,
+            content,
+            size: noteRecord.size,
+            lastModified: noteRecord.updatedAt.toISOString(),
+            type: noteRecord.type as 'markdown' | 'text'
+          })
+        } catch (error) {
+          console.error(`Error processing note ${noteRecord.fileName}:`, error)
         }
-
-        const content = await fileData.text()
-        const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
-        
-        notes.push({
-          name: file.name,
-          content,
-          size: file.metadata?.size || 0,
-          lastModified: file.updated_at || file.created_at || new Date().toISOString(),
-          type: fileExtension === '.md' ? 'markdown' : 'text'
-        })
-      } catch (error) {
-        console.error(`Error processing file ${file.name}:`, error)
       }
-    }
 
-    return notes.sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
+      return notes
+    } else {
+      // Get all client notes across all clients
+      const clientNotes = await prisma.note.findMany({
+        where: { userId },
+        include: { client: true },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      const notes: UserNote[] = []
+
+      for (const noteRecord of clientNotes) {
+        try {
+          const { data: fileData, error: downloadError } = await supabaseAdmin.storage
+            .from('user-notes')
+            .download(noteRecord.filePath)
+
+          if (downloadError) {
+            console.error(`Failed to download ${noteRecord.fileName}:`, downloadError)
+            continue
+          }
+
+          const content = await fileData.text()
+          
+          notes.push({
+            name: `${noteRecord.client.name} - ${noteRecord.fileName}`,
+            content,
+            size: noteRecord.size,
+            lastModified: noteRecord.updatedAt.toISOString(),
+            type: noteRecord.type as 'markdown' | 'text'
+          })
+        } catch (error) {
+          console.error(`Error processing note ${noteRecord.fileName}:`, error)
+        }
+      }
+
+      return notes
+    }
   } catch (error) {
     console.error('Error fetching notes:', error)
     throw error
   }
 }
 
-export async function deleteNote(fileName: string) {
+export async function deleteNote(fileName: string, clientId?: string) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -127,7 +177,28 @@ export async function deleteNote(fileName: string) {
   }
 
   try {
-    const filePath = `${userId}/${fileName}`
+    let filePath: string
+    
+    if (clientId) {
+      filePath = `${userId}/${clientId}/${fileName}`
+      
+      // Also delete from database if it's a client note
+      try {
+        const { prisma } = await import('./prisma')
+        await prisma.note.deleteMany({
+          where: {
+            userId,
+            clientId,
+            fileName
+          }
+        })
+      } catch (dbError) {
+        console.error('Failed to delete note from database:', dbError)
+        // Continue with file deletion even if DB deletion fails
+      }
+    } else {
+      filePath = `${userId}/${fileName}`
+    }
     
     const { error } = await supabaseAdmin.storage
       .from('user-notes')
