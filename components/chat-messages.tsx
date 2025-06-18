@@ -4,7 +4,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import Image from 'next/image'
 
 interface Message {
   id: string
@@ -45,17 +44,11 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
       <div className="p-4 space-y-6">
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 dark:text-gray-400 mt-20">
-            <div className="w-12 h-12 mx-auto mb-4 opacity-50">
-              <Image
-                src="/openai-logo.svg"
-                alt="OpenAI"
-                width={48}
-                height={48}
-                className="w-full h-full"
-              />
+            <div className="w-12 h-12 mx-auto mb-4 opacity-50 flex items-center justify-center text-4xl">
+              🤖
             </div>
             <p className="text-lg">Start a conversation</p>
-            <p className="text-sm">Send a message to begin chatting with the AI assistant.</p>
+            <p className="text-sm">Send a message to begin chatting with HealthCoach AI.</p>
           </div>
         ) : (
           messages.map((message: Message) => (
@@ -69,21 +62,15 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
                     </AvatarFallback>
                   </>
                 ) : (
-                  <AvatarFallback className="bg-black">
-                    <Image
-                      src="/openai-logo.svg"
-                      alt="OpenAI"
-                      width={16}
-                      height={16}
-                      className="w-4 h-4"
-                    />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    🤖
                   </AvatarFallback>
                 )}
               </Avatar>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm">
-                    {message.role === 'USER' ? (userName || 'You') : 'ChatGPT'}
+                    {message.role === 'USER' ? (userName || 'You') : 'HealthCoach AI'}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(message.createdAt).toLocaleTimeString()}

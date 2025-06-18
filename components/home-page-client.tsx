@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChatSidebar } from './chat-sidebar'
 import { ChatInterface } from './chat-interface'
-import { NotesSidebar } from './notes-sidebar'
+import { ClientSidebar } from './notes-sidebar'
 
 interface HomePageClientProps {
   chats: any[]
@@ -11,8 +11,7 @@ interface HomePageClientProps {
 }
 
 export function HomePageClient({ chats, clients }: HomePageClientProps) {
-  const [notesOpen, setNotesOpen] = useState(true)
-  const [selectedNote, setSelectedNote] = useState<string | null>(null)
+  const [clientSidebarOpen, setClientSidebarOpen] = useState(true)
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
 
   return (
@@ -20,22 +19,22 @@ export function HomePageClient({ chats, clients }: HomePageClientProps) {
       <ChatSidebar 
         chats={chats}
         currentChatId={undefined}
-        notesOpen={notesOpen}
-        onNotesToggle={() => setNotesOpen(!notesOpen)}
+        clientSidebarOpen={clientSidebarOpen}
+        onClientSidebarToggle={() => setClientSidebarOpen(!clientSidebarOpen)}
+        selectedClientId={selectedClient}
       />
       <div className="flex-1 flex items-center justify-center min-w-0">
         <ChatInterface />
       </div>
       
-      {/* Notes Sidebar */}
-      <NotesSidebar 
-        isOpen={notesOpen} 
-        onToggle={() => setNotesOpen(!notesOpen)}
-        selectedNote={selectedNote}
-        onNoteSelect={setSelectedNote}
+      {/* Client Sidebar */}
+      <ClientSidebar 
+        isOpen={clientSidebarOpen} 
+        onToggle={() => setClientSidebarOpen(!clientSidebarOpen)}
         clients={clients}
         selectedClientId={selectedClient}
         onClientSelect={setSelectedClient}
+        chatHasStarted={false}
       />
     </div>
   )
