@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
 import { useToast } from '@/hooks/use-toast'
+import { capitalizeName } from '@/lib/utils'
 
 interface ClientFormProps {
   client?: any
@@ -25,6 +26,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
     dateOfBirth: client?.dateOfBirth ? new Date(client.dateOfBirth).toISOString().split('T')[0] : '',
     height: client?.height || undefined,
     weight: client?.weight || undefined,
+    country: client?.country || '',
     goals: client?.goals || '',
     medicalHistory: client?.medicalHistory || '',
     notes: client?.notes || ''
@@ -35,14 +37,20 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
     setIsLoading(true)
 
     try {
+      // Format the name before saving
+      const formattedData = {
+        ...formData,
+        name: capitalizeName(formData.name)
+      }
+
       if (client?.id) {
-        await updateClient(client.id, formData)
+        await updateClient(client.id, formattedData)
         toast({
           title: 'Success',
           description: 'Client updated successfully',
         })
       } else {
-        await createClient(formData)
+        await createClient(formattedData)
         toast({
           title: 'Success',
           description: 'Client created successfully',
@@ -145,6 +153,16 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
                 value={formData.weight || ''}
                 onChange={handleChange('weight')}
                 placeholder="70.5"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                value={formData.country}
+                onChange={handleChange('country')}
+                placeholder="e.g., United States, Canada, UK"
               />
             </div>
           </div>

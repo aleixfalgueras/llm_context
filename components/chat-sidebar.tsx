@@ -175,7 +175,7 @@ export function ChatSidebar({ chats, currentChatId, selectedClientId }: ChatSide
                         >
                         <User className="w-4 h-4 mr-2" />
                         <div className="min-w-0 flex-1">
-                          <div className="font-medium truncate">{client.name}</div>
+                                                                                  <div className="font-medium truncate">{client.name}</div>
                           {client.email && (
                             <div className="text-xs text-muted-foreground truncate">{client.email}</div>
                           )}

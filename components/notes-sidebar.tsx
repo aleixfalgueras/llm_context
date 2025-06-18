@@ -159,7 +159,7 @@ export function ClientSidebar({
                         >
                           <User className="w-4 h-4 mr-2" />
                           <div className="min-w-0 flex-1">
-                            <div className="font-medium truncate">{client.name}</div>
+                                                         <div className="font-medium truncate">{client.name}</div>
                             {client.email && (
                               <div className="text-xs text-muted-foreground truncate">{client.email}</div>
                             )}
@@ -175,7 +175,7 @@ export function ClientSidebar({
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <User className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedClient.name}</span>
+                                         <span className="font-medium text-blue-900 dark:text-blue-100">{selectedClient.name}</span>
                   </div>
                   <div className="space-y-2">
                     {selectedClient.email && (
@@ -186,6 +186,11 @@ export function ClientSidebar({
                     {selectedClient.phone && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         📱 {selectedClient.phone}
+                      </p>
+                    )}
+                    {selectedClient.country && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        🌍 {selectedClient.country}
                       </p>
                     )}
                     {selectedClient.goals && (

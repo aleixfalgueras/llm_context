@@ -106,6 +106,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - `dateOfBirth`: Optional date of birth
 - `height`: Optional height in centimeters
 - `weight`: Optional weight in kilograms
+- `country`: Optional client's country/location
 - `goals`: Client's health and fitness goals
 - `medicalHistory`: Medical conditions, allergies, etc.
 - `notes`: General notes about the client
@@ -143,7 +144,8 @@ const systemPrompt = `You are a professional AI assistant helping a coach/consul
 CLIENT PROFILE:${client.dateOfBirth ? `
 Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
 Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${client.goals ? `
+Weight: ${client.weight}kg` : ''}${client.country ? `
+Country: ${client.country}` : ''}${client.goals ? `
 
 GOALS:
 ${client.goals}` : ''}${client.medicalHistory ? `
@@ -182,6 +184,7 @@ CLIENT PROFILE:
 Age: 35 years old
 Height: 165cm
 Weight: 70kg
+Country: United States
 
 GOALS:
 Lose 15kg for wedding in 6 months, improve cardiovascular health, and build lean muscle. Wants to feel confident and energetic.

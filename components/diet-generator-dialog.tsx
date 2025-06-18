@@ -128,7 +128,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
       
       toast({
         title: 'Diet Saved',
-        description: `Diet plan has been saved successfully for ${selectedClient?.name}`,
+                  description: `Diet plan has been saved successfully for ${selectedClient?.name}`,
       })
 
       // Reset and close
@@ -189,7 +189,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                     <SelectItem key={client.id} value={client.id}>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        <span>{client.name}</span>
+                                                 <span>{client.name}</span>
                         {client.email && <span className="text-sm text-muted-foreground">({client.email})</span>}
                       </div>
                     </SelectItem>
@@ -257,7 +257,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium">Name:</span> {selectedClient.name}
+                                                                      <span className="font-medium">Name:</span> {selectedClient.name}
                     </div>
                     {selectedClient.dateOfBirth && (
                       <div>
@@ -272,6 +272,11 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                     {selectedClient.weight && (
                       <div>
                         <span className="font-medium">Weight:</span> {selectedClient.weight}kg
+                      </div>
+                    )}
+                    {selectedClient.country && (
+                      <div>
+                        <span className="font-medium">Country:</span> {selectedClient.country}
                       </div>
                     )}
                   </div>
