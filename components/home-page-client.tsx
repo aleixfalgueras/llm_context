@@ -16,14 +16,14 @@ export function HomePageClient({ chats, clients }: HomePageClientProps) {
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full overflow-hidden">
       <ChatSidebar 
         chats={chats}
         currentChatId={undefined}
         notesOpen={notesOpen}
         onNotesToggle={() => setNotesOpen(!notesOpen)}
       />
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center min-w-0">
         <ChatInterface />
       </div>
       

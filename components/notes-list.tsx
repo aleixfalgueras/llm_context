@@ -82,7 +82,7 @@ export function NotesList({ notes, onNotesChange, selectedNote, onNoteSelect, us
           return (
             <Card 
               key={note.name} 
-              className={`p-4 transition-colors relative ${
+              className={`p-2 sm:p-4 transition-colors relative ${
                 isSelected 
                   ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/20' 
                   : ''
@@ -94,46 +94,48 @@ export function NotesList({ notes, onNotesChange, selectedNote, onNoteSelect, us
             >
               {/* Used Note Watermark */}
               {isUsed && (
-                <div className="absolute top-2 right-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
-                  <MessageSquare className="h-3 w-3" />
-                  <span>Used</span>
+                <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-1 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+                  <MessageSquare className="h-2 w-2 sm:h-3 sm:w-3" />
+                  <span className="hidden sm:inline">Used</span>
+                  <span className="sm:hidden">✓</span>
                 </div>
               )}
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
               {/* Note Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
+              <div className="flex items-center justify-between min-w-0">
+                <div className="flex items-center space-x-1 sm:space-x-3 flex-1 min-w-0">
                   {/* Selection Button */}
                   {onNoteSelect && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onNoteSelect(isSelected ? null : note.name)}
-                      className={`h-8 w-8 p-0 flex-shrink-0 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}
+                      className={`h-6 w-6 sm:h-8 sm:w-8 p-0 flex-shrink-0 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`}
                       title={isSelected ? 'Deselect note' : 'Select note for AI context'}
                     >
                       {isSelected ? (
-                        <Check className="h-4 w-4" />
+                        <Check className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <Circle className="h-4 w-4" />
+                        <Circle className="h-3 w-3 sm:h-4 sm:w-4" />
                       )}
                     </Button>
                   )}
                   
                   {/* Note Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm truncate" title={note.name}>
+                    <h3 className="font-medium text-xs sm:text-sm truncate" title={note.name}>
                       {note.name}
                     </h3>
-                    <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1">
                       <div className="flex items-center text-xs text-gray-500">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {formatDate(note.lastModified)}
+                        <Calendar className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
+                        <span className="hidden sm:inline">{formatDate(note.lastModified)}</span>
+                        <span className="sm:hidden">{new Date(note.lastModified).toLocaleDateString()}</span>
                       </div>
                       <span className="text-xs text-gray-400">
                         {formatFileSize(note.size)}
                       </span>
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${
+                      <span className={`text-xs px-1 py-0.5 sm:px-1.5 rounded ${
                         note.type === 'markdown' 
                           ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' 
                           : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
@@ -145,17 +147,17 @@ export function NotesList({ notes, onNotesChange, selectedNote, onNoteSelect, us
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-0.5 sm:space-x-1 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleExpanded(note.name)}
-                    className="h-8 w-8 p-0"
+                    className="h-6 w-6 sm:h-8 sm:w-8 p-0"
                   >
                     {expandedNote === note.name ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                     )}
                   </Button>
                   <Button
@@ -163,18 +165,18 @@ export function NotesList({ notes, onNotesChange, selectedNote, onNoteSelect, us
                     size="sm"
                     onClick={() => handleDelete(note.name)}
                     disabled={deletingNote === note.name}
-                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Note Content (Expandable) */}
               {expandedNote === note.name && (
-                <div className="border-t pt-3">
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded p-3">
-                    <pre className="text-sm whitespace-pre-wrap break-words font-mono text-gray-700 dark:text-gray-300 max-h-48 overflow-y-auto">
+                <div className="border-t pt-2 sm:pt-3">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded p-2 sm:p-3">
+                    <pre className="text-xs sm:text-sm whitespace-pre-wrap break-words font-mono text-gray-700 dark:text-gray-300 max-h-32 sm:max-h-48 overflow-y-auto">
                       {note.content}
                     </pre>
                   </div>

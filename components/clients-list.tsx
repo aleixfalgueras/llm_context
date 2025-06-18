@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 import { Search, Plus, Edit, Trash2, User } from 'lucide-react'
 import { deleteClient } from '@/lib/client-actions'
 import { useToast } from '@/hooks/use-toast'
@@ -170,11 +170,9 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh }: C
                     </div>
                   )}
 
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Notes:</span>
-                    <Badge variant="secondary">
-                      {client._count?.clientNotes || 0}
-                    </Badge>
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Notes: </span>
+                    <span>{client._count?.clientNotes || 0}</span>
                   </div>
 
                   {client.goals && (

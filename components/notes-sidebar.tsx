@@ -35,7 +35,7 @@ export function NotesSidebar({
   const [notes, setNotes] = useState<UserNote[]>([])
   const [loading, setLoading] = useState(true)
   const [showUpload, setShowUpload] = useState(false)
-  const [sidebarWidth, setSidebarWidth] = useState(320) // Default 320px (w-80)
+  const [sidebarWidth, setSidebarWidth] = useState(400) // Default 400px for better content visibility
   const [isResizing, setIsResizing] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
@@ -73,7 +73,7 @@ export function NotesSidebar({
       if (!isResizing) return
       
       const newWidth = window.innerWidth - e.clientX
-      const minWidth = 240 // Minimum 240px
+      const minWidth = 320 // Minimum 320px for better readability
       const maxWidth = 600 // Maximum 600px
       
       const constrainedWidth = Math.min(Math.max(newWidth, minWidth), maxWidth)
@@ -124,35 +124,36 @@ export function NotesSidebar({
       {/* Sidebar Content */}
       <div className="flex flex-col flex-1 ml-1">
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <StickyNote className="h-5 w-5" />
-            <h2 className="font-semibold">Client Notes</h2>
+      <div className="p-2 sm:p-4 border-b">
+        <div className="flex items-center justify-between min-w-0">
+          <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
+            <StickyNote className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <h2 className="font-semibold text-sm sm:text-base truncate">Client Notes</h2>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowUpload(!showUpload)}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+              title={showUpload ? "Hide upload area" : "Upload notes"}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={onToggle}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 p-0"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
         
         {/* Client Selector */}
         {clients.length > 0 && onClientSelect && (
-          <div className="mt-3">
+          <div className="mt-2 sm:mt-3">
             <ClientSelector
               clients={clients}
               selectedClientId={selectedClientId}
@@ -163,11 +164,11 @@ export function NotesSidebar({
         )}
         {notes.length > 0 && (
           <div className="mt-1 space-y-1">
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               {notes.length} note{notes.length !== 1 ? 's' : ''}
             </p>
             {selectedNote && (
-              <p className="text-xs text-blue-600 font-medium">
+              <p className="text-xs text-blue-600 font-medium break-words">
                 📝 "{selectedNote}" selected for AI context
               </p>
             )}
@@ -176,22 +177,22 @@ export function NotesSidebar({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         {showUpload ? (
-          <div className="p-4">
-            <div className="mb-4">
-              <h3 className="font-medium mb-2">Upload Notes</h3>
-              <p className="text-sm text-gray-500">
+          <div className="p-2 sm:p-4">
+            <div className="mb-3 sm:mb-4">
+              <h3 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">Upload Notes</h3>
+              <p className="text-xs sm:text-sm text-gray-500 break-words">
                 Upload your .md or .txt files to save them in the cloud
               </p>
             </div>
             <NotesUpload onUploadSuccess={handleNotesChange} clientId={selectedClientId} />
           </div>
         ) : (
-          <div className="p-4 h-full">
+          <div className="p-2 sm:p-4 h-full overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
               </div>
             ) : (
               <NotesList 
@@ -206,19 +207,7 @@ export function NotesSidebar({
         )}
       </div>
 
-      {/* Footer with Upload Toggle */}
-      {!showUpload && !loading && (
-        <div className="p-4 border-t">
-          <Button
-            onClick={() => setShowUpload(true)}
-            variant="outline"
-            className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Upload Notes
-          </Button>
-        </div>
-      )}
+
       </div>
     </div>
   )

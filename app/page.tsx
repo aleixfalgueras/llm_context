@@ -26,9 +26,11 @@ export default async function Home() {
   ])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-hidden flex flex-col">
       <Navbar />
-      <HomePageClient chats={chats} clients={clients} />
+      <div className="flex-1 overflow-hidden">
+        <HomePageClient chats={chats} clients={clients} />
+      </div>
     </div>
   )
 }

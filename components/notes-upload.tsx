@@ -107,9 +107,9 @@ export function NotesUpload({ onUploadSuccess, clientId }: NotesUploadProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <Card
-        className={`p-6 border-2 border-dashed transition-colors relative ${
+        className={`p-3 sm:p-4 border-2 border-dashed transition-colors relative ${
           isDragging 
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
             : 'border-gray-300 dark:border-gray-700'
@@ -119,16 +119,16 @@ export function NotesUpload({ onUploadSuccess, clientId }: NotesUploadProps) {
         onDrop={handleDrop}
       >
         <div className="text-center">
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Drop your notes here</p>
+          <Upload className="mx-auto h-8 w-8 sm:h-10 sm:w-10 text-gray-400 mb-2 sm:mb-3" />
+          <div className="space-y-1">
+            <p className="text-xs sm:text-sm font-medium">Drop your notes here</p>
             <p className="text-xs text-gray-500">or click to select files</p>
-            <p className="text-xs text-gray-400">Supports .md and .txt files</p>
+            <p className="text-xs text-gray-400 break-words">Supports .md and .txt files</p>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="mt-4 bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200"
+            className="mt-2 sm:mt-3 bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200 text-xs sm:text-sm px-2 sm:px-3"
             onClick={() => document.getElementById('file-input')?.click()}
           >
             Select Files
@@ -146,17 +146,17 @@ export function NotesUpload({ onUploadSuccess, clientId }: NotesUploadProps) {
 
       {selectedFiles.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium">Selected files:</p>
+          <p className="text-xs sm:text-sm font-medium">Selected files:</p>
           <div className="space-y-2">
             {selectedFiles.map((file, index) => (
               <div
                 key={`${file.name}-${index}`}
-                className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"
+                className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded min-w-0"
               >
-                <div className="flex items-center space-x-2">
-                  <File className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm truncate">{file.name}</span>
-                  <span className="text-xs text-gray-400">
+                <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
+                  <File className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm truncate">{file.name}</span>
+                  <span className="text-xs text-gray-400 flex-shrink-0">
                     ({(file.size / 1024).toFixed(1)} KB)
                   </span>
                 </div>
@@ -164,9 +164,9 @@ export function NotesUpload({ onUploadSuccess, clientId }: NotesUploadProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeFile(index)}
-                  className="h-6 w-6 p-0"
+                  className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex-shrink-0"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-2 w-2 sm:h-3 sm:w-3" />
                 </Button>
               </div>
             ))}
@@ -175,7 +175,7 @@ export function NotesUpload({ onUploadSuccess, clientId }: NotesUploadProps) {
             onClick={handleUpload}
             disabled={uploading}
             variant="outline"
-            className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200 disabled:opacity-50"
+            className="w-full bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-gray-900 dark:text-gray-100 hover:bg-blue-200 dark:hover:bg-blue-900/50 shadow-sm transition-all duration-200 disabled:opacity-50 text-xs sm:text-sm"
           >
             {uploading ? 'Uploading...' : `Upload ${selectedFiles.length} file(s)`}
           </Button>
