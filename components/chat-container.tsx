@@ -17,13 +17,10 @@ interface ChatContainerProps {
   initialMessages: Message[]
   userImageUrl?: string
   userName?: string
-  selectedNoteContent?: string | null
-  selectedNoteName?: string | null
-  onNoteContextSent?: () => void
   onTitleUpdate?: (title: string) => void
 }
 
-export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, selectedNoteContent, selectedNoteName, onNoteContextSent, onTitleUpdate }: ChatContainerProps) {
+export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, onTitleUpdate }: ChatContainerProps) {
   const { messages, isLoading, input, setInput, sendMessage, setOnTitleUpdate } = useChat(chatId, initialMessages)
   
   // Set up title update callback
@@ -52,9 +49,6 @@ export function ChatContainer({ chatId, initialMessages, userImageUrl, userName,
           setInput={setInput}
           sendMessage={sendMessage}
           isLoading={isLoading}
-          selectedNoteContent={selectedNoteContent}
-          selectedNoteName={selectedNoteName}
-          onNoteContextSent={onNoteContextSent}
         />
       </div>
     </>

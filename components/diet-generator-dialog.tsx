@@ -23,6 +23,8 @@ interface DietFormData {
   clientId: string
   startDate: string
   endDate: string
+  dailyCalories: string
+  proteinTarget: string
   additionalInfo: string
   includeClientGoals: boolean
 }
@@ -34,6 +36,8 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
     clientId: '',
     startDate: '',
     endDate: '',
+    dailyCalories: '',
+    proteinTarget: '',
     additionalInfo: '',
     includeClientGoals: true
   })
@@ -133,7 +137,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
       // Reset and close
       setStep('form')
-      setFormData({ clientId: '', startDate: '', endDate: '', additionalInfo: '', includeClientGoals: true })
+      setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true })
       setGeneratedDiet('')
       setEditedDiet('')
       onOpenChange(false)
@@ -151,7 +155,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
   const handleClose = () => {
     setStep('form')
-    setFormData({ clientId: '', startDate: '', endDate: '', additionalInfo: '', includeClientGoals: true })
+    setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true })
     setGeneratedDiet('')
     setEditedDiet('')
     onOpenChange(false)
@@ -218,6 +222,42 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                   onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                 />
               </div>
+            </div>
+
+            {/* Nutritional Targets */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Nutritional Targets (Optional)</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dailyCalories">Daily Calories (kcal)</Label>
+                  <Input
+                    id="dailyCalories"
+                    type="number"
+                    min="800"
+                    max="5000"
+                    step="50"
+                    value={formData.dailyCalories || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, dailyCalories: e.target.value }))}
+                    placeholder="e.g., 2000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="proteinTarget">Daily Protein (g)</Label>
+                  <Input
+                    id="proteinTarget"
+                    type="number"
+                    min="20"
+                    max="300"
+                    step="5"
+                    value={formData.proteinTarget || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, proteinTarget: e.target.value }))}
+                    placeholder="e.g., 120"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Leave blank to let the AI determine appropriate targets based on the client's profile and goals.
+              </p>
             </div>
 
             {/* Additional Information Field */}

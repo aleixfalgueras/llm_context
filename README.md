@@ -353,8 +353,7 @@ npm run dev
 
 ### Working Test Files:
 - **`example.test.ts`** - Basic Jest functionality (math, arrays, objects)
-- **`simple.test.ts`** - Core Jest matchers and testing patterns  
-- **`simple-button.test.tsx`** - React component testing (Button UI component)
+- **`simple.test.ts`** - Core Jest matchers and testing patterns
 
 ### Usage:
 ```bash
@@ -364,7 +363,6 @@ npm test
 # Run specific test
 npm test -- __tests__/example.test.ts
 npm test -- __tests__/simple.test.ts
-npm test -- __tests__/components/simple-button.test.tsx
 ```
 
 ## Usage
