@@ -71,7 +71,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh }: C
         <div>
           <h1 className="text-3xl font-bold">Clients</h1>
           <p className="text-muted-foreground">
-            Manage your client information and health profiles
+            Manage your client profiles
           </p>
         </div>
         <Button onClick={onAddClient} className="flex items-center gap-2">

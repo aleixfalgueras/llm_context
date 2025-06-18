@@ -1,30 +1,26 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, X, GripVertical } from 'lucide-react'
+import { User, GripVertical, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ClientSelector } from './client-selector'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { getClients } from '@/lib/client-actions'
 
 interface ClientSidebarProps {
-  isOpen: boolean
-  onToggle: () => void
   chatId?: string
   selectedClientId?: string | null
   onClientSelect?: (clientId: string | null) => void
   clients?: any[]
-  chatHasStarted?: boolean // Whether this is an existing chat or new chat selection
+  hasActiveChat?: boolean // Whether there's an active chat selected
 }
 
 export function ClientSidebar({ 
-  isOpen, 
-  onToggle, 
   chatId,
   selectedClientId = null, 
   onClientSelect,
   clients = [],
-  chatHasStarted = false
+  hasActiveChat = false
 }: ClientSidebarProps) {
   const [allClients, setAllClients] = useState<any[]>(clients)
   const [loading, setLoading] = useState(false)
@@ -45,10 +41,10 @@ export function ClientSidebar({
   }
 
   useEffect(() => {
-    if (isOpen && allClients.length === 0) {
+    if (allClients.length === 0) {
       fetchClients()
     }
-  }, [isOpen])
+  }, [])
 
   // Handle resize functionality
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -87,10 +83,6 @@ export function ClientSidebar({
     }
   }, [isResizing])
 
-  if (!isOpen) {
-    return null
-  }
-
   const selectedClient = allClients.find(client => client.id === selectedClientId)
 
   return (
@@ -115,23 +107,11 @@ export function ClientSidebar({
       <div className="flex flex-col flex-1 ml-1">
         {/* Header */}
         <div className="p-2 sm:p-4 border-b">
-          <div className="flex items-center justify-between min-w-0">
-            <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
-              <User className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-              <h2 className="font-semibold text-sm sm:text-base truncate">
-                {chatHasStarted ? 'Client Information' : 'Select Client'}
-              </h2>
-            </div>
-            <div className="flex items-center space-x-1 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggle}
-                className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-              >
-                <X className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-            </div>
+          <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
+            <User className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <h2 className="font-semibold text-sm sm:text-base truncate">
+              Client Information
+            </h2>
           </div>
         </div>
 
@@ -141,9 +121,56 @@ export function ClientSidebar({
             <div className="flex items-center justify-center h-32">
               <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
             </div>
-          ) : chatHasStarted && selectedClient ? (
+          ) : !hasActiveChat ? (
+            // Show message when no chat is selected
+            <div className="space-y-4">
+              <div className="text-center text-gray-500 mt-8">
+                <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">No Chat Selected</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Select a chat to view the client information associated with that conversation.
+                </p>
+              </div>
+            </div>
+          ) : hasActiveChat && selectedClient ? (
             // Show selected client information when chat has started
             <div className="space-y-4">
+              {/* Client Selector Dropdown */}
+              {allClients.length > 0 && onClientSelect && (
+                <div className="mb-4">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-full justify-between">
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 mr-2" />
+                          <span className="truncate">{selectedClient.name}</span>
+                        </div>
+                        <ChevronDown className="w-4 h-4 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-full" align="start">
+                      <DropdownMenuLabel>Switch Client</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {allClients.map((client) => (
+                        <DropdownMenuItem
+                          key={client.id}
+                          onClick={() => onClientSelect(client.id)}
+                          className={selectedClient.id === client.id ? 'bg-blue-50 dark:bg-blue-950/20' : ''}
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium truncate">{client.name}</div>
+                            {client.email && (
+                              <div className="text-xs text-muted-foreground truncate">{client.email}</div>
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+
               <Card className="p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
@@ -189,48 +216,21 @@ export function ClientSidebar({
                 </div>
               </Card>
               <div className="text-xs text-gray-500 p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                💡 This client's information has been provided as context for the AI to personalize responses.
+                💡 This client's information is being used as context for the AI to personalize responses.
               </div>
             </div>
-          ) : (
-            // Show client selector when no chat has started
+          ) : hasActiveChat && !selectedClient ? (
+            // Show message when chat is selected but no client is associated
             <div className="space-y-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {allClients.length > 0 
-                  ? "Select a client to provide context for your chat conversation. The AI will use their information to give personalized responses."
-                  : "No clients found. Create a client first to enable personalized AI conversations."
-                }
-              </div>
-              
-              {allClients.length > 0 && onClientSelect && (
-                <ClientSelector
-                  clients={allClients}
-                  selectedClientId={selectedClientId}
-                  onClientSelect={onClientSelect}
-                  placeholder="Choose a client..."
-                />
-              )}
-              
-              {selectedClientId && selectedClient && (
-                <Card className="p-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <User className="h-4 w-4 text-green-600" />
-                    <span className="font-medium text-green-900 dark:text-green-100 text-sm">Selected Client</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">{selectedClient.name}</h4>
-                    {selectedClient.email && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{selectedClient.email}</p>
-                    )}
-                  </div>
-                </Card>
-              )}
-              
-              <div className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                💡 Start a new chat to begin a conversation with the selected client context.
+              <div className="text-center text-gray-500 mt-8">
+                <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">No Client Selected</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  This chat doesn't have a client associated with it. Create a new chat with a client for personalized responses.
+                </p>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

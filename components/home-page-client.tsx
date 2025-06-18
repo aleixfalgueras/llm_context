@@ -11,7 +11,6 @@ interface HomePageClientProps {
 }
 
 export function HomePageClient({ chats, clients }: HomePageClientProps) {
-  const [clientSidebarOpen, setClientSidebarOpen] = useState(true)
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
 
   return (
@@ -19,22 +18,18 @@ export function HomePageClient({ chats, clients }: HomePageClientProps) {
       <ChatSidebar 
         chats={chats}
         currentChatId={undefined}
-        clientSidebarOpen={clientSidebarOpen}
-        onClientSidebarToggle={() => setClientSidebarOpen(!clientSidebarOpen)}
         selectedClientId={selectedClient}
       />
       <div className="flex-1 flex items-center justify-center min-w-0">
         <ChatInterface />
       </div>
       
-      {/* Client Sidebar */}
+      {/* Client Sidebar - Always visible */}
       <ClientSidebar 
-        isOpen={clientSidebarOpen} 
-        onToggle={() => setClientSidebarOpen(!clientSidebarOpen)}
         clients={clients}
         selectedClientId={selectedClient}
         onClientSelect={setSelectedClient}
-        chatHasStarted={false}
+        hasActiveChat={false}
       />
     </div>
   )
