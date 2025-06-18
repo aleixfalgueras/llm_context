@@ -7,11 +7,13 @@ import { NotesSidebar } from './notes-sidebar'
 
 interface HomePageClientProps {
   chats: any[]
+  clients: any[]
 }
 
-export function HomePageClient({ chats }: HomePageClientProps) {
+export function HomePageClient({ chats, clients }: HomePageClientProps) {
   const [notesOpen, setNotesOpen] = useState(true)
   const [selectedNote, setSelectedNote] = useState<string | null>(null)
+  const [selectedClient, setSelectedClient] = useState<string | null>(null)
 
   return (
     <div className="flex h-screen">
@@ -31,6 +33,9 @@ export function HomePageClient({ chats }: HomePageClientProps) {
         onToggle={() => setNotesOpen(!notesOpen)}
         selectedNote={selectedNote}
         onNoteSelect={setSelectedNote}
+        clients={clients}
+        selectedClientId={selectedClient}
+        onClientSelect={setSelectedClient}
       />
     </div>
   )

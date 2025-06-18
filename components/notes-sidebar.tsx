@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { NotesUpload } from './notes-upload'
 import { NotesList } from './notes-list'
+import { ClientSelector } from './client-selector'
 import { getUserNotes, type UserNote } from '@/lib/notes-actions'
 
 interface NotesSidebarProps {
@@ -15,9 +16,22 @@ interface NotesSidebarProps {
   onNoteSelect?: (noteName: string | null) => void
   chatId?: string
   usedNotes?: string[]
+  clients?: any[]
+  selectedClientId?: string | null
+  onClientSelect?: (clientId: string | null) => void
 }
 
-export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, chatId, usedNotes = [] }: NotesSidebarProps) {
+export function NotesSidebar({ 
+  isOpen, 
+  onToggle, 
+  selectedNote, 
+  onNoteSelect, 
+  chatId, 
+  usedNotes = [], 
+  clients = [], 
+  selectedClientId = null, 
+  onClientSelect 
+}: NotesSidebarProps) {
   const [notes, setNotes] = useState<UserNote[]>([])
   const [loading, setLoading] = useState(true)
   const [showUpload, setShowUpload] = useState(false)
@@ -28,7 +42,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
   const fetchNotes = async () => {
     try {
       setLoading(true)
-      const userNotes = await getUserNotes()
+      const userNotes = await getUserNotes(selectedClientId)
       setNotes(userNotes)
     } catch (error) {
       console.error('Failed to fetch notes:', error)
@@ -41,7 +55,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
     if (isOpen) {
       fetchNotes()
     }
-  }, [isOpen])
+  }, [isOpen, selectedClientId])
 
   const handleNotesChange = () => {
     fetchNotes()
@@ -114,7 +128,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <StickyNote className="h-5 w-5" />
-            <h2 className="font-semibold">My Notes</h2>
+            <h2 className="font-semibold">Client Notes</h2>
           </div>
           <div className="flex items-center space-x-1">
             <Button
@@ -135,6 +149,18 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
             </Button>
           </div>
         </div>
+        
+        {/* Client Selector */}
+        {clients.length > 0 && onClientSelect && (
+          <div className="mt-3">
+            <ClientSelector
+              clients={clients}
+              selectedClientId={selectedClientId}
+              onClientSelect={onClientSelect}
+              placeholder="Select client..."
+            />
+          </div>
+        )}
         {notes.length > 0 && (
           <div className="mt-1 space-y-1">
             <p className="text-sm text-gray-500">
@@ -159,7 +185,7 @@ export function NotesSidebar({ isOpen, onToggle, selectedNote, onNoteSelect, cha
                 Upload your .md or .txt files to save them in the cloud
               </p>
             </div>
-            <NotesUpload onUploadSuccess={handleNotesChange} />
+            <NotesUpload onUploadSuccess={handleNotesChange} clientId={selectedClientId} />
           </div>
         ) : (
           <div className="p-4 h-full">

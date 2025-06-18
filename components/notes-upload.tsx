@@ -9,9 +9,10 @@ import { uploadNote } from '@/lib/notes-actions'
 
 interface NotesUploadProps {
   onUploadSuccess?: () => void
+  clientId?: string | null
 }
 
-export function NotesUpload({ onUploadSuccess }: NotesUploadProps) {
+export function NotesUpload({ onUploadSuccess, clientId }: NotesUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
@@ -79,7 +80,7 @@ export function NotesUpload({ onUploadSuccess }: NotesUploadProps) {
       try {
         const formData = new FormData()
         formData.append('file', file)
-        await uploadNote(formData)
+        await uploadNote(formData, clientId || undefined)
         successCount++
       } catch (error) {
         errorCount++

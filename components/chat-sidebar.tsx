@@ -6,11 +6,9 @@ import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { createChat, deleteChat, updateChatTitle, deleteAllChats } from '@/lib/actions'
-import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { ThemeToggle } from '@/components/theme-toggle'
 
 interface Chat {
   id: string
@@ -62,11 +60,7 @@ export function ChatSidebar({ chats, currentChatId, notesOpen, onNotesToggle }: 
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">AI Chat</h1>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <UserButton />
-          </div>
+          <h1 className="text-xl font-semibold">Chats</h1>
         </div>
         <div className="space-y-2">
           {onNotesToggle && (
