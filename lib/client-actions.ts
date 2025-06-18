@@ -11,6 +11,7 @@ export interface ClientData {
   dateOfBirth?: string
   height?: number
   weight?: number
+  country?: string
   goals?: string
   medicalHistory?: string
   notes?: string
@@ -33,6 +34,7 @@ export async function createClient(data: ClientData) {
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         height: data.height,
         weight: data.weight,
+        country: data.country,
         goals: data.goals,
         medicalHistory: data.medicalHistory,
         notes: data.notes,
@@ -73,6 +75,7 @@ export async function updateClient(id: string, data: ClientData) {
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         height: data.height,
         weight: data.weight,
+        country: data.country,
         goals: data.goals,
         medicalHistory: data.medicalHistory,
         notes: data.notes,

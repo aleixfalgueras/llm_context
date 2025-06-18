@@ -170,6 +170,13 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh }: C
                     </div>
                   )}
 
+                  {client.country && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Country:</span>
+                      <span>{client.country}</span>
+                    </div>
+                  )}
+
                   {client.goals && (
                     <div className="mt-3 p-2 bg-muted rounded-sm">
                       <p className="text-xs text-muted-foreground mb-1">Goals:</p>

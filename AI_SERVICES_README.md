@@ -80,7 +80,8 @@ const clientContextPrompt = `You are a professional AI assistant helping a coach
 CLIENT PROFILE:${client.dateOfBirth ? `
 Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
 Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${includeClientGoals && client.goals ? `
+Weight: ${client.weight}kg` : ''}${client.country ? `
+Country: ${client.country}` : ''}${includeClientGoals && client.goals ? `
 
 GOALS:
 ${client.goals}` : ''}${client.medicalHistory ? `

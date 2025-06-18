@@ -28,6 +28,17 @@ export function generateChatTitle(prompt: string): string {
   return truncated + '...'
 }
 
+// Capitalize each word in a name (proper case)
+export function capitalizeName(name: string): string {
+  if (!name) return name
+  
+  return name
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 // Generate chat title using client name and current date
 export function generateChatTitleWithClient(clientName: string): string {
   const now = new Date()
