@@ -12,6 +12,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - **Real-time Messaging**: Send and receive messages in real-time
 - **Message History**: Persistent chat history stored in database
 - **Context Optimization**: Efficient token usage with smart context injection
+- **AI Services**: Generate personalized documents like diet plans using client profiles
 
 ### User Experience  
 - **ChatGPT-like Interface**: Clean, minimalistic design similar to ChatGPT
@@ -47,8 +48,12 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 
 ```
 ├── app/
-│   ├── api/chat/          # Chat API endpoints
+│   ├── api/
+│   │   ├── chat/          # Chat API endpoints
+│   │   └── ai-services/   # AI document generation APIs
+│   ├── ai-services/       # AI Services page
 │   ├── chat/[id]/         # Individual chat pages
+│   ├── clients/           # Client management pages
 │   ├── sign-in/           # Authentication pages
 │   ├── sign-up/
 │   ├── layout.tsx         # Root layout with providers
@@ -58,13 +63,18 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   ├── chat-sidebar.tsx  # Chat history sidebar
 │   ├── chat-messages.tsx # Message display
 │   ├── chat-input.tsx    # Message input form
-│   └── chat-interface.tsx # Landing page interface
+│   ├── ai-services-client.tsx # AI Services page
+│   ├── diet-generator-dialog.tsx # Diet generation dialog
+│   └── clients-page-client.tsx # Client management
 ├── hooks/
 │   ├── use-chat.ts       # Chat functionality hook
 │   └── use-toast.ts      # Toast notifications
 ├── lib/
 │   ├── actions.ts        # Server actions for CRUD
+│   ├── client-actions.ts # Client management actions
+│   ├── document-actions.ts # Document management actions
 │   ├── prisma.ts         # Database client
+│   ├── supabase.ts       # Supabase client
 │   └── utils.ts          # Utility functions
 ├── prisma/
 │   └── schema.prisma     # Database schema
@@ -101,6 +111,16 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - `notes`: General notes about the client
 - `createdAt/updatedAt`: Timestamps
 
+### Document Model
+- `id`: Unique identifier
+- `userId`: Coach/consultant's user ID
+- `clientId`: Associated client ID
+- `documentName`: Document name/title
+- `documentPath`: Storage path in Supabase
+- `documentType`: Type (e.g., "diet", "workout")
+- `startDate/endDate`: Optional date range for time-based documents
+- `createdAt/updatedAt`: Timestamps
+
 ## AI Client Context System
 
 ### Overview
@@ -113,24 +133,26 @@ Each chat is associated with a specific client, and their information is automat
 
 ### System Prompt Template
 
-The following system prompt is used to provide client context to the AI:
+The following system prompt is dynamically constructed with client context (sections only included if data exists):
 
-```
-You are a professional AI assistant helping a coach/consultant with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses.
+**File Location**: `app/api/chat/route.ts` (lines 72-95)
 
-CLIENT PROFILE:
-Age: [Client Age] years old
-Height: [Height]cm
-Weight: [Weight]kg
+```typescript
+const systemPrompt = `You are a professional AI assistant helping a coach/consultant with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses.
+
+CLIENT PROFILE:${client.dateOfBirth ? `
+Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
+Height: ${client.height}cm` : ''}${client.weight ? `
+Weight: ${client.weight}kg` : ''}${client.goals ? `
 
 GOALS:
-[Client's specific goals and objectives]
+${client.goals}` : ''}${client.medicalHistory ? `
 
 MEDICAL HISTORY:
-[Medical conditions, allergies, previous injuries, etc.]
+${client.medicalHistory}` : ''}${client.notes ? `
 
 ADDITIONAL NOTES:
-[Any additional notes about the client]
+${client.notes}` : ''}
 
 INSTRUCTIONS:
 - Use this client information to personalize your responses
@@ -141,8 +163,13 @@ INSTRUCTIONS:
 - Maintain confidentiality and professionalism at all times
 - Never reference the client by name or any personally identifiable information
 
-Respond naturally and conversationally while keeping this context in mind.
+Respond naturally and conversationally while keeping this context in mind.`
 ```
+
+**Key Features:**
+- **Conditional Sections**: Only includes data that exists (age, height, weight, goals, medical history, notes)
+- **Privacy-Safe**: No personally identifiable information sent to OpenAI
+- **Dynamic Construction**: Template adapts based on available client data
 
 ### Example Client Context
 
@@ -198,6 +225,36 @@ The application uses configurable environment variables for OpenAI parameters, a
 - **Presence Penalty (0.1)**: Slight reduction in repetitive content across the conversation. Range: -2.0 to 2.0. Positive values encourage new topics, negative values encourage staying on topic.
 
 - **Frequency Penalty (0.1)**: Encourages vocabulary diversity while maintaining natural language. Range: -2.0 to 2.0. Positive values reduce word repetition.
+
+## AI Services
+
+### Overview
+AI Services provide automated document generation using client profiles. The feature reuses the same client context system as the AI Assistant to generate personalized, professional documents.
+
+### Diet Plan Generation
+
+The first AI Service implemented is **Diet Plan Generation**, which creates personalized diet plans based on:
+
+- **Client Profile**: Age, height, weight, medical history, notes
+- **Goals Control**: Optional toggle to include/exclude client goals
+- **Date Range**: Specific start and end dates for the diet plan
+- **Additional Context**: Optional extra information for this specific plan
+
+#### Key Features:
+- **Client Goals Toggle**: Control whether the client's goals influence diet generation
+  - **Included** (default): AI considers fitness/health goals in recommendations
+  - **Excluded**: AI focuses purely on nutritional health without goal bias
+- **Live Editor**: Edit generated content with real-time markdown preview
+- **Supabase Storage**: Documents saved to organized folder structure
+- **Database Tracking**: All documents tracked with metadata
+
+#### Document Storage:
+- **Format**: Markdown files for easy editing and display
+- **Structure**: `{user_id}/{client_id}/{document_name}.md`
+- **Naming**: `{Client Name} Diet {start_date} to {end_date}.md`
+- **Security**: Private storage with user-specific access
+
+For detailed implementation information, see [AI_SERVICES_README.md](AI_SERVICES_README.md).
 
 #### Customization Examples:
 
