@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, startDate, endDate, additionalInfo, includeClientGoals = true } = await req.json()
+    const { clientId, startDate, endDate, dailyCalories, proteinTarget, additionalInfo, includeClientGoals = true } = await req.json()
 
     if (!clientId || !startDate || !endDate) {
       return new Response('Missing required fields', { status: 400 })
@@ -53,15 +53,25 @@ ${client.notes}` : ''}
 DIET GENERATION REQUEST:
 - Start Date: ${startDate}
 - End Date: ${endDate}
-- Duration: ${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days${additionalInfo ? `
-- Additional Information: ${additionalInfo}` : ''}
+- Duration: ${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days${dailyCalories ? `
+
+NUTRITIONAL TARGETS:
+- Daily Calories: ${dailyCalories} kcal${proteinTarget ? `
+- Daily Protein: ${proteinTarget}g` : ''}` : proteinTarget ? `
+
+NUTRITIONAL TARGETS:
+- Daily Protein: ${proteinTarget}g` : ''}${additionalInfo ? `
+
+ADDITIONAL INFORMATION:
+${additionalInfo}` : ''}
 
 INSTRUCTIONS:
 - Create a comprehensive, personalized diet plan for this client
 - Use the client's profile information to tailor recommendations
 - Structure the diet plan in a clear, professional format
 - Include meal plans, portion recommendations, and nutritional guidance
-- Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances${additionalInfo ? `
+- Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances${(dailyCalories || proteinTarget) ? `
+- Adhere to the specified nutritional targets above` : ''}${additionalInfo ? `
 - Pay special attention to the additional information provided above` : ''}
 - Provide the response in markdown format for easy reading
 - DO NOT include any suggestions about consulting healthcare professionals

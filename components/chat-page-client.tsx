@@ -66,9 +66,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
           initialMessages={chat.messages}
           userImageUrl={userImageUrl}
           userName={userName}
-          selectedNoteContent={null}
-          selectedNoteName={selectedClient?.name}
-          onNoteContextSent={() => {}}
+          
           onTitleUpdate={setCurrentTitle}
         />
       </div>
