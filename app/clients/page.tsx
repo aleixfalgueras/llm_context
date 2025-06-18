@@ -14,7 +14,7 @@ export default async function ClientsPage() {
   const clients = await getClients()
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
       <div className="container mx-auto py-8 px-4">
         <ClientsPageClient clients={clients} />
