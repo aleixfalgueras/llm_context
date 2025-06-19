@@ -10,7 +10,10 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:setup": "./__tests__/setup-tests.sh"
+    "test:setup": "./__tests__/setup-tests.sh",
+    "postinstall": "prisma generate",
+    "db:deploy": "prisma migrate deploy",
+    "vercel-build": "npx prisma migrate deploy && npx prisma generate && next build"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.22.0",

@@ -1,6 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
-import { supabaseServer } from '@/lib/supabase'
+import { saveDocumentToStorage } from '@/lib/document-save-utils'
 
 export async function POST(req: Request) {
   try {
@@ -19,67 +18,26 @@ export async function POST(req: Request) {
     // Use extracted date if available, otherwise fall back to provided date or current date
     const finalTestDate = extractedData?.testInfo?.testDate || testDate || new Date().toISOString().split('T')[0]
 
-    // Get client information
-    const client = await prisma.client.findFirst({
-      where: {
-        id: clientId,
-        userId,
-      },
+    // Use the shared document save utility
+    const result = await saveDocumentToStorage({
+      clientId,
+      content: reportContent,
+      documentName,
+      documentType: 'blood-test-analysis',
+      startDate: finalTestDate,
+      endDate: finalTestDate // For blood tests, start and end date are the same
     })
-    
-    if (!client) {
-      return new Response('Client not found', { status: 404 })
-    }
 
-    // Use custom document name or create default with test date
-    const formattedTestDate = new Date(finalTestDate).toISOString().split('T')[0]
-    const finalDocumentName = documentName || `${client.name} Blood Test Analysis ${formattedTestDate}`
-    const fileName = `${finalDocumentName}.md`
-    const filePath = `${userId}/${clientId}/${fileName}`
-
-    try {
-      // Upload to Supabase storage
-      const { data: uploadData, error: uploadError } = await supabaseServer.storage
-        .from(process.env.SUPABASE_DOCUMENTS_BUCKET || 'documents')
-        .upload(filePath, reportContent, {
-          contentType: 'text/markdown',
-          upsert: true
-        })
-
-      if (uploadError) {
-        console.error('Supabase upload error:', uploadError)
-        throw new Error('Failed to upload document')
+    return Response.json({
+      success: true,
+      document: {
+        id: result.document.id,
+        name: result.document.name,
+        path: result.document.path,
+        type: result.document.type,
+        testDate: result.document.startDate,
       }
-
-      // Save document metadata to database
-      const document = await prisma.document.create({
-        data: {
-          userId,
-          clientId,
-          documentName: finalDocumentName,
-          documentPath: filePath,
-          documentType: 'blood-test-analysis',
-          startDate: new Date(finalTestDate),
-          endDate: new Date(finalTestDate), // For blood tests, start and end date are the same
-        },
-      })
-
-      return Response.json({
-        success: true,
-        document: {
-          id: document.id,
-          name: finalDocumentName,
-          path: document.documentPath,
-          type: document.documentType,
-          testDate: document.startDate,
-        }
-      })
-
-    } catch (storageError) {
-      console.error('Storage error:', storageError)
-      throw new Error('Failed to save blood test report')
-    }
-
+    })
   } catch (error) {
     console.error('Save blood test report error:', error)
     return new Response(

@@ -3,7 +3,8 @@ import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
 import { createMessage } from '@/lib/actions'
 import { revalidatePath } from 'next/cache'
-import { generateChatTitle, generateChatTitleWithClient } from '@/lib/utils'
+import { generateChatTitleWithClient } from '@/lib/utils'
+import { buildChatSystemPrompt } from '@/lib/client-context-utils'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -70,33 +71,7 @@ export async function POST(req: Request) {
     if (isFirstUserMessage) {
       console.log(`[Chat ${chatId}] Adding client context system message (privacy-safe)`)
       
-      const systemPrompt = `You are a professional AI assistant helping a coach/consultant with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses.
-
-CLIENT PROFILE:${client.dateOfBirth ? `
-Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
-Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${client.country ? `
-Country: ${client.country}` : ''}${client.goals ? `
-
-GOALS:
-${client.goals}` : ''}${client.medicalHistory ? `
-
-MEDICAL HISTORY:
-${client.medicalHistory}` : ''}${client.notes ? `
-
-ADDITIONAL NOTES:
-${client.notes}` : ''}
-
-INSTRUCTIONS:
-- Use this client information to personalize your responses
-- Reference their specific goals and circumstances when relevant
-- Be professional, empathetic, and supportive
-- Provide actionable advice tailored to their profile
-- If medical advice is requested, remind them to consult with healthcare professionals
-- Maintain confidentiality and professionalism at all times
-- Never reference the client by name or any personally identifiable information
-
-Respond naturally and conversationally while keeping this context in mind.`
+      const systemPrompt = buildChatSystemPrompt(client)
 
       openAIMessages.unshift({
         role: 'system',
