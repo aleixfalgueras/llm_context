@@ -113,33 +113,33 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                   <p className="text-sm text-muted-foreground">{client.email}</p>
                 )}
               </div>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onViewDocuments(client)}
-                  title="View Documents"
-                >
-                  <FileText className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEditClient(client)}
-                  title="Edit Client"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(client.id, client.name)}
-                  disabled={isDeleting === client.id}
-                  title="Delete Client"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+                               <div className="flex gap-1">
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     onClick={() => onViewDocuments(client)}
+                     title="View Documents"
+                   >
+                     <FileText className="h-4 w-4 text-yellow-600 hover:text-yellow-700" />
+                   </Button>
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     onClick={() => onEditClient(client)}
+                     title="Edit Client"
+                   >
+                     <Edit className="h-4 w-4 text-blue-600 hover:text-blue-700" />
+                   </Button>
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     onClick={() => handleDelete(client.id, client.name)}
+                     disabled={isDeleting === client.id}
+                     title="Delete Client"
+                   >
+                     <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
+                   </Button>
+                 </div>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
@@ -189,57 +189,61 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
     </div>
   )
 
-  const renderTableView = () => (
+    const renderTableView = () => (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[150px]">
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[180px] hidden sm:table-cell">
                 Email
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[80px] hidden md:table-cell">
                 Age
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px] hidden lg:table-cell">
                 Stats
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[120px] hidden xl:table-cell">
                 Phone
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px] hidden lg:table-cell">
                 Country
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[150px] hidden xl:table-cell">
                 Goals
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[120px] sticky right-0 bg-gray-50 dark:bg-gray-800">
                 Actions
               </th>
             </tr>
           </thead>
-                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-             {paginatedClients.map((client) => (
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            {paginatedClients.map((client) => (
               <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4">
                   <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     {client.name}
                   </div>
+                  {/* Show email on mobile when email column is hidden */}
+                  <div className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+                    {client.email}
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 hidden sm:table-cell">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     {client.email || '-'}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 hidden md:table-cell">
                   <div className="text-sm text-gray-900 dark:text-gray-100">
-                    {client.dateOfBirth ? `${calculateAge(client.dateOfBirth)} years` : '-'}
+                    {client.dateOfBirth ? `${calculateAge(client.dateOfBirth)}` : '-'}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 hidden lg:table-cell">
                   <div className="text-sm text-gray-900 dark:text-gray-100">
                     {(client.height || client.weight) ? (
                       <>
@@ -250,22 +254,22 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                     ) : '-'}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 hidden xl:table-cell">
                   <div className="text-sm text-gray-900 dark:text-gray-100">
                     {client.phone || '-'}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 hidden lg:table-cell">
                   <div className="text-sm text-gray-900 dark:text-gray-100">
                     {client.country || '-'}
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate">
+                <td className="px-4 py-4 hidden xl:table-cell">
+                  <div className="text-sm text-gray-900 dark:text-gray-100 max-w-[150px] truncate" title={client.goals}>
                     {client.goals || '-'}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-4 py-4 text-right sticky right-0 bg-white dark:bg-gray-900">
                   <div className="flex justify-end gap-1">
                     <Button
                       variant="ghost"
@@ -273,7 +277,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                       onClick={() => onViewDocuments(client)}
                       title="View Documents"
                     >
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-4 w-4 text-yellow-600 hover:text-yellow-700" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -281,7 +285,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                       onClick={() => onEditClient(client)}
                       title="Edit Client"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-4 w-4 text-blue-600 hover:text-blue-700" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -290,7 +294,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                       disabled={isDeleting === client.id}
                       title="Delete Client"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
                     </Button>
                   </div>
                 </td>
@@ -299,8 +303,8 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
           </tbody>
         </table>
       </div>
-         </div>
-   )
+    </div>
+  )
 
   const renderPagination = () => {
     if (totalPages <= 1) return null
