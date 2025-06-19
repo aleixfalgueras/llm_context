@@ -214,10 +214,16 @@ export function ClientDocuments({ clientId, clientName, open, onOpenChange }: Cl
           <div className="w-1/3 border-r pr-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold">Documents</h3>
-              <Button size="sm" onClick={() => setIsCreating(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Plus className="h-4 w-4 mr-1" />
-                New
-              </Button>
+              {isCreating ? (
+                <Button size="sm" onClick={handleCreateDocument} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Save
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => setIsCreating(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Plus className="h-4 w-4 mr-1" />
+                  New
+                </Button>
+              )}
             </div>
             
             <div className="space-y-2 overflow-y-auto max-h-[calc(70vh-60px)]">
@@ -355,7 +361,6 @@ export function ClientDocuments({ clientId, clientName, open, onOpenChange }: Cl
                 </div>
 
                 <div className="flex gap-2">
-                  <Button onClick={handleCreateDocument} className="bg-blue-600 hover:bg-blue-700 text-white">Create Document</Button>
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     Cancel
                   </Button>
