@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Zap, FileText, Calendar, User } from 'lucide-react'
 import { DietGeneratorDialog } from './diet-generator-dialog'
+import { WorkoutGeneratorDialog } from './workout-generator-dialog'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -13,6 +14,7 @@ interface AIServicesClientProps {
 
 export function AIServicesClient({ clients }: AIServicesClientProps) {
   const [isDietDialogOpen, setIsDietDialogOpen] = useState(false)
+  const [isWorkoutDialogOpen, setIsWorkoutDialogOpen] = useState(false)
 
   const services = [
     {
@@ -30,8 +32,8 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       description: 'Design custom workout routines tailored to your client\'s fitness level and objectives.',
       icon: <Calendar className="h-8 w-8" />,
       features: ['Progressive overload', 'Equipment customization', 'Injury considerations', 'Weekly schedules'],
-      status: 'coming-soon',
-      onClick: () => {}
+      status: 'available',
+      onClick: () => setIsWorkoutDialogOpen(true)
     },
     {
       id: 'progress-report',
@@ -151,6 +153,13 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       <DietGeneratorDialog 
         open={isDietDialogOpen}
         onOpenChange={setIsDietDialogOpen}
+        clients={clients}
+      />
+
+      {/* Workout Generator Dialog */}
+      <WorkoutGeneratorDialog 
+        open={isWorkoutDialogOpen}
+        onOpenChange={setIsWorkoutDialogOpen}
         clients={clients}
       />
     </>
