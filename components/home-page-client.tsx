@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChatSidebar } from './chat-sidebar'
 import { ChatInterface } from './chat-interface'
-import { ClientSidebar } from './notes-sidebar'
+import { ClientContextSidebar } from './client-context-sidebar'
 
 interface HomePageClientProps {
   chats: any[]
@@ -24,8 +24,8 @@ export function HomePageClient({ chats, clients }: HomePageClientProps) {
         <ChatInterface />
       </div>
       
-      {/* Client Sidebar - Always visible */}
-      <ClientSidebar 
+      {/* Client Context Sidebar - Always visible */}
+      <ClientContextSidebar 
         clients={clients}
         selectedClientId={selectedClient}
         onClientSelect={setSelectedClient}

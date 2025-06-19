@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { getClients } from '@/lib/client-actions'
 
-interface ClientSidebarProps {
+interface ClientContextSidebarProps {
   chatId?: string
   selectedClientId?: string | null
   onClientSelect?: (clientId: string | null) => void
@@ -15,13 +15,13 @@ interface ClientSidebarProps {
   hasActiveChat?: boolean // Whether there's an active chat selected
 }
 
-export function ClientSidebar({ 
+export function ClientContextSidebar({ 
   chatId,
   selectedClientId = null, 
   onClientSelect,
   clients = [],
   hasActiveChat = false
-}: ClientSidebarProps) {
+}: ClientContextSidebarProps) {
   const [allClients, setAllClients] = useState<any[]>(clients)
   const [loading, setLoading] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(320) // Default 320px to match chat sidebar

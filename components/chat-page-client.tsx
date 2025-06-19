@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ChatSidebar } from './chat-sidebar'
 import { ChatContainer } from './chat-container'
-import { ClientSidebar } from './notes-sidebar'
+import { ClientContextSidebar } from './client-context-sidebar'
 import { getClients } from '@/lib/client-actions'
 
 interface ChatPageClientProps {
@@ -71,8 +71,8 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
         />
       </div>
       
-      {/* Client Sidebar - Always visible */}
-      <ClientSidebar 
+      {/* Client Context Sidebar - Always visible */}
+      <ClientContextSidebar 
         chatId={chat.id}
         selectedClientId={chat.clientId}
         clients={clients}
