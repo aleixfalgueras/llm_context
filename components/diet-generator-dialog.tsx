@@ -179,7 +179,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
       
       toast({
         title: 'Diet Saved',
-                  description: `Diet plan has been saved successfully for ${selectedClient?.name}`,
+        description: `Diet plan has been saved successfully for ${selectedClient?.name}. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
       })
 
       // Reset and close

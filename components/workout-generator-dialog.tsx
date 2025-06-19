@@ -185,7 +185,7 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
       
       toast({
         title: 'Workout Saved',
-        description: `Workout plan has been saved successfully for ${selectedClient?.name}`,
+        description: `Workout plan has been saved successfully for ${selectedClient?.name}. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
       })
 
       // Reset and close
