@@ -206,6 +206,15 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       return
     }
 
+    // Ask for confirmation before sending
+    const confirmed = confirm(
+      `Send "${document.documentName}" to ${clientName} at ${clientEmail}?\n\nThis will email the document as a PDF attachment.`
+    )
+
+    if (!confirmed) {
+      return
+    }
+
     try {
       const response = await fetch('/api/send-document', {
         method: 'POST',
