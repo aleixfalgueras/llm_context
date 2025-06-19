@@ -1,0 +1,27 @@
+{
+  "functions": {
+    "app/api/ai-services/extract-blood-test/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/ai-services/generate-blood-test-report/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/ai-services/generate-diet/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/ai-services/generate-workout/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/chat/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/download-document/route.ts": {
+      "maxDuration": 20
+    },
+    "app/api/send-document/route.ts": {
+      "maxDuration": 20
+    }
+  },
+  "regions": ["iad1"],
+  "framework": "nextjs"
+} 
