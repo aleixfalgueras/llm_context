@@ -360,25 +360,26 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
         {step === 'editing' && (
           <div className="flex flex-col flex-1 space-y-4">
-            {/* Header Info */}
-            <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
-              <CardContent className="pt-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-green-900 dark:text-green-100">
-                      Diet Plan for {selectedClient?.name}
-                    </h3>
-                    <p className="text-sm text-green-700 dark:text-green-300">
-                      {formatDate(formData.startDate)} - {formatDate(formData.endDate)}
-                    </p>
-                  </div>
-                  <Calendar className="h-5 w-5 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Review & Edit Diet Plan</h3>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep('form')}>
+                  Back to Form
+                </Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Diet Plan'
+                  )}
+                </Button>
+              </div>
+            </div>
 
-            {/* Edit Area */}
-            <div className="grid grid-cols-2 gap-4" style={{ height: 'calc(100vh - 300px)' }}>
+            <div className="grid grid-cols-2 gap-4" style={{ height: 'calc(100vh - 200px)' }}>
               <Card className="flex flex-col">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm text-muted-foreground">
@@ -391,7 +392,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                     onChange={(e) => setEditedDiet(e.target.value)}
                     className="w-full h-full font-mono text-sm resize-none border-0 rounded-none p-4"
                     placeholder="Generated diet plan will appear here..."
-                    style={{ minHeight: 'calc(100vh - 400px)' }}
+                    style={{ minHeight: 'calc(100vh - 300px)' }}
                   />
                 </CardContent>
               </Card>
@@ -400,31 +401,12 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm text-muted-foreground">Preview</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
+                <CardContent className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
                   <div className="prose prose-sm max-w-none dark:prose-invert">
                     <ReactMarkdown>{editedDiet}</ReactMarkdown>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setStep('form')}>
-                Back to Form
-              </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Save Diet Plan
-                  </>
-                )}
-              </Button>
             </div>
           </div>
         )}

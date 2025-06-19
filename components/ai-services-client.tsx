@@ -26,7 +26,8 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       icon: <FileText className="h-8 w-8" />,
       features: ['Client-specific recommendations', 'Date range planning', 'Editable before saving', 'PDF export'],
       status: 'available',
-      onClick: () => setIsDietDialogOpen(true)
+      onClick: () => setIsDietDialogOpen(true),
+      iconColorClass: 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
     },
     {
       id: 'workout-generator',
@@ -35,7 +36,8 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       icon: <Calendar className="h-8 w-8" />,
       features: ['Progressive overload', 'Equipment customization', 'Injury considerations', 'Weekly schedules'],
       status: 'available',
-      onClick: () => setIsWorkoutDialogOpen(true)
+      onClick: () => setIsWorkoutDialogOpen(true),
+      iconColorClass: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400'
     },
     {
       id: 'blood-test-analysis',
@@ -44,7 +46,8 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       icon: <Activity className="h-8 w-8" />,
       features: ['PDF upload & extraction', 'Parameter validation', 'Health analysis', 'Actionable recommendations'],
       status: 'available',
-      onClick: () => setIsBloodTestDialogOpen(true)
+      onClick: () => setIsBloodTestDialogOpen(true),
+      iconColorClass: 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
     }
   ]
 
@@ -79,7 +82,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${
                       service.status === 'available' 
-                        ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' 
+                        ? service.iconColorClass || 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                     }`}>
                       {service.icon}
