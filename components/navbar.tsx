@@ -13,6 +13,7 @@ export function Navbar() {
     { name: 'Clients', href: '/clients', icon: '👥' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
     { name: 'AI Services', href: '/ai-services', icon: '⚡' },
+    { name: 'Feature Requests', href: '/feedback', icon: '💡' },
   ]
 
   // Helper function to determine if a nav item is active
