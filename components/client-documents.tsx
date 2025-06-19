@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { FileText, Plus, Edit, Trash2, Eye, Calendar } from 'lucide-react'
+import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send } from 'lucide-react'
 import { getClientDocuments, deleteDocument, getDocumentContent, updateDocumentContent, createDocument } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
@@ -29,11 +29,12 @@ interface Document {
 interface ClientDocumentsProps {
   clientId: string
   clientName: string
+  clientEmail?: string
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function ClientDocuments({ clientId, clientName, open, onOpenChange }: ClientDocumentsProps) {
+export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpenChange }: ClientDocumentsProps) {
   const { toast } = useToast()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(false)
@@ -195,6 +196,49 @@ export function ClientDocuments({ clientId, clientName, open, onOpenChange }: Cl
     }
   }
 
+  const handleSendDocument = async (document: Document) => {
+    if (!clientEmail) {
+      toast({
+        title: 'Error',
+        description: 'Client email not available',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/send-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: document.id,
+          clientEmail: clientEmail,
+          clientName: clientName,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send email')
+      }
+
+      toast({
+        title: 'Email Sent!',
+        description: `Document "${document.documentName}" has been sent to ${clientEmail}`,
+      })
+    } catch (error) {
+      console.error('Error sending document:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to send document',
+        variant: 'destructive',
+      })
+    }
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString()
   }
@@ -261,6 +305,30 @@ export function ClientDocuments({ clientId, clientName, open, onOpenChange }: Cl
                           )}
                         </div>
                         <div className="flex">
+                          {!clientEmail ? (
+                            <div title="Add client's email address to enable sending">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={true}
+                                className="cursor-not-allowed"
+                              >
+                                <Send className="h-3 w-3 text-gray-400" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSendDocument(doc)
+                              }}
+                              title="Send document to client via email"
+                            >
+                              <Send className="h-3 w-3" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
