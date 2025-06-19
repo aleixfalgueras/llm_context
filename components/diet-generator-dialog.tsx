@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,6 +13,9 @@ import { Calendar, FileText, Loader2, User, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DateInput } from '@/components/ui/date-input'
+import { getClientDocuments } from '@/lib/document-actions'
+import { DocumentCombobox } from '@/components/ui/document-combobox'
+import { ClientCombobox } from '@/components/ui/client-combobox'
 
 interface DietGeneratorDialogProps {
   open: boolean
@@ -28,6 +31,7 @@ interface DietFormData {
   proteinTarget: string
   additionalInfo: string
   includeClientGoals: boolean
+  formatDocumentId: string
 }
 
 export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGeneratorDialogProps) {
@@ -40,14 +44,44 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
     dailyCalories: '',
     proteinTarget: '',
     additionalInfo: '',
-    includeClientGoals: true
+    includeClientGoals: true,
+    formatDocumentId: ''
   })
   const [generatedDiet, setGeneratedDiet] = useState('')
   const [editedDiet, setEditedDiet] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [clientDocuments, setClientDocuments] = useState<any[]>([])
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
 
   const selectedClient = clients.find(client => client.id === formData.clientId)
+
+  // Load client documents when client is selected
+  useEffect(() => {
+    const loadClientDocuments = async () => {
+      if (formData.clientId) {
+        setIsLoadingDocuments(true)
+        try {
+          const documents = await getClientDocuments(formData.clientId)
+          setClientDocuments(documents)
+        } catch (error) {
+          console.error('Error loading client documents:', error)
+          toast({
+            title: 'Error',
+            description: 'Failed to load client documents',
+            variant: 'destructive'
+          })
+        } finally {
+          setIsLoadingDocuments(false)
+        }
+      } else {
+        setClientDocuments([])
+        setFormData(prev => ({ ...prev, formatDocumentId: '' }))
+      }
+    }
+
+    loadClientDocuments()
+  }, [formData.clientId, toast])
 
   const handleGenerate = async () => {
     if (!formData.clientId || !formData.startDate || !formData.endDate) {
@@ -138,7 +172,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
       // Reset and close
       setStep('form')
-      setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true })
+      setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true, formatDocumentId: '' })
       setGeneratedDiet('')
       setEditedDiet('')
       onOpenChange(false)
@@ -156,7 +190,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
   const handleClose = () => {
     setStep('form')
-    setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true })
+    setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true, formatDocumentId: '' })
     setGeneratedDiet('')
     setEditedDiet('')
     onOpenChange(false)
@@ -185,22 +219,15 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
             {/* Client Selection */}
             <div className="space-y-2">
               <Label htmlFor="client">Select Client *</Label>
-              <Select value={formData.clientId} onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                                                 <span>{client.name}</span>
-                        {client.email && <span className="text-sm text-muted-foreground">({client.email})</span>}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <ClientCombobox
+                clients={clients}
+                value={formData.clientId}
+                onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}
+                placeholder="Choose a client"
+                searchPlaceholder="Search clients..."
+                emptyMessage="No clients found."
+                required
+              />
             </div>
 
             {/* Date Range */}
@@ -275,6 +302,26 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                 Provide any additional context or requirements for this diet plan beyond the client's profile.
               </p>
             </div>
+
+            {/* Format Document Selection */}
+            {formData.clientId && (
+              <div className="space-y-2">
+                <Label htmlFor="formatDocument">Format Example Document (optional)</Label>
+                <DocumentCombobox
+                  documents={clientDocuments}
+                  value={formData.formatDocumentId}
+                  onValueChange={(value: string) => setFormData(prev => ({ ...prev, formatDocumentId: value }))}
+                  placeholder="Select a document to use as format example"
+                  searchPlaceholder="Search documents..."
+                  emptyMessage="No documents found."
+                  loading={isLoadingDocuments}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Select an existing document to use as a format/structure example for the AI when generating the new diet plan.
+                  {clientDocuments.length > 0 && ` (${clientDocuments.length} documents available)`}
+                </p>
+              </div>
+            )}
 
             {/* Include Client Goals Option */}
             <div className="space-y-2">
