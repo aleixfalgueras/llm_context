@@ -183,7 +183,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
       
       toast({
         title: 'Report Saved',
-        description: `Blood test analysis has been saved successfully for ${selectedClient?.name}`,
+        description: `Blood test analysis has been saved successfully for ${selectedClient?.name}. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
       })
 
       // Reset and close
