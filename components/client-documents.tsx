@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send, Download } from 'lucide-react'
-import { getClientDocuments, deleteDocument, getDocumentContent, updateDocumentContent, createDocument } from '@/lib/document-actions'
+import { getClientDocuments, deleteDocument, getDocumentContent, updateDocumentContent, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -48,6 +48,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   const [newDocumentContent, setNewDocumentContent] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [editedDocumentName, setEditedDocumentName] = useState('')
 
   useEffect(() => {
     if (open) {
@@ -77,6 +78,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       setDocumentContent(content)
       setSelectedDocument(document)
       setEditedContent(content)
+      setEditedDocumentName(document.documentName)
       setIsEditing(false)
     } catch (error) {
       toast({
@@ -93,6 +95,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       setDocumentContent(content)
       setSelectedDocument(document)
       setEditedContent(content)
+      setEditedDocumentName(document.documentName)
       setIsEditing(true) // Immediately enter edit mode
     } catch (error) {
       toast({
@@ -104,21 +107,34 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   }
 
   const handleEditDocument = () => {
+    if (selectedDocument) {
+      setEditedDocumentName(selectedDocument.documentName)
+    }
     setIsEditing(true)
   }
 
   const handleSaveDocument = async () => {
     if (!selectedDocument) return
 
+    if (!editedDocumentName.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Document name cannot be empty',
+        variant: 'destructive',
+      })
+      return
+    }
+
     try {
-      await updateDocumentContent(selectedDocument.id, editedContent)
+      await updateDocumentNameAndContent(selectedDocument.id, editedDocumentName, editedContent)
       setDocumentContent(editedContent)
+      setSelectedDocument({ ...selectedDocument, documentName: editedDocumentName })
       setIsEditing(false)
       toast({
         title: 'Success',
         description: 'Document updated successfully',
       })
-      await loadDocuments() // Refresh the list to show updated timestamp
+      await loadDocuments() // Refresh the list to show updated timestamp and name
     } catch (error) {
       toast({
         title: 'Error',
@@ -502,6 +518,9 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     Cancel
                   </Button>
+                  <Button onClick={handleCreateDocument} className="bg-blue-500 hover:bg-blue-600 text-white">
+                    Create Document
+                  </Button>
                 </div>
               </div>
             ) : selectedDocument ? (
@@ -513,12 +532,13 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                   </div>
                   {isEditing && (
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={handleSaveDocument} className="bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button size="sm" onClick={handleSaveDocument} className="bg-blue-500 hover:bg-blue-600 text-white">
                         Save
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => {
                         setIsEditing(false)
                         setEditedContent(documentContent)
+                        setEditedDocumentName(selectedDocument.documentName)
                       }}>
                         Cancel
                       </Button>
@@ -527,12 +547,29 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                 </div>
                 
                 {isEditing ? (
-                  <Textarea
-                    value={editedContent}
-                    onChange={(e) => setEditedContent(e.target.value)}
-                    className="flex-1 resize-none"
-                    placeholder="Enter document content..."
-                  />
+                  <div className="flex flex-col flex-1 space-y-4">
+                    {/* Document Name Input */}
+                    <div className="space-y-2">
+                      <Label htmlFor="documentName">Document Name</Label>
+                      <Input
+                        id="documentName"
+                        value={editedDocumentName}
+                        onChange={(e) => setEditedDocumentName(e.target.value)}
+                        placeholder="Enter document name"
+                        className="font-medium"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        This name will be used to save the document. You can edit it before saving.
+                      </p>
+                    </div>
+                    
+                    <Textarea
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                      className="flex-1 resize-none"
+                      placeholder="Enter document content..."
+                    />
+                  </div>
                 ) : (
                   <div className="flex-1 border border-blue-200 dark:border-blue-800 rounded-md p-4 overflow-y-auto bg-blue-50/20 dark:bg-blue-950/10">
                     <div className="prose prose-sm max-w-none dark:prose-invert">

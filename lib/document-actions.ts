@@ -155,6 +155,93 @@ export async function updateDocumentContent(documentId: string, content: string)
   }
 }
 
+export async function updateDocumentNameAndContent(
+  documentId: string, 
+  newDocumentName: string, 
+  content: string
+) {
+  const { userId } = await auth()
+  
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    // Get the document to verify ownership and get file path
+    const document = await prisma.document.findFirst({
+      where: { 
+        id: documentId,
+        userId 
+      }
+    })
+
+    if (!document) {
+      throw new Error('Document not found or unauthorized')
+    }
+
+    // Create new document path with the new name
+    const pathParts = document.documentPath.split('/')
+    const newDocumentPath = `${pathParts[0]}/${pathParts[1]}/${newDocumentName}.md`
+
+    // If the name changed, we need to handle file operations
+    if (newDocumentPath !== document.documentPath) {
+      // Upload content to new path
+      const { error: uploadError } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .upload(newDocumentPath, content, {
+          contentType: 'text/markdown'
+        })
+
+      if (uploadError) {
+        throw new Error('Failed to upload document with new name')
+      }
+
+      // Delete old file
+      const { error: deleteError } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .remove([document.documentPath])
+
+      if (deleteError) {
+        console.error('Error deleting old file:', deleteError)
+        // Continue anyway as the new file was created
+      }
+
+      // Update database with new name and path
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { 
+          documentName: newDocumentName,
+          documentPath: newDocumentPath,
+          updatedAt: new Date() 
+        }
+      })
+    } else {
+      // Just update content if name didn't change
+      const { error: uploadError } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .upload(document.documentPath, content, {
+          contentType: 'text/markdown',
+          upsert: true
+        })
+
+      if (uploadError) {
+        throw new Error('Failed to update document content')
+      }
+
+      // Update timestamp
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { updatedAt: new Date() }
+      })
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating document:', error)
+    throw new Error('Failed to update document')
+  }
+}
+
 export async function createDocument(
   clientId: string,
   documentName: string,

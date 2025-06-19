@@ -327,7 +327,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                 <Button onClick={handleClose} variant="outline">
                   Cancel
                 </Button>
-                <Button onClick={handleExtract}>
+                <Button onClick={handleExtract} className="bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600">
                   Extract Data
                 </Button>
               </div>
@@ -658,7 +658,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                 <Button onClick={() => setStep('upload')} variant="outline">
                   Back
                 </Button>
-                <Button onClick={handleGenerate}>
+                <Button onClick={handleGenerate} className="bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600">
                   Generate Report
                 </Button>
               </div>
@@ -683,7 +683,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                   <Button variant="outline" onClick={() => setStep('reviewing')}>
                     Back to Review
                   </Button>
-                  <Button onClick={handleSave} disabled={isSaving}>
+                  <Button onClick={handleSave} disabled={isSaving} className="bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600">
                     {isSaving ? (
                       <>
                         <FileText className="h-4 w-4 mr-2 animate-spin" />

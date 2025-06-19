@@ -105,7 +105,15 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                   ))}
                 </ul>
                 {service.status === 'available' && (
-                  <Button className="w-full mt-4" onClick={service.onClick}>
+                  <Button 
+                    className={`w-full mt-4 ${
+                      service.id === 'diet-generator' ? 'bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600' :
+                      service.id === 'workout-generator' ? 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600' :
+                      service.id === 'blood-test-analysis' ? 'bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600' :
+                      ''
+                    }`}
+                    onClick={service.onClick}
+                  >
                     Get Started
                   </Button>
                 )}

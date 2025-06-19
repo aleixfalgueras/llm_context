@@ -404,7 +404,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
               <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button onClick={handleGenerate} disabled={!formData.clientId || !formData.startDate || !formData.endDate}>
+              <Button onClick={handleGenerate} disabled={!formData.clientId || !formData.startDate || !formData.endDate} className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600">
                 <Wand2 className="h-4 w-4 mr-2" />
                 Generate Diet Plan
               </Button>
@@ -430,7 +430,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                 <Button variant="outline" onClick={() => setStep('form')}>
                   Back to Form
                 </Button>
-                <Button onClick={handleSave} disabled={isSaving}>
+                <Button onClick={handleSave} disabled={isSaving} className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600">
                   {isSaving ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
