@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send } from 'lucide-react'
+import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send, Download } from 'lucide-react'
 import { getClientDocuments, deleteDocument, getDocumentContent, updateDocumentContent, createDocument } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
@@ -248,6 +248,49 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
     }
   }
 
+  const handleDownloadDocument = async (document: Document) => {
+    try {
+      const response = await fetch('/api/download-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: document.id,
+        }),
+      })
+
+      if (!response.ok) {
+        const result = await response.json()
+        throw new Error(result.error || 'Failed to download document')
+      }
+
+      // Create a blob from the response
+      const blob = await response.blob()
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob)
+      const link = globalThis.document.createElement('a')
+      link.href = url
+      link.download = `${document.documentName}.pdf`
+      
+      // Trigger the download
+      globalThis.document.body.appendChild(link)
+      link.click()
+      
+      // Clean up
+      globalThis.document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Download document error:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to download document',
+        variant: 'destructive',
+      })
+    }
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString()
   }
@@ -313,53 +356,71 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                             </div>
                           )}
                         </div>
-                        <div className="flex">
-                          {!clientEmail ? (
-                            <div title="Add client's email address to enable sending">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                disabled={true}
-                                className="cursor-not-allowed"
-                              >
-                                <Send className="h-3 w-3 text-gray-400" />
-                              </Button>
-                            </div>
-                          ) : (
+                        <div className="flex flex-col gap-1">
+                          {/* Top row: Edit and Delete */}
+                          <div className="flex">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                handleSendDocument(doc)
+                                handleEditDocumentDirect(doc)
                               }}
-                              title="Send document to client via email"
+                              title="Edit Document"
                             >
-                              <Send className="h-3 w-3" />
+                              <Edit className="h-3 w-3" />
                             </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEditDocumentDirect(doc)
-                            }}
-                            title="Edit Document"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteDocument(doc)
-                            }}
-                            title="Delete Document"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteDocument(doc)
+                              }}
+                              title="Delete Document"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          {/* Bottom row: Download and Send */}
+                          <div className="flex">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDownloadDocument(doc)
+                              }}
+                              title="Download document as PDF"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Download className="h-3 w-3" />
+                            </Button>
+                            {!clientEmail ? (
+                              <div title="Add client's email address to enable sending">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={true}
+                                  className="cursor-not-allowed"
+                                >
+                                  <Send className="h-3 w-3 text-gray-400" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleSendDocument(doc)
+                                }}
+                                title="Send document to client via email"
+                              >
+                                <Send className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
