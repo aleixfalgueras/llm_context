@@ -27,7 +27,8 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
   const [formData, setFormData] = useState({
     clientId: '',
     testDate: '',
-    additionalInfo: ''
+    additionalInfo: '',
+    documentName: ''
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [extractedData, setExtractedData] = useState<any>(null)
@@ -124,6 +125,14 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
       const data = await response.json()
       setGeneratedReport(data.report)
       setEditedReport(data.report)
+      
+      // Set default document name if not already set
+      if (!formData.documentName) {
+        const testDate = extractedData.testInfo?.testDate || formData.testDate || new Date().toISOString().split('T')[0]
+        const defaultName = `${selectedClient?.name} Blood Test Analysis ${testDate}`
+        setFormData(prev => ({ ...prev, documentName: defaultName }))
+      }
+      
       setStep('editing')
     } catch (error) {
       console.error('Error generating report:', error)
@@ -161,7 +170,8 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
           testDate: extractedData.testInfo?.testDate,
           additionalInfo: formData.additionalInfo,
           extractedData,
-          reportContent: editedReport
+          reportContent: editedReport,
+          documentName: formData.documentName
         })
       })
 
@@ -192,7 +202,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
 
   const handleClose = () => {
     setStep('upload')
-    setFormData({ clientId: '', testDate: '', additionalInfo: '' })
+    setFormData({ clientId: '', testDate: '', additionalInfo: '', documentName: '' })
     setSelectedFile(null)
     setExtractedData(null)
     setGeneratedReport('')
@@ -684,6 +694,21 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                     )}
                   </Button>
                 </div>
+              </div>
+
+              {/* Document Name Input */}
+              <div className="space-y-2">
+                <Label htmlFor="documentName">Document Name</Label>
+                <Input
+                  id="documentName"
+                  value={formData.documentName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, documentName: e.target.value }))}
+                  placeholder="Enter document name"
+                  className="font-medium"
+                />
+                <p className="text-xs text-muted-foreground">
+                  This name will be used to save the document. You can edit it before saving.
+                </p>
               </div>
 
               {/* Edit Area */}

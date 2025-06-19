@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Calendar, FileText, Loader2, User, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
-import { DateInput } from '@/components/ui/date-input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { getClientDocuments } from '@/lib/document-actions'
 import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
@@ -32,6 +32,7 @@ interface DietFormData {
   additionalInfo: string
   includeClientGoals: boolean
   formatDocumentId: string
+  documentName: string
 }
 
 export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGeneratorDialogProps) {
@@ -45,7 +46,8 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
     proteinTarget: '',
     additionalInfo: '',
     includeClientGoals: true,
-    formatDocumentId: ''
+    formatDocumentId: '',
+    documentName: ''
   })
   const [generatedDiet, setGeneratedDiet] = useState('')
   const [editedDiet, setEditedDiet] = useState('')
@@ -121,6 +123,15 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
       const data = await response.json()
       setGeneratedDiet(data.diet)
       setEditedDiet(data.diet)
+      
+      // Set default document name if not already set
+      if (!formData.documentName) {
+        const startDateFormatted = new Date(formData.startDate).toISOString().split('T')[0]
+        const endDateFormatted = new Date(formData.endDate).toISOString().split('T')[0]
+        const defaultName = `${selectedClient?.name} Diet ${startDateFormatted} to ${endDateFormatted}`
+        setFormData(prev => ({ ...prev, documentName: defaultName }))
+      }
+      
       setStep('editing')
     } catch (error) {
       console.error('Error generating diet:', error)
@@ -155,7 +166,8 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
         },
         body: JSON.stringify({
           ...formData,
-          dietContent: editedDiet
+          dietContent: editedDiet,
+          documentName: formData.documentName
         })
       })
 
@@ -172,7 +184,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
       // Reset and close
       setStep('form')
-      setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true, formatDocumentId: '' })
+      setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true, formatDocumentId: '', documentName: '' })
       setGeneratedDiet('')
       setEditedDiet('')
       onOpenChange(false)
@@ -190,7 +202,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
   const handleClose = () => {
     setStep('form')
-    setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true, formatDocumentId: '' })
+    setFormData({ clientId: '', startDate: '', endDate: '', dailyCalories: '', proteinTarget: '', additionalInfo: '', includeClientGoals: true, formatDocumentId: '', documentName: '' })
     setGeneratedDiet('')
     setEditedDiet('')
     onOpenChange(false)
@@ -282,19 +294,21 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date *</Label>
-                <DateInput
+                <DatePicker
                   id="startDate"
                   value={formData.startDate}
-                  onChange={(value) => setFormData(prev => ({ ...prev, startDate: value }))}
+                  onChange={(value: string) => setFormData(prev => ({ ...prev, startDate: value }))}
+                  placeholder="Select start date"
                   required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date *</Label>
-                <DateInput
+                <DatePicker
                   id="endDate"
                   value={formData.endDate}
-                  onChange={(value) => setFormData(prev => ({ ...prev, endDate: value }))}
+                  onChange={(value: string) => setFormData(prev => ({ ...prev, endDate: value }))}
+                  placeholder="Select end date"
                   required
                 />
               </div>
@@ -427,6 +441,21 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                   )}
                 </Button>
               </div>
+            </div>
+
+            {/* Document Name Input */}
+            <div className="space-y-2">
+              <Label htmlFor="documentName">Document Name</Label>
+              <Input
+                id="documentName"
+                value={formData.documentName}
+                onChange={(e) => setFormData(prev => ({ ...prev, documentName: e.target.value }))}
+                placeholder="Enter document name"
+                className="font-medium"
+              />
+              <p className="text-xs text-muted-foreground">
+                This name will be used to save the document. You can edit it before saving.
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4" style={{ height: 'calc(100vh - 200px)' }}>

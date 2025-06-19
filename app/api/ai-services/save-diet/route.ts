@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, startDate, endDate, dietContent, additionalInfo } = await req.json()
+    const { clientId, startDate, endDate, dietContent, additionalInfo, documentName } = await req.json()
 
     if (!clientId || !startDate || !endDate || !dietContent) {
       return new Response('Missing required fields', { status: 400 })
@@ -29,11 +29,13 @@ export async function POST(req: Request) {
       return new Response('Client not found', { status: 404 })
     }
 
-    // Create document name: "ClientName Diet StartDate-EndDate"
-    const startDateFormatted = new Date(startDate).toISOString().split('T')[0]
-    const endDateFormatted = new Date(endDate).toISOString().split('T')[0]
-    const documentName = `${client.name} Diet ${startDateFormatted} to ${endDateFormatted}`
-    const fileName = `${documentName}.md`
+    // Use custom document name or create default: "ClientName Diet StartDate-EndDate"
+    const finalDocumentName = documentName || (() => {
+      const startDateFormatted = new Date(startDate).toISOString().split('T')[0]
+      const endDateFormatted = new Date(endDate).toISOString().split('T')[0]
+      return `${client.name} Diet ${startDateFormatted} to ${endDateFormatted}`
+    })()
+    const fileName = `${finalDocumentName}.md`
     
     // Create the file path in Supabase: user_id/client_id/document_name.md
     const filePath = `${userId}/${clientId}/${fileName}`
@@ -56,7 +58,7 @@ export async function POST(req: Request) {
       data: {
         userId,
         clientId,
-        documentName,
+        documentName: finalDocumentName,
         documentPath: filePath,
         documentType: 'diet',
         startDate: new Date(startDate),
@@ -68,7 +70,7 @@ export async function POST(req: Request) {
       success: true, 
       document: {
         id: document.id,
-        name: documentName,
+        name: finalDocumentName,
         path: filePath,
         type: 'diet',
         startDate,

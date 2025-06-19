@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, testDate, additionalInfo, extractedData, reportContent } = await req.json()
+    const { clientId, testDate, additionalInfo, extractedData, reportContent, documentName } = await req.json()
 
     if (!clientId || !reportContent) {
       return new Response('Missing required fields', { status: 400 })
@@ -31,10 +31,10 @@ export async function POST(req: Request) {
       return new Response('Client not found', { status: 404 })
     }
 
-    // Create filename with test date
+    // Use custom document name or create default with test date
     const formattedTestDate = new Date(finalTestDate).toISOString().split('T')[0]
-    const documentName = `${client.name} Blood Test Analysis ${formattedTestDate}`
-    const fileName = `${documentName}.md`
+    const finalDocumentName = documentName || `${client.name} Blood Test Analysis ${formattedTestDate}`
+    const fileName = `${finalDocumentName}.md`
     const filePath = `${userId}/${clientId}/${fileName}`
 
     try {
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         data: {
           userId,
           clientId,
-          documentName,
+          documentName: finalDocumentName,
           documentPath: filePath,
           documentType: 'blood-test-analysis',
           startDate: new Date(finalTestDate),
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
         success: true,
         document: {
           id: document.id,
-          name: document.documentName,
+          name: finalDocumentName,
           path: document.documentPath,
           type: document.documentType,
           testDate: document.startDate,
