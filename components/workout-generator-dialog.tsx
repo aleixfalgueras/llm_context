@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,10 +9,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Calendar, Dumbbell, Loader2, User, Wand2 } from 'lucide-react'
+import { Calendar, Dumbbell, Loader2, User, Wand2, FileText } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DateInput } from '@/components/ui/date-input'
+import { getClientDocuments } from '@/lib/document-actions'
+import { DocumentCombobox } from '@/components/ui/document-combobox'
+import { ClientCombobox } from '@/components/ui/client-combobox'
 
 interface WorkoutGeneratorDialogProps {
   open: boolean
@@ -31,6 +34,7 @@ interface WorkoutFormData {
   equipment: string
   additionalInfo: string
   includeClientGoals: boolean
+  formatDocumentId: string
 }
 
 export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutGeneratorDialogProps) {
@@ -46,14 +50,44 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
     sessionDuration: '',
     equipment: '',
     additionalInfo: '',
-    includeClientGoals: true
+    includeClientGoals: true,
+    formatDocumentId: ''
   })
   const [generatedWorkout, setGeneratedWorkout] = useState('')
   const [editedWorkout, setEditedWorkout] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [clientDocuments, setClientDocuments] = useState<any[]>([])
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
 
   const selectedClient = clients.find(client => client.id === formData.clientId)
+
+  // Load client documents when client is selected
+  useEffect(() => {
+    const loadClientDocuments = async () => {
+      if (formData.clientId) {
+        setIsLoadingDocuments(true)
+        try {
+          const documents = await getClientDocuments(formData.clientId)
+          setClientDocuments(documents)
+        } catch (error) {
+          console.error('Error loading client documents:', error)
+          toast({
+            title: 'Error',
+            description: 'Failed to load client documents',
+            variant: 'destructive'
+          })
+        } finally {
+          setIsLoadingDocuments(false)
+        }
+      } else {
+        setClientDocuments([])
+        setFormData(prev => ({ ...prev, formatDocumentId: '' }))
+      }
+    }
+
+    loadClientDocuments()
+  }, [formData.clientId, toast])
 
   const handleGenerate = async () => {
     if (!formData.clientId || !formData.startDate || !formData.endDate) {
@@ -154,7 +188,8 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
         sessionDuration: '', 
         equipment: '', 
         additionalInfo: '', 
-        includeClientGoals: true 
+        includeClientGoals: true,
+        formatDocumentId: ''
       })
       setGeneratedWorkout('')
       setEditedWorkout('')
@@ -183,7 +218,8 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
       sessionDuration: '', 
       equipment: '', 
       additionalInfo: '', 
-      includeClientGoals: true 
+      includeClientGoals: true,
+      formatDocumentId: ''
     })
     setGeneratedWorkout('')
     setEditedWorkout('')
@@ -213,22 +249,15 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
             {/* Client Selection */}
             <div className="space-y-2">
               <Label htmlFor="client">Select Client *</Label>
-              <Select value={formData.clientId} onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span>{client.name}</span>
-                        {client.email && <span className="text-sm text-muted-foreground">({client.email})</span>}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <ClientCombobox
+                clients={clients}
+                value={formData.clientId}
+                onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}
+                placeholder="Choose a client"
+                searchPlaceholder="Search clients..."
+                emptyMessage="No clients found."
+                required
+              />
             </div>
 
             {/* Client Preview */}
@@ -373,6 +402,26 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
                 rows={4}
               />
             </div>
+
+            {/* Format Document Selection */}
+            {formData.clientId && (
+              <div className="space-y-2">
+                <Label htmlFor="formatDocument">Format Example Document (optional)</Label>
+                <DocumentCombobox
+                  documents={clientDocuments}
+                  value={formData.formatDocumentId}
+                  onValueChange={(value: string) => setFormData(prev => ({ ...prev, formatDocumentId: value }))}
+                  placeholder="Select a document to use as format example"
+                  searchPlaceholder="Search documents..."
+                  emptyMessage="No documents found."
+                  loading={isLoadingDocuments}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Select an existing document to use as a format/structure example for the AI when generating the new workout plan.
+                  {clientDocuments.length > 0 && ` (${clientDocuments.length} documents available)`}
+                </p>
+              </div>
+            )}
 
             {/* Include Client Goals */}
             <div className="flex items-center space-x-2">

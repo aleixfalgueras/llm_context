@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, startDate, endDate, dailyCalories, proteinTarget, additionalInfo, includeClientGoals = true } = await req.json()
+    const { clientId, startDate, endDate, dailyCalories, proteinTarget, additionalInfo, includeClientGoals = true, formatDocumentId } = await req.json()
 
     if (!clientId || !startDate || !endDate) {
       return new Response('Missing required fields', { status: 400 })
@@ -30,6 +30,29 @@ export async function POST(req: Request) {
     
     if (!client) {
       return new Response('Client not found', { status: 404 })
+    }
+
+    // Fetch format document content if provided
+    let formatDocumentContent = ''
+    if (formatDocumentId) {
+      try {
+        const formatDocument = await prisma.document.findFirst({
+          where: {
+            id: formatDocumentId,
+            userId,
+            clientId
+          }
+        })
+        
+        if (formatDocument) {
+          // Import the getDocumentContent function
+          const { getDocumentContent } = await import('@/lib/document-actions')
+          formatDocumentContent = await getDocumentContent(formatDocument.documentPath)
+        }
+      } catch (error) {
+        console.error('Error fetching format document:', error)
+        // Continue without format document rather than failing
+      }
     }
 
     // Build the client context prompt (same as chat system)
@@ -63,11 +86,19 @@ NUTRITIONAL TARGETS:
 - Daily Protein: ${proteinTarget}g` : ''}${additionalInfo ? `
 
 ADDITIONAL INFORMATION:
-${additionalInfo}` : ''}
+${additionalInfo}` : ''}${formatDocumentContent ? `
+
+FORMAT EXAMPLE DOCUMENT:
+Please use the following document as a format and structure example for the new diet plan:
+
+---
+${formatDocumentContent}
+---` : ''}
 
 INSTRUCTIONS:
 - Create a comprehensive, personalized diet plan for this client
-- Use the client's profile information to tailor recommendations
+- Use the client's profile information to tailor recommendations${formatDocumentContent ? `
+- Follow the format, structure, and presentation style from the provided format example document` : ''}
 - Structure the diet plan in a clear, professional format
 - Include meal plans, portion recommendations, and nutritional guidance
 - Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances${(dailyCalories || proteinTarget) ? `

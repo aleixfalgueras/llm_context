@@ -13,6 +13,7 @@ import { Activity, Upload, CheckCircle, AlertCircle, AlertTriangle, FileText, Us
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DateInput } from '@/components/ui/date-input'
+import { ClientCombobox } from '@/components/ui/client-combobox'
 
 interface BloodTestAnalysisDialogProps {
   open: boolean
@@ -225,29 +226,15 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="client">Select Client *</Label>
-                  <Select
+                  <ClientCombobox
+                    clients={clients}
                     value={formData.clientId}
                     onValueChange={(value) => setFormData({ ...formData, clientId: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a client" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clients.map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            <span>{client.name}</span>
-                            {client.dateOfBirth && (
-                              <span className="text-sm text-muted-foreground">
-                                (Age: {Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))})
-                              </span>
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Choose a client"
+                    searchPlaceholder="Search clients..."
+                    emptyMessage="No clients found."
+                    required
+                  />
                 </div>
 
                 <div className="space-y-2">
