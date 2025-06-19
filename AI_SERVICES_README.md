@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI Services feature provides AI-powered content generation for client management. The first service implemented is **Diet Plan Generation**, which creates personalized diet plans based on client profiles and saves them as markdown documents.
+The AI Services feature provides AI-powered content generation for client management. Three services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, and **Blood Test Analysis**, all creating personalized content based on client profiles and saving as documents.
 
 ## Features Implemented
 
@@ -23,6 +23,7 @@ The AI Services feature provides AI-powered content generation for client manage
 #### Features:
 - Client selection dropdown with profile preview
 - Date range input (start/end dates)
+- Optional nutritional targets (calories, protein)
 - Optional additional information field for extra context
 - **Optional client goals inclusion toggle** - Control whether client's goals influence diet generation
 - AI generation using OpenAI with client context
@@ -30,9 +31,74 @@ The AI Services feature provides AI-powered content generation for client manage
 - Save to Supabase storage
 - Document tracking in database
 
-### 3. Database Schema
+### 3. Workout Plan Generation
 
-#### New Document Model:
+#### Components:
+- **Dialog Component**: `components/workout-generator-dialog.tsx`
+- **API Routes**: 
+  - `app/api/ai-services/generate-workout/route.ts` (Generation)
+  - `app/api/ai-services/save-workout/route.ts` (Storage)
+
+#### Features:
+- Client selection dropdown with profile preview
+- Date range input (start/end dates)
+- Workout specifications (type, fitness level, frequency, duration)
+- Equipment availability input
+- Optional additional information field
+- **Optional client goals inclusion toggle** - Control whether client's goals influence workout generation
+- AI generation using OpenAI with client context
+- Live markdown editor with preview
+- Save to Supabase storage
+- Document tracking in database
+
+### 4. Blood Test Analysis
+
+#### Components:
+- **Dialog Component**: `components/blood-test-analysis-dialog.tsx`
+- **API Routes**: 
+  - `app/api/ai-services/extract-blood-test/route.ts` (PDF Extraction)
+  - `app/api/ai-services/generate-blood-test-report/route.ts` (Report Generation)
+  - `app/api/ai-services/save-blood-test-report/route.ts` (Storage)
+
+#### Features:
+- **PDF Upload**: Blood test report upload with validation (10MB limit)
+- **AI-Powered Extraction**: Automatic parameter extraction from PDF using OpenAI
+- **Parameter Review & Editing**: Full editing capability for extracted parameters
+- **Anomalous Parameter Detection**: Automatic highlighting of high/low values
+- **Parameter Search**: Search functionality across all extracted parameters
+- **Parameter Sorting**: Anomalous parameters displayed first for priority review
+- **Health Analysis**: Comprehensive analysis based on client profile (excluding goals)
+- **Live Editor**: Edit generated report with real-time markdown preview
+- **Document Storage**: Save to Supabase storage with database tracking
+
+#### Blood Test Analysis Flow:
+1. **Upload**: Client selection and PDF upload (compact button interface)
+2. **Extraction**: AI extracts blood parameters, test info, and reference ranges
+3. **Review**: 
+   - Anomalous parameters highlighted at top
+   - All parameters editable (name, value, unit, reference ranges, status)
+   - Search functionality for quick parameter location
+   - Add/remove parameters as needed
+4. **Generation**: AI creates comprehensive health analysis (goals excluded for objectivity)
+5. **Edit & Save**: Live markdown editor with preview, save to storage
+
+#### Blood Test Parameters Extracted:
+- **Parameter Details**: Name, value, unit, reference min/max, status
+- **Test Information**: Test date, laboratory name, doctor name
+- **Status Calculation**: Automatic normal/high/low determination
+- **Multi-language Support**: Works with Spanish and English blood tests
+- **Parameter Management**: Add, edit, remove, and search parameters
+
+#### Key Technical Features:
+- **PDF Processing**: Uses `pdf-parse` library for text extraction
+- **Large Report Support**: 16,000 token limit for comprehensive blood panels
+- **Parameter Prioritization**: Anomalous parameters sorted first
+- **Editable Interface**: All extracted data can be corrected before analysis
+- **Search Functionality**: Multi-field search across parameter names, values, units, status
+
+### 5. Database Schema
+
+#### Document Model:
 ```prisma
 model Document {
   id          String   @id @default(cuid())
@@ -40,9 +106,9 @@ model Document {
   clientId    String   // The client this document belongs to
   documentName String  // The name of the document
   documentPath String  // Path in Supabase storage
-  documentType String  // Type of document (e.g., "diet", "workout", "plan")
-  startDate   DateTime? // For time-based documents
-  endDate     DateTime? // For time-based documents
+  documentType String  // Type: "diet", "workout", "blood-test-analysis"
+  startDate   DateTime? // For time-based documents (diet/workout)
+  endDate     DateTime? // For time-based documents (diet/workout)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -50,7 +116,7 @@ model Document {
 }
 ```
 
-### 4. Supabase Storage Integration
+### 6. Supabase Storage Integration
 
 #### Storage Structure:
 ```
@@ -58,97 +124,124 @@ documents/
 ├── {user_id}/
     ├── {client_id}/
         ├── {Client Name} Diet {start_date} to {end_date}.md
+        ├── {Client Name} Workout {start_date} to {end_date}.md
+        ├── {Client Name} Blood Test Analysis {test_date}.md
         └── ...
 ```
 
 #### Setup:
 - Private bucket with markdown/text support
-- 10MB file size limit
+- 10MB file size limit for documents and PDF uploads
 - User-specific folder access
 
 ## Technical Implementation
 
-### Client Context Reuse
+### Client Context Strategy
 
-The diet generation uses the same client context system as the AI Assistant:
+All AI services use the same client context system, with one important distinction:
 
-**File Location**: `app/api/ai-services/generate-diet/route.ts` (lines 35-68)
+#### Diet & Workout Generation (Goals Included):
+- **Optional Goals Toggle**: User can choose to include/exclude client goals
+- **Personalized Recommendations**: Based on fitness/health objectives
+- **Goal-Oriented Output**: Plans aligned with client aspirations
 
-```typescript
-const clientContextPrompt = `You are a professional AI assistant helping a coach/consultant with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses.
-
-CLIENT PROFILE:${client.dateOfBirth ? `
-Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
-Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${client.country ? `
-Country: ${client.country}` : ''}${includeClientGoals && client.goals ? `
-
-GOALS:
-${client.goals}` : ''}${client.medicalHistory ? `
-
-MEDICAL HISTORY:
-${client.medicalHistory}` : ''}${client.notes ? `
-
-ADDITIONAL NOTES:
-${client.notes}` : ''}
-
-DIET GENERATION REQUEST:
-- Start Date: ${startDate}
-- End Date: ${endDate}
-- Duration: ${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days${additionalInfo ? `
-- Additional Information: ${additionalInfo}` : ''}
-
-INSTRUCTIONS:
-- Create a comprehensive, personalized diet plan for this client
-- Use the client's profile information to tailor recommendations
-- Structure the diet plan in a clear, professional format
-- Include meal plans, portion recommendations, and nutritional guidance
-- Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances${additionalInfo ? `
-- Pay special attention to the additional information provided above` : ''}
-- Provide the response in markdown format for easy reading
-- DO NOT include any suggestions about consulting healthcare professionals
-- DO NOT include any disclaimers or OpenAI-related content
-- Provide ONLY the diet plan content in a delivery-ready format
-- Make it actionable and specific to this client's needs`
-```
+#### Blood Test Analysis (Goals Excluded):
+- **Medical Objectivity**: Goals are never included in context
+- **Health-Focused Analysis**: Based purely on clinical data and health optimization
+- **Unbiased Recommendations**: Medical interpretations not influenced by fitness goals
 
 ### Client Goals Toggle Feature
 
-The diet generation includes a toggle to control whether the client's goals should influence the AI's diet recommendations:
+Diet and workout generation include a toggle to control goal influence:
 
-#### When Goals Are Included (Default):
+#### When Goals Are Included (Default for diet/workout):
 - AI considers the client's fitness/health goals
-- Diet plan is tailored to support specific objectives
+- Plans tailored to support specific objectives
 - Example: Weight loss goals influence caloric recommendations
 
 #### When Goals Are Excluded:
-- AI focuses purely on nutritional health without goal bias
-- Useful when client goals might conflict with dietary needs
-- Example: Ignoring "gain muscle fast" goal for a balanced approach
+- AI focuses purely on health without goal bias
+- Useful when goals might conflict with optimal plans
+- Blood test analysis always excludes goals for medical objectivity
 
-#### Implementation:
-**File Location**: `app/api/ai-services/generate-diet/route.ts` (lines 40-42, 58)
+### File Naming Conventions
 
-```typescript
-// Goals are conditionally included in the AI prompt
-${includeClientGoals && client.goals ? `
-GOALS:
-${client.goals}` : ''}
+Documents are saved with specific naming patterns:
 
-// Instructions also conditionally reference goals
-Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances
+```
+Diet Plans: {Client Name} Diet {YYYY-MM-DD} to {YYYY-MM-DD}.md
+Workout Plans: {Client Name} Workout {YYYY-MM-DD} to {YYYY-MM-DD}.md
+Blood Test Analysis: {Client Name} Blood Test Analysis {YYYY-MM-DD}.md
 ```
 
-### File Naming Convention
+## API Endpoints
 
-Documents are saved with the following naming pattern:
+### Blood Test Analysis
+
+#### Extract Blood Test: `POST /api/ai-services/extract-blood-test`
+**Request Body (FormData):**
 ```
-{Client Name} Diet {YYYY-MM-DD} to {YYYY-MM-DD}.md
+file: PDF file (max 10MB)
+clientId: string
+additionalInfo: string (optional - for non-standard PDF formats)
 ```
 
-Example: `John Doe Diet 2024-01-15 to 2024-02-15.md`
+**Response:**
+```json
+{
+  "success": true,
+  "extractedData": {
+    "testInfo": {
+      "testDate": "YYYY-MM-DD",
+      "labName": "laboratory name",
+      "doctorName": "doctor name"
+    },
+    "parameters": [
+      {
+        "name": "parameter name",
+        "value": "test value",
+        "unit": "unit",
+        "referenceMin": "min value",
+        "referenceMax": "max value",
+        "status": "normal/high/low"
+      }
+    ]
+  }
+}
+```
 
-### API Endpoints
+#### Generate Blood Test Report: `POST /api/ai-services/generate-blood-test-report`
+**Request Body:**
+```json
+{
+  "clientId": "string",
+  "testDate": "YYYY-MM-DD",
+  "additionalInfo": "string (optional)",
+  "extractedData": "extracted parameters object"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "report": "markdown formatted analysis report"
+}
+```
+
+#### Save Blood Test Report: `POST /api/ai-services/save-blood-test-report`
+**Request Body:**
+```json
+{
+  "clientId": "string",
+  "testDate": "YYYY-MM-DD",
+  "additionalInfo": "string (optional)",
+  "extractedData": "extracted parameters object",
+  "reportContent": "markdown content"
+}
+```
+
+### Diet Generation
 
 #### Generate Diet: `POST /api/ai-services/generate-diet`
 **Request Body:**
@@ -157,15 +250,10 @@ Example: `John Doe Diet 2024-01-15 to 2024-02-15.md`
   "clientId": "string",
   "startDate": "YYYY-MM-DD",
   "endDate": "YYYY-MM-DD",
+  "dailyCalories": "string (optional)",
+  "proteinTarget": "string (optional)",
   "additionalInfo": "string (optional)",
   "includeClientGoals": "boolean (optional, defaults to true)"
-}
-```
-
-**Response:**
-```json
-{
-  "diet": "markdown formatted diet plan"
 }
 ```
 
@@ -176,24 +264,48 @@ Example: `John Doe Diet 2024-01-15 to 2024-02-15.md`
   "clientId": "string",
   "startDate": "YYYY-MM-DD", 
   "endDate": "YYYY-MM-DD",
+  "dailyCalories": "string (optional)",
+  "proteinTarget": "string (optional)",
   "additionalInfo": "string (optional)",
   "includeClientGoals": "boolean (optional)",
   "dietContent": "markdown content"
 }
 ```
 
-**Response:**
+### Workout Generation
+
+#### Generate Workout: `POST /api/ai-services/generate-workout`
+**Request Body:**
 ```json
 {
-  "success": true,
-  "document": {
-    "id": "string",
-    "name": "document name",
-    "path": "storage path",
-    "type": "diet",
-    "startDate": "date",
-    "endDate": "date"
-  }
+  "clientId": "string",
+  "startDate": "YYYY-MM-DD",
+  "endDate": "YYYY-MM-DD",
+  "workoutType": "string (optional)",
+  "fitnessLevel": "string (optional)",
+  "daysPerWeek": "string (optional)",
+  "sessionDuration": "string (optional)",
+  "equipment": "string (optional)",
+  "additionalInfo": "string (optional)",
+  "includeClientGoals": "boolean (optional, defaults to true)"
+}
+```
+
+#### Save Workout: `POST /api/ai-services/save-workout`
+**Request Body:**
+```json
+{
+  "clientId": "string",
+  "startDate": "YYYY-MM-DD",
+  "endDate": "YYYY-MM-DD",
+  "workoutType": "string (optional)",
+  "fitnessLevel": "string (optional)",
+  "daysPerWeek": "string (optional)",
+  "sessionDuration": "string (optional)",
+  "equipment": "string (optional)",
+  "additionalInfo": "string (optional)",
+  "includeClientGoals": "boolean (optional)",
+  "workoutContent": "markdown content"
 }
 ```
 
@@ -207,69 +319,82 @@ Example: `John Doe Diet 2024-01-15 to 2024-02-15.md`
 ### Data Privacy
 - Same privacy model as AI Assistant
 - No client names/emails sent to OpenAI
-- Only health information and goals used for context
+- Health information and client profile used for context
+- Blood test analysis excludes goals for medical objectivity
 
 ### Storage Security
 - Private Supabase bucket
 - User-specific folder structure
 - Document ownership validation
+- PDF uploads validated and processed securely
 
 ## Usage Flow
 
+### Diet/Workout Generation:
 1. **Navigate to AI Services**: User clicks AI Services in navbar
-2. **Select Service**: Click "Get Started" on Diet Generation
+2. **Select Service**: Click "Get Started" on desired service
 3. **Choose Client**: Select from dropdown with profile preview
-4. **Set Date Range**: Pick start and end dates for diet plan
-5. **Add Context** (Optional): Enter additional information for this specific diet plan
-6. **Configure Goals**: Toggle whether to include client's goals in generation (checked by default)
-7. **Generate**: AI creates personalized diet using client context
+4. **Configure Parameters**: Set date range, specifications, targets
+5. **Add Context** (Optional): Enter additional information
+6. **Configure Goals**: Toggle whether to include client's goals (default: yes)
+7. **Generate**: AI creates personalized plan using client context
 8. **Edit & Preview**: Modify content with live markdown preview
 9. **Save**: Document saved to Supabase storage and tracked in database
 
-## Future Enhancements
+### Blood Test Analysis:
+1. **Navigate to AI Services**: User clicks AI Services in navbar
+2. **Select Blood Test Analysis**: Click "Get Started" on service
+3. **Choose Client & Upload**: Select client and upload PDF via button
+4. **AI Extraction**: System extracts parameters and test information
+5. **Review Parameters**: 
+   - View anomalous parameters highlighted at top
+   - Edit any extracted data using search and edit interface
+   - Add/remove parameters as needed
+6. **Generate Analysis**: AI creates health analysis (excluding goals)
+7. **Edit & Preview**: Modify report with live markdown preview
+8. **Save**: Document saved to storage with database tracking
 
-### Planned Services
-- **Workout Plan Generation**: Custom exercise routines
-- **Progress Reports**: Client achievement tracking
-- **Meal Prep Guides**: Detailed preparation instructions
+## Dependencies & Setup
 
-### Potential Features
-- Document version history
-- Template system
-- Batch generation
-- Client portal access
-- PDF export
-- Email delivery
+### Additional Dependencies for Blood Test Analysis:
+- `pdf-parse`: PDF text extraction
+- `@types/pdf-parse`: Type definitions (manual)
 
-## Setup Instructions
-
-### 1. Database Migration
-```bash
-npx prisma generate
-npx prisma db push
-```
-
-### 2. Supabase Storage Setup
-```bash
-node scripts/setup-supabase-storage.js
-```
-
-### 3. Environment Variables
-Ensure these are set in `.env.local`:
+### Environment Variables:
 ```env
+# Required for all services
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_service_role_key
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
 OPENAI_API_KEY=your_openai_api_key
 SUPABASE_DOCUMENTS_BUCKET=documents
+
+# Optional OpenAI configuration
+OPENAI_API_MODEL=gpt-4o-mini
+OPENAI_TEMPERATURE=0.7
 ```
 
-### 4. Install Dependencies
-All required dependencies are already included:
-- `@supabase/supabase-js` for storage
-- `react-markdown` for preview
-- `lucide-react` for icons
+### Next.js Configuration:
+```javascript
+// next.config.mjs
+const nextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ['pdf-parse']
+  }
+}
+```
+
+### TypeScript Configuration:
+```json
+// tsconfig.json - include types directory
+{
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": ["types/**/*.d.ts"]
+}
+```
 
 ## File Structure
 
@@ -279,30 +404,74 @@ app/
 │   └── page.tsx
 ├── api/
 │   └── ai-services/
+│       ├── extract-blood-test/
+│       │   └── route.ts
+│       ├── generate-blood-test-report/
+│       │   └── route.ts
+│       ├── save-blood-test-report/
+│       │   └── route.ts
 │       ├── generate-diet/
 │       │   └── route.ts
-│       └── save-diet/
+│       ├── save-diet/
+│       │   └── route.ts
+│       ├── generate-workout/
+│       │   └── route.ts
+│       └── save-workout/
 │           └── route.ts
 components/
 ├── ai-services-client.tsx
+├── blood-test-analysis-dialog.tsx
 ├── diet-generator-dialog.tsx
+├── workout-generator-dialog.tsx
 └── ui/
-    └── select.tsx (added)
+    └── (UI components)
+types/
+└── pdf-parse.d.ts
 lib/
-├── supabase.ts (new)
-└── document-actions.ts (new)
+├── supabase.ts
+└── document-actions.ts
 prisma/
 └── schema.prisma (updated)
 scripts/
-└── setup-supabase-storage.js (new)
+└── setup-supabase-storage.js
 ```
 
 ## Testing
 
+### Diet & Workout Generation:
 1. Ensure you have clients created in the system
 2. Navigate to `/ai-services`
-3. Test diet generation with different clients
+3. Test generation with different clients and parameters
 4. Verify documents are saved and retrievable
-5. Check Supabase storage bucket for files
+5. Test goal inclusion/exclusion toggle
 
-The feature is fully functional and ready for use! 
+### Blood Test Analysis:
+1. Prepare PDF blood test reports for testing
+2. Test extraction with different PDF formats
+3. Verify parameter editing and search functionality
+4. Test anomalous parameter detection
+5. Verify comprehensive analysis generation
+6. Test with both English and Spanish blood tests
+
+## Future Enhancements
+
+### Implemented Services (✅ Completed)
+- **Diet Plan Generation**: Custom nutrition plans
+- **Workout Plan Generation**: Custom exercise routines  
+- **Blood Test Analysis**: PDF upload and health insights
+
+### Planned Services
+- **Progress Report Generation**: Client progress summaries
+- **Meal Prep Guides**: Detailed preparation instructions
+- **Supplement Recommendations**: Personalized supplement plans
+
+### Potential Features
+- Document version history
+- Template system for common plans
+- Batch generation for multiple clients
+- Client portal access to documents
+- PDF export functionality
+- Email delivery system
+- Integration with wearable devices
+
+The AI Services feature is fully functional with three comprehensive services ready for production use! 

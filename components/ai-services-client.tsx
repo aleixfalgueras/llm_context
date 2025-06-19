@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Zap, FileText, Calendar, User } from 'lucide-react'
+import { Zap, FileText, Calendar, Activity } from 'lucide-react'
 import { DietGeneratorDialog } from './diet-generator-dialog'
 import { WorkoutGeneratorDialog } from './workout-generator-dialog'
+import { BloodTestAnalysisDialog } from './blood-test-analysis-dialog'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -15,6 +16,7 @@ interface AIServicesClientProps {
 export function AIServicesClient({ clients }: AIServicesClientProps) {
   const [isDietDialogOpen, setIsDietDialogOpen] = useState(false)
   const [isWorkoutDialogOpen, setIsWorkoutDialogOpen] = useState(false)
+  const [isBloodTestDialogOpen, setIsBloodTestDialogOpen] = useState(false)
 
   const services = [
     {
@@ -36,13 +38,13 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       onClick: () => setIsWorkoutDialogOpen(true)
     },
     {
-      id: 'progress-report',
-      title: 'Progress Report',
-      description: 'Generate comprehensive progress reports tracking client achievements and milestones.',
-      icon: <User className="h-8 w-8" />,
-      features: ['Data visualization', 'Goal tracking', 'Improvement suggestions', 'Client-friendly format'],
-      status: 'coming-soon',
-      onClick: () => {}
+      id: 'blood-test-analysis',
+      title: 'Blood Test Analysis',
+      description: 'Upload and analyze blood test reports to generate comprehensive health insights and recommendations.',
+      icon: <Activity className="h-8 w-8" />,
+      features: ['PDF upload & extraction', 'Parameter validation', 'Health analysis', 'Actionable recommendations'],
+      status: 'available',
+      onClick: () => setIsBloodTestDialogOpen(true)
     }
   ]
 
@@ -160,6 +162,13 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       <WorkoutGeneratorDialog 
         open={isWorkoutDialogOpen}
         onOpenChange={setIsWorkoutDialogOpen}
+        clients={clients}
+      />
+
+      {/* Blood Test Analysis Dialog */}
+      <BloodTestAnalysisDialog 
+        open={isBloodTestDialogOpen}
+        onOpenChange={setIsBloodTestDialogOpen}
         clients={clients}
       />
     </>

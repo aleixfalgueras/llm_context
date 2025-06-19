@@ -232,30 +232,54 @@ The application uses configurable environment variables for OpenAI parameters, a
 ## AI Services
 
 ### Overview
-AI Services provide automated document generation using client profiles. The feature reuses the same client context system as the AI Assistant to generate personalized, professional documents.
+AI Services provide automated document generation using client profiles. The feature reuses the same client context system as the AI Assistant to generate personalized, professional documents. Three services are currently implemented.
 
-### Diet Plan Generation
+### Implemented Services
 
-The first AI Service implemented is **Diet Plan Generation**, which creates personalized diet plans based on:
-
+#### 1. Diet Plan Generation
+Creates personalized nutrition plans based on:
 - **Client Profile**: Age, height, weight, medical history, notes
 - **Goals Control**: Optional toggle to include/exclude client goals
 - **Date Range**: Specific start and end dates for the diet plan
-- **Additional Context**: Optional extra information for this specific plan
+- **Nutritional Targets**: Optional calorie and protein targets
+- **Additional Context**: Optional extra information for customization
 
-#### Key Features:
-- **Client Goals Toggle**: Control whether the client's goals influence diet generation
-  - **Included** (default): AI considers fitness/health goals in recommendations
-  - **Excluded**: AI focuses purely on nutritional health without goal bias
+#### 2. Workout Plan Generation
+Creates custom exercise routines based on:
+- **Client Profile**: Age, fitness level, health conditions
+- **Goals Control**: Optional toggle to include/exclude client goals
+- **Date Range**: Specific start and end dates for the workout plan
+- **Workout Specifications**: Type, frequency, duration, equipment
+- **Additional Context**: Injuries, preferences, special requirements
+
+#### 3. Blood Test Analysis
+Analyzes medical blood test reports with:
+- **PDF Upload**: Direct upload of blood test reports (10MB limit)
+- **AI Extraction**: Automatic parameter extraction from PDF
+- **Parameter Review**: Edit and validate all extracted data
+- **Anomalous Detection**: Automatic highlighting of concerning values
+- **Health Analysis**: Comprehensive analysis excluding goals for medical objectivity
+- **Multi-language Support**: Works with Spanish and English reports
+
+### Key Features Across All Services:
+- **Client Context Integration**: Uses the same context system as AI Assistant
 - **Live Editor**: Edit generated content with real-time markdown preview
 - **Supabase Storage**: Documents saved to organized folder structure
 - **Database Tracking**: All documents tracked with metadata
+- **Professional Output**: Production-ready content for client delivery
 
-#### Document Storage:
+### Document Storage:
 - **Format**: Markdown files for easy editing and display
 - **Structure**: `{user_id}/{client_id}/{document_name}.md`
-- **Naming**: `{Client Name} Diet {start_date} to {end_date}.md`
+- **Naming Patterns**: 
+  - Diet: `{Client Name} Diet {start_date} to {end_date}.md`
+  - Workout: `{Client Name} Workout {start_date} to {end_date}.md`
+  - Blood Test: `{Client Name} Blood Test Analysis {test_date}.md`
 - **Security**: Private storage with user-specific access
+
+### Goals Toggle Strategy:
+- **Diet & Workout Plans**: Optional goals inclusion (default: enabled)
+- **Blood Test Analysis**: Goals always excluded for medical objectivity
 
 For detailed implementation information, see [AI_SERVICES_README.md](AI_SERVICES_README.md).
 
