@@ -222,74 +222,25 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
           {/* Upload Step */}
           {step === 'upload' && (
             <div className="space-y-6">
-              {/* Client Selection and File Upload */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="client">Select Client *</Label>
-                  <ClientCombobox
-                    clients={clients}
-                    value={formData.clientId}
-                    onValueChange={(value) => setFormData({ ...formData, clientId: value })}
-                    placeholder="Choose a client"
-                    searchPlaceholder="Search clients..."
-                    emptyMessage="No clients found."
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="file">Upload Blood Test PDF *</Label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      id="file"
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => document.getElementById('file')?.click()}
-                      className="flex items-center gap-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Choose PDF File
-                    </Button>
-                    {selectedFile && (
-                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                        ✓ {selectedFile.name}
-                      </span>
-                    )}
-                  </div>
-                  {selectedFile && (
-                    <p className="text-xs text-muted-foreground">
-                      File size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Additional Info */}
+              {/* Client Selection */}
               <div className="space-y-2">
-                <Label htmlFor="additionalInfo">Extraction Help (Optional)</Label>
-                <Textarea
-                  id="additionalInfo"
-                  placeholder="Provide additional format details if the extraction is not working well or the blood test does not follow the typical format [name, value, units, min reference, max reference]"
-                  value={formData.additionalInfo}
-                  onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
-                  rows={3}
+                <Label htmlFor="client">Select Client *</Label>
+                <ClientCombobox
+                  clients={clients}
+                  value={formData.clientId}
+                  onValueChange={(value) => setFormData({ ...formData, clientId: value })}
+                  placeholder="Choose a client"
+                  searchPlaceholder="Search clients..."
+                  emptyMessage="No clients found."
+                  required
                 />
-                <p className="text-xs text-muted-foreground">
-                  Use this field only if you have a non-standard blood test format that needs special extraction instructions
-                </p>
               </div>
 
               {/* Client Preview */}
               {selectedClient && (
                 <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Client Preview</CardTitle>
+                    <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-sm space-y-1">
@@ -312,11 +263,61 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                 </Card>
               )}
 
-              <div className="flex gap-3 pt-4">
-                <Button onClick={handleClose} variant="outline" className="flex-1">
+              {/* File Upload */}
+              <div className="space-y-2">
+                <Label htmlFor="file">Upload Blood Test PDF *</Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    id="file"
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('file')?.click()}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Choose PDF File
+                  </Button>
+                  {selectedFile && (
+                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                      ✓ {selectedFile.name}
+                    </span>
+                  )}
+                </div>
+                {selectedFile && (
+                  <p className="text-xs text-muted-foreground">
+                    File size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                )}
+              </div>
+
+              {/* Additional Info */}
+              <div className="space-y-2">
+                <Label htmlFor="additionalInfo">Extraction Help (Optional)</Label>
+                <Textarea
+                  id="additionalInfo"
+                  placeholder="Provide additional format details if the extraction is not working well or the blood test does not follow the typical format [name, value, units, min reference, max reference]"
+                  value={formData.additionalInfo}
+                  onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use this field only if you have a non-standard blood test format that needs special extraction instructions
+                </p>
+              </div>
+
+
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button onClick={handleClose} variant="outline">
                   Cancel
                 </Button>
-                <Button onClick={handleExtract} className="flex-1">
+                <Button onClick={handleExtract}>
                   Extract Data
                 </Button>
               </div>
@@ -643,11 +644,11 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                 </CardContent>
               </Card>
 
-              <div className="flex gap-3">
-                <Button onClick={() => setStep('upload')} variant="outline" className="flex-1">
+              <div className="flex justify-end gap-3">
+                <Button onClick={() => setStep('upload')} variant="outline">
                   Back
                 </Button>
-                <Button onClick={handleGenerate} className="flex-1">
+                <Button onClick={handleGenerate}>
                   Generate Report
                 </Button>
               </div>

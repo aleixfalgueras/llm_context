@@ -230,6 +230,54 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
               />
             </div>
 
+            {/* Selected Client Preview */}
+            {selectedClient && (
+              <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Name:</span> {selectedClient.name}
+                    </div>
+                    {selectedClient.dateOfBirth && (
+                      <div>
+                        <span className="font-medium">Age:</span> {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
+                      </div>
+                    )}
+                    {selectedClient.height && (
+                      <div>
+                        <span className="font-medium">Height:</span> {selectedClient.height}cm
+                      </div>
+                    )}
+                    {selectedClient.weight && (
+                      <div>
+                        <span className="font-medium">Weight:</span> {selectedClient.weight}kg
+                      </div>
+                    )}
+                    {selectedClient.country && (
+                      <div>
+                        <span className="font-medium">Country:</span> {selectedClient.country}
+                      </div>
+                    )}
+                  </div>
+                  {selectedClient.goals && (
+                    <div className="mt-3">
+                      <span className="font-medium text-sm">Goals:</span>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.goals}</p>
+                    </div>
+                  )}
+                  {selectedClient.medicalHistory && (
+                    <div className="mt-3">
+                      <span className="font-medium text-sm">Medical History:</span>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.medicalHistory}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Date Range */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -336,53 +384,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
               </p>
             </div>
 
-            {/* Selected Client Preview */}
-            {selectedClient && (
-              <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                                                                      <span className="font-medium">Name:</span> {selectedClient.name}
-                    </div>
-                    {selectedClient.dateOfBirth && (
-                      <div>
-                        <span className="font-medium">Age:</span> {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
-                      </div>
-                    )}
-                    {selectedClient.height && (
-                      <div>
-                        <span className="font-medium">Height:</span> {selectedClient.height}cm
-                      </div>
-                    )}
-                    {selectedClient.weight && (
-                      <div>
-                        <span className="font-medium">Weight:</span> {selectedClient.weight}kg
-                      </div>
-                    )}
-                    {selectedClient.country && (
-                      <div>
-                        <span className="font-medium">Country:</span> {selectedClient.country}
-                      </div>
-                    )}
-                  </div>
-                  {selectedClient.goals && (
-                    <div className="mt-3">
-                      <span className="font-medium text-sm">Goals:</span>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.goals}</p>
-                    </div>
-                  )}
-                  {selectedClient.medicalHistory && (
-                    <div className="mt-3">
-                      <span className="font-medium text-sm">Medical History:</span>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.medicalHistory}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+
 
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={handleClose}>
