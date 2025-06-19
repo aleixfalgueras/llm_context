@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Calendar, FileText, Loader2, User, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
+import { DateInput } from '@/components/ui/date-input'
 
 interface DietGeneratorDialogProps {
   open: boolean
@@ -162,7 +163,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -206,20 +207,20 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date *</Label>
-                <Input
+                <DateInput
                   id="startDate"
-                  type="date"
                   value={formData.startDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                  onChange={(value) => setFormData(prev => ({ ...prev, startDate: value }))}
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date *</Label>
-                <Input
+                <DateInput
                   id="endDate"
-                  type="date"
                   value={formData.endDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                  onChange={(value) => setFormData(prev => ({ ...prev, endDate: value }))}
+                  required
                 />
               </div>
             </div>

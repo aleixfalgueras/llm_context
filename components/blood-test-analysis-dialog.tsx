@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Activity, Upload, CheckCircle, AlertCircle, AlertTriangle, FileText, User, Calendar, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
+import { DateInput } from '@/components/ui/date-input'
 
 interface BloodTestAnalysisDialogProps {
   open: boolean
@@ -199,7 +200,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -365,15 +366,14 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="extractedTestDate">Test Date</Label>
-                      <Input
+                      <DateInput
                         id="extractedTestDate"
-                        type="date"
                         value={extractedData.testInfo?.testDate || ''}
-                        onChange={(e) => setExtractedData({
+                        onChange={(value) => setExtractedData({
                           ...extractedData,
                           testInfo: {
                             ...extractedData.testInfo,
-                            testDate: e.target.value
+                            testDate: value
                           }
                         })}
                         className="mt-1"

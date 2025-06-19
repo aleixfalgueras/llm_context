@@ -292,7 +292,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    return new Date(dateString).toLocaleDateString('en-GB')
   }
 
   return (
