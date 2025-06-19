@@ -143,9 +143,19 @@ export function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-700 py-8">
-        <div className="max-w-6xl mx-auto px-6 text-center text-gray-600 dark:text-gray-400">
-          <p>&copy; 2024 AI Chat Assistant. Powered by OpenAI.</p>
+      <footer className="border-t border-gray-200 dark:border-gray-700 py-8 mt-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center text-gray-600 dark:text-gray-400 text-sm">
+            <p>&copy; 2024 AI Chat Assistant. Powered by OpenAI.</p>
+            <div className="flex items-center gap-6 mt-4 md:mt-0">
+              <Link href="/privacy" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
+                Privacy Policy
+              </Link>
+              <Link href="/feedback" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
+                Feedback
+              </Link>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
