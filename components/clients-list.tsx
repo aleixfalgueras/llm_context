@@ -72,7 +72,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
         <div>
           <div className="flex items-center gap-3 mb-2">
             <User className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-3xl font-bold">Clients</h1>
+          <h1 className="text-3xl font-bold">Clients</h1>
           </div>
           <p className="text-muted-foreground">
             Manage your client profiles and track their health journey
