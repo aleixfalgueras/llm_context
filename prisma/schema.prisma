@@ -82,6 +82,20 @@ model Document {
   @@map("documents")
 }
 
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String   // The user's ID from Clerk
+  userEmail   String?  // User's email for contact purposes
+  userName    String?  // User's name
+  title       String   // Title of the feature request
+  description String   // Detailed description of the feature
+  priority    String   // Priority level: "low", "medium", "high"
+  useCase     String?  // Use case or scenario where this feature would be helpful
+  createdAt   DateTime @default(now())
+  
+  @@map("feedbacks")
+}
+
 enum Role {
   USER
   ASSISTANT
