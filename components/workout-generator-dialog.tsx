@@ -266,26 +266,36 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="text-blue-700 dark:text-blue-300">
-                    <strong>{selectedClient.name}</strong>
-                    {selectedClient.email && ` (${selectedClient.email})`}
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Name:</span> {selectedClient.name}
+                    </div>
+                    {selectedClient.dateOfBirth && (
+                      <div>
+                        <span className="font-medium">Age:</span> {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
+                      </div>
+                    )}
+                    {selectedClient.height && (
+                      <div>
+                        <span className="font-medium">Height:</span> {selectedClient.height}cm
+                      </div>
+                    )}
+                    {selectedClient.weight && (
+                      <div>
+                        <span className="font-medium">Weight:</span> {selectedClient.weight}kg
+                      </div>
+                    )}
+                    {selectedClient.email && (
+                      <div>
+                        <span className="font-medium">Email:</span> {selectedClient.email}
+                      </div>
+                    )}
                   </div>
-                  {selectedClient.dateOfBirth && (
-                    <div className="text-blue-600 dark:text-blue-400">
-                      Age: {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old
-                    </div>
-                  )}
-                  {(selectedClient.height || selectedClient.weight) && (
-                    <div className="text-blue-600 dark:text-blue-400">
-                      {selectedClient.height && `Height: ${selectedClient.height}cm`}
-                      {selectedClient.height && selectedClient.weight && ' • '}
-                      {selectedClient.weight && `Weight: ${selectedClient.weight}kg`}
-                    </div>
-                  )}
                   {selectedClient.goals && (
-                    <div className="text-blue-600 dark:text-blue-400">
-                      <strong>Goals:</strong> {selectedClient.goals}
+                    <div className="mt-3">
+                      <span className="font-medium text-sm">Goals:</span>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.goals}</p>
                     </div>
                   )}
                 </CardContent>
@@ -424,15 +434,16 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
             )}
 
             {/* Include Client Goals */}
-            <div className="flex items-center space-x-2">
+            <div className="space-y-2">
               <Checkbox
                 id="includeClientGoals"
                 checked={formData.includeClientGoals}
                 onChange={(e) => setFormData(prev => ({ ...prev, includeClientGoals: e.target.checked }))}
+                label="Include client's goals in workout plan generation"
               />
-              <Label htmlFor="includeClientGoals" className="text-sm">
-                Include client's goals in workout plan generation
-              </Label>
+              <p className="text-xs text-muted-foreground ml-6">
+                Uncheck this if you want to generate a workout without being influenced by the client's existing goals.
+              </p>
             </div>
 
             {/* Date Range Summary */}
@@ -450,15 +461,15 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
               </Card>
             )}
 
-            {/* Generate Button */}
-            <Button 
-              onClick={handleGenerate} 
-              className="w-full"
-              disabled={!formData.clientId || !formData.startDate || !formData.endDate}
-            >
-              <Wand2 className="mr-2 h-4 w-4" />
-              Generate Workout Plan
-            </Button>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button onClick={handleGenerate} disabled={!formData.clientId || !formData.startDate || !formData.endDate}>
+                <Wand2 className="h-4 w-4 mr-2" />
+                Generate Workout Plan
+              </Button>
+            </div>
           </div>
         )}
 
