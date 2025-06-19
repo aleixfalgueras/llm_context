@@ -267,7 +267,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                 id="additionalInfo"
                 value={formData.additionalInfo}
                 onChange={(e) => setFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
-                placeholder="e.g., Food allergies, dietary preferences, special requirements, upcoming events..."
+                placeholder="e.g., Format guidelines, dietary preferences, special requirements, upcoming events..."
                 rows={2}
               />
               <p className="text-xs text-muted-foreground">
