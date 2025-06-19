@@ -83,7 +83,7 @@ export function DocumentCombobox({
               {documents.map((document) => (
                 <CommandItem
                   key={document.id}
-                  value={`${document.documentName} ${document.documentType}`}
+                  value={`${document.documentName} ${document.documentType} ${document.id}`}
                   onSelect={() => {
                     onValueChange?.(document.id === value ? "" : document.id)
                     setOpen(false)

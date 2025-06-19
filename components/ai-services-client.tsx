@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Zap, FileText, Calendar, Activity } from 'lucide-react'
 import { DietGeneratorDialog } from './diet-generator-dialog'
 import { WorkoutGeneratorDialog } from './workout-generator-dialog'
@@ -89,12 +88,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                     </div>
                     <div>
                       <CardTitle className="text-lg">{service.title}</CardTitle>
-                      <Badge 
-                        variant={service.status === 'available' ? 'default' : 'secondary'}
-                        className="mt-1"
-                      >
-                        {service.status === 'available' ? 'Available' : 'Coming Soon'}
-                      </Badge>
                     </div>
                   </div>
                 </div>
