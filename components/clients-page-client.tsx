@@ -78,6 +78,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
         <ClientDocuments
           clientId={selectedClient.id}
           clientName={selectedClient.name}
+          clientEmail={selectedClient.email}
           open={isDocumentsOpen}
           onOpenChange={setIsDocumentsOpen}
         />
