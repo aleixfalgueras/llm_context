@@ -171,7 +171,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl h-[90vh] max-h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -180,7 +180,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
         </DialogHeader>
 
         {step === 'form' && (
-          <div className="space-y-6">
+          <div className="space-y-6 overflow-y-auto flex-1 px-1">
             {/* Client Selection */}
             <div className="space-y-2">
               <Label htmlFor="client">Select Client *</Label>
@@ -359,7 +359,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
         )}
 
         {step === 'editing' && (
-          <div className="space-y-6">
+          <div className="flex flex-col flex-1 space-y-4">
             {/* Header Info */}
             <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
               <CardContent className="pt-4">
@@ -378,30 +378,34 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
             </Card>
 
             {/* Edit Area */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Editor */}
-              <div className="space-y-2">
-                <Label htmlFor="dietContent">Edit Diet Plan</Label>
-                <Textarea
-                  id="dietContent"
-                  value={editedDiet}
-                  onChange={(e) => setEditedDiet(e.target.value)}
-                  className="min-h-[400px] font-mono text-sm"
-                  placeholder="Diet plan content..."
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-4" style={{ height: 'calc(100vh - 300px)' }}>
+              <Card className="flex flex-col">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-muted-foreground">
+                    Edit the generated diet plan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 p-0">
+                  <Textarea
+                    value={editedDiet}
+                    onChange={(e) => setEditedDiet(e.target.value)}
+                    className="w-full h-full font-mono text-sm resize-none border-0 rounded-none p-4"
+                    placeholder="Generated diet plan will appear here..."
+                    style={{ minHeight: 'calc(100vh - 400px)' }}
+                  />
+                </CardContent>
+              </Card>
 
-              {/* Preview */}
-              <div className="space-y-2">
-                <Label>Preview</Label>
-                <Card className="min-h-[400px] overflow-auto">
-                  <CardContent className="pt-4">
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown>{editedDiet}</ReactMarkdown>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              <Card className="flex flex-col">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-muted-foreground">Preview</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <ReactMarkdown>{editedDiet}</ReactMarkdown>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="flex justify-end gap-3">

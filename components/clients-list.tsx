@@ -105,7 +105,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
             <h3 className="text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">
               {searchTerm ? 'No clients found' : 'No clients yet'}
             </h3>
-            <p className="text-blue-700 dark:text-blue-300 text-center max-w-md">
+            <p className="text-gray-900 dark:text-gray-100 text-center max-w-md">
               {searchTerm 
                 ? 'Try adjusting your search terms'
                 : 'Start by adding your first client to begin tracking their health journey'
