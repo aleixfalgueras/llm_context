@@ -294,8 +294,8 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-red-600" />
+          <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+            <Activity className="h-5 w-5" />
             Blood Test Analysis
           </DialogTitle>
         </DialogHeader>
