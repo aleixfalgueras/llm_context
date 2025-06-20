@@ -12,7 +12,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - **Real-time Messaging**: Send and receive messages in real-time
 - **Message History**: Persistent chat history stored in database
 - **Context Optimization**: Efficient token usage with smart context injection
-- **AI Services**: Generate personalized documents like diet plans using client profiles
+- **AI Services**: Generate personalized documents (diet plans, workout plans, blood test analysis, meeting reports) using client profiles
 
 ### User Experience  
 - **ChatGPT-like Interface**: Clean, minimalistic design similar to ChatGPT
@@ -65,6 +65,9 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   ├── chat-input.tsx    # Message input form
 │   ├── ai-services-client.tsx # AI Services page
 │   ├── diet-generator-dialog.tsx # Diet generation dialog
+│   ├── workout-generator-dialog.tsx # Workout generation dialog
+│   ├── blood-test-analysis-dialog.tsx # Blood test analysis dialog
+│   ├── meeting-report-dialog.tsx # Meeting report generation dialog
 │   └── clients-page-client.tsx # Client management
 ├── hooks/
 │   ├── use-chat.ts       # Chat functionality hook
@@ -118,7 +121,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - `clientId`: Associated client ID
 - `documentName`: Document name/title
 - `documentPath`: Storage path in Supabase
-- `documentType`: Type (e.g., "diet", "workout")
+- `documentType`: Type (e.g., "diet", "workout", "blood-test-analysis", "meeting")
 - `startDate/endDate`: Optional date range for time-based documents
 - `createdAt/updatedAt`: Timestamps
 

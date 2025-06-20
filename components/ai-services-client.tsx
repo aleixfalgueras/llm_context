@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Zap, FileText, Calendar, Activity } from 'lucide-react'
+import { Zap, FileText, Calendar, Activity, MessageSquare } from 'lucide-react'
 import { DietGeneratorDialog } from './diet-generator-dialog'
 import { WorkoutGeneratorDialog } from './workout-generator-dialog'
 import { BloodTestAnalysisDialog } from './blood-test-analysis-dialog'
+import { MeetingReportDialog } from './meeting-report-dialog'
 import { ClientDocuments } from './client-documents'
 
 interface AIServicesClientProps {
@@ -17,6 +18,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const [isDietDialogOpen, setIsDietDialogOpen] = useState(false)
   const [isWorkoutDialogOpen, setIsWorkoutDialogOpen] = useState(false)
   const [isBloodTestDialogOpen, setIsBloodTestDialogOpen] = useState(false)
+  const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
@@ -60,6 +62,16 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       status: 'available',
       onClick: () => setIsBloodTestDialogOpen(true),
       iconColorClass: 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
+    },
+    {
+      id: 'meeting-report',
+      title: 'Meeting Report',
+      description: 'Generate comprehensive meeting reports with actionable steps from client meeting transcriptions.',
+      icon: <MessageSquare className="h-8 w-8" />,
+      features: ['Transcription analysis', 'Actionable insights', 'Professional summaries'],
+      status: 'available',
+      onClick: () => setIsMeetingReportDialogOpen(true),
+      iconColorClass: 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400'
     }
   ]
 
@@ -123,6 +135,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                       service.id === 'diet-generator' ? 'bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600' :
                       service.id === 'workout-generator' ? 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600' :
                       service.id === 'blood-test-analysis' ? 'bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600' :
+                      service.id === 'meeting-report' ? 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600' :
                       ''
                     }`}
                     onClick={service.onClick}
@@ -188,6 +201,14 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       <BloodTestAnalysisDialog 
         open={isBloodTestDialogOpen}
         onOpenChange={setIsBloodTestDialogOpen}
+        clients={clients}
+        onDocumentCreated={handleDocumentCreated}
+      />
+
+      {/* Meeting Report Dialog */}
+      <MeetingReportDialog 
+        open={isMeetingReportDialogOpen}
+        onOpenChange={setIsMeetingReportDialogOpen}
         clients={clients}
         onDocumentCreated={handleDocumentCreated}
       />

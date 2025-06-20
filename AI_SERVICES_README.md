@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI Services feature provides AI-powered content generation for client management. Three services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, and **Blood Test Analysis**, all creating personalized content based on client profiles and saving as documents.
+The AI Services feature provides AI-powered content generation for client management. Four services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, **Blood Test Analysis**, and **Meeting Report Generation**, all creating personalized content based on client profiles and saving as documents.
 
 ## Features Implemented
 
@@ -96,7 +96,48 @@ The AI Services feature provides AI-powered content generation for client manage
 - **Editable Interface**: All extracted data can be corrected before analysis
 - **Search Functionality**: Multi-field search across parameter names, values, units, status
 
-### 5. Database Schema
+### 5. Meeting Report Generation
+
+#### Components:
+- **Dialog Component**: `components/meeting-report-dialog.tsx`
+- **API Routes**: 
+  - `app/api/ai-services/generate-meeting-report/route.ts` (Generation)
+  - `app/api/ai-services/save-meeting-report/route.ts` (Storage)
+
+#### Features:
+- Client selection dropdown with profile preview
+- Meeting date input
+- Large text area for meeting transcription input
+- **Optional client context toggle** - Control whether client's profile influences analysis
+- Optional additional context field for extra information
+- AI generation using OpenAI with structured report format
+- Live markdown editor with preview
+- Save to Supabase storage
+- Document tracking in database
+
+#### Meeting Report Analysis Flow:
+1. **Setup**: Client selection and meeting date input
+2. **Transcription**: Paste or type meeting transcription/notes
+3. **Context Control**: Toggle client profile information usage
+4. **Additional Context**: Optional field for extra meeting context
+5. **Generation**: AI creates structured meeting report with actionable insights
+6. **Edit & Save**: Live markdown editor with preview, save to storage
+
+#### Meeting Report Structure:
+- **Meeting Summary**: Overview of the session
+- **Key Discussion Points**: Main topics covered
+- **Client Progress & Updates**: Progress since last meeting
+- **Action Items & Next Steps**: Specific, actionable tasks
+- **Recommendations**: Professional advice and suggestions
+
+#### Key Features:
+- **Transcription Analysis**: AI processes meeting notes to extract insights
+- **Actionable Insights**: Focus on practical next steps
+- **Client Context Integration**: Optional use of client profile for personalized analysis
+- **Professional Format**: Structured, professional meeting documentation
+- **Flexible Input**: Accepts transcriptions, notes, or bullet points
+
+### 6. Database Schema
 
 #### Document Model:
 ```prisma
@@ -106,7 +147,7 @@ model Document {
   clientId    String   // The client this document belongs to
   documentName String  // The name of the document
   documentPath String  // Path in Supabase storage
-  documentType String  // Type: "diet", "workout", "blood-test-analysis"
+  documentType String  // Type: "diet", "workout", "blood-test-analysis", "meeting"
   startDate   DateTime? // For time-based documents (diet/workout)
   endDate     DateTime? // For time-based documents (diet/workout)
   createdAt   DateTime @default(now())
@@ -116,7 +157,7 @@ model Document {
 }
 ```
 
-### 6. Supabase Storage Integration
+### 7. Supabase Storage Integration
 
 #### Storage Structure:
 ```
@@ -126,6 +167,7 @@ documents/
         ├── {Client Name} Diet {start_date} to {end_date}.md
         ├── {Client Name} Workout {start_date} to {end_date}.md
         ├── {Client Name} Blood Test Analysis {test_date}.md
+        ├── {Client Name} Meeting Report - {meeting_date}.md
         └── ...
 ```
 
@@ -150,9 +192,15 @@ All AI services use the same client context system, with one important distincti
 - **Health-Focused Analysis**: Based purely on clinical data and health optimization
 - **Unbiased Recommendations**: Medical interpretations not influenced by fitness goals
 
+#### Meeting Report Generation (Goals Optional):
+- **Client Context Toggle**: User can choose to include/exclude client profile information
+- **Flexible Analysis**: Can generate reports with or without client context
+- **Actionable Insights**: Focus on practical next steps and professional documentation
+- **Meeting-Focused**: Analysis based on meeting content and optional client context
+
 ### Client Goals Toggle Feature
 
-Diet and workout generation include a toggle to control goal influence:
+Diet, workout, and meeting report generation include toggles to control client context influence:
 
 #### When Goals Are Included (Default for diet/workout):
 - AI considers the client's fitness/health goals
@@ -172,6 +220,7 @@ Documents are saved with specific naming patterns:
 Diet Plans: {Client Name} Diet {YYYY-MM-DD} to {YYYY-MM-DD}.md
 Workout Plans: {Client Name} Workout {YYYY-MM-DD} to {YYYY-MM-DD}.md
 Blood Test Analysis: {Client Name} Blood Test Analysis {YYYY-MM-DD}.md
+Meeting Reports: {Client Name} Meeting Report - {YYYY-MM-DD}.md
 ```
 
 ## API Endpoints
