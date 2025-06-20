@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI Services feature provides AI-powered content generation for client management. Four services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, **Blood Test Analysis**, and **Meeting Report Generation**, all creating personalized content based on client profiles and saving as documents.
+The AI Services feature provides AI-powered content generation for client management. Four services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, **Blood Test Analysis**, and **Meeting Report Generation**, all creating personalized content based on client profiles and saving as documents. Additionally, the platform includes **Medical History PDF Extraction** for comprehensive medical information extraction during client profile creation.
 
 ## Features Implemented
 
@@ -137,7 +137,64 @@ The AI Services feature provides AI-powered content generation for client manage
 - **Professional Format**: Structured, professional meeting documentation
 - **Flexible Input**: Accepts transcriptions, notes, or bullet points
 
-### 6. Database Schema
+### 6. Medical History PDF Extraction
+
+#### Components:
+- **Integration**: Embedded in `components/client-form.tsx`
+- **API Route**: `app/api/ai-services/extract-medical-history/route.ts`
+
+#### Features:
+- **Comprehensive Data Extraction**: AI-powered extraction of medical information from PDF documents
+- **Privacy-First Processing**: Complete anonymization of all personally identifiable information
+- **Advanced Medical Understanding**: Extracts diagnoses, medications, lab results, imaging findings, and assessments
+- **Large Document Support**: Handles up to 40 pages and 50MB PDF files with intelligent truncation
+- **Real-time Processing**: Immediate extraction and population of medical history field
+- **User Control**: Review and edit extracted information before saving
+- **Secure Processing**: Memory-only processing with no file storage
+
+#### Medical History Extraction Flow:
+1. **Upload**: PDF upload during client creation or editing (up to 50MB)
+2. **Processing**: AI extracts comprehensive medical information using GPT-4o-mini
+3. **Anonymization**: Automatic removal of all personal identifiers
+4. **Structuring**: Organization into comprehensive medical sections
+5. **Review**: User reviews and edits extracted information
+6. **Integration**: Extracted summary populates medical history field
+
+#### Extracted Medical Information:
+- **Primary Diagnoses**: Working diagnoses, differential diagnoses, suspected conditions
+- **Conditions**: Current/past/chronic conditions with severity and treatment details
+- **Medications**: Current, past, discontinued medications with dosages and responses
+- **Laboratory Results**: Blood work, values, reference ranges, trends, clinical significance
+- **Imaging Studies**: CT, MRI, X-ray findings with impressions and clinical relevance
+- **Symptoms**: Onset, duration, severity, triggers, functional impact
+- **Vital Signs**: Measurements with normal/abnormal interpretations
+- **Physical Examinations**: System-by-system findings with clinical significance
+- **Assessment Plans**: Clinical assessments, treatment plans, follow-up requirements
+- **Social/Family History**: Occupation, exposures, family medical history
+
+#### Technical Specifications:
+- **Processing Capacity**: Up to 400,000 characters of text extraction
+- **AI Model**: OpenAI GPT-4o-mini with 32,000 token output capacity
+- **Document Types**: Hospital summaries, consultation notes, lab reports, treatment plans
+- **Privacy Compliance**: HIPAA-compliant processing with complete anonymization
+- **Integration Points**: Available during both client creation and editing workflows
+- **Error Handling**: Graceful handling of processing failures with informative feedback
+
+#### Privacy and Security Features:
+- **No File Storage**: PDFs processed in memory only, never stored permanently
+- **Automatic Anonymization**: Names, addresses, dates, provider names removed
+- **User Authentication**: Requires valid login and client ownership verification
+- **Secure API**: All endpoints protected with authentication middleware
+- **Data Control**: Users have complete control over what information is saved
+
+#### Usage Integration:
+- **Client Creation**: Upload and extract medical history during new client setup
+- **Client Editing**: Add or update medical history for existing clients
+- **Override Protection**: Warns before replacing existing medical history content
+- **Summary Format**: Organized plain text summary with section headers
+- **Progress Feedback**: Real-time processing status and completion notifications
+
+### 7. Database Schema
 
 #### Document Model:
 ```prisma
@@ -157,7 +214,7 @@ model Document {
 }
 ```
 
-### 7. Supabase Storage Integration
+### 8. Supabase Storage Integration
 
 #### Storage Structure:
 ```

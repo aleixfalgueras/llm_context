@@ -7,6 +7,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 ### Core Functionality
 - **AI Conversations**: Natural conversations with OpenAI's GPT-4o-mini with client context
 - **Client Management**: Create, view, edit, and delete client profiles
+- **Medical History PDF Extraction**: AI-powered comprehensive extraction from medical documents with privacy protection
 - **Personalized Responses**: AI automatically uses client information for tailored advice
 - **Chat Management**: Create, view, edit, and delete chat conversations associated with clients
 - **Real-time Messaging**: Send and receive messages in real-time
@@ -51,6 +52,12 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   ├── api/
 │   │   ├── chat/          # Chat API endpoints
 │   │   └── ai-services/   # AI document generation APIs
+│   │       ├── extract-medical-history/  # Medical history PDF extraction
+│   │       ├── generate-diet/            # Diet plan generation
+│   │       ├── generate-workout/         # Workout plan generation
+│   │       ├── extract-blood-test/       # Blood test PDF extraction
+│   │       ├── generate-blood-test-report/ # Blood test analysis
+│   │       └── generate-meeting-report/  # Meeting report generation
 │   ├── ai-services/       # AI Services page
 │   ├── chat/[id]/         # Individual chat pages
 │   ├── clients/           # Client management pages
@@ -111,7 +118,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - `weight`: Optional weight in kilograms
 - `country`: Optional client's country/location
 - `goals`: Client's health and fitness goals
-- `medicalHistory`: Medical conditions, allergies, etc.
+- `medicalHistory`: Comprehensive medical information (can be manually entered or AI-extracted from PDFs)
 - `notes`: General notes about the client
 - `createdAt/updatedAt`: Timestamps
 
@@ -286,39 +293,134 @@ Analyzes medical blood test reports with:
 
 For detailed implementation information, see [AI_SERVICES_README.md](AI_SERVICES_README.md).
 
-#### Customization Examples:
+## Medical History PDF Extraction
 
-```bash
-# For more creative, varied responses
-OPENAI_TEMPERATURE=0.9
-OPENAI_PRESENCE_PENALTY=0.3
-OPENAI_FREQUENCY_PENALTY=0.3
+### Overview
+The Medical History PDF Extraction feature provides comprehensive AI-powered extraction of medical information from PDF documents. This feature enhances client profile creation by automatically extracting and organizing medical data while maintaining complete patient privacy through anonymization.
 
-# For more focused, consistent responses  
-OPENAI_TEMPERATURE=0.3
-OPENAI_PRESENCE_PENALTY=0.0
-OPENAI_FREQUENCY_PENALTY=0.0
+### Key Features
 
-# For longer, detailed responses
-OPENAI_MAX_TOKENS=1500
+#### **Comprehensive Data Extraction**
+- **Primary Diagnoses**: Working diagnoses, differential diagnoses, suspected conditions
+- **Detailed Conditions**: Current/past/chronic conditions with severity and treatment information
+- **Medications**: Current, past, and discontinued medications with dosages, responses, and side effects
+- **Laboratory Results**: Blood work, values, reference ranges, trends, and clinical significance
+- **Imaging Studies**: CT, MRI, X-ray findings with impressions and clinical relevance
+- **Symptoms**: Onset, duration, severity, triggers, and functional impact assessment
+- **Assessment Plans**: Clinical assessments, treatment plans, and follow-up requirements
+
+#### **Enhanced Clinical Information**
+- **Vital Signs**: Measurements with normal/abnormal interpretations
+- **Physical Examinations**: System-by-system findings with clinical significance
+- **Social History**: Occupation, exposures, lifestyle factors affecting health
+- **Functional Status**: Work impact, daily activities, sleep patterns, quality of life
+- **Family History**: Detailed family medical history with relationships and conditions
+
+#### **Privacy-First Approach**
+- **Complete Anonymization**: Automatically removes all personally identifiable information
+- **HIPAA-Compliant Processing**: No storage of PDF files - processing in memory only
+- **Secure Extraction**: User authentication and client ownership verification required
+- **Privacy Protection**: Names, addresses, dates, provider names automatically anonymized
+
+#### **Advanced Processing Capabilities**
+- **Large Document Support**: Handles up to 40 pages and 50MB PDF files
+- **Smart Text Processing**: Up to 400,000 characters with intelligent truncation
+- **High Token Output**: 32,000 token responses for comprehensive extraction
+- **Multi-format Support**: Works with various medical document formats and layouts
+
+### Technical Implementation
+
+#### **AI Processing Pipeline**
+1. **PDF Upload**: Secure file upload with size and format validation
+2. **Text Extraction**: Advanced PDF parsing using `pdf-parse` library
+3. **AI Analysis**: OpenAI GPT-4o-mini processes text with comprehensive medical prompts
+4. **Data Structuring**: Organizes extracted information into structured JSON format
+5. **Summary Generation**: Creates readable summary organized by medical sections
+6. **Privacy Validation**: Ensures all personal information has been anonymized
+
+#### **Extracted Data Structure**
+```json
+{
+  "primaryDiagnoses": [{"diagnosis", "status", "timeframe", "severity", "notes"}],
+  "conditions": [{"condition", "status", "treatment", "progression"}],
+  "medications": [{"medication", "dosage", "indication", "response"}],
+  "labResults": [{"test", "result", "significance", "trend"}],
+  "imaging": [{"study", "findings", "impression", "significance"}],
+  "symptoms": [{"symptom", "onset", "severity", "impact"}],
+  "vitalSigns": [{"parameter", "value", "significance"}],
+  "physicalExam": [{"system", "findings", "significance"}],
+  "assessmentPlan": [{"problem", "assessment", "plan", "followUp"}],
+  "summary": {
+    "primaryConcerns": "Main medical issues and diagnoses",
+    "currentTreatments": "Current medications and treatments",
+    "keyFindings": "Important lab results and exam findings",
+    "functionalImpact": "How conditions affect daily life",
+    "riskFactors": "Family history and lifestyle factors",
+    "clinicalStatus": "Overall clinical picture and trajectory"
+  }
+}
 ```
 
-### Context Flow Example
+#### **Integration Points**
+- **Client Form**: Available during both client creation and editing
+- **Real-time Processing**: Immediate extraction and population of medical history field
+- **User Control**: Review and edit extracted information before saving
+- **Override Protection**: Warns users before replacing existing medical history content
 
-**First Message:**
-```
-System: [Full client context as shown above]
-User: "Hi, I need help with my fitness routine"
-Assistant: "Hi there! I'd be happy to help you with your fitness routine. Given your goal to lose 15kg for your wedding in 6 months and your preference for morning workouts, let's create a plan that works with your busy schedule..."
-```
+### Usage Workflow
 
-**Subsequent Messages:**
-```
-User: "What about my diet?"
-Assistant: "Great question! Since you've been vegetarian for 3 years, we can definitely work with that. For your weight loss goal, let's focus on protein-rich vegetarian options that will also support your muscle building..."
-```
+#### **For New Clients**
+1. Fill out client form with basic information
+2. Upload medical history PDF using the "Upload PDF" button
+3. Click "Extract" to process the document with AI
+4. Review and edit the extracted medical history information
+5. Complete client creation with comprehensive medical history populated
 
-Notice how the AI remembers the client's context without it being re-sent, while maintaining privacy by not using names.
+#### **For Existing Clients**
+1. Edit client profile
+2. Upload medical history PDF
+3. AI extracts and organizes medical information
+4. Review and modify extracted content as needed
+5. Save updated client profile with enhanced medical history
+
+### Processing Capabilities
+
+#### **Document Types Supported**
+- Hospital discharge summaries
+- Physician consultation notes
+- Medical history and physical examination reports
+- Specialist reports and assessments
+- Laboratory and diagnostic reports
+- Treatment summaries and care plans
+
+#### **Clinical Information Extracted**
+- **Diagnostic Information**: Primary and differential diagnoses, suspected conditions
+- **Treatment History**: Current and past medications, procedures, therapies
+- **Clinical Findings**: Lab results, imaging findings, physical exam results
+- **Functional Assessment**: Impact on daily activities, work capacity, quality of life
+- **Risk Factors**: Family history, lifestyle factors, occupational exposures
+- **Care Plans**: Treatment recommendations, follow-up requirements, patient education
+
+### Security and Compliance
+
+#### **Privacy Protections**
+- **No File Storage**: PDFs processed in memory only, never stored permanently
+- **Automatic Anonymization**: All personal identifiers removed during processing
+- **User Authentication**: Requires valid user login and client ownership verification
+- **Secure Processing**: All API calls secured with authentication middleware
+
+#### **Data Handling**
+- **Memory-Only Processing**: PDF content processed and discarded immediately
+- **Structured Output**: Only anonymized medical information stored in client profile
+- **User Control**: Complete control over what information is saved
+- **Audit Trail**: Processing metadata available for transparency
+
+### Performance Optimizations
+
+- **Intelligent Truncation**: Smart text truncation at sentence boundaries for large documents
+- **Efficient Processing**: Optimized prompts for comprehensive yet efficient extraction
+- **Progress Feedback**: Real-time processing status and completion notifications
+- **Error Handling**: Graceful handling of processing failures with informative error messages
 
 ## Getting Started
 
@@ -396,6 +498,8 @@ npm test -- __tests__/simple.test.ts
 
 1. **Sign Up/Sign In**: Create an account or sign in with Clerk
 2. **Create Clients**: Go to `/clients` to add client profiles with their information
+   - **Medical History PDF Extraction**: Upload medical PDFs for AI-powered comprehensive extraction
+   - **Privacy Protection**: All personal information automatically anonymized during extraction
 3. **Select Client**: Click "Select Client" in the sidebar to choose a client for context
 4. **Create Chat**: Click "New Chat" (only enabled after client selection)
 5. **Send Messages**: Type your message and press Enter or click Send
@@ -403,6 +507,7 @@ npm test -- __tests__/simple.test.ts
 7. **Manage Chats**: Edit titles or delete chats using the dropdown menu
 8. **View History**: Click on any chat in the sidebar to view conversation and associated client
 9. **Client Context**: View client information in the right sidebar during chats
+10. **AI Services**: Use `/ai-services` to generate personalized documents for clients
 
 ## Architecture Decisions
 

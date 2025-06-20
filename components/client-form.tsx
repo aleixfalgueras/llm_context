@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
 import { useToast } from '@/hooks/use-toast'
 import { capitalizeName } from '@/lib/utils'
-import { Globe, HelpCircle } from 'lucide-react'
+import { Globe, HelpCircle, Upload, FileText, CheckCircle, Loader2 } from 'lucide-react'
 
 interface ClientFormProps {
   client?: any
@@ -23,6 +23,8 @@ interface ClientFormProps {
 export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFormProps) {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [isExtractingMedicalHistory, setIsExtractingMedicalHistory] = useState(false)
+  const [selectedMedicalFile, setSelectedMedicalFile] = useState<File | null>(null)
   const [formData, setFormData] = useState<ClientData>({
     name: client?.name || '',
     email: client?.email || '',
@@ -50,6 +52,123 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
     { value: 'russian', label: 'Russian (Русский)', flag: '🇷🇺' },
     { value: 'catalan', label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
   ]
+
+  const handleMedicalFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && file.type === 'application/pdf') {
+      // Check file size (warn if over 25MB, reject if over 50MB)
+      const fileSizeMB = file.size / (1024 * 1024)
+      
+      if (fileSizeMB > 50) {
+        toast({
+          title: 'File Too Large',
+          description: `PDF file is ${fileSizeMB.toFixed(1)}MB. Maximum size is 50MB. Please compress or split the document.`,
+          variant: 'destructive'
+        })
+        return
+      }
+      
+      if (fileSizeMB > 25) {
+        toast({
+          title: 'Large File Detected',
+          description: `PDF file is ${fileSizeMB.toFixed(1)}MB. Processing may take longer and content might be truncated if too long.`,
+          duration: 8000,
+        })
+      }
+      
+      setSelectedMedicalFile(file)
+    } else {
+      toast({
+        title: 'Invalid File',
+        description: 'Please select a PDF file',
+        variant: 'destructive'
+      })
+    }
+  }
+
+  const handleExtractMedicalHistory = async () => {
+    if (!selectedMedicalFile) {
+      toast({
+        title: 'No File Selected',
+        description: 'Please select a medical history PDF file first',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    // Check if medical history field already has content
+    if (formData.medicalHistory && formData.medicalHistory.trim()) {
+      const confirmOverride = window.confirm(
+        "⚠️ Warning: The Medical History field already contains information.\n\n" +
+        "Extracting from PDF will REPLACE the existing content.\n\n" +
+        "Do you want to continue and override the current medical history?"
+      )
+      
+      if (!confirmOverride) {
+        return // User cancelled, don't proceed
+      }
+    }
+
+    setIsExtractingMedicalHistory(true)
+
+    try {
+      const formDataToSend = new FormData()
+      formDataToSend.append('file', selectedMedicalFile)
+      // For new clients, we don't need to pass clientId
+      if (client?.id) {
+        formDataToSend.append('clientId', client.id)
+      }
+
+      const response = await fetch('/api/ai-services/extract-medical-history', {
+        method: 'POST',
+        body: formDataToSend
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to extract medical history')
+      }
+
+      const data = await response.json()
+      
+      // Update the medical history field with the extracted summary
+      setFormData(prev => ({
+        ...prev,
+        medicalHistory: data.summary
+      }))
+
+      // Show success message with processing info
+      let description = 'Comprehensive medical history has been extracted and organized by sections. Please review and edit as needed.'
+      
+      if (data.processingInfo?.wasContentTruncated) {
+        description += '\n\n⚠️ Note: Document was large and content was truncated. Only the first portion was processed.'
+      }
+
+      toast({
+        title: 'Medical History Extracted 📋',
+        description,
+        duration: 8000,
+      })
+
+      // Clear the selected file
+      setSelectedMedicalFile(null)
+      
+      // Reset the file input
+      const fileInput = document.getElementById('medicalHistoryFile') as HTMLInputElement
+      if (fileInput) {
+        fileInput.value = ''
+      }
+
+    } catch (error) {
+      console.error('Error extracting medical history:', error)
+      toast({
+        title: 'Extraction Failed',
+        description: 'Failed to extract medical history. Please try again or enter manually.',
+        variant: 'destructive'
+      })
+    } finally {
+      setIsExtractingMedicalHistory(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -247,17 +366,6 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="medicalHistory">Medical History</Label>
-            <Textarea
-              id="medicalHistory"
-              value={formData.medicalHistory}
-              onChange={handleChange('medicalHistory')}
-              placeholder="Any relevant medical conditions, allergies, medications..."
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="notes">General Notes</Label>
             <Textarea
               id="notes"
@@ -268,11 +376,83 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
             />
           </div>
 
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="medicalHistory">Medical History</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="medicalHistoryFile"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleMedicalFileChange}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('medicalHistoryFile')?.click()}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  disabled={isExtractingMedicalHistory}
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload PDF
+                </Button>
+                {selectedMedicalFile && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleExtractMedicalHistory}
+                    disabled={isExtractingMedicalHistory}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isExtractingMedicalHistory ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Extracting...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-4 w-4" />
+                        Extract
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+            {selectedMedicalFile && (
+              <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                <span>{selectedMedicalFile.name} ({(selectedMedicalFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+              </div>
+            )}
+            <div className="text-xs text-muted-foreground space-y-1 mb-2">
+              <p className="flex items-center gap-1">
+                <FileText className="h-3 w-3" />
+                <strong>Comprehensive PDF Extraction:</strong> AI extracts detailed medical history from PDF documents (up to 40 pages, 50MB max)
+              </p>
+              <p className="ml-4">
+                • Captures diagnoses, medications, lab results, imaging findings, and assessments
+              </p>
+              <p className="ml-4">
+                • All personal information is automatically removed for privacy
+              </p>
+            </div>
+            <Textarea
+              id="medicalHistory"
+              value={formData.medicalHistory}
+              onChange={handleChange('medicalHistory')}
+              placeholder="Enter comprehensive medical history including diagnoses, medications, lab results, symptoms, and treatments manually - OR - upload a PDF above for AI-powered comprehensive extraction."
+              rows={6}
+            />
+          </div>
+
           <div className="flex gap-4 pt-4">
             <Button
               type="submit"
               disabled={isLoading}
-              className={`flex-1 ${client?.id ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
               {isLoading ? 'Saving...' : (client?.id ? 'Update Client' : 'Create Client')}
             </Button>
