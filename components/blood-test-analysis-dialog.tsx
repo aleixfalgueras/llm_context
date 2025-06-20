@@ -229,10 +229,10 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Upload Step */}
           {step === 'upload' && (
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-auto flex-1 px-1">
               {/* Client Selection */}
               <div className="space-y-2">
                 <Label htmlFor="client">Select Client *</Label>
@@ -337,16 +337,30 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
 
           {/* Extracting Step */}
           {step === 'extracting' && (
-            <div className="text-center py-12">
-              <Upload className="h-16 w-16 text-blue-600 mx-auto mb-4 animate-pulse" />
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                              <Upload className="h-16 w-16 text-red-600 mx-auto mb-4 animate-pulse" />
               <h3 className="text-lg font-semibold mb-2">Extracting Blood Test Data</h3>
-              <p className="text-muted-foreground">AI is analyzing your PDF and extracting blood test parameters...</p>
+              <p className="text-muted-foreground mb-4">AI is analyzing your PDF and extracting parameters...</p>
+              
+              <div className="flex justify-center">
+                <div className="flex space-x-1">
+                  <div className="h-2 w-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-2 w-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-2 w-2 bg-red-600 rounded-full animate-bounce"></div>
+                </div>
+              </div>
+                
+                <p className="text-xs text-muted-foreground mt-4">
+                  This usually takes 30-60 seconds
+                </p>
+              </div>
             </div>
           )}
 
           {/* Reviewing Step */}
           {step === 'reviewing' && extractedData && (
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-auto flex-1 px-1">
               <div className="text-center">
                 <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
                 <h3 className="text-lg font-semibold">Data Extracted Successfully</h3>
@@ -668,10 +682,24 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
 
           {/* Generating Step */}
           {step === 'generating' && (
-            <div className="text-center py-12">
-              <Activity className="h-16 w-16 text-blue-600 mx-auto mb-4 animate-pulse" />
-              <h3 className="text-lg font-semibold mb-2">Generating Analysis Report</h3>
-              <p className="text-muted-foreground">AI is creating a comprehensive health analysis based on the extracted data...</p>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <Activity className="h-16 w-16 text-red-600 mx-auto mb-4 animate-pulse" />
+                <h3 className="text-lg font-semibold mb-2">Generating Analysis Report</h3>
+                <p className="text-muted-foreground mb-4">AI is creating a comprehensive health analysis based on the extracted data...</p>
+                
+                <div className="flex justify-center">
+                  <div className="flex space-x-1">
+                    <div className="h-2 w-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="h-2 w-2 bg-red-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="h-2 w-2 bg-red-600 rounded-full animate-bounce"></div>
+                  </div>
+                </div>
+                
+                <p className="text-xs text-muted-foreground mt-4">
+                  This usually takes 20-40 seconds
+                </p>
+              </div>
             </div>
           )}
 

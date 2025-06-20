@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Calendar, Dumbbell, Loader2, User, Wand2, FileText } from 'lucide-react'
+import { Calendar, Dumbbell, Loader2, User, Wand2, FileText, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -492,11 +492,23 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
         )}
 
         {step === 'generating' && (
-          <div className="text-center space-y-4 py-8">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
-            <div>
-              <h3 className="text-lg font-medium">Generating Workout Plan</h3>
-              <p className="text-muted-foreground">Creating a personalized workout plan for {selectedClient?.name}...</p>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <Upload className="h-16 w-16 text-yellow-600 mx-auto mb-4 animate-pulse" />
+              <h3 className="text-lg font-semibold mb-2">Generating Workout Plan</h3>
+              <p className="text-muted-foreground mb-4">Creating a personalized workout plan for {selectedClient?.name}...</p>
+              
+              <div className="flex justify-center">
+                <div className="flex space-x-1">
+                  <div className="h-2 w-2 bg-yellow-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-2 w-2 bg-yellow-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-2 w-2 bg-yellow-600 rounded-full animate-bounce"></div>
+                </div>
+              </div>
+              
+              <p className="text-xs text-muted-foreground mt-4">
+                This usually takes 15-30 seconds
+              </p>
             </div>
           </div>
         )}
