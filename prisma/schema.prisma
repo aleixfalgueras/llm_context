@@ -15,13 +15,14 @@ datasource db {
 }
 
 model Chat {
-  id        String    @id @default(cuid())
-  title     String
-  userId    String
-  clientId  String    // Required client association for this chat
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  messages  Message[]
+  id           String    @id @default(cuid())
+  title        String
+  userId       String
+  clientId     String    // Required client association for this chat
+  contextFields String[] @default([]) // Array of context field names that were selected for this chat
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  messages     Message[]
 
   // Relations
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)

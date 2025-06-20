@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Activity, Upload, CheckCircle, AlertCircle, AlertTriangle, FileText, User, Calendar, Search } from 'lucide-react'
@@ -14,6 +15,7 @@ import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DateInput } from '@/components/ui/date-input'
 import { ClientCombobox } from '@/components/ui/client-combobox'
+import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 
 interface BloodTestAnalysisDialogProps {
   open: boolean
@@ -29,7 +31,8 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
     clientId: '',
     testDate: '',
     additionalInfo: '',
-    documentName: ''
+    documentName: '',
+    clientContext: defaultClientContextSelections.medical
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [extractedData, setExtractedData] = useState<any>(null)
@@ -168,6 +171,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
           testDate: extractedData.testInfo?.testDate,
           additionalInfo: formData.additionalInfo,
           extractedData,
+          clientContext: formData.clientContext,
           language: selectedClient?.documentsLanguage || 'english'
         })
       })
@@ -275,7 +279,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
 
   const handleClose = () => {
     setStep('upload')
-    setFormData({ clientId: '', testDate: '', additionalInfo: '', documentName: '' })
+    setFormData({ clientId: '', testDate: '', additionalInfo: '', documentName: '', clientContext: defaultClientContextSelections.medical })
     setSelectedFile(null)
     setExtractedData(null)
     setGeneratedReport('')
@@ -319,31 +323,142 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
                 />
               </div>
 
-              {/* Client Preview */}
+              {/* Client Context Selection */}
               {selectedClient && (
-                <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-sm space-y-1">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-blue-600" />
-                        <span className="font-medium">{selectedClient.name}</span>
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">Client Context Selection</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Choose which client information to include in the AI context for blood test analysis:
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    {selectedClient?.dateOfBirth && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="context-age"
+                          checked={formData.clientContext.age}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            clientContext: { ...prev.clientContext, age: e.target.checked }
+                          }))}
+                          label={`Age (${Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years)`}
+                        />
                       </div>
-                      {selectedClient.dateOfBirth && (
-                        <div className="text-blue-700 dark:text-blue-300">
-                          Age: {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old
-                        </div>
-                      )}
-                      {selectedClient.height && selectedClient.weight && (
-                        <div className="text-blue-700 dark:text-blue-300">
-                          {selectedClient.height}cm, {selectedClient.weight}kg
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                    )}
+                    {selectedClient?.height && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="context-height"
+                          checked={formData.clientContext.height}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            clientContext: { ...prev.clientContext, height: e.target.checked }
+                          }))}
+                          label={`Height (${selectedClient.height}cm)`}
+                        />
+                      </div>
+                    )}
+                    {selectedClient?.weight && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="context-weight"
+                          checked={formData.clientContext.weight}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            clientContext: { ...prev.clientContext, weight: e.target.checked }
+                          }))}
+                          label={`Weight (${selectedClient.weight}kg)`}
+                        />
+                      </div>
+                    )}
+                    {selectedClient?.country && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="context-country"
+                          checked={formData.clientContext.country}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            clientContext: { ...prev.clientContext, country: e.target.checked }
+                          }))}
+                          label={`Country (${selectedClient.country})`}
+                        />
+                      </div>
+                    )}
+                    {selectedClient?.goals && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="context-goals"
+                          checked={formData.clientContext.goals}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            clientContext: { ...prev.clientContext, goals: e.target.checked }
+                          }))}
+                          label="Goals"
+                        />
+                      </div>
+                    )}
+                    {selectedClient?.medicalHistory && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="context-medical"
+                          checked={formData.clientContext.medicalHistory}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            clientContext: { ...prev.clientContext, medicalHistory: e.target.checked }
+                          }))}
+                          label="Medical History"
+                        />
+                      </div>
+                    )}
+                    {selectedClient?.notes && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="context-notes"
+                          checked={formData.clientContext.notes}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            clientContext: { ...prev.clientContext, notes: e.target.checked }
+                          }))}
+                          label="General Notes"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        clientContext: defaultClientContextSelections.medical
+                      }))}
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        clientContext: {
+                          age: false,
+                          height: false,
+                          weight: false,
+                          country: false,
+                          goals: false,
+                          medicalHistory: false,
+                          notes: false
+                        }
+                      }))}
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Note: Goals are typically not included in blood test analysis to maintain medical objectivity.
+                  </p>
+                </div>
               )}
 
               {/* File Upload */}

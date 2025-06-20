@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { FileText, Loader2, User, Wand2, Calendar } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
@@ -28,7 +27,6 @@ interface MeetingFormData {
   meetingDate: string
   meetingTranscription: string
   additionalInfo: string
-  includeClientContext: boolean
   formatDocumentId: string
   documentName: string
 }
@@ -41,7 +39,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
     meetingDate: '',
     meetingTranscription: '',
     additionalInfo: '',
-    includeClientContext: true,
     formatDocumentId: '',
     documentName: ''
   })
@@ -194,7 +191,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         meetingDate: '', 
         meetingTranscription: '', 
         additionalInfo: '', 
-        includeClientContext: true, 
         formatDocumentId: '', 
         documentName: '' 
       })
@@ -220,7 +216,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
       meetingDate: '', 
       meetingTranscription: '', 
       additionalInfo: '', 
-      includeClientContext: true, 
       formatDocumentId: '', 
       documentName: '' 
     })
@@ -262,69 +257,7 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
                 required
               />
               
-              {/* Include Client Context Checkbox */}
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox
-                  id="includeClientContext"
-                  checked={formData.includeClientContext}
-                  onChange={(e) => setFormData(prev => ({ ...prev, includeClientContext: e.target.checked }))}
-                />
-                <Label htmlFor="includeClientContext" className="text-sm">
-                  Use client context information in analysis
-                </Label>
-              </div>
-              <p className="text-xs text-muted-foreground ml-6">
-                When enabled, the AI will consider the client's profile, goals, and medical history when generating the report.
-              </p>
             </div>
-
-            {/* Selected Client Preview */}
-            {selectedClient && (
-              <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">Name:</span> {selectedClient.name}
-                    </div>
-                    {selectedClient.dateOfBirth && (
-                      <div>
-                        <span className="font-medium">Age:</span> {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
-                      </div>
-                    )}
-                    {selectedClient.height && (
-                      <div>
-                        <span className="font-medium">Height:</span> {selectedClient.height}cm
-                      </div>
-                    )}
-                    {selectedClient.weight && (
-                      <div>
-                        <span className="font-medium">Weight:</span> {selectedClient.weight}kg
-                      </div>
-                    )}
-                    {selectedClient.country && (
-                      <div>
-                        <span className="font-medium">Country:</span> {selectedClient.country}
-                      </div>
-                    )}
-                  </div>
-                  {selectedClient.goals && (
-                    <div className="mt-3">
-                      <span className="font-medium text-sm">Goals:</span>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.goals}</p>
-                    </div>
-                  )}
-                  {selectedClient.medicalHistory && (
-                    <div className="mt-3">
-                      <span className="font-medium text-sm">Medical History:</span>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.medicalHistory}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
             {/* Meeting Date */}
             <div className="space-y-2">

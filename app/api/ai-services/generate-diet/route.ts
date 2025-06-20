@@ -15,7 +15,25 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, startDate, endDate, dailyCalories, proteinTarget, additionalInfo, includeClientGoals = true, formatDocumentId, language = 'english' } = await req.json()
+    const { 
+      clientId, 
+      startDate, 
+      endDate, 
+      dailyCalories, 
+      proteinTarget, 
+      additionalInfo, 
+      clientContext = {
+        age: true,
+        height: true, 
+        weight: true,
+        country: true,
+        goals: true,
+        medicalHistory: true,
+        notes: true
+      },
+      formatDocumentId, 
+      language = 'english' 
+    } = await req.json()
 
     if (!clientId || !startDate || !endDate) {
       return new Response('Missing required fields', { status: 400 })
@@ -59,23 +77,49 @@ export async function POST(req: Request) {
     // Get language instruction
     const targetLanguage = getLanguageInstruction(language)
 
-    // Build the client context prompt (same as chat system)
+    // Build the client context prompt with selective fields
+    let clientProfileSection = 'CLIENT PROFILE:'
+    
+    // Calculate age if date of birth is available and selected
+    const clientAge = client.dateOfBirth && clientContext.age
+      ? Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))
+      : null
+    
+    if (clientAge) {
+      clientProfileSection += `\nAge: ${clientAge} years old`
+    }
+    
+    if (client.height && clientContext.height) {
+      clientProfileSection += `\nHeight: ${client.height}cm`
+    }
+    
+    if (client.weight && clientContext.weight) {
+      clientProfileSection += `\nWeight: ${client.weight}kg`
+    }
+    
+    if (client.country && clientContext.country) {
+      clientProfileSection += `\nCountry: ${client.country}`
+    }
+
+    // Build optional sections based on selection
+    let goalsSection = ''
+    if (clientContext.goals && client.goals) {
+      goalsSection = `\n\nGOALS:\n${client.goals}`
+    }
+
+    let medicalSection = ''
+    if (clientContext.medicalHistory && client.medicalHistory) {
+      medicalSection = `\n\nMEDICAL HISTORY:\n${client.medicalHistory}`
+    }
+
+    let notesSection = ''
+    if (clientContext.notes && client.notes) {
+      notesSection = `\n\nADDITIONAL NOTES:\n${client.notes}`
+    }
+
     const clientContextPrompt = `You are a professional AI assistant helping a coach/consultant with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses.
 
-CLIENT PROFILE:${client.dateOfBirth ? `
-Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
-Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${client.country ? `
-Country: ${client.country}` : ''}${includeClientGoals && client.goals ? `
-
-GOALS:
-${client.goals}` : ''}${client.medicalHistory ? `
-
-MEDICAL HISTORY:
-${client.medicalHistory}` : ''}${client.notes ? `
-
-ADDITIONAL NOTES:
-${client.notes}` : ''}
+${clientProfileSection}${goalsSection}${medicalSection}${notesSection}
 
 DIET GENERATION REQUEST:
 - Start Date: ${startDate}
@@ -107,7 +151,7 @@ INSTRUCTIONS:
 - Follow the format, structure, and presentation style from the provided format example document` : ''}
 - Structure the diet plan in a clear, professional format
 - Include meal plans, portion recommendations, and nutritional guidance
-- Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances when making recommendations${dailyCalories || proteinTarget ? `
+- Consider their${clientContext.goals && client.goals ? ' goals,' : ''} medical history, and personal circumstances when making recommendations${dailyCalories || proteinTarget ? `
 - Adhere to the specified nutritional targets above` : ''}${additionalInfo ? `
 - Pay special attention to the additional information provided above` : ''}
 - Provide the response in markdown format for easy reading

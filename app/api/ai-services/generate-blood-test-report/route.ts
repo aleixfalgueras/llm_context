@@ -15,7 +15,22 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, testDate, additionalInfo, extractedData, language = 'english' } = await req.json()
+    const { 
+      clientId, 
+      testDate, 
+      additionalInfo, 
+      extractedData, 
+      clientContext = {
+        age: true,
+        height: true,
+        weight: true,
+        country: true,
+        goals: false, // Typically false for medical objectivity
+        medicalHistory: true,
+        notes: true
+      },
+      language = 'english' 
+    } = await req.json()
 
     if (!clientId || !extractedData) {
       return new Response('Missing required fields', { status: 400 })
@@ -39,24 +54,49 @@ export async function POST(req: Request) {
     // Get language instruction
     const targetLanguage = getLanguageInstruction(language)
 
-    // Build client context similar to other AI services
-    const clientAge = client.dateOfBirth 
+    // Build the client context prompt with selective fields
+    let clientProfileSection = 'CLIENT PROFILE:'
+    
+    // Calculate age if date of birth is available and selected
+    const clientAge = client.dateOfBirth && clientContext.age
       ? Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))
       : null
+    
+    if (clientAge) {
+      clientProfileSection += `\nAge: ${clientAge} years old`
+    }
+    
+    if (client.height && clientContext.height) {
+      clientProfileSection += `\nHeight: ${client.height}cm`
+    }
+    
+    if (client.weight && clientContext.weight) {
+      clientProfileSection += `\nWeight: ${client.weight}kg`
+    }
+    
+    if (client.country && clientContext.country) {
+      clientProfileSection += `\nCountry: ${client.country}`
+    }
+
+    // Build optional sections based on selection
+    let goalsSection = ''
+    if (clientContext.goals && client.goals) {
+      goalsSection = `\n\nGOALS:\n${client.goals}`
+    }
+
+    let medicalSection = ''
+    if (clientContext.medicalHistory && client.medicalHistory) {
+      medicalSection = `\n\nMEDICAL HISTORY:\n${client.medicalHistory}`
+    }
+
+    let notesSection = ''
+    if (clientContext.notes && client.notes) {
+      notesSection = `\n\nADDITIONAL NOTES:\n${client.notes}`
+    }
 
     const clientContextPrompt = `You are a professional health analyst helping a coach/consultant analyze their client's blood test results. You have access to the following client information and extracted blood test data.
 
-CLIENT PROFILE:${clientAge ? `
-Age: ${clientAge} years old` : ''}${client.height ? `
-Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${client.country ? `
-Country: ${client.country}` : ''}${client.medicalHistory ? `
-
-MEDICAL HISTORY:
-${client.medicalHistory}` : ''}${client.notes ? `
-
-ADDITIONAL NOTES:
-${client.notes}` : ''}
+${clientProfileSection}${goalsSection}${medicalSection}${notesSection}
 
 BLOOD TEST INFORMATION:
 - Test Date: ${finalTestDate}${extractedData.testInfo?.labName ? `
@@ -93,7 +133,7 @@ IMPORTANT GUIDELINES:
 - DO NOT suggest specific medications
 - Always recommend consulting healthcare professionals for medical concerns
 - Make recommendations appropriate for a fitness/wellness coaching context
-- Base recommendations purely on health optimization, not specific fitness goals
+- Base recommendations purely on health optimization${clientContext.goals && client.goals ? ', considering their fitness goals' : ', not specific fitness goals'}
 - IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, analysis, and recommendations
 
 Provide the response in markdown format for easy reading and professional presentation.`

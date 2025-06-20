@@ -16,6 +16,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { getClientDocuments } from '@/lib/document-actions'
 import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
+import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 
 interface WorkoutGeneratorDialogProps {
   open: boolean
@@ -34,9 +35,9 @@ interface WorkoutFormData {
   sessionDuration: string
   equipment: string
   additionalInfo: string
-  includeClientGoals: boolean
   formatDocumentId: string
   documentName: string
+  clientContext: ClientContextSelection
 }
 
 export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocumentCreated }: WorkoutGeneratorDialogProps) {
@@ -52,9 +53,9 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
     sessionDuration: '',
     equipment: '',
     additionalInfo: '',
-    includeClientGoals: true,
     formatDocumentId: '',
-    documentName: ''
+    documentName: '',
+    clientContext: defaultClientContextSelections.fitness
   })
   const [generatedWorkout, setGeneratedWorkout] = useState('')
   const [editedWorkout, setEditedWorkout] = useState('')
@@ -120,7 +121,11 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ...formData, language: selectedClient?.documentsLanguage || 'english' })
+        body: JSON.stringify({ 
+          ...formData, 
+          language: selectedClient?.documentsLanguage || 'english',
+          includeClientGoals: formData.clientContext.goals 
+        })
       })
 
       if (!response.ok) {
@@ -220,9 +225,9 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
         sessionDuration: '', 
         equipment: '', 
         additionalInfo: '', 
-        includeClientGoals: true,
         formatDocumentId: '',
-        documentName: ''
+        documentName: '',
+        clientContext: defaultClientContextSelections.fitness
       })
       setGeneratedWorkout('')
       setEditedWorkout('')
@@ -251,9 +256,9 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
       sessionDuration: '', 
       equipment: '', 
       additionalInfo: '', 
-      includeClientGoals: true,
       formatDocumentId: '',
-      documentName: ''
+      documentName: '',
+      clientContext: defaultClientContextSelections.fitness
     })
     setGeneratedWorkout('')
     setEditedWorkout('')
@@ -294,46 +299,139 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
               />
             </div>
 
-            {/* Client Preview */}
+            {/* Client Context Selection */}
             {selectedClient && (
-              <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-blue-900 dark:text-blue-100">Selected Client Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">Name:</span> {selectedClient.name}
-                    </div>
-                    {selectedClient.dateOfBirth && (
-                      <div>
-                        <span className="font-medium">Age:</span> {Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
-                      </div>
-                    )}
-                    {selectedClient.height && (
-                      <div>
-                        <span className="font-medium">Height:</span> {selectedClient.height}cm
-                      </div>
-                    )}
-                    {selectedClient.weight && (
-                      <div>
-                        <span className="font-medium">Weight:</span> {selectedClient.weight}kg
-                      </div>
-                    )}
-                    {selectedClient.email && (
-                      <div>
-                        <span className="font-medium">Email:</span> {selectedClient.email}
-                      </div>
-                    )}
-                  </div>
-                  {selectedClient.goals && (
-                    <div className="mt-3">
-                      <span className="font-medium text-sm">Goals:</span>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{selectedClient.goals}</p>
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Client Context Selection</Label>
+                <p className="text-sm text-muted-foreground">
+                  Choose which client information to include in the AI context for workout generation:
+                </p>
+                <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  {selectedClient?.dateOfBirth && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="context-age"
+                        checked={formData.clientContext.age}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          clientContext: { ...prev.clientContext, age: e.target.checked }
+                        }))}
+                        label={`Age (${Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years)`}
+                      />
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                  {selectedClient?.height && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="context-height"
+                        checked={formData.clientContext.height}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          clientContext: { ...prev.clientContext, height: e.target.checked }
+                        }))}
+                        label={`Height (${selectedClient.height}cm)`}
+                      />
+                    </div>
+                  )}
+                  {selectedClient?.weight && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="context-weight"
+                        checked={formData.clientContext.weight}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          clientContext: { ...prev.clientContext, weight: e.target.checked }
+                        }))}
+                        label={`Weight (${selectedClient.weight}kg)`}
+                      />
+                    </div>
+                  )}
+                  {selectedClient?.country && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="context-country"
+                        checked={formData.clientContext.country}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          clientContext: { ...prev.clientContext, country: e.target.checked }
+                        }))}
+                        label={`Country (${selectedClient.country})`}
+                      />
+                    </div>
+                  )}
+                  {selectedClient?.goals && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="context-goals"
+                        checked={formData.clientContext.goals}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          clientContext: { ...prev.clientContext, goals: e.target.checked }
+                        }))}
+                        label="Goals"
+                      />
+                    </div>
+                  )}
+                  {selectedClient?.medicalHistory && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="context-medical"
+                        checked={formData.clientContext.medicalHistory}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          clientContext: { ...prev.clientContext, medicalHistory: e.target.checked }
+                        }))}
+                        label="Medical History"
+                      />
+                    </div>
+                  )}
+                  {selectedClient?.notes && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="context-notes"
+                        checked={formData.clientContext.notes}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          clientContext: { ...prev.clientContext, notes: e.target.checked }
+                        }))}
+                        label="General Notes"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFormData(prev => ({
+                      ...prev,
+                      clientContext: defaultClientContextSelections.fitness
+                    }))}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFormData(prev => ({
+                      ...prev,
+                      clientContext: {
+                        age: false,
+                        height: false,
+                        weight: false,
+                        country: false,
+                        goals: false,
+                        medicalHistory: false,
+                        notes: false
+                      }
+                    }))}
+                  >
+                    Deselect All
+                  </Button>
+                </div>
+              </div>
             )}
 
             {/* Date Range */}
@@ -453,7 +551,7 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
             {/* Format Document Selection */}
             {formData.clientId && (
               <div className="space-y-2">
-                <Label htmlFor="formatDocument">Format Example Document (optional)</Label>
+                <Label htmlFor="formatDocument">Format Example Document</Label>
                 <DocumentCombobox
                   documents={clientDocuments}
                   value={formData.formatDocumentId}
@@ -469,19 +567,6 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
                 </p>
               </div>
             )}
-
-            {/* Include Client Goals */}
-            <div className="space-y-2">
-              <Checkbox
-                id="includeClientGoals"
-                checked={formData.includeClientGoals}
-                onChange={(e) => setFormData(prev => ({ ...prev, includeClientGoals: e.target.checked }))}
-                label="Include client's goals in workout plan generation"
-              />
-              <p className="text-xs text-muted-foreground ml-6">
-                Uncheck this if you want to generate a workout without being influenced by the client's existing goals.
-              </p>
-            </div>
 
             {/* Date Range Summary */}
             {formData.startDate && formData.endDate && (
