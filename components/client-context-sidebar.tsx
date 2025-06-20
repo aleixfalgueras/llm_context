@@ -116,7 +116,7 @@ export function ClientContextSidebar({
       if (onChatCreated) {
         onChatCreated(newChatId)
       }
-      router.push(`/chat/${newChatId}`)
+      router.push(`/assistant/chat/${newChatId}`)
     } catch (error) {
       console.error('Failed to create chat:', error)
     } finally {
@@ -130,6 +130,18 @@ export function ClientContextSidebar({
       className="border-l bg-background flex h-full relative"
       style={{ width: `${sidebarWidth}px` }}
     >
+      {/* Loading Overlay */}
+      {isCreatingChat && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="text-center">
+              <p className="font-medium text-gray-900 dark:text-gray-100">Creating Chat...</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Setting up your conversation</p>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Resize Handle */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 transition-colors z-10 group"

@@ -5,19 +5,23 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 ## Features
 
 ### Core Functionality
-- **AI Conversations**: Natural conversations with OpenAI's GPT-4o-mini with client context
+- **AI Conversations**: Natural conversations with OpenAI's GPT-4o-mini with granular client context selection
 - **Client Management**: Create, view, edit, and delete client profiles
 - **Medical History PDF Extraction**: AI-powered comprehensive extraction from medical documents with privacy protection
-- **Personalized Responses**: AI automatically uses client information for tailored advice
-- **Chat Management**: Create, view, edit, and delete chat conversations associated with clients
+- **Granular Context Control**: Select specific client information fields (age, height, weight, country, goals, medical history, notes) for each conversation
+- **Context Field Tracking**: View exactly which client fields were used as context for each chat
+- **Chat Management**: Create, view, edit, and delete chat conversations with client association
 - **Real-time Messaging**: Send and receive messages in real-time
-- **Message History**: Persistent chat history stored in database
-- **Context Optimization**: Efficient token usage with smart context injection
-- **AI Services**: Generate personalized documents (diet plans, workout plans, blood test analysis, meeting reports) using client profiles
+- **Message History**: Persistent chat history stored in database with context metadata
+- **Context Optimization**: Efficient token usage with smart context injection and field selection
+- **AI Services**: Generate personalized documents with granular client context control
 
 ### User Experience  
 - **ChatGPT-like Interface**: Clean, minimalistic design similar to ChatGPT
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Loading States**: Beautiful loading overlays during chat creation with progress feedback
+- **Context Selection UI**: Intuitive checkboxes for selecting client context fields with dynamic labels
+- **Context Visualization**: Green badges showing selected context fields for each chat
 - **Optimistic Updates**: Instant UI feedback for better user experience
 - **Authentication**: Secure user authentication with Clerk
 
@@ -59,7 +63,9 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   │       ├── generate-blood-test-report/ # Blood test analysis
 │   │       └── generate-meeting-report/  # Meeting report generation
 │   ├── ai-services/       # AI Services page
-│   ├── chat/[id]/         # Individual chat pages
+│   ├── assistant/         # AI Assistant functionality
+│   │   ├── page.tsx      # Main assistant page with client selection
+│   │   └── chat/[id]/    # Individual chat conversations
 │   ├── clients/           # Client management pages
 │   ├── sign-in/           # Authentication pages
 │   ├── sign-up/
@@ -67,13 +73,14 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   └── page.tsx          # Home page
 ├── components/
 │   ├── ui/               # shadcn/ui components
-│   ├── chat-sidebar.tsx  # Chat history sidebar
+│   ├── chat-sidebar.tsx  # Chat history sidebar with new chat button
 │   ├── chat-messages.tsx # Message display
 │   ├── chat-input.tsx    # Message input form
+│   ├── client-context-sidebar.tsx # Client selection and context configuration
 │   ├── ai-services-client.tsx # AI Services page
-│   ├── diet-generator-dialog.tsx # Diet generation dialog
-│   ├── workout-generator-dialog.tsx # Workout generation dialog
-│   ├── blood-test-analysis-dialog.tsx # Blood test analysis dialog
+│   ├── diet-generator-dialog.tsx # Diet generation dialog with context selection
+│   ├── workout-generator-dialog.tsx # Workout generation dialog with context selection
+│   ├── blood-test-analysis-dialog.tsx # Blood test analysis dialog with context selection
 │   ├── meeting-report-dialog.tsx # Meeting report generation dialog
 │   └── clients-page-client.tsx # Client management
 ├── hooks/
@@ -88,6 +95,8 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   └── utils.ts          # Utility functions
 ├── prisma/
 │   └── schema.prisma     # Database schema
+├── types/
+│   └── client-context.ts # Shared types for client context selection
 └── middleware.ts         # Authentication middleware
 ```
 
@@ -97,6 +106,8 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - `id`: Unique identifier
 - `title`: Chat title (editable)
 - `userId`: Owner's user ID
+- `clientId`: Associated client ID (required)
+- `contextFields`: Array of selected context field names (e.g., ["age", "height", "goals"])
 - `createdAt/updatedAt`: Timestamps
 - `messages`: Related messages
 
@@ -135,12 +146,19 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 ## AI Client Context System
 
 ### Overview
-Each chat is associated with a specific client, and their information is automatically provided to the AI as context for personalized responses. The client context is intelligently managed to optimize token usage and conversation flow.
+Each chat is associated with a specific client with **granular context field selection**. Users can choose exactly which client information fields to include as context for each conversation. This provides complete control over personalization while optimizing token usage and maintaining privacy.
+
+### Granular Context Selection
+- **Field-Level Control**: Select specific client fields (age, height, weight, country, goals, medical history, notes)
+- **Dynamic UI**: Checkboxes only appear for fields with actual client data
+- **Context Visualization**: Selected fields shown as green badges with field names
+- **Persistent Tracking**: Context selections stored in database and displayed for each chat
 
 ### Context Injection Strategy
-- **First Message Only**: Client context is added as a system message only on the first user message
+- **First Message Only**: Selected client context is added as a system message only on the first user message
 - **Memory-Based**: Subsequent messages rely on conversation memory, avoiding repeated context
-- **Token Efficient**: Prevents duplicate information, reducing API costs and improving response times
+- **Token Efficient**: Only selected fields included, reducing API costs and improving response times
+- **Context Transparency**: Users can see exactly which fields were used for each conversation
 
 ### System Prompt Template
 
@@ -248,16 +266,16 @@ AI Services provide automated document generation using client profiles. The fea
 
 #### 1. Diet Plan Generation
 Creates personalized nutrition plans based on:
-- **Client Profile**: Age, height, weight, medical history, notes
-- **Goals Control**: Optional toggle to include/exclude client goals
+- **Granular Context Selection**: Choose specific client fields (age, height, weight, country, goals, medical history, notes)
+- **Dynamic UI**: Checkboxes only show for fields with actual client data
 - **Date Range**: Specific start and end dates for the diet plan
 - **Nutritional Targets**: Optional calorie and protein targets
 - **Additional Context**: Optional extra information for customization
 
 #### 2. Workout Plan Generation
 Creates custom exercise routines based on:
-- **Client Profile**: Age, fitness level, health conditions
-- **Goals Control**: Optional toggle to include/exclude client goals
+- **Granular Context Selection**: Choose specific client fields for personalization
+- **Dynamic Field Display**: Only available fields shown with actual values
 - **Date Range**: Specific start and end dates for the workout plan
 - **Workout Specifications**: Type, frequency, duration, equipment
 - **Additional Context**: Injuries, preferences, special requirements
@@ -268,11 +286,12 @@ Analyzes medical blood test reports with:
 - **AI Extraction**: Automatic parameter extraction from PDF
 - **Parameter Review**: Edit and validate all extracted data
 - **Anomalous Detection**: Automatic highlighting of concerning values
-- **Health Analysis**: Comprehensive analysis excluding goals for medical objectivity
+- **Context Selection**: Choose client fields for analysis (goals excluded by default for medical objectivity)
 - **Multi-language Support**: Works with Spanish and English reports
 
 ### Key Features Across All Services:
-- **Client Context Integration**: Uses the same context system as AI Assistant
+- **Granular Context Control**: Same field-level selection system as AI Assistant
+- **Context Presets**: Default selections based on service type (fitness, medical, general)
 - **Live Editor**: Edit generated content with real-time markdown preview
 - **Supabase Storage**: Documents saved to organized folder structure
 - **Database Tracking**: All documents tracked with metadata
@@ -287,9 +306,10 @@ Analyzes medical blood test reports with:
   - Blood Test: `{Client Name} Blood Test Analysis {test_date}.md`
 - **Security**: Private storage with user-specific access
 
-### Goals Toggle Strategy:
-- **Diet & Workout Plans**: Optional goals inclusion (default: enabled)
-- **Blood Test Analysis**: Goals always excluded for medical objectivity
+### Context Selection Strategy:
+- **Diet & Workout Plans**: Fitness preset (all fields selected by default)
+- **Blood Test Analysis**: Medical preset (goals excluded by default for objectivity)
+- **Meeting Reports**: No client context (focused on objective documentation)
 
 For detailed implementation information, see [AI_SERVICES_README.md](AI_SERVICES_README.md).
 
@@ -496,18 +516,34 @@ npm test -- __tests__/simple.test.ts
 
 ## Usage
 
+### Getting Started
 1. **Sign Up/Sign In**: Create an account or sign in with Clerk
 2. **Create Clients**: Go to `/clients` to add client profiles with their information
    - **Medical History PDF Extraction**: Upload medical PDFs for AI-powered comprehensive extraction
    - **Privacy Protection**: All personal information automatically anonymized during extraction
-3. **Select Client**: Click "Select Client" in the sidebar to choose a client for context
-4. **Create Chat**: Click "New Chat" (only enabled after client selection)
-5. **Send Messages**: Type your message and press Enter or click Send
-6. **Personalized Responses**: AI automatically uses client context for tailored advice
-7. **Manage Chats**: Edit titles or delete chats using the dropdown menu
-8. **View History**: Click on any chat in the sidebar to view conversation and associated client
-9. **Client Context**: View client information in the right sidebar during chats
-10. **AI Services**: Use `/ai-services` to generate personalized documents for clients
+
+### AI Assistant Workflow
+3. **Navigate to Assistant**: Go to `/assistant` for the main AI chat interface
+4. **Select Client**: Choose a client from the dropdown menu
+5. **Configure Context**: Select which client information fields to include:
+   - Age, Height, Weight, Country, Goals, Medical History, Notes
+   - Only fields with actual data are shown
+   - Dynamic labels show actual values (e.g., "Age (25 years)", "Height (175cm)")
+6. **Create Chat**: Click "New Chat" with loading feedback during creation
+7. **Send Messages**: Type your message and press Enter or click Send
+8. **View Context**: See selected context fields displayed as green badges in sidebar
+9. **Chat Navigation**: Use "New Chat" button in chat sidebar or return to `/assistant`
+
+### Chat Management
+10. **Manage Chats**: Edit titles or delete chats using the dropdown menu
+11. **View History**: Click on any chat in the sidebar to view conversation
+12. **Context Transparency**: See exactly which client fields were used for each chat
+13. **Client Information**: View essential client info in the right sidebar during chats
+
+### AI Services
+14. **Generate Documents**: Use `/ai-services` to create personalized documents
+15. **Context Selection**: Same granular field selection available for all AI services
+16. **Service-Specific Presets**: Appropriate defaults based on document type
 
 ## Architecture Decisions
 
