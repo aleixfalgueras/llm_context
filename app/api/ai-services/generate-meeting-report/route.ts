@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
+import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, meetingTranscription, meetingDate, additionalInfo, includeClientContext = true } = await req.json()
+    const { clientId, meetingTranscription, meetingDate, additionalInfo, includeClientContext = true, language = 'english' } = await req.json()
 
     if (!clientId || !meetingTranscription || !meetingDate) {
       return new Response('Missing required fields', { status: 400 })
@@ -32,7 +33,8 @@ export async function POST(req: Request) {
       return new Response('Client not found', { status: 404 })
     }
 
-
+    // Get language instruction
+    const targetLanguage = getLanguageInstruction(language)
 
     // Build the client context prompt (same as chat system)
     const clientContextPrompt = `You are a professional AI assistant helping a coach/consultant generate a comprehensive meeting report with actionable steps. You have access to the following client information and should use it to provide personalized, relevant analysis and recommendations.
@@ -60,6 +62,8 @@ ${meetingTranscription}${additionalInfo ? `
 ADDITIONAL CONTEXT:
 ${additionalInfo}` : ''}
 
+${getLanguageRequirementSection(targetLanguage, 'meeting')}
+
 INSTRUCTIONS:
 - Create a comprehensive meeting report based on the transcription provided
 - Use the client's profile information to provide personalized context and insights
@@ -77,7 +81,8 @@ INSTRUCTIONS:
 - DO NOT include any disclaimers or OpenAI-related content
 - Provide ONLY the meeting report content in a delivery-ready format
 - Make the action items specific, measurable, and achievable
-- Focus on practical next steps that can be implemented immediately`
+- Focus on practical next steps that can be implemented immediately
+- IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, summaries, and action items`
 
     // Generate the meeting report
     const response = await openai.chat.completions.create({
@@ -89,7 +94,7 @@ INSTRUCTIONS:
         },
         {
           role: 'user',
-          content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client.`
+          content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client. Generate the complete response in ${targetLanguage}.`
         }
       ],
       temperature: 0.7,

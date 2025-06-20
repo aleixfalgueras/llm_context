@@ -167,7 +167,8 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
           clientId: formData.clientId,
           testDate: extractedData.testInfo?.testDate,
           additionalInfo: formData.additionalInfo,
-          extractedData
+          extractedData,
+          language: selectedClient?.documentsLanguage || 'english'
         })
       })
 

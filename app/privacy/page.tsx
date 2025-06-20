@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
                   <h4 className="font-semibold mb-2">Personal Information</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>Name, email address, and phone number</li>
-                    <li>Health and fitness goals</li>
+                    <li>Goals</li>
                     <li>Medical history and health-related information</li>
                     <li>Physical measurements (height, weight, age)</li>
                     <li>Personal notes and preferences</li>

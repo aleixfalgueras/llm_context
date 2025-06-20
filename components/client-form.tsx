@@ -6,17 +6,21 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
 import { useToast } from '@/hooks/use-toast'
 import { capitalizeName } from '@/lib/utils'
+import { Globe, HelpCircle } from 'lucide-react'
 
 interface ClientFormProps {
   client?: any
   onSuccess?: () => void
   onCancel?: () => void
+  hideTitle?: boolean
 }
 
-export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
+export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFormProps) {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<ClientData>({
@@ -29,8 +33,23 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
     country: client?.country || '',
     goals: client?.goals || '',
     medicalHistory: client?.medicalHistory || '',
-    notes: client?.notes || ''
+    notes: client?.notes || '',
+    documentsLanguage: client?.documentsLanguage || 'english'
   })
+
+  // Available languages for document generation
+  const languages = [
+    { value: 'english', label: 'English', flag: '🇺🇸' },
+    { value: 'spanish', label: 'Spanish (Español)', flag: '🇪🇸' },
+    { value: 'french', label: 'French (Français)', flag: '🇫🇷' },
+    { value: 'german', label: 'German (Deutsch)', flag: '🇩🇪' },
+    { value: 'italian', label: 'Italian (Italiano)', flag: '🇮🇹' },
+    { value: 'portuguese', label: 'Portuguese (Português)', flag: '🇵🇹' },
+    { value: 'dutch', label: 'Dutch (Nederlands)', flag: '🇳🇱' },
+    { value: 'polish', label: 'Polish (Polski)', flag: '🇵🇱' },
+    { value: 'russian', label: 'Russian (Русский)', flag: '🇷🇺' },
+    { value: 'catalan', label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
+  ]
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,14 +99,23 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
     }))
   }
 
+  const handleSelectChange = (field: keyof ClientData) => (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>
-          {client?.id ? 'Edit Client' : 'Add New Client'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      {!hideTitle && (
+        <CardHeader>
+          <CardTitle>
+            {client?.id ? 'Edit Client' : 'Add New Client'}
+          </CardTitle>
+        </CardHeader>
+      )}
+      <CardContent className={hideTitle ? "mt-4" : ""}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -157,7 +185,9 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
+              <div className="flex items-center h-5">
+                <Label htmlFor="country">Country</Label>
+              </div>
               <Input
                 id="country"
                 value={formData.country}
@@ -165,15 +195,53 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
                 placeholder="e.g., United States, Canada, UK"
               />
             </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 h-5">
+                <Label htmlFor="documentsLanguage" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Documents Language
+                </Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">
+                      This language will be used when generating documents (diet plans, workout plans, reports) 
+                      in the AI Services page for this client.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Select 
+                value={formData.documentsLanguage} 
+                onValueChange={handleSelectChange('documentsLanguage')}
+              >
+                <SelectTrigger id="documentsLanguage">
+                  <SelectValue placeholder="Select language for generated documents" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      <span className="flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        <span>{lang.label}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="goals">Health & Fitness Goals</Label>
+            <Label htmlFor="goals">Goals</Label>
             <Textarea
               id="goals"
               value={formData.goals}
               onChange={handleChange('goals')}
-              placeholder="Describe the client's health and fitness goals..."
+              placeholder="Describe the client's goals..."
               rows={3}
             />
           </div>
@@ -204,7 +272,7 @@ export function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1"
+              className={`flex-1 ${client?.id ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
             >
               {isLoading ? 'Saving...' : (client?.id ? 'Update Client' : 'Create Client')}
             </Button>

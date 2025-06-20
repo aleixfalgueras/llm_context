@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
+import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, testDate, additionalInfo, extractedData } = await req.json()
+    const { clientId, testDate, additionalInfo, extractedData, language = 'english' } = await req.json()
 
     if (!clientId || !extractedData) {
       return new Response('Missing required fields', { status: 400 })
@@ -34,6 +35,9 @@ export async function POST(req: Request) {
     if (!client) {
       return new Response('Client not found', { status: 404 })
     }
+
+    // Get language instruction
+    const targetLanguage = getLanguageInstruction(language)
 
     // Build client context similar to other AI services
     const clientAge = client.dateOfBirth 
@@ -62,6 +66,8 @@ BLOOD TEST INFORMATION:
 EXTRACTED BLOOD TEST PARAMETERS:
 ${JSON.stringify(extractedData.parameters, null, 2)}
 
+${getLanguageRequirementSection(targetLanguage, 'blood-test')}
+
 INSTRUCTIONS:
 Create a comprehensive blood test analysis report that includes:
 
@@ -88,6 +94,7 @@ IMPORTANT GUIDELINES:
 - Always recommend consulting healthcare professionals for medical concerns
 - Make recommendations appropriate for a fitness/wellness coaching context
 - Base recommendations purely on health optimization, not specific fitness goals
+- IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, analysis, and recommendations
 
 Provide the response in markdown format for easy reading and professional presentation.`
 
