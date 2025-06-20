@@ -32,9 +32,10 @@ interface ClientDocumentsProps {
   clientEmail?: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  documentToHighlight?: string | null
 }
 
-export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpenChange }: ClientDocumentsProps) {
+export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpenChange, documentToHighlight }: ClientDocumentsProps) {
   const { toast } = useToast()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(false)
@@ -55,6 +56,16 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       loadDocuments()
     }
   }, [open, clientId])
+
+  // Auto-open highlighted document
+  useEffect(() => {
+    if (documentToHighlight && documents.length > 0) {
+      const documentToOpen = documents.find(doc => doc.id === documentToHighlight)
+      if (documentToOpen) {
+        handleViewDocument(documentToOpen)
+      }
+    }
+  }, [documentToHighlight, documents])
 
   const loadDocuments = async () => {
     setLoading(true)

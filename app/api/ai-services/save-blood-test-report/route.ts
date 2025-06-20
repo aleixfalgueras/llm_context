@@ -29,7 +29,8 @@ export async function POST(req: Request) {
     })
 
     return Response.json({
-      success: true,
+      ...result,
+      documentId: result.document.id,
       document: {
         id: result.document.id,
         name: result.document.name,

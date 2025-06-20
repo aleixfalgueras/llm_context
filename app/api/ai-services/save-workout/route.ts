@@ -25,7 +25,10 @@ export async function POST(req: Request) {
       endDate
     })
 
-    return Response.json(result)
+    return Response.json({
+      ...result,
+      documentId: result.document.id
+    })
   } catch (error) {
     console.error('Error saving workout:', error)
     return new Response(
