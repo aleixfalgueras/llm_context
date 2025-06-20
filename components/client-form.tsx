@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
 import { useToast } from '@/hooks/use-toast'
 import { capitalizeName } from '@/lib/utils'
-import { Globe, HelpCircle, Upload, FileText, CheckCircle, Loader2 } from 'lucide-react'
+import { Globe, HelpCircle, Upload, FileText, CheckCircle, Loader2, Shield } from 'lucide-react'
 
 interface ClientFormProps {
   client?: any
@@ -235,40 +235,56 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
         </CardHeader>
       )}
       <CardContent className={hideTitle ? "mt-4" : ""}>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Personal Information Section */}
+          <div className="space-y-4">
+            <div className="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 dark:bg-blue-950/30 rounded-r-md">
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Personal Information
+              </h3>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
+                This information is never shared with anyone and is kept strictly confidential.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-25 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={handleChange('name')}
+                  required
+                  placeholder="Client's full name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange('email')}
+                  placeholder="client@example.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={handleChange('phone')}
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Other Client Information Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={handleChange('name')}
-                required
-                placeholder="Client's full name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange('email')}
-                placeholder="client@example.com"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={handleChange('phone')}
-                placeholder="+1 (555) 123-4567"
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="dateOfBirth">Date of Birth</Label>
               <Input
@@ -430,7 +446,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
             <div className="text-xs text-muted-foreground space-y-1 mb-2">
               <p className="flex items-center gap-1">
                 <FileText className="h-3 w-3" />
-                <strong>Comprehensive PDF Extraction:</strong> AI extracts detailed medical history from PDF documents (up to 40 pages, 50MB max)
+                <strong>PDF Extraction:</strong> AI extracts detailed medical history from PDF documents (up to 40 pages, 50MB max)
               </p>
               <p className="ml-4">
                 • Captures diagnoses, medications, lab results, imaging findings, and assessments
