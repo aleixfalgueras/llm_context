@@ -19,9 +19,10 @@ interface BloodTestAnalysisDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   clients: any[]
+  onDocumentCreated?: (clientId: string, documentId: string) => void
 }
 
-export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTestAnalysisDialogProps) {
+export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumentCreated }: BloodTestAnalysisDialogProps) {
   const { toast } = useToast()
   const [step, setStep] = useState<'upload' | 'extracting' | 'reviewing' | 'generating' | 'editing'>('upload')
   const [formData, setFormData] = useState({
@@ -233,11 +234,29 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
 
       const data = await response.json()
       
-      toast({
-        title: 'Report Saved 🧪',
-        description: `Blood test analysis has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
-        duration: 8000,
-      })
+      if (onDocumentCreated && data.documentId) {
+        toast({
+          title: 'Report Saved 🧪',
+          description: (
+            <div>
+              <p>Blood test analysis has been saved successfully.</p>
+              <button 
+                onClick={() => onDocumentCreated(formData.clientId, data.documentId)}
+                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+              >
+                📄 View Document
+              </button>
+            </div>
+          ),
+          duration: 10000,
+        })
+      } else {
+        toast({
+          title: 'Report Saved 🧪',
+          description: `Blood test analysis has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+          duration: 8000,
+        })
+      }
 
       // Reset and close
       handleClose()

@@ -21,6 +21,7 @@ interface WorkoutGeneratorDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   clients: any[]
+  onDocumentCreated?: (clientId: string, documentId: string) => void
 }
 
 interface WorkoutFormData {
@@ -38,7 +39,7 @@ interface WorkoutFormData {
   documentName: string
 }
 
-export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutGeneratorDialogProps) {
+export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocumentCreated }: WorkoutGeneratorDialogProps) {
   const { toast } = useToast()
   const [step, setStep] = useState<'form' | 'generating' | 'editing'>('form')
   const [formData, setFormData] = useState<WorkoutFormData>({
@@ -183,11 +184,29 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients }: WorkoutG
 
       const data = await response.json()
       
-      toast({
-        title: 'Workout Saved 🏋️‍♂️',
-        description: `Workout plan has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
-        duration: 8000,
-      })
+      if (onDocumentCreated && data.documentId) {
+        toast({
+          title: 'Workout Saved 🏋️‍♂️',
+          description: (
+            <div>
+              <p>Workout plan has been saved successfully.</p>
+              <button 
+                onClick={() => onDocumentCreated(formData.clientId, data.documentId)}
+                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+              >
+                📄 View Document
+              </button>
+            </div>
+          ),
+          duration: 10000,
+        })
+      } else {
+        toast({
+          title: 'Workout Saved 🏋️‍♂️',
+          description: `Workout plan has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+          duration: 8000,
+        })
+      }
 
       // Reset and close
       setStep('form')

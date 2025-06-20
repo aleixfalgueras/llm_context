@@ -7,6 +7,7 @@ import { Zap, FileText, Calendar, Activity } from 'lucide-react'
 import { DietGeneratorDialog } from './diet-generator-dialog'
 import { WorkoutGeneratorDialog } from './workout-generator-dialog'
 import { BloodTestAnalysisDialog } from './blood-test-analysis-dialog'
+import { ClientDocuments } from './client-documents'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -16,6 +17,18 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const [isDietDialogOpen, setIsDietDialogOpen] = useState(false)
   const [isWorkoutDialogOpen, setIsWorkoutDialogOpen] = useState(false)
   const [isBloodTestDialogOpen, setIsBloodTestDialogOpen] = useState(false)
+  const [selectedClient, setSelectedClient] = useState<any>(null)
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
+  const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
+
+  const handleDocumentCreated = (clientId: string, documentId: string) => {
+    const client = clients.find(c => c.id === clientId)
+    if (client) {
+      setSelectedClient(client)
+      setDocumentToHighlight(documentId)
+      setIsDocumentsOpen(true)
+    }
+  }
 
   const services = [
     {
@@ -160,6 +173,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         open={isDietDialogOpen}
         onOpenChange={setIsDietDialogOpen}
         clients={clients}
+        onDocumentCreated={handleDocumentCreated}
       />
 
       {/* Workout Generator Dialog */}
@@ -167,6 +181,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         open={isWorkoutDialogOpen}
         onOpenChange={setIsWorkoutDialogOpen}
         clients={clients}
+        onDocumentCreated={handleDocumentCreated}
       />
 
       {/* Blood Test Analysis Dialog */}
@@ -174,7 +189,20 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         open={isBloodTestDialogOpen}
         onOpenChange={setIsBloodTestDialogOpen}
         clients={clients}
+        onDocumentCreated={handleDocumentCreated}
       />
+
+      {/* Client Documents Dialog */}
+      {selectedClient && (
+        <ClientDocuments
+          clientId={selectedClient.id}
+          clientName={selectedClient.name}
+          clientEmail={selectedClient.email}
+          open={isDocumentsOpen}
+          onOpenChange={setIsDocumentsOpen}
+          documentToHighlight={documentToHighlight}
+        />
+      )}
     </>
   )
 } 

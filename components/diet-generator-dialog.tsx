@@ -21,6 +21,7 @@ interface DietGeneratorDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   clients: any[]
+  onDocumentCreated?: (clientId: string, documentId: string) => void
 }
 
 interface DietFormData {
@@ -35,7 +36,7 @@ interface DietFormData {
   documentName: string
 }
 
-export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGeneratorDialogProps) {
+export function DietGeneratorDialog({ open, onOpenChange, clients, onDocumentCreated }: DietGeneratorDialogProps) {
   const { toast } = useToast()
   const [step, setStep] = useState<'form' | 'generating' | 'editing'>('form')
   const [formData, setFormData] = useState<DietFormData>({
@@ -177,11 +178,29 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
 
       const data = await response.json()
       
-      toast({
-        title: 'Diet Saved 🥙',
-        description: `Diet plan has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
-        duration: 8000,
-      })
+      if (onDocumentCreated && data.documentId) {
+        toast({
+          title: 'Diet Saved 🥙',
+          description: (
+            <div>
+              <p>Diet plan has been saved successfully.</p>
+              <button 
+                onClick={() => onDocumentCreated(formData.clientId, data.documentId)}
+                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+              >
+                📄 View Document
+              </button>
+            </div>
+          ),
+          duration: 10000,
+        })
+      } else {
+        toast({
+          title: 'Diet Saved 🥙',
+          description: `Diet plan has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+          duration: 8000,
+        })
+      }
 
       // Reset and close
       setStep('form')
