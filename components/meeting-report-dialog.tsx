@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Loader2, User, Wand2, Calendar } from 'lucide-react'
+import { FileText, Loader2, User, Wand2, Calendar, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -48,8 +48,57 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
   const [isSaving, setIsSaving] = useState(false)
   const [clientDocuments, setClientDocuments] = useState<any[]>([])
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
+  const [isUploadingFile, setIsUploadingFile] = useState(false)
 
   const selectedClient = clients.find(client => client.id === formData.clientId)
+
+  // Handle file upload for meeting transcription
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Check if it's a text file
+    if (!file.type.startsWith('text/') && !file.name.endsWith('.txt')) {
+      toast({
+        title: 'Invalid File Type',
+        description: 'Please upload a text (.txt) file only.',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    // Check file size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'File Too Large',
+        description: 'Please upload a file smaller than 5MB.',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setIsUploadingFile(true)
+
+    try {
+      const text = await file.text()
+      setFormData(prev => ({ ...prev, meetingTranscription: text }))
+      toast({
+        title: 'File Uploaded Successfully',
+        description: `Loaded ${file.name} into meeting transcription.`,
+      })
+    } catch (error) {
+      console.error('Error reading file:', error)
+      toast({
+        title: 'Upload Failed',
+        description: 'Failed to read the file. Please try again.',
+        variant: 'destructive'
+      })
+    } finally {
+      setIsUploadingFile(false)
+      // Reset the input so the same file can be uploaded again if needed
+      event.target.value = ''
+    }
+  }
 
   // Load client documents when client is selected
   useEffect(() => {
@@ -273,18 +322,49 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
 
             {/* Meeting Transcription */}
             <div className="space-y-2">
-              <Label htmlFor="meetingTranscription">Meeting Transcription *</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="meetingTranscription">Meeting Transcription *</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".txt,text/plain"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="transcription-file-upload"
+                  />
+                                     <Button
+                     type="button"
+                     variant="outline"
+                     size="sm"
+                     onClick={() => document.getElementById('transcription-file-upload')?.click()}
+                     disabled={isUploadingFile}
+                     className="text-xs text-blue-600 dark:text-blue-400"
+                   >
+                    {isUploadingFile ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-3 w-3 mr-1" />
+                        Upload .txt
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
               <Textarea
                 id="meetingTranscription"
                 value={formData.meetingTranscription}
                 onChange={(e) => setFormData(prev => ({ ...prev, meetingTranscription: e.target.value }))}
-                placeholder="Paste or type the meeting transcription here..."
+                placeholder="Paste or type the meeting transcription here, or use the upload button above to load from a .txt file..."
                 rows={8}
                 className="resize-y min-h-[200px]"
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Provide the full transcription or detailed notes from your meeting with the client.
+                Provide the full transcription or detailed notes from your meeting with the client. You can also upload a .txt file using the button above.
               </p>
             </div>
 
