@@ -27,6 +27,7 @@
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-toast": "^1.2.14",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@sparticuz/chromium": "^137.0.1",
     "@supabase/supabase-js": "^2.50.0",
     "ai": "^4.3.16",

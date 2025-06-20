@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
+import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, startDate, endDate, dailyCalories, proteinTarget, additionalInfo, includeClientGoals = true, formatDocumentId } = await req.json()
+    const { clientId, startDate, endDate, dailyCalories, proteinTarget, additionalInfo, includeClientGoals = true, formatDocumentId, language = 'english' } = await req.json()
 
     if (!clientId || !startDate || !endDate) {
       return new Response('Missing required fields', { status: 400 })
@@ -54,6 +55,9 @@ export async function POST(req: Request) {
         // Continue without format document rather than failing
       }
     }
+
+    // Get language instruction
+    const targetLanguage = getLanguageInstruction(language)
 
     // Build the client context prompt (same as chat system)
     const clientContextPrompt = `You are a professional AI assistant helping a coach/consultant with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses.
@@ -95,20 +99,23 @@ Please use the following document as a format and structure example for the new 
 ${formatDocumentContent}
 ---` : ''}
 
+${getLanguageRequirementSection(targetLanguage, 'diet')}
+
 INSTRUCTIONS:
 - Create a comprehensive, personalized diet plan for this client
 - Use the client's profile information to tailor recommendations${formatDocumentContent ? `
 - Follow the format, structure, and presentation style from the provided format example document` : ''}
 - Structure the diet plan in a clear, professional format
 - Include meal plans, portion recommendations, and nutritional guidance
-- Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances${(dailyCalories || proteinTarget) ? `
+- Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, and personal circumstances when making recommendations${dailyCalories || proteinTarget ? `
 - Adhere to the specified nutritional targets above` : ''}${additionalInfo ? `
 - Pay special attention to the additional information provided above` : ''}
 - Provide the response in markdown format for easy reading
 - DO NOT include any suggestions about consulting healthcare professionals
 - DO NOT include any disclaimers or OpenAI-related content
 - Provide ONLY the diet plan content in a delivery-ready format
-- Make it actionable and specific to this client's needs`
+- Make it actionable and specific to this client's needs
+- IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, descriptions, and meal recommendations`
 
     // Generate the diet plan
     const response = await openai.chat.completions.create({
@@ -120,7 +127,7 @@ INSTRUCTIONS:
         },
         {
           role: 'user',
-          content: `Please create a detailed diet plan for this client covering the specified date range. Make it personalized based on their profile information.`
+          content: `Please create a detailed diet plan for this client covering the specified date range. Make it personalized based on their profile information. Generate the complete response in ${targetLanguage}.`
         }
       ],
       temperature: 0.7,

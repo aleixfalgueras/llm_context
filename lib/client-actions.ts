@@ -15,6 +15,7 @@ export interface ClientData {
   goals?: string
   medicalHistory?: string
   notes?: string
+  documentsLanguage?: string
 }
 
 export async function createClient(data: ClientData) {
@@ -38,6 +39,7 @@ export async function createClient(data: ClientData) {
         goals: data.goals,
         medicalHistory: data.medicalHistory,
         notes: data.notes,
+        documentsLanguage: data.documentsLanguage || 'english',
       },
     })
 
@@ -79,6 +81,7 @@ export async function updateClient(id: string, data: ClientData) {
         goals: data.goals,
         medicalHistory: data.medicalHistory,
         notes: data.notes,
+        documentsLanguage: data.documentsLanguage || 'english',
       },
     })
 

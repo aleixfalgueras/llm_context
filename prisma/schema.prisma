@@ -54,6 +54,7 @@ model Client {
   goals       String?  // Health and fitness goals
   medicalHistory String? // Medical conditions, allergies, etc.
   notes       String?  // General notes about the client
+  documentsLanguage String @default("english") // Preferred language for generated documents
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

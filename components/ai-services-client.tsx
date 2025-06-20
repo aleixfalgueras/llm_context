@@ -34,6 +34,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   // Load saved service visibility preferences on component mount
   useEffect(() => {
     const savedVisibility = localStorage.getItem('ai-services-visibility')
+    
     if (savedVisibility) {
       try {
         const parsed = JSON.parse(savedVisibility)
@@ -130,6 +131,8 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
             Leverage AI to create personalized content for your clients
           </p>
         </div>
+
+
 
         {/* Service Configuration Panel */}
         {isConfigOpen && (

@@ -70,6 +70,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
             client={editingClient}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
+            hideTitle={true}
           />
         </DialogContent>
       </Dialog>
