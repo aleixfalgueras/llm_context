@@ -179,7 +179,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
       
       toast({
         title: 'Diet Saved 🥙',
-        description: `Diet plan has been saved successfully You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+        description: `Diet plan has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
         duration: 8000,
       })
 
