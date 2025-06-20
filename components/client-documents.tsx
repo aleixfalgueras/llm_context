@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send, Download } from 'lucide-react'
-import { getClientDocuments, deleteDocument, getDocumentContent, updateDocumentContent, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
+import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send, Download, Search } from 'lucide-react'
+import { getClientDocuments, deleteDocument, deleteAllDocuments, getDocumentContent, updateDocumentContent, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -50,6 +50,8 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [editedDocumentName, setEditedDocumentName] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [documentTypeFilter, setDocumentTypeFilter] = useState('')
 
   useEffect(() => {
     if (open) {
@@ -175,6 +177,37 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       toast({
         title: 'Error',
         description: 'Failed to delete document',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleDeleteAllDocuments = async () => {
+    if (documents.length === 0) {
+      toast({
+        title: 'No documents',
+        description: 'There are no documents to delete',
+      })
+      return
+    }
+
+    if (!confirm(`Are you sure you want to delete ALL ${documents.length} documents for ${clientName}? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const result = await deleteAllDocuments(clientId)
+      toast({
+        title: 'Success',
+        description: `${result.deletedCount} documents deleted successfully`,
+      })
+      await loadDocuments()
+      setSelectedDocument(null)
+      setDocumentContent('')
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete all documents',
         variant: 'destructive',
       })
     }
@@ -322,6 +355,14 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
     return new Date(dateString).toLocaleDateString('en-GB')
   }
 
+  // Filter documents based on search term and document type
+  const filteredDocuments = documents.filter(document => {
+    const matchesSearch = document.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         document.documentType.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesType = !documentTypeFilter || documentTypeFilter === 'all' || document.documentType === documentTypeFilter
+    return matchesSearch && matchesType
+  })
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
@@ -337,25 +378,115 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
           <div className="w-1/3 border-r pr-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold">Documents</h3>
-              {isCreating ? (
-                <Button size="sm" onClick={handleCreateDocument} className="bg-blue-600 hover:bg-blue-700 text-white">
-                  Save
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => setIsCreating(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Plus className="h-4 w-4 mr-1" />
-                  New
-                </Button>
-              )}
+              <div className="flex gap-2">
+                {documents.length > 0 && (
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={handleDeleteAllDocuments}
+                    title="Delete all documents"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete All
+                  </Button>
+                )}
+                {isCreating ? (
+                  <Button size="sm" onClick={handleCreateDocument} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    Save
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={() => setIsCreating(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Plus className="h-4 w-4 mr-1" />
+                    New
+                  </Button>
+                )}
+              </div>
             </div>
+            
+            {/* Search and Filter Controls */}
+            {documents.length > 0 && (
+              <div className="space-y-3 mb-4">
+                {/* Search Box */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Search documents by name or type..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                {/* Document Type Filter */}
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="typeFilter" className="text-sm font-medium whitespace-nowrap">
+                    Filter by type:
+                  </Label>
+                  <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All types</SelectItem>
+                      <SelectItem value="diet">Diet Plan</SelectItem>
+                      <SelectItem value="workout">Workout Plan</SelectItem>
+                      <SelectItem value="assessment">Assessment</SelectItem>
+                      <SelectItem value="notes">Notes</SelectItem>
+                      <SelectItem value="plan">General Plan</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Active Filters Display */}
+                {(searchTerm || (documentTypeFilter && documentTypeFilter !== 'all')) && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Active filters:</span>
+                    {searchTerm && (
+                      <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                        Search: "{searchTerm}"
+                      </span>
+                    )}
+                    {documentTypeFilter && documentTypeFilter !== 'all' && (
+                      <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
+                        Type: {documentTypeFilter === 'diet' ? 'Diet Plan' : 
+                               documentTypeFilter === 'workout' ? 'Workout Plan' :
+                               documentTypeFilter === 'assessment' ? 'Assessment' :
+                               documentTypeFilter === 'notes' ? 'Notes' :
+                               documentTypeFilter === 'plan' ? 'General Plan' : 'Other'}
+                      </span>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSearchTerm('')
+                        setDocumentTypeFilter('all')
+                      }}
+                      className="h-6 px-2 text-xs"
+                    >
+                      Clear all
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
             
             <div className="space-y-2 overflow-y-auto max-h-[calc(70vh-60px)]">
               {loading ? (
                 <p className="text-muted-foreground">Loading...</p>
-              ) : documents.length === 0 ? (
-                <p className="text-muted-foreground">No documents found</p>
+              ) : filteredDocuments.length === 0 ? (
+                searchTerm ? (
+                  <div className="text-center py-8">
+                    <Search className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
+                    <p className="text-muted-foreground mb-1">No documents found matching "{searchTerm}"</p>
+                    <p className="text-sm text-muted-foreground">Try searching for a different term</p>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No documents found</p>
+                )
               ) : (
-                documents.map((doc) => (
+                filteredDocuments.map((doc) => (
                   <Card 
                     key={doc.id} 
                     className={`cursor-pointer transition-all duration-200 ${
