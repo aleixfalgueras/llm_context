@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, meetingTranscription, meetingDate, additionalInfo, includeClientContext = true, language = 'english' } = await req.json()
+    const { clientId, meetingTranscription, meetingDate, additionalInfo, language = 'english' } = await req.json()
 
     if (!clientId || !meetingTranscription || !meetingDate) {
       return new Response('Missing required fields', { status: 400 })
@@ -36,23 +36,10 @@ export async function POST(req: Request) {
     // Get language instruction
     const targetLanguage = getLanguageInstruction(language)
 
-    // Build the client context prompt (same as chat system)
-    const clientContextPrompt = `You are a professional AI assistant helping a coach/consultant generate a comprehensive meeting report with actionable steps. You have access to the following client information and should use it to provide personalized, relevant analysis and recommendations.
+    // Build the meeting report prompt
+    const meetingReportPrompt = `You are a professional AI assistant helping a coach/consultant generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
 
-CLIENT PROFILE:${client.dateOfBirth ? `
-Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
-Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${client.country ? `
-Country: ${client.country}` : ''}${includeClientContext && client.goals ? `
-
-GOALS:
-${client.goals}` : ''}${client.medicalHistory ? `
-
-MEDICAL HISTORY:
-${client.medicalHistory}` : ''}${client.notes ? `
-
-ADDITIONAL NOTES:
-${client.notes}` : ''}
+CLIENT: ${client.name}
 
 MEETING INFORMATION:
 - Meeting Date: ${meetingDate}
@@ -66,18 +53,17 @@ ${getLanguageRequirementSection(targetLanguage, 'meeting')}
 
 INSTRUCTIONS:
 - Create a comprehensive meeting report based on the transcription provided
-- Use the client's profile information to provide personalized context and insights
+- Focus on documenting the meeting content objectively and professionally
 - Structure the report in a clear, professional format with the following sections:
   1. Meeting Summary
   2. Key Discussion Points
-  3. Client Progress & Updates
+  3. Outcomes & Decisions
   4. Action Items & Next Steps
-  5. Recommendations
+  5. Follow-up Requirements
 - Include specific, actionable steps with clear timelines where applicable
-- Consider the client's${includeClientContext && client.goals ? ' goals,' : ''} medical history, and personal circumstances when making recommendations${additionalInfo ? `
+- Base recommendations solely on what was discussed in the meeting${additionalInfo ? `
 - Pay special attention to the additional context provided above` : ''}
 - Provide the response in markdown format for easy reading
-- DO NOT include any suggestions about consulting healthcare professionals unless specifically relevant to the discussion
 - DO NOT include any disclaimers or OpenAI-related content
 - Provide ONLY the meeting report content in a delivery-ready format
 - Make the action items specific, measurable, and achievable
@@ -90,7 +76,7 @@ INSTRUCTIONS:
       messages: [
         {
           role: 'system',
-          content: clientContextPrompt
+          content: meetingReportPrompt
         },
         {
           role: 'user',

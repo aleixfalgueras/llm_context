@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { generateChatTitleWithClient } from './utils'
 
-export async function createChat(title: string = 'New Chat', clientId: string) {
+export async function createChat(title: string = 'New Chat', clientId: string, contextFields: string[] = []) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -38,6 +38,7 @@ export async function createChat(title: string = 'New Chat', clientId: string) {
       title: chatTitle,
       userId,
       clientId,
+      contextFields,
     } as any,
   })
 
@@ -45,7 +46,7 @@ export async function createChat(title: string = 'New Chat', clientId: string) {
   redirect(`/chat/${chat.id}`)
 }
 
-export async function createChatAndReturn(title: string = 'New Chat', clientId: string) {
+export async function createChatAndReturn(title: string = 'New Chat', clientId: string, contextFields: string[] = []) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -77,6 +78,7 @@ export async function createChatAndReturn(title: string = 'New Chat', clientId: 
       title: chatTitle,
       userId,
       clientId,
+      contextFields,
     } as any,
   })
 
@@ -102,7 +104,7 @@ export async function deleteChat(chatId: string) {
   redirect('/')
 }
 
-export async function deleteAllChats() {
+export async function deleteAllChats(currentPath?: string) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -116,7 +118,11 @@ export async function deleteAllChats() {
   })
 
   revalidatePath('/')
-  redirect('/')
+  
+  // If user is currently viewing a chat page, redirect to assistant page
+  if (currentPath && currentPath.startsWith('/chat/')) {
+    redirect('/assistant')
+  }
 }
 
 export async function updateChatTitle(chatId: string, title: string) {

@@ -15,7 +15,28 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { clientId, startDate, endDate, workoutType, fitnessLevel, daysPerWeek, sessionDuration, equipment, additionalInfo, includeClientGoals = true, formatDocumentId, language = 'english' } = await req.json()
+    const { 
+      clientId, 
+      startDate, 
+      endDate, 
+      workoutType, 
+      fitnessLevel, 
+      daysPerWeek, 
+      sessionDuration, 
+      equipment, 
+      additionalInfo, 
+      clientContext = {
+        age: true,
+        height: true, 
+        weight: true,
+        country: true,
+        goals: true,
+        medicalHistory: true,
+        notes: true
+      },
+      formatDocumentId, 
+      language = 'english' 
+    } = await req.json()
 
     if (!clientId || !startDate || !endDate) {
       return new Response('Missing required fields', { status: 400 })
@@ -59,23 +80,49 @@ export async function POST(req: Request) {
     // Get language instruction
     const targetLanguage = getLanguageInstruction(language)
 
-    // Build the client context prompt
+    // Build the client context prompt with selective fields
+    let clientProfileSection = 'CLIENT PROFILE:'
+    
+    // Calculate age if date of birth is available and selected
+    const clientAge = client.dateOfBirth && clientContext.age
+      ? Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))
+      : null
+    
+    if (clientAge) {
+      clientProfileSection += `\nAge: ${clientAge} years old`
+    }
+    
+    if (client.height && clientContext.height) {
+      clientProfileSection += `\nHeight: ${client.height}cm`
+    }
+    
+    if (client.weight && clientContext.weight) {
+      clientProfileSection += `\nWeight: ${client.weight}kg`
+    }
+    
+    if (client.country && clientContext.country) {
+      clientProfileSection += `\nCountry: ${client.country}`
+    }
+
+    // Build optional sections based on selection
+    let goalsSection = ''
+    if (clientContext.goals && client.goals) {
+      goalsSection = `\n\nGOALS:\n${client.goals}`
+    }
+
+    let medicalSection = ''
+    if (clientContext.medicalHistory && client.medicalHistory) {
+      medicalSection = `\n\nMEDICAL HISTORY:\n${client.medicalHistory}`
+    }
+
+    let notesSection = ''
+    if (clientContext.notes && client.notes) {
+      notesSection = `\n\nADDITIONAL NOTES:\n${client.notes}`
+    }
+
     const clientContextPrompt = `You are a professional AI assistant helping a coach/consultant with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses.
 
-CLIENT PROFILE:${client.dateOfBirth ? `
-Age: ${Math.floor((new Date().getTime() - new Date(client.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years old` : ''}${client.height ? `
-Height: ${client.height}cm` : ''}${client.weight ? `
-Weight: ${client.weight}kg` : ''}${client.country ? `
-Country: ${client.country}` : ''}${includeClientGoals && client.goals ? `
-
-GOALS:
-${client.goals}` : ''}${client.medicalHistory ? `
-
-MEDICAL HISTORY:
-${client.medicalHistory}` : ''}${client.notes ? `
-
-ADDITIONAL NOTES:
-${client.notes}` : ''}
+${clientProfileSection}${goalsSection}${medicalSection}${notesSection}
 
 WORKOUT PLAN REQUEST:
 - Start Date: ${startDate}
@@ -107,7 +154,7 @@ INSTRUCTIONS:
 - Follow the format, structure, and presentation style from the provided format example document` : ''}
 - Structure the workout plan in a clear, professional format
 - Include exercise descriptions, sets, reps, and progression guidelines
-- Consider their${includeClientGoals && client.goals ? ' goals,' : ''} medical history, fitness level, and personal circumstances
+- Consider their${clientContext.goals && client.goals ? ' goals,' : ''} medical history, fitness level, and personal circumstances
 - Include warm-up and cool-down routines
 - Provide exercise modifications or alternatives when appropriate${equipment ? `
 - Use only the specified available equipment` : ''}${additionalInfo ? `

@@ -12,6 +12,7 @@ interface ChatPageClientProps {
     title: string
     messages: any[]
     clientId: string
+    contextFields?: string[]
   }
   chats: any[]
   userImageUrl?: string
@@ -77,6 +78,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
         selectedClientId={chat.clientId}
         clients={clients}
         hasActiveChat={true}
+        chatContextFields={chat.contextFields}
       />
     </div>
   )
