@@ -23,7 +23,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       title: 'Generate Diet Plan',
       description: 'Create personalized diet plans for your clients based on their goals, medical history, and preferences.',
       icon: <FileText className="h-8 w-8" />,
-      features: ['Client-specific recommendations', 'Date range planning', 'Editable before saving', 'PDF export'],
+      features: ['Client-specific recommendations', 'Date range planning', 'Editable before saving'],
       status: 'available',
       onClick: () => setIsDietDialogOpen(true),
       iconColorClass: 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
@@ -33,7 +33,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       title: 'Generate Workout Plan',
       description: 'Design custom workout routines tailored to your client\'s fitness level and objectives.',
       icon: <Calendar className="h-8 w-8" />,
-      features: ['Progressive overload', 'Equipment customization', 'Injury considerations', 'Weekly schedules'],
+      features: ['Progressive overload', 'Equipment customization', 'Injury considerations'],
       status: 'available',
       onClick: () => setIsWorkoutDialogOpen(true),
       iconColorClass: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400'
@@ -43,7 +43,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       title: 'Blood Test Analysis',
       description: 'Upload and analyze blood test reports to generate comprehensive health insights and recommendations.',
       icon: <Activity className="h-8 w-8" />,
-      features: ['PDF upload & extraction', 'Parameter validation', 'Health analysis', 'Actionable recommendations'],
+      features: ['PDF upload & extraction', 'Health analysis', 'Actionable recommendations'],
       status: 'available',
       onClick: () => setIsBloodTestDialogOpen(true),
       iconColorClass: 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
