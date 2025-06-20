@@ -182,8 +182,9 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
       const data = await response.json()
       
       toast({
-        title: 'Report Saved',
-        description: `Blood test analysis has been saved successfully for ${selectedClient?.name}. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+        title: 'Report Saved 🧪',
+        description: `Blood test analysis has been saved successfully. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+        duration: 8000,
       })
 
       // Reset and close
@@ -676,8 +677,8 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
 
           {/* Editing Step */}
           {step === 'editing' && (
-            <div className="flex flex-col flex-1 space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="flex flex-col flex-1 space-y-4 min-h-0">
+              <div className="flex items-center justify-between flex-shrink-0">
                 <h3 className="text-lg font-medium">Review & Edit Blood Test Analysis</h3>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep('reviewing')}>
@@ -697,7 +698,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
               </div>
 
               {/* Document Name Input */}
-              <div className="space-y-2">
+              <div className="space-y-2 flex-shrink-0">
                 <Label htmlFor="documentName">Document Name</Label>
                 <Input
                   id="documentName"
@@ -706,40 +707,36 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                   placeholder="Enter document name"
                   className="font-medium"
                 />
-                <p className="text-xs text-muted-foreground">
-                  This name will be used to save the document. You can edit it before saving.
-                </p>
               </div>
 
               {/* Edit Area */}
-              <div className="grid grid-cols-2 gap-4" style={{ height: 'calc(100vh - 300px)' }}>
-                <Card className="flex flex-col">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm text-muted-foreground">
-                      Edit the generated blood test analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-1 p-0">
+              <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+                {/* Edit Panel */}
+                <div className="border rounded-lg flex flex-col min-h-0">
+                  <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+                    <h4 className="text-sm font-medium text-muted-foreground">Edit the generated blood test analysis</h4>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-y-auto">
                     <Textarea
                       value={editedReport}
                       onChange={(e) => setEditedReport(e.target.value)}
-                      className="w-full h-full font-mono text-sm resize-none border-0 rounded-none p-4"
+                      className="w-full h-full font-mono text-sm resize-none border-0 p-4"
                       placeholder="Generated blood test analysis will appear here..."
-                      style={{ minHeight: 'calc(100vh - 400px)' }}
                     />
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <Card className="flex flex-col">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm text-muted-foreground">Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
+                {/* Preview Panel */}
+                <div className="border rounded-lg flex flex-col min-h-0">
+                  <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+                    <h4 className="text-sm font-medium text-muted-foreground">Preview</h4>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-y-auto p-4">
                     <div className="prose prose-sm max-w-none dark:prose-invert">
                       <ReactMarkdown>{editedReport}</ReactMarkdown>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             </div>
           )}
