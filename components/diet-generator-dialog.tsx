@@ -178,8 +178,9 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
       const data = await response.json()
       
       toast({
-        title: 'Diet Saved',
-        description: `Diet plan has been saved successfully for ${selectedClient?.name}. You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+        title: 'Diet Saved 🥙',
+        description: `Diet plan has been saved successfully You can find it in the Clients page under ${selectedClient?.name}'s documents.`,
+        duration: 8000,
       })
 
       // Reset and close
@@ -328,6 +329,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                     step="50"
                     value={formData.dailyCalories || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, dailyCalories: e.target.value }))}
+                    onWheel={(e) => e.currentTarget.blur()}
                     placeholder="e.g., 2000"
                   />
                 </div>
@@ -341,6 +343,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                     step="5"
                     value={formData.proteinTarget || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, proteinTarget: e.target.value }))}
+                    onWheel={(e) => e.currentTarget.blur()}
                     placeholder="e.g., 120"
                   />
                 </div>
@@ -373,7 +376,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                   documents={clientDocuments}
                   value={formData.formatDocumentId}
                   onValueChange={(value: string) => setFormData(prev => ({ ...prev, formatDocumentId: value }))}
-                  placeholder="Select a document to use as format example"
+                  placeholder="Select a document to use as a formatting example"
                   searchPlaceholder="Search documents..."
                   emptyMessage="No documents found."
                   loading={isLoadingDocuments}
@@ -423,8 +426,8 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
         )}
 
         {step === 'editing' && (
-          <div className="flex flex-col flex-1 space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col flex-1 space-y-4 min-h-0">
+            <div className="flex items-center justify-between flex-shrink-0">
               <h3 className="text-lg font-medium">Review & Edit Diet Plan</h3>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setStep('form')}>
@@ -444,7 +447,7 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
             </div>
 
             {/* Document Name Input */}
-            <div className="space-y-2">
+            <div className="space-y-2 flex-shrink-0">
               <Label htmlFor="documentName">Document Name</Label>
               <Input
                 id="documentName"
@@ -453,39 +456,35 @@ export function DietGeneratorDialog({ open, onOpenChange, clients }: DietGenerat
                 placeholder="Enter document name"
                 className="font-medium"
               />
-              <p className="text-xs text-muted-foreground">
-                This name will be used to save the document. You can edit it before saving.
-              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4" style={{ height: 'calc(100vh - 200px)' }}>
-              <Card className="flex flex-col">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-muted-foreground">
-                    Edit the generated diet plan
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 p-0">
+            <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+              {/* Edit Panel */}
+              <div className="border rounded-lg flex flex-col min-h-0">
+                <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+                  <h4 className="text-sm font-medium text-muted-foreground">Edit the generated diet plan</h4>
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto">
                   <Textarea
                     value={editedDiet}
                     onChange={(e) => setEditedDiet(e.target.value)}
-                    className="w-full h-full font-mono text-sm resize-none border-0 rounded-none p-4"
+                    className="w-full h-full font-mono text-sm resize-none border-0 p-4"
                     placeholder="Generated diet plan will appear here..."
-                    style={{ minHeight: 'calc(100vh - 300px)' }}
                   />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="flex flex-col">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-muted-foreground">Preview</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+              {/* Preview Panel */}
+              <div className="border rounded-lg flex flex-col min-h-0">
+                <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+                  <h4 className="text-sm font-medium text-muted-foreground">Preview</h4>
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto p-4">
                   <div className="prose prose-sm max-w-none dark:prose-invert">
                     <ReactMarkdown>{editedDiet}</ReactMarkdown>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
         )}
