@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send, Download, Search } from 'lucide-react'
+import { FileText, Plus, Edit, Trash2, Eye, Calendar, Send, Download, Search, TrashIcon } from 'lucide-react'
 import { getClientDocuments, deleteDocument, deleteAllDocuments, getDocumentContent, updateDocumentContent, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
@@ -52,6 +52,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   const [editedDocumentName, setEditedDocumentName] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [documentTypeFilter, setDocumentTypeFilter] = useState('')
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -191,25 +192,29 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       return
     }
 
-    if (!confirm(`Are you sure you want to delete ALL ${documents.length} documents for ${clientName}? This action cannot be undone.`)) {
-      return
-    }
-
-    try {
-      const result = await deleteAllDocuments(clientId)
-      toast({
-        title: 'Success',
-        description: `${result.deletedCount} documents deleted successfully`,
-      })
-      await loadDocuments()
-      setSelectedDocument(null)
-      setDocumentContent('')
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete all documents',
-        variant: 'destructive',
-      })
+    if (showDeleteAllConfirm) {
+      try {
+        const result = await deleteAllDocuments(clientId)
+        toast({
+          title: 'Success',
+          description: `${result.deletedCount} documents deleted successfully`,
+        })
+        await loadDocuments()
+        setSelectedDocument(null)
+        setDocumentContent('')
+        setShowDeleteAllConfirm(false)
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to delete all documents',
+          variant: 'destructive',
+        })
+        setShowDeleteAllConfirm(false)
+      }
+    } else {
+      setShowDeleteAllConfirm(true)
+      // Reset confirmation after 3 seconds
+      setTimeout(() => setShowDeleteAllConfirm(false), 3000)
     }
   }
 
@@ -381,13 +386,18 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
               <div className="flex gap-2">
                 {documents.length > 0 && (
                   <Button 
-                    size="sm" 
-                    variant="destructive"
                     onClick={handleDeleteAllDocuments}
+                    variant="outline"
+                    className={`transition-all duration-200 ${
+                      showDeleteAllConfirm 
+                        ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 hover:bg-red-200 dark:hover:bg-red-900/50' 
+                        : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    } shadow-sm`}
+                    size="sm"
                     title="Delete all documents"
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete All
+                    <TrashIcon className="w-4 h-4 mr-2" />
+                    {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All'}
                   </Button>
                 )}
                 {isCreating ? (
