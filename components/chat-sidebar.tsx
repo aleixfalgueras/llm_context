@@ -119,7 +119,7 @@ export function ChatSidebar({ chats, currentChatId, selectedClientId, hideNewCha
                 >
                 <div className="flex items-center justify-between">
                   <Link 
-                    href={`/chat/${chat.id}`} 
+                    href={`/assistant/chat/${chat.id}`} 
                     className="flex-1 min-w-0"
                   >
                     {editingChatId === chat.id ? (

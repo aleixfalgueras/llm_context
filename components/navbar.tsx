@@ -20,7 +20,7 @@ export function Navbar() {
   const isActive = (href: string) => {
     if (href === '/assistant') {
       // AI Assistant is active for assistant page and all chat pages
-      return pathname === '/assistant' || pathname.startsWith('/chat/')
+      return pathname === '/assistant' || pathname.startsWith('/assistant/chat/')
     }
     return pathname === href
   }

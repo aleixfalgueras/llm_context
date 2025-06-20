@@ -43,7 +43,7 @@ export async function createChat(title: string = 'New Chat', clientId: string, c
   })
 
   revalidatePath('/')
-  redirect(`/chat/${chat.id}`)
+  redirect(`/assistant/chat/${chat.id}`)
 }
 
 export async function createChatAndReturn(title: string = 'New Chat', clientId: string, contextFields: string[] = []) {
@@ -101,7 +101,7 @@ export async function deleteChat(chatId: string) {
   })
 
   revalidatePath('/')
-  redirect('/')
+  redirect('/assistant')
 }
 
 export async function deleteAllChats(currentPath?: string) {
@@ -120,7 +120,7 @@ export async function deleteAllChats(currentPath?: string) {
   revalidatePath('/')
   
   // If user is currently viewing a chat page, redirect to assistant page
-  if (currentPath && currentPath.startsWith('/chat/')) {
+  if (currentPath && currentPath.startsWith('/assistant/chat/')) {
     redirect('/assistant')
   }
 }
@@ -172,7 +172,7 @@ export async function createMessage(chatId: string, content: string, role: 'USER
     },
   })
 
-  revalidatePath(`/chat/${chatId}`)
+  revalidatePath(`/assistant/chat/${chatId}`)
   return message
 }
 

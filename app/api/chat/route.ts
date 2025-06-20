@@ -106,7 +106,7 @@ export async function POST(req: Request) {
       })
       
       // Revalidate the chat page and home page to show the updated title
-      revalidatePath(`/chat/${chatId}`)
+      revalidatePath(`/assistant/chat/${chatId}`)
       revalidatePath('/')
     }
 
