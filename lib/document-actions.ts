@@ -73,6 +73,52 @@ export async function deleteDocument(documentId: string) {
   }
 }
 
+export async function deleteAllDocuments(clientId: string) {
+  const { userId } = await auth()
+  
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    // Get all documents for the client to verify ownership and get file paths
+    const documents = await prisma.document.findMany({
+      where: { 
+        clientId,
+        userId 
+      }
+    })
+
+    if (documents.length === 0) {
+      return { success: true, deletedCount: 0 }
+    }
+
+    // Delete from Supabase storage
+    const documentPaths = documents.map(doc => doc.documentPath)
+    const { error: storageError } = await supabaseServer.storage
+      .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+      .remove(documentPaths)
+
+    if (storageError) {
+      console.error('Error deleting from storage:', storageError)
+      // Continue with database deletion even if storage deletion fails
+    }
+
+    // Delete from database
+    const deleteResult = await prisma.document.deleteMany({
+      where: { 
+        clientId,
+        userId // Ensure user can only delete their own documents
+      }
+    })
+
+    return { success: true, deletedCount: deleteResult.count }
+  } catch (error) {
+    console.error('Error deleting all documents:', error)
+    throw new Error('Failed to delete all documents')
+  }
+}
+
 export async function getDocumentContent(documentPath: string) {
   const { userId } = await auth()
   
