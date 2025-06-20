@@ -41,6 +41,58 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
 
   const selectedClient = clients.find(client => client.id === formData.clientId)
 
+  // Helper function to calculate parameter status based on value and reference ranges
+  const calculateParameterStatus = (value: string, referenceMin: string, referenceMax: string): string | null => {
+    if (!value || !referenceMin || !referenceMax) {
+      return null
+    }
+    
+    // Handle both comma and dot decimal separators
+    const parseNumeric = (str: string): number => {
+      // Replace comma with dot for decimal separator, then remove any non-numeric characters except dots and minus
+      const normalized = str.toString().replace(',', '.').replace(/[^\d.-]/g, '')
+      return parseFloat(normalized)
+    }
+    
+    const numValue = parseNumeric(value)
+    const minRef = parseNumeric(referenceMin)
+    const maxRef = parseNumeric(referenceMax)
+    
+    if (isNaN(numValue) || isNaN(minRef) || isNaN(maxRef)) {
+      return null
+    }
+    
+    if (numValue < minRef) {
+      return 'low'
+    } else if (numValue > maxRef) {
+      return 'high'
+    } else {
+      return 'normal'
+    }
+  }
+
+  // Helper function to update parameter and recalculate status
+  const updateParameterWithStatusRecalc = (originalIndex: number, updates: any) => {
+    const updatedParams = [...extractedData.parameters]
+    const currentParam = updatedParams[originalIndex]
+    const updatedParam = { ...currentParam, ...updates }
+    
+    // Recalculate status if value, referenceMin, or referenceMax changed (but not if status is being explicitly set)
+    if (('value' in updates || 'referenceMin' in updates || 'referenceMax' in updates) && !('status' in updates)) {
+      const newStatus = calculateParameterStatus(
+        updatedParam.value,
+        updatedParam.referenceMin,
+        updatedParam.referenceMax
+      )
+      
+      
+      updatedParam.status = newStatus
+    }
+    
+    updatedParams[originalIndex] = updatedParam
+    setExtractedData({ ...extractedData, parameters: updatedParams })
+  }
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file && file.type === 'application/pdf') {
@@ -322,8 +374,6 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                 </p>
               </div>
 
-
-
               <div className="flex justify-end gap-3 pt-4">
                 <Button onClick={handleClose} variant="outline">
                   Cancel
@@ -532,9 +582,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                               <Input
                                 value={param.value || ''}
                                 onChange={(e) => {
-                                  const updatedParams = [...extractedData.parameters]
-                                  updatedParams[originalIndex] = { ...updatedParams[originalIndex], value: e.target.value }
-                                  setExtractedData({ ...extractedData, parameters: updatedParams })
+                                  updateParameterWithStatusRecalc(originalIndex, { value: e.target.value })
                                 }}
                                 className="text-sm"
                                 placeholder="Test value"
@@ -561,9 +609,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                               <Input
                                 value={param.referenceMin || ''}
                                 onChange={(e) => {
-                                  const updatedParams = [...extractedData.parameters]
-                                  updatedParams[originalIndex] = { ...updatedParams[originalIndex], referenceMin: e.target.value }
-                                  setExtractedData({ ...extractedData, parameters: updatedParams })
+                                  updateParameterWithStatusRecalc(originalIndex, { referenceMin: e.target.value })
                                 }}
                                 className="text-sm"
                                 placeholder="Min reference"
@@ -574,9 +620,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                               <Input
                                 value={param.referenceMax || ''}
                                 onChange={(e) => {
-                                  const updatedParams = [...extractedData.parameters]
-                                  updatedParams[originalIndex] = { ...updatedParams[originalIndex], referenceMax: e.target.value }
-                                  setExtractedData({ ...extractedData, parameters: updatedParams })
+                                  updateParameterWithStatusRecalc(originalIndex, { referenceMax: e.target.value })
                                 }}
                                 className="text-sm"
                                 placeholder="Max reference"
@@ -587,12 +631,9 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients }: BloodTe
                                                              <Select
                                  value={param.status || 'unspecified'}
                                  onValueChange={(value) => {
-                                   const updatedParams = [...extractedData.parameters]
-                                   updatedParams[originalIndex] = { 
-                                     ...updatedParams[originalIndex], 
+                                   updateParameterWithStatusRecalc(originalIndex, { 
                                      status: value === 'unspecified' ? null : value 
-                                   }
-                                   setExtractedData({ ...extractedData, parameters: updatedParams })
+                                   })
                                  }}
                                >
                                  <SelectTrigger className="text-sm">
