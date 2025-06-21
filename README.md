@@ -7,6 +7,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 ### Core Functionality
 - **AI Conversations**: Natural conversations with OpenAI's GPT-4o-mini with granular client context selection
 - **Client Management**: Create, view, edit, and delete client profiles
+- **Custom Prompt Management**: Create, organize, and reuse personalized AI prompts with automatic client variable replacement
 - **Medical History PDF Extraction**: AI-powered comprehensive extraction from medical documents with privacy protection
 - **Granular Context Control**: Select specific client information fields (age, height, weight, country, goals, medical history, notes) for each conversation
 - **Context Field Tracking**: View exactly which client fields were used as context for each chat
@@ -55,6 +56,10 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 ├── app/
 │   ├── api/
 │   │   ├── chat/          # Chat API endpoints
+│   │   ├── prompts/       # Prompt management APIs
+│   │   │   ├── route.ts  # List and create prompts
+│   │   │   ├── [id]/route.ts # Get, update, delete individual prompts
+│   │   │   └── [id]/use/route.ts # Track prompt usage analytics
 │   │   └── ai-services/   # AI document generation APIs
 │   │       ├── extract-medical-history/  # Medical history PDF extraction
 │   │       ├── generate-diet/            # Diet plan generation
@@ -67,16 +72,20 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   │   ├── page.tsx      # Main assistant page with client selection
 │   │   └── chat/[id]/    # Individual chat conversations
 │   ├── clients/           # Client management pages
+│   ├── prompts/           # Prompt management page
 │   ├── sign-in/           # Authentication pages
 │   ├── sign-up/
 │   ├── layout.tsx         # Root layout with providers
 │   └── page.tsx          # Home page
 ├── components/
-│   ├── ui/               # shadcn/ui components
+│   ├── ui/               # shadcn/ui components (including new badge.tsx)
 │   ├── chat-sidebar.tsx  # Chat history sidebar with new chat button
 │   ├── chat-messages.tsx # Message display
-│   ├── chat-input.tsx    # Message input form
+│   ├── chat-input.tsx    # Message input form with prompt selector integration
 │   ├── client-context-sidebar.tsx # Client selection and context configuration
+│   ├── prompt-dialog.tsx # Create/edit prompt dialog with variable tooltip
+│   ├── prompt-selector.tsx # Prompt selection dropdown for chat interface
+│   ├── prompts-management.tsx # Complete prompt management dashboard
 │   ├── ai-services-client.tsx # AI Services page
 │   ├── diet-generator-dialog.tsx # Diet generation dialog with context selection
 │   ├── workout-generator-dialog.tsx # Workout generation dialog with context selection
@@ -142,6 +151,203 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 - `documentType`: Type (e.g., "diet", "workout", "blood-test-analysis", "meeting")
 - `startDate/endDate`: Optional date range for time-based documents
 - `createdAt/updatedAt`: Timestamps
+
+### Prompt Model
+- `id`: Unique identifier
+- `userId`: Owner's user ID
+- `name`: User-friendly prompt name
+- `description`: Optional description of prompt purpose
+- `content`: The actual prompt template with variable placeholders
+- `category`: Organization category (medical, fitness, nutrition, coaching, analysis, formatting, general, custom)
+- `isActive`: Boolean flag to enable/disable prompts
+- `usageCount`: Analytics counter for tracking popularity
+- `createdAt/updatedAt`: Timestamps
+
+## Custom Prompt Management System
+
+### Overview
+The Custom Prompt Management System allows users to create, organize, and reuse personalized AI prompts with automatic client variable replacement. This powerful feature transforms the AI assistant from a generic chat into a professional coaching tool with standardized, yet personalized responses.
+
+### Key Features
+
+#### **Prompt Creation & Organization**
+- **Rich Prompt Editor**: Create detailed prompt templates with descriptions and categories
+- **Variable Support**: Use client data variables like `{client_name}`, `{medical_history}`, `{goals}`, `{age}`, `{height}`, `{weight}`, `{country}`
+- **Category System**: Organize prompts by type (medical, fitness, nutrition, coaching, analysis, formatting, general, custom)
+- **Active/Inactive Status**: Enable or disable prompts without deleting them
+- **Usage Analytics**: Track which prompts are used most frequently
+
+#### **Smart Variable Replacement**
+- **Automatic Substitution**: Client variables automatically replaced with actual data when prompt is selected
+- **Real-time Processing**: Variables filled instantly when prompt is applied in chat
+- **Context Awareness**: Uses current chat's associated client data for variable replacement
+- **Fallback Handling**: Missing data shows placeholder labels (e.g., `[Client Name]` if no name available)
+
+#### **Prompt Library Management**
+- **Search & Filter**: Find prompts by name, description, or content
+- **Category Filtering**: Filter prompts by category
+- **Usage Sorting**: Sort by most used, recently updated, name, or creation date
+- **Active/Inactive Toggle**: Show all prompts or only active ones
+
+#### **Integration with AI Assistant**
+- **Chat Integration**: "Use Prompt" button in chat interface for easy access
+- **Prompt Selector**: Searchable dropdown with popular and recent prompts
+- **Live Replacement**: Variables replaced in real-time before insertion into chat input
+- **Usage Tracking**: Automatically tracks when prompts are used
+
+### Variable System
+
+#### **Available Client Variables**
+```
+{client_name}     → Client's full name
+{medical_history} → Complete medical history
+{goals}           → Client's goals and objectives
+{age}             → Calculated age from date of birth
+{height}          → Height in centimeters
+{weight}          → Weight in kilograms
+{country}         → Client's country/location
+```
+
+#### **Variable Replacement Examples**
+
+**Template:**
+```
+Please create a comprehensive assessment for {client_name}, a {age}-year-old from {country}.
+
+**Client Profile:**
+- Goals: {goals}
+- Physical: {height} tall, {weight}
+- Medical considerations: {medical_history}
+
+Please provide personalized recommendations based on this information.
+```
+
+**After Variable Replacement:**
+```
+Please create a comprehensive assessment for John Smith, a 35-year-old from United States.
+
+**Client Profile:**
+- Goals: Lose 15kg for wedding in 6 months, improve cardiovascular health
+- Physical: 175cm tall, 80kg
+- Medical considerations: Mild asthma (exercise-induced), no known allergies
+
+Please provide personalized recommendations based on this information.
+```
+
+### Prompt Categories
+
+#### **Medical**
+- Medical report formats
+- Health assessment templates
+- Clinical recommendation structures
+
+#### **Fitness**
+- Workout plan templates
+- Exercise assessment formats
+- Fitness goal evaluation prompts
+
+#### **Nutrition**
+- Diet plan structures
+- Nutritional assessment templates
+- Meal planning prompts
+
+#### **Coaching**
+- Motivational communication styles
+- Progress check-in templates
+- Client consultation frameworks
+
+#### **Analysis**
+- Progress report formats
+- Data analysis templates
+- Performance evaluation structures
+
+#### **Formatting**
+- Professional email templates
+- Document formatting guides
+- Communication style prompts
+
+### Usage Analytics
+
+#### **Tracking Metrics**
+- **Usage Count**: How many times each prompt has been used
+- **Popular Prompts**: Most frequently used prompts highlighted
+- **Recent Activity**: Recently created and updated prompts
+- **Category Distribution**: Prompt distribution across categories
+
+#### **Analytics Dashboard**
+- **Total Prompts**: Count of all prompts (active and inactive)
+- **Active Prompts**: Count of currently enabled prompts
+- **Most Used Prompt**: Identifies the most popular prompt with usage count
+- **Category Overview**: Visual representation of prompt categories
+
+### Management Interface
+
+#### **Prompt Cards**
+- **Visual Organization**: Card-based layout with soft blue styling
+- **Quick Actions**: Edit, enable/disable, and delete prompts directly from cards
+- **Usage Indicators**: Display usage count and activity status
+- **Category Badges**: Visual category identification
+- **Description Preview**: Show prompt descriptions for easy identification
+
+#### **Advanced Features**
+- **Bulk Operations**: Enable/disable multiple prompts
+- **Export/Import**: Share prompt templates between users (future feature)
+- **Template Library**: Pre-built professional prompt templates
+- **Collaboration**: Share prompts with team members (future feature)
+
+### Professional Prompt Examples
+
+#### **Medical Report Template**
+```
+**Medical Assessment for {client_name}**
+
+**Patient Information:**
+- Age: {age}
+- Physical: {height}, {weight}
+- Location: {country}
+
+**Medical History:**
+{medical_history}
+
+**Current Goals:**
+{goals}
+
+**Assessment & Recommendations:**
+Please provide a comprehensive medical assessment with specific recommendations based on the patient's history and goals.
+```
+
+#### **Fitness Evaluation Template**
+```
+**Fitness Assessment - {client_name}**
+
+**Client Profile:**
+- {age} years old, {height}, {weight}
+- Location: {country}
+- Goals: {goals}
+
+**Medical Considerations:**
+{medical_history}
+
+Please conduct a thorough fitness evaluation and provide:
+1. Current fitness level assessment
+2. Customized exercise recommendations
+3. Safety considerations based on medical history
+4. Progressive training plan aligned with goals
+```
+
+#### **Motivational Coaching Style**
+```
+Hi {client_name}! 🌟
+
+I'm excited to work with you on your journey! Your goals of {goals} are absolutely achievable.
+
+**What makes you unique:**
+- Your commitment at {age} is inspiring
+- Your health profile shows: {medical_history}
+- Your location in {country} gives us great opportunities
+
+Let's create a personalized plan that fits your life perfectly! What specific area would you like to focus on first?
+```
 
 ## AI Client Context System
 
@@ -522,28 +728,45 @@ npm test -- __tests__/simple.test.ts
    - **Medical History PDF Extraction**: Upload medical PDFs for AI-powered comprehensive extraction
    - **Privacy Protection**: All personal information automatically anonymized during extraction
 
+### Prompt Management Workflow
+3. **Create Custom Prompts**: Go to `/prompts` to build your prompt library
+   - **Prompt Creation**: Use the "New Prompt" button to create templates
+   - **Variable Integration**: Include client variables like `{client_name}`, `{medical_history}`, `{goals}`
+   - **Category Organization**: Organize prompts by type (medical, fitness, nutrition, coaching, etc.)
+   - **Usage Analytics**: Track which prompts are most effective
+
 ### AI Assistant Workflow
-3. **Navigate to Assistant**: Go to `/assistant` for the main AI chat interface
-4. **Select Client**: Choose a client from the dropdown menu
-5. **Configure Context**: Select which client information fields to include:
+4. **Navigate to Assistant**: Go to `/assistant` for the main AI chat interface
+5. **Select Client**: Choose a client from the dropdown menu
+6. **Configure Context**: Select which client information fields to include:
    - Age, Height, Weight, Country, Goals, Medical History, Notes
    - Only fields with actual data are shown
    - Dynamic labels show actual values (e.g., "Age (25 years)", "Height (175cm)")
-6. **Create Chat**: Click "New Chat" with loading feedback during creation
-7. **Send Messages**: Type your message and press Enter or click Send
-8. **View Context**: See selected context fields displayed as green badges in sidebar
-9. **Chat Navigation**: Use "New Chat" button in chat sidebar or return to `/assistant`
+7. **Create Chat**: Click "New Chat" with loading feedback during creation
+8. **Use Custom Prompts**: Click "Use Prompt" to access your prompt library
+   - **Automatic Variable Replacement**: Client data automatically fills template variables
+   - **Smart Search**: Find prompts by name, category, or content
+   - **Popular Prompts**: Quick access to most-used and recent prompts
+9. **Send Messages**: Type your message (or use prompts) and press Enter or click Send
+10. **View Context**: See selected context fields displayed as green badges in sidebar
+11. **Chat Navigation**: Use "New Chat" button in chat sidebar or return to `/assistant`
 
 ### Chat Management
-10. **Manage Chats**: Edit titles or delete chats using the dropdown menu
-11. **View History**: Click on any chat in the sidebar to view conversation
-12. **Context Transparency**: See exactly which client fields were used for each chat
-13. **Client Information**: View essential client info in the right sidebar during chats
+12. **Manage Chats**: Edit titles or delete chats using the dropdown menu
+13. **View History**: Click on any chat in the sidebar to view conversation
+14. **Context Transparency**: See exactly which client fields were used for each chat
+15. **Client Information**: View essential client info in the right sidebar during chats
+
+### Prompt Management
+16. **Prompt Library**: Access `/prompts` to manage your prompt collection
+17. **Analytics Dashboard**: View usage statistics and prompt performance
+18. **Organization**: Search, filter, and categorize prompts for easy access
+19. **Template Sharing**: Export/import prompt templates (future feature)
 
 ### AI Services
-14. **Generate Documents**: Use `/ai-services` to create personalized documents
-15. **Context Selection**: Same granular field selection available for all AI services
-16. **Service-Specific Presets**: Appropriate defaults based on document type
+20. **Generate Documents**: Use `/ai-services` to create personalized documents
+21. **Context Selection**: Same granular field selection available for all AI services
+22. **Service-Specific Presets**: Appropriate defaults based on document type
 
 ## Architecture Decisions
 
