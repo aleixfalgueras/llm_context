@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { saveDocumentToStorage } from '@/lib/document-save-utils'
+import { DOCUMENT_TYPES } from '@/types/document-types'
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
       clientId,
       content: dietContent,
       documentName,
-      documentType: 'diet',
+      documentType: DOCUMENT_TYPES.DIET,
       startDate,
       endDate
     })

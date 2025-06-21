@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI Services feature provides AI-powered content generation for client management. Four services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, **Blood Test Analysis**, and **Meeting Report Generation**, all creating personalized content based on client profiles and saving as documents. Additionally, the platform includes **Medical History PDF Extraction** for comprehensive medical information extraction during client profile creation.
+The AI Services feature provides AI-powered content generation for client management. Five services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, **Blood Test Analysis**, **Meeting Report Generation**, and **Custom Document Generator**, all creating personalized content based on client profiles and saving as documents. Additionally, the platform includes **Medical History PDF Extraction** for comprehensive medical information extraction during client profile creation.
 
 ## Features Implemented
 
@@ -137,7 +137,49 @@ The AI Services feature provides AI-powered content generation for client manage
 - **Professional Format**: Structured, professional meeting documentation
 - **Flexible Input**: Accepts transcriptions, notes, or bullet points
 
-### 6. Medical History PDF Extraction
+### 6. Custom Document Generator
+
+#### Components:
+- **Dialog Component**: `components/custom-document-generator-dialog.tsx`
+- **API Routes**: 
+  - `app/api/ai-services/generate-custom-document/route.ts` (Generation)
+  - `app/api/ai-services/save-custom-document/route.ts` (Storage)
+
+#### Features:
+- Client selection dropdown with dynamic context selection
+- **Granular Client Context Control**: Select specific client information fields (age, height, weight, country, goals, medical history, notes) to include in document generation
+- **Dual Prompt Sources**: Choose between existing prompts from the prompts management system or write custom prompts inline
+- **Prompt System Integration**: Full integration with existing prompt CRUD operations and usage tracking
+- **Variable Replacement**: Automatic replacement of client variables like `{client_name}`, `{goals}`, `{medical_history}`, `{age}`, `{height}`, `{weight}`, `{country}`, etc.
+- Document title specification
+- AI generation using OpenAI with selected client context and prompt
+- Live markdown editor with preview
+- Save to Supabase storage
+- Document tracking in database
+
+#### Custom Document Generation Flow:
+1. **Setup**: Client selection and document title input
+2. **Context Selection**: Choose which client information fields to include (age, height, weight, country, goals, medical history, notes)
+3. **Prompt Selection**: Either select from existing prompts or write a custom prompt
+4. **Variable Integration**: Client variables automatically replaced in prompts before generation
+5. **Generation**: AI creates personalized document based on selected context and prompt
+6. **Edit & Save**: Live markdown editor with preview, save to storage
+
+#### Key Features:
+- **Prompt System Bridge**: Connects custom prompt management with document generation
+- **Context Granularity**: Fine-grained control over which client data influences generation
+- **Variable Replacement**: Smart replacement of client placeholders with actual data
+- **Flexible Prompting**: Support for both curated prompts and ad-hoc custom prompts
+- **Professional Output**: Structured, personalized document generation
+- **Usage Tracking**: Integrates with prompt usage analytics
+
+#### Variable System Integration:
+- **Available Variables**: `{client_name}`, `{age}`, `{height}`, `{weight}`, `{country}`, `{goals}`, `{medical_history}`, `{notes}`
+- **Context Filtering**: Only selected context fields are available for variable replacement
+- **Smart Replacement**: Variables replaced with actual client data or fallback placeholders
+- **Real-time Processing**: Variables processed during generation for immediate results
+
+### 7. Medical History PDF Extraction
 
 #### Components:
 - **Integration**: Embedded in `components/client-form.tsx`
@@ -194,7 +236,7 @@ The AI Services feature provides AI-powered content generation for client manage
 - **Summary Format**: Organized plain text summary with section headers
 - **Progress Feedback**: Real-time processing status and completion notifications
 
-### 7. Database Schema
+### 8. Database Schema
 
 #### Document Model:
 ```prisma
@@ -204,7 +246,7 @@ model Document {
   clientId    String   // The client this document belongs to
   documentName String  // The name of the document
   documentPath String  // Path in Supabase storage
-  documentType String  // Type: "diet", "workout", "blood-test-analysis", "meeting"
+  documentType String  // Type: "diet", "workout", "blood-test-analysis", "meeting", "custom"
   startDate   DateTime? // For time-based documents (diet/workout)
   endDate     DateTime? // For time-based documents (diet/workout)
   createdAt   DateTime @default(now())
@@ -214,7 +256,7 @@ model Document {
 }
 ```
 
-### 8. Supabase Storage Integration
+### 9. Supabase Storage Integration
 
 #### Storage Structure:
 ```
@@ -225,6 +267,7 @@ documents/
         ├── {Client Name} Workout {start_date} to {end_date}.md
         ├── {Client Name} Blood Test Analysis {test_date}.md
         ├── {Client Name} Meeting Report - {meeting_date}.md
+        ├── {Client Name} - {Document Title}.md
         └── ...
 ```
 
@@ -278,6 +321,7 @@ Diet Plans: {Client Name} Diet {YYYY-MM-DD} to {YYYY-MM-DD}.md
 Workout Plans: {Client Name} Workout {YYYY-MM-DD} to {YYYY-MM-DD}.md
 Blood Test Analysis: {Client Name} Blood Test Analysis {YYYY-MM-DD}.md
 Meeting Reports: {Client Name} Meeting Report - {YYYY-MM-DD}.md
+Custom Documents: {Client Name} - {Document Title}.md
 ```
 
 ## API Endpoints
@@ -415,6 +459,50 @@ additionalInfo: string (optional - for non-standard PDF formats)
 }
 ```
 
+### Custom Document Generation
+
+#### Generate Custom Document: `POST /api/ai-services/generate-custom-document`
+**Request Body:**
+```json
+{
+  "clientId": "string",
+  "promptId": "string (optional - for existing prompts)",
+  "customPrompt": "string (optional - for inline custom prompts)",
+  "documentTitle": "string",
+  "selectedContextFields": ["age", "height", "weight", "country", "goals", "medicalHistory", "notes"]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "content": "markdown formatted document content",
+  "promptName": "name of prompt used (if applicable)",
+  "clientName": "client name for confirmation"
+}
+```
+
+#### Save Custom Document: `POST /api/ai-services/save-custom-document`
+**Request Body:**
+```json
+{
+  "clientId": "string",
+  "content": "markdown content",
+  "documentTitle": "string",
+  "promptName": "string (optional - for tracking)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "filename": "saved document filename",
+  "documentId": "database document ID"
+}
+```
+
 ## Security & Privacy
 
 ### Authentication
@@ -459,6 +547,18 @@ additionalInfo: string (optional - for non-standard PDF formats)
 6. **Generate Analysis**: AI creates health analysis (excluding goals)
 7. **Edit & Preview**: Modify report with live markdown preview
 8. **Save**: Document saved to storage with database tracking
+
+### Custom Document Generation:
+1. **Navigate to AI Services**: User clicks AI Services in navbar
+2. **Select Custom Document Generator**: Click "Get Started" on service
+3. **Choose Client**: Select from dropdown 
+4. **Select Context**: Choose which client information fields to include (age, height, weight, country, goals, medical history, notes)
+5. **Enter Document Title**: Specify the document title
+6. **Choose Prompt Source**: Either select from existing prompts or write a custom prompt inline
+7. **Variable Processing**: Client variables automatically replaced in prompts
+8. **Generate**: AI creates personalized document based on selected context and prompt
+9. **Edit & Preview**: Modify content with live markdown preview
+10. **Save**: Document saved to storage with database tracking
 
 ## Dependencies & Setup
 
@@ -522,11 +622,16 @@ app/
 │       │   └── route.ts
 │       ├── generate-workout/
 │       │   └── route.ts
-│       └── save-workout/
+│       ├── save-workout/
+│       │   └── route.ts
+│       ├── generate-custom-document/
+│       │   └── route.ts
+│       └── save-custom-document/
 │           └── route.ts
 components/
 ├── ai-services-client.tsx
 ├── blood-test-analysis-dialog.tsx
+├── custom-document-generator-dialog.tsx
 ├── diet-generator-dialog.tsx
 ├── workout-generator-dialog.tsx
 └── ui/
@@ -559,12 +664,24 @@ scripts/
 5. Verify comprehensive analysis generation
 6. Test with both English and Spanish blood tests
 
+### Custom Document Generation:
+1. Ensure you have clients created in the system
+2. Create some test prompts in the prompt management system
+3. Navigate to `/ai-services`
+4. Test generation with existing prompts and custom prompts
+5. Verify client context selection works correctly
+6. Test variable replacement functionality
+7. Verify documents are saved and retrievable
+8. Test prompt usage tracking integration
+
 ## Future Enhancements
 
 ### Implemented Services (✅ Completed)
 - **Diet Plan Generation**: Custom nutrition plans
 - **Workout Plan Generation**: Custom exercise routines  
 - **Blood Test Analysis**: PDF upload and health insights
+- **Meeting Report Generation**: Professional meeting documentation
+- **Custom Document Generator**: Flexible document creation with prompt integration
 
 ### Planned Services
 - **Progress Report Generation**: Client progress summaries
@@ -580,4 +697,4 @@ scripts/
 - Email delivery system
 - Integration with wearable devices
 
-The AI Services feature is fully functional with three comprehensive services ready for production use! 
+The AI Services feature is fully functional with five comprehensive services ready for production use! 

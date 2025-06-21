@@ -4,6 +4,7 @@ import { Send, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { PromptSelector } from '@/components/prompt-selector'
+import { replaceClientVariables } from '@/lib/variable-replacement'
 
 interface Prompt {
   id: string
@@ -41,20 +42,10 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
   }
 
   const handlePromptSelect = (prompt: Prompt) => {
-    let processedContent = prompt.content
-
-    // Replace variables with client data if available
-    if (clientData) {
-      processedContent = processedContent
-        .replace(/\{client_name\}/g, clientData.name || '[Client Name]')
-        .replace(/\{medical_history\}/g, clientData.medicalHistory || '[Medical History]')
-        .replace(/\{goals\}/g, clientData.goals || '[Goals]')
-        .replace(/\{height\}/g, clientData.height ? `${clientData.height}cm` : '[Height]')
-        .replace(/\{weight\}/g, clientData.weight ? `${clientData.weight}kg` : '[Weight]')
-        .replace(/\{age\}/g, clientData.dateOfBirth ? 
-          `${Math.floor((Date.now() - new Date(clientData.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))}` : '[Age]')
-        .replace(/\{country\}/g, clientData.country || '[Country]')
-    }
+    // Replace variables with client data if available using shared utility
+    const processedContent = clientData 
+      ? replaceClientVariables(prompt.content, clientData)
+      : prompt.content
 
     // If there's existing input, add the prompt on a new line
     const newInput = input.trim() 

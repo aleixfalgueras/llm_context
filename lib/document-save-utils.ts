@@ -4,12 +4,13 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
+import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
 export interface SaveDocumentParams {
   clientId: string
   content: string
   documentName?: string
-  documentType: string
+  documentType: DocumentType
   startDate?: Date | string
   endDate?: Date | string
 }
@@ -92,12 +93,12 @@ export async function saveDocumentToStorage({
 
 function generateDefaultDocumentName(
   clientName: string,
-  documentType: string,
+  documentType: DocumentType,
   startDate?: Date | string,
   endDate?: Date | string
 ): string {
   switch (documentType) {
-    case 'diet':
+    case DOCUMENT_TYPES.DIET:
       if (startDate && endDate) {
         const startFormatted = new Date(startDate).toISOString().split('T')[0]
         const endFormatted = new Date(endDate).toISOString().split('T')[0]
@@ -105,7 +106,7 @@ function generateDefaultDocumentName(
       }
       return `${clientName} Diet`
     
-    case 'workout':
+    case DOCUMENT_TYPES.WORKOUT:
       if (startDate && endDate) {
         const startFormatted = new Date(startDate).toISOString().split('T')[0]
         const endFormatted = new Date(endDate).toISOString().split('T')[0]
@@ -113,14 +114,27 @@ function generateDefaultDocumentName(
       }
       return `${clientName} Workout`
     
-    case 'blood-test-analysis':
+    case DOCUMENT_TYPES.BLOOD_TEST_ANALYSIS:
       if (startDate) {
         const testDateFormatted = new Date(startDate).toISOString().split('T')[0]
         return `${clientName} Blood Test Analysis ${testDateFormatted}`
       }
       return `${clientName} Blood Test Analysis`
     
+    case DOCUMENT_TYPES.MEETING:
+      if (startDate) {
+        const meetingDateFormatted = new Date(startDate).toISOString().split('T')[0]
+        return `${clientName} Meeting Report ${meetingDateFormatted}`
+      }
+      return `${clientName} Meeting Report`
+    
+    case DOCUMENT_TYPES.CUSTOM_DOCUMENT:
+      return `${clientName} Custom Document`
+    
+    case DOCUMENT_TYPES.MANUAL:
+      return `${clientName} Manual Document`
+    
     default:
-      return `${clientName} ${documentType}`
+      return `${clientName} ${getDocumentTypeLabel(documentType)}`
   }
 } 

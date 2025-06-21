@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Zap, FileText, Calendar, Activity, MessageSquare, Settings, ChevronDown, ChevronUp } from 'lucide-react'
+import { Zap, FileText, Calendar, Activity, MessageSquare, Settings, ChevronDown, ChevronUp, Edit3 } from 'lucide-react'
 import { DietGeneratorDialog } from './diet-generator-dialog'
 import { WorkoutGeneratorDialog } from './workout-generator-dialog'
 import { BloodTestAnalysisDialog } from './blood-test-analysis-dialog'
 import { MeetingReportDialog } from './meeting-report-dialog'
+import { CustomDocumentGeneratorDialog } from './custom-document-generator-dialog'
 import { ClientDocuments } from './client-documents'
 
 interface AIServicesClientProps {
@@ -20,16 +21,21 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const [isWorkoutDialogOpen, setIsWorkoutDialogOpen] = useState(false)
   const [isBloodTestDialogOpen, setIsBloodTestDialogOpen] = useState(false)
   const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
+  const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
   const [isConfigOpen, setIsConfigOpen] = useState(false)
-  const [visibleServices, setVisibleServices] = useState<Record<string, boolean>>({
+  // Default visibility - all services visible by default
+  const defaultVisibility = {
     'diet-generator': true,
     'workout-generator': true,
     'blood-test-analysis': true,
     'meeting-report': true,
-  })
+    'custom-document': true,
+  }
+
+  const [visibleServices, setVisibleServices] = useState<Record<string, boolean>>(defaultVisibility)
 
   // Load saved service visibility preferences on component mount
   useEffect(() => {
@@ -38,9 +44,15 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
     if (savedVisibility) {
       try {
         const parsed = JSON.parse(savedVisibility)
-        setVisibleServices(parsed)
+        // Merge saved preferences with default visibility to ensure new services are visible
+        const mergedVisibility = { ...defaultVisibility, ...parsed }
+        setVisibleServices(mergedVisibility)
+        // Update localStorage to include any new services
+        localStorage.setItem('ai-services-visibility', JSON.stringify(mergedVisibility))
       } catch (error) {
         console.error('Failed to parse saved service visibility:', error)
+        // Fall back to default visibility on error
+        setVisibleServices(defaultVisibility)
       }
     }
   }, [])
@@ -101,6 +113,16 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       status: 'available',
       onClick: () => setIsMeetingReportDialogOpen(true),
       iconColorClass: 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400'
+    },
+    {
+      id: 'custom-document',
+      title: 'Custom Document Generator',
+      description: 'Create personalized documents using your custom prompts with client-specific information and variables.',
+      icon: <Edit3 className="h-8 w-8" />,
+      features: ['Use existing prompts', 'Variable replacement', 'Professional formatting'],
+      status: 'available',
+      onClick: () => setIsCustomDocumentDialogOpen(true),
+      iconColorClass: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
     }
   ]
 
@@ -230,6 +252,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                         service.id === 'workout-generator' ? 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600' :
                         service.id === 'blood-test-analysis' ? 'bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600' :
                         service.id === 'meeting-report' ? 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600' :
+                        service.id === 'custom-document' ? 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600' :
                         ''
                       }`}
                       onClick={service.onClick}
@@ -306,6 +329,14 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       <MeetingReportDialog 
         open={isMeetingReportDialogOpen}
         onOpenChange={setIsMeetingReportDialogOpen}
+        clients={clients}
+        onDocumentCreated={handleDocumentCreated}
+      />
+
+      {/* Custom Document Generator Dialog */}
+      <CustomDocumentGeneratorDialog 
+        isOpen={isCustomDocumentDialogOpen}
+        onClose={() => setIsCustomDocumentDialogOpen(false)}
         clients={clients}
         onDocumentCreated={handleDocumentCreated}
       />
