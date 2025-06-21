@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Loader2, User, Wand2, Calendar, Upload } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { FileText, Loader2, User, Wand2, Calendar, Upload, Edit, Eye, CheckCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -33,7 +34,6 @@ interface MeetingFormData {
 
 export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCreated }: MeetingReportDialogProps) {
   const { toast } = useToast()
-  const [step, setStep] = useState<'form' | 'generating' | 'editing'>('form')
   const [formData, setFormData] = useState<MeetingFormData>({
     clientId: '',
     meetingDate: '',
@@ -42,13 +42,13 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
     formatDocumentId: '',
     documentName: ''
   })
-  const [generatedReport, setGeneratedReport] = useState('')
-  const [editedReport, setEditedReport] = useState('')
+  const [generatedContent, setGeneratedContent] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [clientDocuments, setClientDocuments] = useState<any[]>([])
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
   const [isUploadingFile, setIsUploadingFile] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   const selectedClient = clients.find(client => client.id === formData.clientId)
 
@@ -138,7 +138,13 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
     }
 
     setIsGenerating(true)
-    setStep('generating')
+
+    // Show toast notification
+    toast({
+      title: `📝 Generating meeting report for ${selectedClient?.name}`,
+      description: 'This usually takes 30-60 seconds...',
+      duration: 5000,
+    })
 
     try {
       const response = await fetch('/api/ai-services/generate-meeting-report', {
@@ -154,8 +160,7 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
       }
 
       const data = await response.json()
-      setGeneratedReport(data.report)
-      setEditedReport(data.report)
+      setGeneratedContent(data.report)
       
       // Set default document name if not already set
       if (!formData.documentName) {
@@ -163,8 +168,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         const defaultName = `${selectedClient?.name} Meeting Report - ${meetingDateFormatted}`
         setFormData(prev => ({ ...prev, documentName: defaultName }))
       }
-      
-      setStep('editing')
     } catch (error) {
       console.error('Error generating meeting report:', error)
       toast({
@@ -172,14 +175,13 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         description: 'Failed to generate meeting report. Please try again.',
         variant: 'destructive'
       })
-      setStep('form')
     } finally {
       setIsGenerating(false)
     }
   }
 
   const handleSave = async () => {
-    if (!editedReport.trim()) {
+    if (!generatedContent.trim()) {
       toast({
         title: 'Empty Content',
         description: 'Please provide report content before saving',
@@ -198,7 +200,7 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         },
         body: JSON.stringify({
           ...formData,
-          reportContent: editedReport,
+          reportContent: generatedContent,
           documentName: formData.documentName
         })
       })
@@ -234,7 +236,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
       }
 
       // Reset and close
-      setStep('form')
       setFormData({ 
         clientId: '', 
         meetingDate: '', 
@@ -243,8 +244,7 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         formatDocumentId: '', 
         documentName: '' 
       })
-      setGeneratedReport('')
-      setEditedReport('')
+      setGeneratedContent('')
       onOpenChange(false)
     } catch (error) {
       console.error('Error saving meeting report:', error)
@@ -259,7 +259,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
   }
 
   const handleClose = () => {
-    setStep('form')
     setFormData({ 
       clientId: '', 
       meetingDate: '', 
@@ -268,8 +267,8 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
       formatDocumentId: '', 
       documentName: '' 
     })
-    setGeneratedReport('')
-    setEditedReport('')
+    setGeneratedContent('')
+    setIsEditMode(false)
     onOpenChange(false)
   }
 
@@ -289,204 +288,205 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
             <Calendar className="h-5 w-5" />
             Meeting Report
           </DialogTitle>
+          <DialogDescription>
+            Generate comprehensive meeting reports from transcriptions with AI assistance
+          </DialogDescription>
         </DialogHeader>
 
-        {step === 'form' && (
-          <div className="space-y-6 overflow-y-auto flex-1 px-1">
-            {/* Client Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="client">Select Client *</Label>
-              <ClientCombobox
-                clients={clients}
-                value={formData.clientId}
-                onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}
-                placeholder="Choose a client"
-                searchPlaceholder="Search clients..."
-                emptyMessage="No clients found."
-                required
-              />
-              
-            </div>
-
-            {/* Meeting Date */}
-            <div className="space-y-2">
-              <Label htmlFor="meetingDate">Meeting Date *</Label>
-              <DatePicker
-                id="meetingDate"
-                value={formData.meetingDate}
-                onChange={(value: string) => setFormData(prev => ({ ...prev, meetingDate: value }))}
-                placeholder="Select meeting date"
-                required
-              />
-            </div>
-
-            {/* Meeting Transcription */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="meetingTranscription">Meeting Transcription *</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    accept=".txt,text/plain"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="transcription-file-upload"
-                  />
-                                     <Button
-                     type="button"
-                     variant="outline"
-                     size="sm"
-                     onClick={() => document.getElementById('transcription-file-upload')?.click()}
-                     disabled={isUploadingFile}
-                     className="text-xs text-blue-600 dark:text-blue-400"
-                   >
-                    {isUploadingFile ? (
-                      <>
-                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-3 w-3 mr-1" />
-                        Upload .txt
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <Textarea
-                id="meetingTranscription"
-                value={formData.meetingTranscription}
-                onChange={(e) => setFormData(prev => ({ ...prev, meetingTranscription: e.target.value }))}
-                placeholder="Paste or type the meeting transcription here, or use the upload button above to load from a .txt file..."
-                rows={8}
-                className="resize-y min-h-[200px]"
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Provide the full transcription or detailed notes from your meeting with the client. You can also upload a .txt file using the button above.
-              </p>
-            </div>
-
-
-
-            {/* Additional Information Field */}
-            <div className="space-y-2">
-              <Label htmlFor="additionalInfo">Additional Context (optional)</Label>
-              <Textarea
-                id="additionalInfo"
-                value={formData.additionalInfo}
-                onChange={(e) => setFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
-                placeholder="e.g., Previous session notes, specific focus areas, follow-up actions from last meeting..."
-                rows={3}
-              />
-              <p className="text-xs text-muted-foreground">
-                Provide any additional context that might help generate a more accurate and useful report.
-              </p>
-            </div>
-
-
-
-            {/* Generate Button */}
-            <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleGenerate}
-                disabled={!formData.clientId || !formData.meetingDate || !formData.meetingTranscription.trim()}
-                className="bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600"
-              >
-                <Wand2 className="h-4 w-4 mr-2" />
-                Generate Report
-              </Button>
-            </div>
+        <div className="space-y-6 overflow-y-auto flex-1 px-1">
+          {/* Client Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="client">Select Client *</Label>
+            <ClientCombobox
+              clients={clients}
+              value={formData.clientId}
+              onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}
+              placeholder="Choose a client"
+              searchPlaceholder="Search clients..."
+              emptyMessage="No clients found."
+              required
+            />
           </div>
-        )}
 
-        {step === 'generating' && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <Loader2 className="h-12 w-12 animate-spin mx-auto text-purple-500" />
-              <div>
-                <h3 className="text-lg font-medium">Generating Meeting Report</h3>
-                <p className="text-muted-foreground">
-                  Analyzing the transcription and creating actionable insights...
-                </p>
-              </div>
-            </div>
+          {/* Meeting Date */}
+          <div className="space-y-2">
+            <Label htmlFor="meetingDate">Meeting Date *</Label>
+            <DatePicker
+              id="meetingDate"
+              value={formData.meetingDate}
+              onChange={(value: string) => setFormData(prev => ({ ...prev, meetingDate: value }))}
+              placeholder="Select meeting date"
+              required
+            />
           </div>
-        )}
 
-        {step === 'editing' && (
-          <div className="flex-1 overflow-hidden flex flex-col">
-            {/* Document Name Input */}
-            <div className="mb-4">
-              <Label htmlFor="documentName">Document Name</Label>
-              <Input
-                id="documentName"
-                value={formData.documentName}
-                onChange={(e) => setFormData(prev => ({ ...prev, documentName: e.target.value }))}
-                placeholder="Enter document name"
-                className="mt-1"
-              />
-            </div>
-
-            {/* Report Editor */}
-            <div className="flex-1 overflow-hidden grid grid-cols-2 gap-4">
-              {/* Editor */}
-              <div className="space-y-2">
-                <Label htmlFor="editedReport">Edit Report</Label>
-                <Textarea
-                  id="editedReport"
-                  value={editedReport}
-                  onChange={(e) => setEditedReport(e.target.value)}
-                  className="h-[400px] resize-none font-mono text-sm"
-                  placeholder="Generated report will appear here..."
+          {/* Meeting Transcription */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="meetingTranscription">Meeting Transcription *</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept=".txt,text/plain"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="transcription-file-upload"
                 />
-              </div>
-
-              {/* Preview */}
-              <div className="space-y-2">
-                <Label>Preview</Label>
-                <div className="h-[400px] overflow-y-auto border rounded-md p-4 bg-background">
-                  <ReactMarkdown>
-                    {editedReport || 'Preview will appear here...'}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={() => setStep('form')}>
-                Back to Form
-              </Button>
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleSave}
-                  disabled={isSaving || !editedReport.trim() || !formData.documentName.trim()}
-                  className="bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600"
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('transcription-file-upload')?.click()}
+                  disabled={isUploadingFile}
+                  className="text-xs text-blue-600 dark:text-blue-400"
                 >
-                  {isSaving ? (
+                  {isUploadingFile ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      Uploading...
                     </>
                   ) : (
                     <>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Save Report
+                      <Upload className="h-3 w-3 mr-1" />
+                      Upload .txt
                     </>
                   )}
                 </Button>
               </div>
             </div>
+            <Textarea
+              id="meetingTranscription"
+              value={formData.meetingTranscription}
+              onChange={(e) => setFormData(prev => ({ ...prev, meetingTranscription: e.target.value }))}
+              placeholder="Paste or type the meeting transcription here, or use the upload button above to load from a .txt file..."
+              rows={8}
+              className="resize-y min-h-[200px]"
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Provide the full transcription or detailed notes from your meeting with the client. You can also upload a .txt file using the button above.
+            </p>
           </div>
-        )}
+
+          {/* Additional Information Field */}
+          <div className="space-y-2">
+            <Label htmlFor="additionalInfo">Additional Context (optional)</Label>
+            <Textarea
+              id="additionalInfo"
+              value={formData.additionalInfo}
+              onChange={(e) => setFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
+              placeholder="e.g., Previous session notes, specific focus areas, follow-up actions from last meeting..."
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              Provide any additional context that might help generate a more accurate and useful report.
+            </p>
+          </div>
+
+          {/* Document Title */}
+          <div className="space-y-2">
+            <Label htmlFor="documentName">Document Title</Label>
+            <Input
+              id="documentName"
+              value={formData.documentName}
+              onChange={(e) => setFormData(prev => ({ ...prev, documentName: e.target.value }))}
+              placeholder="Enter document title (auto-filled if empty)"
+            />
+          </div>
+
+          {/* Generated Content */}
+          {generatedContent && (
+            <Card className="border-purple-200 bg-purple-50 dark:bg-purple-950/20 dark:border-purple-800">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-200">
+                    <Calendar className="h-5 w-5" />
+                    Generated Meeting Report
+                  </CardTitle>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300">
+                    {selectedClient?.name}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isEditMode ? (
+                  <Textarea
+                    value={generatedContent}
+                    onChange={(e) => setGeneratedContent(e.target.value)}
+                    className="min-h-[500px] font-mono text-sm"
+                    placeholder="Edit your meeting report here..."
+                  />
+                ) : (
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <ReactMarkdown>{generatedContent}</ReactMarkdown>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <DialogFooter className="flex justify-end gap-3">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          {!generatedContent ? (
+            <Button 
+              onClick={handleGenerate}
+              disabled={isGenerating || !formData.clientId || !formData.meetingDate || !formData.meetingTranscription.trim()}
+              className="bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  Generate Report
+                </>
+              )}
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditMode(!isEditMode)}
+                className="flex items-center gap-2"
+              >
+                {isEditMode ? (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    Preview
+                  </>
+                ) : (
+                  <>
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </>
+                )}
+              </Button>
+              <Button 
+                onClick={handleSave}
+                disabled={isSaving || !generatedContent.trim() || !formData.documentName.trim()}
+                className="bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Save Report
+                  </>
+                )}
+              </Button>
+            </>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

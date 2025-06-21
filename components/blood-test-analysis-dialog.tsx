@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,7 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Activity, Upload, CheckCircle, AlertCircle, AlertTriangle, FileText, User, Calendar, Search } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Activity, Upload, CheckCircle, AlertCircle, AlertTriangle, FileText, User, Calendar, Search, Edit, Eye } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DateInput } from '@/components/ui/date-input'
@@ -42,6 +43,7 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [isEditMode, setIsEditMode] = useState(false)
 
   const selectedClient = clients.find(client => client.id === formData.clientId)
 
@@ -881,66 +883,86 @@ export function BloodTestAnalysisDialog({ open, onOpenChange, clients, onDocumen
 
           {/* Editing Step */}
           {step === 'editing' && (
-            <div className="flex flex-col flex-1 space-y-4 min-h-0">
-              <div className="flex items-center justify-between flex-shrink-0">
-                <h3 className="text-lg font-medium">Review & Edit Blood Test Analysis</h3>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setStep('reviewing')}>
-                    Back to Review
-                  </Button>
-                  <Button onClick={handleSave} disabled={isSaving} className="bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600">
-                    {isSaving ? (
-                      <>
-                        <FileText className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      'Save Analysis Report'
-                    )}
-                  </Button>
-                </div>
+            <div className="space-y-6 overflow-y-auto flex-1 px-1">
+              <div className="text-center">
+                <CheckCircle className="h-12 w-12 text-red-600 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold">Blood Test Analysis Generated</h3>
+                <p className="text-muted-foreground">Review and edit your analysis below</p>
               </div>
 
               {/* Document Name Input */}
-              <div className="space-y-2 flex-shrink-0">
-                <Label htmlFor="documentName">Document Name</Label>
+              <div className="space-y-2">
+                <Label htmlFor="documentName">Document Title</Label>
                 <Input
                   id="documentName"
                   value={formData.documentName}
                   onChange={(e) => setFormData(prev => ({ ...prev, documentName: e.target.value }))}
-                  placeholder="Enter document name"
-                  className="font-medium"
+                  placeholder="Enter document title (auto-filled if empty)"
                 />
               </div>
 
-              {/* Edit Area */}
-              <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
-                {/* Edit Panel */}
-                <div className="border rounded-lg flex flex-col min-h-0">
-                  <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
-                    <h4 className="text-sm font-medium text-muted-foreground">Edit the generated blood test analysis</h4>
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto">
-                    <Textarea
-                      value={editedReport}
-                      onChange={(e) => setEditedReport(e.target.value)}
-                      className="w-full h-full font-mono text-sm resize-none border-0 p-4"
-                      placeholder="Generated blood test analysis will appear here..."
-                    />
-                  </div>
-                </div>
-
-                {/* Preview Panel */}
-                <div className="border rounded-lg flex flex-col min-h-0">
-                  <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
-                    <h4 className="text-sm font-medium text-muted-foreground">Preview</h4>
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto p-4">
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
-                      <ReactMarkdown>{editedReport}</ReactMarkdown>
+              {/* Generated Content */}
+              {editedReport && (
+                <Card className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2 text-red-800 dark:text-red-200">
+                        <Activity className="h-5 w-5" />
+                        Generated Blood Test Analysis
+                      </CardTitle>
+                      <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">
+                        {selectedClient?.name}
+                      </Badge>
                     </div>
-                  </div>
-                </div>
+                  </CardHeader>
+                  <CardContent>
+                    {isEditMode ? (
+                      <Textarea
+                        value={editedReport}
+                        onChange={(e) => setEditedReport(e.target.value)}
+                        className="min-h-[500px] font-mono text-sm"
+                        placeholder="Edit your blood test analysis here..."
+                      />
+                    ) : (
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <ReactMarkdown>{editedReport}</ReactMarkdown>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button onClick={() => setStep('reviewing')} variant="outline">
+                  Back to Review
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  className="flex items-center gap-2"
+                >
+                  {isEditMode ? (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      Preview
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </>
+                  )}
+                </Button>
+                <Button onClick={handleSave} disabled={isSaving} className="bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600">
+                  {isSaving ? (
+                    <>
+                      <FileText className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Analysis Report'
+                  )}
+                </Button>
               </div>
             </div>
           )}
