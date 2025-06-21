@@ -17,12 +17,21 @@ export async function POST(request: NextRequest) {
       : user?.firstName || 'Anonymous'
     const userEmail = user?.emailAddresses[0]?.emailAddress
 
-    const { title, description, priority, useCase } = await request.json()
+    const { type, title, description, priority, useCase, stepsToReproduce } = await request.json()
 
     // Validate required fields
-    if (!title || !description || !priority) {
+    if (!type || !title || !description || !priority) {
       return NextResponse.json(
         { error: 'Missing required fields' }, 
+        { status: 400 }
+      )
+    }
+
+    // Validate feedback type
+    const validTypes = ['feature', 'bug', 'complaint']
+    if (!validTypes.includes(type)) {
+      return NextResponse.json(
+        { error: 'Invalid feedback type' }, 
         { status: 400 }
       )
     }
@@ -36,27 +45,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Save feature request to database
+    // Save feedback to database
     const feedback = await prisma.feedback.create({
       data: {
         userId,
         userEmail,
         userName,
+        type,
         title,
         description,
         priority,
         useCase: useCase || null,
+        stepsToReproduce: stepsToReproduce || null,
       }
     })
 
+    const feedbackTypeLabel = type === 'feature' ? 'feature request' : 
+                             type === 'bug' ? 'bug report' : 'feedback'
+
     return NextResponse.json({ 
       success: true, 
-      featureRequestId: feedback.id,
-      message: 'Feature request submitted successfully'
+      feedbackId: feedback.id,
+      message: `${feedbackTypeLabel.charAt(0).toUpperCase() + feedbackTypeLabel.slice(1)} submitted successfully`
     })
 
   } catch (error) {
-    console.error('Feature request submission error:', error)
+    console.error('Feedback submission error:', error)
     return NextResponse.json(
       { error: 'Internal server error' }, 
       { status: 500 }
@@ -72,16 +86,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get feature requests for the current user
-    const featureRequests = await prisma.feedback.findMany({
+    // Get feedback for the current user
+    const feedbacks = await prisma.feedback.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json({ featureRequests })
+    return NextResponse.json({ feedbacks })
 
   } catch (error) {
-    console.error('Feature requests retrieval error:', error)
+    console.error('Feedback retrieval error:', error)
     return NextResponse.json(
       { error: 'Internal server error' }, 
       { status: 500 }
