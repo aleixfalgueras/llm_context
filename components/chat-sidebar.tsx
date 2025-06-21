@@ -60,7 +60,7 @@ export function ChatSidebar({ chats, currentChatId, selectedClientId, hideNewCha
 
 
   return (
-    <div className="w-80 border-r bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="w-64 border-r bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">

@@ -111,6 +111,9 @@ function generateDefaultDocumentName(
     case DOCUMENT_TYPES.MANUAL:
       return `${clientName} Manual Document`
     
+    case DOCUMENT_TYPES.CHAT:
+      return `${clientName} Chat Export`
+    
     default:
       return `${clientName} ${getDocumentTypeLabel(documentType)}`
   }
