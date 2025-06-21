@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Calendar, Dumbbell, Loader2, User, Wand2, FileText, Upload } from 'lucide-react'
+import { Dumbbell, Loader2, RefreshCw, Save, Edit, Eye } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -17,6 +17,7 @@ import { getClientDocuments } from '@/lib/document-actions'
 import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
+import { Badge } from '@/components/ui/badge'
 
 interface WorkoutGeneratorDialogProps {
   open: boolean
@@ -42,7 +43,6 @@ interface WorkoutFormData {
 
 export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocumentCreated }: WorkoutGeneratorDialogProps) {
   const { toast } = useToast()
-  const [step, setStep] = useState<'form' | 'generating' | 'editing'>('form')
   const [formData, setFormData] = useState<WorkoutFormData>({
     clientId: '',
     startDate: '',
@@ -57,10 +57,10 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
     documentName: '',
     clientContext: defaultClientContextSelections.fitness
   })
-  const [generatedWorkout, setGeneratedWorkout] = useState('')
-  const [editedWorkout, setEditedWorkout] = useState('')
+  const [generatedContent, setGeneratedContent] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
   const [clientDocuments, setClientDocuments] = useState<any[]>([])
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
 
@@ -113,7 +113,13 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
     }
 
     setIsGenerating(true)
-    setStep('generating')
+
+    // Show loading toast
+    toast({
+      title: 'Generating Workout Plan 🏋️‍♂️',
+      description: `Creating a personalized workout plan for ${selectedClient?.name}... This usually takes 15-30 seconds.`,
+      duration: 5000,
+    })
 
     try {
       const response = await fetch('/api/ai-services/generate-workout', {
@@ -133,8 +139,7 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
       }
 
       const data = await response.json()
-      setGeneratedWorkout(data.workout)
-      setEditedWorkout(data.workout)
+      setGeneratedContent(data.workout)
       
       // Set default document name if not already set
       if (!formData.documentName) {
@@ -143,8 +148,6 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
         const defaultName = `${selectedClient?.name} Workout ${startDateFormatted} to ${endDateFormatted}`
         setFormData(prev => ({ ...prev, documentName: defaultName }))
       }
-      
-      setStep('editing')
     } catch (error) {
       console.error('Error generating workout:', error)
       toast({
@@ -152,14 +155,13 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
         description: 'Failed to generate workout plan. Please try again.',
         variant: 'destructive'
       })
-      setStep('form')
     } finally {
       setIsGenerating(false)
     }
   }
 
   const handleSave = async () => {
-    if (!editedWorkout.trim()) {
+    if (!generatedContent.trim()) {
       toast({
         title: 'Empty Content',
         description: 'Please provide workout content before saving',
@@ -178,7 +180,7 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
         },
         body: JSON.stringify({
           ...formData,
-          workoutContent: editedWorkout,
+          workoutContent: generatedContent,
           documentName: formData.documentName
         })
       })
@@ -213,8 +215,7 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
         })
       }
 
-      // Reset and close
-      setStep('form')
+      // Reset form
       setFormData({ 
         clientId: '', 
         startDate: '', 
@@ -225,13 +226,14 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
         sessionDuration: '', 
         equipment: '', 
         additionalInfo: '', 
-        formatDocumentId: '',
-        documentName: '',
+        formatDocumentId: '', 
+        documentName: '', 
         clientContext: defaultClientContextSelections.fitness
       })
-      setGeneratedWorkout('')
-      setEditedWorkout('')
+      setGeneratedContent('')
+      setIsEditMode(false)
       onOpenChange(false)
+      
     } catch (error) {
       console.error('Error saving workout:', error)
       toast({
@@ -245,7 +247,6 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
   }
 
   const handleClose = () => {
-    setStep('form')
     setFormData({ 
       clientId: '', 
       startDate: '', 
@@ -256,213 +257,209 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
       sessionDuration: '', 
       equipment: '', 
       additionalInfo: '', 
-      formatDocumentId: '',
-      documentName: '',
+      formatDocumentId: '', 
+      documentName: '', 
       clientContext: defaultClientContextSelections.fitness
     })
-    setGeneratedWorkout('')
-    setEditedWorkout('')
+    setGeneratedContent('')
+    setIsEditMode(false)
     onOpenChange(false)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
   }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
-            <Dumbbell className="h-5 w-5" />
+          <DialogTitle className="flex items-center gap-2">
+            <Dumbbell className="h-5 w-5 text-yellow-600" />
             Generate Workout Plan
           </DialogTitle>
+          <DialogDescription>
+            Design custom workout routines tailored to your client's fitness level and objectives.
+          </DialogDescription>
         </DialogHeader>
 
-        {step === 'form' && (
-          <div className="space-y-6 overflow-y-auto flex-1 px-1">
-            {/* Client Selection */}
+        <div className="space-y-6">
+          {/* Client Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="client">Select Client *</Label>
+            <ClientCombobox
+              clients={clients}
+              value={formData.clientId}
+              onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}
+              placeholder="Choose a client"
+              searchPlaceholder="Search clients..."
+              emptyMessage="No clients found."
+              required
+            />
+          </div>
+
+          {/* Client Context Selection */}
+          {selectedClient && (
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Client Context Selection</Label>
+              <p className="text-sm text-muted-foreground">
+                Choose which client information to include in the AI context for workout generation:
+              </p>
+              <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                {selectedClient?.dateOfBirth && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-age"
+                      checked={formData.clientContext.age}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        clientContext: { ...prev.clientContext, age: e.target.checked }
+                      }))}
+                      label={`Age (${Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years)`}
+                    />
+                  </div>
+                )}
+                {selectedClient?.height && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-height"
+                      checked={formData.clientContext.height}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        clientContext: { ...prev.clientContext, height: e.target.checked }
+                      }))}
+                      label={`Height (${selectedClient.height}cm)`}
+                    />
+                  </div>
+                )}
+                {selectedClient?.weight && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-weight"
+                      checked={formData.clientContext.weight}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        clientContext: { ...prev.clientContext, weight: e.target.checked }
+                      }))}
+                      label={`Weight (${selectedClient.weight}kg)`}
+                    />
+                  </div>
+                )}
+                {selectedClient?.country && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-country"
+                      checked={formData.clientContext.country}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        clientContext: { ...prev.clientContext, country: e.target.checked }
+                      }))}
+                      label={`Country (${selectedClient.country})`}
+                    />
+                  </div>
+                )}
+                {selectedClient?.goals && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-goals"
+                      checked={formData.clientContext.goals}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        clientContext: { ...prev.clientContext, goals: e.target.checked }
+                      }))}
+                      label="Goals"
+                    />
+                  </div>
+                )}
+                {selectedClient?.medicalHistory && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-medical"
+                      checked={formData.clientContext.medicalHistory}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        clientContext: { ...prev.clientContext, medicalHistory: e.target.checked }
+                      }))}
+                      label="Medical History"
+                    />
+                  </div>
+                )}
+                {selectedClient?.notes && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-notes"
+                      checked={formData.clientContext.notes}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        clientContext: { ...prev.clientContext, notes: e.target.checked }
+                      }))}
+                      label="General Notes"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFormData(prev => ({
+                    ...prev,
+                    clientContext: defaultClientContextSelections.fitness
+                  }))}
+                >
+                  Select All
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFormData(prev => ({
+                    ...prev,
+                    clientContext: {
+                      age: false,
+                      height: false,
+                      weight: false,
+                      country: false,
+                      goals: false,
+                      medicalHistory: false,
+                      notes: false
+                    }
+                  }))}
+                >
+                  Deselect All
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Date Range */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="client">Select Client *</Label>
-              <ClientCombobox
-                clients={clients}
-                value={formData.clientId}
-                onValueChange={(value: string) => setFormData(prev => ({ ...prev, clientId: value }))}
-                placeholder="Choose a client"
-                searchPlaceholder="Search clients..."
-                emptyMessage="No clients found."
+              <Label htmlFor="startDate">Start Date *</Label>
+              <DatePicker
+                id="startDate"
+                value={formData.startDate}
+                onChange={(value: string) => setFormData(prev => ({ ...prev, startDate: value }))}
+                placeholder="Select start date"
                 required
               />
             </div>
-
-            {/* Client Context Selection */}
-            {selectedClient && (
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Client Context Selection</Label>
-                <p className="text-sm text-muted-foreground">
-                  Choose which client information to include in the AI context for workout generation:
-                </p>
-                <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                  {selectedClient?.dateOfBirth && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="context-age"
-                        checked={formData.clientContext.age}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          clientContext: { ...prev.clientContext, age: e.target.checked }
-                        }))}
-                        label={`Age (${Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years)`}
-                      />
-                    </div>
-                  )}
-                  {selectedClient?.height && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="context-height"
-                        checked={formData.clientContext.height}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          clientContext: { ...prev.clientContext, height: e.target.checked }
-                        }))}
-                        label={`Height (${selectedClient.height}cm)`}
-                      />
-                    </div>
-                  )}
-                  {selectedClient?.weight && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="context-weight"
-                        checked={formData.clientContext.weight}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          clientContext: { ...prev.clientContext, weight: e.target.checked }
-                        }))}
-                        label={`Weight (${selectedClient.weight}kg)`}
-                      />
-                    </div>
-                  )}
-                  {selectedClient?.country && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="context-country"
-                        checked={formData.clientContext.country}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          clientContext: { ...prev.clientContext, country: e.target.checked }
-                        }))}
-                        label={`Country (${selectedClient.country})`}
-                      />
-                    </div>
-                  )}
-                  {selectedClient?.goals && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="context-goals"
-                        checked={formData.clientContext.goals}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          clientContext: { ...prev.clientContext, goals: e.target.checked }
-                        }))}
-                        label="Goals"
-                      />
-                    </div>
-                  )}
-                  {selectedClient?.medicalHistory && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="context-medical"
-                        checked={formData.clientContext.medicalHistory}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          clientContext: { ...prev.clientContext, medicalHistory: e.target.checked }
-                        }))}
-                        label="Medical History"
-                      />
-                    </div>
-                  )}
-                  {selectedClient?.notes && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="context-notes"
-                        checked={formData.clientContext.notes}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          clientContext: { ...prev.clientContext, notes: e.target.checked }
-                        }))}
-                        label="General Notes"
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData(prev => ({
-                      ...prev,
-                      clientContext: defaultClientContextSelections.fitness
-                    }))}
-                  >
-                    Select All
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFormData(prev => ({
-                      ...prev,
-                      clientContext: {
-                        age: false,
-                        height: false,
-                        weight: false,
-                        country: false,
-                        goals: false,
-                        medicalHistory: false,
-                        notes: false
-                      }
-                    }))}
-                  >
-                    Deselect All
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Date Range */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date *</Label>
-                <DatePicker
-                  id="startDate"
-                  value={formData.startDate}
-                  onChange={(value: string) => setFormData(prev => ({ ...prev, startDate: value }))}
-                  placeholder="Select start date"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="endDate">End Date *</Label>
-                <DatePicker
-                  id="endDate"
-                  value={formData.endDate}
-                  onChange={(value: string) => setFormData(prev => ({ ...prev, endDate: value }))}
-                  placeholder="Select end date"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date *</Label>
+              <DatePicker
+                id="endDate"
+                value={formData.endDate}
+                onChange={(value: string) => setFormData(prev => ({ ...prev, endDate: value }))}
+                placeholder="Select end date"
+                required
+              />
             </div>
+          </div>
 
-            {/* Workout Specifications */}
+          {/* Workout Specifications */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Workout Specifications</Label>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="workoutType">Workout Type</Label>
-                <Select value={formData.workoutType} onValueChange={(value: string) => setFormData(prev => ({ ...prev, workoutType: value }))}>
+                <Select value={formData.workoutType} onValueChange={(value) => setFormData(prev => ({ ...prev, workoutType: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select workout type" />
                   </SelectTrigger>
@@ -470,18 +467,17 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
                     <SelectItem value="strength">Strength Training</SelectItem>
                     <SelectItem value="cardio">Cardio</SelectItem>
                     <SelectItem value="hiit">HIIT</SelectItem>
+                    <SelectItem value="flexibility">Flexibility/Yoga</SelectItem>
+                    <SelectItem value="mixed">Mixed Training</SelectItem>
                     <SelectItem value="bodyweight">Bodyweight</SelectItem>
                     <SelectItem value="powerlifting">Powerlifting</SelectItem>
-                    <SelectItem value="crossfit">CrossFit</SelectItem>
-                    <SelectItem value="yoga">Yoga</SelectItem>
-                    <SelectItem value="pilates">Pilates</SelectItem>
-                    <SelectItem value="mixed">Mixed Training</SelectItem>
+                    <SelectItem value="functional">Functional Training</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="fitnessLevel">Fitness Level</Label>
-                <Select value={formData.fitnessLevel} onValueChange={(value: string) => setFormData(prev => ({ ...prev, fitnessLevel: value }))}>
+                <Select value={formData.fitnessLevel} onValueChange={(value) => setFormData(prev => ({ ...prev, fitnessLevel: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select fitness level" />
                   </SelectTrigger>
@@ -489,197 +485,219 @@ export function WorkoutGeneratorDialog({ open, onOpenChange, clients, onDocument
                     <SelectItem value="beginner">Beginner</SelectItem>
                     <SelectItem value="intermediate">Intermediate</SelectItem>
                     <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="elite">Elite</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="daysPerWeek">Days Per Week</Label>
-                <Select value={formData.daysPerWeek} onValueChange={(value: string) => setFormData(prev => ({ ...prev, daysPerWeek: value }))}>
+                <Label htmlFor="daysPerWeek">Days per Week</Label>
+                <Select value={formData.daysPerWeek} onValueChange={(value) => setFormData(prev => ({ ...prev, daysPerWeek: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="2">2 days/week</SelectItem>
-                    <SelectItem value="3">3 days/week</SelectItem>
-                    <SelectItem value="4">4 days/week</SelectItem>
-                    <SelectItem value="5">5 days/week</SelectItem>
-                    <SelectItem value="6">6 days/week</SelectItem>
-                    <SelectItem value="7">7 days/week</SelectItem>
+                    <SelectItem value="1">1 day</SelectItem>
+                    <SelectItem value="2">2 days</SelectItem>
+                    <SelectItem value="3">3 days</SelectItem>
+                    <SelectItem value="4">4 days</SelectItem>
+                    <SelectItem value="5">5 days</SelectItem>
+                    <SelectItem value="6">6 days</SelectItem>
+                    <SelectItem value="7">7 days</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sessionDuration">Session Duration (minutes)</Label>
-                <Input
-                  id="sessionDuration"
-                  type="number"
-                  placeholder="e.g. 60"
-                  value={formData.sessionDuration}
-                  onChange={(e) => setFormData(prev => ({ ...prev, sessionDuration: e.target.value }))}
-                  onWheel={(e) => e.currentTarget.blur()}
-                />
+                <Label htmlFor="sessionDuration">Session Duration</Label>
+                <Select value={formData.sessionDuration} onValueChange={(value) => setFormData(prev => ({ ...prev, sessionDuration: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">60 minutes</SelectItem>
+                    <SelectItem value="75">75 minutes</SelectItem>
+                    <SelectItem value="90">90 minutes</SelectItem>
+                    <SelectItem value="120">120 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-
-            {/* Equipment */}
-            <div className="space-y-2">
-              <Label htmlFor="equipment">Available Equipment</Label>
-              <Textarea
-                id="equipment"
-                placeholder="List available equipment (e.g. dumbbells, barbell, resistance bands, etc.)"
-                value={formData.equipment}
-                onChange={(e) => setFormData(prev => ({ ...prev, equipment: e.target.value }))}
-                rows={3}
-              />
-            </div>
-
-            {/* Additional Information */}
-            <div className="space-y-2">
-              <Label htmlFor="additionalInfo">Additional Information</Label>
-              <Textarea
-                id="additionalInfo"
-                placeholder="Any special considerations, injuries, preferences, or specific requirements..."
-                value={formData.additionalInfo}
-                onChange={(e) => setFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
-                rows={4}
-              />
-            </div>
-
-            {/* Format Document Selection */}
-            {formData.clientId && (
-              <div className="space-y-2">
-                <Label htmlFor="formatDocument">Format Example Document</Label>
-                <DocumentCombobox
-                  documents={clientDocuments}
-                  value={formData.formatDocumentId}
-                  onValueChange={(value: string) => setFormData(prev => ({ ...prev, formatDocumentId: value }))}
-                  placeholder="Select a document to use as a formatting example"
-                  searchPlaceholder="Search documents..."
-                  emptyMessage="No documents found."
-                  loading={isLoadingDocuments}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Select an existing document to use as a format/structure example for the AI when generating the new workout plan.
-                  {clientDocuments.length > 0 && ` (${clientDocuments.length} documents available)`}
-                </p>
-              </div>
-            )}
-
-            {/* Date Range Summary */}
-            {formData.startDate && formData.endDate && (
-              <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      Workout plan duration: {formatDate(formData.startDate)} to {formatDate(formData.endDate)}
-                      ({Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24))} days)
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button onClick={handleGenerate} disabled={!formData.clientId || !formData.startDate || !formData.endDate} className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600">
-                <Wand2 className="h-4 w-4 mr-2" />
-                Generate Workout Plan
-              </Button>
             </div>
           </div>
-        )}
 
-        {step === 'generating' && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <Upload className="h-16 w-16 text-yellow-600 mx-auto mb-4 animate-pulse" />
-              <h3 className="text-lg font-semibold mb-2">Generating Workout Plan</h3>
-              <p className="text-muted-foreground mb-4">Creating a personalized workout plan for {selectedClient?.name}...</p>
-              
-              <div className="flex justify-center">
-                <div className="flex space-x-1">
-                  <div className="h-2 w-2 bg-yellow-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="h-2 w-2 bg-yellow-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="h-2 w-2 bg-yellow-600 rounded-full animate-bounce"></div>
-                </div>
-              </div>
-              
-              <p className="text-xs text-muted-foreground mt-4">
-                This usually takes 15-30 seconds
+          {/* Equipment */}
+          <div className="space-y-2">
+            <Label htmlFor="equipment">Available Equipment</Label>
+            <Textarea
+              id="equipment"
+              value={formData.equipment}
+              onChange={(e) => setFormData(prev => ({ ...prev, equipment: e.target.value }))}
+              placeholder="e.g., Dumbbells, barbell, resistance bands, gym access..."
+              rows={2}
+            />
+            <p className="text-xs text-muted-foreground">
+              List the equipment available to your client. Leave blank for bodyweight exercises.
+            </p>
+          </div>
+
+          {/* Additional Information Field */}
+          <div className="space-y-2">
+            <Label htmlFor="additionalInfo">Additional information</Label>
+            <Textarea
+              id="additionalInfo"
+              value={formData.additionalInfo}
+              onChange={(e) => setFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
+              placeholder="e.g., Format guidelines, specific exercises to include/avoid, injury considerations..."
+              rows={2}
+            />
+            <p className="text-xs text-muted-foreground">
+              Provide any additional context or requirements for this workout plan beyond the client's profile.
+            </p>
+          </div>
+
+          {/* Document Title */}
+          <div className="space-y-2">
+            <Label htmlFor="documentName">Document Title</Label>
+            <Input
+              id="documentName"
+              value={formData.documentName}
+              onChange={(e) => setFormData(prev => ({ ...prev, documentName: e.target.value }))}
+              placeholder="Enter document title (auto-filled if empty)"
+            />
+          </div>
+
+          {/* Format Document Selection */}
+          {formData.clientId && (
+            <div className="space-y-2">
+              <Label htmlFor="formatDocument">Format Example Document</Label>
+              <DocumentCombobox
+                documents={clientDocuments}
+                value={formData.formatDocumentId}
+                onValueChange={(value: string) => setFormData(prev => ({ ...prev, formatDocumentId: value }))}
+                placeholder="Select a document to use as a formatting example"
+                searchPlaceholder="Search documents..."
+                emptyMessage="No documents found."
+                loading={isLoadingDocuments}
+              />
+              <p className="text-xs text-muted-foreground">
+                Select an existing document to use as a format/structure example for the AI when generating the new workout plan.
+                {clientDocuments.length > 0 && ` (${clientDocuments.length} documents available)`}
               </p>
             </div>
-          </div>
-        )}
+          )}
 
-        {step === 'editing' && (
-          <div className="flex flex-col flex-1 space-y-4 min-h-0">
-            <div className="flex items-center justify-between flex-shrink-0">
-              <h3 className="text-lg font-medium">Review & Edit Workout Plan</h3>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep('form')}>
-                  Back to Form
-                </Button>
-                <Button onClick={handleSave} disabled={isSaving} className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Workout Plan'
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {/* Document Name Input */}
-            <div className="space-y-2 flex-shrink-0">
-              <Label htmlFor="documentName">Document Name</Label>
-              <Input
-                id="documentName"
-                value={formData.documentName}
-                onChange={(e) => setFormData(prev => ({ ...prev, documentName: e.target.value }))}
-                placeholder="Enter document name"
-                className="font-medium"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
-              {/* Edit Panel */}
-              <div className="border rounded-lg flex flex-col min-h-0">
-                <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
-                  <h4 className="text-sm font-medium text-muted-foreground">Edit the generated workout plan</h4>
-                </div>
-                <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Generated Content */}
+          {generatedContent && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Dumbbell className="h-4 w-4" />
+                  Generated Workout Plan
+                  <Badge variant="outline" className="ml-auto">
+                    {isEditMode ? 'Edit Mode' : 'Preview Mode'}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isEditMode ? (
                   <Textarea
-                    value={editedWorkout}
-                    onChange={(e) => setEditedWorkout(e.target.value)}
-                    className="w-full h-full font-mono text-sm resize-none border-0 p-4"
-                    placeholder="Generated workout plan will appear here..."
+                    value={generatedContent}
+                    onChange={(e) => setGeneratedContent(e.target.value)}
+                    className="min-h-96 font-mono text-sm"
+                    placeholder="Edit your workout plan content here..."
                   />
-                </div>
-              </div>
-
-              {/* Preview Panel */}
-              <div className="border rounded-lg flex flex-col min-h-0">
-                <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex-shrink-0">
-                  <h4 className="text-sm font-medium text-muted-foreground">Preview</h4>
-                </div>
-                <div className="flex-1 min-h-0 overflow-y-auto p-4">
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>{editedWorkout}</ReactMarkdown>
+                ) : (
+                  <div className="max-h-96 overflow-y-auto prose prose-sm max-w-none">
+                    <ReactMarkdown>{generatedContent}</ReactMarkdown>
                   </div>
-                </div>
-              </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          {!generatedContent ? (
+            <Button
+              onClick={handleGenerate}
+              disabled={isGenerating || !formData.clientId || !formData.startDate || !formData.endDate}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Generate Workout Plan
+                </>
+              )}
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="border-yellow-600 text-yellow-600 hover:bg-yellow-50"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Regenerating...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Regenerate
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditMode(!isEditMode)}
+                className="border-yellow-600 text-yellow-600 hover:bg-yellow-50"
+              >
+                {isEditMode ? (
+                  <>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview Workout Plan
+                  </>
+                ) : (
+                  <>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Workout Plan
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Workout Plan
+                  </>
+                )}
+              </Button>
             </div>
-          </div>
-        )}
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
