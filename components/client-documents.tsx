@@ -53,6 +53,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   const [searchTerm, setSearchTerm] = useState('')
   const [documentTypeFilter, setDocumentTypeFilter] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -594,57 +595,69 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
           </div>
 
           {/* Document Content */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden">
             {isCreating ? (
-              <div className="space-y-4">
-                <h3 className="font-semibold">Create New Document</h3>
+              <div className="flex flex-col h-full">
+                <h3 className="font-semibold mb-4">Create New Document</h3>
                 
-                <div>
-                  <Label htmlFor="docName">Document Name *</Label>
-                  <Input
-                    id="docName"
-                    value={newDocumentName}
-                    onChange={(e) => setNewDocumentName(e.target.value)}
-                    placeholder="Enter document name"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex-1 overflow-y-auto pr-2 space-y-4">
                   <div>
-                    <Label htmlFor="startDate">Start Date</Label>
+                    <Label htmlFor="docName">Document Name *</Label>
                     <Input
-                      id="startDate"
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      id="docName"
+                      value={newDocumentName}
+                      onChange={(e) => setNewDocumentName(e.target.value)}
+                      placeholder="Enter document name"
                     />
                   </div>
-                  
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="startDate">Start Date</Label>
+                      <Input
+                        id="startDate"
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="endDate">End Date</Label>
+                      <Input
+                        id="endDate"
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <Label htmlFor="endDate">End Date</Label>
-                    <Input
-                      id="endDate"
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                    <Label htmlFor="content">Content</Label>
+                    <Textarea
+                      id="content"
+                      value={newDocumentContent}
+                      onChange={(e) => setNewDocumentContent(e.target.value)}
+                      placeholder="Enter document content..."
+                      className="mt-2"
+                      rows={8}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea
-                    id="content"
-                    value={newDocumentContent}
-                    onChange={(e) => setNewDocumentContent(e.target.value)}
-                    placeholder="Enter document content..."
-                    className="min-h-[300px] resize-none"
-                  />
-                </div>
-
-                <div className="flex gap-2">
+                <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     Cancel
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowPreview(true)}
+                    disabled={!newDocumentContent.trim()}
+                    className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Preview
                   </Button>
                   <Button onClick={handleCreateDocument} className="bg-blue-500 hover:bg-blue-600 text-white">
                     Create Document
@@ -759,6 +772,80 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
           </div>
         </div>
       </DialogContent>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Preview: {newDocumentName || 'Untitled Document'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto max-h-[70vh] border border-blue-200 dark:border-blue-800 rounded-md p-4 bg-blue-50/20 dark:bg-blue-950/10">
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+                components={{
+                  // Custom styling for code blocks
+                  code: ({ node, inline, className, children, ...props }: any) => {
+                    const match = /language-(\w+)/.exec(className || '')
+                    return !inline && match ? (
+                      <code
+                        className={`${className} block bg-gray-100 dark:bg-gray-800 rounded-md p-3 overflow-x-auto text-sm`}
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    ) : (
+                      <code
+                        className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono"
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    )
+                  },
+                  // Custom styling for blockquotes
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-blue-500 pl-4 italic bg-blue-50 dark:bg-blue-950/20 py-2 rounded-r">
+                      {children}
+                    </blockquote>
+                  ),
+                  // Custom styling for tables
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
+                        {children}
+                      </table>
+                    </div>
+                  )
+                }}
+              >
+                {newDocumentContent || '*No content to preview*'}
+              </ReactMarkdown>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setShowPreview(false)}>
+              Close Preview
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowPreview(false)
+                handleCreateDocument()
+              }}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+              disabled={!newDocumentName.trim() || !newDocumentContent.trim()}
+            >
+              Create Document
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 } 
