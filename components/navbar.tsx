@@ -5,6 +5,9 @@ import { usePathname } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import { ThemeToggle } from './theme-toggle'
 import { cn } from '@/lib/utils'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Menu } from 'lucide-react'
 
 export function Navbar() {
   const pathname = usePathname()
@@ -14,7 +17,7 @@ export function Navbar() {
     { name: 'Prompts', href: '/prompts', icon: '📝' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
     { name: 'AI Services', href: '/ai-services', icon: '⚡' },
-    { name: 'Feature Requests', href: '/feedback', icon: '💡' },
+
   ]
 
   // Helper function to determine if a nav item is active
@@ -61,22 +64,49 @@ export function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center space-x-3">
-            <Link 
-              href="/privacy" 
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <ThemeToggle />
-            <UserButton 
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "h-8 w-8"
-                }
-              }}
-            />
+          <div className="flex items-center">
+            <div className="flex items-center space-x-2 mr-4">
+              <ThemeToggle />
+            </div>
+            
+            <div className="flex items-center space-x-2 pl-4 border-l border-border">
+              <TooltipProvider>
+                <DropdownMenu>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors">
+                        <Menu className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Menu</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/privacy" className="cursor-pointer flex items-center">
+                        <span>Privacy Policy</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/feedback" className="cursor-pointer flex items-center">
+                        <span>Provide Feedback</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TooltipProvider>
+              
+              <UserButton 
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "h-8 w-8 hover:scale-105 transition-transform"
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

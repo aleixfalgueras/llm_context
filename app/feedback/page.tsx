@@ -17,8 +17,11 @@ export default async function FeedbackPage() {
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Suggest New Features
+              Provide Feedback
             </h1>
+            <p className="text-muted-foreground">
+              Help us improve by sharing your feature requests, reporting bugs, or providing general feedback.
+            </p>
           </div>
           <FeedbackForm />
         </div>

@@ -223,7 +223,7 @@ export default function PrivacyPolicyPage() {
                 </p>
                 <div className="space-y-2 text-sm">
                   <p><strong>Email:</strong> privacy@healthcoach.ai</p>
-                  <p><strong>Support:</strong> <Link href="/feedback" className="text-blue-600 dark:text-blue-400 hover:underline">Submit a feature request</Link></p>
+                  <p><strong>Support:</strong> <Link href="/feedback" className="text-blue-600 dark:text-blue-400 hover:underline">Provide feedback</Link></p>
                 </div>
               </CardContent>
             </Card>

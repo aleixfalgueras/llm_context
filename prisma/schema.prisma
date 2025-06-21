@@ -89,10 +89,12 @@ model Feedback {
   userId      String   // The user's ID from Clerk
   userEmail   String?  // User's email for contact purposes
   userName    String?  // User's name
-  title       String   // Title of the feature request
-  description String   // Detailed description of the feature
+  type        String   // Type of feedback: "feature", "bug", "complaint"
+  title       String   // Title of the feedback
+  description String   // Detailed description of the feedback
   priority    String   // Priority level: "low", "medium", "high"
-  useCase     String?  // Use case or scenario where this feature would be helpful
+  useCase     String?  // Use case or scenario (for feature requests)
+  stepsToReproduce String? // Steps to reproduce (for bug reports)
   createdAt   DateTime @default(now())
   
   @@map("feedbacks")
