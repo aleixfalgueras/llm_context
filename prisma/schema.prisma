@@ -98,6 +98,21 @@ model Feedback {
   @@map("feedbacks")
 }
 
+model Prompt {
+  id          String   @id @default(cuid())
+  userId      String   // The user's ID from Clerk
+  name        String   // User-friendly name for the prompt
+  description String?  // Optional description of what the prompt does
+  content     String   // The actual prompt content/template
+  category    String   @default("general") // Category for organization (general, medical, fitness, etc.)
+  isActive    Boolean  @default(true) // Allow users to disable prompts without deleting
+  usageCount  Int      @default(0) // Track how often prompt is used
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("prompts")
+}
+
 enum Role {
   USER
   ASSISTANT

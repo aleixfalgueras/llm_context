@@ -67,7 +67,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
           initialMessages={chat.messages}
           userImageUrl={userImageUrl}
           userName={userName}
-          
+          clientData={selectedClient}
           onTitleUpdate={setCurrentTitle}
         />
       </div>

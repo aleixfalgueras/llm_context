@@ -11,8 +11,9 @@ export function Navbar() {
 
   const navigation = [
     { name: 'Clients', href: '/clients', icon: '👥' },
-    { name: 'AI Services', href: '/ai-services', icon: '⚡' },
+    { name: 'Prompts', href: '/prompts', icon: '📝' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
+    { name: 'AI Services', href: '/ai-services', icon: '⚡' },
     { name: 'Feature Requests', href: '/feedback', icon: '💡' },
   ]
 
