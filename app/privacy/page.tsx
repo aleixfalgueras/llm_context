@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </div>
             <p className="text-lg text-muted-foreground">
-              Your privacy is important to us. This privacy policy explains how HealthCoach AI collects, uses, and protects your information.
+              Your privacy is important to us. This privacy policy explains how AI Marketing Assistant collects, uses, and protects your information.
             </p>
           </div>
 
@@ -44,25 +44,24 @@ export default function PrivacyPolicyPage() {
                   <h4 className="font-semibold mb-2">Personal Information</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>Name, email address, and phone number</li>
-                    <li>Goals</li>
-                    <li>Medical history and health-related information</li>
-                    <li>Physical measurements (height, weight, age)</li>
-                    <li>Personal notes and preferences</li>
+                    <li>Business or client information for marketing purposes</li>
+                    <li>Country or location information</li>
+                    <li>General notes and preferences</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Document Uploads</h4>
+                  <h4 className="font-semibold mb-2">Document Generation</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Blood test reports and medical documents (PDF format)</li>
-                    <li>Medical history documents (PDF format)</li>
-                    <li>Extracted and anonymized health information from uploaded documents</li>
+                    <li>Marketing documents and content generated through our AI services</li>
+                    <li>Meeting reports and custom documents</li>
+                    <li>Content preferences and language settings</li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2">Usage Information</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>Chat messages and interactions with our AI assistant</li>
-                    <li>Documents uploaded and generated</li>
+                    <li>Documents generated and prompts used</li>
                     <li>Usage patterns and preferences</li>
                   </ul>
                 </div>
@@ -73,30 +72,30 @@ export default function PrivacyPolicyPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  Medical Document Processing
+                  Document Processing
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">🔒 Privacy-First Document Processing</p>
+                  <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">🔒 Privacy-First Content Generation</p>
                   <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-                    We've designed our document processing to prioritize your privacy and security.
+                    We've designed our document generation to prioritize your privacy and security.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">How We Handle Your Medical Documents:</h4>
+                  <h4 className="font-semibold mb-2">How We Handle Your Marketing Content:</h4>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                    <li><strong>No Storage:</strong> PDF files are never stored on our servers. They are processed in memory only and immediately discarded after extraction.</li>
-                    <li><strong>Automatic Anonymization:</strong> Our AI automatically removes all personally identifiable information (names, addresses, dates, doctor names, medical IDs) during processing.</li>
-                    <li><strong>Relevant Data Only:</strong> We extract only health information relevant for fitness and wellness coaching (conditions, medications, allergies, lifestyle factors).</li>
-                    <li><strong>User Control:</strong> You can review and edit all extracted information before it's saved to your profile.</li>
+                    <li><strong>Secure Generation:</strong> All content is generated using secure, encrypted connections and processed in memory only.</li>
+                    <li><strong>User Control:</strong> You have full control over what information is shared with AI during content generation.</li>
+                    <li><strong>No Unauthorized Access:</strong> Your generated content is only accessible to you and cannot be accessed by other users.</li>
+                    <li><strong>Data Minimization:</strong> We only use the minimum necessary information to generate your requested content.</li>
                   </ul>
                 </div>
                 <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <p className="text-green-800 dark:text-green-200 font-medium mb-2">✓ What Gets Saved vs. Discarded</p>
+                  <p className="text-green-800 dark:text-green-200 font-medium mb-2">✓ What We Share vs. Keep Private</p>
                   <div className="text-sm text-green-700 dark:text-green-300 space-y-2">
-                    <p><strong>Saved:</strong> Anonymized medical summary (conditions, medications, allergies)</p>
-                    <p><strong>Discarded:</strong> Original PDF, personal identifiers, specific dates, doctor/clinic names</p>
+                    <p><strong>Shared with AI:</strong> Only selected client context (country, notes) when explicitly chosen</p>
+                    <p><strong>Never Shared:</strong> Names, email addresses, phone numbers, or other identifying information</p>
                   </div>
                 </div>
               </CardContent>
@@ -115,17 +114,17 @@ export default function PrivacyPolicyPage() {
                   <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                     <p className="text-green-800 dark:text-green-200 font-medium mb-2">✓ No Personal Identifiers Sent to AI</p>
                     <p className="text-sm text-green-700 dark:text-green-300">
-                      We never send your name, email address, phone number, or other identifying information to our AI models. Only anonymized health and fitness data is used to personalize your experience.
+                      We never send your name, email address, phone number, or other identifying information to our AI models. Only selected client context (country, notes) is used when you explicitly choose to include it.
                     </p>
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Document Processing Security</h4>
+                  <h4 className="font-semibold mb-2">Content Generation Security</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>PDF files are processed in secure, encrypted memory and never written to disk</li>
-                    <li>All personal identifiers are automatically stripped during AI processing</li>
-                    <li>Only relevant, anonymized health data is retained</li>
-                    <li>User verification required before any data extraction</li>
+                    <li>All content generation occurs through secure, encrypted connections</li>
+                    <li>Personal identifiers are never included in AI requests</li>
+                    <li>Only anonymized business context is used for personalization</li>
+                    <li>User-controlled context selection for all AI interactions</li>
                   </ul>
                 </div>
                 <div>
@@ -149,9 +148,9 @@ export default function PrivacyPolicyPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>To provide personalized health and fitness recommendations</li>
-                  <li>To generate customized diet plans, workout routines, and health reports</li>
-                  <li>To analyze blood test results and medical history for wellness insights</li>
+                  <li>To provide personalized marketing content and recommendations</li>
+                  <li>To generate custom documents, meeting reports, and marketing materials</li>
+                  <li>To manage your client information and business context</li>
                   <li>To maintain your chat history and document library</li>
                   <li>To improve our AI assistant's responses and features</li>
                   <li>To send you important service updates and notifications</li>
@@ -170,14 +169,14 @@ export default function PrivacyPolicyPage() {
                 <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                   <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">We Do Not Sell Your Data</p>
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    We never sell, rent, or trade your personal information to third parties for marketing purposes.
+                    We never sell, rent, or trade your personal information to third parties for any purpose.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2">Limited Sharing</h4>
                   <p className="text-muted-foreground mb-2">We may share information only in these circumstances:</p>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>With service providers who help us operate the platform (OpenAI for AI responses - only anonymized data, Supabase for data storage)</li>
+                    <li>With service providers who help us operate the platform (OpenAI for AI responses - only anonymized context, Supabase for data storage)</li>
                     <li>When required by law or to protect our legal rights</li>
                     <li>With your explicit consent</li>
                   </ul>
@@ -197,7 +196,7 @@ export default function PrivacyPolicyPage() {
                   <h4 className="font-semibold mb-2">You can:</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>Access and update your personal information</li>
-                    <li>Review and edit extracted medical information before saving</li>
+                    <li>Control what client context is shared with AI during content generation</li>
                     <li>Delete your account and associated data</li>
                     <li>Export your data (chat history, documents)</li>
                     <li>Control email notifications and communications</li>
@@ -207,7 +206,7 @@ export default function PrivacyPolicyPage() {
                 <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                   <p className="text-yellow-800 dark:text-yellow-200 font-medium mb-2">Data Retention</p>
                   <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                    We retain your data for as long as your account is active. Uploaded PDFs are never retained - only the extracted, anonymized summaries. If you delete your account, we will remove your personal information within 30 days, except where required by law.
+                    We retain your data for as long as your account is active. If you delete your account, we will remove your personal information within 30 days, except where required by law.
                   </p>
                 </div>
               </CardContent>
@@ -222,7 +221,7 @@ export default function PrivacyPolicyPage() {
                   If you have any questions about this Privacy Policy or our data practices, please contact us:
                 </p>
                 <div className="space-y-2 text-sm">
-                  <p><strong>Email:</strong> privacy@healthcoach.ai</p>
+                  <p><strong>Email:</strong> privacy@aimarketingassistant.com</p>
                   <p><strong>Support:</strong> <Link href="/feedback" className="text-blue-600 dark:text-blue-400 hover:underline">Provide feedback</Link></p>
                 </div>
               </CardContent>

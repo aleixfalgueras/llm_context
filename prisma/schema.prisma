@@ -44,16 +44,12 @@ model Message {
 
 model Client {
   id          String   @id @default(cuid())
-  userId      String   // The coach's user ID
+  userId      String   // The marketing service provider's user ID
   name        String
   email       String?
   phone       String?
-  dateOfBirth DateTime?
-  height      Float?   // in centimeters
-  weight      Float?   // in kilograms
   country     String?  // Client's country/location
-  goals       String?  // Health and fitness goals
-  medicalHistory String? // Medical conditions, allergies, etc.
+  goals       String?  // Marketing and content goals
   notes       String?  // General notes about the client
   documentsLanguage String @default("english") // Preferred language for generated documents
   createdAt   DateTime @default(now())

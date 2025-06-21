@@ -1,700 +1,291 @@
-# AI Services Feature Implementation
+# AI Marketing Services Documentation
+
+This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents with granular client context control.
 
 ## Overview
 
-The AI Services feature provides AI-powered content generation for client management. Five services are currently implemented: **Diet Plan Generation**, **Workout Plan Generation**, **Blood Test Analysis**, **Meeting Report Generation**, and **Custom Document Generator**, all creating personalized content based on client profiles and saving as documents. Additionally, the platform includes **Medical History PDF Extraction** for comprehensive medical information extraction during client profile creation.
+AI Services provide automated marketing content generation using client profiles. The feature reuses the same client context system as the AI Assistant to generate personalized, professional marketing documents. Two main services are currently implemented.
 
-## Features Implemented
+## Core Technology
 
-### 1. AI Services Page (`/ai-services`)
+### Client Context Integration
+- **Granular Context Selection**: Choose specific client information fields to include in generation
+- **Dynamic UI**: Checkboxes only appear for fields with actual client data
+- **Context Visualization**: Selected fields displayed with actual values (e.g., "Country (United States)")
+- **Consistent System**: Same context selection system as the AI Assistant for familiarity
 
-- **Location**: `app/ai-services/page.tsx`
-- **Component**: `components/ai-services-client.tsx`
-- **Navigation**: Added to main navbar with ⚡ icon
+### AI Processing
+- **OpenAI Integration**: Uses GPT-4o-mini for content generation
+- **Client Variable Replacement**: Automatic substitution of client variables in prompts
+- **Professional Output**: Production-ready marketing content for client delivery
+- **Real-time Generation**: Interactive content creation with immediate feedback
 
-### 2. Diet Plan Generation
+## Implemented Services
 
-#### Components:
-- **Dialog Component**: `components/diet-generator-dialog.tsx`
-- **API Routes**: 
-  - `app/api/ai-services/generate-diet/route.ts` (Generation)
-  - `app/api/ai-services/save-diet/route.ts` (Storage)
+### 1. Meeting Report Generation
 
-#### Features:
-- Client selection dropdown with profile preview
-- Date range input (start/end dates)
-- Optional nutritional targets (calories, protein)
-- Optional additional information field for extra context
-- **Optional client goals inclusion toggle** - Control whether client's goals influence diet generation
-- AI generation using OpenAI with client context
-- Live markdown editor with preview
-- Save to Supabase storage
-- Document tracking in database
+#### Purpose
+Generate professional meeting reports for client consultations, strategy sessions, and project discussions.
 
-### 3. Workout Plan Generation
+#### Features
+- **Date Selection**: Specific meeting date picker
+- **Agenda Input**: Optional meeting agenda or topics to discuss
+- **Participant Information**: Optional attendee details
+- **Context Selection**: Choose relevant client information fields
+- **Professional Format**: Structured meeting report with sections for agenda, discussion points, action items, and next steps
 
-#### Components:
-- **Dialog Component**: `components/workout-generator-dialog.tsx`
-- **API Routes**: 
-  - `app/api/ai-services/generate-workout/route.ts` (Generation)
-  - `app/api/ai-services/save-workout/route.ts` (Storage)
+#### Context Usage
+- **Default Selection**: No fields selected by default (objective meeting documentation)
+- **Available Fields**: Country, Marketing Goals, Notes
+- **Context Purpose**: Personalizes meeting reports with relevant client background
 
-#### Features:
-- Client selection dropdown with profile preview
-- Date range input (start/end dates)
-- Workout specifications (type, fitness level, frequency, duration)
-- Equipment availability input
-- Optional additional information field
-- **Optional client goals inclusion toggle** - Control whether client's goals influence workout generation
-- AI generation using OpenAI with client context
-- Live markdown editor with preview
-- Save to Supabase storage
-- Document tracking in database
+#### Generated Content Structure
+```markdown
+# Meeting Report - [Client Name]
+**Date:** [Selected Date]
+**Type:** Marketing Consultation
 
-### 4. Blood Test Analysis
+## Meeting Overview
+[Meeting context and purpose]
 
-#### Components:
-- **Dialog Component**: `components/blood-test-analysis-dialog.tsx`
-- **API Routes**: 
-  - `app/api/ai-services/extract-blood-test/route.ts` (PDF Extraction)
-  - `app/api/ai-services/generate-blood-test-report/route.ts` (Report Generation)
-  - `app/api/ai-services/save-blood-test-report/route.ts` (Storage)
+## Agenda
+[Meeting topics and agenda items]
 
-#### Features:
-- **PDF Upload**: Blood test report upload with validation (10MB limit)
-- **AI-Powered Extraction**: Automatic parameter extraction from PDF using OpenAI
-- **Parameter Review & Editing**: Full editing capability for extracted parameters
-- **Anomalous Parameter Detection**: Automatic highlighting of high/low values
-- **Parameter Search**: Search functionality across all extracted parameters
-- **Parameter Sorting**: Anomalous parameters displayed first for priority review
-- **Health Analysis**: Comprehensive analysis based on client profile (excluding goals)
-- **Live Editor**: Edit generated report with real-time markdown preview
-- **Document Storage**: Save to Supabase storage with database tracking
+## Discussion Points
+[Key points discussed during meeting]
 
-#### Blood Test Analysis Flow:
-1. **Upload**: Client selection and PDF upload (compact button interface)
-2. **Extraction**: AI extracts blood parameters, test info, and reference ranges
-3. **Review**: 
-   - Anomalous parameters highlighted at top
-   - All parameters editable (name, value, unit, reference ranges, status)
-   - Search functionality for quick parameter location
-   - Add/remove parameters as needed
-4. **Generation**: AI creates comprehensive health analysis (goals excluded for objectivity)
-5. **Edit & Save**: Live markdown editor with preview, save to storage
+## Client Background
+[Selected client context fields]
 
-#### Blood Test Parameters Extracted:
-- **Parameter Details**: Name, value, unit, reference min/max, status
-- **Test Information**: Test date, laboratory name, doctor name
-- **Status Calculation**: Automatic normal/high/low determination
-- **Multi-language Support**: Works with Spanish and English blood tests
-- **Parameter Management**: Add, edit, remove, and search parameters
+## Action Items
+[Specific action items and responsibilities]
 
-#### Key Technical Features:
-- **PDF Processing**: Uses `pdf-parse` library for text extraction
-- **Large Report Support**: 16,000 token limit for comprehensive blood panels
-- **Parameter Prioritization**: Anomalous parameters sorted first
-- **Editable Interface**: All extracted data can be corrected before analysis
-- **Search Functionality**: Multi-field search across parameter names, values, units, status
+## Next Steps
+[Follow-up actions and timeline]
 
-### 5. Meeting Report Generation
-
-#### Components:
-- **Dialog Component**: `components/meeting-report-dialog.tsx`
-- **API Routes**: 
-  - `app/api/ai-services/generate-meeting-report/route.ts` (Generation)
-  - `app/api/ai-services/save-meeting-report/route.ts` (Storage)
-
-#### Features:
-- Client selection dropdown with profile preview
-- Meeting date input
-- Large text area for meeting transcription input
-- **Optional client context toggle** - Control whether client's profile influences analysis
-- Optional additional context field for extra information
-- AI generation using OpenAI with structured report format
-- Live markdown editor with preview
-- Save to Supabase storage
-- Document tracking in database
-
-#### Meeting Report Analysis Flow:
-1. **Setup**: Client selection and meeting date input
-2. **Transcription**: Paste or type meeting transcription/notes
-3. **Context Control**: Toggle client profile information usage
-4. **Additional Context**: Optional field for extra meeting context
-5. **Generation**: AI creates structured meeting report with actionable insights
-6. **Edit & Save**: Live markdown editor with preview, save to storage
-
-#### Meeting Report Structure:
-- **Meeting Summary**: Overview of the session
-- **Key Discussion Points**: Main topics covered
-- **Client Progress & Updates**: Progress since last meeting
-- **Action Items & Next Steps**: Specific, actionable tasks
-- **Recommendations**: Professional advice and suggestions
-
-#### Key Features:
-- **Transcription Analysis**: AI processes meeting notes to extract insights
-- **Actionable Insights**: Focus on practical next steps
-- **Client Context Integration**: Optional use of client profile for personalized analysis
-- **Professional Format**: Structured, professional meeting documentation
-- **Flexible Input**: Accepts transcriptions, notes, or bullet points
-
-### 6. Custom Document Generator
-
-#### Components:
-- **Dialog Component**: `components/custom-document-generator-dialog.tsx`
-- **API Routes**: 
-  - `app/api/ai-services/generate-custom-document/route.ts` (Generation)
-  - `app/api/ai-services/save-custom-document/route.ts` (Storage)
-
-#### Features:
-- Client selection dropdown with dynamic context selection
-- **Granular Client Context Control**: Select specific client information fields (age, height, weight, country, goals, medical history, notes) to include in document generation
-- **Dual Prompt Sources**: Choose between existing prompts from the prompts management system or write custom prompts inline
-- **Prompt System Integration**: Full integration with existing prompt CRUD operations and usage tracking
-- **Variable Replacement**: Automatic replacement of client variables like `{client_name}`, `{goals}`, `{medical_history}`, `{age}`, `{height}`, `{weight}`, `{country}`, etc.
-- Document title specification
-- AI generation using OpenAI with selected client context and prompt
-- Live markdown editor with preview
-- Save to Supabase storage
-- Document tracking in database
-
-#### Custom Document Generation Flow:
-1. **Setup**: Client selection and document title input
-2. **Context Selection**: Choose which client information fields to include (age, height, weight, country, goals, medical history, notes)
-3. **Prompt Selection**: Either select from existing prompts or write a custom prompt
-4. **Variable Integration**: Client variables automatically replaced in prompts before generation
-5. **Generation**: AI creates personalized document based on selected context and prompt
-6. **Edit & Save**: Live markdown editor with preview, save to storage
-
-#### Key Features:
-- **Prompt System Bridge**: Connects custom prompt management with document generation
-- **Context Granularity**: Fine-grained control over which client data influences generation
-- **Variable Replacement**: Smart replacement of client placeholders with actual data
-- **Flexible Prompting**: Support for both curated prompts and ad-hoc custom prompts
-- **Professional Output**: Structured, personalized document generation
-- **Usage Tracking**: Integrates with prompt usage analytics
-
-#### Variable System Integration:
-- **Available Variables**: `{client_name}`, `{age}`, `{height}`, `{weight}`, `{country}`, `{goals}`, `{medical_history}`, `{notes}`
-- **Context Filtering**: Only selected context fields are available for variable replacement
-- **Smart Replacement**: Variables replaced with actual client data or fallback placeholders
-- **Real-time Processing**: Variables processed during generation for immediate results
-
-### 7. Medical History PDF Extraction
-
-#### Components:
-- **Integration**: Embedded in `components/client-form.tsx`
-- **API Route**: `app/api/ai-services/extract-medical-history/route.ts`
-
-#### Features:
-- **Comprehensive Data Extraction**: AI-powered extraction of medical information from PDF documents
-- **Privacy-First Processing**: Complete anonymization of all personally identifiable information
-- **Advanced Medical Understanding**: Extracts diagnoses, medications, lab results, imaging findings, and assessments
-- **Large Document Support**: Handles up to 40 pages and 50MB PDF files with intelligent truncation
-- **Real-time Processing**: Immediate extraction and population of medical history field
-- **User Control**: Review and edit extracted information before saving
-- **Secure Processing**: Memory-only processing with no file storage
-
-#### Medical History Extraction Flow:
-1. **Upload**: PDF upload during client creation or editing (up to 50MB)
-2. **Processing**: AI extracts comprehensive medical information using GPT-4o-mini
-3. **Anonymization**: Automatic removal of all personal identifiers
-4. **Structuring**: Organization into comprehensive medical sections
-5. **Review**: User reviews and edits extracted information
-6. **Integration**: Extracted summary populates medical history field
-
-#### Extracted Medical Information:
-- **Primary Diagnoses**: Working diagnoses, differential diagnoses, suspected conditions
-- **Conditions**: Current/past/chronic conditions with severity and treatment details
-- **Medications**: Current, past, discontinued medications with dosages and responses
-- **Laboratory Results**: Blood work, values, reference ranges, trends, clinical significance
-- **Imaging Studies**: CT, MRI, X-ray findings with impressions and clinical relevance
-- **Symptoms**: Onset, duration, severity, triggers, functional impact
-- **Vital Signs**: Measurements with normal/abnormal interpretations
-- **Physical Examinations**: System-by-system findings with clinical significance
-- **Assessment Plans**: Clinical assessments, treatment plans, follow-up requirements
-- **Social/Family History**: Occupation, exposures, family medical history
-
-#### Technical Specifications:
-- **Processing Capacity**: Up to 400,000 characters of text extraction
-- **AI Model**: OpenAI GPT-4o-mini with 32,000 token output capacity
-- **Document Types**: Hospital summaries, consultation notes, lab reports, treatment plans
-- **Privacy Compliance**: HIPAA-compliant processing with complete anonymization
-- **Integration Points**: Available during both client creation and editing workflows
-- **Error Handling**: Graceful handling of processing failures with informative feedback
-
-#### Privacy and Security Features:
-- **No File Storage**: PDFs processed in memory only, never stored permanently
-- **Automatic Anonymization**: Names, addresses, dates, provider names removed
-- **User Authentication**: Requires valid login and client ownership verification
-- **Secure API**: All endpoints protected with authentication middleware
-- **Data Control**: Users have complete control over what information is saved
-
-#### Usage Integration:
-- **Client Creation**: Upload and extract medical history during new client setup
-- **Client Editing**: Add or update medical history for existing clients
-- **Override Protection**: Warns before replacing existing medical history content
-- **Summary Format**: Organized plain text summary with section headers
-- **Progress Feedback**: Real-time processing status and completion notifications
-
-### 8. Database Schema
-
-#### Document Model:
-```prisma
-model Document {
-  id          String   @id @default(cuid())
-  userId      String   // The coach's user ID
-  clientId    String   // The client this document belongs to
-  documentName String  // The name of the document
-  documentPath String  // Path in Supabase storage
-  documentType String  // Type: "diet", "workout", "blood-test-analysis", "meeting", "custom"
-  startDate   DateTime? // For time-based documents (diet/workout)
-  endDate     DateTime? // For time-based documents (diet/workout)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-}
+## Meeting Notes
+[Additional notes and observations]
 ```
 
-### 9. Supabase Storage Integration
+### 2. Document Generation
 
-#### Storage Structure:
-```
-documents/
-├── {user_id}/
-    ├── {client_id}/
-        ├── {Client Name} Diet {start_date} to {end_date}.md
-        ├── {Client Name} Workout {start_date} to {end_date}.md
-        ├── {Client Name} Blood Test Analysis {test_date}.md
-        ├── {Client Name} Meeting Report - {meeting_date}.md
-        ├── {Client Name} - {Document Title}.md
-        └── ...
-```
+#### Purpose
+Generate any type of marketing document using custom prompts and client context.
 
-#### Setup:
-- Private bucket with markdown/text support
-- 10MB file size limit for documents and PDF uploads
-- User-specific folder access
+#### Features
+- **Prompt Integration**: Select from user's custom prompt library
+- **Variable Replacement**: Automatic client variable substitution in prompts
+- **Context Selection**: Granular control over client information included
+- **Custom Output**: Flexible document generation based on selected prompt
+- **Real-time Processing**: Interactive prompt selection and content generation
+
+#### Context Usage
+- **Dynamic Selection**: All available client fields can be selected
+- **Available Fields**: Country, Marketing Goals, Notes
+- **Context Variables**: `{client_name}`, `{goals}`, `{country}` automatically replaced
+
+#### Workflow
+1. **Select Client**: Choose the client for document generation
+2. **Choose Prompt**: Select a prompt from your custom prompt library
+3. **Configure Context**: Select which client fields to include
+4. **Preview Variables**: See client variables that will be replaced
+5. **Generate Content**: AI creates personalized document based on prompt and context
+6. **Review & Edit**: Use the built-in editor to modify generated content
+7. **Save Document**: Store final document in Supabase with proper naming
+
+#### Example Use Cases
+- Marketing strategy reports
+- Content calendars
+- Social media plans
+- Campaign proposals
+- Brand guidelines
+- Competitive analysis reports
+- Client onboarding documents
 
 ## Technical Implementation
 
-### Client Context Strategy
+### Context Selection System
 
-All AI services use the same client context system, with one important distinction:
+#### Dynamic Field Display
+```typescript
+interface ClientContextSelection {
+  country: boolean;
+  goals: boolean;
+  notes: boolean;
+}
 
-#### Diet & Workout Generation (Goals Included):
-- **Optional Goals Toggle**: User can choose to include/exclude client goals
-- **Personalized Recommendations**: Based on fitness/health objectives
-- **Goal-Oriented Output**: Plans aligned with client aspirations
-
-#### Blood Test Analysis (Goals Excluded):
-- **Medical Objectivity**: Goals are never included in context
-- **Health-Focused Analysis**: Based purely on clinical data and health optimization
-- **Unbiased Recommendations**: Medical interpretations not influenced by fitness goals
-
-#### Meeting Report Generation (Goals Optional):
-- **Client Context Toggle**: User can choose to include/exclude client profile information
-- **Flexible Analysis**: Can generate reports with or without client context
-- **Actionable Insights**: Focus on practical next steps and professional documentation
-- **Meeting-Focused**: Analysis based on meeting content and optional client context
-
-### Client Goals Toggle Feature
-
-Diet, workout, and meeting report generation include toggles to control client context influence:
-
-#### When Goals Are Included (Default for diet/workout):
-- AI considers the client's fitness/health goals
-- Plans tailored to support specific objectives
-- Example: Weight loss goals influence caloric recommendations
-
-#### When Goals Are Excluded:
-- AI focuses purely on health without goal bias
-- Useful when goals might conflict with optimal plans
-- Blood test analysis always excludes goals for medical objectivity
-
-### File Naming Conventions
-
-Documents are saved with specific naming patterns:
-
+// Only show checkboxes for fields with actual data
+const availableFields = [
+  { key: 'country', label: `Country (${client.country})`, visible: !!client.country },
+  { key: 'goals', label: `Marketing Goals (${client.goals?.substring(0, 50)}...)`, visible: !!client.goals },
+  { key: 'notes', label: `Notes (${client.notes?.substring(0, 50)}...)`, visible: !!client.notes }
+].filter(field => field.visible);
 ```
-Diet Plans: {Client Name} Diet {YYYY-MM-DD} to {YYYY-MM-DD}.md
-Workout Plans: {Client Name} Workout {YYYY-MM-DD} to {YYYY-MM-DD}.md
-Blood Test Analysis: {Client Name} Blood Test Analysis {YYYY-MM-DD}.md
-Meeting Reports: {Client Name} Meeting Report - {YYYY-MM-DD}.md
-Custom Documents: {Client Name} - {Document Title}.md
+
+#### Context Processing
+- **System Prompt Enhancement**: Selected client context added to AI system prompt
+- **Professional Formatting**: Context presented in structured, professional format
+- **Privacy Compliance**: Only selected fields included in AI processing
+- **Token Optimization**: Efficient context injection to minimize API costs
+
+### Document Storage
+
+#### File Organization
 ```
+Storage Structure:
+└── documents/
+    └── {userId}/
+        └── {clientId}/
+            ├── {Client Name} Meeting Report {date}.md
+            └── {Client Name} {Document Type} {timestamp}.md
+```
+
+#### Naming Conventions
+- **Meeting Reports**: `{Client Name} Meeting Report {YYYY-MM-DD}.md`
+- **Generated Documents**: `{Client Name} {Prompt Name} {YYYY-MM-DD-HH-mm}.md`
+- **Fallback Names**: Automatic naming when client name unavailable
+
+#### Metadata Tracking
+```typescript
+interface Document {
+  id: string;
+  userId: string;
+  clientId: string;
+  documentName: string;
+  documentPath: string;
+  documentType: 'MEETING' | 'CUSTOM_DOCUMENT';
+  startDate?: Date;
+  endDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### AI Processing Pipeline
+
+#### 1. Context Preparation
+```typescript
+const buildSystemPrompt = (client: Client, selectedFields: ClientContextSelection) => {
+  let context = `You are a professional AI assistant helping a marketing service provider create content for their client.`;
+  
+  if (selectedFields.country && client.country) {
+    context += `\n\nClient Location: ${client.country}`;
+  }
+  
+  if (selectedFields.goals && client.goals) {
+    context += `\n\nMarketing Goals:\n${client.goals}`;
+  }
+  
+  if (selectedFields.notes && client.notes) {
+    context += `\n\nAdditional Notes:\n${client.notes}`;
+  }
+  
+  return context;
+};
+```
+
+#### 2. Content Generation
+- **OpenAI API**: GPT-4o-mini model for high-quality, cost-effective generation
+- **Streaming Response**: Real-time content generation with progress feedback
+- **Error Handling**: Graceful handling of API failures with user feedback
+- **Content Validation**: Basic validation of generated content structure
+
+#### 3. Post-Processing
+- **Markdown Formatting**: Proper markdown structure for professional appearance
+- **Variable Substitution**: Final pass to ensure all variables are replaced
+- **Content Sanitization**: Remove any potential harmful or inappropriate content
+- **Quality Assurance**: Basic checks for content completeness and coherence
+
+## User Interface
+
+### Service Selection
+- **Card-Based Layout**: Visual service selection with descriptions
+- **Context Preview**: Show which client fields will be available
+- **Service Status**: Clear indication of available vs. coming soon services
+
+### Generation Dialog
+- **Step-by-Step Process**: Guided workflow for document generation
+- **Real-time Feedback**: Progress indicators and status updates
+- **Context Visualization**: Clear display of selected client information
+- **Edit Capabilities**: Built-in editor for content modification
+
+### Content Editor
+- **Markdown Support**: Rich text editing with markdown preview
+- **Real-time Preview**: Live preview of formatted content
+- **Save Options**: Multiple save and export options
+- **Version History**: Track document modifications (future feature)
 
 ## API Endpoints
 
-### Blood Test Analysis
-
-#### Extract Blood Test: `POST /api/ai-services/extract-blood-test`
-**Request Body (FormData):**
+### Meeting Report Generation
 ```
-file: PDF file (max 10MB)
-clientId: string
-additionalInfo: string (optional - for non-standard PDF formats)
+POST /api/ai-services/generate-meeting-report
+- Body: { clientId, meetingDate, agenda, participants, contextSelection }
+- Returns: { content, documentPath, metadata }
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "extractedData": {
-    "testInfo": {
-      "testDate": "YYYY-MM-DD",
-      "labName": "laboratory name",
-      "doctorName": "doctor name"
-    },
-    "parameters": [
-      {
-        "name": "parameter name",
-        "value": "test value",
-        "unit": "unit",
-        "referenceMin": "min value",
-        "referenceMax": "max value",
-        "status": "normal/high/low"
-      }
-    ]
-  }
-}
+### Document Generation
+```
+POST /api/ai-services/generate-custom-document
+- Body: { clientId, promptId, contextSelection }
+- Returns: { content, documentPath, metadata }
 ```
 
-#### Generate Blood Test Report: `POST /api/ai-services/generate-blood-test-report`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "testDate": "YYYY-MM-DD",
-  "additionalInfo": "string (optional)",
-  "extractedData": "extracted parameters object"
-}
+### Document Storage
 ```
-
-**Response:**
-```json
-{
-  "success": true,
-  "report": "markdown formatted analysis report"
-}
-```
-
-#### Save Blood Test Report: `POST /api/ai-services/save-blood-test-report`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "testDate": "YYYY-MM-DD",
-  "additionalInfo": "string (optional)",
-  "extractedData": "extracted parameters object",
-  "reportContent": "markdown content"
-}
-```
-
-### Diet Generation
-
-#### Generate Diet: `POST /api/ai-services/generate-diet`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "startDate": "YYYY-MM-DD",
-  "endDate": "YYYY-MM-DD",
-  "dailyCalories": "string (optional)",
-  "proteinTarget": "string (optional)",
-  "additionalInfo": "string (optional)",
-  "includeClientGoals": "boolean (optional, defaults to true)"
-}
-```
-
-#### Save Diet: `POST /api/ai-services/save-diet`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "startDate": "YYYY-MM-DD", 
-  "endDate": "YYYY-MM-DD",
-  "dailyCalories": "string (optional)",
-  "proteinTarget": "string (optional)",
-  "additionalInfo": "string (optional)",
-  "includeClientGoals": "boolean (optional)",
-  "dietContent": "markdown content"
-}
-```
-
-### Workout Generation
-
-#### Generate Workout: `POST /api/ai-services/generate-workout`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "startDate": "YYYY-MM-DD",
-  "endDate": "YYYY-MM-DD",
-  "workoutType": "string (optional)",
-  "fitnessLevel": "string (optional)",
-  "daysPerWeek": "string (optional)",
-  "sessionDuration": "string (optional)",
-  "equipment": "string (optional)",
-  "additionalInfo": "string (optional)",
-  "includeClientGoals": "boolean (optional, defaults to true)"
-}
-```
-
-#### Save Workout: `POST /api/ai-services/save-workout`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "startDate": "YYYY-MM-DD",
-  "endDate": "YYYY-MM-DD",
-  "workoutType": "string (optional)",
-  "fitnessLevel": "string (optional)",
-  "daysPerWeek": "string (optional)",
-  "sessionDuration": "string (optional)",
-  "equipment": "string (optional)",
-  "additionalInfo": "string (optional)",
-  "includeClientGoals": "boolean (optional)",
-  "workoutContent": "markdown content"
-}
-```
-
-### Custom Document Generation
-
-#### Generate Custom Document: `POST /api/ai-services/generate-custom-document`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "promptId": "string (optional - for existing prompts)",
-  "customPrompt": "string (optional - for inline custom prompts)",
-  "documentTitle": "string",
-  "selectedContextFields": ["age", "height", "weight", "country", "goals", "medicalHistory", "notes"]
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "content": "markdown formatted document content",
-  "promptName": "name of prompt used (if applicable)",
-  "clientName": "client name for confirmation"
-}
-```
-
-#### Save Custom Document: `POST /api/ai-services/save-custom-document`
-**Request Body:**
-```json
-{
-  "clientId": "string",
-  "content": "markdown content",
-  "documentTitle": "string",
-  "promptName": "string (optional - for tracking)"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "filename": "saved document filename",
-  "documentId": "database document ID"
-}
+POST /api/ai-services/save-custom-document
+- Body: { documentContent, documentName, clientId, documentType }
+- Returns: { documentPath, documentId, success }
 ```
 
 ## Security & Privacy
 
 ### Authentication
-- All routes protected with Clerk authentication
-- User ID verification on all operations
-- Client ownership validation
+- **User Verification**: All requests require valid authentication
+- **Client Ownership**: Users can only generate documents for their own clients
+- **Prompt Access**: Users can only use their own custom prompts
 
-### Data Privacy
-- Same privacy model as AI Assistant
-- No client names/emails sent to OpenAI
-- Health information and client profile used for context
-- Blood test analysis excludes goals for medical objectivity
-
-### Storage Security
-- Private Supabase bucket
-- User-specific folder structure
-- Document ownership validation
-- PDF uploads validated and processed securely
-
-## Usage Flow
-
-### Diet/Workout Generation:
-1. **Navigate to AI Services**: User clicks AI Services in navbar
-2. **Select Service**: Click "Get Started" on desired service
-3. **Choose Client**: Select from dropdown with profile preview
-4. **Configure Parameters**: Set date range, specifications, targets
-5. **Add Context** (Optional): Enter additional information
-6. **Configure Goals**: Toggle whether to include client's goals (default: yes)
-7. **Generate**: AI creates personalized plan using client context
-8. **Edit & Preview**: Modify content with live markdown preview
-9. **Save**: Document saved to Supabase storage and tracked in database
-
-### Blood Test Analysis:
-1. **Navigate to AI Services**: User clicks AI Services in navbar
-2. **Select Blood Test Analysis**: Click "Get Started" on service
-3. **Choose Client & Upload**: Select client and upload PDF via button
-4. **AI Extraction**: System extracts parameters and test information
-5. **Review Parameters**: 
-   - View anomalous parameters highlighted at top
-   - Edit any extracted data using search and edit interface
-   - Add/remove parameters as needed
-6. **Generate Analysis**: AI creates health analysis (excluding goals)
-7. **Edit & Preview**: Modify report with live markdown preview
-8. **Save**: Document saved to storage with database tracking
-
-### Custom Document Generation:
-1. **Navigate to AI Services**: User clicks AI Services in navbar
-2. **Select Custom Document Generator**: Click "Get Started" on service
-3. **Choose Client**: Select from dropdown 
-4. **Select Context**: Choose which client information fields to include (age, height, weight, country, goals, medical history, notes)
-5. **Enter Document Title**: Specify the document title
-6. **Choose Prompt Source**: Either select from existing prompts or write a custom prompt inline
-7. **Variable Processing**: Client variables automatically replaced in prompts
-8. **Generate**: AI creates personalized document based on selected context and prompt
-9. **Edit & Preview**: Modify content with live markdown preview
-10. **Save**: Document saved to storage with database tracking
-
-## Dependencies & Setup
-
-### Additional Dependencies for Blood Test Analysis:
-- `pdf-parse`: PDF text extraction
-- `@types/pdf-parse`: Type definitions (manual)
-
-### Environment Variables:
-```env
-# Required for all services
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_service_role_key
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_openai_api_key
-SUPABASE_DOCUMENTS_BUCKET=documents
-
-# Optional OpenAI configuration
-OPENAI_API_MODEL=gpt-4o-mini
-OPENAI_TEMPERATURE=0.7
-```
-
-### Next.js Configuration:
-```javascript
-// next.config.mjs
-const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['pdf-parse']
-  }
-}
-```
-
-### TypeScript Configuration:
-```json
-// tsconfig.json - include types directory
-{
-  "compilerOptions": {
-    "typeRoots": ["./node_modules/@types", "./types"]
-  },
-  "include": ["types/**/*.d.ts"]
-}
-```
-
-## File Structure
-
-```
-app/
-├── ai-services/
-│   └── page.tsx
-├── api/
-│   └── ai-services/
-│       ├── extract-blood-test/
-│       │   └── route.ts
-│       ├── generate-blood-test-report/
-│       │   └── route.ts
-│       ├── save-blood-test-report/
-│       │   └── route.ts
-│       ├── generate-diet/
-│       │   └── route.ts
-│       ├── save-diet/
-│       │   └── route.ts
-│       ├── generate-workout/
-│       │   └── route.ts
-│       ├── save-workout/
-│       │   └── route.ts
-│       ├── generate-custom-document/
-│       │   └── route.ts
-│       └── save-custom-document/
-│           └── route.ts
-components/
-├── ai-services-client.tsx
-├── blood-test-analysis-dialog.tsx
-├── custom-document-generator-dialog.tsx
-├── diet-generator-dialog.tsx
-├── workout-generator-dialog.tsx
-└── ui/
-    └── (UI components)
-types/
-└── pdf-parse.d.ts
-lib/
-├── supabase.ts
-└── document-actions.ts
-prisma/
-└── schema.prisma (updated)
-scripts/
-└── setup-supabase-storage.js
-```
-
-## Testing
-
-### Diet & Workout Generation:
-1. Ensure you have clients created in the system
-2. Navigate to `/ai-services`
-3. Test generation with different clients and parameters
-4. Verify documents are saved and retrievable
-5. Test goal inclusion/exclusion toggle
-
-### Blood Test Analysis:
-1. Prepare PDF blood test reports for testing
-2. Test extraction with different PDF formats
-3. Verify parameter editing and search functionality
-4. Test anomalous parameter detection
-5. Verify comprehensive analysis generation
-6. Test with both English and Spanish blood tests
-
-### Custom Document Generation:
-1. Ensure you have clients created in the system
-2. Create some test prompts in the prompt management system
-3. Navigate to `/ai-services`
-4. Test generation with existing prompts and custom prompts
-5. Verify client context selection works correctly
-6. Test variable replacement functionality
-7. Verify documents are saved and retrievable
-8. Test prompt usage tracking integration
+### Data Protection
+- **Context Control**: Users explicitly choose what client information to include
+- **No Storage**: Client data not permanently stored in AI processing
+- **Audit Trail**: Document generation tracked for transparency
+- **Secure Storage**: Documents stored with user-specific access controls
 
 ## Future Enhancements
 
-### Implemented Services (✅ Completed)
-- **Diet Plan Generation**: Custom nutrition plans
-- **Workout Plan Generation**: Custom exercise routines  
-- **Blood Test Analysis**: PDF upload and health insights
-- **Meeting Report Generation**: Professional meeting documentation
-- **Custom Document Generator**: Flexible document creation with prompt integration
+### Planned Features
+- **Template Library**: Pre-built marketing document templates
+- **Batch Processing**: Generate multiple documents simultaneously
+- **Document Collaboration**: Share and collaborate on generated documents
+- **Version Control**: Track document changes and revisions
+- **Export Options**: PDF, Word, and other format exports
+- **Analytics**: Track document performance and client engagement
 
-### Planned Services
-- **Progress Report Generation**: Client progress summaries
-- **Meal Prep Guides**: Detailed preparation instructions
-- **Supplement Recommendations**: Personalized supplement plans
+### Additional Services
+- **Campaign Builder**: Generate complete marketing campaigns
+- **Content Series**: Create interconnected content pieces
+- **Performance Reports**: Generate analytics and performance summaries
+- **Competitive Analysis**: AI-powered competitor research documents
+- **Brand Guidelines**: Generate comprehensive brand style guides
 
-### Potential Features
-- Document version history
-- Template system for common plans
-- Batch generation for multiple clients
-- Client portal access to documents
-- PDF export functionality
-- Email delivery system
-- Integration with wearable devices
+## Best Practices
 
-The AI Services feature is fully functional with five comprehensive services ready for production use! 
+### Prompt Creation
+- **Clear Instructions**: Use specific, actionable language in prompts
+- **Variable Usage**: Leverage client variables for personalization
+- **Category Organization**: Organize prompts by document type or purpose
+- **Testing**: Test prompts with different client profiles
+
+### Context Selection
+- **Relevance**: Only select client fields relevant to the document type
+- **Privacy**: Consider what information is necessary vs. nice-to-have
+- **Efficiency**: More context isn't always better - be strategic
+- **Consistency**: Use similar context selections for similar document types
+
+### Content Quality
+- **Review Process**: Always review generated content before client delivery
+- **Brand Alignment**: Ensure content matches client's brand voice and style
+- **Accuracy**: Verify all facts and figures in generated content
+- **Personalization**: Add human touches to make content more engaging
+
+Built with ❤️ for marketing professionals creating exceptional content for their clients. 

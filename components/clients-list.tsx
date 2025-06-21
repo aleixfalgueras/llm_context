@@ -107,19 +107,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
     }
   }
 
-  const calculateAge = (dateOfBirth: string | null) => {
-    if (!dateOfBirth) return null
-    const birth = new Date(dateOfBirth)
-    const today = new Date()
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
-    }
-    
-    return age
-  }
+
 
   const renderGridView = () => (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -173,13 +161,6 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                    </div>
                  )}
 
-                 {client.dateOfBirth && (
-                   <div className="flex justify-between text-sm">
-                     <span className="text-muted-foreground">Age:</span>
-                     <span>{calculateAge(client.dateOfBirth)} years</span>
-                   </div>
-                 )}
-
                  {client.country && (
                    <div className="flex justify-between text-sm">
                      <span className="text-muted-foreground">Country:</span>
@@ -195,10 +176,10 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                   </span>
                 </div>
 
-                {client.goals && (
+                {client.notes && (
                   <div className="mt-3 p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md">
-                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Goals:</p>
-                    <p className="text-sm text-blue-700 dark:text-blue-300 line-clamp-2">{client.goals}</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Notes:</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 line-clamp-2">{client.notes}</p>
                   </div>
                 )}
               </div>
@@ -217,9 +198,6 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[150px]">
                 Name
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[80px] hidden sm:table-cell">
-                Age
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px] hidden md:table-cell">
                 Country
@@ -251,11 +229,6 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                          {client.phone}
                        </div>
                      )}
-                   </td>
-                   <td className="px-4 py-4 hidden sm:table-cell">
-                     <div className="text-sm text-gray-900 dark:text-gray-100">
-                       {client.dateOfBirth ? `${calculateAge(client.dateOfBirth)}` : '-'}
-                     </div>
                    </td>
                    <td className="px-4 py-4 hidden md:table-cell">
                      <div className="text-sm text-gray-900 dark:text-gray-100">

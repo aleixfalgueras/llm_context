@@ -51,7 +51,7 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
               🤖
             </div>
             <p className="text-lg">Start a conversation</p>
-            <p className="text-sm">Send a message to begin chatting with HealthCoach AI.</p>
+            <p className="text-sm">Send a message to begin chatting with your AI assistant.</p>
           </div>
         ) : (
           messages.map((message: Message) => (
@@ -73,7 +73,7 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm">
-                    {message.role === 'USER' ? (userName || 'You') : 'HealthCoach AI'}
+                    {message.role === 'USER' ? (userName || 'You') : 'AI Assistant'}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(message.createdAt).toLocaleTimeString()}

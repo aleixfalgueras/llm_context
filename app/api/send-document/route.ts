@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
           <p style="font-size: 12px; color: #64748b;">
-            This email was sent via HealthCoach AI.
+            This email was sent via AI Marketing Assistant.
           </p>
         </div>
       `,

@@ -20,7 +20,7 @@ export function ChatInterface() {
           <h3 className="font-semibold text-green-800 dark:text-green-300">Privacy Protected</h3>
         </div>
         <p className="text-sm text-green-700 dark:text-green-400">
-          We only share client health information, goals, and medical history with AI -
+          We only share selected client information (country, notes) with AI -
           no names, emails, or phone numbers are included in the context.
         </p>
       </Card>

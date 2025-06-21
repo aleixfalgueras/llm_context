@@ -4,10 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Zap, FileText, Calendar, Activity, MessageSquare, Settings, ChevronDown, ChevronUp, Edit3 } from 'lucide-react'
-import { DietGeneratorDialog } from './diet-generator-dialog'
-import { WorkoutGeneratorDialog } from './workout-generator-dialog'
-import { BloodTestAnalysisDialog } from './blood-test-analysis-dialog'
+import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Edit3 } from 'lucide-react'
 import { MeetingReportDialog } from './meeting-report-dialog'
 import { CustomDocumentGeneratorDialog } from './custom-document-generator-dialog'
 import { ClientDocuments } from './client-documents'
@@ -17,20 +14,15 @@ interface AIServicesClientProps {
 }
 
 export function AIServicesClient({ clients }: AIServicesClientProps) {
-  const [isDietDialogOpen, setIsDietDialogOpen] = useState(false)
-  const [isWorkoutDialogOpen, setIsWorkoutDialogOpen] = useState(false)
-  const [isBloodTestDialogOpen, setIsBloodTestDialogOpen] = useState(false)
   const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
   const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
   const [isConfigOpen, setIsConfigOpen] = useState(false)
+  
   // Default visibility - all services visible by default
   const defaultVisibility = {
-    'diet-generator': true,
-    'workout-generator': true,
-    'blood-test-analysis': true,
     'meeting-report': true,
     'custom-document': true,
   }
@@ -75,36 +67,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
 
   const services = [
     {
-      id: 'diet-generator',
-      title: 'Generate Diet Plan',
-      description: 'Create personalized diet plans for your clients based on their goals, medical history, and preferences.',
-      icon: <FileText className="h-8 w-8" />,
-      features: ['Client-specific recommendations', 'Date range planning', 'Editable before saving'],
-      status: 'available',
-      onClick: () => setIsDietDialogOpen(true),
-      iconColorClass: 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
-    },
-    {
-      id: 'workout-generator',
-      title: 'Generate Workout Plan',
-      description: 'Design custom workout routines tailored to your client\'s fitness level and objectives.',
-      icon: <Calendar className="h-8 w-8" />,
-      features: ['Progressive overload', 'Equipment customization', 'Injury considerations'],
-      status: 'available',
-      onClick: () => setIsWorkoutDialogOpen(true),
-      iconColorClass: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400'
-    },
-    {
-      id: 'blood-test-analysis',
-      title: 'Blood Test Analysis',
-      description: 'Upload and analyze blood test reports to generate comprehensive health insights and recommendations.',
-      icon: <Activity className="h-8 w-8" />,
-      features: ['PDF upload & extraction', 'Health analysis', 'Actionable recommendations'],
-      status: 'available',
-      onClick: () => setIsBloodTestDialogOpen(true),
-      iconColorClass: 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
-    },
-    {
       id: 'meeting-report',
       title: 'Meeting Report',
       description: 'Generate comprehensive meeting reports with actionable steps from client meeting transcriptions.',
@@ -116,10 +78,10 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
     },
     {
       id: 'custom-document',
-      title: 'Custom Document Generator',
-      description: 'Create personalized documents using your custom prompts with client-specific information and variables.',
-      icon: <Edit3 className="h-8 w-8" />,
-      features: ['Use existing prompts', 'Variable replacement', 'Professional formatting'],
+      title: 'Document Generator',
+      description: 'Generate custom marketing documents using your own prompts',
+      icon: <FileText className="h-8 w-8" />,
+      features: ['Custom prompts', 'Variable replacement', 'Professional formatting'],
       status: 'available',
       onClick: () => setIsCustomDocumentDialogOpen(true),
       iconColorClass: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
@@ -150,11 +112,9 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
             </Button>
           </div>
           <p className="text-lg text-muted-foreground">
-            Leverage AI to create personalized content for your clients
+            Leverage AI to create personalized marketing content for your clients
           </p>
         </div>
-
-
 
         {/* Service Configuration Panel */}
         {isConfigOpen && (
@@ -248,9 +208,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                   {service.status === 'available' && (
                     <Button 
                       className={`w-full mt-4 ${
-                        service.id === 'diet-generator' ? 'bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600' :
-                        service.id === 'workout-generator' ? 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600' :
-                        service.id === 'blood-test-analysis' ? 'bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600' :
                         service.id === 'meeting-report' ? 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600' :
                         service.id === 'custom-document' ? 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600' :
                         ''
@@ -279,14 +236,14 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                     1
                   </div>
                   <h3 className="font-medium text-blue-900 dark:text-blue-100">Select Client</h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">Choose which client you want to create content for</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">Choose which client you want to create marketing content for</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
                     2
                   </div>
                   <h3 className="font-medium text-blue-900 dark:text-blue-100">AI Generation</h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">AI creates personalized content using client context</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">AI creates personalized marketing content using client context</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
@@ -301,30 +258,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         )}
       </div>
 
-      {/* Diet Generator Dialog */}
-      <DietGeneratorDialog 
-        open={isDietDialogOpen}
-        onOpenChange={setIsDietDialogOpen}
-        clients={clients}
-        onDocumentCreated={handleDocumentCreated}
-      />
-
-      {/* Workout Generator Dialog */}
-      <WorkoutGeneratorDialog 
-        open={isWorkoutDialogOpen}
-        onOpenChange={setIsWorkoutDialogOpen}
-        clients={clients}
-        onDocumentCreated={handleDocumentCreated}
-      />
-
-      {/* Blood Test Analysis Dialog */}
-      <BloodTestAnalysisDialog 
-        open={isBloodTestDialogOpen}
-        onOpenChange={setIsBloodTestDialogOpen}
-        clients={clients}
-        onDocumentCreated={handleDocumentCreated}
-      />
-
       {/* Meeting Report Dialog */}
       <MeetingReportDialog 
         open={isMeetingReportDialogOpen}
@@ -333,7 +266,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         onDocumentCreated={handleDocumentCreated}
       />
 
-      {/* Custom Document Generator Dialog */}
+      {/* Document Generator Dialog */}
       <CustomDocumentGeneratorDialog 
         isOpen={isCustomDocumentDialogOpen}
         onClose={() => setIsCustomDocumentDialogOpen(false)}

@@ -98,29 +98,6 @@ function generateDefaultDocumentName(
   endDate?: Date | string
 ): string {
   switch (documentType) {
-    case DOCUMENT_TYPES.DIET:
-      if (startDate && endDate) {
-        const startFormatted = new Date(startDate).toISOString().split('T')[0]
-        const endFormatted = new Date(endDate).toISOString().split('T')[0]
-        return `${clientName} Diet ${startFormatted} to ${endFormatted}`
-      }
-      return `${clientName} Diet`
-    
-    case DOCUMENT_TYPES.WORKOUT:
-      if (startDate && endDate) {
-        const startFormatted = new Date(startDate).toISOString().split('T')[0]
-        const endFormatted = new Date(endDate).toISOString().split('T')[0]
-        return `${clientName} Workout ${startFormatted} to ${endFormatted}`
-      }
-      return `${clientName} Workout`
-    
-    case DOCUMENT_TYPES.BLOOD_TEST_ANALYSIS:
-      if (startDate) {
-        const testDateFormatted = new Date(startDate).toISOString().split('T')[0]
-        return `${clientName} Blood Test Analysis ${testDateFormatted}`
-      }
-      return `${clientName} Blood Test Analysis`
-    
     case DOCUMENT_TYPES.MEETING:
       if (startDate) {
         const meetingDateFormatted = new Date(startDate).toISOString().split('T')[0]
