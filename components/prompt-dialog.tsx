@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Plus, Edit2, Loader2, HelpCircle } from 'lucide-react'
+import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
+import { Plus, Edit2, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface Prompt {
@@ -175,28 +175,7 @@ export function PromptDialog({ prompt, trigger, onSuccess }: PromptDialogProps) 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="content">Prompt Content *</Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  <div className="space-y-2">
-                    <p className="font-medium">Available client variables:</p>
-                    <div className="space-y-1 text-xs">
-                      <p><code>{`{client_name}`}</code> → Client's name</p>
-                      <p><code>{`{medical_history}`}</code> → Medical History</p>
-                      <p><code>{`{goals}`}</code> → Goals</p>
-                      <p><code>{`{age}`}</code> → Age (calculated from date of birth)</p>
-                      <p><code>{`{height}`}</code> → Height (cm)</p>
-                      <p><code>{`{weight}`}</code> → Weight (kg)</p>
-                      <p><code>{`{country}`}</code> → Country</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      These variables will be automatically replaced with actual client data when you use the prompt.
-                    </p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+              <ClientVariablesTooltip />
             </div>
             <Textarea
               id="content"

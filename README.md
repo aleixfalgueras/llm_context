@@ -66,7 +66,9 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   │       ├── generate-workout/         # Workout plan generation
 │   │       ├── extract-blood-test/       # Blood test PDF extraction
 │   │       ├── generate-blood-test-report/ # Blood test analysis
-│   │       └── generate-meeting-report/  # Meeting report generation
+│   │       ├── generate-meeting-report/  # Meeting report generation
+│   │       ├── generate-custom-document/ # Custom document generation
+│   │       └── save-custom-document/     # Custom document storage
 │   ├── ai-services/       # AI Services page
 │   ├── assistant/         # AI Assistant functionality
 │   │   ├── page.tsx      # Main assistant page with client selection
@@ -91,6 +93,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   ├── workout-generator-dialog.tsx # Workout generation dialog with context selection
 │   ├── blood-test-analysis-dialog.tsx # Blood test analysis dialog with context selection
 │   ├── meeting-report-dialog.tsx # Meeting report generation dialog
+│   ├── custom-document-generator-dialog.tsx # Custom document generation with prompt integration
 │   └── clients-page-client.tsx # Client management
 ├── hooks/
 │   ├── use-chat.ts       # Chat functionality hook
@@ -99,6 +102,7 @@ A modern AI-powered coaching assistant built with Next.js 14, React 18, and Open
 │   ├── actions.ts        # Server actions for CRUD
 │   ├── client-actions.ts # Client management actions
 │   ├── document-actions.ts # Document management actions
+│   ├── variable-replacement.ts # Client variable replacement utilities
 │   ├── prisma.ts         # Database client
 │   ├── supabase.ts       # Supabase client
 │   └── utils.ts          # Utility functions

@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { saveDocumentToStorage } from '@/lib/document-save-utils'
+import { DOCUMENT_TYPES } from '@/types/document-types'
 
 export async function POST(req: Request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       clientId,
       content: reportContent,
       documentName,
-      documentType: 'blood-test-analysis',
+      documentType: DOCUMENT_TYPES.BLOOD_TEST_ANALYSIS,
       startDate: finalTestDate,
       endDate: finalTestDate // For blood tests, start and end date are the same
     })

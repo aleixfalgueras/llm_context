@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
+import { DOCUMENT_TYPES, ALL_DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
 interface Document {
   id: string
@@ -45,7 +46,6 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   const [isCreating, setIsCreating] = useState(false)
   const [editedContent, setEditedContent] = useState('')
   const [newDocumentName, setNewDocumentName] = useState('')
-  const [newDocumentType, setNewDocumentType] = useState('')
   const [newDocumentContent, setNewDocumentContent] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -198,6 +198,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
         toast({
           title: 'Success',
           description: `${result.deletedCount} documents deleted successfully`,
+          duration: 5000,
         })
         await loadDocuments()
         setSelectedDocument(null)
@@ -219,10 +220,10 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   }
 
   const handleCreateDocument = async () => {
-    if (!newDocumentName.trim() || !newDocumentType.trim()) {
+    if (!newDocumentName.trim()) {
       toast({
         title: 'Error',
-        description: 'Please fill in all required fields',
+        description: 'Please enter a document name',
         variant: 'destructive',
       })
       return
@@ -232,7 +233,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       await createDocument(
         clientId,
         newDocumentName,
-        newDocumentType,
+        DOCUMENT_TYPES.MANUAL,
         newDocumentContent,
         startDate ? new Date(startDate) : undefined,
         endDate ? new Date(endDate) : undefined
@@ -245,7 +246,6 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
       
       // Reset form
       setNewDocumentName('')
-      setNewDocumentType('')
       setNewDocumentContent('')
       setStartDate('')
       setEndDate('')
@@ -438,12 +438,11 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All types</SelectItem>
-                      <SelectItem value="diet">Diet Plan</SelectItem>
-                      <SelectItem value="workout">Workout Plan</SelectItem>
-                      <SelectItem value="assessment">Assessment</SelectItem>
-                      <SelectItem value="notes">Notes</SelectItem>
-                      <SelectItem value="plan">General Plan</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      {ALL_DOCUMENT_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {getDocumentTypeLabel(type)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -459,11 +458,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                     )}
                     {documentTypeFilter && documentTypeFilter !== 'all' && (
                       <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
-                        Type: {documentTypeFilter === 'diet' ? 'Diet Plan' : 
-                               documentTypeFilter === 'workout' ? 'Workout Plan' :
-                               documentTypeFilter === 'assessment' ? 'Assessment' :
-                               documentTypeFilter === 'notes' ? 'Notes' :
-                               documentTypeFilter === 'plan' ? 'General Plan' : 'Other'}
+                        Type: {getDocumentTypeLabel(documentTypeFilter as DocumentType)}
                       </span>
                     )}
                     <Button
@@ -604,33 +599,14 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
               <div className="space-y-4">
                 <h3 className="font-semibold">Create New Document</h3>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="docName">Document Name *</Label>
-                    <Input
-                      id="docName"
-                      value={newDocumentName}
-                      onChange={(e) => setNewDocumentName(e.target.value)}
-                      placeholder="Enter document name"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="docType">Document Type *</Label>
-                    <Select value={newDocumentType} onValueChange={setNewDocumentType}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="diet">Diet Plan</SelectItem>
-                        <SelectItem value="workout">Workout Plan</SelectItem>
-                        <SelectItem value="assessment">Assessment</SelectItem>
-                        <SelectItem value="notes">Notes</SelectItem>
-                        <SelectItem value="plan">General Plan</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label htmlFor="docName">Document Name *</Label>
+                  <Input
+                    id="docName"
+                    value={newDocumentName}
+                    onChange={(e) => setNewDocumentName(e.target.value)}
+                    placeholder="Enter document name"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
