@@ -40,7 +40,7 @@ export function ClientContextSidebar({
   const router = useRouter()
   const [allClients, setAllClients] = useState<any[]>(clients)
   const [loading, setLoading] = useState(false)
-  const [sidebarWidth, setSidebarWidth] = useState(320) // Default 320px to match chat sidebar
+  const [sidebarWidth, setSidebarWidth] = useState(256) // Default 256px (20% smaller than original 320px)
   const [isResizing, setIsResizing] = useState(false)
   const [isCreatingChat, setIsCreatingChat] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -74,8 +74,8 @@ export function ClientContextSidebar({
       if (!isResizing) return
       
       const newWidth = window.innerWidth - e.clientX
-      const minWidth = 320 // Minimum 320px for better readability
-      const maxWidth = 600 // Maximum 600px
+      const minWidth = 256 // Minimum 256px for better readability (20% smaller)
+      const maxWidth = 480 // Maximum 480px (20% smaller)
       
       const constrainedWidth = Math.min(Math.max(newWidth, minWidth), maxWidth)
       setSidebarWidth(constrainedWidth)
@@ -403,7 +403,7 @@ export function ClientContextSidebar({
               <div className="space-y-2">
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-xs">
                   <p className="text-green-800 dark:text-green-200 font-medium mb-2">
-                    ✅ AI Context Fields:
+                    ✅ AI Context Fields Used:
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {chatContextFields?.map((field) => {
@@ -422,9 +422,6 @@ export function ClientContextSidebar({
                     })}
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  These client fields were used as context for this chat.
-                </p>
               </div>
             </div>
           ) : hasActiveChat && !selectedClient ? (

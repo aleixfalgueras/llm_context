@@ -29,11 +29,7 @@ const CATEGORIES = [
   { value: 'general', label: 'General' },
   { value: 'marketing', label: 'Marketing' },
   { value: 'content', label: 'Content' },
-  { value: 'strategy', label: 'Strategy' },
-  { value: 'social-media', label: 'Social Media' },
-  { value: 'copywriting', label: 'Copywriting' },
   { value: 'analysis', label: 'Analysis' },
-  { value: 'custom', label: 'Custom' },
 ]
 
 const SORT_OPTIONS = [
