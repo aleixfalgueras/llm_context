@@ -19,11 +19,6 @@ import { ClientContextSelection, defaultClientContextSelections } from '@/types/
 interface Client {
   id: string
   name: string
-  age?: number
-  height?: number
-  weight?: number
-  goals?: string
-  medicalHistory?: string
   country?: string
   notes?: string
 }
@@ -242,10 +237,7 @@ export function CustomDocumentGeneratorDialog({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            Custom Document Generator
-          </DialogTitle>
+          <DialogTitle>Document Generator</DialogTitle>
           <DialogDescription>
             Generate professional documents using your custom prompts with client-specific information.
           </DialogDescription>
@@ -277,45 +269,6 @@ export function CustomDocumentGeneratorDialog({
                 Choose which client information to include for document generation:
               </p>
               <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                {selectedClientData?.age && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-age"
-                      checked={clientContext.age}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        age: e.target.checked
-                      }))}
-                      label={`Age (${selectedClientData.age} years)`}
-                    />
-                  </div>
-                )}
-                {selectedClientData?.height && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-height"
-                      checked={clientContext.height}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        height: e.target.checked
-                      }))}
-                      label={`Height (${selectedClientData.height}cm)`}
-                    />
-                  </div>
-                )}
-                {selectedClientData?.weight && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-weight"
-                      checked={clientContext.weight}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        weight: e.target.checked
-                      }))}
-                      label={`Weight (${selectedClientData.weight}kg)`}
-                    />
-                  </div>
-                )}
                 {selectedClientData?.country && (
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -326,32 +279,6 @@ export function CustomDocumentGeneratorDialog({
                         country: e.target.checked
                       }))}
                       label={`Country (${selectedClientData.country})`}
-                    />
-                  </div>
-                )}
-                {selectedClientData?.goals && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-goals"
-                      checked={clientContext.goals}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        goals: e.target.checked
-                      }))}
-                      label="Goals"
-                    />
-                  </div>
-                )}
-                {selectedClientData?.medicalHistory && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-medical"
-                      checked={clientContext.medicalHistory}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        medicalHistory: e.target.checked
-                      }))}
-                      label="Medical History"
                     />
                   </div>
                 )}
@@ -374,21 +301,8 @@ export function CustomDocumentGeneratorDialog({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setClientContext(defaultClientContextSelections.general)}
-                >
-                  Select All
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() => setClientContext({
-                    age: false,
-                    height: false,
-                    weight: false,
                     country: false,
-                    goals: false,
-                    medicalHistory: false,
                     notes: false
                   })}
                 >
@@ -467,7 +381,7 @@ export function CustomDocumentGeneratorDialog({
                   id="customPrompt"
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="Write your custom prompt here... You can use variables like {client_name}, {goals}, {medical_history}, etc."
+                  placeholder="Write your custom prompt here... You can use variables like {client_name}, {country}, etc."
                   rows={4}
                 />
               </div>

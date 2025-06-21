@@ -27,12 +27,12 @@ interface Prompt {
 const CATEGORIES = [
   { value: 'all', label: 'All Categories' },
   { value: 'general', label: 'General' },
-  { value: 'medical', label: 'Medical' },
-  { value: 'fitness', label: 'Fitness' },
-  { value: 'nutrition', label: 'Nutrition' },
-  { value: 'coaching', label: 'Coaching' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'content', label: 'Content' },
+  { value: 'strategy', label: 'Strategy' },
+  { value: 'social-media', label: 'Social Media' },
+  { value: 'copywriting', label: 'Copywriting' },
   { value: 'analysis', label: 'Analysis' },
-  { value: 'formatting', label: 'Formatting' },
   { value: 'custom', label: 'Custom' },
 ]
 

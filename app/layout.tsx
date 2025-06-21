@@ -18,8 +18,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "HealthCoach AI",
-  description: "AI-powered assistant for health coaches to manage clients and consultations",
+  title: "AI Marketing Assistant",
+  description: "AI-powered marketing content generation and client management platform for marketing professionals",
 };
 
 export default function RootLayout({

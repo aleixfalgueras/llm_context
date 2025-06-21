@@ -4,173 +4,169 @@ const prisma = new PrismaClient()
 
 const samplePrompts = [
   {
-    name: "Medical Report Format",
-    description: "Structured format for generating comprehensive medical reports",
-    content: `Please create a comprehensive medical report for {client_name} with the following structure:
+    name: "Marketing Strategy Report",
+    description: "Structured format for generating comprehensive marketing strategy reports",
+    content: `Please create a comprehensive marketing strategy report for {client_name} with the following structure:
 
-**Patient Information:**
+**Client Information:**
 - Name: {client_name}
-- Age: {age}
-- Height: {height}
-- Weight: {weight}
 - Location: {country}
 
-**Medical History:**
-{medical_history}
+**Strategy Recommendations:**
+Please provide detailed marketing strategy recommendations based on the client's market presence and business needs.
 
-**Current Goals:**
-{goals}
+**Implementation Plan:**
+Include specific next steps and timeline for executing the marketing strategy.
 
-**Recommendations:**
-Please provide detailed recommendations based on the medical history and goals.
-
-**Follow-up Plan:**
-Include specific next steps and timeline for monitoring progress.`,
-    category: "medical",
+**Success Metrics:**
+Define key performance indicators to measure the success of the marketing initiatives.`,
+    category: "marketing",
   },
   {
-    name: "Fitness Assessment",
-    description: "Template for creating detailed fitness assessments",
-    content: `# Fitness Assessment for {client_name}
+    name: "Content Calendar Template",
+    description: "Template for creating detailed content calendars",
+    content: `# Content Calendar for {client_name}
 
-## Current Status
-- Height: {height}
-- Weight: {weight}
-- Current Goals: {goals}
+## Client Overview
+- Location: {country}
 
-## Assessment Areas:
-1. **Cardiovascular Health**
-2. **Strength Assessment**
-3. **Flexibility & Mobility**
-4. **Body Composition**
+## Content Strategy:
+1. **Brand Voice & Messaging**
+2. **Content Pillars**
+3. **Platform Strategy**
+4. **Engagement Tactics**
 
-## Medical Considerations:
-{medical_history}
+## Content Calendar Planning:
+Please provide a detailed content calendar plan, taking into account the client's target audience and market.
 
-Please provide a detailed assessment and recommendations for each area, taking into account the client's medical history and personal goals.`,
-    category: "fitness",
+Include content themes, posting schedules, and engagement strategies tailored for their market.`,
+    category: "content",
   },
   {
-    name: "Nutrition Plan Template",
-    description: "Comprehensive nutrition planning template with client context",
-    content: `# Personalized Nutrition Plan for {client_name}
+    name: "Social Media Campaign Proposal",
+    description: "Comprehensive template for social media campaign proposals",
+    content: `# Social Media Campaign Proposal for {client_name}
 
 ## Client Profile:
-- Age: {age}
-- Height: {height} 
-- Weight: {weight}
+- Business: {client_name}
 - Location: {country}
-- Goals: {goals}
 
-## Medical Considerations:
-{medical_history}
+## Campaign Overview:
+Please create a detailed social media campaign proposal including:
+1. Campaign objectives aligned with business needs
+2. Target audience analysis
+3. Platform selection and rationale
+4. Content strategy and creative direction
+5. Budget allocation and timeline
+6. Success metrics and KPIs
 
-## Plan Structure:
-Please create a detailed nutrition plan including:
-1. Daily caloric requirements
-2. Macronutrient breakdown
-3. Meal timing recommendations
-4. Sample meal ideas
-5. Hydration guidelines
-6. Supplement recommendations (if appropriate)
-
-Ensure the plan considers the client's medical history and is suitable for their location and cultural preferences.`,
-    category: "nutrition",
+Ensure the campaign is tailored to their specific market and business objectives.`,
+    category: "social-media",
   },
   {
-    name: "Progress Report Format",
-    description: "Standard format for client progress tracking reports",
-    content: `# Progress Report - {client_name}
+    name: "Performance Analysis Report",
+    description: "Standard format for marketing performance tracking reports",
+    content: `# Marketing Performance Report - {client_name}
 
-## Report Date: [Current Date]
+## Report Period: [Current Month/Quarter]
 
 ## Client Overview:
-- Name: {client_name}
-- Goals: {goals}
-- Medical History: {medical_history}
+- Business: {client_name}
+- Market: {country}
 
-## Progress Summary:
-Please analyze the progress based on the following areas:
+## Performance Summary:
+Please analyze the marketing performance based on the following areas:
 
-### 1. Goal Achievement
-- Primary goals progress
-- Secondary goals progress
+### 1. Objective Achievement
+- Primary objectives progress
+- Secondary objectives performance
 - Challenges encountered
 
-### 2. Health Metrics
-- Physical measurements
-- Performance improvements
-- Health markers
+### 2. Campaign Metrics
+- Engagement rates
+- Conversion metrics
+- ROI analysis
 
-### 3. Lifestyle Changes
-- Adherence to recommendations
-- Behavioral modifications
-- Quality of life improvements
+### 3. Content Performance
+- Top-performing content
+- Audience engagement patterns
+- Platform-specific insights
 
-### 4. Next Steps
-- Updated recommendations
-- Goal adjustments
-- Timeline for next review
+### 4. Recommendations
+- Optimization opportunities
+- Strategy adjustments
+- Next period priorities
 
-Please provide specific, measurable feedback and actionable next steps.`,
+Please provide specific, data-driven insights and actionable recommendations.`,
     category: "analysis",
   },
   {
-    name: "Professional Email Format",
-    description: "Template for professional client communication",
-    content: `Subject: Update on Your Health & Fitness Journey - {client_name}
+    name: "Client Onboarding Email Template",
+    description: "Template for professional client onboarding communication",
+    content: `Subject: Welcome to Our Marketing Partnership - {client_name}
 
-Dear {client_name},
+Dear {client_name} team,
 
-I hope this email finds you in good health and high spirits.
+Welcome to our marketing partnership! We're excited to help you achieve your business objectives.
 
-**Your Current Progress:**
-Based on our recent consultation and your goals: {goals}
+**Your Partnership:**
+We'll be working together to develop a comprehensive marketing strategy that aligns with your business objectives and target market in {country}.
 
-**Key Points to Address:**
-Please provide professional, encouraging, and informative content that addresses the client's specific needs while maintaining a warm, supportive tone.
+**What to Expect:**
+- Strategic planning sessions
+- Regular performance reviews
+- Creative campaign development
+- Ongoing optimization and support
 
-**Medical Considerations:**
-Taking into account: {medical_history}
+**Getting Started:**
+Please provide any additional brand materials, target audience insights, or specific requirements that will help us deliver the best results.
 
-**Next Steps:**
-Please outline clear, actionable next steps for the client.
+We're committed to your success and look forward to building a strong partnership.
 
 Best regards,
 [Your Name]
-Health & Fitness Coach`,
-    category: "formatting",
+Marketing Strategy Consultant`,
+    category: "general",
   },
   {
-    name: "Motivational Coaching Style",
-    description: "Motivational and encouraging coaching communication style",
-    content: `Hey {client_name}! 🌟
+    name: "Creative Campaign Brief",
+    description: "Professional template for creative campaign briefs",
+    content: `# Creative Campaign Brief - {client_name}
 
-You're doing AMAZING work on your fitness journey! 
+## Campaign Overview
+**Client:** {client_name}
+**Market:** {country}
 
-I want to remind you of your incredible goals: {goals}
+## Creative Direction:
+Please develop a comprehensive creative brief that includes:
 
-**Your Strengths:**
-Let me highlight some of your biggest wins and strengths...
+**Brand Positioning:**
+- How should the brand be positioned in the market?
+- What makes {client_name} unique?
 
-**Today's Focus:**
-Based on your current progress and medical considerations ({medical_history}), let's focus on what will move you forward today.
+**Target Audience:**
+- Primary and secondary audiences
+- Demographics and psychographics
+- Customer journey insights
 
-**Remember:**
-Every small step counts, and you're exactly where you need to be in your journey. Your commitment to your health at {age} years old is truly inspiring!
+**Creative Strategy:**
+- Key messaging themes
+- Visual direction and tone
+- Content formats and channels
 
-**Action Items:**
-Please provide specific, achievable action items that will help the client stay motivated and make progress.
+**Deliverables:**
+- Campaign concepts
+- Content calendar
+- Asset requirements
+- Timeline and milestones
 
-You've got this! 💪
-
-Coach [Your Name]`,
-    category: "coaching",
+Please ensure all creative elements resonate with their target market and business objectives.`,
+    category: "strategy",
   }
 ]
 
 async function main() {
-  console.log('Seeding sample prompts...')
+  console.log('Seeding sample marketing prompts...')
 
   // Note: This would need to be run with a specific user ID in a real scenario
   // For now, this is just a template script
@@ -187,7 +183,7 @@ async function main() {
     // console.log(`Created prompt: ${prompt.name}`)
   }
 
-  console.log('Sample prompts ready! (Note: Actual creation requires user authentication)')
+  console.log('Sample marketing prompts ready! (Note: Actual creation requires user authentication)')
 }
 
 main()

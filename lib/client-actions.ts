@@ -8,21 +8,24 @@ export interface ClientData {
   name: string
   email?: string
   phone?: string
-  dateOfBirth?: string
-  height?: number
-  weight?: number
   country?: string
-  goals?: string
-  medicalHistory?: string
   notes?: string
   documentsLanguage?: string
 }
 
-export async function createClient(data: ClientData) {
+interface ClientFormData {
+  name: string
+  email?: string
+  phone?: string
+  country?: string
+  notes?: string
+  documentsLanguage?: string
+}
+
+export async function createClient(data: ClientFormData) {
   const { userId } = await auth()
-  
   if (!userId) {
-    throw new Error('Unauthorized')
+    throw new Error('User not authenticated')
   }
 
   try {
@@ -32,12 +35,7 @@ export async function createClient(data: ClientData) {
         name: data.name,
         email: data.email,
         phone: data.phone,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-        height: data.height,
-        weight: data.weight,
         country: data.country,
-        goals: data.goals,
-        medicalHistory: data.medicalHistory,
         notes: data.notes,
         documentsLanguage: data.documentsLanguage || 'english',
       },
@@ -51,35 +49,32 @@ export async function createClient(data: ClientData) {
   }
 }
 
-export async function updateClient(id: string, data: ClientData) {
+export async function updateClient(clientId: string, data: ClientFormData) {
   const { userId } = await auth()
-  
   if (!userId) {
-    throw new Error('Unauthorized')
+    throw new Error('User not authenticated')
   }
 
   try {
-    // Verify the client belongs to the user
+    // Verify client belongs to user
     const existingClient = await prisma.client.findFirst({
-      where: { id, userId }
+      where: {
+        id: clientId,
+        userId,
+      },
     })
 
     if (!existingClient) {
-      throw new Error('Client not found or unauthorized')
+      throw new Error('Client not found or access denied')
     }
 
     const client = await prisma.client.update({
-      where: { id },
+      where: { id: clientId },
       data: {
         name: data.name,
         email: data.email,
         phone: data.phone,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-        height: data.height,
-        weight: data.weight,
         country: data.country,
-        goals: data.goals,
-        medicalHistory: data.medicalHistory,
         notes: data.notes,
         documentsLanguage: data.documentsLanguage || 'english',
       },

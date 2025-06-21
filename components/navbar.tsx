@@ -36,10 +36,8 @@ export function Navbar() {
           <div className="flex items-center">
             <div className="flex space-x-8">
               {/* Logo */}
-              <Link href="/clients" className="flex items-center">
-                <span className="text-xl font-bold text-primary">
-                  HealthCoach AI
-                </span>
+              <Link href="/" className="flex items-center">
+                <h1 className="text-xl font-bold">AI Marketing Assistant</h1>
               </Link>
               
               {/* Navigation links */}

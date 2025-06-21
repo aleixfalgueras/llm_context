@@ -224,45 +224,6 @@ export function ClientContextSidebar({
                         Choose which client information to include when chatting with AI:
                       </p>
                       <div className="grid grid-cols-1 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                        {selectedClient?.dateOfBirth && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-age"
-                              checked={clientContext.age}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                age: e.target.checked
-                              })}
-                              label={`Age (${Math.floor((new Date().getTime() - new Date(selectedClient.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365))} years)`}
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.height && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-height"
-                              checked={clientContext.height}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                height: e.target.checked
-                              })}
-                              label={`Height (${selectedClient.height}cm)`}
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.weight && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-weight"
-                              checked={clientContext.weight}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                weight: e.target.checked
-                              })}
-                              label={`Weight (${selectedClient.weight}kg)`}
-                            />
-                          </div>
-                        )}
                         {selectedClient?.country && (
                           <div className="flex items-center space-x-2">
                             <Checkbox
@@ -273,32 +234,6 @@ export function ClientContextSidebar({
                                 country: e.target.checked
                               })}
                               label={`Country (${selectedClient.country})`}
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.goals && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-goals"
-                              checked={clientContext.goals}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                goals: e.target.checked
-                              })}
-                              label="Goals"
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.medicalHistory && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-medical"
-                              checked={clientContext.medicalHistory}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                medicalHistory: e.target.checked
-                              })}
-                              label="Medical History"
                             />
                           </div>
                         )}
@@ -330,12 +265,7 @@ export function ClientContextSidebar({
                           variant="outline"
                           size="sm"
                           onClick={() => onClientContextChange({
-                            age: false,
-                            height: false,
-                            weight: false,
                             country: false,
-                            goals: false,
-                            medicalHistory: false,
                             notes: false
                           })}
                         >
@@ -387,12 +317,7 @@ export function ClientContextSidebar({
                         .filter(([key, value]) => value && selectedClient[key] !== undefined && selectedClient[key] !== null && selectedClient[key] !== '')
                         .map(([key]) => {
                           const fieldNames = {
-                            age: 'Age',
-                            height: 'Height',
-                            weight: 'Weight',
                             country: 'Country',
-                            goals: 'Goals',
-                            medicalHistory: 'Medical History',
                             notes: 'General Notes'
                           }
                           return fieldNames[key as keyof typeof fieldNames]
@@ -470,14 +395,6 @@ export function ClientContextSidebar({
                         🌍 {selectedClient.country}
                       </p>
                     )}
-                    {selectedClient.goals && (
-                      <div className="mt-3">
-                        <h4 className="font-medium text-sm mb-1">Goals:</h4>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-2 rounded border">
-                          {selectedClient.goals}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
               </Card>
@@ -491,12 +408,7 @@ export function ClientContextSidebar({
                   <div className="flex flex-wrap gap-1">
                     {chatContextFields?.map((field) => {
                       const fieldNames: Record<string, string> = {
-                        age: 'Age',
-                        height: 'Height',
-                        weight: 'Weight',
                         country: 'Country',
-                        goals: 'Goals',
-                        medicalHistory: 'Medical History',
                         notes: 'General Notes'
                       }
                       return (
