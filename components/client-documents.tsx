@@ -54,6 +54,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
   const [documentTypeFilter, setDocumentTypeFilter] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [showEditPreview, setShowEditPreview] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -379,9 +380,9 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
           </DialogTitle>
         </DialogHeader>
         
-        <div className="flex gap-4 h-[70vh]">
+        <div className="flex gap-4 h-[70vh] overflow-hidden">
           {/* Documents List */}
-          <div className="w-1/3 border-r pr-4">
+          <div className="w-1/3 border-r pr-4 flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold">Documents</h3>
               <div className="flex gap-2">
@@ -478,7 +479,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
               </div>
             )}
             
-            <div className="space-y-2 overflow-y-auto max-h-[calc(70vh-60px)]">
+            <div className="space-y-2 overflow-y-auto flex-1">
               {loading ? (
                 <p className="text-muted-foreground">Loading...</p>
               ) : filteredDocuments.length === 0 ? (
@@ -665,14 +666,24 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                 </div>
               </div>
             ) : selectedDocument ? (
-              <div className="flex flex-col h-full">
-                <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col h-full overflow-hidden">
+                <div className="flex justify-between items-center mb-4 flex-shrink-0">
                   <div>
                     <h3 className="font-semibold">{selectedDocument.documentName}</h3>
                     <p className="text-sm text-muted-foreground">{selectedDocument.documentType}</p>
                   </div>
                   {isEditing && (
                     <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => setShowEditPreview(true)}
+                        disabled={!editedContent.trim()}
+                        className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Preview
+                      </Button>
                       <Button size="sm" onClick={handleSaveDocument} className="bg-blue-500 hover:bg-blue-600 text-white">
                         Save
                       </Button>
@@ -712,7 +723,7 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
                     />
                   </div>
                 ) : (
-                  <div className="flex-1 border border-blue-200 dark:border-blue-800 rounded-md p-4 overflow-y-auto bg-blue-50/20 dark:bg-blue-950/10">
+                  <div className="flex-1 border border-blue-200 dark:border-blue-800 rounded-md p-4 overflow-y-auto bg-blue-50/20 dark:bg-blue-950/10 min-h-0">
                     <div className="prose prose-sm max-w-none dark:prose-invert">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
@@ -842,6 +853,80 @@ export function ClientDocuments({ clientId, clientName, clientEmail, open, onOpe
               disabled={!newDocumentName.trim() || !newDocumentContent.trim()}
             >
               Create Document
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Preview Dialog */}
+      <Dialog open={showEditPreview} onOpenChange={setShowEditPreview}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Preview: {editedDocumentName || selectedDocument?.documentName || 'Untitled Document'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto max-h-[70vh] border border-blue-200 dark:border-blue-800 rounded-md p-4 bg-blue-50/20 dark:bg-blue-950/10">
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+                components={{
+                  // Custom styling for code blocks
+                  code: ({ node, inline, className, children, ...props }: any) => {
+                    const match = /language-(\w+)/.exec(className || '')
+                    return !inline && match ? (
+                      <code
+                        className={`${className} block bg-gray-100 dark:bg-gray-800 rounded-md p-3 overflow-x-auto text-sm`}
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    ) : (
+                      <code
+                        className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono"
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    )
+                  },
+                  // Custom styling for blockquotes
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-blue-500 pl-4 italic bg-blue-50 dark:bg-blue-950/20 py-2 rounded-r">
+                      {children}
+                    </blockquote>
+                  ),
+                  // Custom styling for tables
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
+                        {children}
+                      </table>
+                    </div>
+                  )
+                }}
+              >
+                {editedContent || '*No content to preview*'}
+              </ReactMarkdown>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setShowEditPreview(false)}>
+              Close Preview
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowEditPreview(false)
+                handleSaveDocument()
+              }}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+              disabled={!editedDocumentName.trim() || !editedContent.trim()}
+            >
+              Save Document
             </Button>
           </div>
         </DialogContent>

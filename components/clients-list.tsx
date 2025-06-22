@@ -175,13 +175,6 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                     <span>{languageInfo.label}</span>
                   </span>
                 </div>
-
-                {client.notes && (
-                  <div className="mt-3 p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-md">
-                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Notes:</p>
-                    <p className="text-sm text-blue-700 dark:text-blue-300 line-clamp-2">{client.notes}</p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -198,6 +191,12 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[150px]">
                 Name
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[180px] hidden sm:table-cell">
+                Email
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[140px] hidden sm:table-cell">
+                Phone
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px] hidden md:table-cell">
                 Country
@@ -219,16 +218,16 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                        {client.name}
                      </div>
-                     {client.email && (
-                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                         {client.email}
-                       </div>
-                     )}
-                     {client.phone && (
-                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                         {client.phone}
-                       </div>
-                     )}
+                   </td>
+                   <td className="px-4 py-4 hidden sm:table-cell">
+                     <div className="text-sm text-gray-900 dark:text-gray-100">
+                       {client.email || '-'}
+                     </div>
+                   </td>
+                   <td className="px-4 py-4 hidden sm:table-cell">
+                     <div className="text-sm text-gray-900 dark:text-gray-100">
+                       {client.phone || '-'}
+                     </div>
                    </td>
                    <td className="px-4 py-4 hidden md:table-cell">
                      <div className="text-sm text-gray-900 dark:text-gray-100">
