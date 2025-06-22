@@ -225,14 +225,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
 
 
 
-          <div className="flex gap-4 pt-4">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
-            >
-              {isLoading ? 'Saving...' : (client?.id ? 'Update Client' : 'Create Client')}
-            </Button>
+          <div className="flex justify-end gap-3 pt-4">
             {onCancel && (
               <Button
                 type="button"
@@ -243,6 +236,13 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
                 Cancel
               </Button>
             )}
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isLoading ? 'Saving...' : (client?.id ? 'Update Client' : 'Create Client')}
+            </Button>
           </div>
         </form>
       </CardContent>
