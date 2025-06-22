@@ -170,7 +170,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
             {filteredServices.map((service) => (
               <Card 
                 key={service.id} 
-                className={`transition-all duration-200 ${
+                className={`transition-all duration-200 flex flex-col h-full ${
                   service.status === 'available' 
                     ? 'hover:shadow-lg cursor-pointer border-blue-200 dark:border-blue-800' 
                     : 'opacity-75 cursor-not-allowed'
@@ -193,18 +193,20 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {service.description}
-                  </p>
-                  <ul className="space-y-1">
-                    {service.features.map((feature, index) => (
-                      <li key={index} className="text-xs text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-1 bg-blue-500 rounded-full" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                <CardContent className="flex flex-col flex-1">
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {service.description}
+                    </p>
+                    <ul className="space-y-1">
+                      {service.features.map((feature, index) => (
+                        <li key={index} className="text-xs text-muted-foreground flex items-center gap-2">
+                          <div className="w-1 h-1 bg-blue-500 rounded-full" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   {service.status === 'available' && (
                     <Button 
                       className={`w-full mt-4 ${

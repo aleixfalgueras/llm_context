@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Loader2, User, Wand2, Calendar, Upload, Edit, Eye, CheckCircle } from 'lucide-react'
+import { FileText, Loader2, User, Wand2, Calendar, Upload, Edit, Eye, CheckCircle, RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import ReactMarkdown from 'react-markdown'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -82,10 +82,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
     try {
       const text = await file.text()
       setFormData(prev => ({ ...prev, meetingTranscription: text }))
-      toast({
-        title: 'File Uploaded Successfully',
-        description: `Loaded ${file.name} into meeting transcription.`,
-      })
     } catch (error) {
       console.error('Error reading file:', error)
       toast({
@@ -449,11 +445,29 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
               )}
             </Button>
           ) : (
-            <>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="border-purple-600 text-purple-600 hover:bg-purple-50"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Regenerating...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Regenerate
+                  </>
+                )}
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => setIsEditMode(!isEditMode)}
-                className="flex items-center gap-2"
+                className="border-purple-600 text-purple-600 hover:bg-purple-50"
               >
                 {isEditMode ? (
                   <>
@@ -480,11 +494,11 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
                 ) : (
                   <>
                     <FileText className="h-4 w-4 mr-2" />
-                    Save Report
+                    Save
                   </>
                 )}
               </Button>
-            </>
+            </div>
           )}
         </DialogFooter>
       </DialogContent>
