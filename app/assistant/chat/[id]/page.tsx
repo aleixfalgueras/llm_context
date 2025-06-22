@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
 import { ChatPageClient } from '@/components/chat-page-client'
 import { Navbar } from '@/components/navbar'
+import { getClients } from '@/lib/client-actions'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
@@ -19,34 +20,35 @@ export default async function ChatPage({ params }: ChatPageProps) {
   // Get current user data from Clerk
   const user = await currentUser()
 
-  // Get the specific chat and verify ownership
-  const chat = await prisma.chat.findFirst({
-    where: {
-      id,
-      userId,
-    },
-    include: {
-      messages: {
-        orderBy: {
-          createdAt: 'asc',
+  // Get the specific chat and verify ownership, all user's chats, and clients in parallel
+  const [chat, chats, clients] = await Promise.all([
+    prisma.chat.findFirst({
+      where: {
+        id,
+        userId,
+      },
+      include: {
+        messages: {
+          orderBy: {
+            createdAt: 'asc',
+          },
         },
       },
-    },
-  }) as any
+    }) as any,
+    prisma.chat.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    }),
+    getClients()
+  ])
 
   if (!chat) {
     notFound()
   }
-
-  // Get all user's chats for the sidebar
-  const chats = await prisma.chat.findMany({
-    where: {
-      userId,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-  })
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
@@ -55,6 +57,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
         <ChatPageClient
           chat={chat}
           chats={chats}
+          clients={clients}
           userImageUrl={user?.imageUrl}
           userName={user?.firstName || 'User'}
         />

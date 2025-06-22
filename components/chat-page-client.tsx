@@ -5,7 +5,6 @@ import { ChatSidebar } from './chat-sidebar'
 import { ChatContainer } from './chat-container'
 import { ClientContextSidebar } from './client-context-sidebar'
 import { ClientDocuments } from './client-documents'
-import { getClients } from '@/lib/client-actions'
 
 interface ChatPageClientProps {
   chat: {
@@ -16,33 +15,15 @@ interface ChatPageClientProps {
     contextFields?: string[]
   }
   chats: any[]
+  clients: any[]
   userImageUrl?: string
   userName: string
 }
 
-export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPageClientProps) {
+export function ChatPageClient({ chat, chats, clients, userImageUrl, userName }: ChatPageClientProps) {
   const [currentTitle, setCurrentTitle] = useState(chat.title)
-  const [clients, setClients] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
-
-  // Fetch clients for sidebar
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        setLoading(true)
-        const clientList = await getClients()
-        setClients(clientList)
-      } catch (error) {
-        console.error('Failed to fetch clients:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchClients()
-  }, [])
 
   // Get selected client info for context
   const selectedClient = clients.find(client => client.id === chat.clientId)
@@ -61,7 +42,6 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
       <ChatSidebar 
         chats={chats}
         currentChatId={chat.id}
-        selectedClientId={chat.clientId}
       />
       <div className="flex-1 flex flex-col">
         {/* Enhanced Chat Header */}
