@@ -480,7 +480,7 @@ export function CustomDocumentGeneratorDialog({
                 ) : (
                   <>
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit Document
+                    Edit
                   </>
                 )}
               </Button>
@@ -497,7 +497,7 @@ export function CustomDocumentGeneratorDialog({
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    Save Document
+                    Save
                   </>
                 )}
               </Button>
