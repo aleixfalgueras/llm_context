@@ -111,6 +111,70 @@ model Prompt {
   @@map("prompts")
 }
 
+model UserConsent {
+  id              String   @id @default(cuid())
+  userId          String   @unique // The user's ID from Clerk
+  
+  // GDPR Consent Fields
+  dataProcessing  Boolean  @default(false) // Required for service
+  analytics       Boolean  @default(false) // Optional - for analytics
+  marketing       Boolean  @default(false) // Optional - for marketing communications
+  
+  // Legal Agreement Fields
+  agreedToTerms   Boolean  @default(false) // Terms of Service agreement
+  agreedToPrivacy Boolean  @default(false) // Privacy Policy agreement
+  termsVersion    String?  // Version of terms they agreed to
+  privacyVersion  String?  // Version of privacy policy they agreed to
+  
+  // Cookie Consent Fields
+  cookiesNecessary  Boolean @default(true)  // Always true
+  cookiesAnalytics  Boolean @default(false) // Optional
+  cookiesMarketing  Boolean @default(false) // Optional
+  cookiesFunctional Boolean @default(false) // Optional
+  
+  // Metadata
+  ipAddress       String?  // IP when consent was given (for audit)
+  userAgent       String?  // User agent when consent was given
+  consentMethod   String?  // How consent was obtained (banner, form, etc.)
+  
+  // Timestamps
+  consentGivenAt  DateTime @default(now())
+  lastUpdatedAt   DateTime @updatedAt
+  withdrawnAt     DateTime? // If consent was withdrawn
+  
+  @@map("user_consents")
+}
+
+model ConsentAuditLog {
+  id            String   @id @default(cuid())
+  userId        String   // The user's ID from Clerk
+  action        String   // 'granted', 'updated', 'withdrawn'
+  consentType   String   // 'data_processing', 'analytics', 'marketing', 'cookies'
+  previousValue Boolean? // Previous consent state
+  newValue      Boolean  // New consent state
+  reason        String?  // Reason for change (user_request, policy_update, etc.)
+  ipAddress     String?  // IP address when change occurred
+  userAgent     String?  // User agent when change occurred
+  createdAt     DateTime @default(now())
+  
+  @@map("consent_audit_logs")
+}
+
+model DataExportRequest {
+  id          String   @id @default(cuid())
+  userId      String   // The user's ID from Clerk
+  requestType String   // 'full_export', 'specific_data', 'deletion_confirmation', 'account_deletion'
+  status      String   // 'pending', 'processing', 'completed', 'failed', 'cancelled'
+  requestData Json?    // Additional request parameters
+  filePath    String?  // Path to generated export file
+  expiresAt   DateTime? // When the export link expires
+  completedAt DateTime? // When the export was completed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("data_export_requests")
+}
+
 enum Role {
   USER
   ASSISTANT

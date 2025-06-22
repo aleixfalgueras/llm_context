@@ -338,6 +338,9 @@ export function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-600 dark:text-gray-400 text-sm">
             <p>&copy; 2024 AI Marketing Assistant. Powered by OpenAI GPT-4o-mini.</p>
             <div className="flex items-center gap-6 mt-4 md:mt-0">
+              <Link href="/terms" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
+                Terms of Service
+              </Link>
               <Link href="/privacy" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
                 Privacy Policy
               </Link>

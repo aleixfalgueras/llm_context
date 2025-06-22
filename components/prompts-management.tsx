@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge'
 import { PromptDialog } from '@/components/prompt-dialog'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, FileText, Edit2, Trash2, Plus, TrendingUp, Eye, EyeOff } from 'lucide-react'
+import { Search, FileText, Edit2, Trash2, Plus, TrendingUp, Eye, EyeOff, Lightbulb, Copy } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { samplePrompts, getSamplePromptsByCategory } from '@/lib/sample-prompts'
 
 interface Prompt {
   id: string
@@ -46,7 +47,16 @@ export function PromptsManagement() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('usage')
   const [showInactive, setShowInactive] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(true)
   const { toast } = useToast()
+
+  // Load showTemplates preference from localStorage after hydration
+  useEffect(() => {
+    const saved = localStorage.getItem('showTemplates')
+    if (saved !== null) {
+      setShowTemplates(JSON.parse(saved))
+    }
+  }, [])
 
   const fetchPrompts = async () => {
     setLoading(true)
@@ -162,6 +172,19 @@ export function PromptsManagement() {
     total: prompts.length,
     active: prompts.filter(p => p.isActive).length,
     mostUsed: prompts.reduce((max, p) => p.usageCount > max.usageCount ? p : max, prompts[0] || { usageCount: 0 }),
+  }
+
+  const filteredSamplePrompts = getSamplePromptsByCategory(selectedCategory)
+
+  const useAsTemplate = (samplePrompt: typeof samplePrompts[0]) => {
+    // This will be handled by the PromptDialog component
+    // We'll pass the sample prompt data to pre-fill the form
+  }
+
+  const toggleTemplates = () => {
+    const newValue = !showTemplates
+    setShowTemplates(newValue)
+    localStorage.setItem('showTemplates', JSON.stringify(newValue))
   }
 
   return (
@@ -289,47 +312,100 @@ export function PromptsManagement() {
             </>
           )}
         </Button>
+        
+        <Button
+          variant="outline"
+          onClick={toggleTemplates}
+          className="w-full sm:w-auto"
+        >
+          {showTemplates ? (
+            <>
+              <Lightbulb className="w-4 h-4 mr-2" />
+              Hide Templates
+            </>
+          ) : (
+            <>
+              <Lightbulb className="w-4 h-4 mr-2" />
+              Show Templates
+            </>
+          )}
+        </Button>
       </div>
 
-      {/* Prompts Grid */}
-      {loading ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Loading prompts...</p>
-        </div>
-      ) : filteredAndSortedPrompts.length === 0 ? (
-        <div className="text-center py-8">
-          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No prompts found</h3>
-          <p className="text-muted-foreground mb-4">
-            {searchTerm || selectedCategory !== 'all' 
-              ? 'Try adjusting your search or filters.' 
-              : 'Create your first prompt to get started.'}
+            {/* Example Prompts Section */}
+      {!searchTerm && (prompts.length === 0 || selectedCategory === 'all') && showTemplates && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb className="h-5 w-5 text-amber-500" />
+            <h2 className="text-xl font-semibold">Example Prompts</h2>
+            <Badge variant="outline" className="text-xs">Templates</Badge>
+          </div>
+          
+          <p className="text-muted-foreground mb-6">
+            Professional prompt templates to get you started. Click "Use as Template" to create your own version.
           </p>
-          {!searchTerm && selectedCategory === 'all' && (
-                         <PromptDialog 
-               onSuccess={fetchPrompts}
-               trigger={
-                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                   <Plus className="w-4 h-4 mr-2" />
-                   Create First Prompt
-                 </Button>
-               }
-             />
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAndSortedPrompts.map((prompt) => (
-            <PromptCard
-              key={prompt.id}
-              prompt={prompt}
-              onEdit={() => fetchPrompts()}
-              onDelete={() => deletePrompt(prompt.id)}
-              onToggleStatus={() => togglePromptStatus(prompt)}
-            />
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {filteredSamplePrompts.map((samplePrompt) => (
+              <SamplePromptCard
+                key={samplePrompt.id}
+                prompt={samplePrompt}
+                onUseAsTemplate={() => useAsTemplate(samplePrompt)}
+                onSuccess={fetchPrompts}
+              />
+            ))}
+          </div>
         </div>
       )}
+
+      {/* User's Prompts Section */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <FileText className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">My Prompts</h2>
+          {prompts.length > 0 && (
+            <Badge variant="outline" className="text-xs">{prompts.length}</Badge>
+          )}
+        </div>
+        
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Loading prompts...</p>
+          </div>
+        ) : filteredAndSortedPrompts.length === 0 ? (
+          <div className="text-center py-8">
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No prompts found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchTerm || selectedCategory !== 'all' 
+                ? 'Try adjusting your search or filters.' 
+                : 'Create your first prompt to get started.'}
+            </p>
+            {!searchTerm && selectedCategory === 'all' && (
+              <PromptDialog 
+                onSuccess={fetchPrompts}
+                trigger={
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create First Prompt
+                  </Button>
+                }
+              />
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredAndSortedPrompts.map((prompt) => (
+              <PromptCard
+                key={prompt.id}
+                prompt={prompt}
+                onEdit={() => fetchPrompts()}
+                onDelete={() => deletePrompt(prompt.id)}
+                onToggleStatus={() => togglePromptStatus(prompt)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -344,8 +420,8 @@ interface PromptCardProps {
 function PromptCard({ prompt, onEdit, onDelete, onToggleStatus }: PromptCardProps) {
 
   return (
-    <Card className={cn('h-fit hover:shadow-lg transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/30 dark:hover:bg-blue-950/10 border-blue-100 dark:border-blue-900 bg-blue-50/20 dark:bg-blue-950/5', !prompt.isActive && 'opacity-60')}>
-      <CardHeader className="pb-3">
+    <Card className={cn('h-[240px] hover:shadow-lg transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/30 dark:hover:bg-blue-950/10 border-blue-100 dark:border-blue-900 bg-blue-50/20 dark:bg-blue-950/5 flex flex-col', !prompt.isActive && 'opacity-60')}>
+      <CardHeader className="pb-3 flex-1 flex flex-col">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <CardTitle className="text-base flex items-center gap-2">
@@ -354,15 +430,19 @@ function PromptCard({ prompt, onEdit, onDelete, onToggleStatus }: PromptCardProp
                 <EyeOff className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               )}
             </CardTitle>
-            {prompt.description && (
-              <CardDescription className="mt-1 line-clamp-2">
-                {prompt.description}
-              </CardDescription>
-            )}
+            <div className="h-12 flex items-start">
+              {prompt.description && (
+                <CardDescription className="mt-1 text-sm leading-relaxed break-words overflow-hidden">
+                  {prompt.description.length > 80 
+                    ? `${prompt.description.substring(0, 80)}...` 
+                    : prompt.description}
+                </CardDescription>
+              )}
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-auto">
           <Badge variant="secondary" className="text-xs capitalize">
             {prompt.category}
           </Badge>
@@ -375,37 +455,35 @@ function PromptCard({ prompt, onEdit, onDelete, onToggleStatus }: PromptCardProp
       </CardHeader>
       
       <CardContent className="pt-0">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between pt-2 border-t">
-            <div className="flex gap-1">
-              <PromptDialog 
-                prompt={prompt} 
-                onSuccess={onEdit}
-                trigger={
-                  <Button variant="ghost" size="sm">
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                }
-              />
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggleStatus}
-              >
-                {prompt.isActive ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-              
-              <DeletePromptDialog onDelete={onDelete} promptName={prompt.name} />
-            </div>
+        <div className="flex items-center justify-between pt-2 border-t">
+          <div className="flex gap-1">
+            <PromptDialog 
+              prompt={prompt} 
+              onSuccess={onEdit}
+              trigger={
+                <Button variant="ghost" size="sm">
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              }
+            />
             
-            <div className="text-xs text-muted-foreground">
-              {new Date(prompt.updatedAt).toLocaleDateString()}
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleStatus}
+            >
+              {prompt.isActive ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+            
+            <DeletePromptDialog onDelete={onDelete} promptName={prompt.name} />
+          </div>
+          
+          <div className="text-xs text-muted-foreground">
+            {new Date(prompt.updatedAt).toLocaleDateString()}
           </div>
         </div>
       </CardContent>
@@ -450,5 +528,70 @@ function DeletePromptDialog({ onDelete, promptName }: DeletePromptDialogProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+interface SamplePromptCardProps {
+  prompt: typeof samplePrompts[0]
+  onUseAsTemplate: () => void
+  onSuccess: () => void
+}
+
+function SamplePromptCard({ prompt, onUseAsTemplate, onSuccess }: SamplePromptCardProps) {
+  return (
+    <Card className="h-[240px] hover:shadow-lg transition-all duration-200 hover:border-amber-200 dark:hover:border-amber-800 hover:bg-amber-50/30 dark:hover:bg-amber-950/10 border-amber-100 dark:border-amber-900 bg-amber-50/20 dark:bg-amber-950/5 flex flex-col">
+      <CardHeader className="pb-3 flex-1 flex flex-col">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-amber-500 flex-shrink-0" />
+              <span className="truncate">{prompt.name}</span>
+            </CardTitle>
+            <div className="h-12 flex items-start">
+              {prompt.description && (
+                <CardDescription className="mt-1 text-sm leading-relaxed break-words overflow-hidden">
+                  {prompt.description.length > 80 
+                    ? `${prompt.description.substring(0, 80)}...` 
+                    : prompt.description}
+                </CardDescription>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2 mt-auto">
+          <Badge variant="secondary" className="text-xs capitalize">
+            {prompt.category}
+          </Badge>
+          <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+            Template
+          </Badge>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="pt-0">
+        <div className="flex gap-2 pt-2 border-t">
+          <PromptDialog 
+            prompt={{
+              id: '', // Will be generated when saved
+              name: prompt.name,
+              description: prompt.description,
+              content: prompt.content,
+              category: prompt.category,
+              isActive: true,
+              usageCount: 0,
+            }}
+            isTemplate={true}
+            onSuccess={onSuccess}
+            trigger={
+              <Button size="sm" className="flex-1 bg-amber-600 hover:bg-amber-700 text-white">
+                <Copy className="h-3 w-3 mr-1" />
+                Use Template
+              </Button>
+            }
+          />
+        </div>
+      </CardContent>
+    </Card>
   )
 } 

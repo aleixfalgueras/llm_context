@@ -5,6 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { CookieBanner } from "@/components/ui/cookie-banner"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,6 +38,7 @@ export default function RootLayout({
             <TooltipProvider>
               {children}
               <Toaster />
+              <CookieBanner />
             </TooltipProvider>
           </ThemeProvider>
         </body>
