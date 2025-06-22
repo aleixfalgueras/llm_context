@@ -25,6 +25,7 @@ interface PromptDialogProps {
   prompt?: Prompt
   trigger?: React.ReactNode
   onSuccess?: () => void
+  isTemplate?: boolean
 }
 
 const CATEGORIES = [
@@ -34,7 +35,7 @@ const CATEGORIES = [
   { value: 'analysis', label: 'Analysis' },
 ]
 
-export function PromptDialog({ prompt, trigger, onSuccess }: PromptDialogProps) {
+export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false }: PromptDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -45,7 +46,7 @@ export function PromptDialog({ prompt, trigger, onSuccess }: PromptDialogProps) 
   })
   const { toast } = useToast()
 
-  const isEditing = Boolean(prompt)
+  const isEditing = Boolean(prompt) && !isTemplate
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,7 +69,7 @@ export function PromptDialog({ prompt, trigger, onSuccess }: PromptDialogProps) 
       }
 
       toast({
-        title: isEditing ? 'Prompt updated' : 'Prompt created',
+        title: isEditing ? 'Prompt updated' : isTemplate ? 'Prompt created from template' : 'Prompt created',
         description: `"${formData.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`,
       })
 
@@ -123,7 +124,7 @@ export function PromptDialog({ prompt, trigger, onSuccess }: PromptDialogProps) 
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Prompt' : 'Create New Prompt'}
+            {isEditing ? 'Edit Prompt' : isTemplate ? 'Create Prompt from Template' : 'Create New Prompt'}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -195,10 +196,10 @@ export function PromptDialog({ prompt, trigger, onSuccess }: PromptDialogProps) 
             <Button 
               type="submit" 
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className={isTemplate ? "bg-amber-600 hover:bg-amber-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
             >
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {isEditing ? 'Update' : 'Create'} Prompt
+              {isEditing ? 'Update' : isTemplate ? 'Create from Template' : 'Create'} Prompt
             </Button>
           </div>
         </form>

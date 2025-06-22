@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['pdf-parse'],
-  },
   // Optimize for Vercel deployment
   output: 'standalone',
-  // Handle large API responses (for blood test analysis)
-  api: {
-    responseLimit: '8mb',
+  // Handle large API responses and external packages
+  experimental: {
+    serverComponentsExternalPackages: ['pdf-parse'],
+    serverActions: {
+      bodySizeLimit: '8mb',
+  },
   },
   // Optimize images
   images: {

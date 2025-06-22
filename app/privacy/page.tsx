@@ -202,6 +202,11 @@ export default function PrivacyPolicyPage() {
                     <li>Control email notifications and communications</li>
                     <li>Request clarification about our data practices</li>
                   </ul>
+                  <div className="mt-4">
+                    <Link href="/privacy/settings" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                      → Manage Your Privacy Settings
+                    </Link>
+                  </div>
                 </div>
                 <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                   <p className="text-yellow-800 dark:text-yellow-200 font-medium mb-2">Data Retention</p>
