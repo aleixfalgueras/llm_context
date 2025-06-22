@@ -219,6 +219,89 @@ export default function PrivacyPolicyPage() {
 
             <Card>
               <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  Contact Information & Legal Entity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">Data Controller Information</p>
+                    <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                      <p><strong>Individual:</strong> Aleix Falgueras Casals</p>
+                      <p><strong>Address:</strong> Carrer d'Antonio de Solis, 27 Bis, 08301, Marato, España</p>
+                      <p><strong>Registration:</strong> Sole Proprietorship</p>
+                      <p><strong>VAT ID:</strong> Not applicable</p>
+                    </div>
+                  </div>
+                                  <div>
+                    <h4 className="font-semibold mb-2">Privacy Contacts</h4>
+                    <div className="text-sm space-y-1">
+                      <p><strong>Privacy Officer:</strong> falguerasaleix@gmail.com</p>
+                      <p><strong>Data Protection Officer:</strong> falguerasaleix@gmail.com</p>
+                      <p><strong>General Support:</strong> falguerasaleix@gmail.com</p>
+                      <p><strong>Legal Department:</strong> falguerasaleix@gmail.com</p>
+                    </div>
+                  </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Supervisory Authority</h4>
+                  <p className="text-sm text-muted-foreground">
+                    If you are not satisfied with our response to your privacy concerns, you have the right to lodge a complaint with your local data protection authority. 
+                    For EU residents, you can find your supervisory authority at: https://edpb.europa.eu/about-edpb/board/members_en
+                  </p>
+                </div>
+                                  <div>
+                    <h4 className="font-semibold mb-2">Governing Law & Jurisdiction</h4>
+                    <p className="text-sm text-muted-foreground">
+                      This Privacy Policy and any privacy-related disputes are governed by Spanish law. 
+                      Any legal proceedings must be brought in the courts of Spain.
+                    </p>
+                  </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  Data Retention & Security
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Data Retention Periods</h4>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground text-sm">
+                    <li><strong>Account Data:</strong> Retained while account is active + 30 days after deletion</li>
+                    <li><strong>Chat Messages:</strong> Retained while account is active + 90 days for security</li>
+                    <li><strong>Generated Documents:</strong> Retained while account is active</li>
+                    <li><strong>Consent Records:</strong> Retained for 7 years for legal compliance</li>
+                    <li><strong>Audit Logs:</strong> Retained for 7 years for security and compliance</li>
+                    <li><strong>Marketing Communications:</strong> Until unsubscribed + 12 months</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Data Security Measures</h4>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground text-sm">
+                    <li>End-to-end encryption for data in transit and at rest</li>
+                    <li>Multi-factor authentication for administrative access</li>
+                    <li>Regular security audits and penetration testing</li>
+                    <li>Employee background checks and privacy training</li>
+                    <li>Incident response and breach notification procedures</li>
+                    <li>Regular backup and disaster recovery testing</li>
+                  </ul>
+                </div>
+                <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                  <p className="text-red-800 dark:text-red-200 font-medium mb-2">Data Breach Notification</p>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    In the event of a data breach that may pose a risk to your personal data, we will notify you within 72 hours 
+                    and provide details about the breach, its impact, and steps taken to address it.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle>Contact Us</CardTitle>
               </CardHeader>
               <CardContent>
