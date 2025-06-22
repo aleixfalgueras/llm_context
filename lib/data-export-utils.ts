@@ -179,8 +179,8 @@ Under GDPR and other privacy laws, you have the right to:
 
 For questions about your data or to exercise your rights:
 
-- **Privacy Email:** privacy@aimarketingassistant.com
-- **Data Protection Officer:** dpo@aimarketingassistant.com
+- **Privacy Email:** falguerasaleix@gmail.com
+- **Data Protection Officer:** falguerasaleix@gmail.com
 - **Support Portal:** Contact through your account settings
 
 ---

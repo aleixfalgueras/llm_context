@@ -29,6 +29,19 @@ export default function TermsOfServicePage() {
             <p className="text-lg text-muted-foreground">
               These Terms of Service govern your use of AI Marketing Assistant. By using our service, you agree to be bound by these terms.
             </p>
+            
+            <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mt-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-orange-800 dark:text-orange-200 font-medium mb-2">⚠️ BETA SERVICE NOTICE</p>
+                  <p className="text-sm text-orange-700 dark:text-orange-300">
+                    This is a beta/MVP service. Terms, features, and pricing may change as we develop and improve the platform. 
+                    By using this service, you acknowledge it's in active development and your feedback helps us improve.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-6">
