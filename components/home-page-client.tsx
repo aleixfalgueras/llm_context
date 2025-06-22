@@ -14,14 +14,11 @@ interface HomePageClientProps {
 export function HomePageClient({ chats, clients }: HomePageClientProps) {
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
   const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
 
   return (
     <div className="flex h-full overflow-hidden">
       <ChatSidebar 
         chats={chats}
-        currentChatId={undefined}
-        selectedClientId={selectedClient}
         hideNewChatButton={true}
       />
       <div className="flex-1 flex items-center justify-center min-w-0">
@@ -33,11 +30,9 @@ export function HomePageClient({ chats, clients }: HomePageClientProps) {
         clients={clients}
         selectedClientId={selectedClient}
         onClientSelect={setSelectedClient}
-        hasActiveChat={!!currentChatId}
+        hasActiveChat={false}
         clientContext={clientContext}
         onClientContextChange={setClientContext}
-        currentChatId={currentChatId}
-        onChatCreated={setCurrentChatId}
       />
     </div>
   )

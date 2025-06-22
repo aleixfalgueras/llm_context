@@ -20,11 +20,10 @@ interface Chat {
 interface ChatSidebarProps {
   chats: Chat[]
   currentChatId?: string
-  selectedClientId?: string | null
   hideNewChatButton?: boolean // Hide the new chat button (e.g., when on assistant page)
 }
 
-export function ChatSidebar({ chats, currentChatId, selectedClientId, hideNewChatButton = false }: ChatSidebarProps) {
+export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false }: ChatSidebarProps) {
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
@@ -57,10 +56,8 @@ export function ChatSidebar({ chats, currentChatId, selectedClientId, hideNewCha
     }
   }
 
-
-
   return (
-    <div className="w-64 border-r bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="border-r bg-gray-50 dark:bg-gray-900 flex flex-col" style={{ width: '307px' }}>
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
