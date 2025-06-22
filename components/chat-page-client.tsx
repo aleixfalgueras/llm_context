@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChatSidebar } from './chat-sidebar'
 import { ChatContainer } from './chat-container'
 import { ClientContextSidebar } from './client-context-sidebar'
+import { ClientDocuments } from './client-documents'
 import { getClients } from '@/lib/client-actions'
 
 interface ChatPageClientProps {
@@ -23,6 +24,8 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
   const [currentTitle, setCurrentTitle] = useState(chat.title)
   const [clients, setClients] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
+  const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
 
   // Fetch clients for sidebar
   useEffect(() => {
@@ -43,6 +46,15 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
 
   // Get selected client info for context
   const selectedClient = clients.find(client => client.id === chat.clientId)
+
+  // Handle document creation (for chat export)
+  const handleDocumentCreated = (clientId: string, documentId: string) => {
+    const client = clients.find(c => c.id === clientId)
+    if (client) {
+      setDocumentToHighlight(documentId)
+      setIsDocumentsOpen(true)
+    }
+  }
 
   return (
     <div className="flex h-full">
@@ -70,6 +82,7 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
           clientData={selectedClient}
           onTitleUpdate={setCurrentTitle}
           chatTitle={currentTitle}
+          onDocumentCreated={handleDocumentCreated}
         />
       </div>
       
@@ -81,6 +94,18 @@ export function ChatPageClient({ chat, chats, userImageUrl, userName }: ChatPage
         hasActiveChat={true}
         chatContextFields={chat.contextFields}
       />
+
+      {/* Client Documents Dialog */}
+      {selectedClient && (
+        <ClientDocuments
+          clientId={selectedClient.id}
+          clientName={selectedClient.name}
+          clientEmail={selectedClient.email}
+          open={isDocumentsOpen}
+          onOpenChange={setIsDocumentsOpen}
+          documentToHighlight={documentToHighlight}
+        />
+      )}
     </div>
   )
 } 

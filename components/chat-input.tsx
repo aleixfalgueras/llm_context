@@ -34,9 +34,10 @@ interface ChatInputProps {
   clientData?: any // Optional client context for prompt variable replacement
   messages?: Message[] // Messages for export functionality
   chatTitle?: string // Chat title for export
+  onDocumentCreated?: (clientId: string, documentId: string) => void // Callback for when chat is exported
 }
 
-export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, clientData, messages = [], chatTitle }: ChatInputProps) {
+export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, clientData, messages = [], chatTitle, onDocumentCreated }: ChatInputProps) {
   const [isExporting, setIsExporting] = useState(false)
   const { toast } = useToast()
 
@@ -101,11 +102,29 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
 
       const data = await response.json()
 
-      toast({
-        title: 'Chat Exported 📄',
-        description: `Chat "${chatTitle}" has been saved as a document. You can find it in the client's documents.`,
-        duration: 8000,
-      })
+      if (onDocumentCreated && data.documentId) {
+        toast({
+          title: 'Chat Exported 📄',
+          description: (
+            <div>
+              <p>Chat "{chatTitle}" has been saved as a document.</p>
+              <button 
+                onClick={() => onDocumentCreated(clientData.id, data.documentId)}
+                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+              >
+                📄 View Document
+              </button>
+            </div>
+          ),
+          duration: 10000,
+        })
+      } else {
+        toast({
+          title: 'Chat Exported 📄',
+          description: `Chat "${chatTitle}" has been saved as a document. You can find it in the client's documents.`,
+          duration: 8000,
+        })
+      }
 
     } catch (error) {
       console.error('Error exporting chat:', error)
