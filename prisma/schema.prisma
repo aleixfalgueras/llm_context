@@ -65,13 +65,13 @@ model Client {
 
 model Document {
   id          String   @id @default(cuid())
-  userId      String   // The coach's user ID
+  userId      String   // The marketing professional's user ID
   clientId    String   // The client this document belongs to
   documentName String  // The name of the document
   documentPath String  // Path in Supabase storage: user_id/client_id/document_name.md
-  documentType String  // Type of document (e.g., "diet", "workout", "plan")
-  startDate   DateTime? // For time-based documents like diets
-  endDate     DateTime? // For time-based documents like diets
+  documentType String  // Type of document (e.g., "meeting-report", "custom-document", "proposal")
+  startDate   DateTime? // For time-based documents like campaigns
+  endDate     DateTime? // For time-based documents like campaigns
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -103,7 +103,7 @@ model Prompt {
   name        String   // User-friendly name for the prompt
   description String?  // Optional description of what the prompt does
   content     String   // The actual prompt content/template
-  category    String   @default("general") // Category for organization (general, medical, fitness, etc.)
+  category    String   @default("general") // Category for organization (general, marketing, content, etc.)
   isActive    Boolean  @default(true) // Allow users to disable prompts without deleting
   usageCount  Int      @default(0) // Track how often prompt is used
   createdAt   DateTime @default(now())

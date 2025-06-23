@@ -392,7 +392,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
             <h1 className="text-3xl font-bold">Clients</h1>
           </div>
           <p className="text-muted-foreground">
-            Manage your client profiles and track their health journey
+            Manage your client profiles and track their marketing projects
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -446,7 +446,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
             <p className="text-gray-900 dark:text-gray-100 text-center max-w-md">
               {searchTerm 
                 ? 'Try adjusting your search terms'
-                : 'Start by adding your first client to begin tracking their health journey'
+                : 'Start by adding your first client to begin creating marketing content'
               }
             </p>
             {!searchTerm && (

@@ -1,381 +1,154 @@
 # AI Marketing Assistant
 
-A modern AI-powered marketing assistant built with Next.js 14, React 18, and OpenAI integration. Designed for marketing professionals and content creators to have personalized AI conversations with client-specific context for creating compelling marketing content.
+A modern AI-powered marketing assistant built with Next.js 14, React 18, and OpenAI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations.
 
-## Features
+## ✨ Key Features
 
-### Core Functionality
-- **AI Conversations**: Natural conversations with OpenAI's GPT-4o-mini with granular client context selection
-- **Client Management**: Create, view, edit, and delete marketing client profiles
-- **Custom Prompt Management**: Create, organize, and reuse personalized AI prompts with automatic client variable replacement
-- **Granular Context Control**: Select specific client information fields (country, marketing goals, notes) for each conversation
-- **Context Field Tracking**: View exactly which client fields were used as context for each chat
-- **Chat Management**: Create, view, edit, and delete chat conversations with client association
-- **Real-time Messaging**: Send and receive messages in real-time
-- **Message History**: Persistent chat history stored in database with context metadata
-- **Context Optimization**: Efficient token usage with smart context injection and field selection
-- **AI Services**: Generate personalized marketing content with granular client context control
+### 🤖 **AI-Powered Content Creation**
+- **Multi-Model Support**: Choose between GPT-4o and GPT-4o-mini based on your needs and budget
+- **Client-Aware AI**: Contextual responses using selected client information
+- **Smart Context Control**: Select specific client fields (country, goals, notes) for each conversation
+- **Token Optimization**: Efficient context injection to minimize API costs
+- **Real-time Chat**: ChatGPT-like interface with persistent conversation history
 
-### User Experience  
-- **ChatGPT-like Interface**: Clean, minimalistic design similar to ChatGPT
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Loading States**: Beautiful loading overlays during chat creation with progress feedback
-- **Context Selection UI**: Intuitive checkboxes for selecting client context fields with dynamic labels
-- **Context Visualization**: Green badges showing selected context fields for each chat
-- **Optimistic Updates**: Instant UI feedback for better user experience
-- **Authentication**: Secure user authentication with Clerk
+### 👥 **Comprehensive Client Management**
+- **Rich Client Profiles**: Store business information, contact details, marketing goals, and project notes
+- **Multi-language Support**: Generate documents in 10 languages (English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Catalan)
+- **Document Association**: All generated content automatically linked to specific clients
+- **Privacy-First Design**: Secure data handling with complete user isolation
 
-### Security & Privacy
-- **User Isolation**: Users can only see and access their own chats and clients
-- **Protected Routes**: Authentication required for all functionality
-- **Database Security**: Proper data validation and user verification
+### 📝 **Advanced Prompt Management**
+- **Custom Prompt Library**: Create, organize, and reuse personalized AI templates
+- **Smart Variable Replacement**: Automatic substitution of client data (`{client_name}`, `{country}`, `{goals}`)
+- **Category Organization**: Sort prompts by type (marketing, content, strategy, social-media, copywriting, analysis)
+- **Usage Analytics**: Track which prompts are most effective for your workflow
+- **Sample Templates**: Pre-built prompts for common marketing tasks
 
-## Tech Stack
+### ⚡ **Professional AI Services**
+- **Meeting Report Generator**: Transform meeting transcriptions into professional, actionable reports
+- **Custom Document Generator**: Create marketing content using your own prompt templates
+- **Automatic Document Storage**: All content saved to Supabase with organized file structure
+- **PDF Export**: Professional PDF generation for client delivery
+- **Email Integration**: Send documents directly to clients via Resend API
 
-### Frontend
-- **Next.js 14.2.29**: React framework with App Router
+### 🛡️ **Enterprise-Grade Privacy & Compliance**
+- **GDPR Compliant**: Complete consent management system with audit trails
+- **Data Export**: Full user data export in JSON and PDF formats
+- **Account Deletion**: Automated data purging with configurable grace periods
+- **Cookie Management**: Granular cookie preferences and compliance
+- **Privacy Dashboard**: User-controlled privacy settings and data rights
+
+### 📊 **Analytics & Insights**
+- **Prompt Usage Tracking**: Monitor which templates drive best results
+- **Model Cost Tracking**: Track OpenAI API usage across different models
+- **Client Activity**: Monitor content generation patterns per client
+- **User Feedback System**: Built-in feedback collection for continuous improvement
+
+## 🏗️ Tech Stack
+
+### **Frontend**
+- **Next.js 14.2.29**: App Router with optimized server/client components
 - **React 18**: Modern React with hooks and concurrent features
-- **TypeScript**: Type-safe development
+- **TypeScript**: Full type safety throughout the application
 - **Tailwind CSS**: Utility-first CSS framework
-- **shadcn/ui**: High-quality UI components
+- **shadcn/ui**: High-quality, accessible UI component library
+- **Lucide React**: Beautiful, customizable icon system
 
-### Backend & Database
-- **Supabase**: PostgreSQL database hosting
-- **Prisma ORM**: Type-safe database operations
-- **Server Actions**: Server-side data mutations
-- **API Routes**: RESTful API endpoints
+### **Backend & Database**
+- **Supabase**: PostgreSQL database with real-time capabilities and file storage
+- **Prisma ORM**: Type-safe database operations with automatic migrations
+- **Server Actions**: Next.js server-side data mutations
+- **API Routes**: RESTful endpoints for AI services and data management
 
-### Authentication & AI
-- **Clerk**: Complete authentication solution
-- **OpenAI API**: GPT-4o-mini for AI responses
+### **AI & External Services**
+- **OpenAI API**: GPT-4o and GPT-4o-mini integration
+- **Resend**: Professional email delivery service
+- **Puppeteer + Chromium**: Server-side PDF generation from markdown
 
-## Project Structure
+### **Authentication & Security**
+- **Clerk**: Complete authentication solution with user management
+- **Route Protection**: Middleware-based authentication for all protected routes
+- **Data Validation**: Comprehensive input validation and sanitization
+
+## 📂 Project Structure
 
 ```
-├── app/
-│   ├── api/
-│   │   ├── chat/          # Chat API endpoints
-│   │   ├── prompts/       # Prompt management APIs
-│   │   │   ├── route.ts  # List and create prompts
-│   │   │   ├── [id]/route.ts # Get, update, delete individual prompts
-│   │   │   └── [id]/use/route.ts # Track prompt usage analytics
-│   │   └── ai-services/   # AI document generation APIs
-│   │       ├── generate-meeting-report/  # Meeting report generation
-│   │       ├── generate-custom-document/ # Custom document generation
-│   │       └── save-custom-document/     # Custom document storage
-│   ├── ai-services/       # AI Services page
-│   ├── assistant/         # AI Assistant functionality
-│   │   ├── page.tsx      # Main assistant page with client selection
-│   │   └── chat/[id]/    # Individual chat conversations
-│   ├── clients/           # Client management pages
-│   ├── prompts/           # Prompt management page
-│   ├── sign-in/           # Authentication pages
-│   ├── sign-up/
-│   ├── layout.tsx         # Root layout with providers
-│   └── page.tsx          # Home page
-├── components/
-│   ├── ui/               # shadcn/ui components
-│   ├── chat-sidebar.tsx  # Chat history sidebar with new chat button
-│   ├── chat-messages.tsx # Message display
-│   ├── chat-input.tsx    # Message input form with prompt selector integration
-│   ├── client-context-sidebar.tsx # Client selection and context configuration
-│   ├── prompt-dialog.tsx # Create/edit prompt dialog with variable tooltip
-│   ├── prompt-selector.tsx # Prompt selection dropdown for chat interface
-│   ├── prompts-management.tsx # Complete prompt management dashboard
-│   ├── ai-services-client.tsx # AI Services page
-│   ├── meeting-report-dialog.tsx # Meeting report generation dialog
-│   ├── custom-document-generator-dialog.tsx # Custom document generation with prompt integration
-│   └── clients-page-client.tsx # Client management
-├── hooks/
-│   ├── use-chat.ts       # Chat functionality hook
-│   └── use-toast.ts      # Toast notifications
-├── lib/
-│   ├── actions.ts        # Server actions for CRUD
-│   ├── client-actions.ts # Client management actions
-│   ├── document-actions.ts # Document management actions
-│   ├── variable-replacement.ts # Client variable replacement utilities
-│   ├── prisma.ts         # Database client
-│   ├── supabase.ts       # Supabase client
-│   └── utils.ts          # Utility functions
-├── prisma/
-│   └── schema.prisma     # Database schema
-├── types/
-│   └── client-context.ts # Shared types for client context selection
-└── middleware.ts         # Authentication middleware
+├── app/                     # Next.js App Router
+│   ├── api/                 # API Routes
+│   │   ├── ai-services/     # AI content generation
+│   │   ├── chat/           # Chat API endpoint
+│   │   ├── prompts/        # Prompt management
+│   │   ├── consent/        # GDPR compliance
+│   │   ├── data-export/    # User data export
+│   │   ├── feedback/       # User feedback
+│   │   └── account/        # Account management
+│   ├── assistant/          # AI chat interface
+│   ├── ai-services/        # AI services dashboard
+│   ├── clients/           # Client management
+│   ├── prompts/           # Prompt library
+│   ├── privacy/           # Privacy policy & settings
+│   ├── terms/             # Terms of service
+│   └── feedback/          # User feedback page
+├── components/             # React components
+│   ├── ui/                # shadcn/ui components
+│   ├── chat-*.tsx         # Chat interface
+│   ├── client-*.tsx       # Client management
+│   ├── prompt-*.tsx       # Prompt management
+│   └── ai-services-*.tsx  # AI services
+├── lib/                   # Utility libraries
+│   ├── actions.ts         # Server actions
+│   ├── client-actions.ts  # Client operations
+│   ├── document-actions.ts # Document management
+│   ├── consent-utils.ts   # GDPR utilities
+│   ├── data-export-utils.ts # Data export
+│   ├── language-utils.ts  # Multi-language support
+│   ├── pdf-generator.ts   # PDF creation
+│   └── variable-replacement.ts # Variable substitution
+├── prisma/               # Database
+│   ├── schema.prisma     # Database schema
+│   └── migrations/       # Database migrations
+└── types/                # TypeScript definitions
 ```
 
-## Database Schema
+## 🗄️ Database Schema
 
-### Chat Model
-- `id`: Unique identifier
-- `title`: Chat title (editable)
-- `userId`: Owner's user ID
-- `clientId`: Associated client ID (required)
-- `contextFields`: Array of selected context field names (e.g., ["country", "goals"])
-- `createdAt/updatedAt`: Timestamps
-- `messages`: Related messages
+### **Core Models**
+- **Chat**: AI conversations with client associations and context tracking
+- **Message**: Individual chat messages with model tracking and timestamps
+- **Client**: Business profiles with contact info, goals, and language preferences
+- **Document**: Generated content with metadata, storage paths, and client linking
+- **Prompt**: Custom templates with usage analytics and category organization
 
-### Message Model  
-- `id`: Unique identifier
-- `content`: Message text
-- `role`: USER or ASSISTANT
-- `chatId`: Parent chat ID
-- `createdAt`: Timestamp
+### **Privacy & Compliance Models**
+- **UserConsent**: GDPR consent preferences with audit trails
+- **ConsentAuditLog**: Complete consent change history for compliance
+- **DataExportRequest**: User data export and deletion request tracking
+- **Feedback**: User feedback and feature requests with categorization
 
-### Client Model
-- `id`: Unique identifier
-- `userId`: Marketing professional's user ID
-- `name`: Client's business/brand name
-- `email`: Optional contact email
-- `phone`: Optional phone number
-- `country`: Optional client's country/location
-- `goals`: Client's marketing and content goals
-- `notes`: General notes about the client
-- `documentsLanguage`: Preferred language for generated content
-- `createdAt/updatedAt`: Timestamps
-
-### Document Model
-- `id`: Unique identifier
-- `userId`: Marketing professional's user ID
-- `clientId`: Associated client ID
-- `documentName`: Document name/title
-- `documentPath`: Storage path in Supabase
-- `documentType`: Type (e.g., "meeting", "custom-document")
-- `startDate/endDate`: Optional date range for time-based documents
-- `createdAt/updatedAt`: Timestamps
-
-### Prompt Model
-- `id`: Unique identifier
-- `userId`: Owner's user ID
-- `name`: User-friendly prompt name
-- `description`: Optional description of prompt purpose
-- `content`: The actual prompt template with variable placeholders
-- `category`: Organization category (marketing, content, strategy, social-media, copywriting, analysis, general, custom)
-- `isActive`: Boolean flag to enable/disable prompts
-- `usageCount`: Analytics counter for tracking popularity
-- `createdAt/updatedAt`: Timestamps
-
-## Custom Prompt Management System
-
-### Overview
-The Custom Prompt Management System allows users to create, organize, and reuse personalized AI prompts with automatic client variable replacement. This powerful feature transforms the AI assistant from a generic chat into a professional marketing tool with standardized, yet personalized content creation.
-
-### Key Features
-
-#### **Prompt Creation & Organization**
-- **Rich Prompt Editor**: Create detailed prompt templates with descriptions and categories
-- **Variable Support**: Use client data variables like `{client_name}`, `{goals}`, `{country}`
-- **Category System**: Organize prompts by type (marketing, content, strategy, social-media, copywriting, analysis, general, custom)
-- **Active/Inactive Status**: Enable or disable prompts without deleting them
-- **Usage Analytics**: Track which prompts are used most frequently
-
-#### **Smart Variable Replacement**
-- **Automatic Substitution**: Client variables automatically replaced with actual data when prompt is selected
-- **Real-time Processing**: Variables filled instantly when prompt is applied in chat
-- **Context Awareness**: Uses current chat's associated client data for variable replacement
-- **Fallback Handling**: Missing data shows placeholder labels (e.g., `[Client Name]` if no name available)
-
-#### **Prompt Library Management**
-- **Search & Filter**: Find prompts by name, description, or content
-- **Category Filtering**: Filter prompts by category
-- **Usage Sorting**: Sort by most used, recently updated, name, or creation date
-- **Active/Inactive Toggle**: Show all prompts or only active ones
-
-#### **Integration with AI Assistant**
-- **Chat Integration**: "Use Prompt" button in chat interface for easy access
-- **Prompt Selector**: Searchable dropdown with popular and recent prompts
-- **Live Replacement**: Variables replaced in real-time before insertion into chat input
-- **Usage Tracking**: Automatically tracks when prompts are used
-
-### Variable System
-
-#### **Available Client Variables**
-```
-{client_name}     → Client's business/brand name
-{goals}           → Marketing and content goals
-{country}         → Client's country/location
-```
-
-#### **Variable Replacement Examples**
-
-**Template:**
-```
-Please create a comprehensive marketing strategy for {client_name}, a business located in {country}.
-
-**Client Profile:**
-- Marketing Goals: {goals}
-- Target Market: {country}
-
-Please provide personalized marketing recommendations based on this information.
-```
-
-**After Variable Replacement:**
-```
-Please create a comprehensive marketing strategy for TechStart Solutions, a business located in United States.
-
-**Client Profile:**
-- Marketing Goals: Increase brand awareness by 50%, launch social media campaigns, create engaging video content for product demos
-- Target Market: United States
-
-Please provide personalized marketing recommendations based on this information.
-```
-
-### Prompt Categories
-
-#### **Marketing**
-- Marketing strategy templates
-- Campaign planning formats
-- Brand positioning prompts
-
-#### **Content**
-- Content calendar templates
-- Blog post structures
-- Social media content formats
-
-#### **Strategy**
-- Brand strategy frameworks
-- Competitive analysis templates
-- Market research prompts
-
-#### **Social Media**
-- Platform-specific content templates
-- Engagement strategy prompts
-- Hashtag research formats
-
-#### **Copywriting**
-- Sales copy templates
-- Email marketing formats
-- Ad copy structures
-
-#### **Analysis**
-- Performance report formats
-- Analytics review templates
-- ROI calculation prompts
-
-### Professional Prompt Examples
-
-#### **Marketing Strategy Template**
-```
-**Marketing Strategy for {client_name}**
-
-**Client Information:**
-- Business: {client_name}
-- Location: {country}
-
-**Current Marketing Goals:**
-{goals}
-
-**Strategy Development:**
-Please provide a comprehensive marketing strategy including:
-1. Target audience analysis
-2. Brand positioning recommendations
-3. Content marketing plan
-4. Social media strategy
-5. Success metrics and KPIs
-```
-
-#### **Content Calendar Template**
-```
-**Content Calendar - {client_name}**
-
-**Client Overview:**
-- Business: {client_name}
-- Location: {country}
-- Marketing Goals: {goals}
-
-Please create a detailed content calendar that includes:
-1. Content themes and pillars
-2. Platform-specific content
-3. Posting schedule recommendations
-4. Engagement strategies
-5. Content types (video, images, text, etc.)
-```
-
-#### **Social Media Strategy**
-```
-**Social Media Strategy for {client_name}**
-
-**Business Profile:**
-- Company: {client_name}
-- Market: {country}
-- Objectives: {goals}
-
-Please develop a comprehensive social media strategy including:
-1. Platform selection and rationale
-2. Content themes and messaging
-3. Posting frequency and timing
-4. Community engagement tactics
-5. Growth strategies and metrics
-```
-
-## AI Client Context System
-
-### Overview
-Each chat is associated with a specific client with **granular context field selection**. Users can choose exactly which client information fields to include as context for each conversation. This provides complete control over personalization while optimizing token usage and maintaining privacy.
-
-### Granular Context Selection
-- **Field-Level Control**: Select specific client fields (country, marketing goals, notes)
-- **Dynamic UI**: Checkboxes only appear for fields with actual client data
-- **Context Visualization**: Selected fields shown as green badges with field names
-- **Persistent Tracking**: Context selections stored in database and displayed for each chat
-
-### Context Injection Strategy
-- **First Message Only**: Selected client context is added as a system message only on the first user message
-- **Memory-Based**: Subsequent messages rely on conversation memory, avoiding repeated context
-- **Token Efficient**: Only selected fields included, reducing API costs and improving response times
-- **Context Transparency**: Users can see exactly which fields were used for each conversation
-
-### System Prompt Template
-
-The following system prompt is dynamically constructed with client context:
-
-```typescript
-const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their client. You have access to the following client information and should use it to provide personalized, relevant advice and responses for content creation and marketing strategies.
-
-CLIENT PROFILE:${client.country ? `
-Country: ${client.country}` : ''}${client.goals ? `
-
-MARKETING GOALS:
-${client.goals}` : ''}${client.notes ? `
-
-ADDITIONAL NOTES:
-${client.notes}` : ''}
-
-INSTRUCTIONS:
-- Use this client information to personalize your responses for content creation and marketing strategies
-- Reference their specific marketing goals and circumstances when relevant
-- Be professional, creative, and supportive
-- Provide actionable advice tailored to their marketing and content needs
-- Focus on content creation, social media strategies, and marketing campaigns
-- Maintain confidentiality and professionalism at all times
-
-Respond naturally and conversationally while keeping this context in mind.`
-```
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- Clerk account
+- Node.js 18+
+- PostgreSQL database (Supabase recommended)
 - OpenAI API key
+- Clerk account for authentication
+- Resend account for email services
 
-### Environment Variables
-Create a `.env.local` file with:
+### Environment Setup
+Create `.env.local` with these variables:
 
 ```env
 # Database
 DATABASE_URL="your_supabase_database_url"
 DIRECT_URL="your_supabase_direct_url"
 
-# Supabase Storage (for documents)
+# Supabase Storage
 SUPABASE_URL="your_supabase_project_url"
 SUPABASE_KEY="your_supabase_service_role_key"
 NEXT_PUBLIC_SUPABASE_URL="your_supabase_project_url"
 NEXT_PUBLIC_SUPABASE_KEY="your_supabase_anon_key"
 
-# Clerk Authentication
+# Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_publishable_key"
 CLERK_SECRET_KEY="your_clerk_secret_key"
 
@@ -384,102 +157,165 @@ OPENAI_API_KEY="your_openai_api_key"
 OPENAI_API_MODEL="gpt-4o-mini"
 OPENAI_TEMPERATURE="0.7"
 OPENAI_MAX_TOKENS="1000"
-OPENAI_PRESENCE_PENALTY="0.1"
-OPENAI_FREQUENCY_PENALTY="0.1"
+
+# Email Services
+RESEND_API_KEY="your_resend_api_key"
+RESEND_FROM_EMAIL="noreply@yourdomain.com"
 ```
 
 ### Installation
 
-1. Install dependencies:
+1. **Install dependencies:**
 ```bash
 npm install --legacy-peer-deps
 ```
 
-2. Set up the database:
+2. **Set up database:**
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-3. Start the development server:
+3. **Start development server:**
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. **Open [http://localhost:3000](http://localhost:3000)**
 
-## Usage
+## 📋 Usage Workflow
 
-### Getting Started
-1. **Sign Up/Sign In**: Create an account or sign in with Clerk
-2. **Create Clients**: Go to `/clients` to add marketing client profiles with their information
+### **1. Client Management**
+- Navigate to `/clients` to create client profiles
+- Add business information, location, and marketing goals
+- Set preferred document generation language
 
-### Prompt Management Workflow
-3. **Create Custom Prompts**: Go to `/prompts` to build your prompt library
-   - **Prompt Creation**: Use the "New Prompt" button to create templates
-   - **Variable Integration**: Include client variables like `{client_name}`, `{goals}`, `{country}`
-   - **Category Organization**: Organize prompts by type (marketing, content, strategy, social-media, etc.)
-   - **Usage Analytics**: Track which prompts are most effective
+### **2. Prompt Library Setup**
+- Go to `/prompts` to create custom templates
+- Use variables: `{client_name}`, `{country}`, `{goals}`
+- Organize by category and track usage analytics
 
-### AI Assistant Workflow
-4. **Navigate to Assistant**: Go to `/assistant` for the main AI chat interface
-5. **Select Client**: Choose a client from the dropdown menu
-6. **Configure Context**: Select which client information fields to include:
-   - Country, Marketing Goals, Notes
-   - Only fields with actual data are shown
-   - Dynamic labels show actual values (e.g., "Country (United States)")
-7. **Create Chat**: Click "New Chat" with loading feedback during creation
-8. **Use Custom Prompts**: Click "Use Prompt" to access your prompt library
-   - **Automatic Variable Replacement**: Client data automatically fills template variables
-   - **Smart Search**: Find prompts by name, category, or content
-   - **Popular Prompts**: Quick access to most-used and recent prompts
-9. **Send Messages**: Type your message (or use prompts) and press Enter or click Send
-10. **View Context**: See selected context fields displayed as green badges in sidebar
-11. **Chat Navigation**: Use "New Chat" button in chat sidebar or return to `/assistant`
+### **3. AI Assistant**
+- Visit `/assistant` for AI conversations
+- Select client and choose context fields
+- Switch between GPT-4o and GPT-4o-mini models
+- Export conversations as documents
 
-### Chat Management
-12. **Manage Chats**: Edit titles or delete chats using the dropdown menu
-13. **View History**: Click on any chat in the sidebar to view conversation
-14. **Context Transparency**: See exactly which client fields were used for each chat
-15. **Client Information**: View essential client info in the right sidebar during chats
+### **4. AI Services**
+- Use `/ai-services` for structured content generation
+- Generate meeting reports from transcriptions
+- Create custom documents with prompt templates
+- Automatically save and organize all content
 
-### Prompt Management
-16. **Prompt Library**: Access `/prompts` to manage your prompt collection
-17. **Analytics Dashboard**: View usage statistics and prompt performance
-18. **Organization**: Search, filter, and categorize prompts for easy access
+### **5. Document Management**
+- All content automatically saved to Supabase
+- Generate PDFs for client delivery
+- Send documents via email integration
+- Organize by client and document type
 
-### AI Services
-19. **Generate Documents**: Use `/ai-services` to create personalized marketing content
-20. **Context Selection**: Same granular field selection available for all AI services
-21. **Service-Specific Features**: Generate meeting reports and custom marketing documents
+## 🔒 Privacy & Compliance Features
 
-## Architecture Decisions
+### **GDPR Compliance**
+- Comprehensive consent management system
+- Complete audit trail for all data processing
+- User data export in multiple formats
+- Account deletion with configurable grace periods
 
-### Server Actions vs API Routes
-- **Server Actions**: Used for simple CRUD operations (create/delete/update chats)
-- **API Routes**: Used for complex AI integration and streaming responses
+### **Data Rights Management**
+- Access: View all stored personal data
+- Rectify: Update personal information
+- Erase: Request account and data deletion
+- Export: Download complete data archive
+- Restrict: Control data processing preferences
 
-### Custom Hooks
-- **useChat**: Encapsulates chat logic, optimistic updates, and API calls
-- **useToast**: Handles user notifications and feedback
+### **Security Features**
+- User data isolation between accounts
+- Encrypted data transmission
+- Secure file storage via Supabase
+- Input validation and sanitization
 
-### Authentication Strategy
-- **Middleware Protection**: Routes protected at the edge
-- **User Verification**: Database operations verify user ownership
-- **Redirect Flow**: Unauthenticated users redirected to sign-in
+## 📊 Analytics & Monitoring
 
-## Performance Optimizations
+- **Prompt Performance**: Track which templates generate best results
+- **Cost Management**: Monitor OpenAI API usage by model
+- **Client Activity**: Analyze content generation patterns
+- **User Feedback**: Built-in feedback system for continuous improvement
 
-- **Optimistic Updates**: Immediate UI feedback
-- **Database Indexing**: Efficient queries with proper relations
-- **Component Optimization**: Client/server component separation
-- **Bundle Optimization**: Tree-shaking and code splitting
+## 🛠️ Development Commands
 
-## Security Features
+```bash
+npm run dev           # Start development server
+npm run build         # Build for production
+npm run start         # Start production server
+npm run lint          # Run ESLint
+npx prisma studio     # Database management GUI
+npx prisma generate   # Generate Prisma client
+npx prisma db push    # Push schema changes
+```
 
-- **Route Protection**: Authentication middleware
-- **Data Validation**: Prisma schema validation
-- **User Isolation**: Database-level user filtering
-- **Input Sanitization**: Safe message handling
+## 🎨 Customization
 
-Built with ❤️ for marketing professionals and content creators.
+### **Branding & Theming**
+- Update colors in `tailwind.config.ts`
+- Modify component themes in `components/ui/`
+- Customize landing page in `components/landing-page.tsx`
+
+### **AI Configuration**
+- Add new OpenAI models in `components/ui/model-selector.tsx`
+- Configure prompts in `lib/sample-prompts.ts`
+- Extend language support in `lib/language-utils.ts`
+
+### **Feature Extensions**
+- Add new AI services in `app/api/ai-services/`
+- Create custom document types in `types/document-types.ts`
+- Extend privacy features in `lib/consent-utils.ts`
+
+## 🚀 Deployment
+
+### **Vercel (Recommended)**
+1. Connect GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### **Production Checklist**
+- [ ] Set up custom domain
+- [ ] Configure email forwarding for privacy contacts
+- [ ] Set up database backups
+- [ ] Configure monitoring and alerts
+- [ ] Test all privacy compliance features
+
+## 📈 Scaling Considerations
+
+### **Cost Management**
+- Monitor OpenAI token usage with built-in analytics
+- Implement usage limits per subscription tier
+- Track costs per client/conversation
+
+### **Performance Optimization**
+- Database connection pooling via Prisma
+- Implement Redis caching for frequent queries
+- Optimize image delivery via Supabase CDN
+
+### **Compliance Scaling**
+- Built-in GDPR compliance scales automatically
+- Audit logs maintain compliance at any scale
+- Data export system handles large datasets
+
+## 🤝 Support & Feedback
+
+- **Built-in Feedback**: Use `/feedback` page for feature requests and bug reports
+- **Documentation**: This README and AI_SERVICES_README.md
+- **Database Management**: Use Prisma Studio for direct database access
+
+## 📄 Legal & Compliance
+
+- **Privacy Policy**: Available at `/privacy`
+- **Terms of Service**: Available at `/terms`
+- **GDPR Rights**: Managed through `/privacy/settings`
+- **Data Processing**: Full audit trail maintained
+
+---
+
+**Built with ❤️ for marketing professionals who want to scale their business with AI.**
+
+*This application provides enterprise-grade AI tools with privacy-first design, helping marketing professionals create compelling content while maintaining complete data security and compliance.*

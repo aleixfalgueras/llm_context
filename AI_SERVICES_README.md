@@ -1,291 +1,266 @@
 # AI Marketing Services Documentation
 
-This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents with granular client context control.
+This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents with granular client context control and professional output formatting.
 
-## Overview
+## 🎯 Overview
 
-AI Services provide automated marketing content generation using client profiles. The feature reuses the same client context system as the AI Assistant to generate personalized, professional marketing documents. Two main services are currently implemented.
+AI Services provide automated marketing content generation using client profiles and custom prompts. The feature leverages the same client context system as the AI Assistant to generate personalized, professional marketing documents that are ready for client delivery.
 
-## Core Technology
+## 🏗️ Core Technology
 
-### Client Context Integration
+### **Client Context Integration**
 - **Granular Context Selection**: Choose specific client information fields to include in generation
 - **Dynamic UI**: Checkboxes only appear for fields with actual client data
 - **Context Visualization**: Selected fields displayed with actual values (e.g., "Country (United States)")
 - **Consistent System**: Same context selection system as the AI Assistant for familiarity
+- **Privacy-First**: Only selected data is sent to OpenAI APIs
 
-### AI Processing
-- **OpenAI Integration**: Uses GPT-4o-mini for content generation
+### **AI Processing**
+- **Multi-Model Support**: Uses both GPT-4o and GPT-4o-mini for different use cases
 - **Client Variable Replacement**: Automatic substitution of client variables in prompts
-- **Professional Output**: Production-ready marketing content for client delivery
+- **Professional Output**: Production-ready marketing content formatted for client delivery
 - **Real-time Generation**: Interactive content creation with immediate feedback
+- **Multi-language Support**: Generate content in 10+ languages based on client preferences
 
-## Implemented Services
+### **Document Management**
+- **Automatic Storage**: All generated content saved to Supabase with organized structure
+- **PDF Generation**: Server-side PDF creation using Puppeteer and Chromium
+- **Email Integration**: Direct document delivery to clients via Resend API
+- **Version Control**: Document history and metadata tracking
+- **File Organization**: Structured storage by user/client/document type
 
-### 1. Meeting Report Generation
+## 🚀 Currently Implemented Services
 
-#### Purpose
-Generate professional meeting reports for client consultations, strategy sessions, and project discussions.
+### **1. Meeting Report Generator**
 
-#### Features
-- **Date Selection**: Specific meeting date picker
-- **Agenda Input**: Optional meeting agenda or topics to discuss
-- **Participant Information**: Optional attendee details
-- **Context Selection**: Choose relevant client information fields
-- **Professional Format**: Structured meeting report with sections for agenda, discussion points, action items, and next steps
+#### **Purpose**
+Generate comprehensive, professional meeting reports from client meeting transcriptions, notes, or agendas.
 
-#### Context Usage
-- **Default Selection**: No fields selected by default (objective meeting documentation)
-- **Available Fields**: Country, Marketing Goals, Notes
-- **Context Purpose**: Personalizes meeting reports with relevant client background
+#### **Key Features**
+- **Meeting Date Selection**: Calendar picker for accurate date recording
+- **Flexible Input**: Accept meeting transcriptions, notes, or agenda items
+- **Context-Aware Generation**: Uses selected client information for personalized reports
+- **Structured Output**: Professional formatting with clear sections and action items
+- **Multi-language Output**: Generate reports in client's preferred language
 
-#### Generated Content Structure
-```markdown
-# Meeting Report - [Client Name]
-**Date:** [Selected Date]
-**Type:** Marketing Consultation
+#### **Input Fields**
+- Meeting date (required)
+- Meeting transcription/notes (required)
+- Additional context (optional)
+- Client context fields (selectable)
 
-## Meeting Overview
-[Meeting context and purpose]
+#### **Output Structure**
+- Meeting Summary
+- Key Discussion Points
+- Outcomes & Decisions Made
+- Action Items & Next Steps
+- Follow-up Requirements
+- Professional formatting with clear sections
 
-## Agenda
-[Meeting topics and agenda items]
+#### **Use Cases**
+- Client consultation summaries
+- Strategy session documentation
+- Project kickoff meeting reports
+- Campaign planning session notes
+- Performance review meetings
 
-## Discussion Points
-[Key points discussed during meeting]
+### **2. Custom Document Generator**
 
-## Client Background
-[Selected client context fields]
+#### **Purpose**
+Create personalized marketing documents using custom prompt templates with automatic client variable replacement.
 
-## Action Items
-[Specific action items and responsibilities]
+#### **Key Features**
+- **Prompt Library Integration**: Use existing custom prompts or create new ones
+- **Variable Substitution**: Automatic replacement of `{client_name}`, `{country}`, `{goals}`
+- **Custom Instructions**: Add specific requirements for each document
+- **Context Selection**: Include relevant client information fields
+- **Professional Formatting**: Markdown output optimized for business delivery
 
-## Next Steps
-[Follow-up actions and timeline]
+#### **Input Options**
+- **Existing Prompt**: Select from your prompt library
+- **Custom Prompt**: Create one-time custom instructions
+- **Document Title**: Professional document naming
+- **Additional Instructions**: Specific requirements or modifications
+- **Client Context**: Select relevant information fields
 
-## Meeting Notes
-[Additional notes and observations]
-```
-
-### 2. Document Generation
-
-#### Purpose
-Generate any type of marketing document using custom prompts and client context.
-
-#### Features
-- **Prompt Integration**: Select from user's custom prompt library
-- **Variable Replacement**: Automatic client variable substitution in prompts
-- **Context Selection**: Granular control over client information included
-- **Custom Output**: Flexible document generation based on selected prompt
-- **Real-time Processing**: Interactive prompt selection and content generation
-
-#### Context Usage
-- **Dynamic Selection**: All available client fields can be selected
-- **Available Fields**: Country, Marketing Goals, Notes
-- **Context Variables**: `{client_name}`, `{goals}`, `{country}` automatically replaced
-
-#### Workflow
-1. **Select Client**: Choose the client for document generation
-2. **Choose Prompt**: Select a prompt from your custom prompt library
-3. **Configure Context**: Select which client fields to include
-4. **Preview Variables**: See client variables that will be replaced
-5. **Generate Content**: AI creates personalized document based on prompt and context
-6. **Review & Edit**: Use the built-in editor to modify generated content
-7. **Save Document**: Store final document in Supabase with proper naming
-
-#### Example Use Cases
+#### **Prompt Examples**
 - Marketing strategy reports
-- Content calendars
-- Social media plans
+- Content calendar planning
 - Campaign proposals
+- Performance analysis reports
+- Social media strategies
 - Brand guidelines
-- Competitive analysis reports
-- Client onboarding documents
 
-## Technical Implementation
-
-### Context Selection System
-
-#### Dynamic Field Display
-```typescript
-interface ClientContextSelection {
-  country: boolean;
-  goals: boolean;
-  notes: boolean;
-}
-
-// Only show checkboxes for fields with actual data
-const availableFields = [
-  { key: 'country', label: `Country (${client.country})`, visible: !!client.country },
-  { key: 'goals', label: `Marketing Goals (${client.goals?.substring(0, 50)}...)`, visible: !!client.goals },
-  { key: 'notes', label: `Notes (${client.notes?.substring(0, 50)}...)`, visible: !!client.notes }
-].filter(field => field.visible);
+#### **Variable System**
+```
+{client_name}     → Client's business/brand name
+{country}         → Client's country/location
+{goals}           → Marketing and content goals
 ```
 
-#### Context Processing
-- **System Prompt Enhancement**: Selected client context added to AI system prompt
-- **Professional Formatting**: Context presented in structured, professional format
-- **Privacy Compliance**: Only selected fields included in AI processing
-- **Token Optimization**: Efficient context injection to minimize API costs
+## 📋 Document Storage & Management
 
-### Document Storage
-
-#### File Organization
+### **Storage Architecture**
 ```
-Storage Structure:
-└── documents/
-    └── {userId}/
-        └── {clientId}/
-            ├── {Client Name} Meeting Report {date}.md
-            └── {Client Name} {Document Type} {timestamp}.md
+Supabase Storage Structure:
+└── user_id/
+    └── client_id/
+        ├── meeting_reports/
+        │   └── YYYY-MM-DD_meeting_report.md
+        ├── custom_documents/
+        │   └── document_name.md
+        └── chat_exports/
+            └── chat_title_YYYY-MM-DD.md
 ```
 
-#### Naming Conventions
-- **Meeting Reports**: `{Client Name} Meeting Report {YYYY-MM-DD}.md`
-- **Generated Documents**: `{Client Name} {Prompt Name} {YYYY-MM-DD-HH-mm}.md`
-- **Fallback Names**: Automatic naming when client name unavailable
+### **Document Metadata**
+Each document includes:
+- **Document Type**: meeting-report, custom-document, chat-export
+- **Client Association**: Linked to specific client profile
+- **Creation Date**: Timestamp and date range (if applicable)
+- **Language**: Document generation language
+- **Source Information**: Original prompt or meeting details
+- **File Path**: Supabase storage location
 
-#### Metadata Tracking
-```typescript
-interface Document {
-  id: string;
-  userId: string;
-  clientId: string;
-  documentName: string;
-  documentPath: string;
-  documentType: 'MEETING' | 'CUSTOM_DOCUMENT';
-  startDate?: Date;
-  endDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
+### **Export Capabilities**
+- **PDF Generation**: Professional PDF creation for client delivery
+- **Email Integration**: Direct sending via Resend API
+- **Download Options**: Direct file download from storage
+- **Sharing Links**: Secure, temporary access links
+
+## 🎨 User Interface Components
+
+### **Service Selection Dashboard**
+- **Service Cards**: Visual representation of each AI service
+- **Feature Lists**: Clear capability descriptions
+- **Status Indicators**: Available/coming soon badges
+- **Quick Actions**: Direct service access buttons
+
+### **Context Selection Interface**
+- **Client Dropdown**: Choose which client to generate content for
+- **Dynamic Fields**: Only show fields with actual data
+- **Value Preview**: Display actual field values in labels
+- **Selection Memory**: Remember context preferences per service
+
+### **Generation Forms**
+- **Service-Specific Fields**: Tailored inputs for each service type
+- **Real-time Validation**: Immediate feedback on required fields
+- **Progress Indicators**: Loading states during generation
+- **Error Handling**: Clear error messages and recovery options
+
+### **Document Preview & Management**
+- **Instant Preview**: Generated content displayed immediately
+- **Edit Capabilities**: Option to modify before saving
+- **Metadata Display**: Show document details and context used
+- **Action Buttons**: Save, export, email, and share options
+
+## 🔧 Technical Implementation
+
+### **API Architecture**
+```
+AI Services API Structure:
+├── /api/ai-services/
+│   ├── generate-meeting-report/     # Meeting report generation
+│   ├── generate-custom-document/    # Custom document creation
+│   ├── save-meeting-report/         # Save generated meeting reports
+│   ├── save-custom-document/        # Save custom documents
+│   └── save-chat-export/           # Save exported chat conversations
 ```
 
-### AI Processing Pipeline
+### **OpenAI Integration**
+- **Model Selection**: Configurable model choice (GPT-4o, GPT-4o-mini)
+- **Token Optimization**: Efficient prompt construction
+- **Temperature Control**: Configurable creativity settings
+- **Max Tokens**: Controlled output length
+- **Error Handling**: Robust API error management
 
-#### 1. Context Preparation
-```typescript
-const buildSystemPrompt = (client: Client, selectedFields: ClientContextSelection) => {
-  let context = `You are a professional AI assistant helping a marketing service provider create content for their client.`;
-  
-  if (selectedFields.country && client.country) {
-    context += `\n\nClient Location: ${client.country}`;
-  }
-  
-  if (selectedFields.goals && client.goals) {
-    context += `\n\nMarketing Goals:\n${client.goals}`;
-  }
-  
-  if (selectedFields.notes && client.notes) {
-    context += `\n\nAdditional Notes:\n${client.notes}`;
-  }
-  
-  return context;
-};
-```
+### **Security Features**
+- **User Verification**: All operations verify user ownership
+- **Data Isolation**: Complete separation between user accounts
+- **Input Sanitization**: Comprehensive validation of all inputs
+- **Secure Storage**: Encrypted file storage via Supabase
 
-#### 2. Content Generation
-- **OpenAI API**: GPT-4o-mini model for high-quality, cost-effective generation
-- **Streaming Response**: Real-time content generation with progress feedback
-- **Error Handling**: Graceful handling of API failures with user feedback
-- **Content Validation**: Basic validation of generated content structure
+## 📊 Analytics & Tracking
 
-#### 3. Post-Processing
-- **Markdown Formatting**: Proper markdown structure for professional appearance
-- **Variable Substitution**: Final pass to ensure all variables are replaced
-- **Content Sanitization**: Remove any potential harmful or inappropriate content
-- **Quality Assurance**: Basic checks for content completeness and coherence
+### **Usage Metrics**
+- **Service Popularity**: Track which services are used most
+- **Document Generation**: Count documents per client/service
+- **Success Rates**: Monitor successful vs. failed generations
+- **User Engagement**: Track feature adoption and usage patterns
 
-## User Interface
+### **Cost Management**
+- **Token Usage**: Track OpenAI API consumption per service
+- **Model Costs**: Monitor expenses across different models
+- **Per-User Analytics**: Track usage per user for billing
+- **Optimization Opportunities**: Identify cost reduction areas
 
-### Service Selection
-- **Card-Based Layout**: Visual service selection with descriptions
-- **Context Preview**: Show which client fields will be available
-- **Service Status**: Clear indication of available vs. coming soon services
+## 🚀 Future Enhancements
 
-### Generation Dialog
-- **Step-by-Step Process**: Guided workflow for document generation
-- **Real-time Feedback**: Progress indicators and status updates
-- **Context Visualization**: Clear display of selected client information
-- **Edit Capabilities**: Built-in editor for content modification
+### **Planned Services**
+- **Campaign Builder**: Complete marketing campaign generation
+- **Content Series Creator**: Interconnected content piece generation
+- **Performance Report Generator**: Analytics and KPI reporting
+- **Competitive Analysis**: AI-powered competitor research
+- **Brand Guidelines Generator**: Comprehensive brand style guides
+- **Social Media Calendar**: Automated content scheduling
+- **Email Campaign Creator**: Personalized email marketing content
 
-### Content Editor
-- **Markdown Support**: Rich text editing with markdown preview
-- **Real-time Preview**: Live preview of formatted content
-- **Save Options**: Multiple save and export options
-- **Version History**: Track document modifications (future feature)
-
-## API Endpoints
-
-### Meeting Report Generation
-```
-POST /api/ai-services/generate-meeting-report
-- Body: { clientId, meetingDate, agenda, participants, contextSelection }
-- Returns: { content, documentPath, metadata }
-```
-
-### Document Generation
-```
-POST /api/ai-services/generate-custom-document
-- Body: { clientId, promptId, contextSelection }
-- Returns: { content, documentPath, metadata }
-```
-
-### Document Storage
-```
-POST /api/ai-services/save-custom-document
-- Body: { documentContent, documentName, clientId, documentType }
-- Returns: { documentPath, documentId, success }
-```
-
-## Security & Privacy
-
-### Authentication
-- **User Verification**: All requests require valid authentication
-- **Client Ownership**: Users can only generate documents for their own clients
-- **Prompt Access**: Users can only use their own custom prompts
-
-### Data Protection
-- **Context Control**: Users explicitly choose what client information to include
-- **No Storage**: Client data not permanently stored in AI processing
-- **Audit Trail**: Document generation tracked for transparency
-- **Secure Storage**: Documents stored with user-specific access controls
-
-## Future Enhancements
-
-### Planned Features
-- **Template Library**: Pre-built marketing document templates
+### **Advanced Features**
 - **Batch Processing**: Generate multiple documents simultaneously
-- **Document Collaboration**: Share and collaborate on generated documents
-- **Version Control**: Track document changes and revisions
-- **Export Options**: PDF, Word, and other format exports
-- **Analytics**: Track document performance and client engagement
+- **Template Marketplace**: Share and discover prompt templates
+- **Integration APIs**: Connect with external marketing tools
+- **White-label Options**: Custom branding for agencies
+- **Advanced Analytics**: Detailed performance and ROI tracking
 
-### Additional Services
-- **Campaign Builder**: Generate complete marketing campaigns
-- **Content Series**: Create interconnected content pieces
-- **Performance Reports**: Generate analytics and performance summaries
-- **Competitive Analysis**: AI-powered competitor research documents
-- **Brand Guidelines**: Generate comprehensive brand style guides
+### **User Experience Improvements**
+- **Drag & Drop Interface**: Visual document builder
+- **Real-time Collaboration**: Multi-user document editing
+- **Version History**: Track document changes and revisions
+- **Client Portal**: Dedicated client access to their documents
+- **Mobile App**: Native iOS/Android applications
 
-## Best Practices
+## 📈 Best Practices
 
-### Prompt Creation
-- **Clear Instructions**: Use specific, actionable language in prompts
+### **Prompt Creation**
+- **Clear Instructions**: Use specific, actionable language
 - **Variable Usage**: Leverage client variables for personalization
-- **Category Organization**: Organize prompts by document type or purpose
-- **Testing**: Test prompts with different client profiles
+- **Testing**: Validate prompts with different client profiles
+- **Iteration**: Refine prompts based on output quality
 
-### Context Selection
-- **Relevance**: Only select client fields relevant to the document type
+### **Context Selection**
+- **Relevance**: Only select client fields relevant to the document
 - **Privacy**: Consider what information is necessary vs. nice-to-have
 - **Efficiency**: More context isn't always better - be strategic
-- **Consistency**: Use similar context selections for similar document types
+- **Consistency**: Use similar context selections for similar documents
 
-### Content Quality
-- **Review Process**: Always review generated content before client delivery
-- **Brand Alignment**: Ensure content matches client's brand voice and style
+### **Content Quality**
+- **Review Process**: Always review generated content before delivery
+- **Brand Alignment**: Ensure content matches client's brand voice
 - **Accuracy**: Verify all facts and figures in generated content
-- **Personalization**: Add human touches to make content more engaging
+- **Personalization**: Add human touches for authentic engagement
 
-Built with ❤️ for marketing professionals creating exceptional content for their clients. 
+### **Workflow Optimization**
+- **Prompt Library**: Build reusable templates for common tasks
+- **Context Presets**: Save frequently used context combinations
+- **Batch Generation**: Create multiple documents in single sessions
+- **Client Feedback**: Incorporate client preferences into future content
+
+## 🛡️ Privacy & Compliance
+
+### **Data Handling**
+- **Minimal Data Transfer**: Only selected fields sent to OpenAI
+- **No Personal Identifiers**: Client names and sensitive data handled carefully
+- **Audit Trails**: Complete logging of all data processing activities
+- **GDPR Compliance**: Full compliance with privacy regulations
+
+### **Client Data Protection**
+- **Encryption**: All data encrypted in transit and at rest
+- **Access Controls**: Role-based access to client information
+- **Data Retention**: Configurable retention policies
+- **Deletion Rights**: Complete data removal capabilities
+
+---
+
+**The AI Services suite transforms marketing content creation from time-consuming manual work into efficient, personalized, AI-powered generation while maintaining the highest standards of quality and privacy.**
+
+*For technical support or feature requests, use the built-in feedback system at `/feedback`.* 

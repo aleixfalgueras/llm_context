@@ -15,11 +15,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the current user (coach) information
+    // Get the current user (marketing professional) information
     const user = await currentUser()
-    const coachName = user?.firstName && user?.lastName 
+    const marketingProfessionalName = user?.firstName && user?.lastName 
       ? `${user.firstName} ${user.lastName}`
-      : user?.firstName || user?.emailAddresses[0]?.emailAddress || 'Your Coach'
+      : user?.firstName || user?.emailAddresses[0]?.emailAddress || 'Your Marketing Partner'
 
     const { documentId, clientEmail, clientName } = await request.json()
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
           </div>
           
           <p>If you have any questions about this document, please don't hesitate to reach out.</p>
-          <p>Best regards,<br>${coachName}</p>
+          <p>Best regards,<br>${marketingProfessionalName}</p>
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
           <p style="font-size: 12px; color: #64748b;">
