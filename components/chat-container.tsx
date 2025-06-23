@@ -21,9 +21,10 @@ interface ChatContainerProps {
   onTitleUpdate?: (title: string) => void
   chatTitle?: string
   onDocumentCreated?: (clientId: string, documentId: string) => void
+  lastUsedModel?: string
 }
 
-export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated }: ChatContainerProps) {
+export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel }: ChatContainerProps) {
   const { messages, isLoading, input, setInput, sendMessage, setOnTitleUpdate } = useChat(chatId, initialMessages)
   
   // Set up title update callback
@@ -56,6 +57,7 @@ export function ChatContainer({ chatId, initialMessages, userImageUrl, userName,
           messages={messages}
           chatTitle={chatTitle}
           onDocumentCreated={onDocumentCreated}
+          lastUsedModel={lastUsedModel}
         />
       </div>
     </>

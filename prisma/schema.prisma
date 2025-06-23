@@ -34,6 +34,7 @@ model Message {
   id        String   @id @default(cuid())
   content   String
   role      Role
+  model     String?  // OpenAI model used for this message (e.g., 'gpt-4o', 'gpt-4o-mini')
   chatId    String
   createdAt DateTime @default(now())
 
