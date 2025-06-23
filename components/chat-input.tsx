@@ -7,7 +7,7 @@ import { PromptSelector } from '@/components/prompt-selector'
 import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Prompt {
   id: string
@@ -43,6 +43,30 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
   const [isExporting, setIsExporting] = useState(false)
   const [selectedModel, setSelectedModel] = useState(lastUsedModel || 'gpt-4o-mini') // Use last used model or default to GPT-4o Mini
   const { toast } = useToast()
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-resize textarea function
+  const autoResize = () => {
+    const textArea = textAreaRef.current
+    if (textArea) {
+      textArea.style.height = 'auto'
+      const newHeight = Math.min(textArea.scrollHeight, 200)
+      textArea.style.height = `${newHeight}px`
+      
+      // Enable scroll if content exceeds max height
+      if (textArea.scrollHeight > 200) {
+        textArea.style.overflowY = 'auto'
+      } else {
+        textArea.style.overflowY = 'hidden'
+      }
+    }
+  }
+
+  // Handle input change with auto-resize
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value)
+    autoResize()
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -169,6 +193,20 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
     setSelectedModel(lastUsedModel || 'gpt-4o-mini')
   }, [lastUsedModel])
 
+  // Auto-resize when input changes
+  useEffect(() => {
+    if (input.trim()) {
+      autoResize()
+    } else {
+      // Reset to initial height when input is cleared
+      const textArea = textAreaRef.current
+      if (textArea) {
+        textArea.style.height = '60px'
+        textArea.style.overflowY = 'hidden'
+      }
+    }
+  }, [input])
+
   return (
     <div className="space-y-2">
       {/* Prompt Selector, Model Selector, and Export Button */}
@@ -203,11 +241,13 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
       <form onSubmit={handleSubmit} className="flex gap-2">
         <Textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-          className="flex-1 min-h-[60px] max-h-[120px] resize-none"
+          className="flex-1 min-h-[60px] resize-none"
+          style={{ height: '60px' }}
           disabled={isLoading}
+          ref={textAreaRef}
         />
         <Button 
           type="submit" 
