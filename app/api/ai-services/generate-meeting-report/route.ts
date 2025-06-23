@@ -1,37 +1,26 @@
-import { auth } from '@clerk/nextjs/server'
-import OpenAI from 'openai'
-import { prisma } from '@/lib/prisma'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+import { withAuthUsageAndClient } from '@/lib/client-middleware'
+import { createOpenAICompletion } from '@/lib/openai-wrapper'
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-
     const { clientId, meetingTranscription, meetingDate, additionalInfo, language = 'english' } = await req.json()
 
     if (!clientId || !meetingTranscription || !meetingDate) {
       return new Response('Missing required fields', { status: 400 })
     }
 
-    // Get client information
-    const client = await prisma.client.findFirst({
-      where: {
-        id: clientId,
-        userId,
-      },
-    })
-    
-    if (!client) {
-      return new Response('Client not found', { status: 404 })
+    // Use unified middleware for auth, usage, and client access
+    const middleware = await withAuthUsageAndClient('document', clientId)
+    if (!middleware.success) {
+      return middleware.response!
     }
+    
+    const { userId, client } = middleware
+    
+    // TypeScript assertion - middleware guarantees these exist
+    const validUserId = userId!
+    const validClient = client!
 
     // Get language instruction
     const targetLanguage = getLanguageInstruction(language)
@@ -39,7 +28,7 @@ export async function POST(req: Request) {
     // Build the meeting report prompt
     const meetingReportPrompt = `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
 
-CLIENT: ${client.name}
+CLIENT: ${validClient.name}
 
 MEETING INFORMATION:
 - Meeting Date: ${meetingDate}
@@ -70,24 +59,34 @@ INSTRUCTIONS:
 - Focus on practical next steps that can be implemented immediately
 - IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, summaries, and action items`
 
-    // Generate the meeting report
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: meetingReportPrompt
-        },
-        {
-          role: 'user',
-          content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client. Generate the complete response in ${targetLanguage}.`
+    // Use unified OpenAI wrapper with automatic usage tracking
+    const completion = await createOpenAICompletion(
+      {
+        model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: meetingReportPrompt
+          },
+          {
+            role: 'user',
+            content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client. Generate the complete response in ${targetLanguage}.`
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+      },
+      {
+        userId: validUserId,
+        eventType: 'document_generation',
+        resourceId: clientId,
+        additionalMetadata: {
+          documentType: 'meeting-report'
         }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    })
+      }
+    )
 
-    const meetingReport = response.choices[0]?.message?.content || ''
+    const meetingReport = completion.content
     
     if (!meetingReport) {
       return new Response('Failed to generate meeting report', { status: 500 })

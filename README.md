@@ -128,7 +128,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 18+ 
 - PostgreSQL database (Supabase recommended)
 - OpenAI API key
 - Clerk account for authentication

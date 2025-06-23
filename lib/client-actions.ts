@@ -3,6 +3,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { checkUsageLimit } from './subscription-utils'
 
 export interface ClientData {
   name: string
@@ -26,6 +27,12 @@ export async function createClient(data: ClientFormData) {
   const { userId } = await auth()
   if (!userId) {
     throw new Error('User not authenticated')
+  }
+
+  // Check usage limits before creating client
+  const usageCheck = await checkUsageLimit(userId, 'client')
+  if (!usageCheck.allowed) {
+    throw new Error(`You've reached your client limit of ${usageCheck.limit}. Upgrade to Pro for unlimited clients.`)
   }
 
   try {

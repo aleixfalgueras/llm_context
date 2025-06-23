@@ -112,6 +112,96 @@ model Prompt {
   @@map("prompts")
 }
 
+// NEW: User Subscription Management
+model UserSubscription {
+  id              String   @id @default(cuid())
+  userId          String   @unique // The user's ID from Clerk
+  
+  // Subscription Details
+  plan            String   @default("free") // "free", "pro", "business"
+  status          String   @default("active") // "active", "canceled", "past_due", "incomplete"
+  
+  // Billing Information
+  stripeCustomerId     String?  // Stripe customer ID
+  stripeSubscriptionId String?  // Stripe subscription ID
+  stripePriceId        String?  // Stripe price ID for current plan
+  
+  // Plan Limits
+  maxConversationsPerMonth Int @default(50)   // Free: 50, Pro: 500, Business: unlimited (-1)
+  maxClients              Int @default(3)     // Free: 3, Pro: unlimited (-1), Business: unlimited (-1)
+  maxPromptsPerUser       Int @default(10)    // Free: 10, Pro: unlimited (-1), Business: unlimited (-1)
+  maxDocumentsPerMonth    Int @default(20)    // Free: 20, Pro: 200, Business: unlimited (-1)
+  maxTokensPerMonth       Int @default(100000) // Free: 100K, Pro: 2M, Business: unlimited (-1)
+  maxCostPerMonth         Float @default(2.00) // Free: $2, Pro: $25, Business: unlimited (-1)
+  
+  // Features Access
+  canAccessPremiumPrompts Boolean @default(false)
+  canAccessTeamFeatures   Boolean @default(false)
+  canAccessPrioritySupport Boolean @default(false)
+  canAccessCustomBranding Boolean @default(false)
+  
+  // Billing Cycle
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd   DateTime @default(now())
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  canceledAt DateTime?
+  
+  @@map("user_subscriptions")
+}
+
+// NEW: Usage Tracking
+model UserUsage {
+  id       String @id @default(cuid())
+  userId   String // The user's ID from Clerk
+  
+  // Usage Period (monthly tracking)
+  year     Int
+  month    Int
+  
+  // Usage Counters
+  conversationsUsed Int @default(0)  // Total conversations this month
+  documentsGenerated Int @default(0) // Total documents generated this month
+  promptsUsed       Int @default(0)  // Total prompt uses this month
+  
+  // Cost Tracking
+  estimatedCost     Float @default(0.0) // Estimated OpenAI costs this month
+  tokensUsed        Int   @default(0)   // Total tokens consumed this month
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Unique constraint for user per month
+  @@unique([userId, year, month])
+  @@map("user_usage")
+}
+
+// NEW: Usage Events Log
+model UsageEvent {
+  id          String   @id @default(cuid())
+  userId      String   // The user's ID from Clerk
+  
+  // Event Details
+  eventType   String   // "conversation", "document_generation", "prompt_usage"
+  resourceId  String?  // ID of the chat, document, or prompt used
+  
+  // Cost Information
+  tokensUsed     Int?     // Tokens used for this event
+  estimatedCost  Float?   // Estimated cost for this event
+  model          String?  // AI model used (gpt-4o, gpt-4o-mini)
+  
+  // Metadata
+  metadata    Json?    // Additional event-specific data
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  
+  @@map("usage_events")
+}
+
 model UserConsent {
   id              String   @id @default(cuid())
   userId          String   @unique // The user's ID from Clerk

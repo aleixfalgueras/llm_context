@@ -1,21 +1,11 @@
-import { auth } from '@clerk/nextjs/server'
-import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
 import { buildClientContext } from '@/lib/client-context-utils'
 import { replaceClientVariables } from '@/lib/variable-replacement'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+import { withAuthUsageAndClient } from '@/lib/client-middleware'
+import { createOpenAICompletion } from '@/lib/openai-wrapper'
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-
     const { 
       clientId, 
       promptId,
@@ -30,17 +20,15 @@ export async function POST(request: Request) {
       return new Response('Missing required fields', { status: 400 })
     }
 
-    // Get client information
-    const client = await prisma.client.findFirst({
-      where: {
-        id: clientId,
-        userId,
-      },
-    })
-
-    if (!client) {
-      return new Response('Client not found', { status: 404 })
+    // Use unified middleware for auth, usage, and client access
+    const middleware = await withAuthUsageAndClient('document', clientId)
+    if (!middleware.success) {
+      return middleware.response!
     }
+    
+    const { userId, client } = middleware
+    const validUserId = userId!
+    const validClient = client!
 
     // Get prompt content
     let promptContent = ''
@@ -51,7 +39,7 @@ export async function POST(request: Request) {
       const prompt = await prisma.prompt.findFirst({
         where: {
           id: promptId,
-          userId,
+          userId: validUserId,
           isActive: true,
         },
       })
@@ -78,10 +66,10 @@ export async function POST(request: Request) {
     }
 
     // Replace client variables in prompt using shared utility
-    const processedPrompt = replaceClientVariables(promptContent, client)
+    const processedPrompt = replaceClientVariables(promptContent, validClient)
 
     // Build client context if fields are selected
-    const clientContext = buildClientContext(client, selectedContextFields)
+    const clientContext = buildClientContext(validClient, selectedContextFields)
 
     // Create the complete prompt
     let completePrompt = processedPrompt
@@ -104,20 +92,31 @@ ${additionalInstructions}`
 
 Please generate a professional, well-structured document based on the above prompt and client information. Format the content in clear markdown with appropriate headings, sections, and formatting for easy reading and professional presentation.`
 
-    // Generate document with OpenAI
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'user',
-          content: completePrompt,
-        },
-      ],
-      temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
-      max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS || '2000'),
-    })
+    // Use unified OpenAI wrapper with automatic usage tracking
+    const completion = await createOpenAICompletion(
+      {
+        model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: completePrompt,
+          },
+        ],
+        temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
+        max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS || '2000'),
+      },
+      {
+        userId: validUserId,
+        eventType: 'document_generation',
+        resourceId: clientId,
+        additionalMetadata: {
+          documentType: 'custom-document',
+          promptName
+        }
+      }
+    )
 
-    const generatedContent = response.choices[0]?.message?.content || ''
+    const generatedContent = completion.content
 
     if (!generatedContent) {
       return new Response('Failed to generate document', { status: 500 })
@@ -126,7 +125,7 @@ Please generate a professional, well-structured document based on the above prom
     return Response.json({
       content: generatedContent,
       promptName,
-      clientName: client.name,
+      clientName: validClient.name,
       documentTitle,
     })
   } catch (error) {
