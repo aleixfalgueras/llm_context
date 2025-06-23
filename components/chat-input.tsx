@@ -4,9 +4,10 @@ import { Send, Loader2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { PromptSelector } from '@/components/prompt-selector'
+import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Prompt {
   id: string
@@ -29,22 +30,24 @@ interface ChatInputProps {
   chatId: string
   input: string
   setInput: (value: string) => void
-  sendMessage: (content: string) => Promise<void>
+  sendMessage: (content: string, selectedModel?: string) => Promise<void>
   isLoading: boolean
   clientData?: any // Optional client context for prompt variable replacement
   messages?: Message[] // Messages for export functionality
   chatTitle?: string // Chat title for export
   onDocumentCreated?: (clientId: string, documentId: string) => void // Callback for when chat is exported
+  lastUsedModel?: string // Last model used in this chat
 }
 
-export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, clientData, messages = [], chatTitle, onDocumentCreated }: ChatInputProps) {
+export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
   const [isExporting, setIsExporting] = useState(false)
+  const [selectedModel, setSelectedModel] = useState(lastUsedModel || 'gpt-4o-mini') // Use last used model or default to GPT-4o Mini
   const { toast } = useToast()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
-      sendMessage(input)
+      sendMessage(input, selectedModel)
     }
   }
 
@@ -161,53 +164,64 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
     return content
   }
 
+  // Update selected model when switching between chats
+  useEffect(() => {
+    setSelectedModel(lastUsedModel || 'gpt-4o-mini')
+  }, [lastUsedModel])
+
   return (
     <div className="space-y-2">
-      {/* Prompt Selector and Export Button */}
-      <div className="flex justify-start gap-2">
-        <PromptSelector onPromptSelect={handlePromptSelect} />
-        {/* Export Chat Button - only show if client is associated and has messages */}
-        {clientData?.id && messages.length > 0 && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleExportChat}
-            disabled={isExporting}
-            className="justify-between"
-          >
-            {isExporting ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
-            )}
-            {isExporting ? 'Exporting...' : 'Export Chat'} 📄
-          </Button>
-        )}
+      {/* Prompt Selector, Model Selector, and Export Button */}
+      <div className="flex justify-between items-center gap-2 flex-wrap">
+        <div className="flex gap-2">
+          <PromptSelector onPromptSelect={handlePromptSelect} />
+          {/* Export Chat Button - only show if client is associated and has messages */}
+          {clientData?.id && messages.length > 0 && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleExportChat}
+              disabled={isExporting}
+              className="justify-between"
+            >
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              {isExporting ? 'Exporting...' : 'Export Chat'} 📄
+            </Button>
+          )}
+        </div>
+        <ModelSelector 
+          selectedModel={selectedModel}
+          onModelSelect={setSelectedModel}
+        />
       </div>
       
       {/* Chat Input Form */}
-    <form onSubmit={handleSubmit} className="flex gap-2">
-      <Textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-        className="flex-1 min-h-[60px] max-h-[120px] resize-none"
-        disabled={isLoading}
-      />
-      <Button 
-        type="submit" 
-        size="icon" 
-        className="h-[60px] w-[60px]"
-        disabled={!input.trim() || isLoading}
-      >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <Send className="w-4 h-4" />
-        )}
-      </Button>
-    </form>
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <Textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
+          className="flex-1 min-h-[60px] max-h-[120px] resize-none"
+          disabled={isLoading}
+        />
+        <Button 
+          type="submit" 
+          size="icon" 
+          className="h-[60px] w-[60px]"
+          disabled={!input.trim() || isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Send className="w-4 h-4" />
+          )}
+        </Button>
+      </form>
     </div>
   )
 } 

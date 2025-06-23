@@ -145,7 +145,7 @@ export async function updateChatTitle(chatId: string, title: string) {
   revalidatePath('/')
 }
 
-export async function createMessage(chatId: string, content: string, role: 'USER' | 'ASSISTANT') {
+export async function createMessage(chatId: string, content: string, role: 'USER' | 'ASSISTANT', model?: string) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -168,6 +168,7 @@ export async function createMessage(chatId: string, content: string, role: 'USER
     data: {
       content,
       role,
+      model,
       chatId,
     },
   })

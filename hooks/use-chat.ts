@@ -20,7 +20,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
     setMessages(initialMessages)
   }, [initialMessages])
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string, selectedModel?: string) => {
     if (!content.trim() || isLoading) return
 
     setIsLoading(true)
@@ -46,6 +46,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
         body: JSON.stringify({
           messages: [{ content }],
           chatId,
+          model: selectedModel || 'gpt-4o-mini', // Default to gpt-4o-mini if no model specified
         }),
       })
 

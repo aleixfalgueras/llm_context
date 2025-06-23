@@ -50,6 +50,13 @@ export default async function ChatPage({ params }: ChatPageProps) {
     notFound()
   }
 
+  // Find the last model used in this chat (from the most recent user message)
+  const lastUserMessage = chat.messages
+    .filter((msg: any) => msg.role === 'USER' && msg.model)
+    .reverse()[0]
+  
+  const lastUsedModel = lastUserMessage?.model || 'gpt-4o-mini' // Default to gpt-4o-mini
+
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
       <Navbar />
@@ -60,6 +67,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
           clients={clients}
           userImageUrl={user?.imageUrl}
           userName={user?.firstName || 'User'}
+          lastUsedModel={lastUsedModel}
         />
       </div>
     </div>

@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const { messages, chatId } = await req.json()
+    const { messages, chatId, model } = await req.json()
 
     // CLIENT CONTEXT FLOW:
     // 1. Client context is ONLY added as system message on the FIRST user message
@@ -88,8 +88,11 @@ export async function POST(req: Request) {
       content: lastMessage.content,
     })
 
+    // Use the model from the request, with fallback to environment variable or default
+    const selectedModel = model || process.env.OPENAI_API_MODEL || 'gpt-4o'
+
     // Save the user message to the database
-    await createMessage(chatId, lastMessage.content, 'USER')
+    await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
 
     // If this is the first user message, update the chat title only if it's still the default
     if (isFirstUserMessage && chat.title === 'New Chat') {
@@ -118,7 +121,7 @@ export async function POST(req: Request) {
     const frequencyPenalty = Math.max(-2, Math.min(2, parseFloat(process.env.OPENAI_FREQUENCY_PENALTY || '0.1')))
 
     const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
+      model: selectedModel,
       messages: openAIMessages,
       temperature,
       max_tokens: maxTokens,
@@ -129,7 +132,7 @@ export async function POST(req: Request) {
     const assistantMessage = response.choices[0]?.message?.content || ''
     
     // Save the assistant's response to the database
-    await createMessage(chatId, assistantMessage, 'ASSISTANT')
+    await createMessage(chatId, assistantMessage, 'ASSISTANT', selectedModel)
 
     // Only include newTitle if we actually updated it
     const shouldIncludeTitle = isFirstUserMessage && chat.title === 'New Chat'

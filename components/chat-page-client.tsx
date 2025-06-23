@@ -18,9 +18,10 @@ interface ChatPageClientProps {
   clients: any[]
   userImageUrl?: string
   userName: string
+  lastUsedModel?: string
 }
 
-export function ChatPageClient({ chat, chats, clients, userImageUrl, userName }: ChatPageClientProps) {
+export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, lastUsedModel }: ChatPageClientProps) {
   const [currentTitle, setCurrentTitle] = useState(chat.title)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
@@ -63,6 +64,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName }:
           onTitleUpdate={setCurrentTitle}
           chatTitle={currentTitle}
           onDocumentCreated={handleDocumentCreated}
+          lastUsedModel={lastUsedModel}
         />
       </div>
       
