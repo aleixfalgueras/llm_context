@@ -17,7 +17,7 @@ export function Navbar() {
     { name: 'Prompts', href: '/prompts', icon: '📝' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
     { name: 'AI Services', href: '/ai-services', icon: '⚡' },
-
+    { name: 'Pricing', href: '/pricing', icon: '💳' },
   ]
 
   // Helper function to determine if a nav item is active

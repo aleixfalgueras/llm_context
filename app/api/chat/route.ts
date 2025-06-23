@@ -1,24 +1,23 @@
-import { auth } from '@clerk/nextjs/server'
-import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
 import { createMessage } from '@/lib/actions'
 import { revalidatePath } from 'next/cache'
 import { generateChatTitleWithClient } from '@/lib/utils'
 import { buildChatSystemPrompt } from '@/lib/client-context-utils'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+import { withAuthAndUsageCheck } from '@/lib/api-middleware'
+import { withClientAccess } from '@/lib/client-middleware'
+import { createOpenAICompletion } from '@/lib/openai-wrapper'
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-
     const { messages, chatId, model } = await req.json()
+
+    // Use unified middleware for auth and usage checking
+    const middleware = await withAuthAndUsageCheck('conversation')
+    if (!middleware.success) {
+      return middleware.response!
+    }
+    
+    const userId = middleware.userId!
 
     // CLIENT CONTEXT FLOW:
     // 1. Client context is ONLY added as system message on the FIRST user message
@@ -56,16 +55,12 @@ export async function POST(req: Request) {
     }))
 
     // Get client information for this chat (required)
-    const client = await prisma.client.findFirst({
-      where: {
-        id: (chat as any).clientId,
-        userId,
-      },
-    })
-    
-    if (!client) {
-      return new Response('Client not found', { status: 404 })
+    const clientAccess = await withClientAccess(userId, (chat as any).clientId)
+    if (!clientAccess.success) {
+      return clientAccess.response!
     }
+    
+    const client = clientAccess.client!
 
     // Add system message with client context ONLY on first message
     if (isFirstUserMessage) {
@@ -113,23 +108,20 @@ export async function POST(req: Request) {
       revalidatePath('/')
     }
 
-    // Get completion from OpenAI with configurable settings
-    // All parameters can be customized via environment variables with validation
-    const temperature = Math.max(0, Math.min(2, parseFloat(process.env.OPENAI_TEMPERATURE || '0.7')))
-    const maxTokens = Math.max(1, parseInt(process.env.OPENAI_MAX_TOKENS || '1000'))
-    const presencePenalty = Math.max(-2, Math.min(2, parseFloat(process.env.OPENAI_PRESENCE_PENALTY || '0.1')))
-    const frequencyPenalty = Math.max(-2, Math.min(2, parseFloat(process.env.OPENAI_FREQUENCY_PENALTY || '0.1')))
+    // Use unified OpenAI wrapper with automatic usage tracking
+    const completion = await createOpenAICompletion(
+      {
+        model: selectedModel,
+        messages: openAIMessages
+      },
+      {
+        userId,
+        eventType: 'conversation',
+        resourceId: chatId
+      }
+    )
 
-    const response = await openai.chat.completions.create({
-      model: selectedModel,
-      messages: openAIMessages,
-      temperature,
-      max_tokens: maxTokens,
-      presence_penalty: presencePenalty,
-      frequency_penalty: frequencyPenalty,
-    })
-
-    const assistantMessage = response.choices[0]?.message?.content || ''
+    const assistantMessage = completion.content
     
     // Save the assistant's response to the database
     await createMessage(chatId, assistantMessage, 'ASSISTANT', selectedModel)
