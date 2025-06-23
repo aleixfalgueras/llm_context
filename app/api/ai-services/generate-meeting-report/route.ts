@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     const targetLanguage = getLanguageInstruction(language)
 
     // Build the meeting report prompt
-    const meetingReportPrompt = `You are a professional AI assistant helping a coach/consultant generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
+    const meetingReportPrompt = `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
 
 CLIENT: ${client.name}
 

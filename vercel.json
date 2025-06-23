@@ -1,17 +1,5 @@
 {
   "functions": {
-    "app/api/ai-services/extract-blood-test/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/ai-services/generate-blood-test-report/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/ai-services/generate-diet/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/ai-services/generate-workout/route.ts": {
-      "maxDuration": 30
-    },
     "app/api/chat/route.ts": {
       "maxDuration": 30
     },
