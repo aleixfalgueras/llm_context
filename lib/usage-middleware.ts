@@ -90,39 +90,32 @@ export async function getUsageInfo(userId: string) {
     // This prevents the race condition of 4 parallel checkUsageLimit calls
     const { getUserSubscription, getCurrentMonthUsage, SUBSCRIPTION_PLANS } = await import('./subscription-utils');
     
-    const [subscription, usage] = await Promise.all([
+    // Parallelize all database calls for better performance
+    const [subscription, usage, clientCount] = await Promise.all([
       getUserSubscription(userId),
-      getCurrentMonthUsage(userId)
+      getCurrentMonthUsage(userId),
+      prisma.client.count({ where: { userId } })
     ]);
 
     const plan = SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS];
 
     // Check conversation limits
     const conversationUsage = {
-      allowed: true,
+      allowed: subscription.maxConversationsPerMonth === -1 || usage.conversationsUsed < subscription.maxConversationsPerMonth,
       limit: subscription.maxConversationsPerMonth === -1 ? 'unlimited' as const : subscription.maxConversationsPerMonth,
       used: usage.conversationsUsed,
       remaining: subscription.maxConversationsPerMonth === -1 ? undefined : Math.max(0, subscription.maxConversationsPerMonth - usage.conversationsUsed)
     };
-    
-    if (subscription.maxConversationsPerMonth !== -1 && usage.conversationsUsed >= subscription.maxConversationsPerMonth) {
-      conversationUsage.allowed = false;
-    }
 
     // Check document limits
     const documentUsage = {
-      allowed: true,
+      allowed: subscription.maxDocumentsPerMonth === -1 || usage.documentsGenerated < subscription.maxDocumentsPerMonth,
       limit: subscription.maxDocumentsPerMonth === -1 ? 'unlimited' as const : subscription.maxDocumentsPerMonth,
       used: usage.documentsGenerated,
       remaining: subscription.maxDocumentsPerMonth === -1 ? undefined : Math.max(0, subscription.maxDocumentsPerMonth - usage.documentsGenerated)
     };
-    
-    if (subscription.maxDocumentsPerMonth !== -1 && usage.documentsGenerated >= subscription.maxDocumentsPerMonth) {
-      documentUsage.allowed = false;
-    }
 
-    // Check client limits - count actual clients created by user
-    const clientCount = await prisma.client.count({ where: { userId } });
+    // Check client limits - use the pre-fetched client count
     const clientUsage = {
       allowed: subscription.maxClients === -1 || clientCount < subscription.maxClients,
       limit: subscription.maxClients === -1 ? 'unlimited' as const : subscription.maxClients,
@@ -132,15 +125,11 @@ export async function getUsageInfo(userId: string) {
 
     // Check prompt limits 
     const promptUsage = {
-      allowed: true,
+      allowed: subscription.maxPromptsPerUser === -1 || usage.promptsUsed < subscription.maxPromptsPerUser,
       limit: subscription.maxPromptsPerUser === -1 ? 'unlimited' as const : subscription.maxPromptsPerUser,
       used: usage.promptsUsed,
       remaining: subscription.maxPromptsPerUser === -1 ? undefined : Math.max(0, subscription.maxPromptsPerUser - usage.promptsUsed)
     };
-    
-    if (subscription.maxPromptsPerUser !== -1 && usage.promptsUsed >= subscription.maxPromptsPerUser) {
-      promptUsage.allowed = false;
-    }
 
     return {
       conversations: conversationUsage,

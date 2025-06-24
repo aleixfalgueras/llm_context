@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Search, Plus, User, Grid, List } from 'lucide-react'
 import { deleteClient } from '@/lib/client-actions'
 import { useToast } from '@/hooks/use-toast'
-import { ClientUsageIndicator } from '@/components/ui/client-usage-indicator'
+
 import { ClientGridView } from '@/components/clients/client-grid-view'
 import { ClientTableView } from '@/components/clients/client-table-view'
 import { ClientPagination } from '@/components/clients/client-pagination'
@@ -144,7 +144,6 @@ export function ClientsList({ clients, usageInfo, onEditClient, onAddClient, onR
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <ClientUsageIndicator usageInfo={usageInfo} />
           {/* View Toggle */}
           <div className="flex border border-gray-200 dark:border-gray-700 rounded-lg p-1">
             <Button
