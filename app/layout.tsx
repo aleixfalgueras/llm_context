@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "@/components/ui/toaster"
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/global/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ConsentManager } from "@/components/ui/consent-manager"
 

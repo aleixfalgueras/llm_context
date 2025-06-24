@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { ChatSidebar } from './chat-sidebar'
-import { ChatInterface } from './chat-interface'
-import { ClientContextSidebar } from './client-context-sidebar'
+import { ChatSidebar } from '@/components/assistant/chat-sidebar'
+import { ChatInterface } from '@/components/assistant/chat-interface'
+import { ClientContextSidebar } from '@/components/clients/client-context-sidebar'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 
 interface HomePageClientProps {

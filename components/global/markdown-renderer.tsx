@@ -48,7 +48,30 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
                 {children}
               </table>
             </div>
-          )
+          ),
+          // Custom styling for table headers
+          th: ({ children }) => (
+            <th className="border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-left font-semibold">
+              {children}
+            </th>
+          ),
+          // Custom styling for table data
+          td: ({ children }) => (
+            <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+              {children}
+            </td>
+          ),
+          // Ensure links open in new tab
+          a: ({ href, children }) => (
+            <a 
+              href={href} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              {children}
+            </a>
+          ),
         }}
       >
         {content}

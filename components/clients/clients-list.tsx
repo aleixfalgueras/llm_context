@@ -15,7 +15,7 @@ interface UsageInfo {
     allowed: boolean
     limit: number | 'unlimited'
     used: number
-    remaining: number | 'unlimited'
+    remaining?: number
   }
   [key: string]: any
 }

@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { Navbar } from '@/components/navbar'
-import { FeedbackForm } from '@/components/feedback-form'
+import { Navbar } from '@/components/global/navbar'
+import { FeedbackForm } from '@/components/global/feedback-form'
 
 export default async function FeedbackPage() {
   const { userId } = await auth()

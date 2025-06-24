@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getClientDocuments, deleteDocument, deleteAllDocuments, getDocumentContent, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
-import { DocumentList } from '@/components/document-list'
-import { DocumentViewer } from '@/components/document-viewer'
-import { DocumentCreationForm } from '@/components/document-creation-form'
-import { DocumentPreviewDialog } from '@/components/document-preview-dialog'
+import { DocumentList } from '@/components/documents/document-list'
+import { DocumentViewer } from '@/components/documents/document-viewer'
+import { DocumentCreationForm } from '@/components/documents/document-creation-form'
+import { DocumentPreviewDialog } from '@/components/documents/document-preview-dialog'
 
 interface Document {
   id: string

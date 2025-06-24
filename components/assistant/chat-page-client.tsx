@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChatSidebar } from './chat-sidebar'
-import { ChatContainer } from './chat-container'
-import { ClientContextSidebar } from './client-context-sidebar'
-import { ClientDocuments } from './client-documents'
+import { ChatSidebar } from '@/components/assistant/chat-sidebar'
+import { ChatContainer } from '@/components/assistant/chat-container'
+import { ClientContextSidebar } from '@/components/clients/client-context-sidebar'
+import { ClientDocuments } from '@/components/clients/client-documents'
 
 interface ChatPageClientProps {
   chat: {

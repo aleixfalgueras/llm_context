@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Edit, Save, X, Eye } from 'lucide-react'
-import { MarkdownRenderer } from '@/components/markdown-renderer'
+import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 
 interface Document {
   id: string

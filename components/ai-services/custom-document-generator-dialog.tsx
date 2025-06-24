@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Loader2, FileText, Save, Download, RefreshCw, Lightbulb, Plus, Edit, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
-import ReactMarkdown from 'react-markdown'
+import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 
 interface Client {
@@ -416,8 +416,8 @@ export function CustomDocumentGeneratorDialog({
                     placeholder="Edit your document content here..."
                   />
                 ) : (
-                  <div className="max-h-96 overflow-y-auto prose prose-sm max-w-none">
-                    <ReactMarkdown>{generatedContent}</ReactMarkdown>
+                  <div className="max-h-96 overflow-y-auto">
+                    <MarkdownRenderer content={generatedContent} />
                   </div>
                 )}
               </CardContent>
