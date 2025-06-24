@@ -289,19 +289,102 @@ export function ClientDocuments({
     setEndDate('')
   }
 
-  // Placeholder functions for download and send (implement as needed)
-  const handleDownloadDocument = async (document: Document) => {
-    toast({
-      title: 'Download',
-      description: `Download functionality for "${document.documentName}" would be implemented here`,
-    })
+  // Download and send functions  
+  const handleDownloadDocument = async (doc: Document) => {
+    try {
+      const response = await fetch('/api/download-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: doc.id,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF')
+      }
+
+      // Create blob from response
+      const blob = await response.blob()
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${doc.documentName}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(link)
+
+      toast({
+        title: 'Download Started',
+        description: `"${doc.documentName}" is being downloaded as PDF`,
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: 'Download Failed',
+        description: 'Failed to download document. Please try again.',
+        variant: 'destructive',
+      })
+    }
   }
 
-  const handleSendDocument = async (document: Document) => {
-    toast({
-      title: 'Send',
-      description: `Send functionality for "${document.documentName}" would be implemented here`,
-    })
+  const handleSendDocument = async (doc: Document) => {
+    if (!clientEmail) {
+      toast({
+        title: 'Email Required',
+        description: 'Client email address is required to send documents',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    // Show confirmation dialog
+    const confirmed = confirm(
+      `Are you sure you want to send "${doc.documentName}" to ${clientEmail}?\n\nThis will email the document as a PDF attachment to the client.`
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/send-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: doc.id,
+          clientEmail,
+          clientName,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send document')
+      }
+
+      const result = await response.json()
+
+      toast({
+        title: 'Document Sent',
+        description: `"${doc.documentName}" has been sent to ${clientEmail}`,
+      })
+    } catch (error) {
+      console.error('Send error:', error)
+      toast({
+        title: 'Send Failed',
+        description: 'Failed to send document. Please try again.',
+        variant: 'destructive',
+      })
+    }
   }
 
   return (
