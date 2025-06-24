@@ -165,7 +165,6 @@ model UserUsage {
   conversationsUsed Int @default(0)  // Total conversations this month
   documentsGenerated Int @default(0) // Total documents generated this month
   promptsUsed       Int @default(0)  // Total prompt uses this month
-  clientsCreated    Int @default(0)  // Total clients created this month
   
   // Cost Tracking
   estimatedCost     Float @default(0.0) // Estimated OpenAI costs this month
@@ -178,29 +177,6 @@ model UserUsage {
   // Unique constraint for user per month
   @@unique([userId, year, month])
   @@map("user_usage")
-}
-
-// NEW: Usage Events Log
-model UsageEvent {
-  id          String   @id @default(cuid())
-  userId      String   // The user's ID from Clerk
-  
-  // Event Details
-  eventType   String   // "conversation", "document_generation", "prompt_usage", "client_creation"
-  resourceId  String?  // ID of the chat, document, prompt, or client used
-  
-  // Cost Information
-  tokensUsed     Int?     // Tokens used for this event
-  estimatedCost  Float?   // Estimated cost for this event
-  model          String?  // AI model used (gpt-4o, gpt-4o-mini)
-  
-  // Metadata
-  metadata    Json?    // Additional event-specific data
-  
-  // Timestamps
-  createdAt   DateTime @default(now())
-  
-  @@map("usage_events")
 }
 
 model UserConsent {

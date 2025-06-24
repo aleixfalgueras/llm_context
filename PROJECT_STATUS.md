@@ -75,7 +75,7 @@ Your AI Marketing Assistant has **all core features implemented** with enterpris
 
 ### **Database Schema** ✅
 - ✅ **Core Models**: Chat, Message, Client, Document, Prompt with full relationships
-- ✅ **Usage Models**: UserSubscription, UserUsage, UsageEvent for billing and analytics
+- ✅ **Usage Models**: UserSubscription, UserUsage for billing and analytics
 - ✅ **Privacy Models**: UserConsent, ConsentAuditLog, DataExportRequest for GDPR compliance
 - ✅ **Feedback Model**: User feedback collection with categorization and tracking
 

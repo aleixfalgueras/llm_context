@@ -390,36 +390,20 @@ export async function checkUsageLimit(userId: string, action: 'conversation' | '
   }
 }
 
-// Track usage event
-export async function trackUsageEvent(
+// Track usage by updating monthly usage only (no individual events)
+export async function updateUsageTracking(
   userId: string,
-  eventType: 'conversation' | 'document_generation' | 'prompt_usage' | 'client_creation',
-  resourceId?: string,
+  eventType: 'conversation' | 'document_generation' | 'prompt_usage',
   metadata?: {
     tokensUsed?: number
     estimatedCost?: number
-    model?: string
     [key: string]: any
   }
 ) {
-  const endTiming = logger.startTiming('Track Usage Event', { userId });
+  const endTiming = logger.startTiming('Update Usage Tracking', { userId });
   
   try {
-
-    // Create usage event
-    await prisma.usageEvent.create({
-      data: {
-        userId,
-        eventType,
-        resourceId,
-        tokensUsed: metadata?.tokensUsed,
-        estimatedCost: metadata?.estimatedCost,
-        model: metadata?.model,
-        metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : null,
-      }
-    })
-
-    // Update monthly usage
+    // Update monthly usage directly
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth() + 1
@@ -435,9 +419,6 @@ export async function trackUsageEvent(
         break
       case 'prompt_usage':
         updateData.promptsUsed = { increment: 1 }
-        break
-      case 'client_creation':
-        updateData.clientsCreated = { increment: 1 }
         break
     }
 
@@ -469,13 +450,11 @@ export async function trackUsageEvent(
       update: updateData
     })
 
-
-    
     endTiming();
   } catch (error) {
-    logger.error('Error tracking usage event', error as Error, { 
+    logger.error('Error updating usage tracking', error as Error, { 
       userId,
-      metadata: { eventType, resourceId }
+      metadata: { eventType }
     });
     endTiming();
     throw error

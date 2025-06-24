@@ -3,7 +3,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { checkUsageLimit, trackUsageEvent } from './subscription-utils'
+import { checkUsageLimit, updateUsageTracking } from './subscription-utils'
 import { logger } from './logger'
 
 export interface ClientData {
@@ -49,11 +49,7 @@ export async function createClient(data: ClientFormData) {
       },
     })
 
-    // Track client creation usage
-    await trackUsageEvent(userId, 'client_creation', client.id, {
-      clientName: client.name,
-      language: client.documentsLanguage
-    })
+    // No longer tracking client creation events - we check total client count instead
 
 
 

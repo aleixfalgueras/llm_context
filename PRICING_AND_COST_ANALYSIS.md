@@ -112,7 +112,7 @@ tokensUsed: 47,382
 estimatedCost: 2.14
 ```
 
-#### 2. **UsageEvent** (Individual API Calls)
+#### 2. **Monthly Usage Tracking**
 ```sql
 userId: "user_123"
 eventType: "conversation"

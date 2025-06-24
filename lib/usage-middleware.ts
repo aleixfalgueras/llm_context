@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { checkUsageLimit, trackUsageEvent } from './subscription-utils'
+import { checkUsageLimit, updateUsageTracking } from './subscription-utils'
 import { createUsageLimitResponse } from './openai-wrapper'
 import { prisma } from './prisma'
 
@@ -76,7 +76,7 @@ export async function trackUsage(
   }
 ) {
   try {
-    await trackUsageEvent(userId, eventType, resourceId, metadata)
+    await updateUsageTracking(userId, eventType, metadata)
   } catch (error) {
     console.error('Error tracking usage:', error)
     // Don't throw error as this shouldn't break the main functionality
@@ -116,12 +116,13 @@ export async function getUsageInfo(userId: string) {
       remaining: subscription.maxDocumentsPerMonth === -1 ? undefined : Math.max(0, subscription.maxDocumentsPerMonth - usage.documentsGenerated)
     };
 
-    // Check client limits - use usage events to prevent bypassing limits by deleting clients
+    // Check client limits - count current clients instead of creation events
+    const clientCount = await prisma.client.count({ where: { userId } })
     const clientUsage = {
-      allowed: subscription.maxClients === -1 || usage.clientsCreated < subscription.maxClients,
+      allowed: subscription.maxClients === -1 || clientCount < subscription.maxClients,
       limit: subscription.maxClients === -1 ? 'unlimited' as const : subscription.maxClients,
-      used: usage.clientsCreated,
-      remaining: subscription.maxClients === -1 ? undefined : Math.max(0, subscription.maxClients - usage.clientsCreated)
+      used: clientCount,
+      remaining: subscription.maxClients === -1 ? undefined : Math.max(0, subscription.maxClients - clientCount)
     };
 
     // Check prompt limits 
