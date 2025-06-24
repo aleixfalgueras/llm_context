@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PromptDialog } from '@/components/prompts/prompt-dialog'
-import { Plus, FileText, Lightbulb } from 'lucide-react'
+import { Plus, FileText, Lightbulb, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { samplePrompts, getSamplePromptsByCategory } from '@/lib/sample-prompts'
 import { PromptStatsCards } from '@/components/prompts/prompt-stats-cards'
 import { PromptFiltersBar } from '@/components/prompts/prompt-filters-bar'
@@ -30,15 +32,10 @@ export function PromptsManagement() {
     showInactive: false,
     showTemplates: true
   })
+  const [showLimitDialog, setShowLimitDialog] = useState(false)
+  const [limitMessage, setLimitMessage] = useState('')
+  const [showPromptDialog, setShowPromptDialog] = useState(false)
   const { toast } = useToast()
-
-  // Load showTemplates preference from localStorage after hydration
-  useEffect(() => {
-    const saved = localStorage.getItem('showTemplates')
-    if (saved !== null) {
-      setFilters(prev => ({ ...prev, showTemplates: JSON.parse(saved) }))
-    }
-  }, [])
 
   const fetchPrompts = async () => {
     setLoading(true)
@@ -68,6 +65,15 @@ export function PromptsManagement() {
     }
   }
 
+  // Load showTemplates preference from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('showTemplates')
+    if (saved !== null) {
+      setFilters(prev => ({ ...prev, showTemplates: JSON.parse(saved) }))
+    }
+  }, [])
+
+  // Fetch prompts on mount and when filters change
   useEffect(() => {
     fetchPrompts()
   }, [filters.selectedCategory, filters.showInactive])
@@ -188,6 +194,31 @@ export function PromptsManagement() {
   }
 
   const filteredSamplePrompts = getSamplePromptsByCategory(filters.selectedCategory)
+  const handleNewPrompt = async () => {
+    // Check usage limits only when user tries to create a prompt
+    try {
+      const response = await fetch('/api/subscription/usage-info')
+      if (response.ok) {
+        const usageInfo = await response.json()
+        
+        // Check prompt limits
+        if (usageInfo?.prompts && !usageInfo.prompts.allowed) {
+          const limit = usageInfo.prompts.limit === 'unlimited' ? 'unlimited' : usageInfo.prompts.limit
+          setLimitMessage(`You've reached your prompt limit of ${limit}. Upgrade your plan to create more prompts.`)
+          setShowLimitDialog(true)
+          return
+        }
+      } else {
+        console.warn('Could not fetch usage info, proceeding with prompt creation')
+      }
+    } catch (error) {
+      console.warn('Error fetching usage info, proceeding with prompt creation:', error)
+    }
+    
+    // User can create prompts (either allowed or couldn't check), proceed with normal flow
+    setShowPromptDialog(true)
+  }
+
   const useAsTemplate = (samplePrompt: typeof samplePrompts[0]) => {
     // This will be handled by the PromptDialog component
     // We'll pass the sample prompt data to pre-fill the form
@@ -203,15 +234,13 @@ export function PromptsManagement() {
             Create, edit, and organize your AI prompts for better conversations.
           </p>
         </div>
-        <PromptDialog 
-          onSuccess={fetchPrompts}
-          trigger={
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              New Prompt
-            </Button>
-          }
-        />
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={handleNewPrompt}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Prompt
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -279,6 +308,43 @@ export function PromptsManagement() {
           </div>
         )}
       </div>
+
+      {/* Prompt Creation Dialog */}
+      <PromptDialog 
+        open={showPromptDialog}
+        onOpenChange={setShowPromptDialog}
+        onSuccess={() => {
+          setShowPromptDialog(false)
+          fetchPrompts()
+        }}
+      />
+
+      {/* Prompt Limit Alert Dialog */}
+      <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              Prompt Limit Reached
+            </DialogTitle>
+          </DialogHeader>
+          <Alert variant="destructive" className="mt-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Upgrade Required</AlertTitle>
+            <AlertDescription>
+              {limitMessage}
+            </AlertDescription>
+          </Alert>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => window.open('/pricing', '_blank')}>
+              View Plans
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

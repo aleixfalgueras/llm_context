@@ -26,6 +26,8 @@ interface PromptDialogProps {
   trigger?: React.ReactNode
   onSuccess?: () => void
   isTemplate?: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const CATEGORIES = [
@@ -35,8 +37,12 @@ const CATEGORIES = [
   { value: 'analysis', label: 'Analysis' },
 ]
 
-export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false }: PromptDialogProps) {
-  const [open, setOpen] = useState(false)
+export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, open: externalOpen, onOpenChange: externalOnOpenChange }: PromptDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  
+  // Use external state if provided, otherwise use internal state
+  const open = externalOpen !== undefined ? externalOpen : internalOpen
+  const setOpen = externalOnOpenChange || setInternalOpen
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: prompt?.name || '',
@@ -118,9 +124,11 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false }:
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
+      {trigger !== undefined && (
+        <DialogTrigger asChild>
+          {trigger || defaultTrigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
