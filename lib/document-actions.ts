@@ -320,14 +320,6 @@ export async function createDocument(
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const documentPath = `${userId}/${clientId}/${documentName}_${timestamp}.md`
 
-    console.log('Attempting to upload document:', {
-      bucket: STORAGE_CONFIG.DOCUMENTS_BUCKET,
-      path: documentPath,
-      userId,
-      clientId,
-      documentName
-    })
-
     // Upload content to Supabase storage
     const { data: uploadData, error: uploadError } = await supabaseServer.storage
       .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
@@ -354,8 +346,6 @@ export async function createDocument(
       
       throw new Error(`Failed to upload document: ${uploadError.message}`)
     }
-
-    console.log('Upload successful:', uploadData)
 
     // Create document record in database
     const document = await prisma.document.create({

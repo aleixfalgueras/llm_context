@@ -93,10 +93,9 @@ export async function getUsageInfo(userId: string) {
     const { getUserSubscription, getCurrentMonthUsage, SUBSCRIPTION_PLANS } = await import('./subscription-utils');
     
     // Parallelize all database calls for better performance
-    const [subscription, usage, clientCount] = await Promise.all([
+    const [subscription, usage] = await Promise.all([
       getUserSubscription(userId),
-      getCurrentMonthUsage(userId),
-      prisma.client.count({ where: { userId } })
+      getCurrentMonthUsage(userId)
     ]);
 
     const plan = SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS];
@@ -117,12 +116,12 @@ export async function getUsageInfo(userId: string) {
       remaining: subscription.maxDocumentsPerMonth === -1 ? undefined : Math.max(0, subscription.maxDocumentsPerMonth - usage.documentsGenerated)
     };
 
-    // Check client limits - use the pre-fetched client count
+    // Check client limits - use usage events to prevent bypassing limits by deleting clients
     const clientUsage = {
-      allowed: subscription.maxClients === -1 || clientCount < subscription.maxClients,
+      allowed: subscription.maxClients === -1 || usage.clientsCreated < subscription.maxClients,
       limit: subscription.maxClients === -1 ? 'unlimited' as const : subscription.maxClients,
-      used: clientCount,
-      remaining: subscription.maxClients === -1 ? undefined : Math.max(0, subscription.maxClients - clientCount)
+      used: usage.clientsCreated,
+      remaining: subscription.maxClients === -1 ? undefined : Math.max(0, subscription.maxClients - usage.clientsCreated)
     };
 
     // Check prompt limits 
