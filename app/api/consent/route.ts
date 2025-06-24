@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { getUserConsent, saveUserConsent, withdrawAllConsent, ConsentData } from '@/lib/consent-utils'
 
+// Force dynamic rendering since we use auth() which accesses headers
+export const dynamic = 'force-dynamic'
+
 // Get user's current consent preferences
 export async function GET() {
   try {

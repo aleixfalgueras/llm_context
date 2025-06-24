@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { NextRequest } from 'next/server'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
 
+// Force dynamic rendering since we use auth() which accesses headers
+export const dynamic = 'force-dynamic'
+
 // GET /api/prompts - List user's prompts
 export async function GET(request: NextRequest) {
   const endTiming = logger.startTiming('Get Prompts API');

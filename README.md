@@ -10,12 +10,14 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Smart Context Control**: Select specific client fields (country, goals, notes) for each conversation
 - **Token Optimization**: Efficient context injection to minimize API costs
 - **Real-time Chat**: ChatGPT-like interface with persistent conversation history
+- **Chat Export**: Export conversations to markdown format
 
 ### 👥 **Comprehensive Client Management**
 - **Rich Client Profiles**: Store business information, contact details, marketing goals, and project notes
 - **Multi-language Support**: Generate documents in 10 languages (English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Catalan)
 - **Document Association**: All generated content automatically linked to specific clients
 - **Privacy-First Design**: Secure data handling with complete user isolation
+- **Client Context Integration**: Dynamic context selection for AI interactions
 
 ### 📝 **Advanced Prompt Management**
 - **Custom Prompt Library**: Create, organize, and reuse personalized AI templates
@@ -23,6 +25,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Category Organization**: Sort prompts by type (marketing, content, strategy, social-media, copywriting, analysis)
 - **Usage Analytics**: Track which prompts are most effective for your workflow
 - **Sample Templates**: Pre-built prompts for common marketing tasks
+- **Prompt Selector Integration**: Use prompts directly in chat interface
 
 ### ⚡ **Professional AI Services**
 - **Meeting Report Generator**: Transform meeting transcriptions into professional, actionable reports
@@ -30,6 +33,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Automatic Document Storage**: All content saved to Supabase with organized file structure
 - **PDF Export**: Professional PDF generation for client delivery
 - **Email Integration**: Send documents directly to clients via Resend API
+- **Document Management**: Update, rename, and organize generated content
 
 ### 🛡️ **Enterprise-Grade Privacy & Compliance**
 - **GDPR Compliant**: Complete consent management system with audit trails
@@ -37,90 +41,118 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Account Deletion**: Automated data purging with configurable grace periods
 - **Cookie Management**: Granular cookie preferences and compliance
 - **Privacy Dashboard**: User-controlled privacy settings and data rights
+- **Policy Version Management**: Automatic consent renewal when policies update
+
+### 💳 **Subscription & Usage Management**
+- **Freemium Model**: Free tier with generous limits for testing
+- **Usage Tracking**: Real-time monitoring of conversations, documents, and API costs
+- **Flexible Plans**: Multiple subscription tiers for different user needs
+- **Cost Optimization**: Smart token management to minimize OpenAI expenses
+- **Usage Analytics**: Detailed insights into feature usage and costs
 
 ### 📊 **Analytics & Insights**
 - **Prompt Usage Tracking**: Monitor which templates drive best results
 - **Model Cost Tracking**: Track OpenAI API usage across different models
 - **Client Activity**: Monitor content generation patterns per client
 - **User Feedback System**: Built-in feedback collection for continuous improvement
+- **Performance Monitoring**: Comprehensive logging and timing analysis
 
 ## 🏗️ Tech Stack
 
 ### **Frontend**
-- **Next.js 14.2.29**: App Router with optimized server/client components
+- **Next.js 14**: App Router with optimized server/client components
 - **React 18**: Modern React with hooks and concurrent features
 - **TypeScript**: Full type safety throughout the application
-- **Tailwind CSS**: Utility-first CSS framework
+- **Tailwind CSS**: Utility-first CSS framework with responsive design
 - **shadcn/ui**: High-quality, accessible UI component library
 - **Lucide React**: Beautiful, customizable icon system
+- **next-themes**: Dark/light mode support
 
 ### **Backend & Database**
 - **Supabase**: PostgreSQL database with real-time capabilities and file storage
 - **Prisma ORM**: Type-safe database operations with automatic migrations
 - **Server Actions**: Next.js server-side data mutations
 - **API Routes**: RESTful endpoints for AI services and data management
+- **Middleware**: Authentication and usage protection
 
 ### **AI & External Services**
-- **OpenAI API**: GPT-4o and GPT-4o-mini integration
+- **OpenAI API**: GPT-4o and GPT-4o-mini integration with cost tracking
 - **Resend**: Professional email delivery service
 - **Puppeteer + Chromium**: Server-side PDF generation from markdown
+- **AI SDK**: Streamlined AI integration with streaming support
 
 ### **Authentication & Security**
 - **Clerk**: Complete authentication solution with user management
 - **Route Protection**: Middleware-based authentication for all protected routes
 - **Data Validation**: Comprehensive input validation and sanitization
+- **Usage Limits**: Subscription-based feature access control
 
 ## 📂 Project Structure
 
 ```
 ├── app/                     # Next.js App Router
 │   ├── api/                 # API Routes
-│   │   ├── ai-services/     # AI content generation
+│   │   ├── ai-services/     # AI content generation endpoints
 │   │   ├── chat/           # Chat API endpoint
-│   │   ├── prompts/        # Prompt management
-│   │   ├── consent/        # GDPR compliance
-│   │   ├── data-export/    # User data export
-│   │   ├── feedback/       # User feedback
-│   │   └── account/        # Account management
+│   │   ├── prompts/        # Prompt management CRUD
+│   │   ├── consent/        # GDPR compliance endpoints
+│   │   ├── data-export/    # User data export functionality
+│   │   ├── feedback/       # User feedback collection
+│   │   ├── subscription/   # Usage tracking and billing
+│   │   └── account/        # Account management & deletion
 │   ├── assistant/          # AI chat interface
+│   │   └── chat/[id]/      # Individual chat sessions
 │   ├── ai-services/        # AI services dashboard
-│   ├── clients/           # Client management
-│   ├── prompts/           # Prompt library
+│   ├── clients/           # Client management interface
+│   ├── prompts/           # Prompt library management
+│   ├── pricing/           # Subscription plans page
 │   ├── privacy/           # Privacy policy & settings
 │   ├── terms/             # Terms of service
 │   └── feedback/          # User feedback page
 ├── components/             # React components
-│   ├── ui/                # shadcn/ui components
-│   ├── chat-*.tsx         # Chat interface
-│   ├── client-*.tsx       # Client management
-│   ├── prompt-*.tsx       # Prompt management
-│   └── ai-services-*.tsx  # AI services
+│   ├── ui/                # shadcn/ui base components
+│   ├── assistant/         # Chat interface components
+│   ├── clients/           # Client management components
+│   ├── prompts/           # Prompt management components
+│   ├── ai-services/       # AI services components
+│   ├── documents/         # Document management components
+│   └── global/            # Shared components
 ├── lib/                   # Utility libraries
-│   ├── actions.ts         # Server actions
-│   ├── client-actions.ts  # Client operations
+│   ├── actions.ts         # Server actions for chat
+│   ├── client-actions.ts  # Client CRUD operations
 │   ├── document-actions.ts # Document management
 │   ├── consent-utils.ts   # GDPR utilities
-│   ├── data-export-utils.ts # Data export
+│   ├── subscription-utils.ts # Usage tracking & limits
+│   ├── data-export-utils.ts # Data export functionality
 │   ├── language-utils.ts  # Multi-language support
-│   ├── pdf-generator.ts   # PDF creation
+│   ├── pdf-generator.ts   # PDF creation utilities
+│   ├── logger.ts          # Comprehensive logging system
+│   ├── openai-wrapper.ts  # OpenAI API integration
 │   └── variable-replacement.ts # Variable substitution
 ├── prisma/               # Database
-│   ├── schema.prisma     # Database schema
+│   ├── schema.prisma     # Complete database schema
 │   └── migrations/       # Database migrations
-└── types/                # TypeScript definitions
+├── hooks/                # Custom React hooks
+├── types/                # TypeScript type definitions
+└── scripts/              # Database seeding & utilities
 ```
 
 ## 🗄️ Database Schema
 
 ### **Core Models**
 - **Chat**: AI conversations with client associations and context tracking
-- **Message**: Individual chat messages with model tracking and timestamps
+- **Message**: Individual chat messages with model tracking and cost data
 - **Client**: Business profiles with contact info, goals, and language preferences
 - **Document**: Generated content with metadata, storage paths, and client linking
 - **Prompt**: Custom templates with usage analytics and category organization
 
+### **Subscription & Usage Models**
+- **UserSubscription**: Subscription plans and billing information
+- **UserUsage**: Monthly usage tracking (conversations, documents, tokens, costs)
+- **UsageEvent**: Individual API call logging for detailed analytics
+
 ### **Privacy & Compliance Models**
-- **UserConsent**: GDPR consent preferences with audit trails
+- **UserConsent**: GDPR consent preferences with version tracking
 - **ConsentAuditLog**: Complete consent change history for compliance
 - **DataExportRequest**: User data export and deletion request tracking
 - **Feedback**: User feedback and feature requests with categorization
@@ -130,7 +162,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 ### Prerequisites
 - Node.js 18+ 
 - PostgreSQL database (Supabase recommended)
-- OpenAI API key
+- OpenAI API key with credits
 - Clerk account for authentication
 - Resend account for email services
 
@@ -176,146 +208,160 @@ npx prisma generate
 npx prisma db push
 ```
 
-3. **Start development server:**
+3. **Seed sample data (optional):**
+```bash
+npx tsx scripts/seed-prompts.ts
+```
+
+4. **Start development server:**
 ```bash
 npm run dev
 ```
 
-4. **Open [http://localhost:3000](http://localhost:3000)**
+5. **Open [http://localhost:3000](http://localhost:3000)**
 
 ## 📋 Usage Workflow
 
-### **1. Client Management**
+### **1. Account Setup**
+- Sign up using Clerk authentication
+- Complete GDPR consent process
+- Choose your subscription plan
+
+### **2. Client Management**
 - Navigate to `/clients` to create client profiles
 - Add business information, location, and marketing goals
 - Set preferred document generation language
 
-### **2. Prompt Library Setup**
+### **3. Prompt Library Setup**
 - Go to `/prompts` to create custom templates
 - Use variables: `{client_name}`, `{country}`, `{goals}`
 - Organize by category and track usage analytics
 
-### **3. AI Assistant**
+### **4. AI Assistant**
 - Visit `/assistant` for AI conversations
 - Select client and choose context fields
-- Switch between GPT-4o and GPT-4o-mini models
-- Export conversations as documents
+- Use prompt selector for quick template access
+- Export conversations when needed
 
-### **4. AI Services**
-- Use `/ai-services` for structured content generation
+### **5. AI Services**
+- Access `/ai-services` for document generation
 - Generate meeting reports from transcriptions
-- Create custom documents with prompt templates
+- Create custom documents using prompt templates
 - Automatically save and organize all content
 
-### **5. Document Management**
-- All content automatically saved to Supabase
-- Generate PDFs for client delivery
-- Send documents via email integration
-- Organize by client and document type
+### **6. Document Management**
+- View all generated documents in client profiles
+- Export to PDF for professional delivery
+- Email documents directly to clients
+- Update and maintain document versions
 
-## 🔒 Privacy & Compliance Features
-
-### **GDPR Compliance**
-- Comprehensive consent management system
-- Complete audit trail for all data processing
-- User data export in multiple formats
-- Account deletion with configurable grace periods
-
-### **Data Rights Management**
-- Access: View all stored personal data
-- Rectify: Update personal information
-- Erase: Request account and data deletion
-- Export: Download complete data archive
-- Restrict: Control data processing preferences
-
-### **Security Features**
-- User data isolation between accounts
-- Encrypted data transmission
-- Secure file storage via Supabase
-- Input validation and sanitization
-
-## 📊 Analytics & Monitoring
-
-- **Prompt Performance**: Track which templates generate best results
-- **Cost Management**: Monitor OpenAI API usage by model
-- **Client Activity**: Analyze content generation patterns
-- **User Feedback**: Built-in feedback system for continuous improvement
-
-## 🛠️ Development Commands
+## 🔧 Development Commands
 
 ```bash
-npm run dev           # Start development server
-npm run build         # Build for production
-npm run start         # Start production server
-npm run lint          # Run ESLint
-npx prisma studio     # Database management GUI
-npx prisma generate   # Generate Prisma client
-npx prisma db push    # Push schema changes
+# Development
+npm run dev              # Start development server
+npm run build           # Build for production
+npm run start           # Start production server
+
+# Database
+npx prisma generate     # Generate Prisma client
+npx prisma db push      # Push schema changes
+npx prisma studio       # Open database GUI
+
+# Testing & Scripts
+npx tsx scripts/test-logging.ts    # Test logging system
+npx tsx scripts/seed-prompts.ts    # Seed sample prompts
 ```
 
-## 🎨 Customization
+## 📊 Monitoring & Analytics
 
-### **Branding & Theming**
-- Update colors in `tailwind.config.ts`
-- Modify component themes in `components/ui/`
-- Customize landing page in `components/landing-page.tsx`
+### **Built-in Analytics**
+- Real-time usage tracking per user
+- Cost monitoring for OpenAI API calls
+- Prompt effectiveness analytics
+- Client engagement metrics
 
-### **AI Configuration**
-- Add new OpenAI models in `components/ui/model-selector.tsx`
-- Configure prompts in `lib/sample-prompts.ts`
-- Extend language support in `lib/language-utils.ts`
+### **Logging System**
+- Comprehensive request/response logging
+- Performance timing for all operations
+- Error tracking with full context
+- Client-side interaction logging
 
-### **Feature Extensions**
-- Add new AI services in `app/api/ai-services/`
-- Create custom document types in `types/document-types.ts`
-- Extend privacy features in `lib/consent-utils.ts`
+### **Usage Limits**
+- Conversation count tracking
+- Token usage monitoring
+- Cost-based limits per subscription tier
+- Automatic limit enforcement
+
+## 🛡️ Security & Privacy
+
+### **GDPR Compliance**
+- Complete consent management system
+- Audit trails for all consent changes
+- User data export capabilities
+- Right to deletion implementation
+
+### **Security Features**
+- User data isolation
+- Input validation and sanitization
+- Secure file storage via Supabase
+- Protected API routes with authentication
 
 ## 🚀 Deployment
 
-### **Vercel (Recommended)**
-1. Connect GitHub repository to Vercel
-2. Add environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+### **Vercel Deployment**
+```bash
+# Build command (configured in package.json)
+npm run vercel-build
 
-### **Production Checklist**
-- [ ] Set up custom domain
-- [ ] Configure email forwarding for privacy contacts
-- [ ] Set up database backups
-- [ ] Configure monitoring and alerts
-- [ ] Test all privacy compliance features
+# Environment variables required:
+# - All .env.local variables
+# - DATABASE_URL (production)
+# - OPENAI_API_KEY
+# - CLERK keys
+# - SUPABASE credentials
+# - RESEND_API_KEY
+```
+
+### **Database Setup**
+```bash
+# After Vercel deployment
+npx prisma migrate deploy
+```
 
 ## 📈 Scaling Considerations
 
-### **Cost Management**
-- Monitor OpenAI token usage with built-in analytics
-- Implement usage limits per subscription tier
-- Track costs per client/conversation
-
 ### **Performance Optimization**
-- Database connection pooling via Prisma
-- Implement Redis caching for frequent queries
-- Optimize image delivery via Supabase CDN
+- Database indexes for common queries
+- Efficient OpenAI token usage
+- Optimized file storage patterns
+- Caching strategies for static content
 
-### **Compliance Scaling**
-- Built-in GDPR compliance scales automatically
-- Audit logs maintain compliance at any scale
-- Data export system handles large datasets
+### **Cost Management**
+- Usage tracking and limits
+- Model selection optimization
+- Token efficiency monitoring
+- Automated cost alerts
 
-## 🤝 Support & Feedback
+## 🤝 Contributing
 
-- **Built-in Feedback**: Use `/feedback` page for feature requests and bug reports
-- **Documentation**: This README and AI_SERVICES_README.md
-- **Database Management**: Use Prisma Studio for direct database access
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 📄 Legal & Compliance
+## 📄 License
 
-- **Privacy Policy**: Available at `/privacy`
-- **Terms of Service**: Available at `/terms`
-- **GDPR Rights**: Managed through `/privacy/settings`
-- **Data Processing**: Full audit trail maintained
+This project is proprietary software. All rights reserved.
+
+## 🆘 Support
+
+For support and questions:
+- Check the documentation files in the project root
+- Review the comprehensive logging output
+- Submit feedback through the in-app feedback system
 
 ---
 
-**Built with ❤️ for marketing professionals who want to scale their business with AI.**
-
-*This application provides enterprise-grade AI tools with privacy-first design, helping marketing professionals create compelling content while maintaining complete data security and compliance.*
+**Built with ❤️ for marketing professionals who want to scale their content creation with AI while maintaining the highest standards of privacy and security.**
