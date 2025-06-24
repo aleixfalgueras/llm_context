@@ -8,6 +8,7 @@ import { DocumentList } from '@/components/documents/document-list'
 import { DocumentViewer } from '@/components/documents/document-viewer'
 import { DocumentCreationForm } from '@/components/documents/document-creation-form'
 import { DocumentPreviewDialog } from '@/components/documents/document-preview-dialog'
+import { DOCUMENT_TYPES } from '@/types/document-types'
 
 interface Document {
   id: string
@@ -240,13 +241,13 @@ export function ClientDocuments({
     setSelectedDocument(null)
     setNewDocumentName('')
     setNewDocumentContent('')
-    setNewDocumentType('')
+    setNewDocumentType(DOCUMENT_TYPES.MANUAL)
     setStartDate('')
     setEndDate('')
   }
 
   const handleCreateDocument = async () => {
-    if (!newDocumentName.trim() || !newDocumentContent.trim() || !newDocumentType) {
+    if (!newDocumentName.trim() || !newDocumentContent.trim()) {
       toast({
         title: 'Error',
         description: 'Please fill in all required fields',
@@ -283,7 +284,7 @@ export function ClientDocuments({
     setIsCreating(false)
     setNewDocumentName('')
     setNewDocumentContent('')
-    setNewDocumentType('')
+    setNewDocumentType(DOCUMENT_TYPES.MANUAL)
     setStartDate('')
     setEndDate('')
   }
@@ -329,7 +330,7 @@ export function ClientDocuments({
           />
 
           {/* Document Content */}
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className={`flex-1 flex flex-col ${isCreating ? 'overflow-y-auto' : 'overflow-hidden'}`}>
             {isCreating ? (
               <div className="p-4">
                 <DocumentCreationForm
@@ -339,6 +340,7 @@ export function ClientDocuments({
                   startDate={startDate}
                   endDate={endDate}
                   isCreating={isCreating}
+                  hideDocumentType={true}
                   onNameChange={setNewDocumentName}
                   onContentChange={setNewDocumentContent}
                   onTypeChange={setNewDocumentType}

@@ -18,6 +18,7 @@ interface DocumentCreationFormProps {
   startDate: string
   endDate: string
   isCreating: boolean
+  hideDocumentType?: boolean
   onNameChange: (name: string) => void
   onContentChange: (content: string) => void
   onTypeChange: (type: string) => void
@@ -35,6 +36,7 @@ export function DocumentCreationForm({
   startDate,
   endDate,
   isCreating,
+  hideDocumentType,
   onNameChange,
   onContentChange,
   onTypeChange,
@@ -69,21 +71,23 @@ export function DocumentCreationForm({
         </div>
 
         {/* Document Type */}
-        <div className="space-y-2">
-          <Label htmlFor="newDocType">Document Type *</Label>
-          <Select value={documentType} onValueChange={onTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select document type" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(DOCUMENT_TYPES).map((type: string) => (
-                <SelectItem key={type} value={type}>
-                  {getDocumentTypeLabel(type as DocumentType)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {!hideDocumentType && (
+          <div className="space-y-2">
+            <Label htmlFor="newDocType">Document Type *</Label>
+            <Select value={documentType} onValueChange={onTypeChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select document type" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(DOCUMENT_TYPES).map((type: string) => (
+                  <SelectItem key={type} value={type}>
+                    {getDocumentTypeLabel(type as DocumentType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Date Range (Optional) */}
         <div className="grid grid-cols-2 gap-4">
@@ -112,7 +116,7 @@ export function DocumentCreationForm({
           <Label htmlFor="newDocContent">Content *</Label>
           <Textarea
             id="newDocContent"
-            placeholder="Enter document content using Markdown..."
+            placeholder="Enter document content..."
             value={documentContent}
             onChange={(e) => onContentChange(e.target.value)}
             className="min-h-[200px] font-mono text-sm"
@@ -139,7 +143,7 @@ export function DocumentCreationForm({
           <Button
             onClick={onCreate}
             className="bg-blue-500 hover:bg-blue-600 text-white"
-            disabled={!documentName.trim() || !documentContent.trim() || !documentType}
+            disabled={!documentName.trim() || !documentContent.trim() || (!hideDocumentType && !documentType)}
           >
             <Plus className="h-4 w-4 mr-1" />
             Create Document
