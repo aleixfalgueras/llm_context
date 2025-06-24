@@ -149,7 +149,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 ### **Subscription & Usage Models**
 - **UserSubscription**: Subscription plans and billing information
 - **UserUsage**: Monthly usage tracking (conversations, documents, tokens, costs)
-- **UsageEvent**: Individual API call logging for detailed analytics
+- **UserUsage**: Monthly usage aggregation for billing and analytics
 
 ### **Privacy & Compliance Models**
 - **UserConsent**: GDPR consent preferences with version tracking
