@@ -119,7 +119,7 @@ export function DocumentCreationForm({
             placeholder="Enter document content..."
             value={documentContent}
             onChange={(e) => onContentChange(e.target.value)}
-            className="min-h-[200px] font-mono text-sm"
+            className="min-h-[150px] font-mono text-sm"
           />
           <p className="text-xs text-muted-foreground">
             You can use Markdown formatting for rich text content.

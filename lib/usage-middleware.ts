@@ -83,6 +83,8 @@ export async function trackUsage(
   }
 }
 
+// Document usage checking functions moved to lib/document-usage-utils.ts for better organization
+
 // Helper to get usage information for client-side display
 export async function getUsageInfo(userId: string) {
   try {
@@ -107,7 +109,7 @@ export async function getUsageInfo(userId: string) {
       remaining: subscription.maxConversationsPerMonth === -1 ? undefined : Math.max(0, subscription.maxConversationsPerMonth - usage.conversationsUsed)
     };
 
-    // Check document limits
+    // Check document limits - use usage events to prevent bypassing limits by deleting documents
     const documentUsage = {
       allowed: subscription.maxDocumentsPerMonth === -1 || usage.documentsGenerated < subscription.maxDocumentsPerMonth,
       limit: subscription.maxDocumentsPerMonth === -1 ? 'unlimited' as const : subscription.maxDocumentsPerMonth,
