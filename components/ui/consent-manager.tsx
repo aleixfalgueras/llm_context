@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -21,6 +22,7 @@ interface ConsentData {
 }
 
 export function ConsentManager() {
+  const { user } = useUser()
   const [isVisible, setIsVisible] = useState(false)
   const [consent, setConsent] = useState<ConsentData>({
     dataProcessing: true, // Pre-selected since it's required
@@ -34,6 +36,20 @@ export function ConsentManager() {
   })
 
   useEffect(() => {
+    // Don't proceed if user is not loaded yet or not authenticated
+    if (!user?.id) {
+      // Clean up any old consent data when user is not authenticated
+      if (typeof window !== 'undefined') {
+        // Remove any old user-consent keys (cleanup)
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('user-consent-') || key === 'user-consent') {
+            localStorage.removeItem(key)
+          }
+        })
+      }
+      return
+    }
+
     // Don't show consent dialog on public/informational pages and auth pages
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
     const isPublicPage = ['/', '/terms', '/privacy', '/privacy/cookies', '/privacy/settings'].includes(currentPath)
@@ -45,8 +61,11 @@ export function ConsentManager() {
 
     const checkConsentStatus = async () => {
       try {
+        // Create user-specific localStorage key to prevent cross-user consent sharing
+        const userConsentKey = `user-consent-${user.id}`
+        
         // First check localStorage for immediate response (avoid API call)
-        const savedConsent = localStorage.getItem('user-consent')
+        const savedConsent = localStorage.getItem(userConsentKey)
         if (savedConsent) {
           const consent = JSON.parse(savedConsent)
           // Check if local storage has current version consent
@@ -71,8 +90,8 @@ export function ConsentManager() {
           const hasRequiredConsent = consentData.dataProcessing
 
           if (hasCurrentTerms && hasCurrentPrivacy && hasRequiredConsent && !consentData.withdrawnAt) {
-            // Save to localStorage for future page loads
-            localStorage.setItem('user-consent', JSON.stringify({
+            // Save to user-specific localStorage for future page loads
+            localStorage.setItem(userConsentKey, JSON.stringify({
               dataProcessing: true,
               agreedToTerms: true,
               agreedToPrivacy: true,
@@ -82,6 +101,11 @@ export function ConsentManager() {
             }))
             return // Valid current consent exists
           }
+        } else if (response.status === 401) {
+          // User not authenticated yet - retry after a short delay
+          console.log('User not authenticated yet, retrying consent check...')
+          const retryTimer = setTimeout(() => checkConsentStatus(), 1000)
+          return () => clearTimeout(retryTimer)
         }
         
         // Show consent dialog after a delay
@@ -96,7 +120,7 @@ export function ConsentManager() {
     }
 
     checkConsentStatus()
-  }, [])
+  }, [user?.id])
 
   const saveConsent = async () => {
     if (!consent.dataProcessing || !consent.agreedToTerms || !consent.agreedToPrivacy) {
@@ -115,22 +139,25 @@ export function ConsentManager() {
           marketing: consent.marketing,
           agreedToTerms: consent.agreedToTerms,
           agreedToPrivacy: consent.agreedToPrivacy,
-          cookiesAnalytics: consent.analytics, // Map to cookies for consistency
-          cookiesMarketing: consent.marketing,
-          cookiesFunctional: false, // Default for now
+          cookiesAnalytics: false, // No analytics cookies for now
+          cookiesMarketing: false, // No marketing cookies for now
+          cookiesFunctional: false, // No functional cookies for now
           termsVersion: CURRENT_TERMS_VERSION,
           privacyVersion: CURRENT_PRIVACY_VERSION
         }),
       })
 
       if (response.ok) {
-        // Also save to localStorage for immediate UI updates
-        localStorage.setItem('user-consent', JSON.stringify({
-          ...consent,
-          timestamp: new Date().toISOString(),
-          termsVersion: CURRENT_TERMS_VERSION,
-          privacyVersion: CURRENT_PRIVACY_VERSION
-        }))
+        // Also save to user-specific localStorage for immediate UI updates
+        if (user?.id) {
+          const userConsentKey = `user-consent-${user.id}`
+          localStorage.setItem(userConsentKey, JSON.stringify({
+            ...consent,
+            timestamp: new Date().toISOString(),
+            termsVersion: CURRENT_TERMS_VERSION,
+            privacyVersion: CURRENT_PRIVACY_VERSION
+          }))
+        }
         setIsVisible(false)
       } else {
         const error = await response.json()

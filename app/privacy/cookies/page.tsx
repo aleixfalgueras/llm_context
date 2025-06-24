@@ -28,7 +28,8 @@ export default function CookiePolicyPage() {
               </div>
             </div>
             <p className="text-lg text-muted-foreground">
-              This Cookie Policy explains how AI Marketing Assistant uses cookies and similar technologies.
+              This Cookie Policy explains how AI Marketing Assistant uses cookies and similar technologies. 
+              Currently, we only use essential cookies for authentication and security.
             </p>
           </div>
 

@@ -165,32 +165,55 @@ Please ensure all creative elements resonate with their target market and busine
   }
 ]
 
-async function main() {
-  console.log('Seeding sample marketing prompts...')
+// Export the sample prompts for reuse in other scripts
+export { samplePrompts }
 
-  // Note: This would need to be run with a specific user ID in a real scenario
-  // For now, this is just a template script
+// Export a function to seed prompts with a given userId
+export async function seedPrompts(userId: string) {
+  console.log('🌱 Seeding sample prompts...')
   
   for (const promptData of samplePrompts) {
-    console.log(`Creating prompt: ${promptData.name}`)
-    // In real implementation, you'd need to pass a userId
-    // const prompt = await prisma.prompt.create({
-    //   data: {
-    //     ...promptData,
-    //     userId: 'your-user-id-here',
-    //   },
-    // })
-    // console.log(`Created prompt: ${prompt.name}`)
+    try {
+      console.log(`  Creating prompt: ${promptData.name}`)
+      const prompt = await prisma.prompt.create({
+        data: {
+          ...promptData,
+          userId,
+        },
+      })
+      console.log(`  ✅ Created prompt: ${prompt.name}`)
+    } catch (error) {
+      console.error(`  ❌ Error creating prompt ${promptData.name}:`, error)
+    }
   }
-
-  console.log('Sample marketing prompts ready! (Note: Actual creation requires user authentication)')
+  
+  console.log('✅ Sample prompts seeded successfully!')
+  return samplePrompts.length
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
+async function main() {
+  console.log('Seeding sample marketing prompts...')
+  
+  // Use system user ID when running this script directly
+  const SYSTEM_USER_ID = 'system_seed_user'
+  
+  try {
+    const count = await seedPrompts(SYSTEM_USER_ID)
+    console.log(`📊 Created ${count} sample prompts`)
+  } catch (error) {
+    console.error('Error seeding prompts:', error)
     process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  }) 
+  }
+}
+
+// Only run main if this script is executed directly
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })
+} 
