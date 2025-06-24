@@ -1,154 +1,182 @@
-# Usage Tracking System Documentation
+# Usage Tracking System
 
-This document provides information about the usage tracking system implemented in the LLM Context application.
+This document explains how the usage tracking system works for the LLM Context application, focusing on monitoring and limiting AI service usage to manage costs and ensure fair resource allocation.
 
-## 🎯 Overview
+## Overview
 
-The usage tracking system monitors user interactions with AI services, enforces subscription limits, and provides detailed analytics for billing and optimization.
+The usage tracking system operates across multiple dimensions:
+- **Document generation limits** (count-based)
+- **Token consumption tracking** (usage-based)
+- **Cost management** (cost-based)
+- **Client profile limits** (count-based)
 
-**Key Features:**
-- **Real-time Monitoring**: Tracks all AI service interactions
-- **Limit Enforcement**: Prevents users from exceeding subscription plan limits
-- **Cost Calculation**: Estimates OpenAI API costs and token consumption
-- **Analytics**: Provides monthly usage insights for billing
-- **Multi-dimensional Limits**: Count-based, token-based, and cost-based restrictions
+## Database Schema
 
-## 🏗️ Database Schema
+### UserSubscription Table
+Stores subscription plan details and limits:
 
-### UserUsage Table - Monthly Aggregated Data
-Tracks monthly usage statistics per user including:
-- Conversations used, documents generated, prompts used
-- Token consumption and estimated costs
-- Year/month tracking with unique constraints
+```sql
+model UserSubscription {
+  -- Plan Limits
+  maxClients              Int     -- Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
+  maxDocumentsPerMonth    Int     -- Basic: 20, Pro: 200, Business: unlimited (-1)
+  maxTokensPerMonth       Int     -- Basic: 100K, Pro: 2M, Business: unlimited (-1)
+  maxCostPerMonth         Float   -- Basic: $2, Pro: $25, Business: unlimited (-1)
+  
+  -- Plan Features
+  canAccessPremiumPrompts Boolean
+  canAccessTeamFeatures   Boolean
+  canAccessPrioritySupport Boolean
+  canAccessCustomBranding Boolean
+}
+```
 
-### UserSubscription Table - Plan Limits
-Defines subscription plan limits:
-- **Free Plan**: 50 conversations, 20 documents, 3 clients, 10 prompts, 100K tokens, $2 cost limit
-- **Pro Plan**: 500 conversations, 200 documents, unlimited clients/prompts, 2M tokens, $25 cost limit  
-- **Business Plan**: Unlimited usage across all dimensions
+### UserUsage Table
+Tracks monthly usage aggregates:
 
-## 🔄 Usage Tracking Flow
+```sql
+model UserUsage {
+  documentsGenerated Int     -- Total documents generated this month
+  tokensUsed        Int     -- Total tokens consumed this month  
+  estimatedCost     Float   -- Estimated OpenAI costs this month
+}
+```
 
-**Process Flow:**
-1. User initiates AI service request
-2. API middleware checks authentication and usage limits
-3. If allowed, service executes with automatic tracking
-4. OpenAI API call tracks tokens and calculates costs
-5. Monthly usage counters updated directly
-6. Cache refreshed for performance
+## Service-Specific Usage Tracking
 
-**Block Points:**
-- Authentication failure → 401 Unauthorized
-- Usage limit exceeded → 429 Too Many Requests with upgrade message
-- Service errors → 500 Internal Server Error
+### Document Generation Services
+All AI services that generate content track:
 
-## 📈 Tracking Points Across Services
+1. **Meeting Report Generator**
+   - Document count increment
+   - Token usage (prompt + completion)
+   - Estimated OpenAI cost
+   - Model used (for analytics)
 
-### AI Services Overview
+2. **Custom Document Generator**
+   - Document count increment  
+   - Token usage (prompt + completion)
+   - Estimated OpenAI cost
+   - Template used (for analytics)
 
-**Meeting Report Generator** 🟣
-- Converts meeting transcriptions into professional reports
-- Tracks as document_generation event type
-- Supports file uploads and multi-language generation
+3. **Chat/Assistant Service**
+   - Treated as document generation
+   - Token usage tracking
+   - Cost monitoring per conversation
 
-**Custom Document Generator** 🔵
-- Creates marketing documents using custom prompts
-- Integrates with prompt library system
-- Supports variable replacement and client context
+### Client Management
+- **Limit Type**: Real-time count of existing client profiles
+- **No Usage Tracking**: Users can delete/recreate clients up to their limit
+- **Enforcement**: Checked before client creation
 
-### Service-Specific Tracking
+### Prompt Management
+- **No Limits**: Users can create unlimited custom prompts
+- **No Usage Tracking**: Prompts are treated as templates, not AI services
+- **Storage Only**: Prompts stored in database without restrictions
 
-**AI Services**: Document generation events with metadata (document type, client ID, model used)
+## Usage Tracking Flow
 
-**Assistant Chat**: Conversation events with message count and model information
+### 1. Pre-Request Validation
+```typescript
+// Check limits before API processing
+const usageCheck = await checkUsageLimit(userId, 'document')
+if (!usageCheck.allowed) {
+  return usageLimitResponse(usageCheck)
+}
+```
 
-**Document Storage**: Automatic tracking when documents are saved to Supabase
+### 2. AI Service Processing
+```typescript
+// Process with OpenAI and track usage automatically
+const result = await createOpenAICompletion({
+  prompt,
+  usageTracking: {
+    userId,
+    eventType: 'document_generation',
+    resourceId: documentId
+  }
+})
+```
 
-**Prompt Usage**: Individual prompt usage increments in database
+### 3. Post-Processing Updates
+```typescript
+// Update monthly usage aggregates
+await updateUsageTracking(userId, 'document_generation', {
+  tokensUsed: result.usage.total_tokens,
+  estimatedCost: result.estimatedCost
+})
+```
 
-**Chat Exports**: Document generation events when chat conversations are saved
+## Subscription Plans
 
-## 🔍 Usage Limit Enforcement
+### Basic Plan (€9/month, first month FREE)
+- 100K tokens per month (~75 pages of content)
+- $2 OpenAI usage limit
+- 3 client profiles
+- 20 documents per month
+- Unlimited custom prompts
+- Email support
 
-**Multi-Dimensional Checks:**
-- **Conversation Limits**: Monthly conversation count vs plan limit
-- **Document Limits**: Monthly document generation vs plan limit
-- **Token Limits**: Total monthly token consumption vs plan allowance
-- **Cost Limits**: Estimated OpenAI costs vs monthly budget
-- **Client Limits**: Current total client count vs plan limit (not creation events)
-- **Prompt Limits**: Current total prompt count vs plan limit
+### Pro Plan (€15/month)
+- 2M tokens per month (~1,500 pages of content)  
+- $25 OpenAI usage limit
+- Unlimited client profiles
+- 200 documents per month
+- Unlimited custom prompts
+- Premium features and support
 
-**Enforcement Points:**
-- API middleware blocks requests before processing
-- Document save operations check limits before storage
-- Real-time validation prevents limit overruns
-- Graceful error messages guide users to upgrade
+### Business Plan (€39/month)
+- Unlimited tokens and OpenAI usage
+- Unlimited everything
+- Team collaboration features
+- Priority support and custom branding
 
-## 📊 Analytics & Reporting
+## Analytics and Reporting
 
-**Usage Information API** (`/api/subscription/usage-info`):
-- Cached usage data (30-second cache duration)
-- Real-time limit checking across all dimensions
-- Returns usage statistics for dashboard display
+### Real-time Usage Info
+```typescript
+const usage = await getUsageInfo(userId)
+// Returns current usage for: documents, clients, tokens, cost
+```
 
-**Subscription Analytics** (`/api/subscription/analytics`):
-- Comprehensive usage analytics for administrative purposes
-- Plan details, limits, current usage, and projections
-- Historical data for billing and optimization
+### Monthly Analytics
+```typescript
+const analytics = await getUserUsageAnalytics(userId)  
+// Returns: subscription info, limits, current usage, plan details
+```
 
-**Key Metrics Tracked:**
-- Service popularity and adoption rates
-- Token consumption patterns by service
-- Cost optimization opportunities
-- User engagement and feature utilization
+## Implementation Guidelines
 
-## 🔐 Security & Privacy
+### Adding New AI Services
+1. Use `withAuthAndUsageCheck('document')` middleware
+2. Implement with `createOpenAICompletion()` for automatic tracking
+3. Update service documentation
 
-**Data Protection:**
-- All usage data tied to authenticated user sessions (Clerk)
-- Complete data isolation between users
-- No personal client data stored in usage events
-- Secure token and cost calculations
+### Cost Management
+- All OpenAI calls go through wrapper for consistent cost tracking
+- Monthly cost limits prevent unexpected charges
+- Token limits provide predictable resource allocation
 
-**Performance Optimization:**
-- Caching prevents excessive database queries
-- Background tracking doesn't impact main functionality
-- Efficient database operations with proper indexing
-- Graceful error handling for tracking failures
+### Performance Considerations
+- Usage checking uses efficient database queries
+- Monthly aggregates prevent expensive historical calculations
+- Caching used for frequently accessed subscription data
 
-## 📝 Implementation Guidelines
+## Security Considerations
 
-**For New Services:**
-1. Use `withAuthAndUsageCheck` middleware for all AI endpoints
-2. Implement automatic tracking via `createOpenAICompletion` wrapper
-3. Enable usage tracking in document save operations (`trackUsage: true`)
-4. Include relevant metadata for analytics and debugging
+### Rate Limiting
+- Usage limits act as natural rate limiting
+- Prevents abuse and ensures fair resource allocation
+- Gradual upgrade path encourages proper usage
 
-**Best Practices:**
-- Always validate authentication before usage checking
-- Handle tracking errors gracefully without breaking functionality
-- Use specific event types for accurate categorization
-- Include contextual metadata for better analytics
-- Cache usage information to reduce database load
+### Data Privacy
+- Usage tracking respects user privacy
+- No content storage in usage tracking
+- Aggregated metrics only for business intelligence
 
-**Common Issues & Solutions:**
-- **Usage not tracked**: Verify middleware implementation
-- **Incorrect limits**: Check subscription plan configuration  
-- **Stale data**: Clear usage info cache
-- **Token miscalculation**: Ensure OpenAI response includes usage data
-- **Database errors**: Verify Prisma connection and schema
+### Error Handling
+- Usage tracking failures don't break core functionality
+- Graceful degradation when tracking is unavailable
+- Comprehensive logging for troubleshooting
 
-## 🚀 Monitoring & Maintenance
-
-**Key Monitoring Points:**
-- Usage pattern anomalies (unusual spikes)
-- Service performance and success rates
-- Cost optimization opportunities
-- Database performance and query efficiency
-
-**Regular Maintenance:**
-- Monitor cache hit rates and effectiveness
-- Review and adjust subscription plan limits
-- Analyze usage patterns for feature development
-
-This usage tracking system ensures accurate billing, prevents abuse, and provides valuable insights while maintaining excellent performance and user experience. 
+This usage tracking system ensures accurate billing, prevents abuse, and provides valuable insights while maintaining excellent performance and user experience. The focus on token-based limits provides more accurate cost control and better user experience. 

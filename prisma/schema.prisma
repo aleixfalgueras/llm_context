@@ -118,7 +118,7 @@ model UserSubscription {
   userId          String   @unique // The user's ID from Clerk
   
   // Subscription Details
-  plan            String   @default("free") // "free", "pro", "business"
+  plan            String   @default("basic") // "basic", "pro", "business"
   status          String   @default("active") // "active", "canceled", "past_due", "incomplete"
   
   // Billing Information
@@ -127,12 +127,10 @@ model UserSubscription {
   stripePriceId        String?  // Stripe price ID for current plan
   
   // Plan Limits
-  maxConversationsPerMonth Int @default(50)   // Free: 50, Pro: 500, Business: unlimited (-1)
-  maxClients              Int @default(3)     // Free: 3, Pro: unlimited (-1), Business: unlimited (-1)
-  maxPromptsPerUser       Int @default(10)    // Free: 10, Pro: unlimited (-1), Business: unlimited (-1)
-  maxDocumentsPerMonth    Int @default(20)    // Free: 20, Pro: 200, Business: unlimited (-1)
-  maxTokensPerMonth       Int @default(100000) // Free: 100K, Pro: 2M, Business: unlimited (-1)
-  maxCostPerMonth         Float @default(2.00) // Free: $2, Pro: $25, Business: unlimited (-1)
+  maxClients              Int @default(3)     // Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
+  maxDocumentsPerMonth    Int @default(20)    // Basic: 20, Pro: 200, Business: unlimited (-1)
+  maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: unlimited (-1)
+  maxCostPerMonth         Float @default(2.00) // Basic: $2, Pro: $25, Business: unlimited (-1)
   
   // Features Access
   canAccessPremiumPrompts Boolean @default(false)
@@ -162,9 +160,7 @@ model UserUsage {
   month    Int
   
   // Usage Counters
-  conversationsUsed Int @default(0)  // Total conversations this month
   documentsGenerated Int @default(0) // Total documents generated this month
-  promptsUsed       Int @default(0)  // Total prompt uses this month
   
   // Cost Tracking
   estimatedCost     Float @default(0.0) // Estimated OpenAI costs this month

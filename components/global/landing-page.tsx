@@ -324,7 +324,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link href="/sign-up">
-                Start Your Free Account
+                Start Your Basic Account - First Month Free
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>

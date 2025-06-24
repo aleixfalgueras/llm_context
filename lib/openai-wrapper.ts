@@ -17,7 +17,7 @@ export interface OpenAICompletionOptions {
 
 export interface UsageTrackingOptions {
   userId: string
-  eventType: 'conversation' | 'document_generation' | 'prompt_usage'
+  eventType: 'document_generation'
   resourceId?: string
   additionalMetadata?: Record<string, any>
 }
@@ -96,10 +96,8 @@ export async function createOpenAICompletion(
  */
 export function createUsageLimitResponse(action: string, limit: number | 'unlimited', limitType?: string, used?: number) {
   const actionMessages = {
-    conversation: 'conversations',
     document: 'documents',
-    client: 'clients',
-    prompt: 'custom prompts'
+    client: 'clients'
   }
 
   const message = actionMessages[action as keyof typeof actionMessages] || action
@@ -116,10 +114,6 @@ export function createUsageLimitResponse(action: string, limit: number | 'unlimi
     case 'cost':
       errorMessage = `You've spent $${used?.toFixed(2)} and reached your monthly OpenAI cost limit of $${limit === -1 ? 'unlimited' : (limit as number).toFixed(2)}. `
       upgradeMessage = 'Upgrade to Pro for $25/month limit or Business for unlimited OpenAI usage.'
-      break
-    case 'conversations':
-      errorMessage = `You've reached your monthly conversation limit of ${limit} conversations. `
-      upgradeMessage = 'Upgrade to Pro for 500 conversations or Business for unlimited conversations.'
       break
     case 'documents':
       errorMessage = `You've reached your monthly document limit of ${limit} documents. `

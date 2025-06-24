@@ -69,7 +69,7 @@ export async function withClientAccess(
  * Perfect for AI service APIs that need client data
  */
 export async function withAuthUsageAndClient(
-  action: 'conversation' | 'document' | 'prompt' | 'client',
+  action: 'document' | 'client',
   clientId: string,
   clientOptions: ClientAccessOptions = {}
 ): Promise<{
