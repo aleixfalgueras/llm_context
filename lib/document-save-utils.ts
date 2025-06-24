@@ -13,6 +13,7 @@ export interface SaveDocumentParams {
   documentType: DocumentType
   startDate?: Date | string
   endDate?: Date | string
+  trackUsage?: boolean
 }
 
 export async function saveDocumentToStorage({
@@ -21,7 +22,8 @@ export async function saveDocumentToStorage({
   documentName,
   documentType,
   startDate,
-  endDate
+  endDate,
+  trackUsage = true
 }: SaveDocumentParams) {
   const { userId } = await auth()
   
@@ -29,7 +31,13 @@ export async function saveDocumentToStorage({
     throw new Error('Unauthorized')
   }
 
-  // Get client information for document name generation
+  if (trackUsage) {
+    const usageCheck = await checkDocumentUsageLimit(userId)
+    if (!usageCheck.allowed) {
+      throw new Error(usageCheck.message || 'Document creation limit exceeded')
+    }
+  }
+
   const client = await prisma.client.findFirst({
     where: {
       id: clientId,
@@ -41,7 +49,6 @@ export async function saveDocumentToStorage({
     throw new Error('Client not found')
   }
 
-  // Generate document name if not provided
   const finalDocumentName = documentName || generateDefaultDocumentName(
     client.name,
     documentType,
@@ -52,12 +59,11 @@ export async function saveDocumentToStorage({
   const fileName = `${finalDocumentName}.md`
   const filePath = `${userId}/${clientId}/${fileName}`
 
-  // Upload to Supabase storage
   const { error: uploadError } = await supabaseServer.storage
     .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
     .upload(filePath, content, {
       contentType: 'text/markdown',
-      upsert: true, // Allow overwriting if file exists
+      upsert: true,
     })
 
   if (uploadError) {
@@ -65,7 +71,6 @@ export async function saveDocumentToStorage({
     throw new Error('Failed to save document to storage')
   }
 
-  // Save document record to database
   const document = await prisma.document.create({
     data: {
       userId,
@@ -78,6 +83,19 @@ export async function saveDocumentToStorage({
     },
   })
 
+  if (trackUsage) {
+    try {
+      const { trackUsage: trackUsageEvent } = await import('./usage-middleware')
+      await trackUsageEvent(userId, 'document_generation', document.id, {
+        documentType,
+        clientId,
+        documentName: finalDocumentName
+      })
+    } catch (error) {
+      console.error('Error tracking document creation usage:', error)
+    }
+  }
+
   return {
     success: true,
     document: {
@@ -88,6 +106,30 @@ export async function saveDocumentToStorage({
       startDate: startDate || undefined,
       endDate: endDate || undefined
     }
+  }
+}
+
+async function checkDocumentUsageLimit(userId: string) {
+  try {
+    const { getUsageInfo } = await import('./usage-middleware')
+    const usageInfo = await getUsageInfo(userId)
+    
+    if (!usageInfo?.documents) {
+      return { allowed: true, limit: 'unlimited' as const, used: 0 }
+    }
+    
+    return {
+      allowed: usageInfo.documents.allowed,
+      limit: usageInfo.documents.limit,
+      used: usageInfo.documents.used,
+      remaining: usageInfo.documents.remaining,
+      message: usageInfo.documents.allowed 
+        ? undefined
+        : `You've reached your document limit of ${usageInfo.documents.limit} for this month. Upgrade your plan to create more documents.`
+    }
+  } catch (error) {
+    console.error('Error checking document usage limit:', error)
+    return { allowed: true, limit: 'unlimited' as const, used: 0 }
   }
 }
 
