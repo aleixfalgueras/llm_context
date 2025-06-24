@@ -8,53 +8,11 @@ import { Badge } from '@/components/ui/badge'
 import { CheckIcon, StarIcon, CrownIcon, ZapIcon } from 'lucide-react'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
 
-interface UserSubscription {
-  plan: string
-  status: string
-  currentPeriodEnd: string
-}
 
-interface UsageAnalytics {
-  subscription: UserSubscription
-  limits: {
-    documents: number
-    clients: number
-    tokens: number
-    cost: number
-  }
-  usage: {
-    documents: number
-    estimatedCost: number
-    tokensUsed: number
-  }
-  planDetails: typeof SUBSCRIPTION_PLANS.basic
-}
 
 export default function PricingPage() {
   const { user } = useUser()
-  const [usageAnalytics, setUsageAnalytics] = useState<UsageAnalytics | null>(null)
-  const [loading, setLoading] = useState(true)
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (user) {
-      fetchUsageAnalytics()
-    }
-  }, [user])
-
-  const fetchUsageAnalytics = async () => {
-    try {
-      const response = await fetch('/api/subscription/analytics')
-      if (response.ok) {
-        const data = await response.json()
-        setUsageAnalytics(data)
-      }
-    } catch (error) {
-      console.error('Error fetching usage analytics:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleUpgrade = async (planId: string) => {
     setUpgradeLoading(planId)
@@ -94,14 +52,7 @@ export default function PricingPage() {
     return null
   }
 
-  const isCurrentPlan = (planId: string) => {
-    return usageAnalytics?.subscription.plan === planId
-  }
 
-  const getUsagePercentage = (used: number, limit: number) => {
-    if (limit === -1) return 0 // unlimited
-    return Math.min((used / limit) * 100, 100)
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -116,52 +67,14 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* Current Usage Stats (if user is logged in) */}
-        {usageAnalytics && !loading && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-center mb-6">Your Current Usage</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
-                  <div className="text-2xl font-bold">
-                    {usageAnalytics.usage.documents}
-                    {usageAnalytics.limits.documents !== -1 && 
-                      <span className="text-sm text-gray-500">/{usageAnalytics.limits.documents}</span>
-                    }
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full" 
-                      style={{ width: `${getUsagePercentage(usageAnalytics.usage.documents, usageAnalytics.limits.documents)}%` }}
-                    ></div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Current Plan</div>
-                  <div className="text-2xl font-bold capitalize">
-                    {usageAnalytics.subscription.plan}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {usageAnalytics.subscription.status}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )}
+
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {Object.entries(SUBSCRIPTION_PLANS).map(([planId, plan]) => (
             <Card 
               key={planId} 
-              className={`relative ${planId === 'pro' ? 'border-blue-500 shadow-lg scale-105' : ''} ${
-                isCurrentPlan(planId) ? 'ring-2 ring-green-500' : ''
-              }`}
+              className={`relative ${planId === 'pro' ? 'border-blue-500 shadow-lg scale-105' : ''}`}
             >
               <CardHeader className="text-center">
                 {getPlanBadge(planId)}
@@ -186,33 +99,21 @@ export default function PricingPage() {
                   ))}
                 </ul>
                 
-                {isCurrentPlan(planId) ? (
-                  <Button className="w-full" disabled>
-                    Current Plan
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={() => handleUpgrade(plan.id)}
-                    disabled={upgradeLoading === plan.id}
-                    className="w-full"
-                    variant={plan.id === 'pro' ? 'default' : 'outline'}
-                  >
-                    {upgradeLoading === plan.id ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : (
-                      planId === 'basic' ? 'Downgrade' : 'Upgrade Now')}
-                  </Button>
-                )}
+                <Button 
+                  onClick={() => handleUpgrade(plan.id)}
+                  disabled={upgradeLoading === plan.id}
+                  className="w-full"
+                  variant={plan.id === 'pro' ? 'default' : 'outline'}
+                >
+                  {upgradeLoading === plan.id ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Processing...
+                    </div>
+                  ) : (
+                    planId === 'basic' ? 'Start Free' : 'Upgrade Now')}
+                </Button>
               </CardContent>
-              
-              {isCurrentPlan(planId) && (
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500">Current Plan</Badge>
-                </div>
-              )}
             </Card>
           ))}
         </div>
