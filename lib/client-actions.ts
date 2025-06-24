@@ -3,7 +3,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { checkUsageLimit } from './subscription-utils'
+import { checkUsageLimit, trackUsageEvent } from './subscription-utils'
+import { logger } from './logger'
 
 export interface ClientData {
   name: string
@@ -48,10 +49,18 @@ export async function createClient(data: ClientFormData) {
       },
     })
 
+    // Track client creation usage
+    await trackUsageEvent(userId, 'client_creation', client.id, {
+      clientName: client.name,
+      language: client.documentsLanguage
+    })
+
+
+
     revalidatePath('/clients')
     return { success: true, client }
   } catch (error) {
-    console.error('Error creating client:', error)
+    logger.error('Error creating client', error as Error, { userId })
     throw new Error('Failed to create client')
   }
 }

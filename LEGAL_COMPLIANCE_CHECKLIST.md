@@ -101,7 +101,7 @@
 ### **Email Addresses to Set Up:**
 - [ ] privacy@aimarketingassistant.com
 - [ ] dpo@aimarketingassistant.com  
-- [ ] legal@aimarketingassistant.com
+- [ ] falguerasaleix@gmail.com
 - [ ] support@aimarketingassistant.com
 - [ ] security@aimarketingassistant.com
 - [ ] compliance@aimarketingassistant.com

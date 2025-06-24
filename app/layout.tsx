@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { CookieBanner } from "@/components/ui/cookie-banner"
+import { ConsentManager } from "@/components/ui/consent-manager"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -38,6 +39,7 @@ export default function RootLayout({
             <TooltipProvider>
               {children}
               <Toaster />
+              <ConsentManager />
               <CookieBanner />
             </TooltipProvider>
           </ThemeProvider>

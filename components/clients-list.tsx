@@ -8,21 +8,37 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Plus, Edit, Trash2, User, FileText, Grid, List, ChevronLeft, ChevronRight, Globe } from 'lucide-react'
 import { deleteClient } from '@/lib/client-actions'
 import { useToast } from '@/hooks/use-toast'
+import { ClientUsageIndicator } from '@/components/ui/client-usage-indicator'
+
+interface UsageInfo {
+  clients: {
+    allowed: boolean
+    limit: number | 'unlimited'
+    used: number
+    remaining: number | 'unlimited'
+  }
+  [key: string]: any
+}
 
 interface ClientsListProps {
   clients: any[]
+  usageInfo: UsageInfo | null
   onEditClient: (client: any) => void
   onAddClient: () => void
   onRefresh: () => void
   onViewDocuments: (client: any) => void
 }
 
-export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
+
+
+export function ClientsList({ clients, usageInfo, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [currentPage, setCurrentPage] = useState(1)
+
+
   const itemsPerPage = 12
 
   // Available languages for document generation
@@ -52,6 +68,8 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
       setViewMode(savedViewMode)
     }
   }, [])
+
+
 
   // Save view preference whenever it changes
   const handleViewModeChange = (newViewMode: 'grid' | 'table') => {
@@ -95,6 +113,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
         title: 'Success',
         description: 'Client deleted successfully',
       })
+
       onRefresh()
     } catch (error) {
       toast({
@@ -107,7 +126,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
     }
   }
 
-
+  // Note: Client limit checking is now handled in the parent component when the button is clicked
 
   const renderGridView = () => (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -396,6 +415,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <ClientUsageIndicator usageInfo={usageInfo} />
           {/* View Toggle */}
           <div className="flex border border-gray-200 dark:border-gray-700 rounded-lg p-1">
             <Button
@@ -415,15 +435,12 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
               <List className="h-4 w-4" />
             </Button>
           </div>
-          <Button onClick={onAddClient} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-            <Plus className="h-4 w-4" />
-            Add Client
-          </Button>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative">
+      {/* Search with Add Client Button */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           placeholder="Search clients by name or email..."
@@ -431,6 +448,15 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
         />
+        </div>
+        <Button 
+          onClick={onAddClient} 
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          title="Add a new client"
+        >
+          <Plus className="h-4 w-4" />
+          Add Client
+        </Button>
       </div>
 
       {/* Clients Display */}
@@ -450,7 +476,11 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
               }
             </p>
             {!searchTerm && (
-              <Button onClick={onAddClient} className="mt-4 bg-blue-600 hover:bg-blue-700 text-white">
+              <Button 
+                onClick={onAddClient} 
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                title="Add your first client"
+              >
                 Add Your First Client
               </Button>
             )}

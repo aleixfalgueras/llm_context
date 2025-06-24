@@ -1,5 +1,9 @@
 import { prisma } from './prisma'
 
+// Current policy versions - update these when you change Terms/Privacy Policy
+export const CURRENT_TERMS_VERSION = '1.0'
+export const CURRENT_PRIVACY_VERSION = '1.0'
+
 export interface ConsentData {
   dataProcessing: boolean
   analytics: boolean
@@ -75,8 +79,8 @@ export async function saveUserConsent(
         marketing: consentData.marketing,
         agreedToTerms: consentData.agreedToTerms,
         agreedToPrivacy: consentData.agreedToPrivacy,
-        termsVersion: consentData.termsVersion || '1.0',
-        privacyVersion: consentData.privacyVersion || '1.0',
+        termsVersion: consentData.termsVersion || CURRENT_TERMS_VERSION,
+        privacyVersion: consentData.privacyVersion || CURRENT_PRIVACY_VERSION,
         cookiesNecessary: true, // Always true
         cookiesAnalytics: consentData.cookiesAnalytics,
         cookiesMarketing: consentData.cookiesMarketing,
@@ -91,8 +95,8 @@ export async function saveUserConsent(
         marketing: consentData.marketing,
         agreedToTerms: consentData.agreedToTerms,
         agreedToPrivacy: consentData.agreedToPrivacy,
-        termsVersion: consentData.termsVersion || existingConsent?.termsVersion || '1.0',
-        privacyVersion: consentData.privacyVersion || existingConsent?.privacyVersion || '1.0',
+        termsVersion: consentData.termsVersion || CURRENT_TERMS_VERSION,
+        privacyVersion: consentData.privacyVersion || CURRENT_PRIVACY_VERSION,
         cookiesAnalytics: consentData.cookiesAnalytics,
         cookiesMarketing: consentData.cookiesMarketing,
         cookiesFunctional: consentData.cookiesFunctional,
@@ -306,5 +310,26 @@ export async function getDeletionRequestHistory(userId: string) {
   } catch (error) {
     console.error('Error fetching deletion request history:', error)
     return []
+  }
+}
+
+// Check if user consent is current with latest policy versions
+export async function hasCurrentConsent(userId: string): Promise<boolean> {
+  try {
+    const consent = await getUserConsent(userId)
+    
+    if (!consent || consent.withdrawnAt) {
+      return false
+    }
+
+    // Check if user has agreed to current versions
+    const hasCurrentTerms = consent.agreedToTerms && consent.termsVersion === CURRENT_TERMS_VERSION
+    const hasCurrentPrivacy = consent.agreedToPrivacy && consent.privacyVersion === CURRENT_PRIVACY_VERSION
+    const hasRequiredConsent = consent.dataProcessing
+
+    return hasCurrentTerms && hasCurrentPrivacy && hasRequiredConsent
+  } catch (error) {
+    console.error('Error checking current consent:', error)
+    return false
   }
 } 

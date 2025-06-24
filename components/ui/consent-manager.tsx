@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Shield, FileText, Mail, BarChart3, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { CURRENT_TERMS_VERSION, CURRENT_PRIVACY_VERSION } from '@/lib/consent-utils'
 
 interface ConsentData {
   dataProcessing: boolean
@@ -15,28 +16,86 @@ interface ConsentData {
   agreedToTerms: boolean
   agreedToPrivacy: boolean
   timestamp: string
+  termsVersion: string
+  privacyVersion: string
 }
 
 export function ConsentManager() {
   const [isVisible, setIsVisible] = useState(false)
   const [consent, setConsent] = useState<ConsentData>({
-    dataProcessing: false,
+    dataProcessing: true, // Pre-selected since it's required
     analytics: false,
     marketing: false,
     agreedToTerms: false,
     agreedToPrivacy: false,
-    timestamp: ''
+    timestamp: '',
+    termsVersion: CURRENT_TERMS_VERSION,
+    privacyVersion: CURRENT_PRIVACY_VERSION
   })
 
   useEffect(() => {
-    // Check if user needs to provide consent
-    const savedConsent = localStorage.getItem('user-consent')
-    const hasValidConsent = savedConsent && JSON.parse(savedConsent).dataProcessing && JSON.parse(savedConsent).agreedToTerms
-
-    if (!hasValidConsent) {
-      const timer = setTimeout(() => setIsVisible(true), 2000)
-      return () => clearTimeout(timer)
+    // Don't show consent dialog on public/informational pages and auth pages
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+    const isPublicPage = ['/', '/terms', '/privacy', '/privacy/cookies', '/privacy/settings'].includes(currentPath)
+    const isAuthPage = currentPath.startsWith('/sign-in') || currentPath.startsWith('/sign-up')
+    
+    if (isPublicPage || isAuthPage) {
+      return // Don't show consent on public pages or during authentication
     }
+
+    const checkConsentStatus = async () => {
+      try {
+        // First check localStorage for immediate response (avoid API call)
+        const savedConsent = localStorage.getItem('user-consent')
+        if (savedConsent) {
+          const consent = JSON.parse(savedConsent)
+          // Check if local storage has current version consent
+          const hasCurrentTerms = consent.agreedToTerms && consent.termsVersion === CURRENT_TERMS_VERSION
+          const hasCurrentPrivacy = consent.agreedToPrivacy && consent.privacyVersion === CURRENT_PRIVACY_VERSION
+          
+          if (consent.dataProcessing && hasCurrentTerms && hasCurrentPrivacy) {
+            return // Valid current version consent exists in localStorage
+          }
+        }
+
+        // Only call API if localStorage doesn't have valid consent
+        const response = await fetch('/api/consent', {
+          method: 'GET',
+        })
+        
+        if (response.ok) {
+          const consentData = await response.json()
+          // Check if user has current version consent (not just any consent)
+          const hasCurrentTerms = consentData.agreedToTerms && consentData.termsVersion === CURRENT_TERMS_VERSION
+          const hasCurrentPrivacy = consentData.agreedToPrivacy && consentData.privacyVersion === CURRENT_PRIVACY_VERSION
+          const hasRequiredConsent = consentData.dataProcessing
+
+          if (hasCurrentTerms && hasCurrentPrivacy && hasRequiredConsent && !consentData.withdrawnAt) {
+            // Save to localStorage for future page loads
+            localStorage.setItem('user-consent', JSON.stringify({
+              dataProcessing: true,
+              agreedToTerms: true,
+              agreedToPrivacy: true,
+              timestamp: new Date().toISOString(),
+              termsVersion: CURRENT_TERMS_VERSION,
+              privacyVersion: CURRENT_PRIVACY_VERSION
+            }))
+            return // Valid current consent exists
+          }
+        }
+        
+        // Show consent dialog after a delay
+        const timer = setTimeout(() => setIsVisible(true), 2000)
+        return () => clearTimeout(timer)
+      } catch (error) {
+        // If API fails, show consent to be safe (GDPR compliance)
+        console.log('Consent check failed, showing consent dialog:', error)
+        const timer = setTimeout(() => setIsVisible(true), 2000)
+        return () => clearTimeout(timer)
+      }
+    }
+
+    checkConsentStatus()
   }, [])
 
   const saveConsent = async () => {
@@ -59,8 +118,8 @@ export function ConsentManager() {
           cookiesAnalytics: consent.analytics, // Map to cookies for consistency
           cookiesMarketing: consent.marketing,
           cookiesFunctional: false, // Default for now
-          termsVersion: '1.0',
-          privacyVersion: '1.0'
+          termsVersion: CURRENT_TERMS_VERSION,
+          privacyVersion: CURRENT_PRIVACY_VERSION
         }),
       })
 
@@ -68,7 +127,9 @@ export function ConsentManager() {
         // Also save to localStorage for immediate UI updates
         localStorage.setItem('user-consent', JSON.stringify({
           ...consent,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          termsVersion: CURRENT_TERMS_VERSION,
+          privacyVersion: CURRENT_PRIVACY_VERSION
         }))
         setIsVisible(false)
       } else {
@@ -176,7 +237,7 @@ export function ConsentManager() {
               />
               <label className="text-sm">
                 I agree to the{' '}
-                <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
+                <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Terms of Service
                 </Link>
                 <span className="text-red-500 ml-1">*</span>
@@ -190,7 +251,7 @@ export function ConsentManager() {
               />
               <label className="text-sm">
                 I have read and understood the{' '}
-                <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
+                <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Privacy Policy
                 </Link>
                 <span className="text-red-500 ml-1">*</span>
