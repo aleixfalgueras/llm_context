@@ -17,21 +17,17 @@ interface UserSubscription {
 interface UsageAnalytics {
   subscription: UserSubscription
   limits: {
-    conversations: number
     documents: number
     clients: number
-    prompts: number
     tokens: number
     cost: number
   }
   usage: {
-    conversations: number
     documents: number
-    prompts: number
     estimatedCost: number
     tokensUsed: number
   }
-  planDetails: typeof SUBSCRIPTION_PLANS.free
+  planDetails: typeof SUBSCRIPTION_PLANS.basic
 }
 
 export default function PricingPage() {
@@ -85,7 +81,7 @@ export default function PricingPage() {
 
   const getPlanIcon = (planId: string) => {
     switch (planId) {
-      case 'free': return <ZapIcon className="h-6 w-6" />
+      case 'basic': return <ZapIcon className="h-6 w-6" />
       case 'pro': return <StarIcon className="h-6 w-6" />
       case 'business': return <CrownIcon className="h-6 w-6" />
       default: return <ZapIcon className="h-6 w-6" />
@@ -115,8 +111,8 @@ export default function PricingPage() {
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Scale your marketing efforts with AI-powered assistance. Start free, upgrade when you need more.
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Scale your marketing efforts with AI-powered assistance. Start with our Basic plan (first month free), upgrade when you need more.
           </p>
         </div>
 
@@ -124,25 +120,7 @@ export default function PricingPage() {
         {usageAnalytics && !loading && (
           <div className="mb-12">
             <h2 className="text-2xl font-semibold text-center mb-6">Your Current Usage</h2>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 max-w-6xl mx-auto">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Conversations</div>
-                  <div className="text-2xl font-bold">
-                    {usageAnalytics.usage.conversations}
-                    {usageAnalytics.limits.conversations !== -1 && 
-                      <span className="text-sm text-gray-500">/{usageAnalytics.limits.conversations}</span>
-                    }
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${getUsagePercentage(usageAnalytics.usage.conversations, usageAnalytics.limits.conversations)}%` }}
-                    ></div>
-                  </div>
-                </CardContent>
-              </Card>
-              
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
@@ -156,42 +134,6 @@ export default function PricingPage() {
                     <div 
                       className="bg-green-600 h-2 rounded-full" 
                       style={{ width: `${getUsagePercentage(usageAnalytics.usage.documents, usageAnalytics.limits.documents)}%` }}
-                    ></div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Tokens Used</div>
-                  <div className="text-2xl font-bold">
-                    {usageAnalytics.usage.tokensUsed.toLocaleString()}
-                    {usageAnalytics.limits.tokens !== -1 && 
-                      <span className="text-sm text-gray-500">/{usageAnalytics.limits.tokens.toLocaleString()}</span>
-                    }
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div 
-                      className="bg-purple-600 h-2 rounded-full" 
-                      style={{ width: `${getUsagePercentage(usageAnalytics.usage.tokensUsed, usageAnalytics.limits.tokens)}%` }}
-                    ></div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">OpenAI Cost</div>
-                  <div className="text-2xl font-bold">
-                    ${usageAnalytics.usage.estimatedCost.toFixed(2)}
-                    {usageAnalytics.limits.cost !== -1 && 
-                      <span className="text-sm text-gray-500">/${usageAnalytics.limits.cost.toFixed(0)}</span>
-                    }
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div 
-                      className="bg-red-600 h-2 rounded-full" 
-                      style={{ width: `${getUsagePercentage(usageAnalytics.usage.estimatedCost, usageAnalytics.limits.cost)}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -250,13 +192,18 @@ export default function PricingPage() {
                   </Button>
                 ) : (
                   <Button 
-                    className="w-full" 
-                    onClick={() => handleUpgrade(planId)}
-                    disabled={upgradeLoading === planId}
-                    variant={planId === 'pro' ? 'default' : 'outline'}
+                    onClick={() => handleUpgrade(plan.id)}
+                    disabled={upgradeLoading === plan.id}
+                    className="w-full"
+                    variant={plan.id === 'pro' ? 'default' : 'outline'}
                   >
-                    {upgradeLoading === planId ? 'Processing...' : 
-                     planId === 'free' ? 'Downgrade' : 'Upgrade Now'}
+                    {upgradeLoading === plan.id ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      planId === 'basic' ? 'Downgrade' : 'Upgrade Now')}
                   </Button>
                 )}
               </CardContent>

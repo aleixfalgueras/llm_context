@@ -15,7 +15,7 @@ export interface UsageLimitResponse {
 // Middleware to check usage limits before API actions
 export async function enforceUsageLimit(
   request: NextRequest,
-  action: 'conversation' | 'document' | 'prompt' | 'client'
+  action: 'document' | 'client'
 ): Promise<{ allowed: boolean; response?: NextResponse; userId?: string }> {
   try {
     const { userId } = await auth()
@@ -66,7 +66,7 @@ export async function enforceUsageLimit(
 // Helper to track usage after successful API action
 export async function trackUsage(
   userId: string,
-  eventType: 'conversation' | 'document_generation' | 'prompt_usage',
+  eventType: 'document_generation',
   resourceId?: string,
   metadata?: {
     tokensUsed?: number
@@ -100,14 +100,6 @@ export async function getUsageInfo(userId: string) {
 
     const plan = SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS];
 
-    // Check conversation limits
-    const conversationUsage = {
-      allowed: subscription.maxConversationsPerMonth === -1 || usage.conversationsUsed < subscription.maxConversationsPerMonth,
-      limit: subscription.maxConversationsPerMonth === -1 ? 'unlimited' as const : subscription.maxConversationsPerMonth,
-      used: usage.conversationsUsed,
-      remaining: subscription.maxConversationsPerMonth === -1 ? undefined : Math.max(0, subscription.maxConversationsPerMonth - usage.conversationsUsed)
-    };
-
     // Check document limits - use usage events to prevent bypassing limits by deleting documents
     const documentUsage = {
       allowed: subscription.maxDocumentsPerMonth === -1 || usage.documentsGenerated < subscription.maxDocumentsPerMonth,
@@ -125,19 +117,27 @@ export async function getUsageInfo(userId: string) {
       remaining: subscription.maxClients === -1 ? undefined : Math.max(0, subscription.maxClients - clientCount)
     };
 
-    // Check prompt limits 
-    const promptUsage = {
-      allowed: subscription.maxPromptsPerUser === -1 || usage.promptsUsed < subscription.maxPromptsPerUser,
-      limit: subscription.maxPromptsPerUser === -1 ? 'unlimited' as const : subscription.maxPromptsPerUser,
-      used: usage.promptsUsed,
-      remaining: subscription.maxPromptsPerUser === -1 ? undefined : Math.max(0, subscription.maxPromptsPerUser - usage.promptsUsed)
+    // Check token limits - important for actual usage tracking
+    const tokenUsage = {
+      allowed: subscription.maxTokensPerMonth === -1 || usage.tokensUsed < subscription.maxTokensPerMonth,
+      limit: subscription.maxTokensPerMonth === -1 ? 'unlimited' as const : subscription.maxTokensPerMonth,
+      used: usage.tokensUsed,
+      remaining: subscription.maxTokensPerMonth === -1 ? undefined : Math.max(0, subscription.maxTokensPerMonth - usage.tokensUsed)
+    };
+
+    // Check cost limits
+    const costUsage = {
+      allowed: subscription.maxCostPerMonth === -1 || usage.estimatedCost < subscription.maxCostPerMonth,
+      limit: subscription.maxCostPerMonth === -1 ? 'unlimited' as const : subscription.maxCostPerMonth,
+      used: usage.estimatedCost,
+      remaining: subscription.maxCostPerMonth === -1 ? undefined : Math.max(0, subscription.maxCostPerMonth - usage.estimatedCost)
     };
 
     return {
-      conversations: conversationUsage,
       documents: documentUsage,
       clients: clientUsage,
-      prompts: promptUsage
+      tokens: tokenUsage,
+      cost: costUsage
     }
   } catch (error) {
     console.error('Error getting usage info:', error)

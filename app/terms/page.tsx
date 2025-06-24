@@ -178,11 +178,12 @@ export default function TermsOfServicePage() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Free Trial</h4>
+                  <h4 className="font-semibold mb-2">Free Month Promotion</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Free trial periods are subject to usage limitations</li>
-                    <li>Credit card required for trial activation</li>
-                    <li>Cancel before trial ends to avoid charges</li>
+                    <li>Basic plan includes first month free promotion</li>
+                    <li>Free month is subject to Basic plan usage limitations</li>
+                    <li>Credit card required for account activation</li>
+                    <li>Cancel before second month to avoid charges</li>
                   </ul>
                 </div>
               </CardContent>

@@ -3,14 +3,12 @@ import { logger, withTiming } from './logger'
 
 // Subscription Plans Configuration
 export const SUBSCRIPTION_PLANS = {
-  free: {
-    id: 'free',
-    name: 'Free',
-    price: 0,
+  basic: {
+    id: 'basic',
+    name: 'Basic',
+    price: 9,
     currency: 'EUR',
-    maxConversationsPerMonth: 50,
     maxClients: 3,
-    maxPromptsPerUser: 10,
     maxDocumentsPerMonth: 20,
     maxTokensPerMonth: 100000,        // 100K tokens (~75 pages of text
     maxCostPerMonth: 2.00,            // $2 OpenAI spending limit
@@ -20,16 +18,16 @@ export const SUBSCRIPTION_PLANS = {
       canAccessPrioritySupport: false,
       canAccessCustomBranding: false,
     },
-    description: 'Perfect for trying out AI marketing assistance',
+    description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
-      '50 AI conversations per month',
+      'First month FREE',
       '100K tokens (~75 pages of content)',
       '$2 OpenAI usage limit',
       '3 client profiles',
-      '10 custom prompts',
       '20 documents per month',
+      'Unlimited custom prompts',
       'Basic AI services',
-      'Community support'
+      'Email support'
     ]
   },
   pro: {
@@ -37,9 +35,7 @@ export const SUBSCRIPTION_PLANS = {
     name: 'Pro',
     price: 15,
     currency: 'EUR',
-    maxConversationsPerMonth: 500,
     maxClients: -1, // unlimited
-    maxPromptsPerUser: -1, // unlimited
     maxDocumentsPerMonth: 200,
     maxTokensPerMonth: 2000000,       // 2M tokens (~1,500 pages of text)
     maxCostPerMonth: 25.00,           // $25 OpenAI spending limit
@@ -51,7 +47,6 @@ export const SUBSCRIPTION_PLANS = {
     },
     description: 'For marketing professionals scaling their business',
     features_list: [
-      '500 AI conversations per month',
       '2M tokens (~1,500 pages of content)',
       '$25 OpenAI usage limit',
       'Unlimited client profiles',
@@ -59,7 +54,7 @@ export const SUBSCRIPTION_PLANS = {
       '200 documents per month',
       'All AI services',
       'Premium prompt templates',
-      'Email support'
+      'Priority email support'
     ]
   },
   business: {
@@ -67,9 +62,7 @@ export const SUBSCRIPTION_PLANS = {
     name: 'Business',
     price: 39,
     currency: 'EUR',
-    maxConversationsPerMonth: -1, // unlimited
     maxClients: -1, // unlimited
-    maxPromptsPerUser: -1, // unlimited
     maxDocumentsPerMonth: -1, // unlimited
     maxTokensPerMonth: -1,            // unlimited tokens
     maxCostPerMonth: -1,              // unlimited OpenAI spending
@@ -81,7 +74,6 @@ export const SUBSCRIPTION_PLANS = {
     },
     description: 'For agencies and teams with advanced needs',
     features_list: [
-      'Unlimited AI conversations',
       'Unlimited tokens & OpenAI usage',
       'Unlimited client profiles',
       'Unlimited custom prompts',
@@ -109,9 +101,9 @@ export async function getUserSubscription(userId: string) {
       where: { userId }
     })
 
-    // Create default free subscription if none exists using upsert to prevent race conditions
+    // Create default basic subscription if none exists using upsert to prevent race conditions
     if (!subscription) {
-      logger.info('Creating new user subscription', { userId, metadata: { plan: 'free' } });
+      logger.info('Creating new user subscription', { userId, metadata: { plan: 'basic' } });
       
       const now = new Date()
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
@@ -124,20 +116,18 @@ export async function getUserSubscription(userId: string) {
           update: {}, // Don't update if exists
           create: {
             userId,
-            plan: 'free',
+            plan: 'basic',
             status: 'active',
             currentPeriodStart: now,
             currentPeriodEnd: periodEnd,
-            maxConversationsPerMonth: SUBSCRIPTION_PLANS.free.maxConversationsPerMonth,
-            maxClients: SUBSCRIPTION_PLANS.free.maxClients,
-            maxPromptsPerUser: SUBSCRIPTION_PLANS.free.maxPromptsPerUser,
-            maxDocumentsPerMonth: SUBSCRIPTION_PLANS.free.maxDocumentsPerMonth,
-            maxTokensPerMonth: SUBSCRIPTION_PLANS.free.maxTokensPerMonth,
-            maxCostPerMonth: SUBSCRIPTION_PLANS.free.maxCostPerMonth,
-            canAccessPremiumPrompts: SUBSCRIPTION_PLANS.free.features.canAccessPremiumPrompts,
-            canAccessTeamFeatures: SUBSCRIPTION_PLANS.free.features.canAccessTeamFeatures,
-            canAccessPrioritySupport: SUBSCRIPTION_PLANS.free.features.canAccessPrioritySupport,
-            canAccessCustomBranding: SUBSCRIPTION_PLANS.free.features.canAccessCustomBranding,
+            maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
+            maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
+            maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
+            maxCostPerMonth: SUBSCRIPTION_PLANS.basic.maxCostPerMonth,
+            canAccessPremiumPrompts: SUBSCRIPTION_PLANS.basic.features.canAccessPremiumPrompts,
+            canAccessTeamFeatures: SUBSCRIPTION_PLANS.basic.features.canAccessTeamFeatures,
+            canAccessPrioritySupport: SUBSCRIPTION_PLANS.basic.features.canAccessPrioritySupport,
+            canAccessCustomBranding: SUBSCRIPTION_PLANS.basic.features.canAccessCustomBranding,
           }
         }),
         { userId },
@@ -201,9 +191,7 @@ export async function getCurrentMonthUsage(userId: string) {
             userId,
             year,
             month,
-            conversationsUsed: 0,
             documentsGenerated: 0,
-            promptsUsed: 0,
             estimatedCost: 0,
             tokensUsed: 0,
           }
@@ -229,8 +217,8 @@ export async function getCurrentMonthUsage(userId: string) {
   }
 }
 
-// Check if user can perform action based on their plan limits
-export async function checkUsageLimit(userId: string, action: 'conversation' | 'document' | 'prompt' | 'client') {
+// Check usage limits for different actions
+export async function checkUsageLimit(userId: string, action: 'document' | 'client') {
   const endTiming = logger.startTiming('Check Usage Limit', { userId });
   
   try {
@@ -246,56 +234,6 @@ export async function checkUsageLimit(userId: string, action: 'conversation' | '
     const plan = SUBSCRIPTION_PLANS[subscription.plan as PlanId]
 
     switch (action) {
-      case 'conversation':
-        // Check conversation count limit
-        const maxConversations = subscription.maxConversationsPerMonth
-        if (maxConversations !== -1 && usage.conversationsUsed >= maxConversations) {
-          return {
-            allowed: false,
-            limit: maxConversations,
-            used: usage.conversationsUsed,
-            remaining: 0,
-            limitType: 'conversations'
-          }
-        }
-        
-        // Check token limit
-        const maxTokens = subscription.maxTokensPerMonth
-        if (maxTokens !== -1 && usage.tokensUsed >= maxTokens) {
-          return {
-            allowed: false,
-            limit: maxTokens,
-            used: usage.tokensUsed,
-            remaining: 0,
-            limitType: 'tokens'
-          }
-        }
-        
-        // Check cost limit
-        const maxCost = subscription.maxCostPerMonth
-        if (maxCost !== -1 && usage.estimatedCost >= maxCost) {
-          return {
-            allowed: false,
-            limit: maxCost,
-            used: usage.estimatedCost,
-            remaining: 0,
-            limitType: 'cost'
-          }
-        }
-        
-        // All limits passed
-        return {
-          allowed: true,
-          limit: maxConversations === -1 ? 'unlimited' : maxConversations,
-          used: usage.conversationsUsed,
-          remaining: maxConversations === -1 ? 'unlimited' : maxConversations - usage.conversationsUsed,
-          limitType: 'conversations',
-          additionalUsage: {
-            tokens: { used: usage.tokensUsed, limit: maxTokens, remaining: maxTokens === -1 ? 'unlimited' : maxTokens - usage.tokensUsed },
-            cost: { used: usage.estimatedCost, limit: maxCost, remaining: maxCost === -1 ? 'unlimited' : maxCost - usage.estimatedCost }
-          }
-        }
-
       case 'document':
         // Check document count limit
         const maxDocuments = subscription.maxDocumentsPerMonth
@@ -358,18 +296,6 @@ export async function checkUsageLimit(userId: string, action: 'conversation' | '
           limitType: 'clients'
         }
 
-      case 'prompt':
-        const promptCount = await prisma.prompt.count({ where: { userId } })
-        const maxPrompts = subscription.maxPromptsPerUser
-        if (maxPrompts === -1) return { allowed: true, limit: 'unlimited', used: promptCount, limitType: 'prompts' }
-        return {
-          allowed: promptCount < maxPrompts,
-          limit: maxPrompts,
-          used: promptCount,
-          remaining: maxPrompts - promptCount,
-          limitType: 'prompts'
-        }
-
       default:
         logger.warn('Unknown action type for usage limit check', { 
           userId,
@@ -393,7 +319,7 @@ export async function checkUsageLimit(userId: string, action: 'conversation' | '
 // Track usage by updating monthly usage only (no individual events)
 export async function updateUsageTracking(
   userId: string,
-  eventType: 'conversation' | 'document_generation' | 'prompt_usage',
+  eventType: 'document_generation',
   metadata?: {
     tokensUsed?: number
     estimatedCost?: number
@@ -411,14 +337,8 @@ export async function updateUsageTracking(
     const updateData: any = {}
     
     switch (eventType) {
-      case 'conversation':
-        updateData.conversationsUsed = { increment: 1 }
-        break
       case 'document_generation':
         updateData.documentsGenerated = { increment: 1 }
-        break
-      case 'prompt_usage':
-        updateData.promptsUsed = { increment: 1 }
         break
     }
 
@@ -441,9 +361,7 @@ export async function updateUsageTracking(
         userId,
         year,
         month,
-        conversationsUsed: eventType === 'conversation' ? 1 : 0,
         documentsGenerated: eventType === 'document_generation' ? 1 : 0,
-        promptsUsed: eventType === 'prompt_usage' ? 1 : 0,
         tokensUsed: metadata?.tokensUsed || 0,
         estimatedCost: metadata?.estimatedCost || 0,
       },
@@ -480,7 +398,7 @@ export function calculateOpenAICost(model: string, inputTokens: number, outputTo
 }
 
 // Check if user has access to premium features
-export async function checkFeatureAccess(userId: string, feature: keyof typeof SUBSCRIPTION_PLANS.free.features) {
+export async function checkFeatureAccess(userId: string, feature: keyof typeof SUBSCRIPTION_PLANS.basic.features) {
   try {
     const subscription = await getUserSubscription(userId)
     const plan = SUBSCRIPTION_PLANS[subscription.plan as PlanId]
@@ -509,17 +427,13 @@ export async function getUserUsageAnalytics(userId: string) {
         currentPeriodEnd: subscription.currentPeriodEnd,
       },
       limits: {
-        conversations: subscription.maxConversationsPerMonth,
         documents: subscription.maxDocumentsPerMonth,
         clients: subscription.maxClients,
-        prompts: subscription.maxPromptsPerUser,
         tokens: subscription.maxTokensPerMonth,
         cost: subscription.maxCostPerMonth,
       },
       usage: {
-        conversations: currentUsage.conversationsUsed,
         documents: currentUsage.documentsGenerated,
-        prompts: currentUsage.promptsUsed,
         estimatedCost: currentUsage.estimatedCost,
         tokensUsed: currentUsage.tokensUsed,
       },

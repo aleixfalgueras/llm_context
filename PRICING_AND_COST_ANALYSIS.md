@@ -2,20 +2,179 @@
 
 ## 📊 Subscription Plans Overview
 
-### Free Plan - $0/month
-- **User Limits**: 50 conversations, 100K tokens, $2 OpenAI spending
-- **Features**: 3 clients, 10 prompts, 20 documents, basic AI services
-- **Target**: Trial users, small freelancers
+### Basic Plan - €9/month (First Month FREE)
+**Target**: Individual marketers, small business owners, freelancers testing AI assistance
 
-### Pro Plan - €15/month ($16.50)
-- **User Limits**: 500 conversations, 2M tokens, $25 OpenAI spending  
-- **Features**: Unlimited clients/prompts, 200 documents, premium templates
-- **Target**: Marketing professionals, small agencies
+**Limits:**
+- 100K tokens per month (~75 pages of content)
+- $2 OpenAI usage limit per month
+- 20 documents per month  
+- 3 client profiles
+- Unlimited custom prompts
 
-### Business Plan - €39/month ($42.90)
-- **User Limits**: Unlimited everything
-- **Features**: Team collaboration, priority support, custom branding, API access
-- **Target**: Large agencies, enterprise teams
+**Features:**
+- All AI services (meeting reports, custom documents, chat assistant)
+- Basic templates and prompts
+- Email support
+- Document export (PDF, Word)
+
+**Cost Analysis:**
+- Revenue: €9/month × 12 = €108/year
+- OpenAI Cost: Max $2/month = $24/year (€22/year)
+- Gross Margin: ~80%
+
+### Pro Plan - €15/month  
+**Target**: Marketing professionals, growing agencies, active content creators
+
+**Limits:**
+- 2M tokens per month (~1,500 pages of content)
+- $25 OpenAI usage limit per month
+- 200 documents per month
+- Unlimited client profiles  
+- Unlimited custom prompts
+
+**Features:**
+- All Basic features
+- Premium prompt templates
+- Priority email support
+- Advanced analytics
+- Bulk operations
+
+**Cost Analysis:**
+- Revenue: €15/month × 12 = €180/year
+- OpenAI Cost: Max $25/month = $300/year (€275/year)
+- Gross Margin: ~55-60%
+
+### Business Plan - €39/month
+**Target**: Marketing agencies, enterprise teams, high-volume users
+
+**Limits:**
+- Unlimited tokens and OpenAI usage
+- Unlimited documents per month
+- Unlimited client profiles
+- Unlimited custom prompts
+
+**Features:**
+- All Pro features
+- Team collaboration tools
+- Custom branding options
+- Priority support (24h response)
+- API access
+- Custom integrations
+
+**Cost Analysis:**
+- Revenue: €39/month × 12 = €468/year
+- OpenAI Cost: Variable, but customers paying for value
+- Target: Keep OpenAI costs under €200/user/year
+- Gross Margin: ~60-70%
+
+## Updated Limit Philosophy
+
+### Primary Restrictions (Cost-Based)
+1. **Token Limits**: Primary usage metric, directly correlates with content generation
+2. **Cost Limits**: Direct OpenAI spending caps for budget protection
+3. **Document Limits**: Output-based restrictions for service value
+
+### Secondary Restrictions (Resource-Based)  
+4. **Client Limits**: Organization tool limits, not AI-related
+
+### Removed Restrictions
+- ~~**Prompt Limits**: Eliminated - prompts are templates, not consumable resources~~
+- ~~**Conversation Limits**: Eliminated - redundant with token/cost limits~~
+
+## Business Model Rationale
+
+### Why Remove Prompt Limits?
+1. **User Experience**: Prompts are templates that improve user productivity
+2. **Cost Structure**: Prompts don't consume OpenAI resources directly
+3. **Competitive Advantage**: Unlimited prompts encourage platform adoption
+4. **Simplicity**: Reduces confusion in pricing structure
+
+### Why Focus on Token/Cost Limits?
+1. **Direct Cost Correlation**: Tokens directly map to OpenAI expenses
+2. **Predictable Budgeting**: Both users and business can predict costs
+3. **Fair Usage**: Heavy users pay more, light users pay less
+4. **Scalability**: System scales naturally with actual usage
+
+## Customer Acquisition Strategy
+
+### Basic Plan (Entry Point)
+- **Free First Month**: Removes barrier to entry
+- **Low Commitment**: €9 is accessible for most users
+- **Value Demonstration**: Sufficient limits to show platform value
+- **Natural Upgrade**: Limits encourage growth to Pro
+
+### Pro Plan (Sweet Spot)
+- **Professional Target**: Priced for marketing professionals
+- **High Value**: 20x token increase for 1.67x price increase
+- **Premium Features**: Access to advanced tools
+- **Retention Focus**: Most profitable segment
+
+### Business Plan (Enterprise)
+- **Unlimited Usage**: Removes all usage concerns
+- **Team Features**: Supports organizational needs
+- **Premium Support**: Enterprise-level service
+- **Custom Solutions**: Flexible for large customers
+
+## Competitive Analysis
+
+### Advantages Over Competitors
+1. **Transparent Pricing**: Clear limits, no hidden fees
+2. **First Month Free**: Risk-free trial period
+3. **Unlimited Prompts**: Better than competitors with prompt limits
+4. **Cost Caps**: Protected spending vs. pay-per-use models
+5. **European Focus**: €-based pricing, GDPR compliance
+
+### Market Positioning
+- **Basic**: Competitive with entry-level AI writing tools
+- **Pro**: Premium positioning vs. general AI assistants  
+- **Business**: Enterprise alternative to custom AI solutions
+
+## Revenue Projections
+
+### Conservative Estimates (Year 1)
+- **Basic Users**: 500 users × €9 × 12 = €54,000
+- **Pro Users**: 100 users × €15 × 12 = €18,000  
+- **Business Users**: 20 users × €39 × 12 = €9,360
+- **Total**: €81,360
+
+### Optimistic Estimates (Year 2)
+- **Basic Users**: 2,000 users × €9 × 12 = €216,000
+- **Pro Users**: 500 users × €15 × 12 = €90,000
+- **Business Users**: 50 users × €39 × 12 = €23,400
+- **Total**: €329,400
+
+## Cost Management
+
+### OpenAI Expenses
+- **Basic**: Max €22/user/year (capped at $2/month)
+- **Pro**: Max €275/user/year (capped at $25/month)  
+- **Business**: Target <€200/user/year (unlimited but monitored)
+
+### Infrastructure Costs
+- **Database**: Supabase Pro ~€25/month
+- **Hosting**: Vercel Pro ~€20/month
+- **Storage**: Minimal document storage costs
+- **Support**: Customer service tools and time
+
+### Target Margins
+- **Basic**: 80% gross margin (after OpenAI costs)
+- **Pro**: 60% gross margin (after OpenAI costs)
+- **Business**: 70% gross margin (after all costs)
+
+## Future Considerations
+
+### Potential Optimizations
+1. **Annual Plans**: 20% discount for annual payment
+2. **Team Discounts**: Volume pricing for Business plan
+3. **Add-ons**: Additional tokens/documents for existing plans
+4. **API Tiers**: Separate pricing for API access
+
+### Market Expansion
+1. **Localization**: Multi-language support
+2. **Integrations**: CRM, marketing tools, social media
+3. **White-label**: Custom branding for agencies
+4. **Enterprise**: Custom solutions for large organizations
 
 ---
 
@@ -56,9 +215,9 @@
 
 ## 📈 Profit Margins & Unit Economics
 
-### Free Plan Economics:
+### Basic Plan Economics:
 ```
-Revenue: $0/month
+Revenue: €9/month (€0 first month)
 Avg OpenAI Cost: $0.10/month (mixed usage)
 Infrastructure Cost: $0.05/month (hosting, DB)
 Net Loss: -$0.15/month per user
@@ -169,9 +328,9 @@ estimatedCost: $1.89/$2.00 ⚠️ ($0.11 remaining)
 
 ## 🎯 Customer Lifetime Value (CLV)
 
-### Free to Pro Conversion Funnel:
+### Basic to Pro Conversion Funnel:
 ```
-Free Users: 1,000 
+Basic Users: 1,000 
 Conversion Rate: 8%
 Pro Subscribers: 80
 Monthly Revenue: 80 × €15 = €1,200
@@ -214,7 +373,7 @@ Net CLV: €255 per converted user
 
 ### Why These Price Points?
 
-#### **Free Plan ($2 OpenAI limit)**:
+#### **Basic Plan ($2 OpenAI limit)**:
 - Allows ~300 conversations with GPT-4o-mini
 - Or ~20 document generations
 - Sufficient for meaningful trial experience

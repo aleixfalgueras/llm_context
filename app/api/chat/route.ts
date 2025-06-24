@@ -7,9 +7,11 @@ import { withAuthAndUsageCheck } from '@/lib/api-middleware'
 import { withClientAccess } from '@/lib/client-middleware'
 import { createOpenAICompletion } from '@/lib/openai-wrapper'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
+import { auth } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  const endTiming = logger.startTiming('Chat API Request');
+  const endTiming = logger.startTiming('Chat API');
   let chatId: string = '';
   
   try {
@@ -17,15 +19,13 @@ export async function POST(req: Request) {
     chatId = requestChatId;
     logger.apiRequest('POST', '/api/chat', { chatId, model });
 
-    // Use unified middleware for auth and usage checking
-    const middleware = await withAuthAndUsageCheck('conversation')
-    if (!middleware.success) {
-      logger.warn('Auth or usage check failed', { chatId });
-      return middleware.response!
+    // Authentication check only - no conversation limits, token limits will be enforced by OpenAI wrapper
+    const { userId } = await auth()
+    if (!userId) {
+      logger.warn('Authentication failed', { chatId });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userId = middleware.userId!
-    const context = createRequestContext(req, userId);
     logger.info('Chat request authenticated', { userId, chatId, model });
 
     // CLIENT CONTEXT FLOW:
@@ -149,7 +149,7 @@ export async function POST(req: Request) {
       revalidatePath('/')
     }
 
-    // Use unified OpenAI wrapper with automatic usage tracking
+    // Use unified OpenAI wrapper with automatic usage tracking (token and cost limits enforced automatically)
     logger.aiRequest(selectedModel, undefined, { userId, chatId });
     const completion = await withTiming(
       'OpenAI API Call',
@@ -160,7 +160,7 @@ export async function POST(req: Request) {
       },
       {
         userId,
-        eventType: 'conversation',
+        eventType: 'document_generation', // Track as document generation since it's content creation
         resourceId: chatId
       }
       ),

@@ -17,7 +17,6 @@ export function Navbar() {
     { name: 'Prompts', href: '/prompts', icon: '📝' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
     { name: 'AI Services', href: '/ai-services', icon: '⚡' },
-    { name: 'Pricing', href: '/pricing', icon: '💳' },
   ]
 
   // Helper function to determine if a nav item is active
@@ -81,7 +80,14 @@ export function Navbar() {
                       <p>Menu</p>
                     </TooltipContent>
                   </Tooltip>
-                  <DropdownMenuContent align="end" className="w-48">
+                  
+                  <DropdownMenuContent>
+                    <DropdownMenuItem asChild>
+                      <Link href="/pricing" className="cursor-pointer flex items-center">
+                        <span>💳</span>
+                        <span className="ml-2">Pricing</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/privacy" className="cursor-pointer flex items-center">
                         <span>Privacy Policy</span>

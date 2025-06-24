@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { checkUsageLimit } from './subscription-utils'
 import { createUsageLimitResponse } from './openai-wrapper'
+import { NextRequest, NextResponse } from 'next/server'
+import { enforceUsageLimit } from './usage-middleware'
 
 export interface ApiMiddlewareResult {
   success: boolean
@@ -8,11 +10,14 @@ export interface ApiMiddlewareResult {
   response?: Response
 }
 
+// Action types that require usage checking
+export type ActionType = 'document' | 'client'
+
 /**
  * Unified middleware for API authentication and usage enforcement
  */
 export async function withAuthAndUsageCheck(
-  action: 'conversation' | 'document' | 'prompt' | 'client'
+  action: ActionType
 ): Promise<ApiMiddlewareResult> {
   try {
     // Check authentication
@@ -27,7 +32,7 @@ export async function withAuthAndUsageCheck(
 
     // Check usage limits
     const usageCheck = await checkUsageLimit(userId, action)
-    
+
     if (!usageCheck.allowed) {
       return {
         success: false,
@@ -54,10 +59,36 @@ export async function withAuthAndUsageCheck(
 }
 
 /**
+ * Helper to track usage after successful API completion
+ */
+export async function trackApiUsage(
+  userId: string,
+  action: ActionType,
+  metadata?: Record<string, any>
+) {
+  try {
+    const { trackUsage } = await import('./usage-middleware')
+    
+    switch (action) {
+      case 'document':
+        await trackUsage(userId, 'document_generation', undefined, metadata)
+        break
+      // Note: Clients don't have usage tracking since we count actual client records
+      case 'client':
+        // No usage tracking needed - we count actual clients in database
+        break
+    }
+  } catch (error) {
+    console.error('Error tracking API usage:', error)
+    // Don't throw - usage tracking failures shouldn't break the API
+  }
+}
+
+/**
  * Wrapper for API routes that need authentication and usage checking
  */
 export function withUsageEnforcement(
-  action: 'conversation' | 'document' | 'prompt' | 'client',
+  action: ActionType,
   handler: (userId: string, request: Request) => Promise<Response>
 ) {
   return async (request: Request) => {
