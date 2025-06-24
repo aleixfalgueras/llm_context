@@ -15,14 +15,14 @@ import { UsageInfo, Client, LanguageInfo, ClientActionHandlers, PaginationInfo }
 
 interface ClientsListProps {
   clients: Client[]
-  usageInfo: UsageInfo | null
+  usageInfo?: UsageInfo | null // Optional since we no longer pre-load it
   onEditClient: (client: Client) => void
   onAddClient: () => void
   onRefresh: () => void
   onViewDocuments: (client: Client) => void
 }
 
-export function ClientsList({ clients, usageInfo, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
+export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [isDeleting, setIsDeleting] = useState<string | null>(null)

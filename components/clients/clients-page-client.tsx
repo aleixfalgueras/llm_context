@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { ClientsList } from '@/components/clients/clients-list'
 import { ClientForm } from '@/components/clients/client-form'
 import { ClientDocuments } from '@/components/clients/client-documents'
@@ -13,15 +13,7 @@ interface ClientsPageClientProps {
   clients: any[]
 }
 
-interface UsageInfo {
-  clients: {
-    allowed: boolean
-    limit: number | 'unlimited'
-    used: number
-    remaining?: number
-  }
-  [key: string]: any
-}
+// No longer need to store usage info at component level
 
 export function ClientsPageClient({ clients: initialClients }: ClientsPageClientProps) {
   const [clients, setClients] = useState(initialClients)
@@ -31,76 +23,30 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [showLimitDialog, setShowLimitDialog] = useState(false)
   const [limitMessage, setLimitMessage] = useState('')
-  const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null)
-  const hasFetched = useRef(false)
-
-  // Fetch usage info once on component mount (Strict Mode safe)
-  useEffect(() => {
-    // Prevent double API calls in React Strict Mode
-    if (hasFetched.current) return
-
-    const controller = new AbortController()
-    hasFetched.current = true
-
-    const fetchUsageInfo = async () => {
-      try {
-        const response = await fetch('/api/subscription/usage-info', {
-          // Add cache control to prevent unnecessary requests
-          headers: {
-            'Cache-Control': 'max-age=60' // Cache for 1 minute
-          },
-          signal: controller.signal // Enable request cancellation
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          if (!controller.signal.aborted) {
-            setUsageInfo(data)
-          }
-        } else {
-          console.error(`Failed to fetch usage info: ${response.status}`)
-        }
-              } catch (error) {
-          if (error instanceof Error && error.name !== 'AbortError') {
-            console.error('Error fetching usage info:', error)
-          }
-        }
-    }
-
-    fetchUsageInfo()
-
-    // Cleanup function to cancel request if component unmounts
-    return () => {
-      controller.abort()
-      hasFetched.current = false // Reset for potential remount
-    }
-  }, []) // Empty dependency array - run only once on mount
+    // No pre-loading of usage info - check only when needed
 
   const handleAddClient = async () => {
-    // Use cached usage info if available, otherwise fetch fresh
-    let currentUsageInfo = usageInfo
-    
-    if (!currentUsageInfo) {
-      try {
-        const response = await fetch('/api/subscription/usage-info')
-        if (response.ok) {
-          currentUsageInfo = await response.json()
-          setUsageInfo(currentUsageInfo)
+    // Check usage limits only when user tries to add a client
+    try {
+      const response = await fetch('/api/subscription/usage-info')
+      if (response.ok) {
+        const usageInfo = await response.json()
+        
+        // Check client limits
+        if (usageInfo?.clients && !usageInfo.clients.allowed) {
+          const limit = usageInfo.clients.limit === 'unlimited' ? 'unlimited' : usageInfo.clients.limit
+          setLimitMessage(`You've reached your client limit of ${limit}. Upgrade your plan to add more clients.`)
+          setShowLimitDialog(true)
+          return
         }
-      } catch (error) {
-        console.error('Error fetching usage info for add client:', error)
+      } else {
+        console.warn('Could not fetch usage info, proceeding with client creation')
       }
+    } catch (error) {
+      console.warn('Error fetching usage info, proceeding with client creation:', error)
     }
     
-    // Check client limits - if we can't get usage info, allow the user to proceed
-    if (currentUsageInfo?.clients && !currentUsageInfo.clients.allowed) {
-      const limit = currentUsageInfo.clients.limit === 'unlimited' ? 'unlimited' : currentUsageInfo.clients.limit
-      setLimitMessage(`You've reached your client limit of ${limit}. Upgrade your plan to add more clients.`)
-      setShowLimitDialog(true)
-      return
-    }
-    
-    // User can add clients, proceed with normal flow
+    // User can add clients (either allowed or couldn't check), proceed with normal flow
     setEditingClient(null)
     setIsDialogOpen(true)
   }
@@ -136,7 +82,6 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
     <>
       <ClientsList
         clients={clients}
-        usageInfo={usageInfo}
         onAddClient={handleAddClient}
         onEditClient={handleEditClient}
         onRefresh={handleRefresh}
