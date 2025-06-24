@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react'
 import { useChat } from '@/hooks/use-chat'
-import { ChatMessages } from './chat-messages'
-import { ChatInput } from './chat-input'
+import { ChatMessages } from '@/components/assistant/chat-messages'
+import { ChatInput } from '@/components/assistant/chat-input'
 
 interface Message {
   id: string

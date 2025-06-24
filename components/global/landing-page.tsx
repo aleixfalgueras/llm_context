@@ -3,7 +3,7 @@
 import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Users, FileText, Edit, Megaphone, Video, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { ThemeToggle } from '@/components/global/theme-toggle'
 import Link from 'next/link'
 
 export function LandingPage() {

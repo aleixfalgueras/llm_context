@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Edit3 } from 'lucide-react'
-import { MeetingReportDialog } from './meeting-report-dialog'
-import { CustomDocumentGeneratorDialog } from './custom-document-generator-dialog'
-import { ClientDocuments } from './client-documents'
+import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dialog'
+import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
+import { ClientDocuments } from '@/components/clients/client-documents'
 
 interface AIServicesClientProps {
   clients: any[]

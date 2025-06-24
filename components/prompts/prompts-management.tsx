@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { PromptDialog } from '@/components/prompt-dialog'
+import { PromptDialog } from '@/components/prompts/prompt-dialog'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Search, FileText, Edit2, Trash2, Plus, TrendingUp, Eye, EyeOff, Lightbulb, Copy } from 'lucide-react'

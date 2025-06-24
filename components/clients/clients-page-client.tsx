@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ClientsList } from './clients-list'
-import { ClientForm } from './client-form'
-import { ClientDocuments } from './client-documents'
+import { ClientsList } from '@/components/clients/clients-list'
+import { ClientForm } from '@/components/clients/client-form'
+import { ClientDocuments } from '@/components/clients/client-documents'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { AlertTriangle } from 'lucide-react'
@@ -18,7 +18,7 @@ interface UsageInfo {
     allowed: boolean
     limit: number | 'unlimited'
     used: number
-    remaining: number | 'unlimited'
+    remaining?: number
   }
   [key: string]: any
 }

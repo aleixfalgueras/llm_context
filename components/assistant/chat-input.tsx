@@ -3,7 +3,7 @@
 import { Send, Loader2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { PromptSelector } from '@/components/prompt-selector'
+import { PromptSelector } from '@/components/prompts/prompt-selector'
 import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'

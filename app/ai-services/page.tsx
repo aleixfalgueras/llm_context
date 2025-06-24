@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { AIServicesClient } from '@/components/ai-services-client'
-import { Navbar } from '@/components/navbar'
+import { AIServicesClient } from '@/components/ai-services/ai-services-client'
+import { Navbar } from '@/components/global/navbar'
 import { getClients } from '@/lib/client-actions'
 
 export default async function AIServicesPage() {

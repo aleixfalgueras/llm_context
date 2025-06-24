@@ -1,4 +1,4 @@
-import { Navbar } from '@/components/navbar'
+import { Navbar } from '@/components/global/navbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { ArrowLeft, Shield, Eye, Lock, Database, Users, Mail, FileText } from 'lucide-react'

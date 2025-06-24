@@ -1,8 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { getClients } from '@/lib/client-actions'
-import { ClientsPageClient } from '@/components/clients-page-client'
-import { Navbar } from '@/components/navbar'
+import { ClientsPageClient } from '@/components/clients/clients-page-client'
+import { Navbar } from '@/components/global/navbar'
 
 export default async function ClientsPage() {
   const { userId } = await auth()
