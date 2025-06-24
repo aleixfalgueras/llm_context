@@ -1,0 +1,151 @@
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DateInput } from '@/components/ui/date-input'
+import { Plus, Eye, X } from 'lucide-react'
+import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
+
+interface DocumentCreationFormProps {
+  documentName: string
+  documentContent: string
+  documentType: string
+  startDate: string
+  endDate: string
+  isCreating: boolean
+  onNameChange: (name: string) => void
+  onContentChange: (content: string) => void
+  onTypeChange: (type: string) => void
+  onStartDateChange: (date: string) => void
+  onEndDateChange: (date: string) => void
+  onCreate: () => void
+  onCancel: () => void
+  onPreview: () => void
+}
+
+export function DocumentCreationForm({
+  documentName,
+  documentContent,
+  documentType,
+  startDate,
+  endDate,
+  isCreating,
+  onNameChange,
+  onContentChange,
+  onTypeChange,
+  onStartDateChange,
+  onEndDateChange,
+  onCreate,
+  onCancel,
+  onPreview
+}: DocumentCreationFormProps) {
+  if (!isCreating) {
+    return null
+  }
+
+  return (
+    <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-950/10">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Plus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          Create New Document
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Document Name */}
+        <div className="space-y-2">
+          <Label htmlFor="newDocName">Document Name *</Label>
+          <Input
+            id="newDocName"
+            placeholder="Enter document name"
+            value={documentName}
+            onChange={(e) => onNameChange(e.target.value)}
+          />
+        </div>
+
+        {/* Document Type */}
+        <div className="space-y-2">
+          <Label htmlFor="newDocType">Document Type *</Label>
+          <Select value={documentType} onValueChange={onTypeChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select document type" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.values(DOCUMENT_TYPES).map((type: string) => (
+                <SelectItem key={type} value={type}>
+                  {getDocumentTypeLabel(type as DocumentType)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Date Range (Optional) */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="startDate">Start Date</Label>
+            <DateInput
+              id="startDate"
+              value={startDate}
+              onChange={onStartDateChange}
+              placeholder="Select start date"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="endDate">End Date</Label>
+            <DateInput
+              id="endDate"
+              value={endDate}
+              onChange={onEndDateChange}
+              placeholder="Select end date"
+            />
+          </div>
+        </div>
+
+        {/* Document Content */}
+        <div className="space-y-2">
+          <Label htmlFor="newDocContent">Content *</Label>
+          <Textarea
+            id="newDocContent"
+            placeholder="Enter document content using Markdown..."
+            value={documentContent}
+            onChange={(e) => onContentChange(e.target.value)}
+            className="min-h-[200px] font-mono text-sm"
+          />
+          <p className="text-xs text-muted-foreground">
+            You can use Markdown formatting for rich text content.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={onCancel}>
+            <X className="h-4 w-4 mr-1" />
+            Cancel
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onPreview}
+            disabled={!documentName.trim() || !documentContent.trim()}
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Preview
+          </Button>
+          <Button
+            onClick={onCreate}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+            disabled={!documentName.trim() || !documentContent.trim() || !documentType}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Create Document
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+} 
