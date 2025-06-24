@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { NextRequest } from 'next/server'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
+import { trackUsageEvent, checkUsageLimit } from '@/lib/subscription-utils'
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'
@@ -79,6 +80,13 @@ export async function POST(request: Request) {
       return new Response('Name and content are required', { status: 400 })
     }
 
+    // Check usage limits before creating prompt
+    const usageCheck = await checkUsageLimit(userId, 'prompt')
+    if (!usageCheck.allowed) {
+      logger.warn('Prompt creation blocked due to usage limit', { userId, metadata: { usageLimit: usageCheck.limit } });
+      return new Response(`You've reached your prompt limit of ${usageCheck.limit}. Upgrade your plan to create more prompts.`, { status: 403 })
+    }
+
 
 
     logger.dbQuery('create', 'prompt', { userId });
@@ -96,7 +104,16 @@ export async function POST(request: Request) {
       { userId }
     );
 
-
+    // Track usage event for prompt creation
+    try {
+      await trackUsageEvent(userId, 'prompt_usage', prompt.id, {
+        promptName: prompt.name,
+        category: prompt.category
+      })
+    } catch (error) {
+      logger.error('Error tracking prompt creation usage', error as Error, { userId })
+      // Don't fail the prompt creation if usage tracking fails
+    }
 
     logger.apiResponse('POST', '/api/prompts', 201, { userId });
     endTiming();
