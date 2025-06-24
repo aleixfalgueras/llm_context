@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Edit, Save, X, Eye } from 'lucide-react'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
+import { getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
 interface Document {
   id: string
@@ -74,7 +75,7 @@ export function DocumentViewer({
           ) : (
             <div>
               <h2 className="text-lg font-semibold">{document.documentName}</h2>
-              <p className="text-sm text-muted-foreground">{document.documentType}</p>
+              <p className="text-sm text-muted-foreground">{getDocumentTypeLabel(document.documentType as DocumentType)}</p>
             </div>
           )}
         </div>
