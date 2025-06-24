@@ -16,7 +16,7 @@ const nextConfig = {
   },
   // Production optimizations
   poweredByHeader: false,
-  reactStrictMode: true,
+  reactStrictMode: true, // Re-enabled with proper effect protection
 };
 
 export default nextConfig;
