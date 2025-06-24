@@ -5,7 +5,6 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { CookieBanner } from "@/components/ui/cookie-banner"
 import { ConsentManager } from "@/components/ui/consent-manager"
 
 const geistSans = localFont({
@@ -30,7 +29,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+    >
       <html lang="en-GB" suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -40,7 +42,6 @@ export default function RootLayout({
               {children}
               <Toaster />
               <ConsentManager />
-              <CookieBanner />
             </TooltipProvider>
           </ThemeProvider>
         </body>
