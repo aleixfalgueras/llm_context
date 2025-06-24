@@ -8,6 +8,7 @@ import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
 import { useState, useEffect, useRef } from 'react'
+import { clientLogger, withClientTiming } from '@/lib/client-logger'
 
 interface Prompt {
   id: string
@@ -66,12 +67,27 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value)
     autoResize()
+    clientLogger.messageInput(e.target.value.length, { 
+      chatId,
+      component: 'ChatInput'
+    });
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
+      clientLogger.userInteraction('Submit message', { 
+        chatId,
+        component: 'ChatInput',
+        metadata: { messageLength: input.trim().length, model: selectedModel }
+      });
       sendMessage(input, selectedModel)
+    } else {
+      clientLogger.warn('Submit attempted with invalid conditions', { 
+        chatId,
+        component: 'ChatInput',
+        metadata: { hasInput: !!input.trim(), isLoading }
+      });
     }
   }
 
@@ -83,6 +99,12 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
   }
 
   const handlePromptSelect = (prompt: Prompt) => {
+    clientLogger.promptSelected(prompt.name, { 
+      chatId,
+      component: 'ChatInput',
+      metadata: { promptId: prompt.id, category: prompt.category }
+    });
+
     // Replace variables with client data if available using shared utility
     const processedContent = clientData 
       ? replaceClientVariables(prompt.content, clientData)
@@ -94,10 +116,25 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
       : processedContent
 
     setInput(newInput)
+    clientLogger.debug('Prompt content added to input', { 
+      chatId,
+      component: 'ChatInput',
+      metadata: { finalLength: newInput.length, hasVariables: !!clientData }
+    });
   }
 
   const handleExportChat = async () => {
     if (!clientData?.id || !messages.length || !chatTitle) {
+      clientLogger.warn('Export attempted with missing requirements', { 
+        chatId,
+        component: 'ChatInput',
+        metadata: { 
+          hasClientId: !!clientData?.id, 
+          hasMessages: !!messages.length, 
+          hasChatTitle: !!chatTitle 
+        }
+      });
+      
       toast({
         title: 'Export Not Available',
         description: 'Cannot export chat without client association and messages.',
@@ -106,10 +143,26 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
       return
     }
 
+    clientLogger.exportInitiated('chat', { 
+      chatId,
+      clientId: clientData.id,
+      component: 'ChatInput',
+      metadata: { messageCount: messages.length, chatTitle }
+    });
+
     setIsExporting(true)
     try {
       // Format messages for export
-      const chatContent = formatChatForExport(messages, chatTitle, clientData)
+      const chatContent = await withClientTiming(
+        'Format chat for export',
+        () => formatChatForExport(messages, chatTitle, clientData),
+        { chatId, clientId: clientData.id }
+      );
+      
+      clientLogger.apiCall('POST', '/api/ai-services/save-chat-export', { 
+        chatId,
+        clientId: clientData.id
+      });
       
       const response = await fetch('/api/ai-services/save-chat-export', {
         method: 'POST',
@@ -123,11 +176,22 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
         }),
       })
 
+      clientLogger.apiResponse('POST', '/api/ai-services/save-chat-export', response.status, { 
+        chatId,
+        clientId: clientData.id
+      });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
+
+      clientLogger.exportCompleted('chat', { 
+        chatId,
+        clientId: clientData.id,
+        metadata: { documentId: data.documentId }
+      });
 
       if (onDocumentCreated && data.documentId) {
         toast({
@@ -154,7 +218,11 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
       }
 
     } catch (error) {
-      console.error('Error exporting chat:', error)
+      clientLogger.error('Error exporting chat', error as Error, { 
+        chatId,
+        clientId: clientData?.id
+      });
+      
       toast({
         title: 'Export Failed',
         description: 'Failed to export chat. Please try again.',
@@ -188,10 +256,23 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
     return content
   }
 
+  // Component lifecycle logging
+  useEffect(() => {
+    clientLogger.componentMount('ChatInput', { chatId });
+    return () => {
+      clientLogger.componentUnmount('ChatInput', { chatId });
+    };
+  }, [chatId]);
+
   // Update selected model when switching between chats
   useEffect(() => {
     setSelectedModel(lastUsedModel || 'gpt-4o-mini')
-  }, [lastUsedModel])
+    clientLogger.debug('Model selection updated', { 
+      chatId,
+      component: 'ChatInput',
+      metadata: { model: lastUsedModel || 'gpt-4o-mini' }
+    });
+  }, [lastUsedModel, chatId])
 
   // Auto-resize when input changes
   useEffect(() => {

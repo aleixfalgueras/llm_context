@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { logger, withTiming } from './logger'
 
 // Subscription Plans Configuration
 export const SUBSCRIPTION_PLANS = {
@@ -99,51 +100,74 @@ export type PlanId = keyof typeof SUBSCRIPTION_PLANS
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string) {
+  const endTiming = logger.startTiming('Get User Subscription', { userId });
+  
   try {
+    logger.dbQuery('findUnique', 'userSubscription', { userId });
+    
     let subscription = await prisma.userSubscription.findUnique({
       where: { userId }
     })
 
-    // Create default free subscription if none exists
+    // Create default free subscription if none exists using upsert to prevent race conditions
     if (!subscription) {
+      logger.info('Creating new user subscription', { userId, metadata: { plan: 'free' } });
+      
       const now = new Date()
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
       
-      subscription = await prisma.userSubscription.create({
-        data: {
-          userId,
-          plan: 'free',
-          status: 'active',
-          currentPeriodStart: now,
-          currentPeriodEnd: periodEnd,
-          maxConversationsPerMonth: SUBSCRIPTION_PLANS.free.maxConversationsPerMonth,
-          maxClients: SUBSCRIPTION_PLANS.free.maxClients,
-          maxPromptsPerUser: SUBSCRIPTION_PLANS.free.maxPromptsPerUser,
-          maxDocumentsPerMonth: SUBSCRIPTION_PLANS.free.maxDocumentsPerMonth,
-          maxTokensPerMonth: SUBSCRIPTION_PLANS.free.maxTokensPerMonth,
-          maxCostPerMonth: SUBSCRIPTION_PLANS.free.maxCostPerMonth,
-          canAccessPremiumPrompts: SUBSCRIPTION_PLANS.free.features.canAccessPremiumPrompts,
-          canAccessTeamFeatures: SUBSCRIPTION_PLANS.free.features.canAccessTeamFeatures,
-          canAccessPrioritySupport: SUBSCRIPTION_PLANS.free.features.canAccessPrioritySupport,
-          canAccessCustomBranding: SUBSCRIPTION_PLANS.free.features.canAccessCustomBranding,
-        }
-      })
+      logger.dbQuery('upsert', 'userSubscription', { userId });
+      subscription = await withTiming(
+        'Create user subscription',
+        () => prisma.userSubscription.upsert({
+          where: { userId },
+          update: {}, // Don't update if exists
+          create: {
+            userId,
+            plan: 'free',
+            status: 'active',
+            currentPeriodStart: now,
+            currentPeriodEnd: periodEnd,
+            maxConversationsPerMonth: SUBSCRIPTION_PLANS.free.maxConversationsPerMonth,
+            maxClients: SUBSCRIPTION_PLANS.free.maxClients,
+            maxPromptsPerUser: SUBSCRIPTION_PLANS.free.maxPromptsPerUser,
+            maxDocumentsPerMonth: SUBSCRIPTION_PLANS.free.maxDocumentsPerMonth,
+            maxTokensPerMonth: SUBSCRIPTION_PLANS.free.maxTokensPerMonth,
+            maxCostPerMonth: SUBSCRIPTION_PLANS.free.maxCostPerMonth,
+            canAccessPremiumPrompts: SUBSCRIPTION_PLANS.free.features.canAccessPremiumPrompts,
+            canAccessTeamFeatures: SUBSCRIPTION_PLANS.free.features.canAccessTeamFeatures,
+            canAccessPrioritySupport: SUBSCRIPTION_PLANS.free.features.canAccessPrioritySupport,
+            canAccessCustomBranding: SUBSCRIPTION_PLANS.free.features.canAccessCustomBranding,
+          }
+        }),
+        { userId },
+        500 // Database operations should be fast - warn if >500ms
+      );
+      
+
+    } else {
+
     }
 
+    endTiming();
     return subscription
   } catch (error) {
-    console.error('Error getting user subscription:', error)
+    logger.error('Error getting user subscription', error as Error, { userId });
+    endTiming();
     throw error
   }
 }
 
 // Get current month usage
 export async function getCurrentMonthUsage(userId: string) {
+  const endTiming = logger.startTiming('Get Current Month Usage', { userId });
+  
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
   try {
+    logger.dbQuery('findUnique', 'userUsage', { userId });
     let usage = await prisma.userUsage.findUnique({
       where: {
         userId_year_month: {
@@ -154,36 +178,70 @@ export async function getCurrentMonthUsage(userId: string) {
       }
     })
 
-    // Create usage record if none exists for current month
+    // Create usage record if none exists for current month using upsert to prevent race conditions
     if (!usage) {
-      usage = await prisma.userUsage.create({
-        data: {
-          userId,
-          year,
-          month,
-          conversationsUsed: 0,
-          documentsGenerated: 0,
-          promptsUsed: 0,
-          estimatedCost: 0,
-          tokensUsed: 0,
-        }
-      })
+      logger.info('Creating new user usage record', { 
+        userId,
+        metadata: { year, month }
+      });
+      
+      logger.dbQuery('upsert', 'userUsage', { userId });
+      usage = await withTiming(
+        'Create user usage record',
+        () => prisma.userUsage.upsert({
+          where: {
+            userId_year_month: {
+              userId,
+              year,
+              month
+            }
+          },
+          update: {}, // Don't update if exists
+          create: {
+            userId,
+            year,
+            month,
+            conversationsUsed: 0,
+            documentsGenerated: 0,
+            promptsUsed: 0,
+            estimatedCost: 0,
+            tokensUsed: 0,
+          }
+        }),
+        { userId },
+        500 // Database operations should be fast - warn if >500ms
+      );
+      
+
+    } else {
+
     }
 
+    endTiming();
     return usage
   } catch (error) {
-    console.error('Error getting current month usage:', error)
+    logger.error('Error getting current month usage', error as Error, { 
+      userId,
+      metadata: { year, month }
+    });
+    endTiming();
     throw error
   }
 }
 
 // Check if user can perform action based on their plan limits
 export async function checkUsageLimit(userId: string, action: 'conversation' | 'document' | 'prompt' | 'client') {
+  const endTiming = logger.startTiming('Check Usage Limit', { userId });
+  
   try {
+
+    
     const [subscription, usage] = await Promise.all([
       getUserSubscription(userId),
       getCurrentMonthUsage(userId)
     ])
+    
+
 
     const plan = SUBSCRIPTION_PLANS[subscription.plan as PlanId]
 
@@ -313,18 +371,29 @@ export async function checkUsageLimit(userId: string, action: 'conversation' | '
         }
 
       default:
+        logger.warn('Unknown action type for usage limit check', { 
+          userId,
+          metadata: { action }
+        });
+        endTiming();
         return { allowed: false, limit: 0, used: 0 }
     }
   } catch (error) {
-    console.error('Error checking usage limit:', error)
+    logger.error('Error checking usage limit', error as Error, { 
+      userId,
+      metadata: { action }
+    });
+    endTiming();
     return { allowed: false, limit: 0, used: 0 }
+  } finally {
+    endTiming();
   }
 }
 
 // Track usage event
 export async function trackUsageEvent(
   userId: string,
-  eventType: 'conversation' | 'document_generation' | 'prompt_usage',
+  eventType: 'conversation' | 'document_generation' | 'prompt_usage' | 'client_creation',
   resourceId?: string,
   metadata?: {
     tokensUsed?: number
@@ -333,7 +402,10 @@ export async function trackUsageEvent(
     [key: string]: any
   }
 ) {
+  const endTiming = logger.startTiming('Track Usage Event', { userId });
+  
   try {
+
     // Create usage event
     await prisma.usageEvent.create({
       data: {
@@ -363,6 +435,9 @@ export async function trackUsageEvent(
         break
       case 'prompt_usage':
         updateData.promptsUsed = { increment: 1 }
+        break
+      case 'client_creation':
+        updateData.clientsCreated = { increment: 1 }
         break
     }
 
@@ -394,8 +469,15 @@ export async function trackUsageEvent(
       update: updateData
     })
 
+
+    
+    endTiming();
   } catch (error) {
-    console.error('Error tracking usage event:', error)
+    logger.error('Error tracking usage event', error as Error, { 
+      userId,
+      metadata: { eventType, resourceId }
+    });
+    endTiming();
     throw error
   }
 }

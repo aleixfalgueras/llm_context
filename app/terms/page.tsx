@@ -248,7 +248,7 @@ export default function TermsOfServicePage() {
                 <div>
                   <h4 className="font-semibold mb-2">Jurisdiction</h4>
                   <p className="text-muted-foreground mb-2">
-                    These Terms are governed by the laws of [Your Jurisdiction]. Any disputes will be resolved through:
+                    These Terms are governed by the laws of Spain. Any disputes will be resolved through:
                   </p>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>First, good faith negotiation between the parties</li>
@@ -268,7 +268,7 @@ export default function TermsOfServicePage() {
                   For questions about these Terms of Service, please contact us:
                 </p>
                 <div className="space-y-2 text-sm">
-                  <p><strong>Email:</strong> legal@aimarketingassistant.com</p>
+                  <p><strong>Email:</strong> falguerasaleix@gmail.com</p>
                   <p><strong>Support:</strong> <Link href="/feedback" className="text-blue-600 dark:text-blue-400 hover:underline">Provide feedback</Link></p>
                   <p><strong>Privacy:</strong> <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">Privacy Policy</Link></p>
                 </div>

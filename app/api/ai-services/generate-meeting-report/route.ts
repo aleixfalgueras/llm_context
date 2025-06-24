@@ -1,18 +1,35 @@
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createOpenAICompletion } from '@/lib/openai-wrapper'
+import { logger, createRequestContext, withTiming } from '@/lib/logger'
 
 export async function POST(req: Request) {
+  const endTiming = logger.startTiming('Generate Meeting Report API');
+  let clientId: string = '';
+  
   try {
-    const { clientId, meetingTranscription, meetingDate, additionalInfo, language = 'english' } = await req.json()
+    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, language = 'english' } = await req.json()
+    clientId = requestClientId;
+    logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
 
     if (!clientId || !meetingTranscription || !meetingDate) {
+      logger.warn('Missing required fields for meeting report', { 
+        clientId,
+        metadata: { 
+          hasClientId: !!clientId, 
+          hasTranscription: !!meetingTranscription,
+          hasMeetingDate: !!meetingDate
+        }
+      });
       return new Response('Missing required fields', { status: 400 })
     }
+
+
 
     // Use unified middleware for auth, usage, and client access
     const middleware = await withAuthUsageAndClient('document', clientId)
     if (!middleware.success) {
+      logger.warn('Auth, usage, or client access failed', { clientId });
       return middleware.response!
     }
     
@@ -21,6 +38,8 @@ export async function POST(req: Request) {
     // TypeScript assertion - middleware guarantees these exist
     const validUserId = userId!
     const validClient = client!
+
+
 
     // Get language instruction
     const targetLanguage = getLanguageInstruction(language)
@@ -60,9 +79,14 @@ INSTRUCTIONS:
 - IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, summaries, and action items`
 
     // Use unified OpenAI wrapper with automatic usage tracking
-    const completion = await createOpenAICompletion(
-      {
-        model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
+    const model = process.env.OPENAI_API_MODEL || 'gpt-4o-mini';
+    logger.aiRequest(model, undefined, { userId: validUserId, clientId });
+    
+    const completion = await withTiming(
+      'OpenAI Meeting Report Generation',
+      () => createOpenAICompletion(
+        {
+          model,
         messages: [
           {
             role: 'system',
@@ -84,17 +108,32 @@ INSTRUCTIONS:
           documentType: 'meeting-report'
         }
       }
-    )
+      ),
+      { userId: validUserId, clientId, model }
+    );
 
     const meetingReport = completion.content
     
     if (!meetingReport) {
+      logger.error('Failed to generate meeting report - empty response', undefined, { 
+        userId: validUserId, 
+        clientId 
+      });
       return new Response('Failed to generate meeting report', { status: 500 })
     }
 
+
+
+    logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 200, { 
+      userId: validUserId, 
+      clientId 
+    });
+    endTiming();
     return Response.json({ report: meetingReport })
   } catch (error) {
-    console.error('Error generating meeting report:', error)
+    logger.error('Error generating meeting report', error as Error, { clientId });
+    logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 500, { clientId });
+    endTiming();
     return new Response('Internal Server Error', { status: 500 })
   }
 } 

@@ -13,8 +13,8 @@ export async function GET() {
 
     const consent = await getUserConsent(userId)
 
-    return NextResponse.json({
-      consent: consent || {
+    // Return consent data directly (not wrapped in 'consent' object)
+    return NextResponse.json(consent || {
         dataProcessing: false,
         analytics: false,
         marketing: false,
@@ -24,7 +24,6 @@ export async function GET() {
         cookiesAnalytics: false,
         cookiesMarketing: false,
         cookiesFunctional: false,
-      }
     })
   } catch (error) {
     console.error('Error fetching consent:', error)

@@ -1,11 +1,38 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { logger } from '@/lib/logger'
 
-const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)'])
+const isPublicRoute = createRouteMatcher([
+  '/', 
+  '/sign-in(.*)', 
+  '/sign-up(.*)',
+  '/terms',
+  '/privacy',
+  '/privacy/cookies',
+  '/privacy/settings'
+])
 
 export default clerkMiddleware(async (auth, request) => {
+  const url = new URL(request.url)
+  const startTime = Date.now()
+  
+
+
   if (!isPublicRoute(request)) {
+    try {
     await auth.protect()
+      const authData = await auth();
+      // Removed authentication successful log to reduce noise
+    } catch (error) {
+      logger.warn('🚫 Authentication failed', { 
+        operation: `${request.method} ${url.pathname}`,
+        metadata: { error: (error as Error).message }
+      });
+      throw error;
+    }
   }
+
+  const duration = Date.now() - startTime;
+  // Removed middleware completed log to reduce noise
 })
 
 export const config = {
