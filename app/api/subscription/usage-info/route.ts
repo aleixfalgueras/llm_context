@@ -3,6 +3,9 @@ import { auth } from '@clerk/nextjs/server'
 import { getUsageInfo } from '@/lib/usage-middleware'
 import { logger, withTiming } from '@/lib/logger'
 
+// Force dynamic rendering since we use auth() which accesses headers
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const endTiming = logger.startTiming('Usage Info API');
   
