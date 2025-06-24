@@ -94,8 +94,18 @@ export function DocumentList({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowDeleteAllConfirm(!showDeleteAllConfirm)}
-                className={showDeleteAllConfirm ? 'bg-red-50 dark:bg-red-950 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300' : ''}
+                onClick={() => {
+                  if (showDeleteAllConfirm) {
+                    onDeleteAllDocuments()
+                  } else {
+                    setShowDeleteAllConfirm(true)
+                  }
+                }}
+                className={`transition-all duration-200 ${
+                  showDeleteAllConfirm 
+                    ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 hover:bg-red-200 dark:hover:bg-red-900/50' 
+                    : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
+                } shadow-sm`}
               >
                 <TrashIcon className="w-4 h-4 mr-2" />
                 {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All'}

@@ -225,9 +225,10 @@ export async function updateDocumentNameAndContent(
       throw new Error('Document not found or unauthorized')
     }
 
-    // Create new document path with the new name
+    // Create new document path with the new name and timestamp to avoid conflicts
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const pathParts = document.documentPath.split('/')
-    const newDocumentPath = `${pathParts[0]}/${pathParts[1]}/${newDocumentName}.md`
+    const newDocumentPath = `${pathParts[0]}/${pathParts[1]}/${newDocumentName}_${timestamp}.md`
 
     // If the name changed, we need to handle file operations
     if (newDocumentPath !== document.documentPath) {
@@ -315,19 +316,46 @@ export async function createDocument(
       throw new Error('Client not found or unauthorized')
     }
 
-    // Create the document path
-    const documentPath = `${userId}/${clientId}/${documentName}.md`
+    // Create the document path with timestamp to avoid conflicts
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const documentPath = `${userId}/${clientId}/${documentName}_${timestamp}.md`
+
+    console.log('Attempting to upload document:', {
+      bucket: STORAGE_CONFIG.DOCUMENTS_BUCKET,
+      path: documentPath,
+      userId,
+      clientId,
+      documentName
+    })
 
     // Upload content to Supabase storage
-    const { error: uploadError } = await supabaseServer.storage
+    const { data: uploadData, error: uploadError } = await supabaseServer.storage
       .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
       .upload(documentPath, content, {
         contentType: 'text/markdown'
       })
 
     if (uploadError) {
-      throw new Error('Failed to upload document')
+      console.error('Supabase upload error:', uploadError)
+      console.error('Document path:', documentPath)
+      console.error('Bucket name:', STORAGE_CONFIG.DOCUMENTS_BUCKET)
+      console.error('Upload data:', uploadData)
+      
+      // Try to get more info about the bucket
+      const { data: bucketInfo, error: bucketError } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .list('', { limit: 1 })
+      
+      if (bucketError) {
+        console.error('Bucket access error:', bucketError)
+      } else {
+        console.log('Bucket is accessible, list result:', bucketInfo)
+      }
+      
+      throw new Error(`Failed to upload document: ${uploadError.message}`)
     }
+
+    console.log('Upload successful:', uploadData)
 
     // Create document record in database
     const document = await prisma.document.create({
@@ -341,6 +369,19 @@ export async function createDocument(
         endDate
       }
     })
+
+    // Track usage event for document creation
+    try {
+      const { trackUsage } = await import('./usage-middleware')
+      await trackUsage(userId, 'document_generation', document.id, {
+        documentType,
+        clientId,
+        documentName
+      })
+    } catch (error) {
+      console.error('Error tracking document creation usage:', error)
+      // Don't fail the document creation if usage tracking fails
+    }
 
     return { success: true, document }
   } catch (error) {
