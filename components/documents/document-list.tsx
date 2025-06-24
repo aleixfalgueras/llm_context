@@ -202,7 +202,7 @@ export function DocumentList({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{doc.documentName}</h4>
-                    <p className="text-xs text-muted-foreground font-medium">{doc.documentType}</p>
+                    <p className="text-xs text-muted-foreground font-medium">{getDocumentTypeLabel(doc.documentType as DocumentType)}</p>
                     <p className="text-xs text-muted-foreground">
                       Updated: {formatDate(doc.updatedAt.toString())}
                     </p>
