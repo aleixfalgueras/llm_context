@@ -38,8 +38,6 @@ interface CustomDocumentGeneratorDialogProps {
   onDocumentCreated?: (clientId: string, documentId: string) => void
 }
 
-
-
 export function CustomDocumentGeneratorDialog({
   isOpen,
   onClose,
@@ -387,8 +385,6 @@ export function CustomDocumentGeneratorDialog({
               </div>
             )}
           </div>
-
-
 
           {/* Generated Content */}
           {generatedContent && (

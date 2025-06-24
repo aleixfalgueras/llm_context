@@ -15,6 +15,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { getClientDocuments } from '@/lib/document-actions'
 import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
+import type { Document } from '@/types/client-document-types'
 
 interface MeetingReportDialogProps {
   open: boolean
@@ -45,7 +46,7 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
   const [generatedContent, setGeneratedContent] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [clientDocuments, setClientDocuments] = useState<any[]>([])
+  const [clientDocuments, setClientDocuments] = useState<Document[]>([])
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
   const [isUploadingFile, setIsUploadingFile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
