@@ -1,5 +1,5 @@
 import { prisma } from './prisma'
-import { generatePdfFromMarkdown } from './pdf-generator'
+
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -117,7 +117,6 @@ export async function compileUserDataExport(userId: string, exportId: string): P
 
 export async function generateDataExportFiles(userId: string, exportId: string): Promise<{
   jsonPath: string
-  pdfPath: string
 }> {
   try {
     // Compile the data
@@ -131,76 +130,21 @@ export async function generateDataExportFiles(userId: string, exportId: string):
     const jsonPath = path.join(exportDir, `${exportId}.json`)
     await fs.writeFile(jsonPath, JSON.stringify(exportData, null, 2))
 
-    // Generate PDF file
-    const pdfContent = generateExportPdfContent(exportData)
-    const pdfPath = path.join(exportDir, `${exportId}.pdf`)
-    const pdfBuffer = await generatePdfFromMarkdown(pdfContent)
-    await fs.writeFile(pdfPath, pdfBuffer)
-
-    return { jsonPath, pdfPath }
+    return { jsonPath }
   } catch (error) {
     console.error('Error generating export files:', error)
     throw new Error('Failed to generate export files')
   }
 }
 
-function generateExportPdfContent(exportData: UserDataExport): string {
-  return `# Data Export Report
 
-**Generated:** ${new Date(exportData.generatedAt).toLocaleString()}  
-**Export ID:** ${exportData.exportId}  
-**User ID:** ${exportData.userId}
-
-## Data Summary
-
-**Total Records:** ${exportData.summary.totalRecords}
-
-- **Clients:** ${exportData.data.clients.length} records
-- **Documents:** ${exportData.data.documents.length} records  
-- **Chat Sessions:** ${exportData.data.chats.length} records
-- **Messages:** ${exportData.data.messages.length} records
-- **Custom Prompts:** ${exportData.data.prompts.length} records
-- **Feedback Submitted:** ${exportData.data.feedbacks.length} records
-- **Consent Records:** ${exportData.data.consent.length} records
-- **Audit Log Entries:** ${exportData.data.auditLogs.length} records
-
-## Data Rights Information
-
-Under GDPR and other privacy laws, you have the right to:
-
-- **Access** your personal data (this export)
-- **Rectify** incorrect or incomplete data
-- **Erase** your data ("right to be forgotten")
-- **Restrict** processing of your data
-- **Data portability** (export in machine-readable format)
-- **Object** to processing of your data
-
-## Contact Information
-
-For questions about your data or to exercise your rights:
-
-- **Privacy Email:** falguerasaleix@gmail.com
-- **Data Protection Officer:** falguerasaleix@gmail.com
-- **Support Portal:** Contact through your account settings
-
----
-
-*This is a summary of your data export. The complete data is available in the JSON file: ${exportData.exportId}.json*
-
-*For detailed document content or specific questions about your data, please contact our support team.*
-`
-}
 
 export async function cleanupExportFiles(exportId: string) {
   try {
     const exportDir = path.join(process.cwd(), 'temp', 'exports')
     const jsonPath = path.join(exportDir, `${exportId}.json`)
-    const pdfPath = path.join(exportDir, `${exportId}.pdf`)
 
-    await Promise.allSettled([
-      fs.unlink(jsonPath),
-      fs.unlink(pdfPath)
-    ])
+    await fs.unlink(jsonPath)
   } catch (error) {
     console.error('Error cleaning up export files:', error)
     // Don't throw - cleanup is best effort

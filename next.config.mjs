@@ -4,10 +4,9 @@ const nextConfig = {
   output: 'standalone',
   // Handle large API responses and external packages
   experimental: {
-    serverComponentsExternalPackages: ['pdf-parse'],
     serverActions: {
       bodySizeLimit: '8mb',
-  },
+    },
   },
   // Optimize images
   images: {

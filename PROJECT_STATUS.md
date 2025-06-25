@@ -30,12 +30,12 @@ Your AI Marketing Assistant has **all core features implemented** with enterpris
 - ✅ **Meeting Report Generator**: Transform transcriptions into professional reports
 - ✅ **Custom Document Generator**: Create content using prompt templates
 - ✅ Automatic document storage in Supabase with organized file structure
-- ✅ Professional PDF generation for client delivery
+- ✅ Professional Markdown export for client delivery
 
 
 ### **🛡️ Enterprise Privacy & Compliance**
 - ✅ **GDPR Compliant**: Complete consent management with version tracking
-- ✅ **Data Export**: JSON and PDF export capabilities with full user data
+- ✅ **Data Export**: JSON export capabilities with full user data
 - ✅ **Account Deletion**: Automated data purging with configurable grace periods
 - ✅ **Cookie Management**: Granular cookie preferences and compliance
 - ✅ **Privacy Dashboard**: User-controlled privacy settings and data rights
@@ -115,7 +115,7 @@ Your AI Marketing Assistant has **all core features implemented** with enterpris
 | Core AI Functionality | 100% ✅ | All models working with cost tracking |
 | Client Management | 100% ✅ | Complete CRUD with privacy controls |
 | Prompt Management | 100% ✅ | Library system with analytics |
-| Document Generation | 100% ✅ | PDF export and email delivery working |
+| Document Generation | 100% ✅ | Markdown export and download working |
 | Privacy & GDPR | 100% ✅ | Full compliance implementation |
 | Authentication | 100% ✅ | Clerk integration complete |
 | Usage Tracking | 100% ✅ | Real-time monitoring implemented |
@@ -166,7 +166,7 @@ Your AI Marketing Assistant has **all core features implemented** with enterpris
 1. **Privacy-First Design**: Enterprise-grade GDPR compliance from day one
 2. **Complete Solution**: End-to-end marketing content workflow with client management
 3. **Cost Transparency**: Real-time cost tracking and optimization
-4. **Professional Output**: PDF generation and email delivery for client presentation
+4. **Professional Output**: Document export and download for client presentation
 5. **Scalable Architecture**: Built to handle enterprise-level usage
 6. **Multi-language Support**: International market ready from launch
 

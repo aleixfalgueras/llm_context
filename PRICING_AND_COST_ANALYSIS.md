@@ -16,7 +16,7 @@
 - All AI services (meeting reports, custom documents, chat assistant)
 - Basic templates and prompts
 - Email support
-- Document export (PDF, Word)
+- Document export (Markdown)
 
 **Cost Analysis:**
 - Revenue: €9/month × 12 = €108/year

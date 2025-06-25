@@ -189,7 +189,7 @@ export function useDocumentOperations({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF')
+        throw new Error('Failed to download document')
       }
 
       // Create blob from response
@@ -199,7 +199,7 @@ export function useDocumentOperations({
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${doc.documentName}.pdf`
+      link.download = `${doc.documentName}.md`
       document.body.appendChild(link)
       link.click()
       
@@ -209,7 +209,7 @@ export function useDocumentOperations({
 
       toast({
         title: 'Download Started',
-        description: `"${doc.documentName}" is being downloaded as PDF`,
+        description: `"${doc.documentName}" is being downloaded as Markdown`,
       })
       return true
     } catch (error) {

@@ -257,7 +257,7 @@ export function DocumentList({
                           e.stopPropagation()
                           onDownloadDocument(doc)
                         }}
-                        title="Download document as PDF"
+                        title="Download document as Markdown"
                         className="text-blue-600 hover:text-blue-700"
                       >
                         <Download className="h-3 w-3" />

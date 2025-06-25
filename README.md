@@ -31,13 +31,13 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Meeting Report Generator**: Transform meeting transcriptions into professional, actionable reports
 - **Custom Document Generator**: Create marketing content using your own prompt templates
 - **Automatic Document Storage**: All content saved to Supabase with organized file structure
-- **PDF Export**: Professional PDF generation for client delivery
+- **Document Export**: Download documents in Markdown format
 
 - **Document Management**: Update, rename, and organize generated content
 
 ### 🛡️ **Enterprise-Grade Privacy & Compliance**
 - **GDPR Compliant**: Complete consent management system with audit trails
-- **Data Export**: Full user data export in JSON and PDF formats
+- **Data Export**: Full user data export in JSON format
 - **Account Deletion**: Automated data purging with configurable grace periods
 - **Cookie Management**: Granular cookie preferences and compliance
 - **Privacy Dashboard**: User-controlled privacy settings and data rights
@@ -78,7 +78,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 ### **AI & External Services**
 - **OpenAI API**: GPT-4o and GPT-4o-mini integration with cost tracking
 
-- **Puppeteer + Chromium**: Server-side PDF generation from markdown
+
 - **AI SDK**: Streamlined AI integration with streaming support
 
 ### **Authentication & Security**
@@ -125,7 +125,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 │   ├── subscription-utils.ts # Usage tracking & limits
 │   ├── data-export-utils.ts # Data export functionality
 │   ├── language-utils.ts  # Multi-language support
-│   ├── pdf-generator.ts   # PDF creation utilities
+
 │   ├── logger.ts          # Comprehensive logging system
 │   ├── openai-wrapper.ts  # OpenAI API integration
 │   └── variable-replacement.ts # Variable substitution
@@ -250,8 +250,8 @@ npm run dev
 
 ### **6. Document Management**
 - View all generated documents in client profiles
-- Export to PDF for professional delivery
-- Email documents directly to clients
+- Export to Markdown for professional delivery
+
 - Update and maintain document versions
 
 ## 🔧 Development Commands
