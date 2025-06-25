@@ -24,7 +24,7 @@ AI Services provide automated marketing content generation using client profiles
 
 ### **Document Management**
 - **Automatic Storage**: All generated content saved to Supabase with organized structure
-- **PDF Generation**: Server-side PDF creation using Puppeteer and Chromium
+- **Document Export**: Download documents in original Markdown format
 
 - **Version Control**: Document history and metadata tracking
 - **File Organization**: Structured storage by user/client/document type
@@ -123,7 +123,7 @@ Each document includes:
 - **File Path**: Supabase storage location
 
 ### **Export Capabilities**
-- **PDF Generation**: Professional PDF creation for client delivery
+- **Markdown Export**: Professional document export in Markdown format
 
 - **Download Options**: Direct file download from storage
 - **Sharing Links**: Secure, temporary access links
