@@ -310,9 +310,37 @@ estimatedCost: $1.89/$2.00 ⚠️ ($0.11 remaining)
 - Token limits prevent context stuffing attacks
 
 ### 2. **Model Selection Strategy**
-- Default to GPT-4o-mini (17x cheaper than GPT-4o)
-- Allow GPT-4o selection for Pro+ users
-- Monitor usage patterns for abuse
+
+**GPT-4o vs GPT-4o-mini Usage:**
+
+#### **Cost Comparison:**
+- **GPT-4o**: $0.0025 input + $0.01 output per 1K tokens
+- **GPT-4o-mini**: $0.00015 input + $0.0006 output per 1K tokens
+- **Cost Ratio**: GPT-4o costs ~17x more than GPT-4o-mini
+
+#### **Recommended Usage:**
+- **GPT-4o for**: Complex strategy documents, detailed analysis, technical content requiring higher reasoning
+- **GPT-4o-mini for**: Standard marketing content, meeting reports, routine communications (80% of use cases)
+
+#### **User Interface:**
+- **Clear Model Selection**: Users see cost implications and recommendations
+- **Per-Service Choice**: Different models for different AI services
+- **Smart Defaults**: GPT-4o-mini as default for cost efficiency
+- **Education**: In-app guidance on when to use each model
+
+#### **Cost Impact:**
+```
+Typical Document Generation:
+- GPT-4o-mini: $0.0015 average cost
+- GPT-4o: $0.025 average cost
+
+Monthly Cost Estimates (200 docs):
+- 100% GPT-4o-mini: $3.00
+- 100% GPT-4o: $50.00
+- 80% mini + 20% GPT-4o: $12.40
+```
+
+This strategy allows users to optimize costs while having access to premium capabilities when needed.
 
 ### 3. **Context Optimization**
 - Only inject client context on first message

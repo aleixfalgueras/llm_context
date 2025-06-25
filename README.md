@@ -2,15 +2,38 @@
 
 A modern AI-powered marketing assistant built with Next.js 14, React 18, and OpenAI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations.
 
+## 🆕 Recent Updates & Improvements
+
+### **Model Selection System (Latest)**
+- **User-Friendly Interface**: Choose between GPT-4o and GPT-4o-mini with clear descriptions
+- **Cost-Aware Recommendations**: Each model shows cost implications and use cases
+- **Per-Service Selection**: Different model choice for AI services and chat assistant
+- **Persistent Preferences**: Your model choice is remembered across sessions
+- **Performance Optimization**: Choose the right model for your specific task
+
+### **Simplified Usage System**
+- **Streamlined Limits**: Focus on essential metrics (documents, tokens, cost)
+- **Removed Restrictions**: Unlimited custom prompts and conversations for better UX
+- **Improved Analytics**: Better tracking of actual value-generating activities
+- **Clearer Pricing**: More transparent usage limits aligned with real costs
+
+### **Enhanced Document Management**
+- **In-Place Editing**: Edit document content and names after creation
+- **Better Organization**: Improved search, filtering, and document management
+- **Streamlined Interface**: Removed unnecessary features, focused on core functionality
+- **Performance Improvements**: Faster document operations and better error handling
+
 ## ✨ Key Features
 
 ### 🤖 **AI-Powered Content Creation**
 - **Multi-Model Support**: Choose between GPT-4o and GPT-4o-mini based on your needs and budget
+- **Model Selection Interface**: User-friendly model selector with descriptions and cost implications
 - **Client-Aware AI**: Contextual responses using selected client information
 - **Smart Context Control**: Select specific client fields (country, goals, notes) for each conversation
 - **Token Optimization**: Efficient context injection to minimize API costs
 - **Real-time Chat**: ChatGPT-like interface with persistent conversation history
 - **Chat Export**: Export conversations to markdown format
+- **Model Persistence**: Remembers your model choice per chat session
 
 ### 👥 **Comprehensive Client Management**
 - **Rich Client Profiles**: Store business information, contact details, marketing goals, and project notes
@@ -30,9 +53,9 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 ### ⚡ **Professional AI Services**
 - **Meeting Report Generator**: Transform meeting transcriptions into professional, actionable reports
 - **Custom Document Generator**: Create marketing content using your own prompt templates
+- **Model Selection**: Choose optimal AI model for each service (GPT-4o or GPT-4o-mini)
 - **Automatic Document Storage**: All content saved to Supabase with organized file structure
 - **Document Export**: Download documents in Markdown format
-
 - **Document Management**: Update, rename, and organize generated content
 
 ### 🛡️ **Enterprise-Grade Privacy & Compliance**
@@ -125,7 +148,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 │   ├── subscription-utils.ts # Usage tracking & limits
 │   ├── data-export-utils.ts # Data export functionality
 │   ├── language-utils.ts  # Multi-language support
-
+│   ├── models-config.ts   # AI model configuration and defaults
 │   ├── logger.ts          # Comprehensive logging system
 │   ├── openai-wrapper.ts  # OpenAI API integration
 │   └── variable-replacement.ts # Variable substitution
