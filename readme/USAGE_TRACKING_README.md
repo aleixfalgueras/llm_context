@@ -127,6 +127,69 @@ await updateUsageTracking(userId, 'document_generation', {
 ### Business Plan (€39/month)
 - Unlimited everything
 
+## How Limits Interact: The Triple-Constraint System
+
+### Limit Hierarchy & Enforcement
+The system enforces **three separate limits** (whichever hits first blocks further usage):
+
+1. **Document Limits** - Simple count-based restriction
+2. **Token Limits** - Raw token consumption (same counting regardless of model)
+3. **Cost Limits** - Actual dollar cost (varies significantly by model)
+
+### Why Token Limits Act as an "Equalizer"
+
+**Key Insight**: Token limits count the same regardless of model cost, which creates important behavioral constraints:
+
+#### Model Cost Differences:
+- **GPT-4o**: ~17x more expensive than GPT-4o-mini
+- **GPT-4o**: $0.011 per typical document (2K tokens)
+- **GPT-4o-mini**: $0.00066 per typical document (2K tokens)
+
+#### Real-World Limit Analysis:
+
+**Basic Plan Example** (20 docs, 100K tokens, $2 cost):
+```
+With GPT-4o-mini:
+- Document limit: 20 documents ← Hits first
+- Token limit: 50 documents (100K ÷ 2K each)
+- Cost limit: ~3,030 documents ($2 ÷ $0.00066)
+
+With GPT-4o:
+- Document limit: 20 documents ← Hits first  
+- Token limit: 50 documents (100K ÷ 2K each)
+- Cost limit: ~182 documents ($2 ÷ $0.011)
+```
+
+**Pro Plan Example** (200 docs, 2M tokens, $25 cost):
+```
+With GPT-4o-mini:
+- Document limit: 200 documents ← Hits first
+- Token limit: 1,000 documents (2M ÷ 2K each)
+- Cost limit: ~37,878 documents
+
+With GPT-4o:
+- Document limit: 200 documents ← Hits first
+- Token limit: 1,000 documents  
+- Cost limit: ~2,272 documents
+```
+
+### Benefits of This Design:
+
+1. **Prevents Gaming**: Users can't exploit cheap models to generate massive content volumes
+2. **Normalizes Usage**: Same "work effort" regardless of model choice
+3. **Infrastructure Protection**: Limits total API calls and processing load
+4. **Cost Safety Net**: Expensive models are constrained by cost limits
+5. **Predictable Experience**: Users understand they get X documents or Y tokens
+
+### Practical Implications:
+
+- **Token limits** are the real constraint for cost-effective models (GPT-4o-mini)
+- **Cost limits** protect against expensive model overuse (GPT-4o)
+- **Document limits** provide the simplest user-facing metric
+- Users are encouraged to choose appropriate models for their needs without breaking the business model
+
+This triple-constraint system ensures fair resource allocation while protecting both user experience and business sustainability.
+
 ## Analytics and Reporting
 
 ### Real-time Usage Info
