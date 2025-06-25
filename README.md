@@ -186,9 +186,13 @@ CLERK_SECRET_KEY="your_clerk_secret_key"
 
 # OpenAI Configuration
 OPENAI_API_KEY="your_openai_api_key"
-OPENAI_API_MODEL="gpt-4o-mini"
-OPENAI_TEMPERATURE="0.7"
-OPENAI_MAX_TOKENS="1000"
+# Optional: Override the default model (defaults to gpt-4o-mini if not set)
+OPENAI_API_DEFAULT_MODEL="gpt-4o-mini"
+# Optional: Override OpenAI generation parameters (defaults are defined in lib/models-config.ts)
+# OPENAI_TEMPERATURE="0.7"
+# OPENAI_MAX_TOKENS="1000"
+# OPENAI_PRESENCE_PENALTY="0.1"
+# OPENAI_FREQUENCY_PENALTY="0.1"
 
 # Email Services
 

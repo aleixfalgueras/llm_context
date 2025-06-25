@@ -3,6 +3,7 @@ import { buildClientContext } from '@/lib/client-context-utils'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createOpenAICompletion } from '@/lib/openai-wrapper'
+import { getDefaultTemperature, getDefaultMaxTokens } from '@/lib/models-config'
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +13,8 @@ export async function POST(request: Request) {
       customPrompt,
       documentTitle,
       additionalInstructions,
-      selectedContextFields = []
+      selectedContextFields = [],
+      model: selectedModel = 'gpt-4o-mini'
     } = await request.json()
 
     // Validate required fields
@@ -95,15 +97,15 @@ Please generate a professional, well-structured document based on the above prom
     // Use unified OpenAI wrapper with automatic usage tracking
     const completion = await createOpenAICompletion(
       {
-        model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
+        model: selectedModel,
         messages: [
           {
             role: 'user',
             content: completePrompt,
           },
         ],
-        temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
-        max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS || '2000'),
+        temperature: getDefaultTemperature(),
+        max_tokens: getDefaultMaxTokens(true), // Use AI Services default (2000 tokens)
       },
       {
         userId: validUserId,

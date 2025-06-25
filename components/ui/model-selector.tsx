@@ -6,19 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { ChevronDown, Cpu } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-const OPENAI_MODELS = [
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    description: 'Most capable model, best for complex tasks'
-  },
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    description: 'Faster and more cost-effective'
-  }
-]
+import { AVAILABLE_MODELS } from '@/lib/models-config'
 
 interface ModelSelectorProps {
   selectedModel: string
@@ -29,7 +17,7 @@ interface ModelSelectorProps {
 export function ModelSelector({ selectedModel, onModelSelect, className }: ModelSelectorProps) {
   const [open, setOpen] = useState(false)
 
-  const currentModel = OPENAI_MODELS.find(model => model.id === selectedModel)
+  const currentModel = AVAILABLE_MODELS.find(model => model.id === selectedModel)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,7 +38,7 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
           <CommandList>
             <CommandEmpty>No models found.</CommandEmpty>
             <CommandGroup heading="OpenAI Models">
-              {OPENAI_MODELS.map((model) => (
+              {AVAILABLE_MODELS.map((model) => (
                 <CommandItem
                   key={model.id}
                   value={model.id}

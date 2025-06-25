@@ -9,6 +9,7 @@ import { createOpenAICompletion } from '@/lib/openai-wrapper'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { getDefaultModel } from '@/lib/models-config'
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Chat API');
@@ -110,8 +111,8 @@ export async function POST(req: Request) {
       content: lastMessage.content,
     })
 
-    // Use the model from the request, with fallback to environment variable or default
-    const selectedModel = model || process.env.OPENAI_API_MODEL || 'gpt-4o'
+    // Use the model from the request, with fallback to centralized default
+    const selectedModel = model || getDefaultModel()
 
     // Save the user message to the database
     logger.dbQuery('create', 'message', { userId, chatId });

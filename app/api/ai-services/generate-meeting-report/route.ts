@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   let clientId: string = '';
   
   try {
-    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, language = 'english' } = await req.json()
+    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, language = 'english', model: selectedModel = 'gpt-4o-mini' } = await req.json()
     clientId = requestClientId;
     logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
 
@@ -79,14 +79,13 @@ INSTRUCTIONS:
 - IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, summaries, and action items`
 
     // Use unified OpenAI wrapper with automatic usage tracking
-    const model = process.env.OPENAI_API_MODEL || 'gpt-4o-mini';
-    logger.aiRequest(model, undefined, { userId: validUserId, clientId });
+    logger.aiRequest(selectedModel, undefined, { userId: validUserId, clientId });
     
     const completion = await withTiming(
       'OpenAI Meeting Report Generation',
       () => createOpenAICompletion(
         {
-          model,
+          model: selectedModel,
         messages: [
           {
             role: 'system',
@@ -109,7 +108,7 @@ INSTRUCTIONS:
         }
       }
       ),
-      { userId: validUserId, clientId, model }
+      { userId: validUserId, clientId, model: selectedModel }
     );
 
     const meetingReport = completion.content
