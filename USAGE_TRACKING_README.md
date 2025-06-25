@@ -24,10 +24,7 @@ model UserSubscription {
   maxCostPerMonth         Float   -- Basic: $2, Pro: $25, Business: unlimited (-1)
   
   -- Plan Features
-  canAccessPremiumPrompts Boolean
-  canAccessTeamFeatures   Boolean
-  canAccessPrioritySupport Boolean
-  canAccessCustomBranding Boolean
+  
 }
 ```
 

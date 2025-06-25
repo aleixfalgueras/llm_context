@@ -12,22 +12,11 @@ export const SUBSCRIPTION_PLANS = {
     maxDocumentsPerMonth: 20,
     maxTokensPerMonth: 100000,        // 100K tokens (~75 pages of text
     maxCostPerMonth: 2.00,            // $2 OpenAI spending limit
-    features: {
-      canAccessPremiumPrompts: false,
-      canAccessTeamFeatures: false,
-      canAccessPrioritySupport: false,
-      canAccessCustomBranding: false,
-    },
     description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
-      'First month FREE',
-      '100K tokens (~75 pages of content)',
-      '$2 OpenAI usage limit',
-      '3 client profiles',
-      '20 documents per month',
-      'Unlimited custom prompts',
-      'Basic AI services',
-      'Email support'
+      '👥 3 client profiles',
+      '📄 20 documents per month',
+      '🔤 100K tokens (~75 pages of content)'
     ]
   },
   pro: {
@@ -39,22 +28,11 @@ export const SUBSCRIPTION_PLANS = {
     maxDocumentsPerMonth: 200,
     maxTokensPerMonth: 2000000,       // 2M tokens (~1,500 pages of text)
     maxCostPerMonth: 25.00,           // $25 OpenAI spending limit
-    features: {
-      canAccessPremiumPrompts: true,
-      canAccessTeamFeatures: false,
-      canAccessPrioritySupport: false,
-      canAccessCustomBranding: false,
-    },
     description: 'For marketing professionals scaling their business',
     features_list: [
-      '2M tokens (~1,500 pages of content)',
-      '$25 OpenAI usage limit',
-      'Unlimited client profiles',
-      'Unlimited custom prompts',
-      '200 documents per month',
-      'All AI services',
-      'Premium prompt templates',
-      'Priority email support'
+      '👥 Unlimited client profiles',
+      '📄 200 documents per month',
+      '🔤 2M tokens (~1,500 pages of content)'
     ]
   },
   business: {
@@ -66,24 +44,11 @@ export const SUBSCRIPTION_PLANS = {
     maxDocumentsPerMonth: -1, // unlimited
     maxTokensPerMonth: -1,            // unlimited tokens
     maxCostPerMonth: -1,              // unlimited OpenAI spending
-    features: {
-      canAccessPremiumPrompts: true,
-      canAccessTeamFeatures: true,
-      canAccessPrioritySupport: true,
-      canAccessCustomBranding: true,
-    },
     description: 'For agencies and teams with advanced needs',
     features_list: [
-      'Unlimited tokens & OpenAI usage',
-      'Unlimited client profiles',
-      'Unlimited custom prompts',
-      'Unlimited documents',
-      'All AI services',
-      'Premium prompt templates',
-      'Team collaboration features',
-      'Priority support',
-      'Custom branding',
-      'API access'
+      '👥 Unlimited client profiles',
+      '📄 Unlimited documents per month',
+      '🔤 Unlimited tokens'
     ]
   }
 } as const
@@ -124,10 +89,6 @@ export async function getUserSubscription(userId: string) {
             maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
             maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
             maxCostPerMonth: SUBSCRIPTION_PLANS.basic.maxCostPerMonth,
-            canAccessPremiumPrompts: SUBSCRIPTION_PLANS.basic.features.canAccessPremiumPrompts,
-            canAccessTeamFeatures: SUBSCRIPTION_PLANS.basic.features.canAccessTeamFeatures,
-            canAccessPrioritySupport: SUBSCRIPTION_PLANS.basic.features.canAccessPrioritySupport,
-            canAccessCustomBranding: SUBSCRIPTION_PLANS.basic.features.canAccessCustomBranding,
           }
         }),
         { userId },
@@ -395,19 +356,6 @@ export function calculateOpenAICost(model: string, inputTokens: number, outputTo
   const modelPricing = pricing[model as keyof typeof pricing] || pricing['gpt-4o-mini']
   
   return (inputTokens / 1000) * modelPricing.input + (outputTokens / 1000) * modelPricing.output
-}
-
-// Check if user has access to premium features
-export async function checkFeatureAccess(userId: string, feature: keyof typeof SUBSCRIPTION_PLANS.basic.features) {
-  try {
-    const subscription = await getUserSubscription(userId)
-    const plan = SUBSCRIPTION_PLANS[subscription.plan as PlanId]
-    
-    return plan.features[feature]
-  } catch (error) {
-    console.error('Error checking feature access:', error)
-    return false
-  }
 }
 
 // Get usage analytics for dashboard

@@ -111,7 +111,7 @@ export default function PricingPage() {
                       Processing...
                     </div>
                   ) : (
-                    planId === 'basic' ? 'Start Free' : 'Upgrade Now')}
+                    planId === 'basic' ? 'First Month Free 🚀' : 'Upgrade Now')}
                 </Button>
               </CardContent>
             </Card>
