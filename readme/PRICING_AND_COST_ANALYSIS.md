@@ -57,24 +57,6 @@
 ### Secondary Restrictions (Resource-Based)  
 4. **Client Limits**: Organization tool limits, not AI-related
 
-### Removed Restrictions
-- ~~**Prompt Limits**: Eliminated - prompts are templates, not consumable resources~~
-- ~~**Conversation Limits**: Eliminated - redundant with token/cost limits~~
-
-## Business Model Rationale
-
-### Why Remove Prompt Limits?
-1. **User Experience**: Prompts are templates that improve user productivity
-2. **Cost Structure**: Prompts don't consume OpenAI resources directly
-3. **Competitive Advantage**: Unlimited prompts encourage platform adoption
-4. **Simplicity**: Reduces confusion in pricing structure
-
-### Why Focus on Token/Cost Limits?
-1. **Direct Cost Correlation**: Tokens directly map to OpenAI expenses
-2. **Predictable Budgeting**: Both users and business can predict costs
-3. **Fair Usage**: Heavy users pay more, light users pay less
-4. **Scalability**: System scales naturally with actual usage
-
 ## Customer Acquisition Strategy
 
 ### Basic Plan (Entry Point)
@@ -108,20 +90,6 @@
 - **Basic**: Competitive with entry-level AI writing tools
 - **Pro**: Premium positioning vs. general AI assistants  
 - **Business**: Enterprise alternative to custom AI solutions
-
-## Revenue Projections
-
-### Conservative Estimates (Year 1)
-- **Basic Users**: 500 users × €9 × 12 = €54,000
-- **Pro Users**: 100 users × €15 × 12 = €18,000  
-- **Business Users**: 20 users × €39 × 12 = €9,360
-- **Total**: €81,360
-
-### Optimistic Estimates (Year 2)
-- **Basic Users**: 2,000 users × €9 × 12 = €216,000
-- **Pro Users**: 500 users × €15 × 12 = €90,000
-- **Business Users**: 50 users × €39 × 12 = €23,400
-- **Total**: €329,400
 
 ## Cost Management
 
