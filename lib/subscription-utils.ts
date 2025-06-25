@@ -6,8 +6,8 @@ export const SUBSCRIPTION_PLANS = {
   basic: {
     id: 'basic',
     name: 'Basic',
-    price: 9,
-    currency: 'EUR',
+    price: 10,
+    currency: 'USD',
     maxClients: 3,
     maxDocumentsPerMonth: 20,
     maxTokensPerMonth: 100000,        // 100K tokens (~75 pages of text
@@ -22,8 +22,8 @@ export const SUBSCRIPTION_PLANS = {
   pro: {
     id: 'pro',
     name: 'Pro',
-    price: 15,
-    currency: 'EUR',
+    price: 17,
+    currency: 'USD',
     maxClients: -1, // unlimited
     maxDocumentsPerMonth: 200,
     maxTokensPerMonth: 2000000,       // 2M tokens (~1,500 pages of text)
@@ -38,12 +38,12 @@ export const SUBSCRIPTION_PLANS = {
   business: {
     id: 'business',
     name: 'Business',
-    price: 39,
-    currency: 'EUR',
+    price: 43,
+    currency: 'USD',
     maxClients: -1, // unlimited
     maxDocumentsPerMonth: -1, // unlimited
     maxTokensPerMonth: -1,            // unlimited tokens
-    maxCostPerMonth: -1,              // unlimited OpenAI spending
+    maxCostPerMonth: 40.00,           // $40 OpenAI spending limit (was unlimited)
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',

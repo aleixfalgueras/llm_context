@@ -109,23 +109,24 @@ await updateUsageTracking(userId, 'document_generation', {
 
 ## Subscription Plans
 
-### Basic Plan (€9/month, first month FREE)
+### Basic Plan ($10/month, first month FREE)
 - 100K tokens per month (~75 pages of content)
 - $2 OpenAI usage limit
 - 3 client profiles
 - 20 documents per month
 - Unlimited custom prompts
 
-### Pro Plan (€15/month)
+### Pro Plan ($17/month)
 - 2M tokens per month (~1,500 pages of content)  
 - $25 OpenAI usage limit
 - Unlimited client profiles
 - 200 documents per month
 - Unlimited custom prompts
 
-
-### Business Plan (€39/month)
-- Unlimited everything
+### Business Plan ($43/month)
+- Unlimited tokens and documents
+- $40 OpenAI usage limit
+- Unlimited client profiles
 
 ## How Limits Interact: The Triple-Constraint System
 
@@ -147,7 +148,7 @@ The system enforces **three separate limits** (whichever hits first blocks furth
 
 #### Real-World Limit Analysis:
 
-**Basic Plan Example** (20 docs, 100K tokens, $2 cost):
+**Basic Plan Example** ($10/month: 20 docs, 100K tokens, $2 cost):
 ```
 With GPT-4o-mini:
 - Document limit: 20 documents ← Hits first
@@ -160,7 +161,7 @@ With GPT-4o:
 - Cost limit: ~182 documents ($2 ÷ $0.011)
 ```
 
-**Pro Plan Example** (200 docs, 2M tokens, $25 cost):
+**Pro Plan Example** ($17/month: 200 docs, 2M tokens, $25 cost):
 ```
 With GPT-4o-mini:
 - Document limit: 200 documents ← Hits first
@@ -171,6 +172,19 @@ With GPT-4o:
 - Document limit: 200 documents ← Hits first
 - Token limit: 1,000 documents  
 - Cost limit: ~2,272 documents
+```
+
+**Business Plan Example** ($43/month: unlimited docs/tokens, $40 cost):
+```
+With GPT-4o-mini:
+- Document limit: unlimited
+- Token limit: unlimited
+- Cost limit: ~60,606 documents ($40 ÷ $0.00066)
+
+With GPT-4o:
+- Document limit: unlimited
+- Token limit: unlimited  
+- Cost limit: ~3,636 documents ($40 ÷ $0.011)
 ```
 
 ### Benefits of This Design:
