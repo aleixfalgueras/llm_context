@@ -87,15 +87,15 @@ async function updateUserUsageToMax(userId: string, planName: PlanName) {
   let estimatedCost: number
   
   if (planName === 'business') {
-    // For business plan, set high values that would simulate heavy usage
-    documentsGenerated = 1000  // Very high number to simulate unlimited usage
-    tokensUsed = 10000000     // 10M tokens - very high usage
-    estimatedCost = 100.00    // $100 - high cost but reasonable for business
+    // For business plan, use actual limits since it now has a $40 cost cap
+    documentsGenerated = 1000  // High but finite number (since unlimited = -1 in DB)
+    tokensUsed = 10000000     // High but finite number (since unlimited = -1 in DB)
+    estimatedCost = plan.maxCostPerMonth  // Use actual $40 limit
     
-    console.log(`📊 Business plan - setting high usage values:`)
+    console.log(`📊 Business plan - setting to actual limits:`)
     console.log(`   Documents: ${documentsGenerated} (simulating heavy usage)`)
     console.log(`   Tokens: ${tokensUsed.toLocaleString()} (simulating heavy usage)`)
-    console.log(`   Cost: $${estimatedCost} (simulating heavy usage)`)
+    console.log(`   Cost: $${estimatedCost} (at limit - $${plan.maxCostPerMonth})`)
   } else {
     // For basic and pro plans, set to exact maximum limits
     documentsGenerated = plan.maxDocumentsPerMonth

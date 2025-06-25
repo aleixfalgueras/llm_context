@@ -38,7 +38,7 @@ tsx scripts/set-usage-to-max.ts user_2abc123def456 business
 2. Sets the current month's usage to maximum limits (using the centralized configuration from `lib/subscription-utils.ts`):
    - **Basic Plan**: 20 documents, 100K tokens, $2.00 cost
    - **Pro Plan**: 200 documents, 2M tokens, $25.00 cost
-   - **Business Plan**: 1000 documents, 10M tokens, $100.00 cost (simulated heavy usage)
+   - **Business Plan**: 1000 documents, 10M tokens, $40.00 cost (simulated heavy usage)
 
 ### 2. `reset-usage.ts`
 
@@ -98,22 +98,22 @@ tsx scripts/set-usage-to-max.ts user_123 business
 
 ## Plan Limits
 
-### Basic Plan (€9/month)
+### Basic Plan ($10/month)
 - **Documents**: 20 per month
 - **Tokens**: 100,000 per month (~75 pages)
 - **Cost**: $2.00 OpenAI spending limit
 - **Clients**: 3 total
 
-### Pro Plan (€15/month)
+### Pro Plan ($17/month)
 - **Documents**: 200 per month
 - **Tokens**: 2,000,000 per month (~1,500 pages)
 - **Cost**: $25.00 OpenAI spending limit
 - **Clients**: Unlimited (-1)
 
-### Business Plan (€39/month)
+### Business Plan ($43/month)
 - **Documents**: Unlimited (-1)
 - **Tokens**: Unlimited (-1)
-- **Cost**: Unlimited (-1)
+- **Cost**: $40.00 OpenAI spending limit
 - **Clients**: Unlimited (-1)
 
 *Note: For Business plan testing, the script sets high but finite values since the database needs actual numbers.*
