@@ -115,7 +115,6 @@ await updateUsageTracking(userId, 'document_generation', {
 - 3 client profiles
 - 20 documents per month
 - Unlimited custom prompts
-- Email support
 
 ### Pro Plan (€15/month)
 - 2M tokens per month (~1,500 pages of content)  
@@ -123,13 +122,10 @@ await updateUsageTracking(userId, 'document_generation', {
 - Unlimited client profiles
 - 200 documents per month
 - Unlimited custom prompts
-- Premium features and support
+
 
 ### Business Plan (€39/month)
-- Unlimited tokens and OpenAI usage
 - Unlimited everything
-- Team collaboration features
-- Priority support and custom branding
 
 ## Analytics and Reporting
 

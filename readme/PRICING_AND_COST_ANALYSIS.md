@@ -12,12 +12,6 @@
 - 3 client profiles
 - Unlimited custom prompts
 
-**Features:**
-- All AI services (meeting reports, custom documents, chat assistant)
-- Basic templates and prompts
-- Email support
-- Document export (Markdown)
-
 **Cost Analysis:**
 - Revenue: €9/month × 12 = €108/year
 - OpenAI Cost: Max $2/month = $24/year (€22/year)
@@ -33,13 +27,6 @@
 - Unlimited client profiles  
 - Unlimited custom prompts
 
-**Features:**
-- All Basic features
-- Premium prompt templates
-- Priority email support
-- Advanced analytics
-- Bulk operations
-
 **Cost Analysis:**
 - Revenue: €15/month × 12 = €180/year
 - OpenAI Cost: Max $25/month = $300/year (€275/year)
@@ -53,14 +40,6 @@
 - Unlimited documents per month
 - Unlimited client profiles
 - Unlimited custom prompts
-
-**Features:**
-- All Pro features
-- Team collaboration tools
-- Custom branding options
-- Priority support (24h response)
-- API access
-- Custom integrations
 
 **Cost Analysis:**
 - Revenue: €39/month × 12 = €468/year
