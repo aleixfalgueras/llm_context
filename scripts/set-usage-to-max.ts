@@ -61,10 +61,6 @@ async function getUserSubscription(userId: string) {
         maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
         maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
         maxCostPerMonth: SUBSCRIPTION_PLANS.basic.maxCostPerMonth,
-        canAccessPremiumPrompts: SUBSCRIPTION_PLANS.basic.features.canAccessPremiumPrompts,
-        canAccessTeamFeatures: SUBSCRIPTION_PLANS.basic.features.canAccessTeamFeatures,
-        canAccessPrioritySupport: SUBSCRIPTION_PLANS.basic.features.canAccessPrioritySupport,
-        canAccessCustomBranding: SUBSCRIPTION_PLANS.basic.features.canAccessCustomBranding,
       }
     })
     
@@ -151,10 +147,6 @@ async function updateUserSubscriptionPlan(userId: string, planName: PlanName) {
       maxDocumentsPerMonth: plan.maxDocumentsPerMonth,
       maxTokensPerMonth: plan.maxTokensPerMonth,
       maxCostPerMonth: plan.maxCostPerMonth,
-      canAccessPremiumPrompts: plan.features.canAccessPremiumPrompts,
-      canAccessTeamFeatures: plan.features.canAccessTeamFeatures,
-      canAccessPrioritySupport: plan.features.canAccessPrioritySupport,
-      canAccessCustomBranding: plan.features.canAccessCustomBranding,
       updatedAt: new Date()
     }
   })

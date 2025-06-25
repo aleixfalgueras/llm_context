@@ -84,8 +84,7 @@ export function Navbar() {
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
                       <Link href="/pricing" className="cursor-pointer flex items-center">
-                        <span>💳</span>
-                        <span className="ml-2">Pricing</span>
+                        <span>Pricing</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

@@ -132,12 +132,6 @@ model UserSubscription {
   maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: unlimited (-1)
   maxCostPerMonth         Float @default(2.00) // Basic: $2, Pro: $25, Business: unlimited (-1)
   
-  // Features Access
-  canAccessPremiumPrompts Boolean @default(false)
-  canAccessTeamFeatures   Boolean @default(false)
-  canAccessPrioritySupport Boolean @default(false)
-  canAccessCustomBranding Boolean @default(false)
-  
   // Billing Cycle
   currentPeriodStart DateTime @default(now())
   currentPeriodEnd   DateTime @default(now())
