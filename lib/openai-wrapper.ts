@@ -1,6 +1,13 @@
 import OpenAI from 'openai'
 import { trackUsage } from './usage-middleware'
 import { calculateOpenAICost } from './subscription-utils'
+import { 
+  getDefaultModel, 
+  getDefaultTemperature, 
+  getDefaultMaxTokens, 
+  getDefaultPresencePenalty, 
+  getDefaultFrequencyPenalty 
+} from './models-config'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -37,13 +44,13 @@ export async function createOpenAICompletion(
     estimatedCost: number
   } | null
 }> {
-  const model = completionOptions.model || process.env.OPENAI_API_MODEL || 'gpt-4o-mini'
+  const model = completionOptions.model || getDefaultModel()
   
-  // Use environment variable defaults with validation
-  const temperature = Math.max(0, Math.min(2, completionOptions.temperature ?? parseFloat(process.env.OPENAI_TEMPERATURE || '0.7')))
-  const maxTokens = Math.max(1, completionOptions.max_tokens ?? parseInt(process.env.OPENAI_MAX_TOKENS || '1000'))
-  const presencePenalty = Math.max(-2, Math.min(2, completionOptions.presence_penalty ?? parseFloat(process.env.OPENAI_PRESENCE_PENALTY || '0.1')))
-  const frequencyPenalty = Math.max(-2, Math.min(2, completionOptions.frequency_penalty ?? parseFloat(process.env.OPENAI_FREQUENCY_PENALTY || '0.1')))
+  // Use centralized configuration with validation
+  const temperature = Math.max(0, Math.min(2, completionOptions.temperature ?? getDefaultTemperature()))
+  const maxTokens = Math.max(1, completionOptions.max_tokens ?? getDefaultMaxTokens())
+  const presencePenalty = Math.max(-2, Math.min(2, completionOptions.presence_penalty ?? getDefaultPresencePenalty()))
+  const frequencyPenalty = Math.max(-2, Math.min(2, completionOptions.frequency_penalty ?? getDefaultFrequencyPenalty()))
 
   const response = await openai.chat.completions.create({
     model,

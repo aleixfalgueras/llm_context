@@ -22,6 +22,7 @@ interface MeetingReportDialogProps {
   onOpenChange: (open: boolean) => void
   clients: any[]
   onDocumentCreated?: (clientId: string, documentId: string) => void
+  selectedModel: string
 }
 
 interface MeetingFormData {
@@ -33,7 +34,7 @@ interface MeetingFormData {
   documentName: string
 }
 
-export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCreated }: MeetingReportDialogProps) {
+export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCreated, selectedModel }: MeetingReportDialogProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState<MeetingFormData>({
     clientId: '',
@@ -149,7 +150,11 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ...formData, language: selectedClient?.documentsLanguage || 'english' })
+        body: JSON.stringify({ 
+          ...formData, 
+          language: selectedClient?.documentsLanguage || 'english',
+          model: selectedModel
+        })
       })
 
       if (!response.ok) {

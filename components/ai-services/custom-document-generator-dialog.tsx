@@ -36,6 +36,7 @@ interface CustomDocumentGeneratorDialogProps {
   onClose: () => void
   clients: Client[]
   onDocumentCreated?: (clientId: string, documentId: string) => void
+  selectedModel: string
 }
 
 export function CustomDocumentGeneratorDialog({
@@ -43,6 +44,7 @@ export function CustomDocumentGeneratorDialog({
   onClose,
   clients,
   onDocumentCreated,
+  selectedModel,
 }: CustomDocumentGeneratorDialogProps) {
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [documentTitle, setDocumentTitle] = useState('')
@@ -124,6 +126,7 @@ export function CustomDocumentGeneratorDialog({
           customPrompt: useCustomPrompt ? customPrompt : null,
           documentTitle,
           selectedContextFields: Object.keys(clientContext).filter(key => clientContext[key as keyof ClientContextSelection]),
+          model: selectedModel,
         }),
       })
 
