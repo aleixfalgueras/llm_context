@@ -5,9 +5,6 @@
     },
     "app/api/download-document/route.ts": {
       "maxDuration": 20
-    },
-    "app/api/send-document/route.ts": {
-      "maxDuration": 20
     }
   },
   "regions": ["iad1"],

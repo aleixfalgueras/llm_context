@@ -31,7 +31,7 @@ Your AI Marketing Assistant has **all core features implemented** with enterpris
 - ✅ **Custom Document Generator**: Create content using prompt templates
 - ✅ Automatic document storage in Supabase with organized file structure
 - ✅ Professional PDF generation for client delivery
-- ✅ Email integration via Resend API with template system
+
 
 ### **🛡️ Enterprise Privacy & Compliance**
 - ✅ **GDPR Compliant**: Complete consent management with version tracking
@@ -71,7 +71,7 @@ Your AI Marketing Assistant has **all core features implemented** with enterpris
 - ✅ **AI**: OpenAI GPT-4o/4o-mini integration with streaming and cost tracking
 - ✅ **Auth**: Clerk authentication with complete user lifecycle management
 - ✅ **Storage**: Supabase file storage with organized directory structure
-- ✅ **Email**: Resend API integration for document delivery and notifications
+
 
 ### **Database Schema** ✅
 - ✅ **Core Models**: Chat, Message, Client, Document, Prompt with full relationships

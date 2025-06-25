@@ -82,7 +82,6 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
         <ClientDocuments
           clientId={selectedClient.id}
           clientName={selectedClient.name}
-          clientEmail={selectedClient.email}
           open={isDocumentsOpen}
           onOpenChange={setIsDocumentsOpen}
           documentToHighlight={documentToHighlight}

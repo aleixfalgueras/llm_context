@@ -32,7 +32,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Custom Document Generator**: Create marketing content using your own prompt templates
 - **Automatic Document Storage**: All content saved to Supabase with organized file structure
 - **PDF Export**: Professional PDF generation for client delivery
-- **Email Integration**: Send documents directly to clients via Resend API
+
 - **Document Management**: Update, rename, and organize generated content
 
 ### 🛡️ **Enterprise-Grade Privacy & Compliance**
@@ -77,7 +77,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 
 ### **AI & External Services**
 - **OpenAI API**: GPT-4o and GPT-4o-mini integration with cost tracking
-- **Resend**: Professional email delivery service
+
 - **Puppeteer + Chromium**: Server-side PDF generation from markdown
 - **AI SDK**: Streamlined AI integration with streaming support
 
@@ -164,7 +164,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - PostgreSQL database (Supabase recommended)
 - OpenAI API key with credits
 - Clerk account for authentication
-- Resend account for email services
+
 
 ### Environment Setup
 Create `.env.local` with these variables:
@@ -191,8 +191,7 @@ OPENAI_TEMPERATURE="0.7"
 OPENAI_MAX_TOKENS="1000"
 
 # Email Services
-RESEND_API_KEY="your_resend_api_key"
-RESEND_FROM_EMAIL="noreply@yourdomain.com"
+
 ```
 
 ### Installation
@@ -320,7 +319,7 @@ npm run vercel-build
 # - OPENAI_API_KEY
 # - CLERK keys
 # - SUPABASE credentials
-# - RESEND_API_KEY
+
 ```
 
 ### **Database Setup**
