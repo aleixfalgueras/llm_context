@@ -281,7 +281,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         <ClientDocuments
           clientId={selectedClient.id}
           clientName={selectedClient.name}
-          clientEmail={selectedClient.email}
           open={isDocumentsOpen}
           onOpenChange={setIsDocumentsOpen}
           documentToHighlight={documentToHighlight}

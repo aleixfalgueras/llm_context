@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Search, Edit, Trash2, Download, Send, Calendar, TrashIcon, Plus } from 'lucide-react'
+import { Search, Edit, Trash2, Download, Calendar, TrashIcon, Plus } from 'lucide-react'
 import { DOCUMENT_TYPES, ALL_DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
 interface Document {
@@ -24,13 +24,11 @@ interface DocumentListProps {
   documents: Document[]
   loading: boolean
   selectedDocument: Document | null
-  clientEmail?: string
   onViewDocument: (document: Document) => void
   onEditDocument: (document: Document) => void
   onDeleteDocument: (document: Document) => void
   onDeleteAllDocuments: () => void
   onDownloadDocument: (document: Document) => void
-  onSendDocument: (document: Document) => void
   onCreateNew: () => void
   showDeleteAllConfirm: boolean
   setShowDeleteAllConfirm: (show: boolean) => void
@@ -40,13 +38,11 @@ export function DocumentList({
   documents,
   loading,
   selectedDocument,
-  clientEmail,
   onViewDocument,
   onEditDocument,
   onDeleteDocument,
   onDeleteAllDocuments,
   onDownloadDocument,
-  onSendDocument,
   onCreateNew,
   showDeleteAllConfirm,
   setShowDeleteAllConfirm
@@ -252,7 +248,7 @@ export function DocumentList({
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
-                    {/* Bottom row: Download and Send */}
+                    {/* Bottom row: Download */}
                     <div className="flex">
                       <Button
                         variant="ghost"
@@ -266,30 +262,6 @@ export function DocumentList({
                       >
                         <Download className="h-3 w-3" />
                       </Button>
-                      {!clientEmail ? (
-                        <div title="Add client's email address to enable sending">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={true}
-                            className="cursor-not-allowed"
-                          >
-                            <Send className="h-3 w-3 text-gray-400" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onSendDocument(doc)
-                          }}
-                          title="Send document to client via email"
-                        >
-                          <Send className="h-3 w-3" />
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </div>

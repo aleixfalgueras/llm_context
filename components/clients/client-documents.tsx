@@ -20,7 +20,6 @@ import type { ClientDocumentsProps, Document } from '@/types/client-document-typ
 export function ClientDocuments({ 
   clientId, 
   clientName, 
-  clientEmail, 
   open, 
   onOpenChange, 
   documentToHighlight 
@@ -39,7 +38,6 @@ export function ClientDocuments({
   const operations = useDocumentOperations({
     clientId,
     clientName,
-    clientEmail,
     loadDocuments: documentState.loadDocuments,
     resetCreateState: documentState.resetCreateState,
     resetEditState: documentState.resetEditState,
@@ -146,13 +144,11 @@ export function ClientDocuments({
             documents={documentState.documents}
             loading={documentState.loading}
             selectedDocument={documentState.selectedDocument}
-            clientEmail={clientEmail}
             onViewDocument={documentState.handleViewDocument}
             onEditDocument={handleEditDocument}
             onDeleteDocument={handleDeleteDocument}
             onDeleteAllDocuments={handleDeleteAllDocuments}
             onDownloadDocument={operations.handleDownloadDocument}
-            onSendDocument={operations.handleSendDocument}
             onCreateNew={handleCreateNew}
             showDeleteAllConfirm={uiState.showDeleteAllConfirm}
             setShowDeleteAllConfirm={uiState.setShowDeleteAllConfirm}

@@ -17,7 +17,6 @@ interface Document {
 interface UseDocumentOperationsProps {
   clientId: string
   clientName: string
-  clientEmail?: string
   loadDocuments: () => Promise<void>
   resetCreateState: () => void
   resetEditState: () => void
@@ -29,7 +28,6 @@ interface UseDocumentOperationsProps {
 export function useDocumentOperations({
   clientId,
   clientName,
-  clientEmail,
   loadDocuments,
   resetCreateState,
   resetEditState,
@@ -225,57 +223,7 @@ export function useDocumentOperations({
     }
   }
 
-  const handleSendDocument = async (doc: Document) => {
-    if (!clientEmail) {
-      toast({
-        title: 'Email Required',
-        description: 'Client email address is required to send documents',
-        variant: 'destructive',
-      })
-      return false
-    }
 
-    // Show confirmation dialog
-    const confirmed = confirm(
-      `Are you sure you want to send "${doc.documentName}" to ${clientEmail}?\n\nThis will email the document as a PDF attachment to the client.`
-    )
-
-    if (!confirmed) {
-      return false
-    }
-
-    try {
-      const response = await fetch('/api/send-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          documentId: doc.id,
-          clientEmail,
-          clientName,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to send document')
-      }
-
-      toast({
-        title: 'Document Sent',
-        description: `"${doc.documentName}" has been sent to ${clientEmail}`,
-      })
-      return true
-    } catch (error) {
-      console.error('Send error:', error)
-      toast({
-        title: 'Send Failed',
-        description: 'Failed to send document. Please try again.',
-        variant: 'destructive',
-      })
-      return false
-    }
-  }
 
   return {
     handleCreateDocument,
@@ -283,6 +231,5 @@ export function useDocumentOperations({
     handleDeleteDocument,
     handleDeleteAllDocuments,
     handleDownloadDocument,
-    handleSendDocument,
   }
 } 

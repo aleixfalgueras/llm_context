@@ -12,7 +12,6 @@ export interface Document {
 export interface ClientDocumentsProps {
   clientId: string
   clientName: string
-  clientEmail?: string
   open: boolean
   onOpenChange: (open: boolean) => void
   documentToHighlight?: string | null
