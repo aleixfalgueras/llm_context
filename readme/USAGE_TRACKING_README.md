@@ -10,6 +10,8 @@ The usage tracking system operates across multiple dimensions:
 - **Cost management** (cost-based)
 - **Client profile limits** (count-based)
 
+**Simplified Approach**: The system has been streamlined to focus on essential metrics that directly correlate with costs and value delivery. Conversation limits and prompt limits have been removed to improve user experience.
+
 ## Database Schema
 
 ### UserSubscription Table
@@ -67,9 +69,10 @@ All AI services that generate content track:
 - **Enforcement**: Checked before client creation
 
 ### Prompt Management
-- **No Limits**: Users can create unlimited custom prompts
+- **No Limits**: Users can create unlimited custom prompts (removed restriction)
 - **No Usage Tracking**: Prompts are treated as templates, not AI services
 - **Storage Only**: Prompts stored in database without restrictions
+- **Usage Analytics**: Track which prompts generate the most content (for optimization)
 
 ## Usage Tracking Flow
 

@@ -17,6 +17,10 @@ AI Services provide automated marketing content generation using client profiles
 
 ### **AI Processing**
 - **Multi-Model Support**: Uses both GPT-4o and GPT-4o-mini for different use cases
+- **Model Selection Interface**: User-friendly dropdown to choose between models
+- **Cost-Aware Recommendations**: Model descriptions include cost and performance information
+- **Per-Service Model Choice**: Select different models for different AI services
+- **Model Persistence**: Selected model is remembered across sessions
 - **Client Variable Replacement**: Automatic substitution of client variables in prompts
 - **Professional Output**: Production-ready marketing content formatted for client delivery
 - **Real-time Generation**: Interactive content creation with immediate feedback
@@ -25,9 +29,9 @@ AI Services provide automated marketing content generation using client profiles
 ### **Document Management**
 - **Automatic Storage**: All generated content saved to Supabase with organized structure
 - **Document Export**: Download documents in original Markdown format
-
 - **Version Control**: Document history and metadata tracking
 - **File Organization**: Structured storage by user/client/document type
+- **Document Editing**: Update content and rename documents after creation
 
 ## 🚀 Currently Implemented Services
 
@@ -150,9 +154,10 @@ Each document includes:
 
 ### **Document Preview & Management**
 - **Instant Preview**: Generated content displayed immediately
-- **Edit Capabilities**: Option to modify before saving
+- **Edit Capabilities**: Modify content and document names after creation
 - **Metadata Display**: Show document details and context used
-- **Action Buttons**: Save, export, email, and share options
+- **Action Buttons**: Save, export, and download options
+- **Document Organization**: Structured file management with search and filtering
 
 ## 🔧 Technical Implementation
 
@@ -258,6 +263,33 @@ AI Services API Structure:
 - **Access Controls**: Role-based access to client information
 - **Data Retention**: Configurable retention policies
 - **Deletion Rights**: Complete data removal capabilities
+
+## 🎛️ Model Selection System
+
+### **Available Models**
+- **GPT-4o**: Most capable model, best for complex tasks requiring higher reasoning
+- **GPT-4o Mini**: Faster and more cost-effective, ideal for standard content generation
+
+### **Model Selection Interface**
+- **Service Dashboard**: Global model selector affects all AI services
+- **Per-Chat Selection**: Different model choice per chat conversation in Assistant
+- **Persistent Preferences**: Your model choice is saved and remembered
+- **Visual Indicators**: Clear model names and descriptions help with selection
+
+### **Cost Considerations**
+```
+GPT-4o Pricing:
+- Input: $0.0025 per 1K tokens (~750 words)
+- Output: $0.01 per 1K tokens (~750 words)
+
+GPT-4o-mini Pricing:
+- Input: $0.00015 per 1K tokens
+- Output: $0.0006 per 1K tokens
+```
+
+### **When to Use Each Model**
+- **Use GPT-4o for**: Complex strategy documents, detailed analysis, technical content
+- **Use GPT-4o-mini for**: Standard marketing content, simple reports, routine communications
 
 ---
 
