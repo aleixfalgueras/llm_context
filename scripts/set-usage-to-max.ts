@@ -1,27 +1,46 @@
 #!/usr/bin/env tsx
+/**
+ * Usage Limit Testing Script
+ * 
+ * Sets a user's usage to the maximum limits for their subscription plan.
+ * Can target specific limits (tokens, documents, cost) or all limits.
+ * 
+ * Usage: tsx scripts/set-usage-to-max.ts <userId> <planName> <limitType>
+ * 
+ * Examples:
+ *   tsx scripts/set-usage-to-max.ts user_123 basic all       # Set all limits to max
+ *   tsx scripts/set-usage-to-max.ts user_123 pro tokens     # Set only token limit to max
+ *   tsx scripts/set-usage-to-max.ts user_123 business cost  # Set only cost limit to max
+ */
 import { PrismaClient } from '@prisma/client'
 import { SUBSCRIPTION_PLANS } from '../lib/subscription-utils'
 
 const prisma = new PrismaClient()
 
 type PlanName = keyof typeof SUBSCRIPTION_PLANS
+type LimitType = 'tokens' | 'documents' | 'cost' | 'all'
 
 interface ScriptArgs {
   userId: string
   planName: PlanName
+  limitType: LimitType
 }
 
 function parseArguments(): ScriptArgs {
   const args = process.argv.slice(2)
   
-  if (args.length !== 2) {
-    console.error('❌ Usage: tsx scripts/set-usage-to-max.ts <userId> <planName>')
+  if (args.length !== 3) {
+    console.error('❌ Usage: tsx scripts/set-usage-to-max.ts <userId> <planName> <limitType>')
     console.error('   planName must be one of: basic, pro, business')
-    console.error('   Example: tsx scripts/set-usage-to-max.ts user_123abc basic')
+    console.error('   limitType must be one of: tokens, documents, cost, all')
+    console.error('   Examples:')
+    console.error('     tsx scripts/set-usage-to-max.ts user_123abc basic all')
+    console.error('     tsx scripts/set-usage-to-max.ts user_123abc pro tokens')
+    console.error('     tsx scripts/set-usage-to-max.ts user_123abc business cost')
     process.exit(1)
   }
 
-  const [userId, planName] = args
+  const [userId, planName, limitType] = args
   
   if (!userId || userId.trim() === '') {
     console.error('❌ Error: userId cannot be empty')
@@ -33,9 +52,16 @@ function parseArguments(): ScriptArgs {
     process.exit(1)
   }
 
+  const validLimitTypes: LimitType[] = ['tokens', 'documents', 'cost', 'all']
+  if (!validLimitTypes.includes(limitType as LimitType)) {
+    console.error(`❌ Error: limitType must be one of: ${validLimitTypes.join(', ')}`)
+    process.exit(1)
+  }
+
   return {
     userId: userId.trim(),
-    planName: planName as PlanName
+    planName: planName as PlanName,
+    limitType: limitType as LimitType
   }
 }
 
@@ -71,41 +97,91 @@ async function getUserSubscription(userId: string) {
   return subscription
 }
 
-async function updateUserUsageToMax(userId: string, planName: PlanName) {
+async function updateUserUsageToMax(userId: string, planName: PlanName, limitType: LimitType) {
   const plan = SUBSCRIPTION_PLANS[planName]
   const now = new Date()
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1 // JavaScript months are 0-based
   
-  console.log(`🎯 Setting usage to maximum for plan: ${planName}`)
+  console.log(`🎯 Setting ${limitType} usage to maximum for plan: ${planName}`)
   console.log(`📅 Target period: ${currentYear}-${currentMonth.toString().padStart(2, '0')}`)
   
-  // For unlimited plans (business), we'll set high values for testing
-  // but not truly unlimited since we need actual numbers
-  let documentsGenerated: number
-  let tokensUsed: number
-  let estimatedCost: number
+  // Get current usage to preserve limits we're not targeting
+  const currentUsage = await prisma.userUsage.findUnique({
+    where: {
+      userId_year_month: {
+        userId,
+        year: currentYear,
+        month: currentMonth
+      }
+    }
+  })
+  
+  // Start with current values or 0
+  let documentsGenerated = currentUsage?.documentsGenerated || 0
+  let tokensUsed = currentUsage?.tokensUsed || 0
+  let estimatedCost = currentUsage?.estimatedCost || 0
+  
+  // Determine target values based on plan and limit type
+  let targetDocuments: number
+  let targetTokens: number
+  let targetCost: number
   
   if (planName === 'business') {
-    // For business plan, use actual limits since it now has a $40 cost cap
-    documentsGenerated = 1000  // High but finite number (since unlimited = -1 in DB)
-    tokensUsed = 10000000     // High but finite number (since unlimited = -1 in DB)
-    estimatedCost = plan.maxCostPerMonth  // Use actual $40 limit
-    
-    console.log(`📊 Business plan - setting to actual limits:`)
-    console.log(`   Documents: ${documentsGenerated} (simulating heavy usage)`)
-    console.log(`   Tokens: ${tokensUsed.toLocaleString()} (simulating heavy usage)`)
-    console.log(`   Cost: $${estimatedCost} (at limit - $${plan.maxCostPerMonth})`)
+    // For business plan, use high but finite values for unlimited fields
+    targetDocuments = 1000  // High but finite number (since unlimited = -1 in DB)
+    targetTokens = 10000000  // High but finite number (since unlimited = -1 in DB)
+    targetCost = plan.maxCostPerMonth  // Use actual $40 limit
   } else {
-    // For basic and pro plans, set to exact maximum limits
-    documentsGenerated = plan.maxDocumentsPerMonth
-    tokensUsed = plan.maxTokensPerMonth
-    estimatedCost = plan.maxCostPerMonth
-    
-    console.log(`📊 ${planName} plan - setting to maximum limits:`)
-    console.log(`   Documents: ${documentsGenerated}/${plan.maxDocumentsPerMonth}`)
-    console.log(`   Tokens: ${tokensUsed.toLocaleString()}/${plan.maxTokensPerMonth.toLocaleString()}`)
-    console.log(`   Cost: $${estimatedCost}/$${plan.maxCostPerMonth}`)
+    // For basic and pro plans, use exact maximum limits
+    targetDocuments = plan.maxDocumentsPerMonth
+    targetTokens = plan.maxTokensPerMonth
+    targetCost = plan.maxCostPerMonth
+  }
+  
+  // Set specific limit(s) to maximum based on limitType
+  switch (limitType) {
+    case 'documents':
+      documentsGenerated = targetDocuments
+      console.log(`📊 Setting DOCUMENTS to maximum:`)
+      console.log(`   Documents: ${documentsGenerated} (at limit)`)
+      console.log(`   Tokens: ${tokensUsed.toLocaleString()} (preserved)`)
+      console.log(`   Cost: $${estimatedCost} (preserved)`)
+      break
+      
+    case 'tokens':
+      tokensUsed = targetTokens
+      console.log(`📊 Setting TOKENS to maximum:`)
+      console.log(`   Documents: ${documentsGenerated} (preserved)`)
+      console.log(`   Tokens: ${tokensUsed.toLocaleString()} (at limit)`)
+      console.log(`   Cost: $${estimatedCost} (preserved)`)
+      break
+      
+    case 'cost':
+      estimatedCost = targetCost
+      console.log(`📊 Setting COST to maximum:`)
+      console.log(`   Documents: ${documentsGenerated} (preserved)`)
+      console.log(`   Tokens: ${tokensUsed.toLocaleString()} (preserved)`)
+      console.log(`   Cost: $${estimatedCost} (at limit)`)
+      break
+      
+    case 'all':
+      documentsGenerated = targetDocuments
+      tokensUsed = targetTokens
+      estimatedCost = targetCost
+      
+      if (planName === 'business') {
+        console.log(`📊 Business plan - setting ALL limits to maximum:`)
+        console.log(`   Documents: ${documentsGenerated} (simulating heavy usage)`)
+        console.log(`   Tokens: ${tokensUsed.toLocaleString()} (simulating heavy usage)`)
+        console.log(`   Cost: $${estimatedCost} (at limit - $${plan.maxCostPerMonth})`)
+      } else {
+        console.log(`📊 ${planName} plan - setting ALL limits to maximum:`)
+        console.log(`   Documents: ${documentsGenerated}/${plan.maxDocumentsPerMonth}`)
+        console.log(`   Tokens: ${tokensUsed.toLocaleString()}/${plan.maxTokensPerMonth.toLocaleString()}`)
+        console.log(`   Cost: $${estimatedCost}/$${plan.maxCostPerMonth}`)
+      }
+      break
   }
   
   // Upsert the usage record for the current month
@@ -159,10 +235,11 @@ async function main() {
   console.log('🚀 Starting usage limit testing setup...\n')
   
   try {
-    const { userId, planName } = parseArguments()
+    const { userId, planName, limitType } = parseArguments()
     
     console.log(`👤 User ID: ${userId}`)
     console.log(`📋 Plan: ${planName}`)
+    console.log(`📏 Limit Type: ${limitType}`)
     console.log('')
     
     // Step 1: Ensure user has a subscription and update to correct plan
@@ -171,20 +248,40 @@ async function main() {
     await updateUserSubscriptionPlan(userId, planName)
     
     // Step 2: Set usage to maximum for the plan
-    console.log('\n📊 Step 2: Setting usage to maximum limits...')
-    const updatedUsage = await updateUserUsageToMax(userId, planName)
+    console.log(`\n📊 Step 2: Setting ${limitType} usage to maximum limits...`)
+    const updatedUsage = await updateUserUsageToMax(userId, planName, limitType)
     
-    console.log('\n✅ Success! Usage has been set to maximum limits.')
+    console.log(`\n✅ Success! ${limitType === 'all' ? 'All limits' : limitType.charAt(0).toUpperCase() + limitType.slice(1) + ' limit'} set to maximum.`)
     console.log('\n📋 Final Usage Summary:')
     console.log(`   User ID: ${userId}`)
     console.log(`   Plan: ${planName}`)
+    console.log(`   Limit Type: ${limitType}`)
     console.log(`   Period: ${updatedUsage.year}-${updatedUsage.month.toString().padStart(2, '0')}`)
     console.log(`   Documents Generated: ${updatedUsage.documentsGenerated}`)
     console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
     console.log(`   Estimated Cost: $${updatedUsage.estimatedCost.toFixed(2)}`)
     
     console.log('\n🧪 Testing Tips:')
-    console.log('   • Try creating a new document - it should be blocked')
+    
+    switch (limitType) {
+      case 'documents':
+        console.log('   • Try creating a new document - it should be blocked by document limit')
+        console.log('   • Token and cost limits should still work normally')
+        break
+      case 'tokens':
+        console.log('   • Try creating content that uses many tokens - it should be blocked by token limit')
+        console.log('   • Document and cost limits should still work normally')
+        break
+      case 'cost':
+        console.log('   • Try using expensive models (GPT-4o) - it should be blocked by cost limit')
+        console.log('   • Document and token limits should still work normally')
+        break
+      case 'all':
+        console.log('   • Try creating a new document - it should be blocked')
+        console.log('   • All limits should show maximum usage warnings')
+        break
+    }
+    
     console.log('   • Check the usage info API to see limit warnings')
     console.log('   • Test the subscription upgrade flow')
     console.log('   • Use /api/subscription/usage-info to verify limits')
