@@ -228,7 +228,7 @@ export default function PrivacyPolicyPage() {
                                   <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                     <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">Data Controller Information</p>
                     <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                      <p><strong>Individual:</strong> Aleix Falgueras Casals</p>
+                      <p><strong>Individual:</strong> <a href="https://www.linkedin.com/in/aleix-falgueras-casals-066076186/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Aleix Falgueras Casals</a></p>
                       <p><strong>Address:</strong> Carrer d'Antonio de Solis, 27 Bis, 08301, Marato, España</p>
                       <p><strong>Registration:</strong> Sole Proprietorship</p>
                       <p><strong>VAT ID:</strong> Not applicable</p>
