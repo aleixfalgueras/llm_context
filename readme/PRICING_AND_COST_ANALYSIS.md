@@ -22,29 +22,29 @@
 
 **Limits:**
 - 2M tokens per month (~1,500 pages of content)
-- $25 AI usage limit per month (across all providers)
+- $12 AI usage limit per month (across all providers)
 - 200 documents per month
 - Unlimited client profiles  
 - Unlimited custom prompts
 
 **Cost Analysis:**
 - Revenue: $17/month × 12 = $204/year
-- AI Cost: Max $25/month = $300/year (OpenAI + Anthropic)
-- Gross Margin: ~32% (negative for heavy users)
+- AI Cost: Max $12/month = $144/year (OpenAI + Anthropic)
+- Gross Margin: ~70% (positive for all users)
 
 ### Business Plan - $43/month
 **Target**: Marketing agencies, enterprise teams, high-volume users
 
 **Limits:**
 - Unlimited tokens and documents
-- $40 AI usage limit per month (across all providers)
+- $35 AI usage limit per month (across all providers)
 - Unlimited client profiles
 - Unlimited custom prompts
 
 **Cost Analysis:**
 - Revenue: $43/month × 12 = $516/year
-- AI Cost: Max $40/month = $480/year (OpenAI + Anthropic)
-- Gross Margin: ~7% minimum, 60-70% typical usage
+- AI Cost: Max $35/month = $420/year (OpenAI + Anthropic)
+- Gross Margin: ~18% minimum, 65-75% typical usage
 
 ## Updated Limit Philosophy
 
@@ -94,8 +94,8 @@
 
 ### AI Provider Expenses (OpenAI + Anthropic)
 - **Basic**: Max $24/user/year (capped at $2/month across all providers)
-- **Pro**: Max $300/user/year (capped at $25/month across all providers)  
-- **Business**: Max $480/user/year (capped at $40/month across all providers)
+- **Pro**: Max $144/user/year (capped at $12/month across all providers)  
+- **Business**: Max $420/user/year (capped at $35/month across all providers)
 
 ### Infrastructure Costs
 - **Database**: Supabase Pro ~$27/month
@@ -105,8 +105,8 @@
 
 ### Target Margins
 - **Basic**: 80% gross margin (after multi-AI costs)
-- **Pro**: 60% gross margin (after multi-AI costs)
-- **Business**: 70% gross margin (after all costs)
+- **Pro**: 70% gross margin (after multi-AI costs)
+- **Business**: 75% gross margin (after all costs)
 
 ## Future Considerations
 
@@ -190,19 +190,19 @@ Net Profit: $9.80/month (98% margin)
 ### Pro Plan Economics:
 ```
 Revenue: $17/month
-Max AI Cost: $25/month (if user hits limit across all providers)
-Avg AI Cost: $10/month (typical usage across OpenAI + Anthropic)
+Max AI Cost: $12/month (if user hits limit across all providers)
+Avg AI Cost: $6/month (typical usage across OpenAI + Anthropic)
 Infrastructure Cost: $0.20/month
-Net Profit: $6.80/month (40% margin typical)
+Net Profit: $10.80/month (63% margin typical)
 ```
 
 ### Business Plan Economics:
 ```
 Revenue: $43/month  
-Max AI Cost: $40/month (capped limit across all providers)
-Avg AI Cost: $18/month (typical heavy usage across providers)
+Max AI Cost: $35/month (capped limit across all providers)
+Avg AI Cost: $15/month (typical heavy usage across providers)
 Infrastructure Cost: $0.50/month
-Net Profit: $24.50/month (57% margin typical)
+Net Profit: $27.50/month (64% margin typical)
 ```
 
 ---
@@ -371,17 +371,19 @@ Net CLV: $290 per converted user
 - Sufficient for meaningful trial experience
 - Low enough cost to absorb as marketing expense
 
-#### **Pro Plan ($25 OpenAI limit)**:  
-- Supports ~4,000 conversations with GPT-4o-mini
-- Or ~1,500 document generations
-- Covers 99% of professional use cases
+#### **Pro Plan ($12 OpenAI limit)**:  
+- Supports ~2,400 conversations with GPT-4o-mini
+- Or ~900 document generations
+- Covers 95% of professional use cases
 - $17 price point competitive with industry
+- Ensures positive unit economics
 
-#### **Business Plan ($40 OpenAI limit)**:
+#### **Business Plan ($35 OpenAI limit)**:
 - For agencies with 10+ team members
 - Cost absorbed across team subscription
 - Premium features justify higher price point
 - Target market can afford $43/month easily
+- Maintains healthy profit margins
 
 ### Competitive Analysis:
 - **ChatGPT Plus**: $20/month, no business features

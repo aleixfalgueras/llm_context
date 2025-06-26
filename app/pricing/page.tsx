@@ -151,6 +151,25 @@ export default function PricingPage() {
                 </p>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-2">How do token limits and AI model choices affect my usage?</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-3">
+                  Each plan includes token limits that prevent usage once reached. Depending on which AI model you choose, 
+                  you may hit these limits at different rates:
+                </p>
+                <ul className="text-gray-600 dark:text-gray-400 space-y-2 text-sm">
+                  <li><strong>• Efficient models</strong> (like GPT-4o-mini, Claude Haiku): Let you maximize content creation within your token allowance.</li>
+                  <li><strong>• Premium models</strong> (like GPT-4o, Claude Opus): May reach token limits sooner due to higher processing costs, but deliver superior quality.</li>
+                  <li><strong>• Token counting</strong>: All models count tokens equally (~750 words per 1,000 tokens), ensuring fair usage regardless of model choice.</li>
+                </ul>
+                <p className="text-gray-600 dark:text-gray-400 mt-3">
+                  Choose efficient models for routine content and premium models when you need the highest quality output. 
+                  This flexibility helps you optimize your monthly token allowance based on your specific needs.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

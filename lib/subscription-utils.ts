@@ -27,7 +27,7 @@ export const SUBSCRIPTION_PLANS = {
     maxClients: -1, // unlimited
     maxDocumentsPerMonth: 200,
     maxTokensPerMonth: 2000000,       // 2M tokens (~1,500 pages of text)
-    maxCostPerMonth: 25.00,           // $25 OpenAI spending limit
+    maxCostPerMonth: 12.00,           // $12 OpenAI spending limit
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
@@ -43,7 +43,7 @@ export const SUBSCRIPTION_PLANS = {
     maxClients: -1, // unlimited
     maxDocumentsPerMonth: -1, // unlimited
     maxTokensPerMonth: -1,            // unlimited tokens
-    maxCostPerMonth: 40.00,           // $40 OpenAI spending limit (was unlimited)
+    maxCostPerMonth: 35.00,           // $35 OpenAI spending limit
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',

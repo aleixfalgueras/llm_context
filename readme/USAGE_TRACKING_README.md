@@ -23,7 +23,7 @@ model UserSubscription {
   maxClients              Int     -- Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
   maxDocumentsPerMonth    Int     -- Basic: 20, Pro: 200, Business: unlimited (-1)
   maxTokensPerMonth       Int     -- Basic: 100K, Pro: 2M, Business: unlimited (-1)
-  maxCostPerMonth         Float   -- Basic: $2, Pro: $25, Business: $40 (all across AI providers)
+  maxCostPerMonth         Float   -- Basic: $2, Pro: $12, Business: $35 (all across AI providers)
   
   -- Plan Features
   
@@ -119,14 +119,14 @@ await updateUsageTracking(userId, 'document_generation', {
 
 ### Pro Plan ($17/month)
 - 2M tokens per month (~1,500 pages of content)  
-- $25 AI usage limit (across all providers)
+- $12 AI usage limit (across all providers)
 - Unlimited client profiles
 - 200 documents per month
 - Unlimited custom prompts
 
 ### Business Plan ($43/month)
 - Unlimited tokens and documents
-- $40 AI usage limit (across all providers)
+- $35 AI usage limit (across all providers)
 - Unlimited client profiles
 
 ## How Limits Interact: The Triple-Constraint System
@@ -167,30 +167,30 @@ With GPT-4o:
 - Cost limit: ~182 documents ($2 ÷ $0.011)
 ```
 
-**Pro Plan Example** ($17/month: 200 docs, 2M tokens, $25 cost):
+**Pro Plan Example** ($17/month: 200 docs, 2M tokens, $12 cost):
 ```
 With GPT-4o-mini:
 - Document limit: 200 documents ← Hits first
 - Token limit: 1,000 documents (2M ÷ 2K each)
-- Cost limit: ~37,878 documents
+- Cost limit: ~18,181 documents ($12 ÷ $0.00066)
 
 With GPT-4o:
 - Document limit: 200 documents ← Hits first
 - Token limit: 1,000 documents  
-- Cost limit: ~2,272 documents
+- Cost limit: ~1,090 documents ($12 ÷ $0.011)
 ```
 
-**Business Plan Example** ($43/month: unlimited docs/tokens, $40 cost):
+**Business Plan Example** ($43/month: unlimited docs/tokens, $35 cost):
 ```
 With GPT-4o-mini:
 - Document limit: unlimited
 - Token limit: unlimited
-- Cost limit: ~60,606 documents ($40 ÷ $0.00066)
+- Cost limit: ~53,030 documents ($35 ÷ $0.00066)
 
 With GPT-4o:
 - Document limit: unlimited
 - Token limit: unlimited  
-- Cost limit: ~3,636 documents ($40 ÷ $0.011)
+- Cost limit: ~3,181 documents ($35 ÷ $0.011)
 ```
 
 ### Benefits of This Design:
