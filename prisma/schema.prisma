@@ -34,7 +34,7 @@ model Message {
   id        String   @id @default(cuid())
   content   String
   role      Role
-  model     String?  // OpenAI model used for this message (e.g., 'gpt-4o', 'gpt-4o-mini')
+  model     String?  // AI model used for this message (e.g., 'gpt-4o', 'gpt-4o-mini', 'claude-3-5-haiku')
   chatId    String
   createdAt DateTime @default(now())
 
@@ -157,7 +157,7 @@ model UserUsage {
   documentsGenerated Int @default(0) // Total documents generated this month
   
   // Cost Tracking
-  estimatedCost     Float @default(0.0) // Estimated OpenAI costs this month
+  estimatedCost     Float @default(0.0) // Estimated AI costs this month
   tokensUsed        Int   @default(0)   // Total tokens consumed this month
   
   // Timestamps

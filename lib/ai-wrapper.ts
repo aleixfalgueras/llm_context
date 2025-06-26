@@ -38,7 +38,7 @@ export interface UsageTrackingOptions {
 
 
 /**
- * Enhanced error handling for OpenAI errors
+ * Enhanced error handling for OpenAI provider errors
  */
 function handleOpenAIError(error: any): never {
   if (error.name === 'OpenAIError' || error.constructor?.name === 'OpenAIError') {
@@ -96,7 +96,7 @@ function handleOpenAIError(error: any): never {
     )
   }
   
-  // Generic OpenAI error
+  // Generic OpenAI provider error
   throw new AIProviderError(
     error.message || 'OpenAI service error',
     'openai',
@@ -174,7 +174,7 @@ function handleAnthropicError(error: any): never {
 }
 
 /**
- * Unified AI API wrapper that handles both OpenAI and Claude
+ * Unified AI API wrapper that handles multiple providers (OpenAI and Anthropic)
  */
 export async function createAICompletion(
   completionOptions: AICompletionOptions,
@@ -233,7 +233,7 @@ export async function createAICompletion(
 }
 
 /**
- * OpenAI completion handler
+ * OpenAI provider completion handler
  */
 async function createOpenAICompletion(
   completionOptions: AICompletionOptions,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { checkUsageLimit, updateUsageTracking } from './subscription-utils'
-import { createUsageLimitResponse } from './openai-wrapper'
+import { createUsageLimitResponse } from './ai-wrapper'
 import { prisma } from './prisma'
 
 export interface UsageLimitResponse {

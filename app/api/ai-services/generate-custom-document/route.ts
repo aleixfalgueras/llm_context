@@ -101,7 +101,7 @@ Please generate a professional, well-structured document based on the above prom
 
 IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining professional language and cultural appropriateness for this language.`
 
-    // Use unified OpenAI wrapper with automatic usage tracking
+    // Use unified AI wrapper with automatic usage tracking
     const completion = await createAICompletion(
       {
         model: selectedModel,
