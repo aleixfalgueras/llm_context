@@ -218,7 +218,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
               id="notes"
               value={formData.notes}
               onChange={handleChange('notes')}
-              placeholder="Any additional notes about the client..."
+              placeholder="Any notes about the client..."
               rows={4}
             />
           </div>
