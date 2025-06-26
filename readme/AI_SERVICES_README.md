@@ -83,7 +83,7 @@ Create personalized marketing documents using custom prompt templates with autom
 The custom document service:
 - **User-Defined Prompts**: Uses prompts from user's prompt library or custom input
 - **Client Context Integration**: Calls `buildClientContextSection()` to respect user privacy selections
-- **Variable Substitution**: Automatic replacement of `{client_name}`, `{country}`, `{goals}`
+- **Variable Substitution**: Automatic replacement of `{client_name}`, `{country}`
 - **Flexible Context**: Only includes client information fields user explicitly selected
 - **Service-Specific Logic**: Appends client context section to user's custom prompt
 
@@ -105,7 +105,7 @@ The custom document service:
 ```
 {client_name}     → Client's business/brand name
 {country}         → Client's country/location
-{goals}           → Marketing and content goals
+
 ```
 
 ## 📋 Document Storage & Management

@@ -43,7 +43,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Model Persistence**: Remembers your provider and model choice per chat session
 
 ### 👥 **Comprehensive Client Management**
-- **Rich Client Profiles**: Store business information, contact details, marketing goals, and project notes
+- **Rich Client Profiles**: Store business information, contact details, and project notes
 - **Multi-language Support**: Generate documents in 10 languages (English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Catalan)
 - **Document Association**: All generated content automatically linked to specific clients
 - **Privacy-First Design**: Secure data handling with complete user isolation
@@ -51,7 +51,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 
 ### 📝 **Advanced Prompt Management**
 - **Custom Prompt Library**: Create, organize, and reuse personalized AI templates
-- **Smart Variable Replacement**: Automatic substitution of client data (`{client_name}`, `{country}`, `{goals}`)
+- **Smart Variable Replacement**: Automatic substitution of client data (`{client_name}`, `{country}`)
 - **Category Organization**: Sort prompts by type (marketing, content, strategy, social-media, copywriting, analysis)
 - **Usage Analytics**: Track which prompts are most effective for your workflow
 - **Sample Templates**: Pre-built prompts for common marketing tasks
@@ -188,7 +188,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 ### **Core Models**
 - **Chat**: AI conversations with client associations and context tracking
 - **Message**: Individual chat messages with model tracking and cost data
-- **Client**: Business profiles with contact info, goals, and language preferences
+- **Client**: Business profiles with contact info and language preferences
 - **Document**: Generated content with metadata, storage paths, and client linking
 - **Prompt**: Custom templates with usage analytics and category organization
 
@@ -283,12 +283,12 @@ npm run dev
 
 ### **2. Client Management**
 - Navigate to `/clients` to create client profiles
-- Add business information, location, and marketing goals
+- Add business information and location
 - Set preferred document generation language
 
 ### **3. Prompt Library Setup**
 - Go to `/prompts` to create custom templates
-- Use variables: `{client_name}`, `{country}`, `{goals}`
+- Use variables: `{client_name}`, `{country}`
 - Organize by category and track usage analytics
 
 ### **4. AI Assistant**

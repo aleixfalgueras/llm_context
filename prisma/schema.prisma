@@ -50,7 +50,7 @@ model Client {
   email       String?
   phone       String?
   country     String?  // Client's country/location
-  goals       String?  // Marketing and content goals
+
   notes       String?  // General notes about the client
   documentsLanguage String @default("english") // Preferred language for generated documents
   createdAt   DateTime @default(now())
