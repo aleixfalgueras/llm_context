@@ -1,8 +1,35 @@
 // Script to set up Supabase storage bucket for documents
 // Run this once to create the necessary storage bucket
+// Usage: node scripts/setup-supabase-storage.js <env-file>
+// Example: node scripts/setup-supabase-storage.js .env.development
 
 const { createClient } = require('@supabase/supabase-js')
-require('dotenv').config()
+const path = require('path')
+
+// Get the environment file from command line arguments
+const envFile = process.argv[2]
+
+if (!envFile) {
+  console.error('❌ Error: Environment file parameter is required')
+  console.log('Usage: node scripts/setup-supabase-storage.js <env-file>')
+  console.log('Examples:')
+  console.log('  node scripts/setup-supabase-storage.js .env.development')
+  console.log('  node scripts/setup-supabase-storage.js .env.production')
+  process.exit(1)
+}
+
+// Validate environment file parameter
+if (envFile !== '.env.development' && envFile !== '.env.production') {
+  console.error('❌ Error: Invalid environment file')
+  console.log('Allowed values: .env.development or .env.production')
+  console.log('Usage: node scripts/setup-supabase-storage.js <env-file>')
+  process.exit(1)
+}
+
+// Load the specified environment file
+require('dotenv').config({ path: path.resolve(process.cwd(), envFile) })
+
+console.log(`🔧 Using environment file: ${envFile}`)
 
 const DOCUMENTS_BUCKET = process.env.SUPABASE_DOCUMENTS_BUCKET || 'documents'
 
@@ -10,7 +37,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_KEY
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase environment variables')
+  console.error(`❌ Missing Supabase environment variables in ${envFile}`)
+  console.log('Required variables:')
+  console.log('  - NEXT_PUBLIC_SUPABASE_URL')
+  console.log('  - SUPABASE_KEY')
+  console.log('  - SUPABASE_DOCUMENTS_BUCKET (optional, defaults to "documents")')
   process.exit(1)
 }
 
@@ -18,6 +49,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 async function setupStorage() {
   console.log('Setting up Supabase storage...')
+  console.log(`Target bucket: ${DOCUMENTS_BUCKET}`)
 
   // Create the documents bucket
   const { data: bucket, error: bucketError } = await supabase.storage.createBucket(DOCUMENTS_BUCKET, {
@@ -37,36 +69,6 @@ async function setupStorage() {
     console.log(`ℹ️ ${DOCUMENTS_BUCKET} bucket already exists`)
   }
 
-  // Set up RLS policies for the documents bucket
-  console.log('Setting up storage policies...')
-  
-  // Policy to allow users to upload their own documents
-  const uploadPolicy = {
-    name: 'Users can upload their own documents',
-    definition: `(bucket_id = '${DOCUMENTS_BUCKET}') AND (auth.uid()::text = (storage.foldername(name))[1])`,
-    check: null,
-    command: 'INSERT'
-  }
-
-  // Policy to allow users to read their own documents
-  const readPolicy = {
-    name: 'Users can read their own documents',
-    definition: `(bucket_id = '${DOCUMENTS_BUCKET}') AND (auth.uid()::text = (storage.foldername(name))[1])`,
-    check: null,
-    command: 'SELECT'
-  }
-
-  // Policy to allow users to delete their own documents
-  const deletePolicy = {
-    name: 'Users can delete their own documents',
-    definition: `(bucket_id = '${DOCUMENTS_BUCKET}') AND (auth.uid()::text = (storage.foldername(name))[1])`,
-    check: null,
-    command: 'DELETE'
-  }
-
-  console.log('✅ Supabase storage setup complete!')
-  console.log('Note: You may need to manually set up RLS policies in the Supabase dashboard')
-  console.log(`Go to Storage > Policies and create policies for the ${DOCUMENTS_BUCKET} bucket`)
 }
 
 setupStorage().catch(console.error) 
