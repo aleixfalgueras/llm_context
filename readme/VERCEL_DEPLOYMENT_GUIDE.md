@@ -63,13 +63,15 @@ OPENAI_FREQUENCY_PENALTY="0.1"
 
 **After deployment, run the storage setup script:**
 ```bash
-node scripts/setup-supabase-storage.js
+# For production environment
+node scripts/setup-supabase-storage.js .env.production
+
+# For development environment  
+node scripts/setup-supabase-storage.js .env.development
 ```
 
 **This script will:**
 - Create the `documents` storage bucket
-- Set up Row Level Security (RLS) policies
-- Configure proper file permissions
 
 ### ⚙️ 4. Build Configuration
 
@@ -162,7 +164,7 @@ Copy all environment variables from your local `.env.local` to Vercel:
 ```bash
 # If needed, run storage setup script
 # (Can be done via Vercel CLI or directly on your production database)
-node scripts/setup-supabase-storage.js
+node scripts/setup-supabase-storage.js .env.production
 ```
 
 ## ✅ Post-Deployment Testing
@@ -191,7 +193,7 @@ Test these critical features after deployment:
 ### Storage & Database
 - [ ] Document storage in Supabase
 - [ ] Database operations
-- [ ] File permissions and RLS
+- [ ] File permissions and access control
 
 ## 🛠️ Troubleshooting
 
@@ -219,7 +221,7 @@ npx prisma migrate deploy
 #### **Supabase Storage Issues**
 ```bash
 # Re-run storage setup if needed
-node scripts/setup-supabase-storage.js
+node scripts/setup-supabase-storage.js .env.production
 ```
 
 #### **Build Failures**
