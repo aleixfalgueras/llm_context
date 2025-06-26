@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { buildClientContext } from '@/lib/client-context-utils'
+import { buildClientContextSection } from '@/lib/client-context-utils'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createAICompletion } from '@/lib/ai-wrapper'
@@ -74,17 +74,14 @@ export async function POST(request: Request) {
     // Get language instruction from client's documentsLanguage preference
     const targetLanguage = getLanguageInstruction(validClient.documentsLanguage || 'english')
 
-    // Build client context if fields are selected
-    const clientContext = buildClientContext(validClient, selectedContextFields)
+    // Build client context section if fields are selected - RESPECTS user privacy choices
+    const clientContextSection = buildClientContextSection(validClient, selectedContextFields)
 
-    // Create the complete prompt
+    // Create the complete prompt with client context section
     let completePrompt = processedPrompt
 
-    if (clientContext) {
-      completePrompt = `${processedPrompt}
-
-CLIENT CONTEXT:
-${clientContext}`
+    if (clientContextSection) {
+      completePrompt = `${processedPrompt}${clientContextSection}`
     }
 
     if (additionalInstructions) {

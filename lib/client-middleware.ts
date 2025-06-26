@@ -1,22 +1,18 @@
 import { prisma } from './prisma'
-import { buildClientContext } from './client-context-utils'
 
 export interface ClientAccessOptions {
-  buildContext?: boolean
-  contextType?: 'chat' | 'meeting'
-  includeNotes?: boolean
-  additionalInstructions?: string
+  // Context building is now handled in individual services
+  // Removed buildContext, contextType, includeNotes, additionalInstructions
 }
 
 export interface ClientAccessResult {
   success: boolean
   client?: any
-  context?: string | null
   response?: Response
 }
 
 /**
- * Unified middleware for client access validation and context building
+ * Unified middleware for client access validation
  * Eliminates the repeated client fetching pattern across all APIs
  */
 export async function withClientAccess(
@@ -40,20 +36,9 @@ export async function withClientAccess(
       }
     }
 
-    // Build client context if requested
-    let context = null
-    if (options.buildContext) {
-      context = buildClientContext(client, {
-        contextType: options.contextType,
-        includeNotes: options.includeNotes,
-        additionalInstructions: options.additionalInstructions
-      })
-    }
-
     return {
       success: true,
-      client,
-      context
+      client
     }
   } catch (error) {
     console.error('Error in client access middleware:', error)
@@ -76,7 +61,6 @@ export async function withAuthUsageAndClient(
   success: boolean
   userId?: string
   client?: any
-  context?: string | null
   response?: Response
 }> {
   // Import here to avoid circular dependencies
@@ -105,7 +89,6 @@ export async function withAuthUsageAndClient(
   return {
     success: true,
     userId: authCheck.userId,
-    client: clientCheck.client,
-    context: clientCheck.context
+    client: clientCheck.client
   }
 } 

@@ -189,7 +189,7 @@ export function ClientContextSidebar({
                     <div className="space-y-3">
                       <Label className="text-base font-medium">AI Context Selection</Label>
                       <p className="text-sm text-muted-foreground">
-                        Choose which client information to include when chatting with AI:
+                        Choose which client information to include when chatting with AI. Your privacy choices are strictly respected.
                       </p>
                       <div className="grid grid-cols-1 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
                         {selectedClient?.country && (
