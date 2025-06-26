@@ -22,7 +22,7 @@ export default async function AssistantPage() {
         updatedAt: 'desc',
       },
     }),
-    getClients()
+    getClients({ includeDetails: true })
   ])
 
   return (

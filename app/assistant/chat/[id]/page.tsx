@@ -43,7 +43,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
         updatedAt: 'desc',
       },
     }),
-    getClients()
+    getClients({ includeDetails: true })
   ])
 
   if (!chat) {
