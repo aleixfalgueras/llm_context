@@ -68,13 +68,13 @@ INSTRUCTIONS:
 - Base recommendations solely on what was discussed in the meeting${additionalInfo ? `
 - Pay special attention to the additional context provided above` : ''}
 - Provide the response in markdown format for easy reading
-- DO NOT include any disclaimers or OpenAI-related content
+- DO NOT include any disclaimers or AI provider-related content
 - Provide ONLY the meeting report content in a delivery-ready format
 - Make the action items specific, measurable, and achievable
 - Focus on practical next steps that can be implemented immediately
 - Generate the response in English with clear, professional language`
 
-    // Use unified OpenAI wrapper with automatic usage tracking
+    // Use unified AI wrapper with automatic usage tracking
     logger.aiRequest(selectedModel, undefined, { userId: validUserId, clientId });
     
     const completion = await withTiming(

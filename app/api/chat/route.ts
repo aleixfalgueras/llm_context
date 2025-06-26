@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     chatId = requestChatId;
     logger.apiRequest('POST', '/api/chat', { chatId, model });
 
-    // Authentication check only - no conversation limits, token limits will be enforced by OpenAI wrapper
+    // Authentication check only - no conversation limits, token limits will be enforced by AI wrapper
     const { userId } = await auth()
     if (!userId) {
       logger.warn('Authentication failed', { chatId });
@@ -68,8 +68,8 @@ export async function POST(req: Request) {
     // Check if this is the first user message
     const isFirstUserMessage = existingMessages.length === 0
 
-    // Format messages for OpenAI
-    const openAIMessages: Array<{role: 'system' | 'user' | 'assistant', content: string}> = existingMessages.map((msg: any) => ({
+    // Format messages for AI provider
+    const aiMessages: Array<{role: 'system' | 'user' | 'assistant', content: string}> = existingMessages.map((msg: any) => ({
       role: msg.role.toLowerCase() as 'user' | 'assistant',
       content: msg.content,
     }))
@@ -125,7 +125,7 @@ Respond naturally and conversationally while keeping this context in mind.`
         }
       });
 
-      openAIMessages.unshift({
+      aiMessages.unshift({
         role: 'system',
         content: systemPrompt,
       })
@@ -139,7 +139,7 @@ Respond naturally and conversationally while keeping this context in mind.`
 
     // Add the new user message
     const lastMessage = messages[messages.length - 1]
-    openAIMessages.push({
+    aiMessages.push({
       role: 'user' as const,
       content: lastMessage.content,
     })
@@ -183,14 +183,14 @@ Respond naturally and conversationally while keeping this context in mind.`
       revalidatePath('/')
     }
 
-    // Use unified OpenAI wrapper with automatic usage tracking (token and cost limits enforced automatically)
+    // Use unified AI wrapper with automatic usage tracking (token and cost limits enforced automatically)
     logger.aiRequest(selectedModel, undefined, { userId, chatId });
     const completion = await withTiming(
       'AI API Call',
       () => createAICompletion(
       {
         model: selectedModel,
-        messages: openAIMessages
+        messages: aiMessages
       },
       {
         userId,
@@ -199,7 +199,7 @@ Respond naturally and conversationally while keeping this context in mind.`
       }
       ),
       { userId, chatId, model: selectedModel },
-      3000 // AI API calls can take longer - warn if >3 seconds
+      30000 // AI API calls can take longer - warn if > 30 seconds
     );
 
     const assistantMessage = completion.content

@@ -1,4 +1,4 @@
-// Helper function to get language instruction for OpenAI
+// Helper function to get language instruction for AI providers
 export function getLanguageInstruction(language: string): string {
   const languageMap: Record<string, string> = {
     'english': 'English',
