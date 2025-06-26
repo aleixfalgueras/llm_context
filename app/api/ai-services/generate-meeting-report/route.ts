@@ -1,6 +1,7 @@
 // Language utilities removed - meeting reports are now generated in English only
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
-import { createAICompletion, AIProviderError } from '@/lib/ai-wrapper'
+import { createAICompletion } from '@/lib/ai-wrapper'
+import { AIProviderError } from '@/lib/ai-errors'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
 
 export async function POST(req: Request) {

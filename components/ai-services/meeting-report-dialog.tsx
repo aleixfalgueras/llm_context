@@ -15,7 +15,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { getClientDocuments } from '@/lib/document-actions'
 import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai-wrapper'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 import type { Document } from '@/types/client-document-types'
 
 interface MeetingReportDialogProps {

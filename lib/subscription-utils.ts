@@ -1,5 +1,13 @@
 import { prisma } from './prisma'
 import { logger, withTiming } from './logger'
+import { 
+  getCachedSubscription, 
+  cacheSubscription, 
+  getCachedUsage, 
+  cacheUsage,
+  invalidateSubscriptionCache,
+  invalidateUsageCache
+} from './subscription-cache'
 
 // Subscription Plans Configuration
 export const SUBSCRIPTION_PLANS = {
@@ -60,6 +68,14 @@ export async function getUserSubscription(userId: string) {
   const endTiming = logger.startTiming('Get User Subscription', { userId });
   
   try {
+    // Check cache first
+    const cached = getCachedSubscription(userId)
+    if (cached) {
+      logger.debug('Returning cached subscription', { userId })
+      endTiming();
+      return cached
+    }
+
     logger.dbQuery('findUnique', 'userSubscription', { userId });
     
     let subscription = await prisma.userSubscription.findUnique({
@@ -94,11 +110,10 @@ export async function getUserSubscription(userId: string) {
         { userId },
         500 // Database operations should be fast - warn if >500ms
       );
-      
-
-    } else {
-
     }
+
+    // Cache the result
+    cacheSubscription(userId, subscription)
 
     endTiming();
     return subscription
@@ -118,6 +133,15 @@ export async function getCurrentMonthUsage(userId: string) {
   const month = now.getMonth() + 1
 
   try {
+    // Check cache first (shorter TTL for usage data)
+    const cacheKey = `${userId}_${year}_${month}`
+    const cached = getCachedUsage(cacheKey)
+    if (cached) {
+      logger.debug('Returning cached usage', { userId, metadata: { year: year.toString(), month: month.toString() } })
+      endTiming();
+      return cached
+    }
+
     logger.dbQuery('findUnique', 'userUsage', { userId });
     let usage = await prisma.userUsage.findUnique({
       where: {
@@ -160,18 +184,17 @@ export async function getCurrentMonthUsage(userId: string) {
         { userId },
         500 // Database operations should be fast - warn if >500ms
       );
-      
-
-    } else {
-
     }
+
+    // Cache the result
+    cacheUsage(cacheKey, usage)
 
     endTiming();
     return usage
   } catch (error) {
     logger.error('Error getting current month usage', error as Error, { 
       userId,
-      metadata: { year, month }
+      metadata: { year: year.toString(), month: month.toString() }
     });
     endTiming();
     throw error
@@ -328,6 +351,10 @@ export async function updateUsageTracking(
       },
       update: updateData
     })
+
+    // Invalidate usage cache after update
+    const cacheKey = `${userId}_${year}_${month}`
+    invalidateUsageCache(cacheKey)
 
     endTiming();
   } catch (error) {

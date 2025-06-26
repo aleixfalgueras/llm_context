@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai-wrapper'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 
 interface Client {
   id: string
