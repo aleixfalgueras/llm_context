@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { createMessage } from '@/lib/actions'
 import { revalidatePath } from 'next/cache'
 import { generateChatTitleWithClient } from '@/lib/utils'
-import { buildChatSystemPrompt } from '@/lib/client-context-utils'
+import { buildClientContextSection, hasClientContext } from '@/lib/client-context-utils'
 import { withAuthAndUsageCheck } from '@/lib/api-middleware'
 import { withClientAccess } from '@/lib/client-middleware'
 import { createAICompletion } from '@/lib/ai-wrapper'
@@ -87,10 +87,28 @@ export async function POST(req: Request) {
         userId, 
         chatId, 
         clientId: client.id,
-        metadata: { clientName: client.name }
+        metadata: { 
+          clientName: client.name,
+          selectedContextFields: (chat as any).contextFields || []
+        }
       });
       
-      const systemPrompt = buildChatSystemPrompt(client)
+      // Build chat system prompt with user-selected client context
+      const selectedContextFields = (chat as any).contextFields || []
+      const clientContextSection = buildClientContextSection(client, selectedContextFields)
+      const hasContext = hasClientContext(selectedContextFields)
+      
+      const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their business.${hasContext ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
+
+INSTRUCTIONS:
+- ${hasContext ? 'Use this client information to personalize your responses when relevant' : 'Provide helpful general business advice'}
+- ${hasContext ? 'Reference their specific circumstances when it adds value to your response' : 'Keep responses broadly applicable but actionable'}
+- Be professional, knowledgeable, and supportive
+- Help with any aspect of marketing business operations: strategy, client management, content creation, campaigns, analysis, operations, industry insights, problem-solving, etc.
+- Provide practical, actionable advice tailored to marketing professionals
+- Maintain confidentiality and professionalism at all times
+
+Respond naturally and conversationally while keeping this context in mind.`
 
       openAIMessages.unshift({
         role: 'system',

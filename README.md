@@ -33,8 +33,10 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Intelligent Model Selection**: Choose optimal AI provider and model for each task
 - **Cost-Optimized Usage**: Transparent pricing across providers with automated cost tracking
 - **Provider Redundancy**: Robust failover capabilities across multiple AI providers
-- **Client-Aware AI**: Contextual responses using selected client information
-- **Smart Context Control**: Select specific client fields (country, goals, notes) for each conversation
+- **Comprehensive Business Assistant**: Full-spectrum support for marketing business operations (strategy, client management, content creation, campaigns, analysis, operations, industry insights, problem-solving)
+- **Client-Aware AI**: Contextual responses using selected client information when relevant
+- **Smart Context Control**: Select specific client fields (country, notes) for each conversation with strict privacy respect
+- **Flexible Assistance**: Provides general business advice when no client context is selected, personalized guidance when context is provided
 - **Token Optimization**: Efficient context injection to minimize API costs across all providers
 - **Real-time Chat**: Advanced chat interface with persistent conversation history
 - **Chat Export**: Export conversations to markdown format
@@ -54,6 +56,13 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Usage Analytics**: Track which prompts are most effective for your workflow
 - **Sample Templates**: Pre-built prompts for common marketing tasks
 - **Prompt Selector Integration**: Use prompts directly in chat interface
+
+### 🎯 **Clean Prompt Architecture**
+- **Service-Owned Prompts**: Each AI service defines its own explicit prompt within its route file for maximum transparency and maintainability
+- **Shared Client Context**: Centralized `buildClientContextSection()` function ensures consistent privacy respect across all services
+- **Privacy-First Design**: User context selections strictly respected - only selected client fields are shared with AI
+- **Clear Separation**: Service-specific prompt logic separated from client context handling
+- **Explicit Control**: Prompts are visible and easily customizable in their respective service files
 
 ### ⚡ **Professional Multi-AI Services**
 - **Meeting Report Generator**: Transform meeting transcriptions into professional, actionable reports
@@ -156,6 +165,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 │   ├── actions.ts         # Server actions for chat
 │   ├── client-actions.ts  # Client CRUD operations
 │   ├── document-actions.ts # Document management
+│   ├── client-context-utils.ts # Centralized client context handling
 │   ├── consent-utils.ts   # GDPR utilities
 │   ├── subscription-utils.ts # Usage tracking & limits
 │   ├── data-export-utils.ts # Data export functionality

@@ -4,9 +4,16 @@ This document provides detailed information about the AI Services feature for ma
 
 ## 🎯 Overview
 
-AI Services provide automated marketing content generation using client profiles and custom prompts across multiple AI providers. The feature leverages the same client context system as the AI Assistant while offering choice between OpenAI and Anthropic models to generate personalized, professional marketing documents that are ready for client delivery.
+AI Services provide automated marketing content generation using client profiles and custom prompts across multiple AI providers. The feature leverages a unified client context system while each service maintains its own specialized prompts to generate personalized, professional marketing documents that are ready for client delivery.
 
 ## 🏗️ Core Technology
+
+### **Prompt Architecture (New)**
+- **Service-Owned Prompts**: Each AI service defines its own explicit prompt within its route file
+- **Shared Client Context**: Services call `buildClientContextSection()` for consistent client information integration
+- **Privacy-First Design**: User context selections are strictly respected across all services
+- **Clear Separation**: Prompts are visible and maintainable in their respective service files
+- **Flexible Integration**: Services can customize how they use client context based on their specific needs
 
 ### **Client Context Integration**
 - **Granular Context Selection**: Choose specific client information fields to include in generation
@@ -14,6 +21,7 @@ AI Services provide automated marketing content generation using client profiles
 - **Context Visualization**: Selected fields displayed with actual values (e.g., "Country (United States)")
 - **Consistent System**: Same context selection system as the AI Assistant for familiarity
 - **Privacy-First**: Only selected data is sent to AI provider APIs
+- **Centralized Privacy Logic**: `buildClientContextSection()` ensures consistent privacy respect
 
 ### **Multi-AI Processing**
 - **Multi-Provider Support**: Access OpenAI (GPT-4o, GPT-4o-mini) and Anthropic (Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku) models
@@ -42,18 +50,21 @@ AI Services provide automated marketing content generation using client profiles
 #### **Purpose**
 Generate comprehensive, professional meeting reports from client meeting transcriptions, notes, or agendas.
 
+#### **Prompt Structure**
+The meeting report service uses its own specialized prompt that focuses on:
+- Professional meeting documentation
+- Actionable insights and next steps
+- Clear, structured output format
+- Objective meeting content analysis
+- **Minimal Client Context**: Only includes client name for personalization
+- **No Privacy Concerns**: Meeting reports don't use the full client context system
+
 #### **Key Features**
 - **Meeting Date Selection**: Calendar picker for accurate date recording
 - **Flexible Input**: Accept meeting transcriptions, notes, or agenda items
-- **Context-Aware Generation**: Uses selected client information for personalized reports
+- **Isolated Prompt Logic**: Service-specific prompt optimized for meeting documentation
 - **Structured Output**: Professional formatting with clear sections and action items
 - **Multi-language Output**: Generate reports in client's preferred language
-
-#### **Input Fields**
-- Meeting date (required)
-- Meeting transcription/notes (required)
-- Additional context (optional)
-- Client context fields (selectable)
 
 #### **Output Structure**
 - Meeting Summary
@@ -63,23 +74,24 @@ Generate comprehensive, professional meeting reports from client meeting transcr
 - Follow-up Requirements
 - Professional formatting with clear sections
 
-#### **Use Cases**
-- Client consultation summaries
-- Strategy session documentation
-- Project kickoff meeting reports
-- Campaign planning session notes
-- Performance review meetings
-
 ### **2. Custom Document Generator**
 
 #### **Purpose**
 Create personalized marketing documents using custom prompt templates with automatic client variable replacement.
 
+#### **Prompt Structure**
+The custom document service:
+- **User-Defined Prompts**: Uses prompts from user's prompt library or custom input
+- **Client Context Integration**: Calls `buildClientContextSection()` to respect user privacy selections
+- **Variable Substitution**: Automatic replacement of `{client_name}`, `{country}`, `{goals}`
+- **Flexible Context**: Only includes client information fields user explicitly selected
+- **Service-Specific Logic**: Appends client context section to user's custom prompt
+
 #### **Key Features**
 - **Prompt Library Integration**: Use existing custom prompts or create new ones
-- **Variable Substitution**: Automatic replacement of `{client_name}`, `{country}`, `{goals}`
+- **Variable Substitution**: Automatic replacement of client variables
 - **Custom Instructions**: Add specific requirements for each document
-- **Context Selection**: Include relevant client information fields
+- **Context Selection**: Include relevant client information fields based on user choice
 - **Professional Formatting**: Markdown output optimized for business delivery
 
 #### **Input Options**
@@ -87,15 +99,7 @@ Create personalized marketing documents using custom prompt templates with autom
 - **Custom Prompt**: Create one-time custom instructions
 - **Document Title**: Professional document naming
 - **Additional Instructions**: Specific requirements or modifications
-- **Client Context**: Select relevant information fields
-
-#### **Prompt Examples**
-- Marketing strategy reports
-- Content calendar planning
-- Campaign proposals
-- Performance analysis reports
-- Social media strategies
-- Brand guidelines
+- **Client Context**: Select relevant information fields (respects user privacy)
 
 #### **Variable System**
 ```
@@ -163,12 +167,43 @@ Each document includes:
 
 ## 🔧 Technical Implementation
 
+### **Prompt Architecture**
+```typescript
+// Each service owns its prompt
+// app/api/ai-services/generate-meeting-report/route.ts
+const meetingReportPrompt = `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report...
+CLIENT: ${validClient.name}
+MEETING INFORMATION:
+...`
+
+// app/api/ai-services/generate-custom-document/route.ts
+const clientContextSection = buildClientContextSection(validClient, selectedContextFields)
+let completePrompt = processedPrompt
+if (clientContextSection) {
+  completePrompt = `${processedPrompt}${clientContextSection}`
+}
+```
+
+### **Client Context System**
+```typescript
+// lib/client-context-utils.ts
+export function buildClientContextSection(client: Client, selectedFields: string[] = []): string {
+  // Respects user privacy selections
+  // Returns formatted client context section
+  // Returns empty string if no fields selected
+}
+
+export function hasClientContext(selectedFields: string[] = []): boolean {
+  // Helper to check if any context was selected
+}
+```
+
 ### **API Architecture**
 ```
 AI Services API Structure:
 ├── /api/ai-services/
-│   ├── generate-meeting-report/     # Meeting report generation
-│   ├── generate-custom-document/    # Custom document creation
+│   ├── generate-meeting-report/     # Own prompt + minimal client info
+│   ├── generate-custom-document/    # User prompt + client context section
 │   ├── save-meeting-report/         # Save generated meeting reports
 │   ├── save-custom-document/        # Save custom documents
 │   └── save-chat-export/           # Save exported chat conversations
@@ -189,6 +224,7 @@ AI Services API Structure:
 - **Data Isolation**: Complete separation between user accounts
 - **Input Sanitization**: Comprehensive validation of all inputs
 - **Secure Storage**: Encrypted file storage via Supabase
+- **Privacy Enforcement**: Client context selections strictly respected
 
 ## 📊 Analytics & Tracking
 
@@ -197,6 +233,7 @@ AI Services API Structure:
 - **Document Generation**: Count documents per client/service
 - **Success Rates**: Monitor successful vs. failed generations
 - **User Engagement**: Track feature adoption and usage patterns
+- **Privacy Compliance**: Monitor client context selection patterns
 
 ### **Multi-AI Cost Management**
 - **Cross-Provider Usage Tracking**: Monitor API consumption across OpenAI and Anthropic services
