@@ -72,7 +72,7 @@ export function CustomDocumentGeneratorDialog({
   const loadPrompts = async () => {
     setIsLoadingPrompts(true)
     try {
-      const response = await fetch('/api/prompts?active=true')
+      const response = await fetch('/api/prompts?active=true&includeContent=true')
       if (response.ok) {
         const data = await response.json()
         setPrompts(data || [])
