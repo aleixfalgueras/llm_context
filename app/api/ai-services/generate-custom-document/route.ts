@@ -4,6 +4,7 @@ import { replaceClientVariables } from '@/lib/variable-replacement'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createOpenAICompletion } from '@/lib/openai-wrapper'
 import { getDefaultTemperature, getDefaultMaxTokens } from '@/lib/models-config'
+import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 
 export async function POST(request: Request) {
   try {
@@ -70,6 +71,9 @@ export async function POST(request: Request) {
     // Replace client variables in prompt using shared utility
     const processedPrompt = replaceClientVariables(promptContent, validClient)
 
+    // Get language instruction from client's documentsLanguage preference
+    const targetLanguage = getLanguageInstruction(validClient.documentsLanguage || 'english')
+
     // Build client context if fields are selected
     const clientContext = buildClientContext(validClient, selectedContextFields)
 
@@ -90,9 +94,14 @@ ADDITIONAL INSTRUCTIONS:
 ${additionalInstructions}`
     }
 
+    // Add language requirements
     completePrompt += `
 
-Please generate a professional, well-structured document based on the above prompt and client information. Format the content in clear markdown with appropriate headings, sections, and formatting for easy reading and professional presentation.`
+${getLanguageRequirementSection(targetLanguage, 'custom-document')}
+
+Please generate a professional, well-structured document based on the above prompt and client information. Format the content in clear markdown with appropriate headings, sections, and formatting for easy reading and professional presentation. 
+
+IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining professional language and cultural appropriateness for this language.`
 
     // Use unified OpenAI wrapper with automatic usage tracking
     const completion = await createOpenAICompletion(
