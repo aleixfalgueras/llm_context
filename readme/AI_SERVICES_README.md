@@ -1,10 +1,10 @@
-# AI Marketing Services Documentation
+# Multi-AI Marketing Services Documentation
 
-This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents with granular client context control and professional output formatting.
+This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents using multiple AI providers (OpenAI and Anthropic) with granular client context control and professional output formatting.
 
 ## 🎯 Overview
 
-AI Services provide automated marketing content generation using client profiles and custom prompts. The feature leverages the same client context system as the AI Assistant to generate personalized, professional marketing documents that are ready for client delivery.
+AI Services provide automated marketing content generation using client profiles and custom prompts across multiple AI providers. The feature leverages the same client context system as the AI Assistant while offering choice between OpenAI and Anthropic models to generate personalized, professional marketing documents that are ready for client delivery.
 
 ## 🏗️ Core Technology
 
@@ -13,14 +13,16 @@ AI Services provide automated marketing content generation using client profiles
 - **Dynamic UI**: Checkboxes only appear for fields with actual client data
 - **Context Visualization**: Selected fields displayed with actual values (e.g., "Country (United States)")
 - **Consistent System**: Same context selection system as the AI Assistant for familiarity
-- **Privacy-First**: Only selected data is sent to OpenAI APIs
+- **Privacy-First**: Only selected data is sent to AI provider APIs
 
-### **AI Processing**
-- **Multi-Model Support**: Uses both GPT-4o and GPT-4o-mini for different use cases
-- **Model Selection Interface**: User-friendly dropdown to choose between models
-- **Cost-Aware Recommendations**: Model descriptions include cost and performance information
-- **Per-Service Model Choice**: Select different models for different AI services
-- **Model Persistence**: Selected model is remembered across sessions
+### **Multi-AI Processing**
+- **Multi-Provider Support**: Access OpenAI (GPT-4o, GPT-4o-mini) and Anthropic (Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku) models
+- **Unified Model Selection**: User-friendly interface to choose optimal AI provider and model
+- **Cross-Provider Cost Tracking**: Transparent pricing and usage monitoring across all providers
+- **Performance-Based Recommendations**: Model descriptions include provider, cost, and optimal use cases
+- **Per-Service Model Choice**: Select different providers and models for different AI services
+- **Model Persistence**: Selected provider and model are remembered across sessions
+- **Intelligent Routing**: Automatic provider selection based on task requirements
 - **Client Variable Replacement**: Automatic substitution of client variables in prompts
 - **Professional Output**: Production-ready marketing content formatted for client delivery
 - **Real-time Generation**: Interactive content creation with immediate feedback
@@ -172,12 +174,15 @@ AI Services API Structure:
 │   └── save-chat-export/           # Save exported chat conversations
 ```
 
-### **OpenAI Integration**
-- **Model Selection**: Configurable model choice (GPT-4o, GPT-4o-mini)
-- **Token Optimization**: Efficient prompt construction
-- **Temperature Control**: Configurable creativity settings
-- **Max Tokens**: Controlled output length
-- **Error Handling**: Robust API error management
+### **Multi-AI Integration**
+- **Provider Support**: Seamless integration with OpenAI and Anthropic APIs
+- **Model Selection**: Choose from GPT-4o, GPT-4o-mini, Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku
+- **Cross-Provider Cost Tracking**: Unified usage monitoring across all AI providers
+- **Token Optimization**: Efficient prompt construction for all models
+- **Temperature Control**: Configurable creativity settings per provider
+- **Max Tokens**: Controlled output length across different model architectures
+- **Robust Error Handling**: Comprehensive error management with provider fallback capabilities
+- **Performance Monitoring**: Track response times and quality across providers
 
 ### **Security Features**
 - **User Verification**: All operations verify user ownership
@@ -193,11 +198,13 @@ AI Services API Structure:
 - **Success Rates**: Monitor successful vs. failed generations
 - **User Engagement**: Track feature adoption and usage patterns
 
-### **Cost Management**
-- **Token Usage**: Track OpenAI API consumption per service
-- **Model Costs**: Monitor expenses across different models
-- **Per-User Analytics**: Track usage per user for billing
-- **Optimization Opportunities**: Identify cost reduction areas
+### **Multi-AI Cost Management**
+- **Cross-Provider Usage Tracking**: Monitor API consumption across OpenAI and Anthropic services
+- **Unified Cost Analytics**: Track expenses across all AI providers and models
+- **Provider Performance Comparison**: Compare costs and quality across different providers
+- **Per-User Multi-Cloud Analytics**: Track usage per user across all providers for billing
+- **Cost Optimization Insights**: Identify opportunities to reduce expenses across providers
+- **Provider ROI Analysis**: Measure return on investment for different AI providers
 
 ## 🚀 Future Enhancements
 

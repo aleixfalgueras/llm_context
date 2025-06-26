@@ -340,9 +340,10 @@ export async function updateUsageTracking(
   }
 }
 
-// Calculate estimated cost for OpenAI usage
-export function calculateOpenAICost(model: string, inputTokens: number, outputTokens: number): number {
+// Calculate estimated cost for AI usage (OpenAI and Claude)
+export function calculateAICost(model: string, inputTokens: number, outputTokens: number): number {
   const pricing = {
+    // OpenAI pricing
     'gpt-4o': {
       input: 0.0025,  // $0.0025 per 1K input tokens
       output: 0.01    // $0.01 per 1K output tokens
@@ -350,6 +351,20 @@ export function calculateOpenAICost(model: string, inputTokens: number, outputTo
     'gpt-4o-mini': {
       input: 0.00015, // $0.00015 per 1K input tokens
       output: 0.0006  // $0.0006 per 1K output tokens
+    },
+    // Claude pricing (latest models)
+    'claude-opus-4-20250514': {
+      input: 0.015,   // $15 per 1M tokens = $0.015 per 1K tokens
+      output: 0.075   // $75 per 1M tokens = $0.075 per 1K tokens
+    },
+    'claude-sonnet-4-20250514': {
+      input: 0.003,   // $3 per 1M tokens = $0.003 per 1K tokens
+      output: 0.015   // $15 per 1M tokens = $0.015 per 1K tokens
+    },
+
+    'claude-3-5-haiku-20241022': {
+      input: 0.0008,  // $0.80 per 1M tokens = $0.0008 per 1K tokens  
+      output: 0.004   // $4 per 1M tokens = $0.004 per 1K tokens
     }
   }
 
@@ -357,6 +372,8 @@ export function calculateOpenAICost(model: string, inputTokens: number, outputTo
   
   return (inputTokens / 1000) * modelPricing.input + (outputTokens / 1000) * modelPricing.output
 }
+
+
 
 // Get usage analytics for dashboard
 export async function getUserUsageAnalytics(userId: string) {

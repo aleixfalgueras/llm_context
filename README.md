@@ -1,15 +1,17 @@
 # AI Marketing Assistant
 
-A modern AI-powered marketing assistant built with Next.js 14, React 18, and OpenAI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations.
+A modern AI-powered marketing assistant built with Next.js 14, React 18, and multi-AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations with the best AI models from multiple providers.
 
 ## 🆕 Recent Updates & Improvements
 
-### **Model Selection System (Latest)**
-- **User-Friendly Interface**: Choose between GPT-4o and GPT-4o-mini with clear descriptions
-- **Cost-Aware Recommendations**: Each model shows cost implications and use cases
+### **Multi-AI Integration (Latest)**
+- **Multiple AI Providers**: Seamless integration of OpenAI and Anthropic Claude models
+- **Unified Model Selection**: Choose from GPT-4o, GPT-4o-mini, Claude 4 Opus, Claude 4 Sonnet, and Claude 3.5 Haiku
+- **Cost-Aware Recommendations**: Each model shows provider, cost implications, and optimal use cases
+- **Provider Transparency**: Clear indication of which AI provider powers each model
+- **Intelligent Fallbacks**: Robust error handling across multiple AI providers
 - **Per-Service Selection**: Different model choice for AI services and chat assistant
 - **Persistent Preferences**: Your model choice is remembered across sessions
-- **Performance Optimization**: Choose the right model for your specific task
 
 ### **Simplified Usage System**
 - **Streamlined Limits**: Focus on essential metrics (documents, tokens, cost)
@@ -25,15 +27,18 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 
 ## ✨ Key Features
 
-### 🤖 **AI-Powered Content Creation**
-- **Multi-Model Support**: Choose between GPT-4o and GPT-4o-mini based on your needs and budget
-- **Model Selection Interface**: User-friendly model selector with descriptions and cost implications
+### 🤖 **Multi-AI-Powered Content Creation**
+- **Multi-Provider Support**: Access OpenAI and Anthropic models through unified interface
+- **Comprehensive Model Library**: GPT-4o, GPT-4o-mini, Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku
+- **Intelligent Model Selection**: Choose optimal AI provider and model for each task
+- **Cost-Optimized Usage**: Transparent pricing across providers with automated cost tracking
+- **Provider Redundancy**: Robust failover capabilities across multiple AI providers
 - **Client-Aware AI**: Contextual responses using selected client information
 - **Smart Context Control**: Select specific client fields (country, goals, notes) for each conversation
-- **Token Optimization**: Efficient context injection to minimize API costs
-- **Real-time Chat**: ChatGPT-like interface with persistent conversation history
+- **Token Optimization**: Efficient context injection to minimize API costs across all providers
+- **Real-time Chat**: Advanced chat interface with persistent conversation history
 - **Chat Export**: Export conversations to markdown format
-- **Model Persistence**: Remembers your model choice per chat session
+- **Model Persistence**: Remembers your provider and model choice per chat session
 
 ### 👥 **Comprehensive Client Management**
 - **Rich Client Profiles**: Store business information, contact details, marketing goals, and project notes
@@ -50,10 +55,12 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Sample Templates**: Pre-built prompts for common marketing tasks
 - **Prompt Selector Integration**: Use prompts directly in chat interface
 
-### ⚡ **Professional AI Services**
+### ⚡ **Professional Multi-AI Services**
 - **Meeting Report Generator**: Transform meeting transcriptions into professional, actionable reports
 - **Custom Document Generator**: Create marketing content using your own prompt templates
-- **Model Selection**: Choose optimal AI model for each service (GPT-4o or GPT-4o-mini)
+- **Multi-Provider Model Selection**: Choose optimal AI provider and model for each service
+- **Performance-Optimized Routing**: Automatic selection of best provider based on task requirements
+- **Cross-Provider Cost Tracking**: Unified usage monitoring across OpenAI and Anthropic
 - **Automatic Document Storage**: All content saved to Supabase with organized file structure
 - **Document Export**: Download documents in Markdown format
 - **Document Management**: Update, rename, and organize generated content
@@ -66,19 +73,22 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **Privacy Dashboard**: User-controlled privacy settings and data rights
 - **Policy Version Management**: Automatic consent renewal when policies update
 
-### 💳 **Subscription & Usage Management**
-- **Freemium Model**: Free tier with generous limits for testing
-- **Usage Tracking**: Real-time monitoring of conversations, documents, and API costs
-- **Flexible Plans**: Multiple subscription tiers for different user needs
-- **Cost Optimization**: Smart token management to minimize OpenAI expenses
-- **Usage Analytics**: Detailed insights into feature usage and costs
+### 💳 **Multi-AI Subscription & Usage Management**
+- **Freemium Model**: Free tier with generous limits for testing across all providers
+- **Unified Usage Tracking**: Real-time monitoring of conversations, documents, and API costs across OpenAI and Anthropic
+- **Cross-Provider Analytics**: Comprehensive cost tracking regardless of AI provider used
+- **Flexible Plans**: Multiple subscription tiers accommodating different provider preferences
+- **Multi-AI Cost Optimization**: Smart token management to minimize expenses across all AI providers
+- **Provider Performance Insights**: Detailed analytics showing usage patterns by AI provider
 
-### 📊 **Analytics & Insights**
-- **Prompt Usage Tracking**: Monitor which templates drive best results
-- **Model Cost Tracking**: Track OpenAI API usage across different models
-- **Client Activity**: Monitor content generation patterns per client
+### 📊 **Multi-AI Analytics & Insights**
+- **Prompt Usage Tracking**: Monitor which templates drive best results across all providers
+- **Cross-Provider Cost Analysis**: Track API usage and costs across OpenAI and Anthropic models
+- **Provider Performance Comparison**: Analyze response quality and speed by AI provider
+- **Client Activity Monitoring**: Track content generation patterns per client across all models
+- **Multi-AI Usage Patterns**: Insights into which providers are preferred for different tasks
 - **User Feedback System**: Built-in feedback collection for continuous improvement
-- **Performance Monitoring**: Comprehensive logging and timing analysis
+- **Comprehensive Performance Monitoring**: Logging and timing analysis across all AI providers
 
 ## 🏗️ Tech Stack
 
@@ -98,11 +108,13 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **API Routes**: RESTful endpoints for AI services and data management
 - **Middleware**: Authentication and usage protection
 
-### **AI & External Services**
+### **Multi-AI & External Services**
 - **OpenAI API**: GPT-4o and GPT-4o-mini integration with cost tracking
-
-
-- **AI SDK**: Streamlined AI integration with streaming support
+- **Anthropic API**: Claude 4 Opus, Claude 4 Sonnet, and Claude 3.5 Haiku integration
+- **Unified AI Wrapper**: Single interface handling multiple AI providers seamlessly
+- **Cross-Provider Cost Tracking**: Unified billing and usage monitoring across all AI services
+- **Provider Failover**: Automatic fallback capabilities for enhanced reliability
+- **AI SDK**: Streamlined multi-provider AI integration with streaming support
 
 ### **Authentication & Security**
 - **Clerk**: Complete authentication solution with user management
@@ -148,9 +160,10 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 │   ├── subscription-utils.ts # Usage tracking & limits
 │   ├── data-export-utils.ts # Data export functionality
 │   ├── language-utils.ts  # Multi-language support
-│   ├── models-config.ts   # AI model configuration and defaults
+│   ├── models-config.ts   # Multi-AI model configuration
 │   ├── logger.ts          # Comprehensive logging system
-│   ├── openai-wrapper.ts  # OpenAI API integration
+│   ├── ai-wrapper.ts      # Unified multi-AI integration
+│   ├── openai-wrapper.ts  # Legacy OpenAI API integration
 │   └── variable-replacement.ts # Variable substitution
 ├── prisma/               # Database
 │   ├── schema.prisma     # Complete database schema
@@ -186,6 +199,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - Node.js 18+ 
 - PostgreSQL database (Supabase recommended)
 - OpenAI API key with credits
+- Anthropic API key for Claude models
 - Clerk account for authentication
 
 
@@ -196,6 +210,10 @@ Create `.env.local` with these variables:
 # Database
 DATABASE_URL="your_supabase_database_url"
 DIRECT_URL="your_supabase_direct_url"
+
+# AI Providers
+OPENAI_API_KEY="your_openai_api_key"
+ANTHROPIC_API_KEY="your_anthropic_api_key"
 
 # Supabase Storage
 SUPABASE_URL="your_supabase_project_url"

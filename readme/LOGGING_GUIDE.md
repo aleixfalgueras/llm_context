@@ -1,6 +1,6 @@
-# 📊 Comprehensive Logging System Guide
+# 📊 Multi-AI Logging System Guide
 
-I've added extensive temporal logging throughout your application to help with testing, debugging, and monitoring. This guide explains how to use and interpret the logs.
+I've added extensive temporal logging throughout your application to help with testing, debugging, and monitoring across multiple AI providers. This guide explains how to use and interpret the logs for OpenAI and Anthropic integrations.
 
 ## 🚀 Quick Start
 
@@ -79,7 +79,7 @@ npm run dev
 | `clientId` | Client/customer ID | `client_456abc` |
 | `component` | Frontend component name | `ChatInput`, `useChat` |
 | `operation` | Server operation | `POST /api/chat` |
-| `model` | AI model used | `gpt-4o`, `gpt-4o-mini` |
+| `model` | AI model used | `gpt-4o`, `gpt-4o-mini`, `claude-4-opus`, `claude-4-sonnet`, `claude-3-5-haiku` |
 | `metadata` | Additional context | `{"duration":150,"messageLength":25}` |
 
 ## 🎯 Key Testing Scenarios

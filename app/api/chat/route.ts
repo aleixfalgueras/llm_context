@@ -5,7 +5,7 @@ import { generateChatTitleWithClient } from '@/lib/utils'
 import { buildChatSystemPrompt } from '@/lib/client-context-utils'
 import { withAuthAndUsageCheck } from '@/lib/api-middleware'
 import { withClientAccess } from '@/lib/client-middleware'
-import { createOpenAICompletion } from '@/lib/openai-wrapper'
+import { createAICompletion } from '@/lib/ai-wrapper'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
@@ -153,8 +153,8 @@ export async function POST(req: Request) {
     // Use unified OpenAI wrapper with automatic usage tracking (token and cost limits enforced automatically)
     logger.aiRequest(selectedModel, undefined, { userId, chatId });
     const completion = await withTiming(
-      'OpenAI API Call',
-      () => createOpenAICompletion(
+      'AI API Call',
+      () => createAICompletion(
       {
         model: selectedModel,
         messages: openAIMessages

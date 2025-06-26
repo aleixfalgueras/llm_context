@@ -1,6 +1,6 @@
 import OpenAI from 'openai'
 import { trackUsage } from './usage-middleware'
-import { calculateOpenAICost } from './subscription-utils'
+import { calculateAICost } from './subscription-utils'
 import { 
   getDefaultModel, 
   getDefaultTemperature, 
@@ -68,7 +68,7 @@ export async function createOpenAICompletion(
   let usageInfo = null
   
   if (usage) {
-    const estimatedCost = calculateOpenAICost(
+    const estimatedCost = calculateAICost(
       model,
       usage.prompt_tokens,
       usage.completion_tokens

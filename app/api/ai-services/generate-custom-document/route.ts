@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { buildClientContext } from '@/lib/client-context-utils'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
-import { createOpenAICompletion } from '@/lib/openai-wrapper'
+import { createAICompletion } from '@/lib/ai-wrapper'
 import { getDefaultTemperature, getDefaultMaxTokens } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 
@@ -104,7 +104,7 @@ Please generate a professional, well-structured document based on the above prom
 IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining professional language and cultural appropriateness for this language.`
 
     // Use unified OpenAI wrapper with automatic usage tracking
-    const completion = await createOpenAICompletion(
+    const completion = await createAICompletion(
       {
         model: selectedModel,
         messages: [
