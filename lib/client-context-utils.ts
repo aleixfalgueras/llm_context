@@ -32,7 +32,7 @@ export function buildClientContextSection(client: Client, selectedFields: string
 
   // Add notes section - ONLY if user selected notes
   if (shouldIncludeNotes && client.notes) {
-    contextSection += `\n\nAdditional Notes:\n${client.notes}`
+    contextSection += `\n\nNotes:\n${client.notes}`
   }
 
   return contextSection
