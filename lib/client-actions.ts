@@ -150,7 +150,6 @@ export async function getClients(options?: { includeDetails?: boolean; limit?: n
         // Include heavy fields only when requested
         ...(options?.includeDetails && {
           phone: true,
-          goals: true,
           notes: true
         })
       },
