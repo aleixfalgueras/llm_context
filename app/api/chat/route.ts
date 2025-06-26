@@ -111,6 +111,20 @@ INSTRUCTIONS:
 
 Respond naturally and conversationally while keeping this context in mind.`
 
+      // Log the complete system prompt for the first message
+      logger.info('System prompt created for chat', { 
+        userId, 
+        chatId, 
+        clientId: client.id,
+        metadata: { 
+          systemPrompt,
+          promptLength: systemPrompt.length,
+          hasClientContext: hasContext,
+          contextFields: selectedContextFields,
+          clientName: client.name
+        }
+      });
+
       openAIMessages.unshift({
         role: 'system',
         content: systemPrompt,

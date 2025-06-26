@@ -12,7 +12,7 @@ export default async function AIServicesPage() {
   }
 
   // Get user's clients
-  const clients = await getClients()
+  const clients = await getClients({ includeDetails: true })
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
