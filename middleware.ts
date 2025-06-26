@@ -11,6 +11,8 @@ const isPublicRoute = createRouteMatcher([
   '/privacy/settings'
 ])
 
+// Note: /admin is NOT public - it requires authentication and email verification
+
 export default clerkMiddleware(async (auth, request) => {
   const url = new URL(request.url)
   const startTime = Date.now()
