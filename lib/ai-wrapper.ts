@@ -34,7 +34,206 @@ export interface UsageTrackingOptions {
   additionalMetadata?: Record<string, any>
 }
 
+/**
+ * Custom error class for AI provider issues
+ */
+export class AIProviderError extends Error {
+  public readonly provider: string
+  public readonly type: 'timeout' | 'rate_limit' | 'service_unavailable' | 'authentication' | 'quota_exceeded' | 'unknown'
+  public readonly statusCode?: number
+  public readonly retryAfter?: number
 
+  constructor(
+    message: string, 
+    provider: string, 
+    type: AIProviderError['type'], 
+    statusCode?: number,
+    retryAfter?: number
+  ) {
+    super(message)
+    this.name = 'AIProviderError'
+    this.provider = provider
+    this.type = type
+    this.statusCode = statusCode
+    this.retryAfter = retryAfter
+  }
+}
+
+/**
+ * Utility function to create user-friendly error messages for different AI provider errors
+ */
+export function getAIErrorMessage(error: AIProviderError): { title: string; description: string } {
+  const providerName = error.provider === 'openai' ? 'OpenAI' : 'Anthropic'
+  
+  switch (error.type) {
+    case 'timeout':
+      return {
+        title: `${providerName} Service Timeout`,
+        description: `The ${providerName} service is taking longer than expected to respond. This usually resolves within a few minutes. Please try again.`
+      }
+    case 'rate_limit':
+      return {
+        title: `${providerName} Rate Limit`,
+        description: `Too many requests to ${providerName}. Please wait ${error.retryAfter ? `${Math.ceil(error.retryAfter / 1000)} seconds` : 'a moment'} before trying again.`
+      }
+    case 'service_unavailable':
+      return {
+        title: `${providerName} Service Unavailable`,
+        description: `The ${providerName} service is temporarily unavailable. This is usually brief - please try again in a few minutes.`
+      }
+    case 'authentication':
+      return {
+        title: `${providerName} Authentication Error`,
+        description: `There's an issue with the ${providerName} API configuration. Please contact support if this persists.`
+      }
+    case 'quota_exceeded':
+      return {
+        title: `${providerName} Quota Exceeded`,
+        description: `The ${providerName} usage quota has been exceeded. Please try again later or contact support.`
+      }
+    default:
+      return {
+        title: `${providerName} Service Error`,
+        description: `The ${providerName} service encountered an unexpected error. Please try again, and if the problem persists, try switching to a different AI model.`
+      }
+  }
+}
+
+/**
+ * Enhanced error handling for OpenAI errors
+ */
+function handleOpenAIError(error: any): never {
+  if (error.name === 'OpenAIError' || error.constructor?.name === 'OpenAIError') {
+    // Handle OpenAI-specific errors
+    const status = error.status || error.statusCode
+    
+    if (status === 429) {
+      const retryAfter = error.headers?.['retry-after'] ? parseInt(error.headers['retry-after']) * 1000 : undefined
+      throw new AIProviderError(
+        error.message || 'Rate limit exceeded',
+        'openai',
+        'rate_limit',
+        status,
+        retryAfter
+      )
+    } else if (status === 401 || status === 403) {
+      throw new AIProviderError(
+        error.message || 'Authentication failed',
+        'openai',
+        'authentication',
+        status
+      )
+    } else if (status === 503 || status === 502) {
+      throw new AIProviderError(
+        error.message || 'Service temporarily unavailable',
+        'openai',
+        'service_unavailable',
+        status
+      )
+    } else if (status === 422 && error.message?.includes('quota')) {
+      throw new AIProviderError(
+        error.message || 'Quota exceeded',
+        'openai',
+        'quota_exceeded',
+        status
+      )
+    }
+  }
+  
+  // Handle timeout errors
+  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
+    throw new AIProviderError(
+      'Request timed out',
+      'openai',
+      'timeout'
+    )
+  }
+  
+  // Handle network errors
+  if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED' || error.message?.includes('network')) {
+    throw new AIProviderError(
+      'Network connection failed',
+      'openai',
+      'service_unavailable'
+    )
+  }
+  
+  // Generic OpenAI error
+  throw new AIProviderError(
+    error.message || 'OpenAI service error',
+    'openai',
+    'unknown',
+    error.status || error.statusCode
+  )
+}
+
+/**
+ * Enhanced error handling for Anthropic errors
+ */
+function handleAnthropicError(error: any): never {
+  if (error.name === 'AnthropicError' || error.constructor?.name === 'AnthropicError') {
+    // Handle Anthropic-specific errors
+    const status = error.status || error.statusCode
+    
+    if (status === 429) {
+      const retryAfter = error.headers?.['retry-after'] ? parseInt(error.headers['retry-after']) * 1000 : undefined
+      throw new AIProviderError(
+        error.message || 'Rate limit exceeded',
+        'anthropic',
+        'rate_limit',
+        status,
+        retryAfter
+      )
+    } else if (status === 401 || status === 403) {
+      throw new AIProviderError(
+        error.message || 'Authentication failed',
+        'anthropic',
+        'authentication',
+        status
+      )
+    } else if (status === 503 || status === 502) {
+      throw new AIProviderError(
+        error.message || 'Service temporarily unavailable',
+        'anthropic',
+        'service_unavailable',
+        status
+      )
+    } else if (status === 422 && error.message?.includes('quota')) {
+      throw new AIProviderError(
+        error.message || 'Quota exceeded',
+        'anthropic',
+        'quota_exceeded',
+        status
+      )
+    }
+  }
+  
+  // Handle timeout errors
+  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
+    throw new AIProviderError(
+      'Request timed out',
+      'anthropic',
+      'timeout'
+    )
+  }
+  
+  // Handle network errors
+  if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED' || error.message?.includes('network')) {
+    throw new AIProviderError(
+      'Network connection failed',
+      'anthropic',
+      'service_unavailable'
+    )
+  }
+  
+  // Generic Anthropic error
+  throw new AIProviderError(
+    error.message || 'Anthropic service error',
+    'anthropic',
+    'unknown',
+    error.status || error.statusCode
+  )
+}
 
 /**
  * Unified AI API wrapper that handles both OpenAI and Claude
@@ -74,10 +273,24 @@ export async function createAICompletion(
   // Log model usage information
   console.log(`🤖 AI Model Request: ${model} (${provider}) | Service: ${serviceSource} | User: ${trackingOptions.userId}`)
   
-  if (isAnthropic) {
-    return createClaudeCompletion(completionOptions, trackingOptions)
-  } else {
-    return createOpenAICompletion(completionOptions, trackingOptions)
+  try {
+    if (isAnthropic) {
+      return await createClaudeCompletion(completionOptions, trackingOptions)
+    } else {
+      return await createOpenAICompletion(completionOptions, trackingOptions)
+    }
+  } catch (error) {
+    // Re-throw AIProviderError as-is
+    if (error instanceof AIProviderError) {
+      throw error
+    }
+    
+    // Handle other errors based on provider
+    if (isAnthropic) {
+      handleAnthropicError(error)
+    } else {
+      handleOpenAIError(error)
+    }
   }
 }
 

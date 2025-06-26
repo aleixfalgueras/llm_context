@@ -1,6 +1,6 @@
 // Language utilities removed - meeting reports are now generated in English only
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
-import { createAICompletion } from '@/lib/ai-wrapper'
+import { createAICompletion, AIProviderError } from '@/lib/ai-wrapper'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
 
 export async function POST(req: Request) {
@@ -128,6 +128,20 @@ INSTRUCTIONS:
     logger.error('Error generating meeting report', error as Error, { clientId });
     logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 500, { clientId });
     endTiming();
+    
+    // Handle AI provider errors specifically
+    if (error instanceof AIProviderError) {
+      return Response.json(
+        {
+          error: error.message,
+          provider: error.provider,
+          type: error.type,
+          retryAfter: error.retryAfter
+        },
+        { status: error.statusCode || 500 }
+      )
+    }
+    
     return new Response('Internal Server Error', { status: 500 })
   }
 } 

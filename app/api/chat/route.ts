@@ -5,7 +5,7 @@ import { generateChatTitleWithClient } from '@/lib/utils'
 import { buildClientContextSection, hasClientContext } from '@/lib/client-context-utils'
 import { withAuthAndUsageCheck } from '@/lib/api-middleware'
 import { withClientAccess } from '@/lib/client-middleware'
-import { createAICompletion } from '@/lib/ai-wrapper'
+import { createAICompletion, AIProviderError } from '@/lib/ai-wrapper'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
@@ -226,6 +226,20 @@ Respond naturally and conversationally while keeping this context in mind.`
     logger.error('Error in chat API', error as Error, { chatId });
     logger.apiResponse('POST', '/api/chat', 500, { chatId });
     endTiming();
+    
+    // Handle AI provider errors specifically
+    if (error instanceof AIProviderError) {
+      return Response.json(
+        {
+          error: error.message,
+          provider: error.provider,
+          type: error.type,
+          retryAfter: error.retryAfter
+        },
+        { status: error.statusCode || 500 }
+      )
+    }
+    
     return new Response('Internal Server Error', { status: 500 })
   }
 } 
