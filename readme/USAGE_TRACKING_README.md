@@ -1,6 +1,6 @@
-# Usage Tracking System
+# Multi-AI Usage Tracking System
 
-This document explains how the usage tracking system works for the LLM Context application, focusing on monitoring and limiting AI service usage to manage costs and ensure fair resource allocation.
+This document explains how the usage tracking system works for the LLM Context application, focusing on monitoring and limiting AI service usage across multiple providers (OpenAI and Anthropic) to manage costs and ensure fair resource allocation.
 
 ## Overview
 
@@ -23,7 +23,7 @@ model UserSubscription {
   maxClients              Int     -- Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
   maxDocumentsPerMonth    Int     -- Basic: 20, Pro: 200, Business: unlimited (-1)
   maxTokensPerMonth       Int     -- Basic: 100K, Pro: 2M, Business: unlimited (-1)
-  maxCostPerMonth         Float   -- Basic: $2, Pro: $25, Business: unlimited (-1)
+  maxCostPerMonth         Float   -- Basic: $2, Pro: $25, Business: $40 (all across AI providers)
   
   -- Plan Features
   
@@ -37,7 +37,7 @@ Tracks monthly usage aggregates:
 model UserUsage {
   documentsGenerated Int     -- Total documents generated this month
   tokensUsed        Int     -- Total tokens consumed this month  
-  estimatedCost     Float   -- Estimated OpenAI costs this month
+  estimatedCost     Float   -- Estimated AI costs this month (across all providers)
 }
 ```
 
@@ -49,19 +49,19 @@ All AI services that generate content track:
 1. **Meeting Report Generator**
    - Document count increment
    - Token usage (prompt + completion)
-   - Estimated OpenAI cost
-   - Model used (for analytics)
+   - Estimated AI cost (OpenAI or Anthropic)
+   - Model and provider used (for analytics)
 
 2. **Custom Document Generator**
    - Document count increment  
    - Token usage (prompt + completion)
-   - Estimated OpenAI cost
-   - Template used (for analytics)
+   - Estimated AI cost (OpenAI or Anthropic)
+   - Template and provider used (for analytics)
 
 3. **Chat/Assistant Service**
    - Treated as document generation
-   - Token usage tracking
-   - Cost monitoring per conversation
+   - Token usage tracking across providers
+   - Cost monitoring per conversation across all AI providers
 
 ### Client Management
 - **Limit Type**: Real-time count of existing client profiles
@@ -85,11 +85,12 @@ if (!usageCheck.allowed) {
 }
 ```
 
-### 2. AI Service Processing
+### 2. Multi-AI Service Processing
 ```typescript
-// Process with OpenAI and track usage automatically
-const result = await createOpenAICompletion({
+// Process with AI provider and track usage automatically
+const result = await createAICompletion({
   prompt,
+  model: selectedModel, // GPT-4o, Claude 4 Sonnet, etc.
   usageTracking: {
     userId,
     eventType: 'document_generation',
@@ -111,21 +112,21 @@ await updateUsageTracking(userId, 'document_generation', {
 
 ### Basic Plan ($10/month, first month FREE)
 - 100K tokens per month (~75 pages of content)
-- $2 OpenAI usage limit
+- $2 AI usage limit (across all providers)
 - 3 client profiles
 - 20 documents per month
 - Unlimited custom prompts
 
 ### Pro Plan ($17/month)
 - 2M tokens per month (~1,500 pages of content)  
-- $25 OpenAI usage limit
+- $25 AI usage limit (across all providers)
 - Unlimited client profiles
 - 200 documents per month
 - Unlimited custom prompts
 
 ### Business Plan ($43/month)
 - Unlimited tokens and documents
-- $40 OpenAI usage limit
+- $40 AI usage limit (across all providers)
 - Unlimited client profiles
 
 ## How Limits Interact: The Triple-Constraint System
@@ -141,10 +142,15 @@ The system enforces **three separate limits** (whichever hits first blocks furth
 
 **Key Insight**: Token limits count the same regardless of model cost, which creates important behavioral constraints:
 
-#### Model Cost Differences:
-- **GPT-4o**: ~17x more expensive than GPT-4o-mini
+#### Multi-AI Model Cost Differences:
+**OpenAI Models:**
 - **GPT-4o**: $0.011 per typical document (2K tokens)
 - **GPT-4o-mini**: $0.00066 per typical document (2K tokens)
+
+**Anthropic Models:**
+- **Claude 4 Opus**: $0.090 per typical document (2K tokens)
+- **Claude 4 Sonnet**: $0.018 per typical document (2K tokens)
+- **Claude 3.5 Haiku**: $0.0048 per typical document (2K tokens)
 
 #### Real-World Limit Analysis:
 
@@ -197,7 +203,10 @@ With GPT-4o:
 
 ### Practical Implications:
 
-- **Token limits** are the real constraint for cost-effective models (GPT-4o-mini)
+- **Token limits** are the real constraint for cost-effective models (GPT-4o-mini, Claude 3.5 Haiku)
+- **Cost limits** become active constraints for premium models (Claude 4 Opus, GPT-4o)
+- **Document limits** provide baseline protection regardless of provider choice
+- **Multi-AI choice** allows users to optimize for their specific cost/quality preferences
 - **Cost limits** protect against expensive model overuse (GPT-4o)
 - **Document limits** provide the simplest user-facing metric
 - Users are encouraged to choose appropriate models for their needs without breaking the business model

@@ -1,6 +1,6 @@
 // Language utilities removed - meeting reports are now generated in English only
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
-import { createOpenAICompletion } from '@/lib/openai-wrapper'
+import { createAICompletion } from '@/lib/ai-wrapper'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
 
 export async function POST(req: Request) {
@@ -77,8 +77,8 @@ INSTRUCTIONS:
     logger.aiRequest(selectedModel, undefined, { userId: validUserId, clientId });
     
     const completion = await withTiming(
-      'OpenAI Meeting Report Generation',
-      () => createOpenAICompletion(
+      'AI Meeting Report Generation',
+      () => createAICompletion(
         {
           model: selectedModel,
         messages: [

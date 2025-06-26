@@ -2,18 +2,40 @@ export interface AIModel {
   id: string
   name: string
   description: string
+  provider: 'openai' | 'anthropic'
 }
 
 export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: 'gpt-4o',
     name: 'GPT-4o',
-    description: 'Most capable model, best for complex tasks'
+    description: 'Most capable OpenAI model, best for complex tasks',
+    provider: 'openai'
   },
   {
     id: 'gpt-4o-mini',
     name: 'GPT-4o Mini',
-    description: 'Faster and more cost-effective'
+    description: 'Faster and more cost-effective OpenAI model',
+    provider: 'openai'
+  },
+  {
+    id: 'claude-opus-4-20250514',
+    name: 'Claude 4 Opus',
+    description: 'Most capable Claude model for complex reasoning and analysis',
+    provider: 'anthropic'
+  },
+  {
+    id: 'claude-sonnet-4-20250514',
+    name: 'Claude 4 Sonnet',
+    description: 'High-performance Claude model with exceptional reasoning capabilities',
+    provider: 'anthropic'
+  },
+
+  {
+    id: 'claude-3-5-haiku-20241022',
+    name: 'Claude 3.5 Haiku',
+    description: 'Fastest and most cost-effective Claude model',
+    provider: 'anthropic'
   }
 ]
 

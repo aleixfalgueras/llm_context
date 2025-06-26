@@ -1,4 +1,4 @@
-# 💰 Pricing & Cost Analysis - AI Marketing Assistant
+# 💰 Multi-AI Pricing & Cost Analysis - AI Marketing Assistant
 
 ## 📊 Subscription Plans Overview
 
@@ -7,14 +7,14 @@
 
 **Limits:**
 - 100K tokens per month (~75 pages of content)
-- $2 OpenAI usage limit per month
+- $2 AI usage limit per month (across all providers)
 - 20 documents per month  
 - 3 client profiles
 - Unlimited custom prompts
 
 **Cost Analysis:**
 - Revenue: $10/month × 12 = $120/year
-- OpenAI Cost: Max $2/month = $24/year
+- AI Cost: Max $2/month = $24/year (OpenAI + Anthropic)
 - Gross Margin: ~80%
 
 ### Pro Plan - $17/month  
@@ -22,14 +22,14 @@
 
 **Limits:**
 - 2M tokens per month (~1,500 pages of content)
-- $25 OpenAI usage limit per month
+- $25 AI usage limit per month (across all providers)
 - 200 documents per month
 - Unlimited client profiles  
 - Unlimited custom prompts
 
 **Cost Analysis:**
 - Revenue: $17/month × 12 = $204/year
-- OpenAI Cost: Max $25/month = $300/year
+- AI Cost: Max $25/month = $300/year (OpenAI + Anthropic)
 - Gross Margin: ~32% (negative for heavy users)
 
 ### Business Plan - $43/month
@@ -37,20 +37,20 @@
 
 **Limits:**
 - Unlimited tokens and documents
-- $40 OpenAI usage limit per month
+- $40 AI usage limit per month (across all providers)
 - Unlimited client profiles
 - Unlimited custom prompts
 
 **Cost Analysis:**
 - Revenue: $43/month × 12 = $516/year
-- OpenAI Cost: Max $40/month = $480/year
+- AI Cost: Max $40/month = $480/year (OpenAI + Anthropic)
 - Gross Margin: ~7% minimum, 60-70% typical usage
 
 ## Updated Limit Philosophy
 
 ### Primary Restrictions (Cost-Based)
 1. **Token Limits**: Primary usage metric, directly correlates with content generation
-2. **Cost Limits**: Direct OpenAI spending caps for budget protection
+2. **Cost Limits**: Direct AI spending caps across all providers for budget protection
 3. **Document Limits**: Output-based restrictions for service value
 
 ### Secondary Restrictions (Resource-Based)  
@@ -83,19 +83,19 @@
 2. **First Month Free**: Risk-free trial period
 3. **Unlimited Prompts**: Better than competitors with prompt limits
 4. **Cost Caps**: Protected spending vs. pay-per-use models
-5. **USD Pricing**: Simplified billing aligned with OpenAI costs
+5. **USD Pricing**: Simplified billing aligned with multi-cloud AI costs
 
 ### Market Positioning
 - **Basic**: Competitive with entry-level AI writing tools
 - **Pro**: Premium positioning vs. general AI assistants  
 - **Business**: Enterprise alternative to custom AI solutions
 
-## Cost Management
+## Multi-AI Cost Management
 
-### OpenAI Expenses
-- **Basic**: Max $24/user/year (capped at $2/month)
-- **Pro**: Max $300/user/year (capped at $25/month)  
-- **Business**: Max $480/user/year (capped at $40/month)
+### AI Provider Expenses (OpenAI + Anthropic)
+- **Basic**: Max $24/user/year (capped at $2/month across all providers)
+- **Pro**: Max $300/user/year (capped at $25/month across all providers)  
+- **Business**: Max $480/user/year (capped at $40/month across all providers)
 
 ### Infrastructure Costs
 - **Database**: Supabase Pro ~$27/month
@@ -104,8 +104,8 @@
 - **Support**: Customer service tools and time
 
 ### Target Margins
-- **Basic**: 80% gross margin (after OpenAI costs)
-- **Pro**: 60% gross margin (after OpenAI costs)
+- **Basic**: 80% gross margin (after multi-AI costs)
+- **Pro**: 60% gross margin (after multi-AI costs)
 - **Business**: 70% gross margin (after all costs)
 
 ## Future Considerations
@@ -124,19 +124,36 @@
 
 ---
 
-## 💡 Cost Structure & Profit Analysis
+## 💡 Multi-AI Cost Structure & Profit Analysis
 
-### OpenAI API Costs (Our Expenses)
+### AI API Costs (Our Expenses)
 
-#### GPT-4o Pricing:
+#### OpenAI Pricing:
+**GPT-4o:**
 - **Input**: $0.0025 per 1K tokens (~750 words)
 - **Output**: $0.01 per 1K tokens (~750 words)
 - **Average Cost**: $0.006 per 1K tokens (mixed input/output)
 
-#### GPT-4o-mini Pricing (Default):
+**GPT-4o-mini (Default):**
 - **Input**: $0.00015 per 1K tokens 
 - **Output**: $0.0006 per 1K tokens
 - **Average Cost**: $0.0004 per 1K tokens (mixed input/output)
+
+#### Anthropic Pricing:
+**Claude 4 Opus:**
+- **Input**: $0.015 per 1K tokens (~750 words)
+- **Output**: $0.075 per 1K tokens (~750 words)
+- **Average Cost**: $0.045 per 1K tokens (mixed input/output)
+
+**Claude 4 Sonnet:**
+- **Input**: $0.003 per 1K tokens (~750 words)
+- **Output**: $0.015 per 1K tokens (~750 words)
+- **Average Cost**: $0.009 per 1K tokens (mixed input/output)
+
+**Claude 3.5 Haiku:**
+- **Input**: $0.0008 per 1K tokens (~750 words)
+- **Output**: $0.004 per 1K tokens (~750 words)
+- **Average Cost**: $0.0024 per 1K tokens (mixed input/output)
 
 ### Real Usage Examples:
 
@@ -164,28 +181,28 @@
 ### Basic Plan Economics:
 ```
 Revenue: $10/month ($0 first month)
-Avg OpenAI Cost: $0.10/month (mixed usage)
+Avg AI Cost: $0.15/month (mixed usage across providers)
 Infrastructure Cost: $0.05/month (hosting, DB)
-Net Profit: $9.85/month (98% margin)
+Net Profit: $9.80/month (98% margin)
 ```
 **Strategy**: High margin entry point for conversion
 
 ### Pro Plan Economics:
 ```
 Revenue: $17/month
-Max OpenAI Cost: $25/month (if user hits limit)
-Avg OpenAI Cost: $8/month (typical usage)
+Max AI Cost: $25/month (if user hits limit across all providers)
+Avg AI Cost: $10/month (typical usage across OpenAI + Anthropic)
 Infrastructure Cost: $0.20/month
-Net Profit: $8.80/month (52% margin typical)
+Net Profit: $6.80/month (40% margin typical)
 ```
 
 ### Business Plan Economics:
 ```
 Revenue: $43/month  
-Max OpenAI Cost: $40/month (capped limit)
-Avg OpenAI Cost: $15/month (typical heavy usage)
+Max AI Cost: $40/month (capped limit across all providers)
+Avg AI Cost: $18/month (typical heavy usage across providers)
 Infrastructure Cost: $0.50/month
-Net Profit: $27.50/month (64% margin typical)
+Net Profit: $24.50/month (57% margin typical)
 ```
 
 ---
