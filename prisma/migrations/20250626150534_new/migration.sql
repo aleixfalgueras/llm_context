@@ -96,21 +96,15 @@ CREATE TABLE "prompts" (
 CREATE TABLE "user_subscriptions" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "plan" TEXT NOT NULL DEFAULT 'free',
+    "plan" TEXT NOT NULL DEFAULT 'basic',
     "status" TEXT NOT NULL DEFAULT 'active',
     "stripeCustomerId" TEXT,
     "stripeSubscriptionId" TEXT,
     "stripePriceId" TEXT,
-    "maxConversationsPerMonth" INTEGER NOT NULL DEFAULT 50,
     "maxClients" INTEGER NOT NULL DEFAULT 3,
-    "maxPromptsPerUser" INTEGER NOT NULL DEFAULT 10,
     "maxDocumentsPerMonth" INTEGER NOT NULL DEFAULT 20,
     "maxTokensPerMonth" INTEGER NOT NULL DEFAULT 100000,
     "maxCostPerMonth" DOUBLE PRECISION NOT NULL DEFAULT 2.00,
-    "canAccessPremiumPrompts" BOOLEAN NOT NULL DEFAULT false,
-    "canAccessTeamFeatures" BOOLEAN NOT NULL DEFAULT false,
-    "canAccessPrioritySupport" BOOLEAN NOT NULL DEFAULT false,
-    "canAccessCustomBranding" BOOLEAN NOT NULL DEFAULT false,
     "currentPeriodStart" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "currentPeriodEnd" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -126,30 +120,13 @@ CREATE TABLE "user_usage" (
     "userId" TEXT NOT NULL,
     "year" INTEGER NOT NULL,
     "month" INTEGER NOT NULL,
-    "conversationsUsed" INTEGER NOT NULL DEFAULT 0,
     "documentsGenerated" INTEGER NOT NULL DEFAULT 0,
-    "promptsUsed" INTEGER NOT NULL DEFAULT 0,
     "estimatedCost" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     "tokensUsed" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "user_usage_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "usage_events" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "eventType" TEXT NOT NULL,
-    "resourceId" TEXT,
-    "tokensUsed" INTEGER,
-    "estimatedCost" DOUBLE PRECISION,
-    "model" TEXT,
-    "metadata" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "usage_events_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
