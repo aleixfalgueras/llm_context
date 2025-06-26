@@ -15,6 +15,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { getClientDocuments } from '@/lib/document-actions'
 import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai-wrapper'
 import type { Document } from '@/types/client-document-types'
 
 interface MeetingReportDialogProps {
@@ -157,7 +158,21 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate meeting report')
+        const errorData = await response.json().catch(() => null)
+        
+        // Handle AI provider errors from API
+        if (errorData?.error && errorData?.provider) {
+          const aiError = new AIProviderError(
+            errorData.error,
+            errorData.provider,
+            errorData.type || 'unknown',
+            response.status,
+            errorData.retryAfter
+          )
+          throw aiError
+        }
+        
+        throw new Error(errorData?.error || 'Failed to generate meeting report')
       }
 
       const data = await response.json()
@@ -171,11 +186,25 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
       }
     } catch (error) {
       console.error('Error generating meeting report:', error)
-      toast({
-        title: 'Generation Failed',
-        description: 'Failed to generate meeting report. Please try again.',
-        variant: 'destructive'
-      })
+      
+      // Handle AI provider errors with specific messages
+      if (error instanceof AIProviderError) {
+        const { title, description } = getAIErrorMessage(error)
+        toast({
+          title,
+          description,
+          variant: 'destructive',
+          duration: error.type === 'rate_limit' ? 10000 : 8000, // Longer duration for rate limits
+        })
+      } else {
+        // Generic error handling
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate meeting report. Please try again.'
+        toast({
+          title: 'Generation Failed',
+          description: errorMessage,
+          variant: 'destructive'
+        })
+      }
     } finally {
       setIsGenerating(false)
     }

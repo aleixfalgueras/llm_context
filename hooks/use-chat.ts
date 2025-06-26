@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
+import { useToast } from '@/hooks/use-toast'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai-wrapper'
 
 interface Message {
   id: string
@@ -15,6 +17,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
   const [isLoading, setIsLoading] = useState(false)
   const [input, setInput] = useState('')
   const [onTitleUpdate, setOnTitleUpdate] = useState<((title: string) => void) | null>(null)
+  const { toast } = useToast()
 
   // Update messages when initialMessages changes (for server-side updates)
   useEffect(() => {
@@ -84,7 +87,21 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
       clientLogger.apiResponse('POST', '/api/chat', response.status, { chatId });
 
       if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.status}`)
+        const errorData = await response.json().catch(() => null)
+        
+        // Handle AI provider errors from API
+        if (errorData?.error && errorData?.provider) {
+          const aiError = new AIProviderError(
+            errorData.error,
+            errorData.provider,
+            errorData.type || 'unknown',
+            response.status,
+            errorData.retryAfter
+          )
+          throw aiError
+        }
+        
+        throw new Error(errorData?.error || `Failed to send message: ${response.status}`)
       }
 
       const data = await response.json()
@@ -116,6 +133,26 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
       
     } catch (error) {
       clientLogger.error('Error sending message', error as Error, { chatId });
+      
+      // Handle AI provider errors with specific messages
+      if (error instanceof AIProviderError) {
+        const { title, description } = getAIErrorMessage(error)
+        toast({
+          title,
+          description,
+          variant: 'destructive',
+          duration: error.type === 'rate_limit' ? 10000 : 8000, // Longer duration for rate limits
+        })
+      } else {
+        // Generic error handling
+        const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.'
+        toast({
+          title: 'Message Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+      }
+      
       // Remove user message on error
       setMessages(prev => prev.filter(msg => msg.id !== userMessage.id))
       clientLogger.debug('User message removed due to error', { 

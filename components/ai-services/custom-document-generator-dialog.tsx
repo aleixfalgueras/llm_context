@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai-wrapper'
 
 interface Client {
   id: string
@@ -131,7 +132,21 @@ export function CustomDocumentGeneratorDialog({
       })
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorData = await response.json().catch(() => null)
+        
+        // Handle AI provider errors from API
+        if (errorData?.error && errorData?.provider) {
+          const aiError = new AIProviderError(
+            errorData.error,
+            errorData.provider,
+            errorData.type || 'unknown',
+            response.status,
+            errorData.retryAfter
+          )
+          throw aiError
+        }
+        
+        throw new Error(errorData?.error || `HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
@@ -139,11 +154,25 @@ export function CustomDocumentGeneratorDialog({
       setPromptName(data.promptName)
     } catch (error) {
       console.error('Error generating document:', error)
-      toast({
-        title: 'Generation Failed',
-        description: 'Failed to generate document. Please try again.',
-        variant: 'destructive',
-      })
+      
+      // Handle AI provider errors with specific messages
+      if (error instanceof AIProviderError) {
+        const { title, description } = getAIErrorMessage(error)
+        toast({
+          title,
+          description,
+          variant: 'destructive',
+          duration: error.type === 'rate_limit' ? 10000 : 8000, // Longer duration for rate limits
+        })
+      } else {
+        // Generic error handling
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate document. Please try again.'
+        toast({
+          title: 'Generation Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+      }
     } finally {
       setIsGenerating(false)
     }

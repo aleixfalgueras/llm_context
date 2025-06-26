@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { buildClientContextSection } from '@/lib/client-context-utils'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
-import { createAICompletion } from '@/lib/ai-wrapper'
+import { createAICompletion, AIProviderError } from '@/lib/ai-wrapper'
 import { getDefaultTemperature, getDefaultMaxTokens } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 
@@ -138,6 +138,20 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
     })
   } catch (error) {
     console.error('Error generating custom document:', error)
+    
+    // Handle AI provider errors specifically
+    if (error instanceof AIProviderError) {
+      return Response.json(
+        {
+          error: error.message,
+          provider: error.provider,
+          type: error.type,
+          retryAfter: error.retryAfter
+        },
+        { status: error.statusCode || 500 }
+      )
+    }
+    
     return new Response('Internal Server Error', { status: 500 })
   }
 } 
