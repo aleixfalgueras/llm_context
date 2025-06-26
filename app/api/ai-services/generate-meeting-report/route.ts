@@ -1,4 +1,4 @@
-import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
+// Language utilities removed - meeting reports are now generated in English only
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createOpenAICompletion } from '@/lib/openai-wrapper'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   let clientId: string = '';
   
   try {
-    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, language = 'english', model: selectedModel = 'gpt-4o-mini' } = await req.json()
+    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = 'gpt-4o-mini' } = await req.json()
     clientId = requestClientId;
     logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
 
@@ -41,10 +41,7 @@ export async function POST(req: Request) {
 
 
 
-    // Get language instruction
-    const targetLanguage = getLanguageInstruction(language)
-
-    // Build the meeting report prompt
+    // Build the meeting report prompt (always in English)
     const meetingReportPrompt = `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
 
 CLIENT: ${validClient.name}
@@ -56,8 +53,6 @@ ${meetingTranscription}${additionalInfo ? `
 
 ADDITIONAL CONTEXT:
 ${additionalInfo}` : ''}
-
-${getLanguageRequirementSection(targetLanguage, 'meeting')}
 
 INSTRUCTIONS:
 - Create a comprehensive meeting report based on the transcription provided
@@ -76,7 +71,7 @@ INSTRUCTIONS:
 - Provide ONLY the meeting report content in a delivery-ready format
 - Make the action items specific, measurable, and achievable
 - Focus on practical next steps that can be implemented immediately
-- IMPORTANT: Write the entire response in ${targetLanguage}, including all headings, summaries, and action items`
+- Generate the response in English with clear, professional language`
 
     // Use unified OpenAI wrapper with automatic usage tracking
     logger.aiRequest(selectedModel, undefined, { userId: validUserId, clientId });
@@ -93,7 +88,7 @@ INSTRUCTIONS:
           },
           {
             role: 'user',
-            content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client. Generate the complete response in ${targetLanguage}.`
+            content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client.`
           }
         ],
         temperature: 0.7,

@@ -152,7 +152,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         },
         body: JSON.stringify({ 
           ...formData, 
-          language: selectedClient?.documentsLanguage || 'english',
           model: selectedModel
         })
       })
