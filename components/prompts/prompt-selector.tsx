@@ -35,7 +35,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
   const fetchPrompts = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/prompts?active=true')
+      const response = await fetch('/api/prompts?active=true&includeContent=true')
       if (response.ok) {
         const data = await response.json()
         setPrompts(data)

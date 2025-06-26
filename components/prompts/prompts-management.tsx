@@ -47,6 +47,7 @@ export function PromptsManagement() {
       if (!filters.showInactive) {
         params.append('active', 'true')
       }
+      params.append('includeContent', 'true')
 
       const response = await fetch(`/api/prompts?${params.toString()}`)
       if (response.ok) {

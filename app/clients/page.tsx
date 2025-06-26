@@ -11,7 +11,7 @@ export default async function ClientsPage() {
     redirect('/sign-in')
   }
 
-  const clients = await getClients()
+  const clients = await getClients({ includeDetails: true })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
