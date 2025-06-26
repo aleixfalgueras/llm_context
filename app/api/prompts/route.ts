@@ -25,6 +25,11 @@ export async function GET(request: NextRequest) {
 
 
 
+    // Add pagination support
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '50', 10)
+    const skip = (page - 1) * limit
+
     logger.dbQuery('findMany', 'prompt', { userId });
     const prompts = await withTiming(
       'Fetch prompts from DB',
@@ -34,10 +39,24 @@ export async function GET(request: NextRequest) {
         ...(category && { category }),
         ...(activeOnly && { isActive: true }),
       },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category: true,
+        isActive: true,
+        usageCount: true,
+        createdAt: true,
+        updatedAt: true,
+        // Exclude large content field for listing
+        ...(searchParams.get('includeContent') === 'true' && { content: true })
+      },
       orderBy: [
         { usageCount: 'desc' }, // Most used first
         { updatedAt: 'desc' }, // Then by recent updates
       ],
+      take: Math.min(limit, 100), // Cap at 100 items per page
+      skip: skip,
       }),
       { userId }
     );

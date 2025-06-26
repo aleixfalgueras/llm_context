@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
 
-export async function getClientDocuments(clientId: string) {
+export async function getClientDocuments(clientId: string, options?: { includeContent?: boolean; limit?: number }) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -18,7 +18,21 @@ export async function getClientDocuments(clientId: string) {
         clientId,
         userId 
       },
-      orderBy: { createdAt: 'desc' }
+      select: {
+        id: true,
+        documentName: true,
+        documentType: true,
+        createdAt: true,
+        updatedAt: true,
+        startDate: true,
+        endDate: true,
+        // Only include heavy fields when needed
+        ...(options?.includeContent && {
+          documentPath: true
+        })
+      },
+      orderBy: { createdAt: 'desc' },
+      ...(options?.limit && { take: options.limit })
     })
 
     return documents

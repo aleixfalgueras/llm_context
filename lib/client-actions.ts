@@ -129,7 +129,7 @@ export async function deleteClient(id: string) {
   }
 }
 
-export async function getClients() {
+export async function getClients(options?: { includeDetails?: boolean; limit?: number }) {
   const { userId } = await auth()
   
   if (!userId) {
@@ -139,7 +139,23 @@ export async function getClients() {
   try {
     const clients = await prisma.client.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        country: true,
+        documentsLanguage: true,
+        createdAt: true,
+        updatedAt: true,
+        // Include heavy fields only when requested
+        ...(options?.includeDetails && {
+          phone: true,
+          goals: true,
+          notes: true
+        })
+      },
+      orderBy: { createdAt: 'desc' },
+      ...(options?.limit && { take: options.limit })
     })
 
     return clients

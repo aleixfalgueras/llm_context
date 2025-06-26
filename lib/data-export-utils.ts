@@ -46,15 +46,103 @@ export async function compileUserDataExport(userId: string, exportId: string): P
       prisma.consentAuditLog.count({ where: { userId } })
     ])
 
-    // Get actual data (simplified for now)
-    const clients = await prisma.client.findMany({ where: { userId } })
-    const documents = await prisma.document.findMany({ where: { userId } })
-    const chats = await prisma.chat.findMany({ where: { userId } })
-    const messages = await prisma.message.findMany({ where: { chat: { userId } } })
-    const prompts = await prisma.prompt.findMany({ where: { userId } })
-    const feedbacks = await prisma.feedback.findMany({ where: { userId } })
-    const consent = await prisma.userConsent.findMany({ where: { userId } })
-    const auditLogs = await prisma.consentAuditLog.findMany({ where: { userId } })
+    // Get actual data with optimized includes to prevent N+1 queries
+    const [clients, documents, chats, prompts, feedbacks, consent, auditLogs] = await Promise.all([
+      prisma.client.findMany({ 
+        where: { userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          country: true,
+          goals: true,
+          notes: true,
+          documentsLanguage: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      }),
+      prisma.document.findMany({ 
+        where: { userId },
+        select: {
+          id: true,
+          documentName: true,
+          documentType: true,
+          createdAt: true,
+          updatedAt: true,
+          startDate: true,
+          endDate: true,
+          client: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }),
+      prisma.chat.findMany({ 
+        where: { userId },
+        include: {
+          messages: {
+            select: {
+              id: true,
+              content: true,
+              role: true,
+              model: true,
+              createdAt: true
+            }
+          },
+          client: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }),
+      prisma.prompt.findMany({ 
+        where: { userId },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          content: true,
+          category: true,
+          isActive: true,
+          usageCount: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      }),
+      prisma.feedback.findMany({ 
+        where: { userId },
+        select: {
+          id: true,
+          userEmail: true,
+          userName: true,
+          type: true,
+          title: true,
+          description: true,
+          priority: true,
+          useCase: true,
+          stepsToReproduce: true,
+          createdAt: true
+        }
+      }),
+      prisma.userConsent.findMany({ 
+        where: { userId }
+      }),
+      prisma.consentAuditLog.findMany({ 
+        where: { userId }
+      })
+    ])
+
+    // Extract messages from chats to maintain original structure
+    const messages = chats.flatMap(chat => 
+      chat.messages.map(message => ({
+        ...message,
+        chatId: chat.id
+      }))
+    )
 
     const exportData: UserDataExport = {
       exportId,

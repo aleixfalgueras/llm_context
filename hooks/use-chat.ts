@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai-wrapper'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 
 interface Message {
   id: string
