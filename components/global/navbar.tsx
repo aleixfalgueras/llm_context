@@ -2,21 +2,26 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
+import { UserButton, useUser } from '@clerk/nextjs'
 import { ThemeToggle } from '@/components/global/theme-toggle'
 import { cn } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Menu } from 'lucide-react'
+import { Menu, Shield } from 'lucide-react'
 
 export function Navbar() {
   const pathname = usePathname()
+  const { user } = useUser()
+  
+  // Check if current user is admin
+  const isAdmin = user?.emailAddresses[0]?.emailAddress === 'feina.aleix@gmail.com'
 
   const navigation = [
     { name: 'Clients', href: '/clients', icon: '👥' },
     { name: 'Prompts', href: '/prompts', icon: '📝' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
     { name: 'AI Services', href: '/ai-services', icon: '⚡' },
+    ...(isAdmin ? [{ name: 'Admin', href: '/admin', icon: '🛡️' }] : []),
   ]
 
   // Helper function to determine if a nav item is active
@@ -24,6 +29,9 @@ export function Navbar() {
     if (href === '/assistant') {
       // AI Assistant is active for assistant page and all chat pages
       return pathname === '/assistant' || pathname.startsWith('/assistant/chat/')
+    }
+    if (href === '/admin') {
+      return pathname === '/admin'
     }
     return pathname === href
   }
