@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getClientDocuments, getDocumentContent } from '@/lib/document-actions'
+import { getClientDocuments } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 
@@ -56,7 +56,19 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
 
   const handleViewDocument = async (document: Document) => {
     try {
-      const content = await getDocumentContent(document.documentPath)
+      const response = await fetch('/api/document-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ documentId: document.id }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to load document content')
+      }
+
+      const { content } = await response.json()
       setDocumentContent(content)
       setSelectedDocument(document)
       setEditedContent(content)

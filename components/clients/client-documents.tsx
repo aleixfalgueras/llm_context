@@ -12,7 +12,7 @@ import { DocumentPreviewDialog } from '@/components/documents/document-preview-d
 import { useDocumentState } from '@/hooks/use-document-state'
 import { useDocumentOperations } from '@/hooks/use-document-operations'
 import { useDocumentUIState } from '@/hooks/use-document-ui-state'
-import { getDocumentContent } from '@/lib/document-actions'
+
 import { checkCanCreateDocument } from '@/lib/document-usage-utils'
 import { useToast } from '@/hooks/use-toast'
 import type { ClientDocumentsProps, Document } from '@/types/client-document-types'
@@ -49,7 +49,19 @@ export function ClientDocuments({
   // Document editing handlers
   const handleEditDocument = async (document: Document) => {
     try {
-      const content = await getDocumentContent(document.documentPath)
+      const response = await fetch('/api/document-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ documentId: document.id }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to load document content')
+      }
+
+      const { content } = await response.json()
       documentState.setDocumentContent(content)
       documentState.setSelectedDocument(document)
       documentState.setEditedContent(content)
