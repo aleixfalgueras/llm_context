@@ -93,7 +93,6 @@ INSTRUCTIONS:
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
       },
       {
         userId: validUserId,

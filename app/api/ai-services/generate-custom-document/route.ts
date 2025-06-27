@@ -112,7 +112,6 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
           },
         ],
         temperature: getDefaultTemperature(),
-        max_tokens: getDefaultMaxTokens(true), // Use AI Services default (2000 tokens)
       },
       {
         userId: validUserId,

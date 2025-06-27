@@ -4,7 +4,7 @@ import { calculateAICost } from './subscription-utils'
 import { 
   getDefaultModel, 
   getDefaultTemperature, 
-  getDefaultMaxTokens, 
+  getDefaultMaxTokens,
   getDefaultPresencePenalty, 
   getDefaultFrequencyPenalty 
 } from './models-config'
@@ -48,18 +48,20 @@ export async function createOpenAICompletion(
   
   // Use centralized configuration with validation
   const temperature = Math.max(0, Math.min(2, completionOptions.temperature ?? getDefaultTemperature()))
-  const maxTokens = Math.max(1, completionOptions.max_tokens ?? getDefaultMaxTokens())
+  const maxTokens = completionOptions.max_tokens ?? getDefaultMaxTokens()
   const presencePenalty = Math.max(-2, Math.min(2, completionOptions.presence_penalty ?? getDefaultPresencePenalty()))
   const frequencyPenalty = Math.max(-2, Math.min(2, completionOptions.frequency_penalty ?? getDefaultFrequencyPenalty()))
 
-  const response = await openai.chat.completions.create({
+  const requestParams: any = {
     model,
     messages: completionOptions.messages,
     temperature,
-    max_tokens: maxTokens,
+    max_tokens: Math.max(1, maxTokens),
     presence_penalty: presencePenalty,
     frequency_penalty: frequencyPenalty,
-  })
+  }
+
+  const response = await openai.chat.completions.create(requestParams)
 
   const content = response.choices[0]?.message?.content || ''
   
