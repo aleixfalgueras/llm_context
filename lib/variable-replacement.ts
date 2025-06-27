@@ -1,19 +1,19 @@
 interface Client {
   name?: string | null
   country?: string | null
-  notes?: string | null
+  generalContext?: string | null
 }
 
 /**
  * Replaces client variables in content with actual client data
- * @param content - The content containing variables like {client_name}, {country}, etc.
+ * @param content - The content containing variables like {country}, {general_context}, etc.
  * @param client - The client data to use for replacement
  * @returns The content with variables replaced
  */
 export function replaceClientVariables(content: string, client: Client): string {
   return content
-    .replace(/\{client_name\}/g, client.name || '[Client Name]')
     .replace(/\{country\}/g, client.country || '[Country]')
+    .replace(/\{general_context\}/g, client.generalContext || '[General Context]')
 }
 
 /**
@@ -21,7 +21,7 @@ export function replaceClientVariables(content: string, client: Client): string 
  */
 export function getAvailableVariables(): string[] {
   return [
-    '{client_name}',
     '{country}',
+    '{general_context}',
   ]
 } 

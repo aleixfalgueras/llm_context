@@ -1,7 +1,7 @@
 interface Client {
   name?: string | null
   country?: string | null
-  notes?: string | null
+  generalContext?: string | null
 }
 
 /**
@@ -16,10 +16,10 @@ export function buildClientContextSection(client: Client, selectedFields: string
   }
 
   const shouldIncludeCountry = selectedFields.includes('country')
-  const shouldIncludeNotes = selectedFields.includes('notes')
+  const shouldIncludeGeneralContext = selectedFields.includes('general_context')
 
   // If no valid fields selected, return empty
-  if (!shouldIncludeCountry && !shouldIncludeNotes) {
+  if (!shouldIncludeCountry && !shouldIncludeGeneralContext) {
     return ''
   }
 
@@ -28,11 +28,14 @@ export function buildClientContextSection(client: Client, selectedFields: string
   // Add client profile section - ONLY if user selected country
   if (shouldIncludeCountry && client.country) {
     contextSection += `\nCountry: ${client.country}`
-  }
-
-  // Add notes section - ONLY if user selected notes
-  if (shouldIncludeNotes && client.notes) {
-    contextSection += `\n\nNotes:\n${client.notes}`
+    
+    // Add general context after country without a label - per user request
+    if (shouldIncludeGeneralContext && client.generalContext) {
+      contextSection += ` ${client.generalContext}`
+    }
+  } else if (shouldIncludeGeneralContext && client.generalContext) {
+    // If only general context is selected, add it after a basic country label
+    contextSection += `\nCountry: ${client.generalContext}`
   }
 
   return contextSection
@@ -44,5 +47,5 @@ export function buildClientContextSection(client: Client, selectedFields: string
  */
 export function hasClientContext(selectedFields: string[] = []): boolean {
   return selectedFields.length > 0 && 
-         (selectedFields.includes('country') || selectedFields.includes('notes'))
+         (selectedFields.includes('country') || selectedFields.includes('general_context'))
 }

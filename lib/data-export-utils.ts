@@ -56,8 +56,7 @@ export async function compileUserDataExport(userId: string, exportId: string): P
           email: true,
           phone: true,
           country: true,
-
-          notes: true,
+          generalContext: true,
           documentsLanguage: true,
           createdAt: true,
           updatedAt: true

@@ -109,7 +109,7 @@ export function LandingPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Add Essential Client Context</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Store only the key information you need for AI interactions - business focus, industry, project notes, and communication style.
+                Store only the key information you need for AI interactions - business focus, industry, general context, and communication style.
               </p>
             </div>
             <div className="text-center">
