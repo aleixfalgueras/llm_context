@@ -205,16 +205,16 @@ export function ClientContextSidebar({
                             />
                           </div>
                         )}
-                        {selectedClient?.notes && (
+                        {selectedClient?.generalContext && (
                           <div className="flex items-center space-x-2">
                             <Checkbox
-                              id="context-notes"
-                              checked={clientContext.notes}
+                              id="context-general-context"
+                              checked={clientContext.general_context}
                               onChange={(e) => onClientContextChange({
                                 ...clientContext,
-                                notes: e.target.checked
+                                general_context: e.target.checked
                               })}
-                              label="General Notes"
+                              label="General Context"
                             />
                           </div>
                         )}
@@ -234,7 +234,7 @@ export function ClientContextSidebar({
                           size="sm"
                           onClick={() => onClientContextChange({
                             country: false,
-                            notes: false
+                            general_context: false
                           })}
                         >
                           Deselect All
@@ -323,7 +323,7 @@ export function ClientContextSidebar({
                     chatContextFields.map(field => {
                       const fieldNames = {
                         country: 'Country',
-                        notes: 'General Notes'
+                        general_context: 'General Context'
                       }
                       return fieldNames[field as keyof typeof fieldNames]
                     }).join(', ')

@@ -48,7 +48,7 @@ AI Services provide automated marketing content generation using client profiles
 ### **1. Meeting Report Generator**
 
 #### **Purpose**
-Generate comprehensive, professional meeting reports from client meeting transcriptions, notes, or agendas.
+Generate comprehensive, professional meeting reports from client meeting transcriptions, detailed notes, or agendas.
 
 #### **Prompt Structure**
 The meeting report service uses its own specialized prompt that focuses on:
@@ -61,7 +61,7 @@ The meeting report service uses its own specialized prompt that focuses on:
 
 #### **Key Features**
 - **Meeting Date Selection**: Calendar picker for accurate date recording
-- **Flexible Input**: Accept meeting transcriptions, notes, or agenda items
+- **Flexible Input**: Accept meeting transcriptions, detailed notes, or agenda items
 - **Isolated Prompt Logic**: Service-specific prompt optimized for meeting documentation
 - **Structured Output**: Professional formatting with clear sections and action items
 - **Multi-language Output**: Generate reports in client's preferred language
@@ -103,8 +103,8 @@ The custom document service:
 
 #### **Variable System**
 ```
-{client_name}     → Client's business/brand name
 {country}         → Client's country/location
+{general_context} → Client's general context
 
 ```
 

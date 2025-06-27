@@ -51,7 +51,7 @@ model Client {
   phone       String?
   country     String?  // Client's country/location
 
-  notes       String?  // General notes about the client
+  generalContext String?  // General context about the client
   documentsLanguage String @default("english") // Preferred language for generated documents
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

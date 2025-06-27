@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
                     <li>Name, email address, and phone number</li>
                     <li>Business or client information for marketing purposes</li>
                     <li>Country or location information</li>
-                    <li>General notes and preferences</li>
+                    <li>General context and preferences</li>
                   </ul>
                 </div>
                 <div>
@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
                 <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                   <p className="text-green-800 dark:text-green-200 font-medium mb-2">✓ What We Share vs. Keep Private</p>
                   <div className="text-sm text-green-700 dark:text-green-300 space-y-2">
-                    <p><strong>Shared with AI:</strong> Only selected client context (country, notes) when explicitly chosen</p>
+                    <p><strong>Shared with AI:</strong> Only selected client context (country, general context) when explicitly chosen</p>
                     <p><strong>Never Shared:</strong> Names, email addresses, phone numbers, or other identifying information</p>
                   </div>
                 </div>
@@ -114,7 +114,7 @@ export default function PrivacyPolicyPage() {
                   <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                     <p className="text-green-800 dark:text-green-200 font-medium mb-2">✓ No Personal Identifiers Sent to AI</p>
                     <p className="text-sm text-green-700 dark:text-green-300">
-                      We never send your name, email address, phone number, or other identifying information to our AI models. Only selected client context (country, notes) is used when you explicitly choose to include it.
+                      We never send your name, email address, phone number, or other identifying information to our AI models. Only selected client context (country, general context) is used when you explicitly choose to include it.
                     </p>
                   </div>
                 </div>

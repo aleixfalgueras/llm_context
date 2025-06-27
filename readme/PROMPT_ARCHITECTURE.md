@@ -32,10 +32,10 @@ export function buildClientContextSection(client: Client, selectedFields: string
   }
 
   const shouldIncludeCountry = selectedFields.includes('country')
-  const shouldIncludeNotes = selectedFields.includes('notes')
+  const shouldIncludeGeneralContext = selectedFields.includes('general_context')
 
   // If no valid fields selected, return empty
-  if (!shouldIncludeCountry && !shouldIncludeNotes) {
+  if (!shouldIncludeCountry && !shouldIncludeGeneralContext) {
     return ''
   }
 
@@ -44,11 +44,14 @@ export function buildClientContextSection(client: Client, selectedFields: string
   // Add client profile section - ONLY if user selected country
   if (shouldIncludeCountry && client.country) {
     contextSection += `\nCountry: ${client.country}`
-  }
-
-  // Add notes section - ONLY if user selected notes
-  if (shouldIncludeNotes && client.notes) {
-    contextSection += `\n\nNotes:\n${client.notes}`
+    
+    // Add general context after country without a label - per user request
+    if (shouldIncludeGeneralContext && client.generalContext) {
+      contextSection += ` ${client.generalContext}`
+    }
+  } else if (shouldIncludeGeneralContext && client.generalContext) {
+    // If only general context is selected, add it after a basic country label
+    contextSection += `\nCountry: ${client.generalContext}`
   }
 
   return contextSection
@@ -63,7 +66,7 @@ export function buildClientContextSection(client: Client, selectedFields: string
  */
 export function hasClientContext(selectedFields: string[] = []): boolean {
   return selectedFields.length > 0 && 
-         (selectedFields.includes('country') || selectedFields.includes('notes'))
+         (selectedFields.includes('country') || selectedFields.includes('general_context'))
 }
 ```
 
@@ -245,23 +248,23 @@ if (contextSection) {
    hasClientContext(['country']) // Should return true
    ```
 
-3. **Notes Only**
+3. **General Context Only**
    ```typescript
-   buildClientContextSection(client, ['notes']) // Should include only notes
-   hasClientContext(['notes']) // Should return true
+   buildClientContextSection(client, ['general_context']) // Should include only general context
+   hasClientContext(['general_context']) // Should return true
    ```
 
 4. **Both Fields**
    ```typescript
-   buildClientContextSection(client, ['country', 'notes']) // Should include both
-   hasClientContext(['country', 'notes']) // Should return true
+   buildClientContextSection(client, ['country', 'general_context']) // Should include both
+   hasClientContext(['country', 'general_context']) // Should return true
    ```
 
 ### **Manual Testing**
 
 1. Create a chat with no context selected → AI should provide general advice
 2. Create a chat with country selected → AI should mention country when relevant
-3. Create a chat with notes selected → AI should reference notes when helpful
+3. Create a chat with general context selected → AI should reference general context when helpful
 4. Generate document with no context → Should use base prompt only
 5. Generate document with context → Should append client context section
 

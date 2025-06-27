@@ -11,7 +11,7 @@ export interface ClientData {
   email?: string
   phone?: string
   country?: string
-  notes?: string
+  generalContext?: string
   documentsLanguage?: string
 }
 
@@ -20,7 +20,7 @@ interface ClientFormData {
   email?: string
   phone?: string
   country?: string
-  notes?: string
+  generalContext?: string
   documentsLanguage?: string
 }
 
@@ -44,7 +44,7 @@ export async function createClient(data: ClientFormData) {
         email: data.email,
         phone: data.phone,
         country: data.country,
-        notes: data.notes,
+        generalContext: data.generalContext,
         documentsLanguage: data.documentsLanguage || 'english',
       },
     })
@@ -87,7 +87,7 @@ export async function updateClient(clientId: string, data: ClientFormData) {
         email: data.email,
         phone: data.phone,
         country: data.country,
-        notes: data.notes,
+        generalContext: data.generalContext,
         documentsLanguage: data.documentsLanguage || 'english',
       },
     })
@@ -150,7 +150,7 @@ export async function getClients(options?: { includeDetails?: boolean; limit?: n
         // Include heavy fields only when requested
         ...(options?.includeDetails && {
           phone: true,
-          notes: true
+          generalContext: true
         })
       },
       orderBy: { createdAt: 'desc' },

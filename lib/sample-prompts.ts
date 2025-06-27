@@ -3,11 +3,11 @@ export const samplePrompts = [
     id: 'sample-1',
     name: "Marketing Strategy Report",
     description: "Structured format for generating comprehensive marketing strategy reports",
-    content: `Please create a comprehensive marketing strategy report for {client_name} with the following structure:
+    content: `Please create a comprehensive marketing strategy report with the following structure:
 
 Client Information:
-- Name: {client_name}
 - Location: {country}
+- Context: {general_context}
 
 Strategy Recommendations:
 Please provide detailed marketing strategy recommendations based on the client's market presence and business needs.
@@ -26,10 +26,11 @@ Define key performance indicators to measure the success of the marketing initia
     id: 'sample-2',
     name: "Content Calendar Template",
     description: "Template for creating detailed content calendars",
-    content: `Content Calendar for {client_name}
+    content: `Content Calendar Template
 
 Client Overview
 - Location: {country}
+- Context: {general_context}
 
 Content Strategy:
 1. Brand Voice & Messaging
@@ -51,13 +52,13 @@ Include content themes, posting schedules, and engagement strategies tailored fo
     id: 'sample-4',
     name: "Performance Analysis Report",
     description: "Standard format for marketing performance tracking reports",
-    content: `Marketing Performance Report - {client_name}
+    content: `Marketing Performance Report
 
 Report Period: [Current Month/Quarter]
 
 Client Overview:
-- Business: {client_name}
 - Market: {country}
+- Context: {general_context}
 
 Performance Summary:
 Please analyze the marketing performance based on the following areas:

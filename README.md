@@ -35,7 +35,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Provider Redundancy**: Robust failover capabilities across multiple AI providers
 - **Comprehensive Business Assistant**: Full-spectrum support for marketing business operations (strategy, client management, content creation, campaigns, analysis, operations, industry insights, problem-solving)
 - **Client-Aware AI**: Contextual responses using selected client information when relevant
-- **Smart Context Control**: Select specific client fields (country, notes) for each conversation with strict privacy respect
+- **Smart Context Control**: Select specific client fields (country, general context) for each conversation with strict privacy respect
 - **Flexible Assistance**: Provides general business advice when no client context is selected, personalized guidance when context is provided
 - **Token Optimization**: Efficient context injection to minimize API costs across all providers
 - **Real-time Chat**: Advanced chat interface with persistent conversation history
@@ -43,7 +43,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Model Persistence**: Remembers your provider and model choice per chat session
 
 ### 👥 **Comprehensive Client Management**
-- **Rich Client Profiles**: Store business information, contact details, and project notes
+- **Rich Client Profiles**: Store business information, contact details, and general context
 - **Multi-language Support**: Generate documents in 10 languages (English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Catalan)
 - **Document Association**: All generated content automatically linked to specific clients
 - **Privacy-First Design**: Secure data handling with complete user isolation
@@ -51,7 +51,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 
 ### 📝 **Advanced Prompt Management**
 - **Custom Prompt Library**: Create, organize, and reuse personalized AI templates
-- **Smart Variable Replacement**: Automatic substitution of client data (`{client_name}`, `{country}`)
+- **Smart Variable Replacement**: Automatic substitution of client data (`{country}`, `{general_context}`)
 - **Category Organization**: Sort prompts by type (marketing, content, strategy, social-media, copywriting, analysis)
 - **Usage Analytics**: Track which prompts are most effective for your workflow
 - **Sample Templates**: Pre-built prompts for common marketing tasks

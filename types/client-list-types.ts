@@ -14,7 +14,7 @@ export interface Client {
   email?: string
   phone?: string
   country?: string
-  notes?: string
+  generalContext?: string
   documentsLanguage?: string
 }
 

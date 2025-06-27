@@ -21,7 +21,7 @@ interface Client {
   id: string
   name: string
   country?: string
-  notes?: string
+  generalContext?: string
 }
 
 interface Prompt {
@@ -320,16 +320,16 @@ export function CustomDocumentGeneratorDialog({
                     />
                   </div>
                 )}
-                {selectedClientData?.notes && (
+                {selectedClientData?.generalContext && (
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id="context-notes"
-                      checked={clientContext.notes}
+                      id="context-general-context"
+                      checked={clientContext.general_context}
                       onChange={(e) => setClientContext(prev => ({
                         ...prev,
-                        notes: e.target.checked
+                        general_context: e.target.checked
                       }))}
-                      label="General Notes"
+                      label="General Context"
                     />
                   </div>
                 )}
@@ -341,7 +341,7 @@ export function CustomDocumentGeneratorDialog({
                   size="sm"
                   onClick={() => setClientContext({
                     country: false,
-                    notes: false
+                    general_context: false
                   })}
                 >
                   Deselect All
@@ -419,7 +419,7 @@ export function CustomDocumentGeneratorDialog({
                   id="customPrompt"
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="Write your custom prompt here... You can use variables like {client_name}, {country}, etc."
+                  placeholder="Write your custom prompt here... You can use variables like {country}, {general_context}, etc."
                   rows={4}
                 />
               </div>

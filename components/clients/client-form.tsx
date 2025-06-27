@@ -28,7 +28,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
     email: client?.email || '',
     phone: client?.phone || '',
     country: client?.country || '',
-    notes: client?.notes || '',
+    generalContext: client?.generalContext || '',
     documentsLanguage: client?.documentsLanguage || 'english'
   })
 
@@ -213,12 +213,12 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="generalContext">General Context</Label>
             <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={handleChange('notes')}
-              placeholder="Any notes about the client..."
+              id="generalContext"
+              value={formData.generalContext}
+              onChange={handleChange('generalContext')}
+              placeholder="Any general context about the client..."
               rows={4}
             />
           </div>
