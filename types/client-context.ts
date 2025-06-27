@@ -5,6 +5,9 @@
 export interface ClientContextSelection {
   country: boolean
   general_context: boolean
+  specific_context_1: boolean
+  specific_context_2: boolean
+  specific_context_3: boolean
 }
 
 /**
@@ -15,11 +18,17 @@ export const defaultClientContextSelections = {
   general: {
     country: true,
     general_context: true,
+    specific_context_1: false,
+    specific_context_2: false,
+    specific_context_3: false,
   } as ClientContextSelection,
   
   // Meeting-focused context (for meeting reports)
   meeting: {
     country: false,
     general_context: false,
+    specific_context_1: false,
+    specific_context_2: false,
+    specific_context_3: false,
   } as ClientContextSelection,
 } 

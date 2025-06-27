@@ -1,5 +1,5 @@
 import { prisma } from './prisma'
-
+import { CLIENT_SELECT_DETAILED } from '@/types/client'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -57,6 +57,9 @@ export async function compileUserDataExport(userId: string, exportId: string): P
           phone: true,
           country: true,
           generalContext: true,
+          specifiContext1: true,
+          specifiContext2: true,
+          specifiContext3: true,
           documentsLanguage: true,
           createdAt: true,
           updatedAt: true

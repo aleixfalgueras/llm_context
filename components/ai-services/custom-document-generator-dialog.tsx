@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
+import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 
 interface Client {
@@ -22,6 +23,9 @@ interface Client {
   name: string
   country?: string
   generalContext?: string
+  specifiContext1?: string
+  specifiContext2?: string
+  specifiContext3?: string
 }
 
 interface Prompt {
@@ -329,7 +333,46 @@ export function CustomDocumentGeneratorDialog({
                         ...prev,
                         general_context: e.target.checked
                       }))}
-                      label="General Context"
+                                              label={CLIENT_CONTEXT_FIELD_LABELS.general_context}
+                    />
+                  </div>
+                )}
+                {selectedClientData?.specifiContext1 && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-specific-context-1"
+                      checked={clientContext.specific_context_1}
+                      onChange={(e) => setClientContext(prev => ({
+                        ...prev,
+                        specific_context_1: e.target.checked
+                      }))}
+                                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_1}
+                    />
+                  </div>
+                )}
+                {selectedClientData?.specifiContext2 && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-specific-context-2"
+                      checked={clientContext.specific_context_2}
+                      onChange={(e) => setClientContext(prev => ({
+                        ...prev,
+                        specific_context_2: e.target.checked
+                      }))}
+                                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_2}
+                    />
+                  </div>
+                )}
+                {selectedClientData?.specifiContext3 && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="context-specific-context-3"
+                      checked={clientContext.specific_context_3}
+                      onChange={(e) => setClientContext(prev => ({
+                        ...prev,
+                        specific_context_3: e.target.checked
+                      }))}
+                                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_3}
                     />
                   </div>
                 )}
@@ -341,7 +384,10 @@ export function CustomDocumentGeneratorDialog({
                   size="sm"
                   onClick={() => setClientContext({
                     country: false,
-                    general_context: false
+                    general_context: false,
+                    specific_context_1: false,
+                    specific_context_2: false,
+                    specific_context_3: false
                   })}
                 >
                   Deselect All

@@ -16,7 +16,7 @@ AI Services provide automated marketing content generation using client profiles
 - **Flexible Integration**: Services can customize how they use client context based on their specific needs
 
 ### **Client Context Integration**
-- **Granular Context Selection**: Choose specific client information fields to include in generation
+- **Granular Context Selection**: Choose specific client information fields to include in generation (country, general context, 3 specific context fields)
 - **Dynamic UI**: Checkboxes only appear for fields with actual client data
 - **Context Visualization**: Selected fields displayed with actual values (e.g., "Country (United States)")
 - **Consistent System**: Same context selection system as the AI Assistant for familiarity
@@ -91,7 +91,7 @@ The custom document service:
 - **Prompt Library Integration**: Use existing custom prompts or create new ones
 - **Variable Substitution**: Automatic replacement of client variables
 - **Custom Instructions**: Add specific requirements for each document
-- **Context Selection**: Include relevant client information fields based on user choice
+- **Context Selection**: Include relevant client information fields based on user choice (country, general context, up to 3 specific context fields)
 - **Professional Formatting**: Markdown output optimized for business delivery
 
 #### **Input Options**
@@ -99,13 +99,16 @@ The custom document service:
 - **Custom Prompt**: Create one-time custom instructions
 - **Document Title**: Professional document naming
 - **Additional Instructions**: Specific requirements or modifications
-- **Client Context**: Select relevant information fields (respects user privacy)
+- **Client Context**: Select relevant information fields (respects user privacy) - up to 5 context fields available
 
 #### **Variable System**
 ```
 {country}         → Client's country/location
 {general_context} → Client's general context
 
+Note: The 3 specific context fields (specifiContext1, specifiContext2, specifiContext3) 
+are available for context selection but do not have corresponding template variables 
+for security reasons. Their content is included in the context section when selected.
 ```
 
 ## 📋 Document Storage & Management

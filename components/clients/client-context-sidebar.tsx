@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
+import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
 import { createChatAndReturn } from '@/lib/actions'
 import { useRouter } from 'next/navigation'
 
@@ -214,7 +215,46 @@ export function ClientContextSidebar({
                                 ...clientContext,
                                 general_context: e.target.checked
                               })}
-                              label="General Context"
+                              label={CLIENT_CONTEXT_FIELD_LABELS.general_context}
+                            />
+                          </div>
+                        )}
+                        {selectedClient?.specifiContext1 && (
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="context-specific-context-1"
+                              checked={clientContext.specific_context_1}
+                              onChange={(e) => onClientContextChange({
+                                ...clientContext,
+                                specific_context_1: e.target.checked
+                              })}
+                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_1}
+                            />
+                          </div>
+                        )}
+                        {selectedClient?.specifiContext2 && (
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="context-specific-context-2"
+                              checked={clientContext.specific_context_2}
+                              onChange={(e) => onClientContextChange({
+                                ...clientContext,
+                                specific_context_2: e.target.checked
+                              })}
+                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_2}
+                            />
+                          </div>
+                        )}
+                        {selectedClient?.specifiContext3 && (
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="context-specific-context-3"
+                              checked={clientContext.specific_context_3}
+                              onChange={(e) => onClientContextChange({
+                                ...clientContext,
+                                specific_context_3: e.target.checked
+                              })}
+                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_3}
                             />
                           </div>
                         )}
@@ -234,7 +274,10 @@ export function ClientContextSidebar({
                           size="sm"
                           onClick={() => onClientContextChange({
                             country: false,
-                            general_context: false
+                            general_context: false,
+                            specific_context_1: false,
+                            specific_context_2: false,
+                            specific_context_3: false
                           })}
                         >
                           Deselect All
@@ -323,7 +366,10 @@ export function ClientContextSidebar({
                     chatContextFields.map(field => {
                       const fieldNames = {
                         country: 'Country',
-                        general_context: 'General Context'
+                        general_context: 'General Context',
+                        specific_context_1: 'Specific Context 1',
+                        specific_context_2: 'Specific Context 2',
+                        specific_context_3: 'Specific Context 3'
                       }
                       return fieldNames[field as keyof typeof fieldNames]
                     }).join(', ')

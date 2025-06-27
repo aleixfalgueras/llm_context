@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
+import { CLIENT_FIELD_LABELS, CLIENT_FIELD_PLACEHOLDERS } from '@/types/client'
 import { useToast } from '@/hooks/use-toast'
 import { capitalizeName } from '@/lib/utils'
 import { Globe, HelpCircle, Upload, FileText, CheckCircle, Loader2, Shield } from 'lucide-react'
@@ -29,6 +30,9 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
     phone: client?.phone || '',
     country: client?.country || '',
     generalContext: client?.generalContext || '',
+    specifiContext1: client?.specifiContext1 || '',
+    specifiContext2: client?.specifiContext2 || '',
+    specifiContext3: client?.specifiContext3 || '',
     documentsLanguage: client?.documentsLanguage || 'english'
   })
 
@@ -163,7 +167,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center h-5">
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country">{CLIENT_FIELD_LABELS.country}</Label>
               </div>
               <Input
                 id="country"
@@ -213,13 +217,46 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="generalContext">General Context</Label>
+            <Label htmlFor="generalContext">{CLIENT_FIELD_LABELS.generalContext}</Label>
             <Textarea
               id="generalContext"
               value={formData.generalContext}
               onChange={handleChange('generalContext')}
               placeholder="Any general context about the client..."
               rows={4}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="specifiContext1">{CLIENT_FIELD_LABELS.specifiContext1}</Label>
+            <Textarea
+              id="specifiContext1"
+              value={formData.specifiContext1}
+              onChange={handleChange('specifiContext1')}
+              placeholder="Specific context 1 about the client..."
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="specifiContext2">{CLIENT_FIELD_LABELS.specifiContext2}</Label>
+            <Textarea
+              id="specifiContext2"
+              value={formData.specifiContext2}
+              onChange={handleChange('specifiContext2')}
+              placeholder="Specific context 2 about the client..."
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="specifiContext3">{CLIENT_FIELD_LABELS.specifiContext3}</Label>
+            <Textarea
+              id="specifiContext3"
+              value={formData.specifiContext3}
+              onChange={handleChange('specifiContext3')}
+              placeholder="Specific context 3 about the client..."
+              rows={3}
             />
           </div>
 

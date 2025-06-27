@@ -8,15 +8,10 @@ export interface UsageInfo {
   [key: string]: any
 }
 
-export interface Client {
-  id: string
-  name: string
-  email?: string
-  phone?: string
-  country?: string
-  generalContext?: string
-  documentsLanguage?: string
-}
+// Import Client interface from centralized types
+import type { Client } from './client'
+export type { Client } from './client'
+export { CLIENT_FIELD_LABELS, CLIENT_FIELD_PLACEHOLDERS } from './client'
 
 export interface LanguageInfo {
   value: string
