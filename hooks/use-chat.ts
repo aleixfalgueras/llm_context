@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
@@ -18,6 +18,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
   const [isLoading, setIsLoading] = useState(false)
   const [input, setInput] = useState('')
   const [onTitleUpdate, setOnTitleUpdate] = useState<((title: string) => void) | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const { toast } = useToast()
 
   // Update messages when initialMessages changes (for server-side updates)
@@ -36,6 +37,21 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
     };
   }, [chatId])
 
+  const stopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+      setIsLoading(false)
+      
+      // Mark any streaming message as complete
+      setMessages(prev => prev.map(msg => 
+        msg.isStreaming ? { ...msg, isStreaming: false } : msg
+      ))
+      
+      clientLogger.info('Text generation stopped by user', { chatId });
+    }
+  }
+
   const sendMessage = async (content: string, selectedModel?: string) => {
     if (!content.trim() || isLoading) {
       clientLogger.warn('Message send attempted with empty content or while loading', { 
@@ -47,6 +63,9 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
 
     const endTiming = clientLogger.startTiming('Send Message', { chatId });
     clientLogger.messageSent(content.length, selectedModel, { chatId });
+
+    // Create abort controller for this request
+    abortControllerRef.current = new AbortController()
 
     setIsLoading(true)
     setInput('')
@@ -90,6 +109,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
           chatId,
           model: selectedModel || 'gpt-4o-mini', // Default to gpt-4o-mini if no model specified
         }),
+        signal: abortControllerRef.current?.signal,
         }),
         { chatId }
       );
@@ -189,6 +209,11 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
       }
       
     } catch (error) {
+      // Don't show error if it was aborted by user
+      if (error instanceof Error && error.name === 'AbortError') {
+        return // User stopped generation, no need to show error
+      }
+      
       clientLogger.error('Error sending message', error as Error, { chatId });
       
       // Handle AI provider errors with specific messages
@@ -220,16 +245,22 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
       });
     } finally {
       setIsLoading(false)
+      abortControllerRef.current = null
       endTiming();
     }
   }
 
+  // Check if AI is currently streaming
+  const isStreaming = messages.some(message => message.isStreaming)
+
   return {
     messages,
     isLoading,
+    isStreaming,
     input,
     setInput,
     sendMessage,
+    stopGeneration,
     setOnTitleUpdate,
   }
 } 

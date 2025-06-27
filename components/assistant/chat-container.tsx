@@ -25,7 +25,7 @@ interface ChatContainerProps {
 }
 
 export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel }: ChatContainerProps) {
-  const { messages, isLoading, input, setInput, sendMessage, setOnTitleUpdate } = useChat(chatId, initialMessages)
+  const { messages, isLoading, isStreaming, input, setInput, sendMessage, stopGeneration, setOnTitleUpdate } = useChat(chatId, initialMessages)
   
   // Set up title update callback
   useEffect(() => {
@@ -53,6 +53,8 @@ export function ChatContainer({ chatId, initialMessages, userImageUrl, userName,
           setInput={setInput}
           sendMessage={sendMessage}
           isLoading={isLoading}
+          isStreaming={isStreaming}
+          stopGeneration={stopGeneration}
           clientData={clientData}
           messages={messages}
           chatTitle={chatTitle}
