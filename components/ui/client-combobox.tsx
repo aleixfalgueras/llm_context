@@ -18,12 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-
-interface Client {
-  id: string
-  name: string
-  email?: string
-}
+import type { ClientBasic as Client } from "@/types/client"
 
 interface ClientComboboxProps {
   clients: Client[]
