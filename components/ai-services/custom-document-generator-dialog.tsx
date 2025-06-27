@@ -115,6 +115,14 @@ export function CustomDocumentGeneratorDialog({
     }
 
     setIsGenerating(true)
+
+    // Show toast notification
+    toast({
+      title: `📄 Generating custom document for ${selectedClientData?.name}`,
+      description: 'This usually takes 30-60 seconds...',
+      duration: 5000,
+    })
+
     try {
       const response = await fetch('/api/ai-services/generate-custom-document', {
         method: 'POST',
