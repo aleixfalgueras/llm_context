@@ -1,6 +1,6 @@
 'use client'
 
-import { Send, Loader2, Download } from 'lucide-react'
+import { Send, Loader2, Download, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { PromptSelector } from '@/components/prompts/prompt-selector'
@@ -34,6 +34,8 @@ interface ChatInputProps {
   setInput: (value: string) => void
   sendMessage: (content: string, selectedModel?: string) => Promise<void>
   isLoading: boolean
+  isStreaming: boolean
+  stopGeneration: () => void
   clientData?: any // Optional client context for prompt variable replacement
   messages?: Message[] // Messages for export functionality
   chatTitle?: string // Chat title for export
@@ -41,7 +43,7 @@ interface ChatInputProps {
   lastUsedModel?: string // Last model used in this chat
 }
 
-export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
+export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
   const [isExporting, setIsExporting] = useState(false)
   const [selectedModel, setSelectedModel] = useState(() => {
     // If this is an existing chat with a lastUsedModel, use that
@@ -358,6 +360,14 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
     });
   }
 
+  const handleStop = () => {
+    clientLogger.userInteraction('Stop generation', { 
+      chatId,
+      component: 'ChatInput'
+    });
+    stopGeneration()
+  }
+
   return (
     <div className="space-y-2">
       {/* Prompt Selector, Model Selector, and Export Button */}
@@ -400,18 +410,29 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
           disabled={isLoading}
           ref={textAreaRef}
         />
-        <Button 
-          type="submit" 
-          size="icon" 
-          className="h-[60px] w-[60px]"
-          disabled={!input.trim() || isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Send className="w-4 h-4" />
-          )}
-        </Button>
+        {isStreaming ? (
+          <Button 
+            type="button"
+            onClick={handleStop}
+            size="icon" 
+            className="h-[60px] w-[60px] bg-red-500 hover:bg-red-600"
+          >
+            <Square className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button 
+            type="submit" 
+            size="icon" 
+            className="h-[60px] w-[60px]"
+            disabled={!input.trim() || isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+          </Button>
+        )}
       </form>
     </div>
   )

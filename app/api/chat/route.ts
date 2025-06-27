@@ -188,6 +188,17 @@ Respond naturally and conversationally while keeping this context in mind.`
         const encoder = new TextEncoder()
         let fullContent = ''
         
+        // Helper function to safely enqueue data
+        const safeEnqueue = (data: Uint8Array) => {
+          try {
+            controller.enqueue(data)
+            return true
+          } catch (error) {
+            // Controller is closed/aborted - client disconnected
+            return false
+          }
+        }
+        
         try {
           // Use unified AI wrapper with automatic usage tracking (streaming version)
           logger.aiRequest(selectedModel, undefined, { userId, chatId });
@@ -227,7 +238,12 @@ Respond naturally and conversationally while keeping this context in mind.`
                 type: 'complete',
                 newTitle: isFirstUserMessage && chat.title === 'New Chat' ? generateChatTitleWithClient(client.name) : undefined
               }
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))
+              
+              if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))) {
+                // Client disconnected, stop processing
+                logger.info('Client disconnected during completion', { userId, chatId });
+                return
+              }
               
               controller.close()
             } else if (chunk.content) {
@@ -237,7 +253,12 @@ Respond naturally and conversationally while keeping this context in mind.`
                 type: 'content',
                 content: chunk.content
               }
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
+              
+              if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))) {
+                // Client disconnected, stop processing
+                logger.info('Client disconnected during streaming', { userId, chatId });
+                return
+              }
             }
           }
         } catch (error) {
@@ -252,16 +273,20 @@ Respond naturally and conversationally while keeping this context in mind.`
               errorType: error.type,
               retryAfter: error.retryAfter
             }
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
+            safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
           } else {
             const errorData = {
               type: 'error',
               error: 'Internal Server Error'
             }
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
+            safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
           }
           
-          controller.close()
+          try {
+            controller.close()
+          } catch {
+            // Controller already closed, ignore
+          }
         }
       }
     })
