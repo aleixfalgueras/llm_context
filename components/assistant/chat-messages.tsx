@@ -54,7 +54,7 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
           </div>
         ) : (
           messages.map((message: Message) => (
-            <div key={message.id} className="flex gap-3">
+            <div key={message.id} className={`flex gap-3 ${message.role === 'USER' ? 'flex-row-reverse' : ''}`}>
               <Avatar className="w-8 h-8">
                 {message.role === 'USER' ? (
                   <>
@@ -73,8 +73,8 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
                   </AvatarFallback>
                 )}
               </Avatar>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
+              <div className={`space-y-1 max-w-[70%] ${message.role === 'USER' ? 'ml-auto' : ''}`}>
+                <div className={`flex items-center gap-2 ${message.role === 'USER' ? 'flex-row-reverse' : ''}`}>
                   <span className="font-medium text-sm">
                     {message.role === 'USER' ? (userName || 'You') : 'AI Assistant'}
                   </span>
@@ -89,14 +89,14 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
                   )}
                 </div>
                 {message.role === 'ASSISTANT' ? (
-                  <div className="relative">
+                  <div className="relative border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                     <MarkdownRenderer content={message.content} />
                     {message.isStreaming && message.content && (
                       <div className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
                     )}
                   </div>
                 ) : (
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <div className="prose prose-sm max-w-none dark:prose-invert border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                     <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.content}</p>
                   </div>
                 )}
