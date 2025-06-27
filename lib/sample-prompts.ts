@@ -5,17 +5,17 @@ export const samplePrompts = [
     description: "Structured format for generating comprehensive marketing strategy reports",
     content: `Please create a comprehensive marketing strategy report for {client_name} with the following structure:
 
-**Client Information:**
+Client Information:
 - Name: {client_name}
 - Location: {country}
 
-**Strategy Recommendations:**
+Strategy Recommendations:
 Please provide detailed marketing strategy recommendations based on the client's market presence and business needs.
 
-**Implementation Plan:**
+Implementation Plan:
 Include specific next steps and timeline for executing the marketing strategy.
 
-**Success Metrics:**
+Success Metrics:
 Define key performance indicators to measure the success of the marketing initiatives.`,
     category: "marketing",
     isActive: true,
@@ -26,18 +26,18 @@ Define key performance indicators to measure the success of the marketing initia
     id: 'sample-2',
     name: "Content Calendar Template",
     description: "Template for creating detailed content calendars",
-    content: `# Content Calendar for {client_name}
+    content: `Content Calendar for {client_name}
 
-## Client Overview
+Client Overview
 - Location: {country}
 
-## Content Strategy:
-1. **Brand Voice & Messaging**
-2. **Content Pillars**
-3. **Platform Strategy**
-4. **Engagement Tactics**
+Content Strategy:
+1. Brand Voice & Messaging
+2. Content Pillars
+3. Platform Strategy
+4. Engagement Tactics
 
-## Content Calendar Planning:
+Content Calendar Planning:
 Please provide a detailed content calendar plan, taking into account the client's target audience and market.
 
 Include content themes, posting schedules, and engagement strategies tailored for their market.`,
@@ -51,33 +51,33 @@ Include content themes, posting schedules, and engagement strategies tailored fo
     id: 'sample-4',
     name: "Performance Analysis Report",
     description: "Standard format for marketing performance tracking reports",
-    content: `# Marketing Performance Report - {client_name}
+    content: `Marketing Performance Report - {client_name}
 
-## Report Period: [Current Month/Quarter]
+Report Period: [Current Month/Quarter]
 
-## Client Overview:
+Client Overview:
 - Business: {client_name}
 - Market: {country}
 
-## Performance Summary:
+Performance Summary:
 Please analyze the marketing performance based on the following areas:
 
-### 1. Objective Achievement
+1. Objective Achievement
 - Primary objectives progress
 - Secondary objectives performance
 - Challenges encountered
 
-### 2. Campaign Metrics
+2. Campaign Metrics
 - Engagement rates
 - Conversion metrics
 - ROI analysis
 
-### 3. Content Performance
+3. Content Performance
 - Top-performing content
 - Audience engagement patterns
 - Platform-specific insights
 
-### 4. Recommendations
+4. Recommendations
 - Optimization opportunities
 - Strategy adjustments
 - Next period priorities
