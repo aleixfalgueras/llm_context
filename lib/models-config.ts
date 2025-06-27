@@ -47,7 +47,7 @@ export const DEFAULT_FREQUENCY_PENALTY = 0.1
 
 // Consistent max tokens limit across all AI providers
 // Large enough to avoid cutting responses, but prevents extremely long outputs
-export const DEFAULT_MAX_TOKENS = 10000
+export const DEFAULT_MAX_TOKENS = 8000
 
 /**
  * Get the default model, with optional environment override
@@ -92,4 +92,51 @@ export function getModelById(modelId: string): AIModel | undefined {
 export function getModelDisplayName(modelId: string): string {
   const model = getModelById(modelId)
   return model?.name || modelId
+}
+
+/**
+ * Get the default model for new chats from localStorage, with validation
+ * Falls back to system default if saved model is invalid or not found
+ */
+export function getDefaultModelForNewChats(): string {
+  if (typeof window === 'undefined') {
+    return DEFAULT_MODEL // Server-side fallback
+  }
+
+  try {
+    const savedModel = localStorage.getItem('chat-default-model')
+    if (savedModel) {
+      // Validate that the saved model is still available
+      const isValidModel = AVAILABLE_MODELS.some(model => model.id === savedModel)
+      if (isValidModel) {
+        return savedModel
+      } else {
+        // Remove invalid model from localStorage
+        localStorage.removeItem('chat-default-model')
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load saved default model:', error)
+  }
+  
+  return DEFAULT_MODEL
+}
+
+/**
+ * Save the default model for new chats to localStorage
+ */
+export function saveDefaultModelForNewChats(modelId: string): void {
+  if (typeof window === 'undefined') return // Server-side safety
+
+  try {
+    // Validate model before saving
+    const isValidModel = AVAILABLE_MODELS.some(model => model.id === modelId)
+    if (isValidModel) {
+      localStorage.setItem('chat-default-model', modelId)
+    } else {
+      console.error('Attempted to save invalid model as default:', modelId)
+    }
+  } catch (error) {
+    console.error('Failed to save default model to localStorage:', error)
+  }
 } 

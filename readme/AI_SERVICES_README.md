@@ -215,7 +215,7 @@ AI Services API Structure:
 - **Cross-Provider Cost Tracking**: Unified usage monitoring across all AI providers
 - **Token Optimization**: Efficient prompt construction for all models
 - **Temperature Control**: Configurable creativity settings per provider
-- **Max Tokens**: Controlled output length (10,000 tokens) across different model architectures
+- **Max Tokens**: Controlled output length (8,000 tokens) across different model architectures
 - **Robust Error Handling**: Comprehensive error management with provider fallback capabilities
 - **Performance Monitoring**: Track response times and quality across providers
 

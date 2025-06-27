@@ -55,7 +55,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
     .filter((msg: any) => msg.role === 'USER' && msg.model)
     .reverse()[0]
   
-  const lastUsedModel = lastUserMessage?.model || 'gpt-4o-mini' // Default to gpt-4o-mini
+  // Only pass lastUsedModel if there are actual messages, otherwise let ChatInput use localStorage
+  const lastUsedModel = lastUserMessage?.model
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">

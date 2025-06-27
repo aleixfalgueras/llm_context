@@ -9,6 +9,7 @@ import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
 import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
+import { AVAILABLE_MODELS, getDefaultModelForNewChats, saveDefaultModelForNewChats } from '@/lib/models-config'
 
 interface Prompt {
   id: string
@@ -42,7 +43,28 @@ interface ChatInputProps {
 
 export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
   const [isExporting, setIsExporting] = useState(false)
-  const [selectedModel, setSelectedModel] = useState(lastUsedModel || 'gpt-4o-mini') // Use last used model or default to GPT-4o Mini
+  const [selectedModel, setSelectedModel] = useState(() => {
+    // If this is an existing chat with a lastUsedModel, use that
+    if (lastUsedModel) {
+      return lastUsedModel
+    }
+    
+    // For new chats, read localStorage directly (client-side only)
+    if (typeof window !== 'undefined') {
+      const savedModel = localStorage.getItem('chat-default-model')
+      if (savedModel) {
+        // Validate the saved model exists in available models
+        const isValidModel = ['gpt-4o', 'gpt-4o-mini', 'claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'].includes(savedModel)
+        if (isValidModel) {
+          return savedModel
+        }
+      }
+    }
+    
+    // Default fallback
+    return 'gpt-4o-mini'
+  })
+  
   const { toast } = useToast()
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -278,11 +300,31 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
 
   // Update selected model when switching between chats
   useEffect(() => {
-    setSelectedModel(lastUsedModel || 'gpt-4o-mini')
+    // If switching to an existing chat with a specific model, use that
+    if (lastUsedModel) {
+      setSelectedModel(lastUsedModel)
+      return
+    }
+    
+    // For new chats, check localStorage
+    if (typeof window !== 'undefined') {
+      const savedModel = localStorage.getItem('chat-default-model')
+      if (savedModel) {
+        const isValidModel = ['gpt-4o', 'gpt-4o-mini', 'claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'].includes(savedModel)
+        if (isValidModel) {
+          setSelectedModel(savedModel)
+          return
+        }
+      }
+    }
+    
+    // Fallback to default
+    setSelectedModel('gpt-4o-mini')
+    
     clientLogger.debug('Model selection updated', { 
       chatId,
       component: 'ChatInput',
-      metadata: { model: lastUsedModel || 'gpt-4o-mini' }
+      metadata: { model: selectedModel, source: lastUsedModel ? 'chat-specific' : 'localStorage' }
     });
   }, [lastUsedModel, chatId])
 
@@ -299,6 +341,22 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
       }
     }
   }, [input])
+
+  // Handle model selection - save to localStorage for future new chats
+  const handleModelSelect = (modelId: string) => {
+    setSelectedModel(modelId)
+    
+    // Save to localStorage directly for future new chats
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chat-default-model', modelId)
+    }
+    
+    clientLogger.debug('Model saved as default for new chats', { 
+      chatId,
+      component: 'ChatInput',
+      metadata: { model: modelId }
+    });
+  }
 
   return (
     <div className="space-y-2">
@@ -326,7 +384,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, cli
         </div>
         <ModelSelector 
           selectedModel={selectedModel}
-          onModelSelect={setSelectedModel}
+          onModelSelect={handleModelSelect}
         />
       </div>
       
