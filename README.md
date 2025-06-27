@@ -240,7 +240,7 @@ OPENAI_API_KEY="your_openai_api_key"
 # Optional: Override the default model (defaults to gpt-4o-mini if not set)
 OPENAI_API_DEFAULT_MODEL="gpt-4o-mini"
 # Optional: Override OpenAI generation parameters (defaults are defined in lib/models-config.ts)
-# Default max output tokens: 10,000 per response (generous limit to ensure complete responses)
+# Default max output tokens: 8,000 per response (generous limit to ensure complete responses)
 # OPENAI_TEMPERATURE="0.7"
 # OPENAI_PRESENCE_PENALTY="0.1"
 # OPENAI_FREQUENCY_PENALTY="0.1"
