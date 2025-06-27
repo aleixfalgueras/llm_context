@@ -2,7 +2,7 @@
 
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { User } from 'lucide-react'
+import { User, Loader2 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 
@@ -11,6 +11,7 @@ interface Message {
   content: string
   role: 'USER' | 'ASSISTANT'
   createdAt: Date
+  isStreaming?: boolean
 }
 
 interface ChatMessagesProps {
@@ -64,7 +65,11 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
                   </>
                 ) : (
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                    🤖
+                    {message.isStreaming ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      '🤖'
+                    )}
                   </AvatarFallback>
                 )}
               </Avatar>
@@ -76,9 +81,20 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(message.createdAt).toLocaleTimeString()}
                   </span>
+                  {message.isStreaming && (
+                    <span className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></span>
+                      Typing...
+                    </span>
+                  )}
                 </div>
                 {message.role === 'ASSISTANT' ? (
-                  <MarkdownRenderer content={message.content} />
+                  <div className="relative">
+                    <MarkdownRenderer content={message.content} />
+                    {message.isStreaming && message.content && (
+                      <div className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
+                    )}
+                  </div>
                 ) : (
                   <div className="prose prose-sm max-w-none dark:prose-invert">
                     <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.content}</p>

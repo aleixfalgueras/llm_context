@@ -3,11 +3,10 @@ import { createMessage } from '@/lib/actions'
 import { revalidatePath } from 'next/cache'
 import { generateChatTitleWithClient } from '@/lib/utils'
 import { buildClientContextSection, hasClientContext } from '@/lib/client-context-utils'
-import { withAuthAndUsageCheck } from '@/lib/api-middleware'
 import { withClientAccess } from '@/lib/client-middleware'
-import { createAICompletion } from '@/lib/ai-wrapper'
+import { createAICompletionStream } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
-import { logger, createRequestContext, withTiming } from '@/lib/logger'
+import { logger } from '@/lib/logger'
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getDefaultModel } from '@/lib/models-config'
@@ -183,60 +182,108 @@ Respond naturally and conversationally while keeping this context in mind.`
       revalidatePath('/')
     }
 
-    // Use unified AI wrapper with automatic usage tracking (token and cost limits enforced automatically)
-    logger.aiRequest(selectedModel, undefined, { userId, chatId });
-    const completion = await withTiming(
-      'AI API Call',
-      () => createAICompletion(
-      {
-        model: selectedModel,
-        messages: aiMessages
-      },
-      {
-        userId,
-        eventType: 'document_generation', // Track as document generation since it's content creation
-        resourceId: chatId
-      }
-      ),
-      { userId, chatId, model: selectedModel },
-      30000 // AI API calls can take longer - warn if > 30 seconds
-    );
+    // Create a streaming response
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder()
+        let fullContent = ''
+        
+        try {
+          // Use unified AI wrapper with automatic usage tracking (streaming version)
+          logger.aiRequest(selectedModel, undefined, { userId, chatId });
+          
+          const completionStream = createAICompletionStream(
+            {
+              model: selectedModel,
+              messages: aiMessages
+            },
+            {
+              userId,
+              eventType: 'document_generation', // Track as document generation since it's content creation
+              resourceId: chatId
+            }
+          );
 
-    const assistantMessage = completion.content
-    logger.info('AI response received', { 
-      userId, 
-      chatId, 
-      model: selectedModel,
-      metadata: { 
-        responseLength: assistantMessage.length,
-        tokensUsed: completion.usage?.totalTokens 
-      }
-    });
-    
-    // Save the assistant's response to the database
-    logger.dbQuery('create', 'message', { userId, chatId });
-    await createMessage(chatId, assistantMessage, 'ASSISTANT', selectedModel)
-    logger.info('Assistant message saved', { userId, chatId });
+          for await (const chunk of completionStream) {
+            if (chunk.isComplete) {
+              // Final chunk - save the complete message to database
+              logger.info('AI response received', { 
+                userId, 
+                chatId, 
+                model: selectedModel,
+                metadata: { 
+                  responseLength: fullContent.length,
+                  tokensUsed: chunk.usage?.totalTokens 
+                }
+              });
+              
+              // Save the assistant's response to the database
+              logger.dbQuery('create', 'message', { userId, chatId });
+              await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel)
+              logger.info('Assistant message saved', { userId, chatId });
 
-    // Only include newTitle if we actually updated it
-    const shouldIncludeTitle = isFirstUserMessage && chat.title === 'New Chat'
-    
-    const response = { 
-      message: assistantMessage,
-      ...(shouldIncludeTitle && { newTitle: generateChatTitleWithClient(client.name) })
-    };
-    
+              // Send completion signal
+              const completionData = {
+                type: 'complete',
+                newTitle: isFirstUserMessage && chat.title === 'New Chat' ? generateChatTitleWithClient(client.name) : undefined
+              }
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))
+              
+              controller.close()
+            } else if (chunk.content) {
+              // Stream content chunk
+              fullContent += chunk.content
+              const data = {
+                type: 'content',
+                content: chunk.content
+              }
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
+            }
+          }
+        } catch (error) {
+          logger.error('Error in streaming chat', error as Error, { chatId });
+          
+          // Handle AI provider errors specifically
+          if (error instanceof AIProviderError) {
+            const errorData = {
+              type: 'error',
+              error: error.message,
+              provider: error.provider,
+              errorType: error.type,
+              retryAfter: error.retryAfter
+            }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
+          } else {
+            const errorData = {
+              type: 'error',
+              error: 'Internal Server Error'
+            }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
+          }
+          
+          controller.close()
+        }
+      }
+    })
+
     logger.apiResponse('POST', '/api/chat', 200, { 
       userId, 
       chatId,
       metadata: { 
-        responseLength: assistantMessage.length,
-        includedTitle: shouldIncludeTitle
+        streaming: true
       }
     });
     
     endTiming();
-    return Response.json(response);
+    
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    })
+    
   } catch (error) {
     logger.error('Error in chat API', error as Error, { chatId });
     logger.apiResponse('POST', '/api/chat', 500, { chatId });
