@@ -240,8 +240,8 @@ Respond naturally and conversationally while keeping this context in mind.`
               }
               
               if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))) {
-                // Client disconnected, stop processing
-                logger.info('Client disconnected during completion', { userId, chatId });
+                // Client disconnected during completion, but message is already saved
+                logger.info('Client disconnected during completion signal', { userId, chatId });
                 return
               }
               
@@ -255,8 +255,20 @@ Respond naturally and conversationally while keeping this context in mind.`
               }
               
               if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))) {
-                // Client disconnected, stop processing
-                logger.info('Client disconnected during streaming', { userId, chatId });
+                // Client disconnected during streaming - save partial message
+                logger.info('Client disconnected during streaming, saving partial message', { 
+                  userId, 
+                  chatId,
+                  metadata: { partialLength: fullContent.length }
+                });
+                
+                if (fullContent.trim()) {
+                  // Save the partial assistant's response to the database
+                  logger.dbQuery('create', 'message', { userId, chatId });
+                  await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel)
+                  logger.info('Partial assistant message saved', { userId, chatId });
+                }
+                
                 return
               }
             }
