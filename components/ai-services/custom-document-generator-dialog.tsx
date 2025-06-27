@@ -17,16 +17,7 @@ import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
-
-interface Client {
-  id: string
-  name: string
-  country?: string
-  generalContext?: string
-  specifiContext1?: string
-  specifiContext2?: string
-  specifiContext3?: string
-}
+import type { Client } from '@/types/client'
 
 interface Prompt {
   id: string
