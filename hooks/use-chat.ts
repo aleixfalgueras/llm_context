@@ -10,6 +10,7 @@ interface Message {
   content: string
   role: 'USER' | 'ASSISTANT'
   createdAt: Date
+  isStreaming?: boolean // Add flag for streaming messages
 }
 
 export function useChat(chatId: string, initialMessages: Message[] = []) {
@@ -58,11 +59,20 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
       createdAt: new Date(),
     }
 
-    // Immediately add user message to UI
-    setMessages(prev => [...prev, userMessage])
-    clientLogger.debug('User message added to UI', { 
+    // Create initial assistant message (will be updated as content streams)
+    const assistantMessage: Message = {
+      id: `assistant-${Date.now()}`,
+      content: '',
+      role: 'ASSISTANT',
+      createdAt: new Date(),
+      isStreaming: true,
+    }
+
+    // Immediately add both messages to UI
+    setMessages(prev => [...prev, userMessage, assistantMessage])
+    clientLogger.debug('User and initial assistant messages added to UI', { 
       chatId,
-      metadata: { messageId: userMessage.id }
+      metadata: { userMessageId: userMessage.id, assistantMessageId: assistantMessage.id }
     });
 
     try {
@@ -104,31 +114,78 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
         throw new Error(errorData?.error || `Failed to send message: ${response.status}`)
       }
 
-      const data = await response.json()
-      clientLogger.messageReceived(data.message.length, { chatId });
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
       
-      // Create assistant message
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        content: data.message,
-        role: 'ASSISTANT',
-        createdAt: new Date(),
+      if (!reader) {
+        throw new Error('No response stream available')
       }
 
-      // Add assistant message to UI
-      setMessages(prev => [...prev, assistantMessage])
-      clientLogger.debug('Assistant message added to UI', { 
-        chatId,
-        metadata: { messageId: assistantMessage.id }
-      });
-      
-      // Update title if this was the first message
-      if (data.newTitle && onTitleUpdate) {
-        onTitleUpdate(data.newTitle)
-        clientLogger.info('Chat title updated', { 
-          chatId,
-          metadata: { newTitle: data.newTitle }
-        });
+      let streamedContent = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        
+        if (done) {
+          break
+        }
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              
+              if (data.type === 'content') {
+                // Update streaming content
+                streamedContent += data.content
+                setMessages(prev => prev.map(msg => 
+                  msg.id === assistantMessage.id 
+                    ? { ...msg, content: streamedContent }
+                    : msg
+                ))
+              } else if (data.type === 'complete') {
+                // Mark as complete and handle title update
+                setMessages(prev => prev.map(msg => 
+                  msg.id === assistantMessage.id 
+                    ? { ...msg, isStreaming: false }
+                    : msg
+                ))
+                
+                clientLogger.messageReceived(streamedContent.length, { chatId });
+                
+                // Update title if this was the first message
+                if (data.newTitle && onTitleUpdate) {
+                  onTitleUpdate(data.newTitle)
+                  clientLogger.info('Chat title updated', { 
+                    chatId,
+                    metadata: { newTitle: data.newTitle }
+                  });
+                }
+              } else if (data.type === 'error') {
+                // Handle streaming error
+                if (data.provider) {
+                  const aiError = new AIProviderError(
+                    data.error,
+                    data.provider,
+                    data.errorType || 'unknown',
+                    500,
+                    data.retryAfter
+                  )
+                  throw aiError
+                } else {
+                  throw new Error(data.error || 'Streaming error occurred')
+                }
+              }
+            } catch (parseError) {
+              // Skip malformed JSON lines
+              console.warn('Failed to parse streaming data:', line)
+            }
+          }
+        }
       }
       
     } catch (error) {
@@ -153,11 +210,13 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
         })
       }
       
-      // Remove user message on error
-      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id))
-      clientLogger.debug('User message removed due to error', { 
+      // Remove both user and assistant messages on error
+      setMessages(prev => prev.filter(msg => 
+        msg.id !== userMessage.id && msg.id !== assistantMessage.id
+      ))
+      clientLogger.debug('Messages removed due to error', { 
         chatId,
-        metadata: { messageId: userMessage.id }
+        metadata: { userMessageId: userMessage.id, assistantMessageId: assistantMessage.id }
       });
     } finally {
       setIsLoading(false)

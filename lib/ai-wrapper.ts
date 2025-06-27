@@ -35,7 +35,17 @@ export interface UsageTrackingOptions {
   additionalMetadata?: Record<string, any>
 }
 
-
+// New interface for streaming responses
+export interface StreamChunk {
+  content: string
+  isComplete: boolean
+  usage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+    estimatedCost: number
+  }
+}
 
 /**
  * Enhanced error handling for OpenAI provider errors
@@ -302,6 +312,86 @@ async function createOpenAICompletion(
 }
 
 /**
+ * OpenAI provider streaming completion handler
+ */
+async function* createOpenAICompletionStream(
+  completionOptions: AICompletionOptions,
+  trackingOptions: UsageTrackingOptions
+): AsyncGenerator<StreamChunk, void, unknown> {
+  const model = completionOptions.model || getDefaultModel()
+  
+  // Use centralized configuration with validation
+  const temperature = Math.max(0, Math.min(2, completionOptions.temperature ?? getDefaultTemperature()))
+  const maxTokens = completionOptions.max_tokens ?? getDefaultMaxTokens()
+  const presencePenalty = Math.max(-2, Math.min(2, completionOptions.presence_penalty ?? getDefaultPresencePenalty()))
+  const frequencyPenalty = Math.max(-2, Math.min(2, completionOptions.frequency_penalty ?? getDefaultFrequencyPenalty()))
+
+  const stream = await openai.chat.completions.create({
+    model,
+    messages: completionOptions.messages,
+    temperature,
+    max_tokens: Math.max(1, maxTokens),
+    presence_penalty: presencePenalty,
+    frequency_penalty: frequencyPenalty,
+    stream: true,
+  })
+
+  let fullContent = ''
+  let usage = null
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta
+    
+    if (delta?.content) {
+      fullContent += delta.content
+      yield {
+        content: delta.content,
+        isComplete: false
+      }
+    }
+
+    // Handle usage information from the final chunk
+    if (chunk.usage) {
+      usage = chunk.usage
+    }
+  }
+
+  // Calculate final usage and cost
+  let usageInfo = null
+  if (usage) {
+    const estimatedCost = calculateAICost(
+      model,
+      usage.prompt_tokens,
+      usage.completion_tokens
+    )
+
+    usageInfo = {
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      totalTokens: usage.total_tokens,
+      estimatedCost
+    }
+
+    // Track usage after completion
+    await trackUsage(trackingOptions.userId, trackingOptions.eventType, trackingOptions.resourceId, {
+      tokensUsed: usage.total_tokens,
+      estimatedCost,
+      model,
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      ...trackingOptions.additionalMetadata
+    })
+  }
+
+  // Final chunk with completion flag and usage
+  yield {
+    content: '',
+    isComplete: true,
+    usage: usageInfo || undefined
+  }
+}
+
+/**
  * Claude completion handler
  */
 async function createClaudeCompletion(
@@ -371,6 +461,141 @@ async function createClaudeCompletion(
   return {
     content,
     usage: usageInfo
+  }
+}
+
+/**
+ * Claude streaming completion handler
+ */
+async function* createClaudeCompletionStream(
+  completionOptions: AICompletionOptions,
+  trackingOptions: UsageTrackingOptions
+): AsyncGenerator<StreamChunk, void, unknown> {
+  const model = completionOptions.model || getDefaultModel()
+  const temperature = Math.max(0, Math.min(1, completionOptions.temperature ?? getDefaultTemperature()))
+  // Claude requires max_tokens to be present, use consistent limit across all providers
+  const maxTokens = completionOptions.max_tokens ?? getDefaultMaxTokens()
+
+  // Convert messages format for Claude
+  const systemMessage = completionOptions.messages.find(m => m.role === 'system')
+  const conversationMessages = completionOptions.messages
+    .filter(m => m.role !== 'system')
+    .map(m => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content
+    }))
+
+  const stream = await anthropic.messages.create({
+    model,
+    max_tokens: Math.max(1, maxTokens),
+    temperature,
+    system: systemMessage?.content,
+    messages: conversationMessages,
+    stream: true,
+  })
+
+  let fullContent = ''
+  let usage = null
+
+  for await (const chunk of stream) {
+    if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+      const deltaContent = chunk.delta.text
+      fullContent += deltaContent
+      yield {
+        content: deltaContent,
+        isComplete: false
+      }
+    }
+
+    // Handle usage information from the final chunk
+    if (chunk.type === 'message_delta' && chunk.usage) {
+      usage = chunk.usage
+    }
+  }
+
+  // Calculate final usage and cost
+  let usageInfo = undefined
+  if (usage && usage.input_tokens !== null && usage.output_tokens !== null) {
+    const estimatedCost = calculateAICost(
+      model,
+      usage.input_tokens,
+      usage.output_tokens
+    )
+
+    usageInfo = {
+      promptTokens: usage.input_tokens,
+      completionTokens: usage.output_tokens,
+      totalTokens: usage.input_tokens + usage.output_tokens,
+      estimatedCost
+    }
+
+    // Track usage after completion
+    await trackUsage(trackingOptions.userId, trackingOptions.eventType, trackingOptions.resourceId, {
+      tokensUsed: usage.input_tokens + usage.output_tokens,
+      estimatedCost,
+      model,
+      promptTokens: usage.input_tokens,
+      completionTokens: usage.output_tokens,
+      ...trackingOptions.additionalMetadata
+    })
+  }
+
+  // Final chunk with completion flag and usage
+  yield {
+    content: '',
+    isComplete: true,
+    usage: usageInfo
+  }
+}
+
+/**
+ * Streaming version of the unified AI API wrapper
+ */
+export async function* createAICompletionStream(
+  completionOptions: AICompletionOptions,
+  trackingOptions: UsageTrackingOptions
+): AsyncGenerator<StreamChunk, void, unknown> {
+  const model = completionOptions.model || getDefaultModel()
+  
+  // Determine provider based on model
+  const isAnthropic = model.startsWith('claude-')
+  const provider = isAnthropic ? 'anthropic' : 'openai'
+  
+  // Determine service source from metadata
+  const documentType = trackingOptions.additionalMetadata?.documentType
+  let serviceSource = 'unknown'
+  
+  if (documentType === 'meeting-report') {
+    serviceSource = 'meeting-report-generator'
+  } else if (documentType === 'custom-document') {
+    serviceSource = 'custom-document-generator'
+  } else if (trackingOptions.resourceId && trackingOptions.resourceId.startsWith('chat')) {
+    serviceSource = 'chat-assistant'
+  } else if (trackingOptions.eventType === 'document_generation') {
+    serviceSource = 'document-generation'
+  }
+  
+  // Log model usage information
+  console.log(`🤖 AI Model Streaming Request: ${model} (${provider}) | Service: ${serviceSource} | User: ${trackingOptions.userId}`)
+  
+  try {
+    if (isAnthropic) {
+      yield* createClaudeCompletionStream(completionOptions, trackingOptions)
+    } else {
+      yield* createOpenAICompletionStream(completionOptions, trackingOptions)
+    }
+  } catch (error) {
+    // Re-throw AIProviderError as-is
+    if (error instanceof AIProviderError) {
+      throw error
+    }
+    
+    // Handle other errors based on provider
+    if (isAnthropic) {
+      handleAnthropicError(error)
+    } else {
+      handleOpenAIError(error)
+    }
   }
 }
 
