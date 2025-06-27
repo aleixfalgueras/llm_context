@@ -1,8 +1,6 @@
-interface Client {
-  name?: string | null
-  country?: string | null
-  generalContext?: string | null
-}
+import { ClientWithContext } from '@/types/client'
+
+type Client = ClientWithContext
 
 /**
  * Builds just the client context section for AI prompts
@@ -17,25 +15,43 @@ export function buildClientContextSection(client: Client, selectedFields: string
 
   const shouldIncludeCountry = selectedFields.includes('country')
   const shouldIncludeGeneralContext = selectedFields.includes('general_context')
+  const shouldIncludeSpecificContext1 = selectedFields.includes('specific_context_1')
+  const shouldIncludeSpecificContext2 = selectedFields.includes('specific_context_2')
+  const shouldIncludeSpecificContext3 = selectedFields.includes('specific_context_3')
 
   // If no valid fields selected, return empty
-  if (!shouldIncludeCountry && !shouldIncludeGeneralContext) {
+  if (!shouldIncludeCountry && !shouldIncludeGeneralContext && !shouldIncludeSpecificContext1 && !shouldIncludeSpecificContext2 && !shouldIncludeSpecificContext3) {
     return ''
   }
 
   let contextSection = '\n\nCLIENT CONTEXT:'
   
-  // Add client profile section - ONLY if user selected country
+  // Collect all selected context parts (excluding country)
+  const contextParts = []
+  
+  if (shouldIncludeGeneralContext && client.generalContext) {
+    contextParts.push(client.generalContext)
+  }
+  if (shouldIncludeSpecificContext1 && client.specifiContext1) {
+    contextParts.push(client.specifiContext1)
+  }
+  if (shouldIncludeSpecificContext2 && client.specifiContext2) {
+    contextParts.push(client.specifiContext2)
+  }
+  if (shouldIncludeSpecificContext3 && client.specifiContext3) {
+    contextParts.push(client.specifiContext3)
+  }
+  
+  // Build the context line based on whether country is selected
   if (shouldIncludeCountry && client.country) {
+    // Country selected: "Country: [country] [other contexts...]"
     contextSection += `\nCountry: ${client.country}`
-    
-    // Add general context after country without a label - per user request
-    if (shouldIncludeGeneralContext && client.generalContext) {
-      contextSection += ` ${client.generalContext}`
+    if (contextParts.length > 0) {
+      contextSection += ` ${contextParts.join(' ')}`
     }
-  } else if (shouldIncludeGeneralContext && client.generalContext) {
-    // If only general context is selected, add it after a basic country label
-    contextSection += `\nCountry: ${client.generalContext}`
+  } else if (contextParts.length > 0) {
+    // No country selected but other contexts available: just the context content
+    contextSection += `\n${contextParts.join(' ')}`
   }
 
   return contextSection
@@ -47,5 +63,9 @@ export function buildClientContextSection(client: Client, selectedFields: string
  */
 export function hasClientContext(selectedFields: string[] = []): boolean {
   return selectedFields.length > 0 && 
-         (selectedFields.includes('country') || selectedFields.includes('general_context'))
+         (selectedFields.includes('country') || 
+          selectedFields.includes('general_context') || 
+          selectedFields.includes('specific_context_1') || 
+          selectedFields.includes('specific_context_2') || 
+          selectedFields.includes('specific_context_3'))
 }

@@ -6,23 +6,9 @@ import { revalidatePath } from 'next/cache'
 import { checkUsageLimit, updateUsageTracking } from './subscription-utils'
 import { logger } from './logger'
 
-export interface ClientData {
-  name: string
-  email?: string
-  phone?: string
-  country?: string
-  generalContext?: string
-  documentsLanguage?: string
-}
+import { ClientFormData, CLIENT_SELECT_DETAILED } from '@/types/client'
 
-interface ClientFormData {
-  name: string
-  email?: string
-  phone?: string
-  country?: string
-  generalContext?: string
-  documentsLanguage?: string
-}
+export type ClientData = ClientFormData
 
 export async function createClient(data: ClientFormData) {
   const { userId } = await auth()
@@ -45,6 +31,9 @@ export async function createClient(data: ClientFormData) {
         phone: data.phone,
         country: data.country,
         generalContext: data.generalContext,
+        specifiContext1: data.specifiContext1,
+        specifiContext2: data.specifiContext2,
+        specifiContext3: data.specifiContext3,
         documentsLanguage: data.documentsLanguage || 'english',
       },
     })
@@ -88,6 +77,9 @@ export async function updateClient(clientId: string, data: ClientFormData) {
         phone: data.phone,
         country: data.country,
         generalContext: data.generalContext,
+        specifiContext1: data.specifiContext1,
+        specifiContext2: data.specifiContext2,
+        specifiContext3: data.specifiContext3,
         documentsLanguage: data.documentsLanguage || 'english',
       },
     })
@@ -150,7 +142,10 @@ export async function getClients(options?: { includeDetails?: boolean; limit?: n
         // Include heavy fields only when requested
         ...(options?.includeDetails && {
           phone: true,
-          generalContext: true
+          generalContext: true,
+          specifiContext1: true,
+          specifiContext2: true,
+          specifiContext3: true
         })
       },
       orderBy: { createdAt: 'desc' },

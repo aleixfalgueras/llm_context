@@ -1,8 +1,6 @@
-interface Client {
-  name?: string | null
-  country?: string | null
-  generalContext?: string | null
-}
+import { ClientWithContext } from '@/types/client'
+
+type Client = ClientWithContext
 
 /**
  * Replaces client variables in content with actual client data

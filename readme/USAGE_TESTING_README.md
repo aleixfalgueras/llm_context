@@ -162,12 +162,30 @@ After running the scripts, test these endpoints:
 - Check that the current month/year in the database matches
 - Verify the `userId` matches exactly with Clerk
 
+## Client Context Testing
+
+When testing AI services and chat functionality, remember to test the expanded client context system:
+
+### Client Profile Fields Available:
+- **Country**: Client's country/location
+- **General Context**: General information about the client
+- **Specific Context 1**: Additional specific context field
+- **Specific Context 2**: Additional specific context field  
+- **Specific Context 3**: Additional specific context field
+
+### Context Selection Testing:
+- Test selecting individual fields vs. multiple fields
+- Verify privacy compliance - only selected fields should be included
+- Test that context appears correctly in AI responses
+- Verify fallback behavior when country is not selected
+
 ## Development Notes
 
 - Scripts use the current month/year automatically
 - Business plan uses simulated high values since "unlimited" needs actual numbers
 - The `userId` must exactly match the Clerk user ID format
 - Scripts include proper error handling and database cleanup
+- Client context system now supports up to 5 different context fields for granular privacy control
 
 ## Clean Up
 

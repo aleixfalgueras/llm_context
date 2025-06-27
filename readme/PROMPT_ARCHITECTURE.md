@@ -33,25 +33,55 @@ export function buildClientContextSection(client: Client, selectedFields: string
 
   const shouldIncludeCountry = selectedFields.includes('country')
   const shouldIncludeGeneralContext = selectedFields.includes('general_context')
+  const shouldIncludeSpecificContext1 = selectedFields.includes('specific_context_1')
+  const shouldIncludeSpecificContext2 = selectedFields.includes('specific_context_2')
+  const shouldIncludeSpecificContext3 = selectedFields.includes('specific_context_3')
 
   // If no valid fields selected, return empty
-  if (!shouldIncludeCountry && !shouldIncludeGeneralContext) {
+  if (!shouldIncludeCountry && !shouldIncludeGeneralContext && !shouldIncludeSpecificContext1 && !shouldIncludeSpecificContext2 && !shouldIncludeSpecificContext3) {
     return ''
   }
 
   let contextSection = '\n\nCLIENT CONTEXT:'
   
-  // Add client profile section - ONLY if user selected country
+  // Build context section based on selected fields
   if (shouldIncludeCountry && client.country) {
     contextSection += `\nCountry: ${client.country}`
     
-    // Add general context after country without a label - per user request
+    // Add general context after country without a label
     if (shouldIncludeGeneralContext && client.generalContext) {
       contextSection += ` ${client.generalContext}`
     }
-  } else if (shouldIncludeGeneralContext && client.generalContext) {
-    // If only general context is selected, add it after a basic country label
-    contextSection += `\nCountry: ${client.generalContext}`
+    
+    // Add specific context fields after general context (no labels)
+    if (shouldIncludeSpecificContext1 && client.specifiContext1) {
+      contextSection += ` ${client.specifiContext1}`
+    }
+    if (shouldIncludeSpecificContext2 && client.specifiContext2) {
+      contextSection += ` ${client.specifiContext2}`
+    }
+    if (shouldIncludeSpecificContext3 && client.specifiContext3) {
+      contextSection += ` ${client.specifiContext3}`
+    }
+  } else {
+    // If country not selected, build context with fallback format
+    const contextParts = []
+    if (shouldIncludeGeneralContext && client.generalContext) {
+      contextParts.push(client.generalContext)
+    }
+    if (shouldIncludeSpecificContext1 && client.specifiContext1) {
+      contextParts.push(client.specifiContext1)
+    }
+    if (shouldIncludeSpecificContext2 && client.specifiContext2) {
+      contextParts.push(client.specifiContext2)
+    }
+    if (shouldIncludeSpecificContext3 && client.specifiContext3) {
+      contextParts.push(client.specifiContext3)
+    }
+    
+    if (contextParts.length > 0) {
+      contextSection += `\nCountry: ${contextParts.join(' ')}`
+    }
   }
 
   return contextSection
@@ -66,7 +96,11 @@ export function buildClientContextSection(client: Client, selectedFields: string
  */
 export function hasClientContext(selectedFields: string[] = []): boolean {
   return selectedFields.length > 0 && 
-         (selectedFields.includes('country') || selectedFields.includes('general_context'))
+         (selectedFields.includes('country') || 
+          selectedFields.includes('general_context') ||
+          selectedFields.includes('specific_context_1') ||
+          selectedFields.includes('specific_context_2') ||
+          selectedFields.includes('specific_context_3'))
 }
 ```
 
@@ -254,10 +288,19 @@ if (contextSection) {
    hasClientContext(['general_context']) // Should return true
    ```
 
-4. **Both Fields**
+4. **Specific Context Fields**
+   ```typescript
+   buildClientContextSection(client, ['specific_context_1']) // Should include only specific context 1
+   buildClientContextSection(client, ['specific_context_2']) // Should include only specific context 2
+   buildClientContextSection(client, ['specific_context_3']) // Should include only specific context 3
+   hasClientContext(['specific_context_1']) // Should return true
+   ```
+
+5. **Multiple Fields**
    ```typescript
    buildClientContextSection(client, ['country', 'general_context']) // Should include both
-   hasClientContext(['country', 'general_context']) // Should return true
+   buildClientContextSection(client, ['country', 'general_context', 'specific_context_1']) // Should include all three
+   hasClientContext(['country', 'general_context', 'specific_context_1']) // Should return true
    ```
 
 ### **Manual Testing**
