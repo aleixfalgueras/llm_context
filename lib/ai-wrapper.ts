@@ -5,7 +5,7 @@ import { calculateAICost } from './subscription-utils'
 import { 
   getDefaultModel, 
   getDefaultTemperature, 
-  getDefaultMaxTokens, 
+  getDefaultMaxTokens,
   getDefaultPresencePenalty, 
   getDefaultFrequencyPenalty 
 } from './models-config'
@@ -251,7 +251,7 @@ async function createOpenAICompletion(
   
   // Use centralized configuration with validation
   const temperature = Math.max(0, Math.min(2, completionOptions.temperature ?? getDefaultTemperature()))
-  const maxTokens = Math.max(1, completionOptions.max_tokens ?? getDefaultMaxTokens())
+  const maxTokens = completionOptions.max_tokens ?? getDefaultMaxTokens()
   const presencePenalty = Math.max(-2, Math.min(2, completionOptions.presence_penalty ?? getDefaultPresencePenalty()))
   const frequencyPenalty = Math.max(-2, Math.min(2, completionOptions.frequency_penalty ?? getDefaultFrequencyPenalty()))
 
@@ -259,7 +259,7 @@ async function createOpenAICompletion(
     model,
     messages: completionOptions.messages,
     temperature,
-    max_tokens: maxTokens,
+    max_tokens: Math.max(1, maxTokens),
     presence_penalty: presencePenalty,
     frequency_penalty: frequencyPenalty,
   })
@@ -318,7 +318,8 @@ async function createClaudeCompletion(
 }> {
   const model = completionOptions.model || getDefaultModel()
   const temperature = Math.max(0, Math.min(1, completionOptions.temperature ?? getDefaultTemperature()))
-  const maxTokens = Math.max(1, completionOptions.max_tokens ?? getDefaultMaxTokens())
+  // Claude requires max_tokens to be present, use consistent limit across all providers
+  const maxTokens = completionOptions.max_tokens ?? getDefaultMaxTokens()
 
   // Convert messages format for Claude
   const systemMessage = completionOptions.messages.find(m => m.role === 'system')
@@ -331,7 +332,7 @@ async function createClaudeCompletion(
 
   const response = await anthropic.messages.create({
     model,
-    max_tokens: maxTokens,
+    max_tokens: Math.max(1, maxTokens),
     temperature,
     system: systemMessage?.content,
     messages: conversationMessages,

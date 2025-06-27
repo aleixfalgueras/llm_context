@@ -42,12 +42,12 @@ export const AVAILABLE_MODELS: AIModel[] = [
 // OpenAI Configuration Constants
 export const DEFAULT_MODEL = 'gpt-4o-mini'
 export const DEFAULT_TEMPERATURE = 0.7
-export const DEFAULT_MAX_TOKENS = 1000
 export const DEFAULT_PRESENCE_PENALTY = 0.1
 export const DEFAULT_FREQUENCY_PENALTY = 0.1
 
-// AI Services specific defaults (higher token limits for document generation)
-export const AI_SERVICES_DEFAULT_MAX_TOKENS = 2000
+// Consistent max tokens limit across all AI providers
+// Large enough to avoid cutting responses, but prevents extremely long outputs
+export const DEFAULT_MAX_TOKENS = 10000
 
 /**
  * Get the default model, with optional environment override
@@ -65,11 +65,10 @@ export function getDefaultTemperature(): number {
 }
 
 /**
- * Get the default max tokens, with optional environment override
+ * Get the default max tokens - consistent limit across all AI providers
  */
-export function getDefaultMaxTokens(useAIServicesDefault = false): number {
-  const defaultValue = useAIServicesDefault ? AI_SERVICES_DEFAULT_MAX_TOKENS : DEFAULT_MAX_TOKENS
-  return parseInt(process.env.OPENAI_MAX_TOKENS || defaultValue.toString())
+export function getDefaultMaxTokens(): number {
+  return DEFAULT_MAX_TOKENS
 }
 
 /**
