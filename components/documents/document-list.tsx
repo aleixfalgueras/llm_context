@@ -245,7 +245,7 @@ export function DocumentList({
                         }}
                         title="Delete Document"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-3 w-3 text-red-600 hover:text-red-700" />
                       </Button>
                     </div>
                     {/* Bottom row: Download */}

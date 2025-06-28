@@ -109,7 +109,7 @@ export function DocumentViewer({
               </Button>
             </>
           ) : (
-            <Button size="sm" onClick={onEdit}>
+            <Button size="sm" onClick={onEdit} className="bg-blue-600 hover:bg-blue-700 text-white">
               <Edit className="h-4 w-4 mr-1" />
               Edit
             </Button>

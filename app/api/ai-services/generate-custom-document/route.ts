@@ -6,6 +6,7 @@ import { createAICompletion } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
 import { getDefaultTemperature, getDefaultMaxTokens } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: Request) {
   try {
@@ -100,6 +101,25 @@ ${getLanguageRequirementSection(targetLanguage, 'custom-document')}
 Please generate a professional, well-structured document based on the above prompt and client information. Format the content in clear markdown with appropriate headings, sections, and formatting for easy reading and professional presentation. 
 
 IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining professional language and cultural appropriateness for this language.`
+
+    // Log the prompt used for document generation
+    logger.info('🤖 Custom Document Generation - Prompt Used', {
+      userId: validUserId,
+      clientId,
+      operation: 'custom-document-generation',
+      model: selectedModel,
+      metadata: {
+        promptName,
+        documentTitle,
+        clientName: validClient.name,
+        targetLanguage,
+        hasCustomPrompt: !!customPrompt,
+        hasAdditionalInstructions: !!additionalInstructions,
+        selectedContextFields,
+        promptLength: completePrompt.length,
+        prompt: completePrompt
+      }
+    })
 
     // Use unified AI wrapper with automatic usage tracking
     const completion = await createAICompletion(
