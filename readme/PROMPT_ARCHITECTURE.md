@@ -299,8 +299,9 @@ if (contextSection) {
 5. **Multiple Fields**
    ```typescript
    buildClientContextSection(client, ['country', 'general_context']) // Should include both
-   buildClientContextSection(client, ['country', 'general_context', 'specific_context_1']) // Should include all three
-   hasClientContext(['country', 'general_context', 'specific_context_1']) // Should return true
+buildClientContextSection(client, ['country', 'general_context', 'specific_context_1']) // Should include all three
+buildClientContextSection(client, ['specific_context_1', 'specific_context_2', 'specific_context_3']) // All specific contexts
+hasClientContext(['country', 'general_context', 'specific_context_1']) // Should return true
    ```
 
 ### **Manual Testing**

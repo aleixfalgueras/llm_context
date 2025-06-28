@@ -456,7 +456,7 @@ export function CustomDocumentGeneratorDialog({
                   id="customPrompt"
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="Write your custom prompt here... You can use variables like {country}, {general_context}, etc."
+                  placeholder="Write your custom prompt here... You can use variables like {country}, {general_context}, {specific_context_1}, {specific_context_2}, {specific_context_3}."
                   rows={4}
                 />
               </div>
