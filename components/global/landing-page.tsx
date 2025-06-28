@@ -17,6 +17,9 @@ export function LandingPage() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
           <Button variant="ghost" asChild>
+            <Link href="/pricing">Pricing</Link>
+          </Button>
+          <Button variant="ghost" asChild>
             <Link href="/sign-in">Sign in</Link>
           </Button>
           <Button asChild>
@@ -263,6 +266,9 @@ export function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-600 dark:text-gray-400 text-sm">
             <p>&copy; 2025 AI Context Manager for Marketing. Intelligent campaign creation for marketing professionals.</p>
             <div className="flex items-center gap-6 mt-4 md:mt-0">
+              <Link href="/pricing" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
+                Pricing
+              </Link>
               <Link href="/terms" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
                 Terms of Service
               </Link>
