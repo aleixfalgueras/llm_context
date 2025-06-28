@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </div>
             <p className="text-lg text-muted-foreground">
-              Your privacy is important to us. This privacy policy explains how AI Marketing Assistant collects, uses, and protects your information.
+              Your privacy is important to us. This privacy policy explains how SpeedBrand collects, uses, and protects your information.
             </p>
           </div>
 

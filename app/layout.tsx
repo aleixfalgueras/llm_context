@@ -19,7 +19,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AI Marketing Assistant",
+      title: "SpeedBrand",
   description: "AI-powered marketing content generation and client management platform for marketing professionals",
 };
 

@@ -12,7 +12,7 @@ export function LandingPage() {
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center">
-          <h1 className="text-xl font-bold">AI Context Manager for Marketing</h1>
+          {/* Logo space can be used for icon or kept empty */}
         </div>
         <div className="flex items-center gap-4">
           <ThemeToggle />
@@ -31,19 +31,22 @@ export function LandingPage() {
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/80 dark:to-purple-900/80 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-blue-200 dark:border-blue-700">
-            <Bot className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-blue-800 dark:text-blue-200">Powered by OpenAI, Claude & Gemini</span>
+          {/* Brand Name - Centered */}
+          <div className="mb-8">
+            <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              SpeedBrand
+            </h1>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
+          
+          <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
             Smart Client Context
             <br />
             for Marketing Teams
-          </h1>
+          </h2>
           
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-            Store essential client context to supercharge your marketing AI services. Create campaigns, content, and strategies that actually understand your clients' business, industry, and goals.
+            Store essential client information and create campaigns, content, and strategies with an AI that actually understand and use your clients' business context.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -264,7 +267,7 @@ export function LandingPage() {
       <footer className="border-t border-gray-200 dark:border-gray-700 py-8 mt-16">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-600 dark:text-gray-400 text-sm">
-            <p>&copy; 2025 AI Context Manager for Marketing. Intelligent campaign creation for marketing professionals.</p>
+            <p>&copy; 2025 SpeedBrand. Intelligent campaign creation for marketing professionals.</p>
             <div className="flex items-center gap-6 mt-4 md:mt-0">
               <Link href="/pricing" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
                 Pricing

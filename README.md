@@ -1,4 +1,4 @@
-# AI Marketing Assistant
+# SpeedBrand
 
 A modern AI-powered marketing assistant built with Next.js 14, React 18, and multi-AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations with the best AI models from multiple providers.
 

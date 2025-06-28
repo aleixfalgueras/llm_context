@@ -44,7 +44,7 @@ export function Navbar() {
             <div className="flex space-x-8">
               {/* Logo */}
               <Link href="/" className="flex items-center">
-                <h1 className="text-xl font-bold">AI Marketing Assistant</h1>
+                <h1 className="text-xl font-bold">SpeedBrand</h1>
               </Link>
               
               {/* Navigation links */}
