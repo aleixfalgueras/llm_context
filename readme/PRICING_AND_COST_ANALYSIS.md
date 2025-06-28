@@ -1,4 +1,4 @@
-# 💰 Multi-AI Pricing & Cost Analysis - AI Marketing Assistant
+# 💰 Multi-AI Pricing & Cost Analysis - SpeedBrand
 
 ## 📊 Subscription Plans Overview
 

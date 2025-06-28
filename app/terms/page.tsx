@@ -27,7 +27,7 @@ export default function TermsOfServicePage() {
               </div>
             </div>
             <p className="text-lg text-muted-foreground">
-              These Terms of Service govern your use of AI Marketing Assistant. By using our service, you agree to be bound by these terms.
+              These Terms of Service govern your use of SpeedBrand. By using our service, you agree to be bound by these terms.
             </p>
             
             <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mt-4">
@@ -54,13 +54,13 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  By accessing or using AI Marketing Assistant ("Service"), you agree to be bound by these Terms of Service ("Terms"). 
+                  By accessing or using SpeedBrand ("Service"), you agree to be bound by these Terms of Service ("Terms"). 
                   If you disagree with any part of these terms, you may not access the Service.
                 </p>
                 <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                   <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">✓ Legal Agreement</p>
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    These Terms constitute a legally binding agreement between you and AI Marketing Assistant. 
+                    These Terms constitute a legally binding agreement between you and SpeedBrand. 
                     Please read them carefully before using our Service.
                   </p>
                 </div>
@@ -76,7 +76,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-semibold mb-2">AI Marketing Assistant provides:</h4>
+                  <h4 className="font-semibold mb-2">SpeedBrand provides:</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>AI-powered content generation for marketing materials</li>
                     <li>Client management and document organisation tools</li>
