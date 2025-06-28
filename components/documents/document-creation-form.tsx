@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateInput } from '@/components/ui/date-input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Plus, Eye, X } from 'lucide-react'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
@@ -93,7 +93,7 @@ export function DocumentCreationForm({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="startDate">Start Date</Label>
-            <DateInput
+            <DatePicker
               id="startDate"
               value={startDate}
               onChange={onStartDateChange}
@@ -102,7 +102,7 @@ export function DocumentCreationForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="endDate">End Date</Label>
-            <DateInput
+            <DatePicker
               id="endDate"
               value={endDate}
               onChange={onEndDateChange}
