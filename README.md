@@ -51,7 +51,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 
 ### 📝 **Advanced Prompt Management**
 - **Custom Prompt Library**: Create, organize, and reuse personalized AI templates
-- **Smart Variable Replacement**: Automatic substitution of client data (`{country}`, `{general_context}`)
+- **Smart Variable Replacement**: Automatic substitution of client data (`{country}`, `{general_context}`, `{specific_context_1}`, `{specific_context_2}`, `{specific_context_3}`)
 - **Category Organization**: Sort prompts by type (marketing, content, strategy, social-media, copywriting, analysis)
 - **Usage Analytics**: Track which prompts are most effective for your workflow
 - **Sample Templates**: Pre-built prompts for common marketing tasks

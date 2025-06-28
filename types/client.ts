@@ -76,9 +76,9 @@ export const CLIENT_FIELD_PLACEHOLDERS = {
   phone: 'Enter phone number',
   country: 'Select country',
   generalContext: 'Add general context about this client...',
-  specifiContext1: 'Add specific context 1...',
-  specifiContext2: 'Add specific context 2...',
-  specifiContext3: 'Add specific context 3...',
+  specifiContext1: 'Add specific context...',
+  specifiContext2: 'Add specific context...',
+  specifiContext3: 'Add specific context...',
   documentsLanguage: 'Select language'
 } as const
 

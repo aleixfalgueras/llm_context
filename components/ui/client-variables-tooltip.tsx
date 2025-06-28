@@ -14,6 +14,9 @@ export function ClientVariablesTooltip() {
             <div className="text-sm space-y-1">
               <p><code>{`{country}`}</code> → Client's country/location</p>
               <p><code>{`{general_context}`}</code> → Client's general context</p>
+              <p><code>{`{specific_context_1}`}</code> → Client's specific context 1</p>
+              <p><code>{`{specific_context_2}`}</code> → Client's specific context 2</p>
+              <p><code>{`{specific_context_3}`}</code> → Client's specific context 3</p>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               Variables will be automatically replaced with actual client data when used.
