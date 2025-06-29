@@ -119,14 +119,14 @@ await updateUsageTracking(userId, 'document_generation', {
 
 ### Pro Plan ($17/month)
 - 2M tokens per month (~1,500 pages of content)  
-- $12 AI usage limit (across all providers)
+- $12 OpenRouter AI usage limit (across all models)
 - Unlimited client profiles
 - 200 documents per month
 - Unlimited custom prompts
 
 ### Business Plan ($43/month)
 - Unlimited tokens and documents
-- $35 AI usage limit (across all providers)
+- $35 OpenRouter AI usage limit (across all models)
 - Unlimited client profiles
 
 ## How Limits Interact: The Triple-Constraint System
@@ -142,15 +142,21 @@ The system enforces **three separate limits** (whichever hits first blocks furth
 
 **Key Insight**: Token limits count the same regardless of model cost, which creates important behavioral constraints:
 
-#### Multi-AI Model Cost Differences:
-**OpenAI Models:**
+#### OpenRouter Model Cost Differences:
+**OpenAI Models via OpenRouter:**
 - **GPT-4o**: $0.011 per typical document (2K tokens)
 - **GPT-4o-mini**: $0.00066 per typical document (2K tokens)
 
-**Anthropic Models:**
-- **Claude 4 Opus**: $0.090 per typical document (2K tokens)
-- **Claude 4 Sonnet**: $0.018 per typical document (2K tokens)
-- **Claude 3.5 Haiku**: $0.0048 per typical document (2K tokens)
+**Anthropic Models via OpenRouter:**
+- **Claude 3.5 Sonnet**: $0.018 per typical document (2K tokens)
+- **Claude 3 Haiku**: $0.0018 per typical document (2K tokens)
+
+**Google Models via OpenRouter:**
+- **Gemini Pro**: $0.002 per typical document (2K tokens)
+- **Gemini Flash**: $0.0015 per typical document (2K tokens)
+
+**Meta Models via OpenRouter:**
+- **Llama 3.1 70B**: $0.0018 per typical document (2K tokens)
 
 #### Real-World Limit Analysis:
 
@@ -231,7 +237,7 @@ const analytics = await getUserUsageAnalytics(userId)
 
 ### Adding New AI Services
 1. Use `withAuthAndUsageCheck('document')` middleware
-2. Implement with `createOpenAICompletion()` for automatic tracking
+2. Implement with `createAICompletion()` for automatic tracking
 3. Update service documentation
 
 ### Cost Management

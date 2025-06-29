@@ -6,7 +6,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 
 ### **Multi-AI Integration (Latest)**
 - **Multiple AI Providers**: Seamless integration of OpenAI and Anthropic Claude models
-- **Unified Model Selection**: Choose from GPT-4o, GPT-4o-mini, Claude 4 Opus, Claude 4 Sonnet, and Claude 3.5 Haiku
+- **Unified Model Selection**: Choose from 400+ models including OpenAI GPT-4o, Claude 3.5 Sonnet, Google Gemini, Meta Llama, and many more
 - **Cost-Aware Recommendations**: Each model shows provider, cost implications, and optimal use cases
 - **Provider Transparency**: Clear indication of which AI provider powers each model
 - **Intelligent Fallbacks**: Robust error handling across multiple AI providers
@@ -29,7 +29,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 
 ### 🤖 **Multi-AI-Powered Content Creation**
 - **Multi-Provider Support**: Access OpenAI and Anthropic models through unified interface
-- **Comprehensive Model Library**: GPT-4o, GPT-4o-mini, Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku
+- **Comprehensive Model Library**: 400+ models from OpenAI, Anthropic, Google, Meta, and other leading providers
 - **Intelligent Model Selection**: Choose optimal AI provider and model for each task
 - **Cost-Optimized Usage**: Transparent pricing across providers with automated cost tracking
 - **Provider Redundancy**: Robust failover capabilities across multiple AI providers
@@ -118,8 +118,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Middleware**: Authentication and usage protection
 
 ### **Multi-AI & External Services**
-- **OpenAI API**: GPT-4o and GPT-4o-mini integration with cost tracking
-- **Anthropic API**: Claude 4 Opus, Claude 4 Sonnet, and Claude 3.5 Haiku integration
+- **OpenRouter Integration**: Access to 400+ AI models through a single, unified API with automatic fallbacks and cost tracking
 - **Unified AI Wrapper**: Single interface handling multiple AI providers seamlessly
 - **Cross-Provider Cost Tracking**: Unified billing and usage monitoring across all AI services
 - **Provider Failover**: Automatic fallback capabilities for enhanced reliability
@@ -172,8 +171,8 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 │   ├── language-utils.ts  # Multi-language support
 │   ├── models-config.ts   # Multi-AI model configuration
 │   ├── logger.ts          # Comprehensive logging system
-│   ├── ai-wrapper.ts      # Unified multi-AI integration
-│   ├── openai-wrapper.ts  # Legacy OpenAI API integration
+│   ├── ai-wrapper.ts      # Unified AI integration (OpenRouter)
+│   ├── openrouter-wrapper.ts # OpenRouter API integration
 │   └── variable-replacement.ts # Variable substitution
 ├── prisma/               # Database
 │   ├── schema.prisma     # Complete database schema
@@ -208,8 +207,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 ### Prerequisites
 - Node.js 18+ 
 - PostgreSQL database (Supabase recommended)
-- OpenAI API key with credits
-- Anthropic API key for Claude models
+- OpenRouter API key with credits (provides access to 400+ AI models)
 - Clerk account for authentication
 
 
@@ -221,9 +219,8 @@ Create `.env.local` with these variables:
 DATABASE_URL="your_supabase_database_url"
 DIRECT_URL="your_supabase_direct_url"
 
-# AI Providers
-OPENAI_API_KEY="your_openai_api_key"
-ANTHROPIC_API_KEY="your_anthropic_api_key"
+# OpenRouter API (unified AI provider)
+OPENROUTER_API_KEY="your_openrouter_api_key"
 
 # Supabase Storage
 SUPABASE_URL="your_supabase_project_url"
@@ -235,15 +232,18 @@ NEXT_PUBLIC_SUPABASE_KEY="your_supabase_anon_key"
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_publishable_key"
 CLERK_SECRET_KEY="your_clerk_secret_key"
 
-# OpenAI Configuration
-OPENAI_API_KEY="your_openai_api_key"
-# Optional: Override the default model (defaults to gpt-4o-mini if not set)
-OPENAI_API_DEFAULT_MODEL="gpt-4o-mini"
-# Optional: Override OpenAI generation parameters (defaults are defined in lib/models-config.ts)
-# Default max output tokens: 8,000 per response (generous limit to ensure complete responses)
-# OPENAI_TEMPERATURE="0.7"
-# OPENAI_PRESENCE_PENALTY="0.1"
-# OPENAI_FREQUENCY_PENALTY="0.1"
+# OpenRouter Configuration
+OPENROUTER_API_KEY="your_openrouter_api_key"
+# Optional: Override the default model (defaults to openai/gpt-4o-mini if not set)
+OPENROUTER_DEFAULT_MODEL="openai/gpt-4o-mini"
+# Optional: Override generation parameters (defaults are defined in lib/models-config.ts)
+# OPENROUTER_TEMPERATURE="0.7"
+# OPENROUTER_PRESENCE_PENALTY="0.1"
+# OPENROUTER_FREQUENCY_PENALTY="0.1"
+
+# Optional: Site information for OpenRouter rankings
+SITE_URL="https://yourdomain.com"
+SITE_NAME="Your App Name"
 
 # Email Services
 
@@ -371,7 +371,7 @@ npm run vercel-build
 # Environment variables required:
 # - All .env.local variables
 # - DATABASE_URL (production)
-# - OPENAI_API_KEY
+# - OPENROUTER_API_KEY
 # - CLERK keys
 # - SUPABASE credentials
 

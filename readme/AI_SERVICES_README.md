@@ -1,6 +1,6 @@
-# Multi-AI Marketing Services Documentation
+# OpenRouter AI Marketing Services Documentation
 
-This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents using multiple AI providers (OpenAI and Anthropic) with granular client context control and professional output formatting.
+This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents using 400+ AI models through OpenRouter with granular client context control and professional output formatting.
 
 ## 🎯 Overview
 
@@ -23,14 +23,14 @@ AI Services provide automated marketing content generation using client profiles
 - **Privacy-First**: Only selected data is sent to AI provider APIs
 - **Centralized Privacy Logic**: `buildClientContextSection()` ensures consistent privacy respect
 
-### **Multi-AI Processing**
-- **Multi-Provider Support**: Access OpenAI (GPT-4o, GPT-4o-mini) and Anthropic (Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku) models
-- **Unified Model Selection**: User-friendly interface to choose optimal AI provider and model
-- **Cross-Provider Cost Tracking**: Transparent pricing and usage monitoring across all providers
+### **OpenRouter AI Processing**
+- **400+ Model Access**: Access OpenAI, Anthropic, Google, Meta, and many other providers through unified interface
+- **Unified Model Selection**: User-friendly interface to choose optimal AI model from any provider
+- **Transparent Cost Tracking**: Real-time pricing and usage monitoring across all models
 - **Performance-Based Recommendations**: Model descriptions include provider, cost, and optimal use cases
-- **Per-Service Model Choice**: Select different providers and models for different AI services
-- **Model Persistence**: Selected provider and model are remembered across sessions
-- **Intelligent Routing**: Automatic provider selection based on task requirements
+- **Per-Service Model Choice**: Select different models for different AI services
+- **Model Persistence**: Selected models are remembered across sessions
+- **Automatic Fallbacks**: Better uptime through provider redundancy
 - **Client Variable Replacement**: Automatic substitution of client variables in prompts
 - **Professional Output**: Production-ready marketing content formatted for client delivery
 - **Real-time Generation**: Interactive content creation with immediate feedback
