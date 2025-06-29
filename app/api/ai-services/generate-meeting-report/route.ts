@@ -3,13 +3,14 @@ import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createAICompletion } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
 import { logger, createRequestContext, withTiming } from '@/lib/logger'
+import { DEFAULT_MODEL } from '@/lib/models-config'
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Generate Meeting Report API');
   let clientId: string = '';
   
   try {
-    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = 'gpt-4o-mini' } = await req.json()
+    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL } = await req.json()
     clientId = requestClientId;
     logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
+import { DEFAULT_MODEL } from '@/lib/models-config'
 
 interface Message {
   id: string
@@ -107,7 +108,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
         body: JSON.stringify({
           messages: [{ content }],
           chatId,
-          model: selectedModel || 'gpt-4o-mini', // Default to gpt-4o-mini if no model specified
+          model: selectedModel || DEFAULT_MODEL, // Default to configured default model if no model specified
         }),
         signal: abortControllerRef.current?.signal,
         }),

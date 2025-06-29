@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { checkUsageLimit } from './subscription-utils'
-import { createUsageLimitResponse } from './openai-wrapper'
+import { createUsageLimitResponse } from './ai-wrapper'
 import { NextRequest, NextResponse } from 'next/server'
 import { enforceUsageLimit } from './usage-middleware'
 

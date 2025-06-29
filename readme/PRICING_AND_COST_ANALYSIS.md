@@ -124,11 +124,11 @@
 
 ---
 
-## 💡 Multi-AI Cost Structure & Profit Analysis
+## 💡 OpenRouter Cost Structure & Profit Analysis
 
-### AI API Costs (Our Expenses)
+### AI API Costs (Our Expenses via OpenRouter)
 
-#### OpenAI Pricing:
+#### OpenAI Models via OpenRouter:
 **GPT-4o:**
 - **Input**: $0.0025 per 1K tokens (~750 words)
 - **Output**: $0.01 per 1K tokens (~750 words)
@@ -139,34 +139,45 @@
 - **Output**: $0.0006 per 1K tokens
 - **Average Cost**: $0.0004 per 1K tokens (mixed input/output)
 
-#### Anthropic Pricing:
-**Claude 4 Opus:**
-- **Input**: $0.015 per 1K tokens (~750 words)
-- **Output**: $0.075 per 1K tokens (~750 words)
-- **Average Cost**: $0.045 per 1K tokens (mixed input/output)
-
-**Claude 4 Sonnet:**
+#### Anthropic Models via OpenRouter:
+**Claude 3.5 Sonnet:**
 - **Input**: $0.003 per 1K tokens (~750 words)
 - **Output**: $0.015 per 1K tokens (~750 words)
 - **Average Cost**: $0.009 per 1K tokens (mixed input/output)
 
-**Claude 3.5 Haiku:**
-- **Input**: $0.0008 per 1K tokens (~750 words)
-- **Output**: $0.004 per 1K tokens (~750 words)
-- **Average Cost**: $0.0024 per 1K tokens (mixed input/output)
+**Claude 3 Haiku:**
+- **Input**: $0.00025 per 1K tokens (~750 words)
+- **Output**: $0.00125 per 1K tokens (~750 words)
+- **Average Cost**: $0.0009 per 1K tokens (mixed input/output)
 
-### Real Usage Examples:
+#### Additional Provider Options:
+**Google Gemini Pro:**
+- **Input**: $0.0005 per 1K tokens
+- **Output**: $0.0015 per 1K tokens
+- **Average Cost**: $0.001 per 1K tokens (mixed input/output)
 
-#### Typical Conversation (GPT-4o-mini):
+**Meta Llama 3.1 70B:**
+- **Input**: $0.0009 per 1K tokens
+- **Output**: $0.0009 per 1K tokens
+- **Average Cost**: $0.0009 per 1K tokens (same input/output pricing)
+
+### Real Usage Examples via OpenRouter:
+
+#### Typical Conversation (OpenAI GPT-4o-mini):
 - **Input**: 800 tokens (context + user message)
 - **Output**: 400 tokens (AI response)
 - **Total Cost**: $0.00036 per conversation
 - **Monthly Cost (50 conversations)**: $0.018
 
-#### Document Generation (GPT-4o-mini):
+#### Document Generation (OpenAI GPT-4o-mini):
 - **Input**: 1,200 tokens (prompt + context)
 - **Output**: 800 tokens (generated document)
 - **Total Cost**: $0.00066 per document
+
+#### Cost-Optimized Document Generation (Meta Llama 3.1 70B):
+- **Input**: 1,200 tokens (prompt + context)
+- **Output**: 800 tokens (generated document)
+- **Total Cost**: $0.0018 per document
 - **Monthly Cost (20 documents)**: $0.0132
 
 #### Heavy User Scenario (GPT-4o):

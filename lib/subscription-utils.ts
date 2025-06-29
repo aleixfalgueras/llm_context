@@ -367,37 +367,56 @@ export async function updateUsageTracking(
   }
 }
 
-// Calculate estimated cost for AI usage (OpenAI and Claude)
-export function calculateAICost(model: string, inputTokens: number, outputTokens: number): number {
-  const pricing = {
-    // OpenAI pricing
-    'gpt-4o': {
-      input: 0.0025,  // $0.0025 per 1K input tokens
-      output: 0.01    // $0.01 per 1K output tokens
-    },
-    'gpt-4o-mini': {
-      input: 0.00015, // $0.00015 per 1K input tokens
-      output: 0.0006  // $0.0006 per 1K output tokens
-    },
-    // Claude pricing (latest models)
-    'claude-opus-4-20250514': {
-      input: 0.015,   // $15 per 1M tokens = $0.015 per 1K tokens
-      output: 0.075   // $75 per 1M tokens = $0.075 per 1K tokens
-    },
-    'claude-sonnet-4-20250514': {
-      input: 0.003,   // $3 per 1M tokens = $0.003 per 1K tokens
-      output: 0.015   // $15 per 1M tokens = $0.015 per 1K tokens
-    },
 
-    'claude-3-5-haiku-20241022': {
-      input: 0.0008,  // $0.80 per 1M tokens = $0.0008 per 1K tokens  
-      output: 0.004   // $4 per 1M tokens = $0.004 per 1K tokens
+
+// Calculate estimated cost for OpenRouter usage
+// Note: OpenRouter has dynamic pricing. This is a fallback estimation.
+// For accurate pricing, consider fetching real-time pricing from OpenRouter API
+export function calculateOpenRouterCost(model: string, inputTokens: number, outputTokens: number): number {
+  // OpenRouter model pricing (approximate, based on common models)
+  // These should ideally be fetched from OpenRouter's API for accuracy
+  const openRouterPricing = {
+    // OpenAI models via OpenRouter
+    [MODEL_IDS.OPENAI_GPT_4O]: {
+      input: 0.0025,
+      output: 0.01
+    },
+    [MODEL_IDS.OPENAI_GPT_4O_MINI]: {
+      input: 0.00015,
+      output: 0.0006
+    },
+    // Anthropic models via OpenRouter
+    [MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET]: {
+      input: 0.003,
+      output: 0.015
+    },
+    [MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU]: {
+      input: 0.00025,
+      output: 0.00125
+    },
+    // Other popular models on OpenRouter
+    [MODEL_IDS.GOOGLE_GEMINI_PRO]: {
+      input: 0.0005,
+      output: 0.0015
+    },
+    [MODEL_IDS.META_LLAMA_3_1_70B]: {
+      input: 0.0009,
+      output: 0.0009  
     }
   }
 
-  const modelPricing = pricing[model as keyof typeof pricing] || pricing['gpt-4o-mini']
+  // Try to find specific model pricing
+  const modelPricing = openRouterPricing[model as keyof typeof openRouterPricing]
   
-  return (inputTokens / 1000) * modelPricing.input + (outputTokens / 1000) * modelPricing.output
+  // If no specific pricing found, use a reasonable default (similar to GPT-4o-mini)
+  const fallbackPricing = {
+    input: 0.0005,
+    output: 0.002
+  }
+  
+  const pricing = modelPricing || fallbackPricing
+  
+  return (inputTokens / 1000) * pricing.input + (outputTokens / 1000) * pricing.output
 }
 
 

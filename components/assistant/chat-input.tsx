@@ -9,7 +9,7 @@ import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
 import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { AVAILABLE_MODELS, getDefaultModelForNewChats, saveDefaultModelForNewChats } from '@/lib/models-config'
+import { AVAILABLE_MODELS, getDefaultModelForNewChats, saveDefaultModelForNewChats, MODEL_IDS, ALL_MODEL_IDS, DEFAULT_MODEL } from '@/lib/models-config'
 
 interface Prompt {
   id: string
@@ -56,7 +56,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
       const savedModel = localStorage.getItem('chat-default-model')
       if (savedModel) {
         // Validate the saved model exists in available models
-        const isValidModel = ['gpt-4o', 'gpt-4o-mini', 'claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'].includes(savedModel)
+        const isValidModel = ALL_MODEL_IDS.includes(savedModel)
         if (isValidModel) {
           return savedModel
         }
@@ -64,7 +64,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
     }
     
     // Default fallback
-    return 'gpt-4o-mini'
+    return DEFAULT_MODEL
   })
   
   const { toast } = useToast()
@@ -312,7 +312,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
     if (typeof window !== 'undefined') {
       const savedModel = localStorage.getItem('chat-default-model')
       if (savedModel) {
-        const isValidModel = ['gpt-4o', 'gpt-4o-mini', 'claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'].includes(savedModel)
+        const isValidModel = ALL_MODEL_IDS.includes(savedModel)
         if (isValidModel) {
           setSelectedModel(savedModel)
           return
@@ -321,7 +321,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
     }
     
     // Fallback to default
-    setSelectedModel('gpt-4o-mini')
+          setSelectedModel(DEFAULT_MODEL)
     
     clientLogger.debug('Model selection updated', { 
       chatId,
