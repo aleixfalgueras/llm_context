@@ -2,39 +2,6 @@
 
 A modern AI-powered marketing assistant built with Next.js 14, React 18, and OpenRouter AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations with curated AI models organized by subscription tiers.
 
-## 🆕 Recent Updates & Improvements
-
-### **Model Tiers System (Latest)**
-- **Tiered Model Access**: Curated AI models organized by subscription plan for optimal cost-effectiveness
-- **Basic Tier Models**: Cost-effective options (GPT-4o Mini, Claude Haiku, Gemini Flash) for essential tasks
-- **Pro Tier Models**: Premium options (GPT-4o, Claude Sonnet, Gemini Pro) for complex work + all basic models
-- **Sustainable Pricing**: Token limits calculated based on most expensive model in each tier to ensure profitability
-- **Business Model Security**: Subscription revenue covers all AI costs with healthy profit margins
-- **Model Selector Enhancement**: Visual distinction between tiers with upgrade prompts and cost indicators
-- **Access Control**: Server-side validation ensures users only access models included in their plan
-
-### **OpenRouter AI Integration**
-- **Unified AI Platform**: Access curated models through OpenRouter's single, unified API
-- **Curated Model Library**: Focused selection of OpenAI, Anthropic, and Google models optimized for marketing
-- **Cost-Aware Design**: Each model shows cost implications and optimal use cases within subscription tiers
-- **Provider Transparency**: Clear indication of which AI provider powers each model
-- **Intelligent Fallbacks**: Robust error handling with automatic failover through OpenRouter
-- **Per-Service Selection**: Different model choice for AI services and chat assistant
-- **Persistent Preferences**: Your model choice is remembered across sessions
-
-### **Simplified Usage System**
-- **Token-Based Limits**: Focus on token consumption as the primary usage metric
-- **Profitable Margins**: Token limits ensure sustainable business operations at all subscription levels
-- **Removed Cost Estimates**: No more confusing cost calculations - simple token tracking
-- **Improved Analytics**: Better tracking of actual value-generating activities
-- **Clearer Pricing**: Transparent usage limits aligned with business sustainability
-
-### **Enhanced Document Management**
-- **In-Place Editing**: Edit document content and names after creation
-- **Better Organization**: Improved search, filtering, and document management
-- **Streamlined Interface**: Removed unnecessary features, focused on core functionality
-- **Performance Improvements**: Faster document operations and better error handling
-
 ## ✨ Key Features
 
 ### 🤖 **Tiered AI Model Access**

@@ -12,45 +12,44 @@ export interface AIModel {
 
 // Model ID Constants - Use these instead of literal strings throughout the codebase
 export const MODEL_IDS = {
-  // OpenAI models via OpenRouter
-  OPENAI_GPT_4O: 'openai/gpt-4o',
-  OPENAI_GPT_4O_MINI: 'openai/gpt-4o-mini',
-  OPENAI_GPT_4_TURBO: 'openai/gpt-4-turbo',
-  
-  // Anthropic models via OpenRouter
-  ANTHROPIC_CLAUDE_3_5_SONNET: 'anthropic/claude-3.5-sonnet',
+  // Basic Tier Models
+  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano',
   ANTHROPIC_CLAUDE_3_HAIKU: 'anthropic/claude-3-haiku',
-  ANTHROPIC_CLAUDE_3_OPUS: 'anthropic/claude-3-opus',
+  GOOGLE_GEMINI_1_5_FLASH: 'google/gemini-1.5-flash',
   
-  // Google models via OpenRouter
-  GOOGLE_GEMINI_PRO: 'google/gemini-pro',
-  GOOGLE_GEMINI_FLASH: 'google/gemini-flash',
-  
-  // Meta models via OpenRouter
-  META_LLAMA_3_1_405B: 'meta-llama/llama-3.1-405b-instruct',
-  META_LLAMA_3_1_70B: 'meta-llama/llama-3.1-70b-instruct',
-  
-  // Other models
-  PERPLEXITY_SONAR_HUGE: 'perplexity/llama-3.1-sonar-huge-128k-online'
+  // Pro/Business Tier Models
+  OPENAI_GPT_4_1: 'openai/gpt-4.1',
+  ANTHROPIC_CLAUDE_3_5_SONNET: 'anthropic/claude-3.5-sonnet',
+  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash',
 } as const
 
 // Model Tiers Configuration
 export const MODEL_TIERS = {
   [ModelTier.BASIC]: [
-    MODEL_IDS.OPENAI_GPT_4O_MINI,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
     MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
-    MODEL_IDS.GOOGLE_GEMINI_FLASH,
+    MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
   ],
   [ModelTier.PRO]: [
-    MODEL_IDS.OPENAI_GPT_4O,
+    // Pro tier models
+    MODEL_IDS.OPENAI_GPT_4_1,
     MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
-    MODEL_IDS.GOOGLE_GEMINI_PRO,
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     // Pro tier also includes basic tier models
-    MODEL_IDS.OPENAI_GPT_4O_MINI,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
     MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
-    MODEL_IDS.GOOGLE_GEMINI_FLASH,
+    MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
   ],
-} as const
+  [ModelTier.BUSINESS]: [
+    // Business tier has same model access as Pro tier
+    MODEL_IDS.OPENAI_GPT_4_1,
+    MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
+    MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
+  ],
+}
 
 // Create array of all model IDs for validation  
 export const ALL_MODEL_IDS = Object.values(MODEL_IDS) as string[]
@@ -58,12 +57,12 @@ export const ALL_MODEL_IDS = Object.values(MODEL_IDS) as string[]
 export const AVAILABLE_MODELS: AIModel[] = [
   // Basic Tier Models (Cost-effective)
   {
-    id: MODEL_IDS.OPENAI_GPT_4O_MINI,
-    name: 'GPT-4o Mini',
-    description: 'Faster and more cost-effective OpenAI model',
+    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    name: 'GPT-4.1 Nano',
+    description: 'Fastest and cheapest GPT-4.1 model, ideal for classification and autocompletion',
     provider: 'openai',
-    contextLength: 128000,
-    pricing: { input: 0.00015, output: 0.0006 },
+    contextLength: 1047576,
+    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
     tier: ModelTier.BASIC
   },
   {
@@ -72,27 +71,27 @@ export const AVAILABLE_MODELS: AIModel[] = [
     description: 'Fastest and most cost-effective Claude model',
     provider: 'anthropic',
     contextLength: 200000,
-    pricing: { input: 0.00025, output: 0.00125 },
+    pricing: { input: 0.00025, output: 0.00125 }, // $0.25/M input, $1.25/M output
     tier: ModelTier.BASIC
   },
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_FLASH,
-    name: 'Gemini Flash',
-    description: 'Fast and efficient Google model',
+    id: MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
+    name: 'Gemini 1.5 Flash',
+    description: 'Fast and efficient Google model, excellent value',
     provider: 'google',
-    contextLength: 32000,
-    pricing: { input: 0.00025, output: 0.00075 },
+    contextLength: 1000000,
+    pricing: { input: 0.000075, output: 0.0003 }, // $0.075/M input, $0.30/M output
     tier: ModelTier.BASIC
   },
   
-  // Pro Tier Models (Premium)
+  // Pro/Business Tier Models (Premium Performance)
   {
-    id: MODEL_IDS.OPENAI_GPT_4O,
-    name: 'GPT-4o',
-    description: 'Most capable OpenAI model, best for complex tasks',
+    id: MODEL_IDS.OPENAI_GPT_4_1,
+    name: 'GPT-4.1',
+    description: 'Flagship model optimized for advanced instruction following and coding',
     provider: 'openai',
-    contextLength: 128000,
-    pricing: { input: 0.0025, output: 0.01 },
+    contextLength: 1047576,
+    pricing: { input: 0.002, output: 0.008 }, // $2/M input, $8/M output
     tier: ModelTier.PRO
   },
   {
@@ -101,22 +100,22 @@ export const AVAILABLE_MODELS: AIModel[] = [
     description: 'High-performance Claude model with exceptional reasoning',
     provider: 'anthropic',
     contextLength: 200000,
-    pricing: { input: 0.003, output: 0.015 },
+    pricing: { input: 0.003, output: 0.015 }, // $3/M input, $15/M output
     tier: ModelTier.PRO
   },
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_PRO,
-    name: 'Gemini Pro',
-    description: 'Google\'s flagship model for text and reasoning',
+    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    name: 'Gemini 2.0 Flash',
+    description: 'Enhanced multimodal capabilities with excellent performance/cost ratio',
     provider: 'google',
-    contextLength: 32000,
-    pricing: { input: 0.0005, output: 0.0015 },
+    contextLength: 1000000,
+    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
     tier: ModelTier.PRO
   }
 ]
 
-// OpenRouter Configuration Constants - Default to basic tier model
-export const DEFAULT_MODEL = MODEL_IDS.OPENAI_GPT_4O_MINI
+// OpenRouter Configuration Constants - Default to best value basic tier model
+export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH
 export const DEFAULT_TEMPERATURE = 0.7
 export const DEFAULT_PRESENCE_PENALTY = 0.1
 export const DEFAULT_FREQUENCY_PENALTY = 0.1
@@ -228,9 +227,9 @@ export function getModelCost(modelId: string, inputTokens: number, outputTokens:
     return (inputTokens / 1000) * model.pricing.input + (outputTokens / 1000) * model.pricing.output
   }
   
-  // Fallback pricing similar to GPT-4o-mini if no specific pricing
-  const fallbackInputCost = 0.00015
-  const fallbackOutputCost = 0.0006
+  // Fallback pricing similar to Gemini 1.5 Flash if no specific pricing
+  const fallbackInputCost = 0.000075
+  const fallbackOutputCost = 0.0003
   
   return (inputTokens / 1000) * fallbackInputCost + (outputTokens / 1000) * fallbackOutputCost
 }
@@ -239,20 +238,16 @@ export function getModelCost(modelId: string, inputTokens: number, outputTokens:
  * Get models available for a specific subscription tier
  */
 export function getModelsByTier(tier: ModelTierType): AIModel[] {
-  if (tier === ModelTier.BASIC) {
-    return AVAILABLE_MODELS.filter(model => model.tier === ModelTier.BASIC)
-  } else {
-    // Pro tier includes both basic and pro models
-    return AVAILABLE_MODELS
-  }
+  const tierModels = MODEL_TIERS[tier] || []
+  return AVAILABLE_MODELS.filter(model => (tierModels as string[]).includes(model.id))
 }
 
 /**
  * Check if a model is available for a specific subscription tier
  */
 export function isModelAvailableForTier(modelId: string, tier: ModelTierType): boolean {
-  const availableModels = getModelsByTier(tier)
-  return availableModels.some(model => model.id === modelId)
+  const tierModels = MODEL_TIERS[tier] || []
+  return (tierModels as string[]).includes(modelId)
 }
 
 /**
@@ -264,8 +259,8 @@ export function getMaxTierCost(tier: ModelTierType): number {
   
   models.forEach(model => {
     if (model.pricing) {
-      // Calculate average cost per 1K tokens (assuming 50/50 input/output split)
-      const avgCost = (model.pricing.input + model.pricing.output) / 2
+      // Calculate cost per 1K tokens (assuming 1:2 input:output ratio)
+      const avgCost = (model.pricing.input + 2 * model.pricing.output) / 3
       if (avgCost > maxCost) {
         maxCost = avgCost
       }
@@ -279,6 +274,14 @@ export function getMaxTierCost(tier: ModelTierType): number {
  * Get subscription tier from plan name
  */
 export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
-  if (plan === SubscriptionPlan.BASIC) return ModelTier.BASIC
-  return ModelTier.PRO // Both 'pro' and 'business' plans use pro tier models
+  switch (plan) {
+    case SubscriptionPlan.BASIC:
+      return ModelTier.BASIC
+    case SubscriptionPlan.PRO:
+      return ModelTier.PRO
+    case SubscriptionPlan.BUSINESS:
+      return ModelTier.BUSINESS
+    default:
+      return ModelTier.BASIC
+  }
 } 
