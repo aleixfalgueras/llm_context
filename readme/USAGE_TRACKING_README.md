@@ -40,7 +40,7 @@ Tracks monthly usage aggregates:
 
 ```sql
 model UserUsage {
-  documentsGenerated Int     -- Total documents generated this month
+  -- documentsGenerated field removed - documents are unlimited
   tokensUsed        Int     -- Total tokens consumed this month (primary metric)
   
   -- No cost tracking - business pays OpenRouter directly

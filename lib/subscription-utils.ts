@@ -25,7 +25,6 @@ export const SUBSCRIPTION_PLANS = {
     description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
       '👥 3 client profiles',
-      '📄 Unlimited documents per month',
       '💾 50 MB document storage',
       '🔤 100K tokens (~75 pages of content)',
       '🤖 Cost-effective models: GPT-4o Mini, Claude Haiku, Gemini Flash'
@@ -43,7 +42,6 @@ export const SUBSCRIPTION_PLANS = {
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
-      '📄 Unlimited documents per month',
       '💾 200 MB document storage',
       '🔤 1.6M tokens (~1,200 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
@@ -61,7 +59,6 @@ export const SUBSCRIPTION_PLANS = {
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',
-      '📄 Unlimited documents per month',
       '💾 2 GB document storage',
       '🔤 4.5M tokens (~3,400 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
@@ -178,13 +175,12 @@ export async function getCurrentMonthUsage(userId: string) {
             }
           },
           update: {}, // Don't update if exists
-          create: {
-            userId,
-            year,
-            month,
-            documentsGenerated: 0,
-            tokensUsed: 0,
-          }
+                  create: {
+          userId,
+          year,
+          month,
+          tokensUsed: 0,
+        }
         }),
         { userId },
         500 // Database operations should be fast - warn if >500ms
@@ -207,42 +203,13 @@ export async function getCurrentMonthUsage(userId: string) {
 }
 
 // Check usage limits for different actions
-export async function checkUsageLimit(userId: string, action: 'document' | 'client') {
+export async function checkUsageLimit(userId: string, action: 'client') {
   const endTiming = logger.startTiming('Check Usage Limit', { userId });
   
   try {
-
-    
-    const [subscription, usage] = await Promise.all([
-      getUserSubscription(userId),
-      getCurrentMonthUsage(userId)
-    ])
-    
-
-
-    const plan = SUBSCRIPTION_PLANS[subscription.plan as PlanId]
+    const subscription = await getUserSubscription(userId)
 
     switch (action) {
-      case 'document':
-        // Only check token limit for documents (no document count limits)
-        const maxTokensDoc = subscription.maxTokensPerMonth
-        if (maxTokensDoc !== -1 && usage.tokensUsed >= maxTokensDoc) {
-          return {
-            allowed: false,
-            limit: maxTokensDoc,
-            used: usage.tokensUsed,
-            remaining: 0,
-            limitType: 'tokens'
-          }
-        }
-        
-        return {
-          allowed: true,
-          limit: 'unlimited',
-          used: 0,
-          limitType: 'documents'
-        }
-
       case 'client':
         const clientCount = await prisma.client.count({ where: { userId } })
         const maxClients = subscription.maxClients
@@ -278,7 +245,6 @@ export async function checkUsageLimit(userId: string, action: 'document' | 'clie
 // Track usage by updating monthly usage only (no individual events)
 export async function updateUsageTracking(
   userId: string,
-  eventType: 'document_generation',
   metadata?: {
     tokensUsed?: number
     // Removed estimatedCost - OpenRouter handles billing automatically
@@ -295,12 +261,6 @@ export async function updateUsageTracking(
 
     const updateData: any = {}
     
-    switch (eventType) {
-      case 'document_generation':
-        updateData.documentsGenerated = { increment: 1 }
-        break
-    }
-
     if (metadata?.tokensUsed) {
       updateData.tokensUsed = { increment: metadata.tokensUsed }
     }
@@ -318,7 +278,6 @@ export async function updateUsageTracking(
         userId,
         year,
         month,
-        documentsGenerated: eventType === 'document_generation' ? 1 : 0,
         tokensUsed: metadata?.tokensUsed || 0,
         // Removed estimatedCost - OpenRouter handles billing automatically
       },
@@ -332,8 +291,7 @@ export async function updateUsageTracking(
     endTiming();
   } catch (error) {
     logger.error('Error updating usage tracking', error as Error, { 
-      userId,
-      metadata: { eventType }
+      userId
     });
     endTiming();
     throw error
@@ -391,8 +349,6 @@ export async function getUserUsageAnalytics(userId: string) {
         // Removed cost limit - OpenRouter handles billing automatically
       },
       usage: {
-        documents: currentUsage.documentsGenerated,
-        // Removed estimatedCost - OpenRouter handles billing automatically
         tokensUsed: currentUsage.tokensUsed,
       },
       planDetails: plan

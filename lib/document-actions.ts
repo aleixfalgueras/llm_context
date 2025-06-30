@@ -380,17 +380,17 @@ export async function createDocument(
       }
     })
 
-    // Track usage event for document creation
+    // Track token usage
     try {
       const { trackUsage } = await import('./usage-middleware')
-      await trackUsage(userId, 'document_generation', document.id, {
+      await trackUsage(userId, {
         documentType,
         clientId,
         documentName
       })
     } catch (error) {
-      console.error('Error tracking document creation usage:', error)
-      // Don't fail the document creation if usage tracking fails
+      console.error('Error tracking usage:', error)
+      // Don't fail the operation if usage tracking fails
     }
 
     return { success: true, document }

@@ -16,7 +16,7 @@ export interface UsageLimitResponse {
 
 // Middleware to check usage limits and model access before API actions
 export async function withAuthAndUsageCheck(
-  action: 'document' | 'client',
+  action: 'client',
   handler: (userId: string, req: NextRequest) => Promise<Response>
 ) {
   return async (req: NextRequest) => {
@@ -110,8 +110,6 @@ export async function withModelAccessCheck(
 // Helper to track usage after successful API action
 export async function trackUsage(
   userId: string,
-  eventType: 'document_generation',
-  resourceId?: string,
   metadata?: {
     tokensUsed?: number
     model?: string
@@ -119,14 +117,12 @@ export async function trackUsage(
   }
 ) {
   try {
-    await updateUsageTracking(userId, eventType, metadata)
+    await updateUsageTracking(userId, metadata)
   } catch (error) {
     console.error('Error tracking usage:', error)
     // Don't throw error as this shouldn't break the main functionality
   }
 }
-
-// Document usage checking functions moved to lib/document-usage-utils.ts for better organization
 
 // Helper to get usage information for client-side display
 export async function getUsageInfo(userId: string) {
@@ -144,13 +140,7 @@ export async function getUsageInfo(userId: string) {
 
     const plan = SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS];
 
-    // Documents are unlimited for all plans - no need to check limits
-    const documentUsage = {
-      allowed: true,
-      limit: 'unlimited' as const,
-      used: usage.documentsGenerated,
-      remaining: undefined
-    };
+
 
     // Check client limits - count current clients instead of creation events
     const clientCount = await prisma.client.count({ where: { userId } })
@@ -182,7 +172,6 @@ export async function getUsageInfo(userId: string) {
     };
 
     return {
-      documents: documentUsage,
       clients: clientUsage,
       tokens: tokenUsage,
       storage: storageUsage,

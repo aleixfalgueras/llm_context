@@ -10,7 +10,7 @@ export interface ApiMiddlewareResult {
 }
 
 // Action types that require usage checking
-export type ActionType = 'document' | 'client'
+export type ActionType = 'client'
 
 /**
  * Unified middleware for API authentication and usage enforcement
@@ -62,21 +62,11 @@ export async function withAuthAndUsageCheck(
  */
 export async function trackApiUsage(
   userId: string,
-  action: ActionType,
   metadata?: Record<string, any>
 ) {
   try {
     const { trackUsage } = await import('./usage-middleware')
-    
-    switch (action) {
-      case 'document':
-        await trackUsage(userId, 'document_generation', undefined, metadata)
-        break
-      // Note: Clients don't have usage tracking since we count actual client records
-      case 'client':
-        // No usage tracking needed - we count actual clients in database
-        break
-    }
+    await trackUsage(userId, metadata)
   } catch (error) {
     console.error('Error tracking API usage:', error)
     // Don't throw - usage tracking failures shouldn't break the API

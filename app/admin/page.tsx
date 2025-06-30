@@ -82,7 +82,6 @@ async function getAdminDashboardData() {
         month: new Date().getMonth() + 1
       },
       select: {
-        documentsGenerated: true,
         tokensUsed: true
       }
     }),
@@ -100,10 +99,9 @@ async function getAdminDashboardData() {
   // Calculate monthly totals
   const monthlyStats = monthlyUsage.reduce(
     (acc, usage) => ({
-      documents: acc.documents + usage.documentsGenerated,
       tokens: acc.tokens + usage.tokensUsed
     }),
-    { documents: 0, tokens: 0 }
+    { tokens: 0 }
   )
 
   return {
@@ -180,13 +178,13 @@ export default async function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Documents Generated</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{data.totalDocuments}</div>
               <p className="text-xs text-muted-foreground">
-                {data.monthlyStats.documents} this month
+                Unlimited for all plans
               </p>
             </CardContent>
           </Card>
@@ -216,7 +214,7 @@ export default async function AdminDashboard() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm">Documents:</span>
-                  <span className="font-medium">{data.monthlyStats.documents}</span>
+                  <span className="font-medium">Unlimited</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm">Tokens:</span>

@@ -154,9 +154,6 @@ model UserUsage {
   year     Int
   month    Int
   
-  // Usage Counters
-  documentsGenerated Int @default(0) // Total documents generated this month
-  
   // Token Tracking (primary limit with OpenRouter)
   tokensUsed        Int   @default(0)   // Total tokens consumed this month
   

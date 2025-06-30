@@ -97,7 +97,6 @@ INSTRUCTIONS:
       },
       {
         userId: validUserId,
-        eventType: 'document_generation',
         resourceId: clientId,
         additionalMetadata: {
           documentType: 'meeting-report'

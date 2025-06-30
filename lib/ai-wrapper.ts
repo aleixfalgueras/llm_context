@@ -74,7 +74,6 @@ export async function* createAICompletionStream(
  */
 export function createUsageLimitResponse(action: string, limit: number | 'unlimited', limitType?: string, used?: number) {
   const actionMessages = {
-    document: 'documents',
     client: 'clients'
   }
 
@@ -88,11 +87,6 @@ export function createUsageLimitResponse(action: string, limit: number | 'unlimi
     case 'tokens':
       errorMessage = `You've used ${used?.toLocaleString()} tokens and reached your monthly token limit of ${limit === 'unlimited' ? 'unlimited' : (limit as number).toLocaleString()}. `
       upgradeMessage = 'Upgrade to Pro for 2M tokens per month or Business for unlimited tokens.'
-      break
-    case 'documents':
-      // This case should never occur since documents are unlimited
-      errorMessage = `Unexpected document limit error. `
-      upgradeMessage = 'All plans include unlimited documents.'
       break
     default:
       errorMessage = `You've reached your monthly ${message} limit of ${limit}. `

@@ -241,7 +241,6 @@ Respond naturally and conversationally while keeping this context in mind.`
             },
             {
               userId,
-              eventType: 'document_generation', // Track as document generation since it's content creation
               resourceId: chatId
             }
           );

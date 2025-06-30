@@ -83,13 +83,13 @@ export async function saveDocumentToStorage({
   if (trackUsage) {
     try {
       const { trackUsage: trackUsageEvent } = await import('./usage-middleware')
-      await trackUsageEvent(userId, 'document_generation', document.id, {
+      await trackUsageEvent(userId, {
         documentType,
         clientId,
         documentName: finalDocumentName
       })
     } catch (error) {
-      console.error('Error tracking document creation usage:', error)
+      console.error('Error tracking usage:', error)
     }
   }
 

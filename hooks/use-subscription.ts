@@ -9,7 +9,6 @@ interface SubscriptionInfo {
   maxTokensPerMonth: number
   maxClients: number
   tokensUsed: number
-  documentsGenerated: number
   storageUsed: number
   storageUsedFormatted: string
   storageLimit: number
@@ -25,7 +24,6 @@ export function useSubscription() {
     maxTokensPerMonth: 100000,
     maxClients: 3,
     tokensUsed: 0,
-    documentsGenerated: 0,
     storageUsed: 0,
     storageUsedFormatted: '0 Bytes',
     storageLimit: 50 * 1024 * 1024, // 50MB default
@@ -51,7 +49,6 @@ export function useSubscription() {
             maxTokensPerMonth: data.subscription.maxTokensPerMonth,
             maxClients: data.subscription.maxClients,
             tokensUsed: data.usage.tokensUsed,
-            documentsGenerated: data.usage.documentsGenerated,
             storageUsed: data.storage?.used || 0,
             storageUsedFormatted: data.storage?.usedFormatted || '0 Bytes',
             storageLimit: data.storage?.limit || 0,
