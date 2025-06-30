@@ -35,7 +35,10 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Error saving meeting report:', error)
     
-    // No limit errors to check for documents
+    // Check for storage limit errors
+    if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
+      return new Response(error.message, { status: 413 }) // 413 Payload Too Large
+    }
     
     return new Response(
       error instanceof Error ? error.message : 'Internal Server Error', 

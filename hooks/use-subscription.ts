@@ -10,6 +10,11 @@ interface SubscriptionInfo {
   maxClients: number
   tokensUsed: number
   documentsGenerated: number
+  storageUsed: number
+  storageUsedFormatted: string
+  storageLimit: number
+  storageLimitFormatted: string
+  storageUsagePercentage: number
   isLoading: boolean
 }
 
@@ -21,6 +26,11 @@ export function useSubscription() {
     maxClients: 3,
     tokensUsed: 0,
     documentsGenerated: 0,
+    storageUsed: 0,
+    storageUsedFormatted: '0 Bytes',
+    storageLimit: 50 * 1024 * 1024, // 50MB default
+    storageLimitFormatted: '50 MB',
+    storageUsagePercentage: 0,
     isLoading: true
   })
 
@@ -42,6 +52,11 @@ export function useSubscription() {
             maxClients: data.subscription.maxClients,
             tokensUsed: data.usage.tokensUsed,
             documentsGenerated: data.usage.documentsGenerated,
+            storageUsed: data.storage?.used || 0,
+            storageUsedFormatted: data.storage?.usedFormatted || '0 Bytes',
+            storageLimit: data.storage?.limit || 0,
+            storageLimitFormatted: data.storage?.limitFormatted || '0 Bytes',
+            storageUsagePercentage: data.storage?.usagePercentage || 0,
             isLoading: false
           })
         } else {

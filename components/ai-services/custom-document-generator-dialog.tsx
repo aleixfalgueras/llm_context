@@ -207,6 +207,11 @@ export function CustomDocumentGeneratorDialog({
       })
 
       if (!response.ok) {
+        // Handle storage limit errors specifically
+        if (response.status === 413) {
+          const errorText = await response.text()
+          throw new Error(errorText)
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 

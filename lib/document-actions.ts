@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
+import { validateDocumentStorage } from '@/lib/storage-utils'
 
 export async function getClientDocuments(clientId: string, options?: { includeContent?: boolean; limit?: number }) {
   const { userId } = await auth()
@@ -319,7 +320,8 @@ export async function createDocument(
     throw new Error('Unauthorized')
   }
 
-  // No document limits to check
+  // Check storage limits before proceeding
+  await validateDocumentStorage(content, userId)
 
   try {
     // Verify the client belongs to the user

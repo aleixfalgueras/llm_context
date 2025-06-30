@@ -4,15 +4,17 @@ This document explains how the model tiers usage tracking system works for the L
 
 ## Overview
 
-The usage tracking system operates across **three primary dimensions**:
+The usage tracking system operates across **four primary dimensions**:
 - **Model tier access control** (subscription-based)
 - **Token consumption tracking** (usage-based)
 - **Document generation limits** (count-based)
+- **Storage usage tracking** (storage-based)
 
 **Key Features:**
 - ✅ **Model tiers** restrict access to expensive models by subscription level
 - ✅ **Business pays OpenRouter** costs from subscription revenue
 - ✅ **Token limits calculated** based on most expensive model in each tier
+- ✅ **Storage limits** prevent runaway storage costs and ensure sustainable operations
 - ✅ **Guaranteed profit margins** at all subscription levels
 - ✅ **Server-side validation** ensures users only access models in their tier
 
@@ -29,6 +31,7 @@ model UserSubscription {
   maxTokensPerMonth       Int     -- Basic: 100K, Pro: 1.6M, Business: 4.5M
   
   -- Token limits calculated based on most expensive model in tier for profitability
+  -- Storage limits are enforced separately through storage-utils.ts
 }
 ```
 
@@ -43,6 +46,15 @@ model UserUsage {
   -- No cost tracking - business pays OpenRouter directly
 }
 ```
+
+### Storage Usage Tracking
+Storage usage is tracked separately from monthly usage aggregates:
+
+- **Real-time calculation**: Storage usage is calculated on-demand by measuring actual file sizes
+- **Per-user tracking**: Total storage consumption across all documents
+- **Per-client breakdown**: Storage usage segmented by client for analytics
+- **Plan-based limits**: Storage limits enforced based on subscription plan
+- **Efficient validation**: Storage checks performed before document save operations
 
 ## Service-Specific Usage Tracking
 
@@ -83,6 +95,10 @@ const usageCheck = await checkUsageLimit(userId, 'document')
 if (!usageCheck.allowed) {
   return usageLimitResponse(usageCheck)
 }
+
+// Check storage limits for document saving operations
+await validateDocumentStorage(documentContent, userId)
+// Throws error if storage limit would be exceeded
 ```
 
 ### 2. Model Access Validation & Processing
@@ -119,6 +135,7 @@ await updateUsageTracking(userId, 'document_generation', {
 ### Basic Plan ($10/month)
 - **100K tokens per month** (~75 pages of content)
 - **3 client profiles**
+- **50 MB document storage**
 - **Unlimited documents per month**
 - **Basic tier models**: GPT-4o Mini, Claude Haiku, Gemini Flash
 - **91% profit margin** (worst-case: $0.875 AI cost)
@@ -126,6 +143,7 @@ await updateUsageTracking(userId, 'document_generation', {
 ### Pro Plan ($17/month)
 - **1.6M tokens per month** (~1,200 pages of content)  
 - **Unlimited client profiles**
+- **200 MB document storage**
 - **Unlimited documents per month**
 - **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
 - **15% profit margin** (worst-case: $14.40 AI cost)
@@ -133,6 +151,7 @@ await updateUsageTracking(userId, 'document_generation', {
 ### Business Plan ($43/month)
 - **4.5M tokens per month** (~3,400 pages of content)
 - **Unlimited client profiles**
+- **2 GB document storage**
 - **Unlimited documents per month**
 - **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
 - **6% profit margin** (worst-case: $40.50 AI cost)
@@ -140,10 +159,11 @@ await updateUsageTracking(userId, 'document_generation', {
 ## Simplified Limit System: Dual-Constraint Model
 
 ### Limit Hierarchy & Enforcement
-The system enforces **two primary limits** (whichever hits first blocks further usage):
+The system enforces **three primary limits** (whichever hits first blocks further usage):
 
 1. **Document Limits** - Simple count-based restriction
 2. **Token Limits** - Raw token consumption (fair across all models)
+3. **Storage Limits** - Total document storage consumption
 
 ### Why This Works Better
 
@@ -152,6 +172,12 @@ The system enforces **two primary limits** (whichever hits first blocks further 
 - **Predictable**: Users understand token consumption patterns
 - **No gaming**: Can't exploit cheap models for massive content generation
 - **Resource protection**: Limits total API calls and processing load
+
+**Storage Limit Benefits:**
+- **Cost control**: Prevents runaway storage infrastructure costs
+- **Resource management**: Ensures server storage capacity planning
+- **Fair usage**: Storage limits scale appropriately with plan pricing
+- **Sustainable growth**: Storage costs remain predictable as user base grows
 
 **Example: Model Tier Cost Management**
 ```
@@ -249,8 +275,9 @@ export const MODEL_TIERS = {
 ### Real-time Usage Info
 ```typescript
 const usage = await getUsageInfo(userId)
-// Returns current usage for: documents, clients, tokens
+// Returns current usage for: documents, clients, tokens, storage
 // Plus subscription tier and model access information
+// Storage usage includes: used bytes, formatted display, percentage used
 ```
 
 ### Monthly Analytics

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
+import { validateDocumentStorage } from '@/lib/storage-utils'
 
 export interface SaveDocumentParams {
   clientId: string
@@ -31,7 +32,8 @@ export async function saveDocumentToStorage({
     throw new Error('Unauthorized')
   }
 
-  // No document limits to check
+  // Check storage limits before proceeding
+  await validateDocumentStorage(content, userId)
 
   const client = await prisma.client.findFirst({
     where: {
