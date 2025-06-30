@@ -260,7 +260,7 @@ Respond naturally and conversationally while keeping this context in mind.`
               
               // Save the assistant's response to the database
               logger.dbQuery('create', 'message', { userId, chatId });
-              await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel)
+              await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel, chunk.usage?.totalTokens)
               logger.info('Assistant message saved', { userId, chatId });
 
               // Send completion signal
@@ -295,7 +295,7 @@ Respond naturally and conversationally while keeping this context in mind.`
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
                   logger.dbQuery('create', 'message', { userId, chatId });
-                  await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel)
+                  await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
                   logger.info('Partial assistant message saved', { userId, chatId });
                 }
                 

@@ -172,7 +172,7 @@ export async function updateChatTitle(chatId: string, title: string) {
   revalidatePath('/')
 }
 
-export async function createMessage(chatId: string, content: string, role: 'USER' | 'ASSISTANT', model?: string) {
+export async function createMessage(chatId: string, content: string, role: 'USER' | 'ASSISTANT', model?: string, tokensUsed?: number) {
   const endTiming = logger.startTiming('Create Message Action');
   
   try {
@@ -186,7 +186,7 @@ export async function createMessage(chatId: string, content: string, role: 'USER
     logger.userAction('Create message', { 
       userId, 
       chatId,
-      metadata: { role, contentLength: content.length, model }
+      metadata: { role, contentLength: content.length, model, tokensUsed }
     });
 
   // Verify the chat belongs to the user
@@ -211,6 +211,7 @@ export async function createMessage(chatId: string, content: string, role: 'USER
       content,
       role,
       model,
+      tokensUsed: tokensUsed || 0,
       chatId,
     },
       }),
