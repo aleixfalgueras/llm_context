@@ -1,16 +1,15 @@
 import { saveDocumentToStorage } from '@/lib/document-save-utils'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-import { withAuthAndUsageCheck } from '@/lib/api-middleware'
+import { auth } from '@clerk/nextjs/server'
 
 export async function POST(req: Request) {
   try {
-    // Use unified middleware for auth and usage checking
-    const middleware = await withAuthAndUsageCheck('document')
-    if (!middleware.success) {
-      return middleware.response!
-    }
+    // Check authentication only - no usage limits for documents
+    const { userId } = await auth()
     
-    const userId = middleware.userId!
+    if (!userId) {
+      return new Response('Authentication required', { status: 401 })
+    }
 
     const { clientId, meetingDate, reportContent, additionalInfo, documentName } = await req.json()
 
@@ -36,10 +35,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Error saving meeting report:', error)
     
-    // Check if it's a usage limit error
-    if (error instanceof Error && error.message.includes('limit')) {
-      return new Response(error.message, { status: 403 })
-    }
+    // No limit errors to check for documents
     
     return new Response(
       error instanceof Error ? error.message : 'Internal Server Error', 

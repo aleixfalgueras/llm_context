@@ -90,8 +90,9 @@ export function createUsageLimitResponse(action: string, limit: number | 'unlimi
       upgradeMessage = 'Upgrade to Pro for 2M tokens per month or Business for unlimited tokens.'
       break
     case 'documents':
-      errorMessage = `You've reached your monthly document limit of ${limit} documents. `
-      upgradeMessage = 'Upgrade to Pro for 200 documents or Business for unlimited documents.'
+      // This case should never occur since documents are unlimited
+      errorMessage = `Unexpected document limit error. `
+      upgradeMessage = 'All plans include unlimited documents.'
       break
     default:
       errorMessage = `You've reached your monthly ${message} limit of ${limit}. `

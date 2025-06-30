@@ -31,12 +31,7 @@ export async function saveDocumentToStorage({
     throw new Error('Unauthorized')
   }
 
-  if (trackUsage) {
-    const usageCheck = await checkDocumentUsageLimit(userId)
-    if (!usageCheck.allowed) {
-      throw new Error(usageCheck.message || 'Document creation limit exceeded')
-    }
-  }
+  // No document limits to check
 
   const client = await prisma.client.findFirst({
     where: {
@@ -109,29 +104,7 @@ export async function saveDocumentToStorage({
   }
 }
 
-async function checkDocumentUsageLimit(userId: string) {
-  try {
-    const { getUsageInfo } = await import('./usage-middleware')
-    const usageInfo = await getUsageInfo(userId)
-    
-    if (!usageInfo?.documents) {
-      return { allowed: true, limit: 'unlimited' as const, used: 0 }
-    }
-    
-    return {
-      allowed: usageInfo.documents.allowed,
-      limit: usageInfo.documents.limit,
-      used: usageInfo.documents.used,
-      remaining: usageInfo.documents.remaining,
-      message: usageInfo.documents.allowed 
-        ? undefined
-        : `You've reached your document limit of ${usageInfo.documents.limit} for this month. Upgrade your plan to create more documents.`
-    }
-  } catch (error) {
-    console.error('Error checking document usage limit:', error)
-    return { allowed: true, limit: 'unlimited' as const, used: 0 }
-  }
-}
+
 
 function generateDefaultDocumentName(
   clientName: string,

@@ -84,7 +84,6 @@ async function getUserSubscription(userId: string) {
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
         maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
-        maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
         maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
       }
     })
@@ -129,8 +128,8 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
     targetDocuments = 1000  // High but finite number (since unlimited = -1 in DB)
     targetTokens = 10000000  // High but finite number (since unlimited = -1 in DB)
   } else {
-    // For basic and pro plans, use exact maximum limits
-    targetDocuments = plan.maxDocumentsPerMonth
+    // For basic and pro plans, use high values (since no document limits exist)
+    targetDocuments = 1000  // Simulated high usage for testing
     targetTokens = plan.maxTokensPerMonth
   }
   
@@ -165,7 +164,7 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
         console.log(`   Tokens: ${tokensUsed.toLocaleString()} (simulating heavy usage)`)
       } else {
         console.log(`📊 ${planName} plan - setting document and token limits to maximum:`)
-        console.log(`   Documents: ${documentsGenerated}/${plan.maxDocumentsPerMonth}`)
+        console.log(`   Documents: ${documentsGenerated} (unlimited)`)
         console.log(`   Tokens: ${tokensUsed.toLocaleString()}/${plan.maxTokensPerMonth.toLocaleString()}`)
       }
       break
@@ -205,7 +204,6 @@ async function updateUserSubscriptionPlan(userId: string, planName: PlanName) {
     data: {
       plan: planName,
       maxClients: plan.maxClients,
-      maxDocumentsPerMonth: plan.maxDocumentsPerMonth,
       maxTokensPerMonth: plan.maxTokensPerMonth,
       updatedAt: new Date()
     }

@@ -131,7 +131,6 @@ model UserSubscription {
   
   // Plan Limits
   maxClients              Int @default(3)     // Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
-  maxDocumentsPerMonth    Int @default(20)    // Basic: 20, Pro: 200, Business: unlimited (-1)
   maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: unlimited (-1)
   
   // Billing Cycle

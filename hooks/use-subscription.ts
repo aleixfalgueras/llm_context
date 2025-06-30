@@ -7,7 +7,6 @@ interface SubscriptionInfo {
   plan: string
   tier: 'basic' | 'pro'
   maxTokensPerMonth: number
-  maxDocumentsPerMonth: number
   maxClients: number
   tokensUsed: number
   documentsGenerated: number
@@ -19,7 +18,6 @@ export function useSubscription() {
     plan: 'basic',
     tier: 'basic',
     maxTokensPerMonth: 100000,
-    maxDocumentsPerMonth: 20,
     maxClients: 3,
     tokensUsed: 0,
     documentsGenerated: 0,
@@ -41,7 +39,6 @@ export function useSubscription() {
             plan: data.subscription.plan,
             tier: getTierFromPlan(data.subscription.plan),
             maxTokensPerMonth: data.subscription.maxTokensPerMonth,
-            maxDocumentsPerMonth: data.subscription.maxDocumentsPerMonth,
             maxClients: data.subscription.maxClients,
             tokensUsed: data.usage.tokensUsed,
             documentsGenerated: data.usage.documentsGenerated,

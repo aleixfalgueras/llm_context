@@ -25,7 +25,7 @@ Stores subscription plan details and limits:
 model UserSubscription {
   -- Plan Limits (Model Tiers Based)
   maxClients              Int     -- Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
-  maxDocumentsPerMonth    Int     -- Basic: 20, Pro: 200, Business: unlimited (-1)
+  maxDocumentsPerMonth    Int     -- All plans: unlimited (-1)
   maxTokensPerMonth       Int     -- Basic: 100K, Pro: 1.6M, Business: 4.5M
   
   -- Token limits calculated based on most expensive model in tier for profitability
@@ -119,14 +119,14 @@ await updateUsageTracking(userId, 'document_generation', {
 ### Basic Plan ($10/month)
 - **100K tokens per month** (~75 pages of content)
 - **3 client profiles**
-- **20 documents per month**
+- **Unlimited documents per month**
 - **Basic tier models**: GPT-4o Mini, Claude Haiku, Gemini Flash
 - **91% profit margin** (worst-case: $0.875 AI cost)
 
 ### Pro Plan ($17/month)
 - **1.6M tokens per month** (~1,200 pages of content)  
 - **Unlimited client profiles**
-- **200 documents per month**
+- **Unlimited documents per month**
 - **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
 - **15% profit margin** (worst-case: $14.40 AI cost)
 
@@ -178,7 +178,7 @@ Token limit ensures fair usage:
 - 100 short posts (1K tokens each)
 
 Document limit provides baseline protection:
-- Maximum 20 documents regardless of size
+- Unlimited documents
 ```
 
 **Pro Plan Example** (200 docs, 2M tokens):
@@ -186,7 +186,7 @@ Document limit provides baseline protection:
 Professional usage support:
 - 1,000 standard documents (2K tokens each) OR
 - 500 comprehensive reports (4K tokens each)
-- Document limit: 200 documents maximum
+- Unlimited documents
 ```
 
 **Business Plan** (unlimited):

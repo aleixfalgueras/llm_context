@@ -303,35 +303,7 @@ export async function updateDocumentNameAndContent(
   }
 }
 
-/**
- * Server-side function to check if user can create a document
- * Returns usage info for server actions
- */
-async function checkDocumentUsageServerSide(userId: string) {
-  try {
-    const { getUsageInfo } = await import('./usage-middleware')
-    const usageInfo = await getUsageInfo(userId)
-    
-    if (!usageInfo?.documents) {
-      // If no usage info, allow creation (graceful degradation)
-      return { allowed: true, limit: 'unlimited' as const, used: 0 }
-    }
-    
-    return {
-      allowed: usageInfo.documents.allowed,
-      limit: usageInfo.documents.limit,
-      used: usageInfo.documents.used,
-      remaining: usageInfo.documents.remaining,
-      message: usageInfo.documents.allowed 
-        ? undefined
-        : `You've reached your document limit of ${usageInfo.documents.limit}. Upgrade your plan to create more documents.`
-    }
-  } catch (error) {
-    console.error('Error checking document usage limit on server:', error)
-    // Graceful degradation - allow creation if check fails
-    return { allowed: true, limit: 'unlimited' as const, used: 0 }
-  }
-}
+
 
 export async function createDocument(
   clientId: string,
@@ -347,11 +319,7 @@ export async function createDocument(
     throw new Error('Unauthorized')
   }
 
-  // Check usage limits on server-side
-  const usageCheck = await checkDocumentUsageServerSide(userId)
-  if (!usageCheck.allowed) {
-    throw new Error(usageCheck.message || 'Document creation limit exceeded')
-  }
+  // No document limits to check
 
   try {
     // Verify the client belongs to the user
