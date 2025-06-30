@@ -17,13 +17,13 @@ import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 import type { Document } from '@/types/client-document-types'
+import { getDefaultModel } from '@/lib/models-config'
 
 interface MeetingReportDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   clients: any[]
   onDocumentCreated?: (clientId: string, documentId: string) => void
-  selectedModel: string
 }
 
 interface MeetingFormData {
@@ -35,7 +35,7 @@ interface MeetingFormData {
   documentName: string
 }
 
-export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCreated, selectedModel }: MeetingReportDialogProps) {
+export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCreated }: MeetingReportDialogProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState<MeetingFormData>({
     clientId: '',
@@ -153,7 +153,7 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
         },
         body: JSON.stringify({ 
           ...formData, 
-          model: selectedModel
+          model: getDefaultModel()
         })
       })
 

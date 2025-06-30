@@ -8,8 +8,6 @@ import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Edit3 }
 import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dialog'
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
-import { ModelSelector } from '@/components/ui/model-selector'
-import { getDefaultModel, AVAILABLE_MODELS } from '@/lib/models-config'
 import { useSubscription } from '@/hooks/use-subscription'
 
 interface AIServicesClientProps {
@@ -24,7 +22,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
   const [isConfigOpen, setIsConfigOpen] = useState(false)
-  const [selectedModel, setSelectedModel] = useState(getDefaultModel())
   
   // Default visibility - all services visible by default
   const defaultVisibility = {
@@ -54,40 +51,11 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
     }
   }, [])
 
-  // Load saved model selection on component mount
-  useEffect(() => {
-    const savedModel = localStorage.getItem('ai-services-selected-model')
-    
-    if (savedModel) {
-      try {
-        // Validate that the saved model is still available
-        const isValidModel = AVAILABLE_MODELS.some(model => model.id === savedModel)
-        if (isValidModel) {
-          setSelectedModel(savedModel)
-        } else {
-          // Remove invalid model from localStorage and use default
-          localStorage.removeItem('ai-services-selected-model')
-          setSelectedModel(getDefaultModel())
-        }
-      } catch (error) {
-        console.error('Failed to load saved model selection:', error)
-        // Fall back to default model on error
-        setSelectedModel(getDefaultModel())
-      }
-    }
-  }, [])
-
   // Save service visibility preferences whenever they change
   const handleServiceVisibilityChange = (serviceId: string, visible: boolean) => {
     const newVisibility = { ...visibleServices, [serviceId]: visible }
     setVisibleServices(newVisibility)
     localStorage.setItem('ai-services-visibility', JSON.stringify(newVisibility))
-  }
-
-  // Save model selection whenever it changes
-  const handleModelChange = (modelId: string) => {
-    setSelectedModel(modelId)
-    localStorage.setItem('ai-services-selected-model', modelId)
   }
 
   const handleDocumentCreated = (clientId: string, documentId: string) => {
@@ -136,11 +104,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               <h1 className="text-3xl font-bold">AI Services</h1>
             </div>
             <div className="flex items-center gap-3">
-              <ModelSelector 
-                selectedModel={selectedModel}
-                onModelSelect={handleModelChange}
-                userTier={subscription.tier}
-              />
               <Button
                 variant="outline"
                 onClick={() => setIsConfigOpen(!isConfigOpen)}
@@ -302,25 +265,23 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       </div>
 
       {/* Meeting Report Dialog */}
-      <MeetingReportDialog 
+      <MeetingReportDialog
         open={isMeetingReportDialogOpen}
         onOpenChange={setIsMeetingReportDialogOpen}
         clients={clients}
         onDocumentCreated={handleDocumentCreated}
-        selectedModel={selectedModel}
       />
 
       {/* Document Generator Dialog */}
-      <CustomDocumentGeneratorDialog 
+      <CustomDocumentGeneratorDialog
         isOpen={isCustomDocumentDialogOpen}
         onClose={() => setIsCustomDocumentDialogOpen(false)}
         clients={clients}
         onDocumentCreated={handleDocumentCreated}
-        selectedModel={selectedModel}
       />
 
-      {/* Client Documents Dialog */}
-      {selectedClient && (
+      {/* Client Documents */}
+      {isDocumentsOpen && selectedClient && (
         <ClientDocuments
           clientId={selectedClient.id}
           clientName={selectedClient.name}
