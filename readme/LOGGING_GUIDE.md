@@ -1,6 +1,6 @@
 # 📊 Multi-AI Logging System Guide
 
-I've added extensive temporal logging throughout your application to help with testing, debugging, and monitoring across multiple AI providers. This guide explains how to use and interpret the logs for OpenAI and Anthropic integrations.
+I've added extensive temporal logging throughout your application to help with testing, debugging, and monitoring across 400+ models via OpenRouter. This guide explains how to use and interpret the logs for OpenRouter integration.
 
 ## 🚀 Quick Start
 

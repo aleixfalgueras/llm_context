@@ -4,7 +4,7 @@ This document provides detailed information about the AI Services feature for ma
 
 ## 🎯 Overview
 
-AI Services provide automated marketing content generation using client profiles and custom prompts across multiple AI providers. The feature leverages a unified client context system while each service maintains its own specialized prompts to generate personalized, professional marketing documents that are ready for client delivery.
+AI Services provide automated marketing content generation using client profiles and custom prompts through OpenRouter's 400+ models. The feature leverages a unified client context system while each service maintains its own specialized prompts to generate personalized, professional marketing documents that are ready for client delivery.
 
 ## 🏗️ Core Technology
 
@@ -213,7 +213,7 @@ AI Services API Structure:
 ```
 
 ### **Multi-AI Integration**
-- **Provider Support**: Seamless integration with OpenAI and Anthropic APIs
+- **Provider Support**: Seamless integration with 400+ models via OpenRouter API
 - **Model Selection**: Choose from GPT-4o, GPT-4o-mini, Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku
 - **Cross-Provider Cost Tracking**: Unified usage monitoring across all AI providers
 - **Token Optimization**: Efficient prompt construction for all models
@@ -239,7 +239,7 @@ AI Services API Structure:
 - **Privacy Compliance**: Monitor client context selection patterns
 
 ### **Multi-AI Cost Management**
-- **Cross-Provider Usage Tracking**: Monitor API consumption across OpenAI and Anthropic services
+- **Comprehensive Usage Tracking**: Monitor API consumption across 400+ models via OpenRouter
 - **Unified Cost Analytics**: Track expenses across all AI providers and models
 - **Provider Performance Comparison**: Compare costs and quality across different providers
 - **Per-User Multi-Cloud Analytics**: Track usage per user across all providers for billing

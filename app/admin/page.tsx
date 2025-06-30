@@ -83,7 +83,6 @@ async function getAdminDashboardData() {
       },
       select: {
         documentsGenerated: true,
-        estimatedCost: true,
         tokensUsed: true
       }
     }),
@@ -102,10 +101,9 @@ async function getAdminDashboardData() {
   const monthlyStats = monthlyUsage.reduce(
     (acc, usage) => ({
       documents: acc.documents + usage.documentsGenerated,
-      cost: acc.cost + usage.estimatedCost,
       tokens: acc.tokens + usage.tokensUsed
     }),
-    { documents: 0, cost: 0, tokens: 0 }
+    { documents: 0, tokens: 0 }
   )
 
   return {
@@ -224,9 +222,8 @@ export default async function AdminDashboard() {
                   <span className="text-sm">Tokens:</span>
                   <span className="font-medium">{data.monthlyStats.tokens.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Est. Cost:</span>
-                  <span className="font-medium">${data.monthlyStats.cost.toFixed(2)}</span>
+                <div className="text-xs text-muted-foreground mt-2">
+                  OpenRouter handles billing automatically
                 </div>
               </div>
             </CardContent>

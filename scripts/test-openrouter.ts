@@ -82,7 +82,7 @@ async function testOpenRouterIntegration() {
     console.log(`   Response: ${testCompletion.content}`)
     if (testCompletion.usage) {
       console.log(`   Tokens: ${testCompletion.usage.totalTokens}`)
-      console.log(`   Cost: $${testCompletion.usage.estimatedCost.toFixed(6)}`)
+      console.log(`   Note: OpenRouter handles billing automatically`)
     }
   } catch (error) {
     console.error('❌ Error in AI completion test:', error)

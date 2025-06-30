@@ -1,6 +1,5 @@
 import OpenAI from 'openai'
 import { trackUsage } from './usage-middleware'
-import { calculateOpenRouterCost } from './subscription-utils'
 import { 
   getDefaultModel, 
   getDefaultTemperature, 
@@ -44,7 +43,7 @@ export interface StreamChunk {
     promptTokens: number
     completionTokens: number
     totalTokens: number
-    estimatedCost: number
+    // Removed estimatedCost - OpenRouter handles billing automatically
   }
 }
 
@@ -135,7 +134,7 @@ export async function createOpenRouterCompletion(
     promptTokens: number
     completionTokens: number
     totalTokens: number
-    estimatedCost: number
+    // Removed estimatedCost - OpenRouter handles billing automatically
   } | null
 }> {
   const model = completionOptions.model || getDefaultModel()
@@ -175,28 +174,22 @@ export async function createOpenRouterCompletion(
 
     const content = response.choices[0]?.message?.content || ''
     
-    // Calculate usage and cost
+    // Get usage information - OpenRouter handles the actual billing
     const usage = response.usage
     let usageInfo = null
     
     if (usage) {
-      const estimatedCost = calculateOpenRouterCost(
-        model,
-        usage.prompt_tokens,
-        usage.completion_tokens
-      )
-
       usageInfo = {
         promptTokens: usage.prompt_tokens,
         completionTokens: usage.completion_tokens,
         totalTokens: usage.total_tokens,
-        estimatedCost
+        // Removed estimatedCost - OpenRouter handles billing automatically
       }
 
-      // Track usage
+      // Track token usage only - OpenRouter will charge actual cost to your account
       await trackUsage(trackingOptions.userId, trackingOptions.eventType, trackingOptions.resourceId, {
         tokensUsed: usage.total_tokens,
-        estimatedCost,
+        // Removed estimatedCost - OpenRouter handles billing automatically
         model,
         promptTokens: usage.prompt_tokens,
         completionTokens: usage.completion_tokens,
@@ -282,26 +275,18 @@ export async function* createOpenRouterCompletionStream(
       }
     }
 
-    // Calculate final usage and cost
+    // Get final usage - OpenRouter handles the actual billing
     let usageInfo = null
     if (usage) {
-      const estimatedCost = calculateOpenRouterCost(
-        model,
-        usage.prompt_tokens,
-        usage.completion_tokens
-      )
-
       usageInfo = {
         promptTokens: usage.prompt_tokens,
         completionTokens: usage.completion_tokens,
         totalTokens: usage.total_tokens,
-        estimatedCost
       }
 
-      // Track usage after completion
+      // Track token usage only - OpenRouter will charge actual cost to your account
       await trackUsage(trackingOptions.userId, trackingOptions.eventType, trackingOptions.resourceId, {
         tokensUsed: usage.total_tokens,
-        estimatedCost,
         model,
         promptTokens: usage.prompt_tokens,
         completionTokens: usage.completion_tokens,

@@ -9,7 +9,8 @@ import { AIProviderError } from '@/lib/ai-errors'
 import { logger } from '@/lib/logger'
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { getDefaultModel } from '@/lib/models-config'
+import { getDefaultModel, getModelsByTier } from '@/lib/models-config'
+import { checkModelAccess } from '@/lib/subscription-utils'
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Chat API');
@@ -27,7 +28,40 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    logger.info('Chat request authenticated', { userId, chatId, model });
+    // Use the model from the request, with fallback to centralized default
+    const selectedModel = model || getDefaultModel()
+    
+    // Validate model access based on user's subscription tier
+    const modelAccess = await checkModelAccess(userId, selectedModel)
+    if (!modelAccess.allowed) {
+      const availableModels = getModelsByTier(modelAccess.tier)
+      const modelNames = availableModels.map(m => m.name).join(', ')
+      
+      logger.warn('Model access denied', { 
+        userId, 
+        chatId,
+        metadata: {
+          requestedModel: selectedModel,
+          userTier: modelAccess.tier,
+          userPlan: modelAccess.plan
+        }
+      });
+      
+      return NextResponse.json({
+        error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
+        code: 'MODEL_ACCESS_DENIED',
+        tier: modelAccess.tier,
+        plan: modelAccess.plan,
+        modelId: selectedModel,
+        upgradeUrl: '/pricing'
+      }, { status: 403 })
+    }
+    
+    logger.info('Chat request authenticated and model access validated', { 
+      userId, 
+      chatId, 
+      model: selectedModel
+    });
 
     // CLIENT CONTEXT FLOW:
     // 1. Client context is ONLY added as system message on the FIRST user message
@@ -142,9 +176,6 @@ Respond naturally and conversationally while keeping this context in mind.`
       role: 'user' as const,
       content: lastMessage.content,
     })
-
-    // Use the model from the request, with fallback to centralized default
-    const selectedModel = model || getDefaultModel()
 
     // Save the user message to the database
     logger.dbQuery('create', 'message', { userId, chatId });

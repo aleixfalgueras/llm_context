@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { AVAILABLE_MODELS, getDefaultModelForNewChats, saveDefaultModelForNewChats, MODEL_IDS, ALL_MODEL_IDS, DEFAULT_MODEL } from '@/lib/models-config'
+import { useSubscription } from '@/hooks/use-subscription'
 
 interface Prompt {
   id: string
@@ -44,6 +45,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
+  const subscription = useSubscription()
   const [isExporting, setIsExporting] = useState(false)
   const [selectedModel, setSelectedModel] = useState(() => {
     // If this is an existing chat with a lastUsedModel, use that
@@ -395,6 +397,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
         <ModelSelector 
           selectedModel={selectedModel}
           onModelSelect={handleModelSelect}
+          userTier={subscription.tier}
         />
       </div>
       

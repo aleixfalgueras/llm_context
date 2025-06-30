@@ -10,12 +10,14 @@ import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-d
 import { ClientDocuments } from '@/components/clients/client-documents'
 import { ModelSelector } from '@/components/ui/model-selector'
 import { getDefaultModel, AVAILABLE_MODELS } from '@/lib/models-config'
+import { useSubscription } from '@/hooks/use-subscription'
 
 interface AIServicesClientProps {
   clients: any[]
 }
 
 export function AIServicesClient({ clients }: AIServicesClientProps) {
+  const subscription = useSubscription()
   const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
   const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
@@ -137,6 +139,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               <ModelSelector 
                 selectedModel={selectedModel}
                 onModelSelect={handleModelChange}
+                userTier={subscription.tier}
               />
               <Button
                 variant="outline"

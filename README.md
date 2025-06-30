@@ -1,23 +1,33 @@
 # SpeedBrand
 
-A modern AI-powered marketing assistant built with Next.js 14, React 18, and multi-AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations with the best AI models from multiple providers.
+A modern AI-powered marketing assistant built with Next.js 14, React 18, and OpenRouter AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations with curated AI models organized by subscription tiers.
 
 ## 🆕 Recent Updates & Improvements
 
-### **Multi-AI Integration (Latest)**
-- **Multiple AI Providers**: Seamless integration of OpenAI and Anthropic Claude models
-- **Unified Model Selection**: Choose from 400+ models including OpenAI GPT-4o, Claude 3.5 Sonnet, Google Gemini, Meta Llama, and many more
-- **Cost-Aware Recommendations**: Each model shows provider, cost implications, and optimal use cases
+### **Model Tiers System (Latest)**
+- **Tiered Model Access**: Curated AI models organized by subscription plan for optimal cost-effectiveness
+- **Basic Tier Models**: Cost-effective options (GPT-4o Mini, Claude Haiku, Gemini Flash) for essential tasks
+- **Pro Tier Models**: Premium options (GPT-4o, Claude Sonnet, Gemini Pro) for complex work + all basic models
+- **Sustainable Pricing**: Token limits calculated based on most expensive model in each tier to ensure profitability
+- **Business Model Security**: Subscription revenue covers all AI costs with healthy profit margins
+- **Model Selector Enhancement**: Visual distinction between tiers with upgrade prompts and cost indicators
+- **Access Control**: Server-side validation ensures users only access models included in their plan
+
+### **OpenRouter AI Integration**
+- **Unified AI Platform**: Access curated models through OpenRouter's single, unified API
+- **Curated Model Library**: Focused selection of OpenAI, Anthropic, and Google models optimized for marketing
+- **Cost-Aware Design**: Each model shows cost implications and optimal use cases within subscription tiers
 - **Provider Transparency**: Clear indication of which AI provider powers each model
-- **Intelligent Fallbacks**: Robust error handling across multiple AI providers
+- **Intelligent Fallbacks**: Robust error handling with automatic failover through OpenRouter
 - **Per-Service Selection**: Different model choice for AI services and chat assistant
 - **Persistent Preferences**: Your model choice is remembered across sessions
 
 ### **Simplified Usage System**
-- **Streamlined Limits**: Focus on essential metrics (documents, tokens, cost)
-- **Removed Restrictions**: Unlimited custom prompts and conversations for better UX
+- **Token-Based Limits**: Focus on token consumption as the primary usage metric
+- **Profitable Margins**: Token limits ensure sustainable business operations at all subscription levels
+- **Removed Cost Estimates**: No more confusing cost calculations - simple token tracking
 - **Improved Analytics**: Better tracking of actual value-generating activities
-- **Clearer Pricing**: More transparent usage limits aligned with real costs
+- **Clearer Pricing**: Transparent usage limits aligned with business sustainability
 
 ### **Enhanced Document Management**
 - **In-Place Editing**: Edit document content and names after creation
@@ -27,20 +37,18 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 
 ## ✨ Key Features
 
-### 🤖 **Multi-AI-Powered Content Creation**
-- **Multi-Provider Support**: Access OpenAI and Anthropic models through unified interface
-- **Comprehensive Model Library**: 400+ models from OpenAI, Anthropic, Google, Meta, and other leading providers
-- **Intelligent Model Selection**: Choose optimal AI provider and model for each task
-- **Cost-Optimized Usage**: Transparent pricing across providers with automated cost tracking
-- **Provider Redundancy**: Robust failover capabilities across multiple AI providers
-- **Comprehensive Business Assistant**: Full-spectrum support for marketing business operations (strategy, client management, content creation, campaigns, analysis, operations, industry insights, problem-solving)
-- **Client-Aware AI**: Contextual responses using selected client information when relevant
-- **Smart Context Control**: Select specific client fields (country, general context, 3 specific context fields) for each conversation with strict privacy respect
-- **Flexible Assistance**: Provides general business advice when no client context is selected, personalized guidance when context is provided
-- **Token Optimization**: Efficient context injection to minimize API costs across all providers
-- **Real-time Chat**: Advanced chat interface with persistent conversation history
-- **Chat Export**: Export conversations to markdown format
-- **Model Persistence**: Remembers your provider and model choice per chat session
+### 🤖 **Tiered AI Model Access**
+- **Basic Tier Models**: Cost-effective options for everyday tasks
+  - GPT-4o Mini: Fastest OpenAI model for general content
+  - Claude 3 Haiku: Efficient Anthropic model for quick responses  
+  - Gemini Flash: Google's speed-optimized model
+- **Pro Tier Models**: Premium options for complex work + all basic models
+  - GPT-4o: OpenAI's most capable model for complex reasoning
+  - Claude 3.5 Sonnet: Anthropic's premium model for sophisticated writing
+  - Gemini Pro: Google's flagship model for advanced tasks
+- **Smart Model Selection**: Visual indicators showing which models are available in your plan
+- **Upgrade Prompts**: Clear guidance on accessing premium models with plan upgrades
+- **Cost Optimization**: Token limits calculated to ensure profitability while maximizing user value
 
 ### 👥 **Comprehensive Client Management**
 - **Rich Client Profiles**: Store business information, contact details, general context, and up to 3 specific context fields
@@ -64,12 +72,12 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Clear Separation**: Service-specific prompt logic separated from client context handling
 - **Explicit Control**: Prompts are visible and easily customizable in their respective service files
 
-### ⚡ **Professional Multi-AI Services**
+### ⚡ **Professional AI Services**
 - **Meeting Report Generator**: Transform meeting transcriptions into professional, actionable reports
 - **Custom Document Generator**: Create marketing content using your own prompt templates
-- **Multi-Provider Model Selection**: Choose optimal AI provider and model for each service
-- **Performance-Optimized Routing**: Automatic selection of best provider based on task requirements
-- **Cross-Provider Cost Tracking**: Unified usage monitoring across OpenAI and Anthropic
+- **Tiered Model Selection**: Choose appropriate AI model based on your subscription tier
+- **Performance-Optimized Routing**: Automatic selection of best model based on task requirements and plan access
+- **Token Usage Tracking**: Real-time monitoring of token consumption across all services
 - **Automatic Document Storage**: All content saved to Supabase with organized file structure
 - **Document Export**: Download documents in Markdown format
 - **Document Management**: Update, rename, and organize generated content
@@ -82,22 +90,21 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **Privacy Dashboard**: User-controlled privacy settings and data rights
 - **Policy Version Management**: Automatic consent renewal when policies update
 
-### 💳 **Multi-AI Subscription & Usage Management**
-- **Freemium Model**: Free tier with generous limits for testing across all providers
-- **Unified Usage Tracking**: Real-time monitoring of conversations, documents, and API costs across OpenAI and Anthropic
-- **Cross-Provider Analytics**: Comprehensive cost tracking regardless of AI provider used
-- **Flexible Plans**: Multiple subscription tiers accommodating different provider preferences
-- **Multi-AI Cost Optimization**: Smart token management to minimize expenses across all AI providers
-- **Provider Performance Insights**: Detailed analytics showing usage patterns by AI provider
+### 💳 **Sustainable Subscription & Usage Management**
+- **Profitable Business Model**: Subscription pricing covers all AI costs with healthy margins
+- **Token-Based Limits**: Fair usage limits calculated based on most expensive models in each tier
+- **Real-Time Tracking**: Monitor token consumption and document generation
+- **Tier-Based Access**: Different model access levels based on subscription plan
+- **Upgrade Incentives**: Clear benefits for moving to higher tiers
+- **Business Sustainability**: Pricing ensures long-term platform viability
 
-### 📊 **Multi-AI Analytics & Insights**
-- **Prompt Usage Tracking**: Monitor which templates drive best results across all providers
-- **Cross-Provider Cost Analysis**: Track API usage and costs across OpenAI and Anthropic models
-- **Provider Performance Comparison**: Analyze response quality and speed by AI provider
-- **Client Activity Monitoring**: Track content generation patterns per client across all models
-- **Multi-AI Usage Patterns**: Insights into which providers are preferred for different tasks
+### 📊 **Analytics & Insights**
+- **Token Usage Tracking**: Monitor consumption patterns across different models
+- **Model Performance Analysis**: Track which models work best for different tasks
+- **Subscription Analytics**: Understand usage patterns and upgrade triggers
+- **Client Activity Monitoring**: Track content generation patterns per client
 - **User Feedback System**: Built-in feedback collection for continuous improvement
-- **Comprehensive Performance Monitoring**: Logging and timing analysis across all AI providers
+- **Performance Monitoring**: Logging and timing analysis across all models
 
 ## 🏗️ Tech Stack
 
@@ -117,18 +124,43 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and mul
 - **API Routes**: RESTful endpoints for AI services and data management
 - **Middleware**: Authentication and usage protection
 
-### **Multi-AI & External Services**
-- **OpenRouter Integration**: Access to 400+ AI models through a single, unified API with automatic fallbacks and cost tracking
-- **Unified AI Wrapper**: Single interface handling multiple AI providers seamlessly
-- **Cross-Provider Cost Tracking**: Unified billing and usage monitoring across all AI services
-- **Provider Failover**: Automatic fallback capabilities for enhanced reliability
-- **AI SDK**: Streamlined multi-provider AI integration with streaming support
+### **OpenRouter AI Platform**
+- **OpenRouter Integration**: Access to curated AI models through unified API with cost management
+- **Tiered Model Access**: Server-side validation ensuring users only access models in their subscription tier
+- **Business-Sustainable Pricing**: Token limits calculated to cover AI costs with profitable margins
+- **Unified AI Wrapper**: Single interface handling multiple models through OpenRouter seamlessly
+- **Token Tracking**: Accurate usage monitoring without confusing cost estimates
+- **AI SDK**: Streamlined OpenRouter integration with streaming support
 
 ### **Authentication & Security**
 - **Clerk**: Complete authentication solution with user management
 - **Route Protection**: Middleware-based authentication for all protected routes
 - **Data Validation**: Comprehensive input validation and sanitization
 - **Usage Limits**: Subscription-based feature access control
+- **Model Access Control**: Server-side validation of model tier access
+
+## 💰 Pricing Strategy
+
+### **Basic Plan - $10/month**
+- **100K tokens per month** (~75 pages of content)
+- **20 documents per month**
+- **3 client profiles**
+- **Basic Tier Models**: GPT-4o Mini, Claude Haiku, Gemini Flash
+- **91% profit margin** (most expensive model costs $0.875/month)
+
+### **Pro Plan - $17/month**  
+- **1.6M tokens per month** (~1,200 pages of content)
+- **200 documents per month**
+- **Unlimited client profiles**
+- **Pro Tier Models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
+- **15% profit margin** (most expensive model costs $14.40/month)
+
+### **Business Plan - $43/month**
+- **4.5M tokens per month** (~3,400 pages of content)
+- **Unlimited documents per month**
+- **Unlimited client profiles**
+- **Pro Tier Models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
+- **6% profit margin** (most expensive model costs $40.50/month)
 
 ## 📂 Project Structure
 
