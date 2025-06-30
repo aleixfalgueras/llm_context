@@ -11,7 +11,8 @@ export enum SubscriptionPlan {
 
 export enum ModelTier {
   BASIC = 'basic',
-  PRO = 'pro'
+  PRO = 'pro',
+  BUSINESS = 'business'
 }
 
 export enum SubscriptionStatus {

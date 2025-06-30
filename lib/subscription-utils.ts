@@ -34,17 +34,17 @@ export const SUBSCRIPTION_PLANS = {
   [SubscriptionPlan.PRO]: {
     id: SubscriptionPlan.PRO,
     name: 'Pro',
-    price: 20,
+    price: 25,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxTokensPerMonth: 1000000,       // 1M tokens - sustainable with premium models
+    maxTokensPerMonth: 2000000,       // 2M tokens - sustainable with premium models
     // Pricing calculation: Claude 3.5 Sonnet (most expensive pro) = $0.009/1K tokens
-    // Max cost: 1000K * $0.009 = $9.00, leaving $11.00 profit (55% margin)
+    // Max cost: 2000K * $0.009 = $18.00, leaving $7.00 profit (28% margin)
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
       '💾 200 MB document storage',
-      '🔤 1M tokens (~750 pages of content)',
+      '🔤 2M tokens (~1,500 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
   },
