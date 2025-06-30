@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckIcon, StarIcon, CrownIcon, ZapIcon } from 'lucide-react'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
+import { SubscriptionPlan } from '@/types/subscription-types'
 
 
 
@@ -39,16 +40,16 @@ export default function PricingPage() {
 
   const getPlanIcon = (planId: string) => {
     switch (planId) {
-      case 'basic': return <ZapIcon className="h-6 w-6" />
-      case 'pro': return <StarIcon className="h-6 w-6" />
-      case 'business': return <CrownIcon className="h-6 w-6" />
+      case SubscriptionPlan.BASIC: return <ZapIcon className="h-6 w-6" />
+      case SubscriptionPlan.PRO: return <StarIcon className="h-6 w-6" />
+      case SubscriptionPlan.BUSINESS: return <CrownIcon className="h-6 w-6" />
       default: return <ZapIcon className="h-6 w-6" />
     }
   }
 
   const getPlanBadge = (planId: string) => {
-    if (planId === 'pro') return <Badge className="bg-blue-500">Most Popular</Badge>
-    if (planId === 'business') return <Badge className="bg-purple-500">Enterprise</Badge>
+    if (planId === SubscriptionPlan.PRO) return <Badge className="bg-blue-500">Most Popular</Badge>
+    if (planId === SubscriptionPlan.BUSINESS) return <Badge className="bg-purple-500">Enterprise</Badge>
     return null
   }
 
@@ -74,7 +75,7 @@ export default function PricingPage() {
           {Object.entries(SUBSCRIPTION_PLANS).map(([planId, plan]) => (
             <Card 
               key={planId} 
-              className={`relative ${planId === 'pro' ? 'border-blue-500 shadow-lg scale-105' : ''}`}
+              className={`relative ${planId === SubscriptionPlan.PRO ? 'border-blue-500 shadow-lg scale-105' : ''}`}
             >
               <CardHeader className="text-center">
                 {getPlanBadge(planId)}
@@ -103,7 +104,7 @@ export default function PricingPage() {
                   onClick={() => handleUpgrade(plan.id)}
                   disabled={upgradeLoading === plan.id}
                   className="w-full"
-                  variant={plan.id === 'pro' ? 'default' : 'outline'}
+                  variant={plan.id === SubscriptionPlan.PRO ? 'default' : 'outline'}
                 >
                   {upgradeLoading === plan.id ? (
                     <div className="flex items-center gap-2">
@@ -111,7 +112,7 @@ export default function PricingPage() {
                       Processing...
                     </div>
                   ) : (
-                    planId === 'basic' ? 'First Month Free 🚀' : 'Upgrade Now')}
+                    planId === SubscriptionPlan.BASIC ? 'First Month Free 🚀' : 'Upgrade Now')}
                 </Button>
               </CardContent>
             </Card>

@@ -7,21 +7,22 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ChevronDown, Cpu, Crown, Zap, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AVAILABLE_MODELS, getModelsByTier } from '@/lib/models-config'
+import { ModelTier, ModelTierType } from '@/types/subscription-types'
 
 interface ModelSelectorProps {
   selectedModel: string
   onModelSelect: (modelId: string) => void
-  userTier?: 'basic' | 'pro' // User's subscription tier
+  userTier?: ModelTierType // User's subscription tier
   className?: string
 }
 
-export function ModelSelector({ selectedModel, onModelSelect, userTier = 'basic', className }: ModelSelectorProps) {
+export function ModelSelector({ selectedModel, onModelSelect, userTier = ModelTier.BASIC, className }: ModelSelectorProps) {
   const [open, setOpen] = useState(false)
 
   const currentModel = AVAILABLE_MODELS.find(model => model.id === selectedModel)
   const availableModels = getModelsByTier(userTier)
-  const basicModels = AVAILABLE_MODELS.filter(model => model.tier === 'basic')
-  const proModels = AVAILABLE_MODELS.filter(model => model.tier === 'pro')
+  const basicModels = AVAILABLE_MODELS.filter(model => model.tier === ModelTier.BASIC)
+  const proModels = AVAILABLE_MODELS.filter(model => model.tier === ModelTier.PRO)
 
   const canAccessModel = (modelId: string) => {
     return availableModels.some(model => model.id === modelId)
@@ -93,7 +94,7 @@ export function ModelSelector({ selectedModel, onModelSelect, userTier = 'basic'
             <CommandGroup heading={
               <div className="flex items-center gap-2">
                 <Crown className="w-4 h-4 text-purple-500" />
-                Premium Models {userTier === 'basic' && "(Pro Plan)"}
+                Premium Models {userTier === ModelTier.BASIC && "(Pro Plan)"}
               </div>
             }>
               {proModels.map((model) => (

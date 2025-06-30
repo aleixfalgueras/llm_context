@@ -13,10 +13,11 @@
  */
 import { PrismaClient } from '@prisma/client'
 import { SUBSCRIPTION_PLANS } from '../lib/subscription-utils'
+import { SubscriptionPlan } from '../types/subscription-types'
 
 const prisma = new PrismaClient()
 
-type PlanName = keyof typeof SUBSCRIPTION_PLANS
+type PlanName = SubscriptionPlan
 type LimitType = 'tokens'
 
 interface ScriptArgs {
@@ -30,12 +31,12 @@ function parseArguments(): ScriptArgs {
   
   if (args.length !== 3) {
     console.error('❌ Usage: tsx scripts/set-usage-to-max.ts <userId> <planName> <limitType>')
-    console.error('   planName must be one of: basic, pro, business')
+    console.error(`   planName must be one of: ${Object.values(SubscriptionPlan).join(', ')}`)
     console.error('   limitType must be: tokens')
     console.error('   Examples:')
-    console.error('     tsx scripts/set-usage-to-max.ts user_123abc basic tokens')
-    console.error('     tsx scripts/set-usage-to-max.ts user_123abc pro tokens')
-    console.error('     tsx scripts/set-usage-to-max.ts user_123abc business tokens')
+    console.error(`     tsx scripts/set-usage-to-max.ts user_123abc ${SubscriptionPlan.BASIC} tokens`)
+    console.error(`     tsx scripts/set-usage-to-max.ts user_123abc ${SubscriptionPlan.PRO} tokens`)
+    console.error(`     tsx scripts/set-usage-to-max.ts user_123abc ${SubscriptionPlan.BUSINESS} tokens`)
     process.exit(1)
   }
 
@@ -46,8 +47,8 @@ function parseArguments(): ScriptArgs {
     process.exit(1)
   }
 
-  if (!Object.keys(SUBSCRIPTION_PLANS).includes(planName)) {
-    console.error(`❌ Error: planName must be one of: ${Object.keys(SUBSCRIPTION_PLANS).join(', ')}`)
+  if (!Object.values(SubscriptionPlan).includes(planName as SubscriptionPlan)) {
+    console.error(`❌ Error: planName must be one of: ${Object.values(SubscriptionPlan).join(', ')}`)
     process.exit(1)
   }
 
@@ -78,12 +79,12 @@ async function getUserSubscription(userId: string) {
     const newSubscription = await prisma.userSubscription.create({
       data: {
         userId,
-        plan: 'basic',
+        plan: SubscriptionPlan.BASIC,
         status: 'active',
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
-        maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
-        maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
+        maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
+        maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
       }
     })
     
@@ -117,7 +118,7 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
   // Determine target token usage based on plan
   let targetTokens: number
   
-  if (planName === 'business') {
+  if (planName === SubscriptionPlan.BUSINESS) {
     // For business plan, use high but finite value
     targetTokens = 4500000  // Business plan limit
   } else {
