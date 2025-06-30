@@ -23,11 +23,6 @@
 ### Pro/Business Tier Models (Premium Performance)
 **Available Models (6 total - includes all Basic tier + 3 premium):**
 
-**Basic Tier Models (inherited):**
-- **OpenAI GPT-4.1 Nano**: $0.0003 per 1K tokens
-- **Anthropic Claude 3 Haiku**: $0.00058 per 1K tokens
-- **Google Gemini 1.5 Flash**: $0.000158 per 1K tokens
-
 **Premium Models (Pro/Business exclusive):**
 - **OpenAI GPT-4.1**: $0.006 per 1K tokens (input: $2/M, output: $8/M) ← **Flagship performance!**
 - **Anthropic Claude 3.5 Sonnet**: $0.011 per 1K tokens (input: $3/M, output: $15/M)
