@@ -120,7 +120,7 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
   
   if (planName === SubscriptionPlan.BUSINESS) {
     // For business plan, use high but finite value
-    targetTokens = 4500000  // Business plan limit
+    targetTokens = 4000000  // Business plan limit
   } else {
     // For basic and pro plans, use plan limits
     targetTokens = plan.maxTokensPerMonth

@@ -54,21 +54,21 @@ model UserUsage {
 - **Basic tier models**: GPT-4o Mini, Claude Haiku, Gemini Flash
 - **Cost structure**: Max AI cost $0.875 → **91% profit margin**
 
-### Pro Plan ($17/month)
-- **1.6M tokens per month** (~1,200 pages of content)  
+### Pro Plan ($20/month)
+- **1M tokens per month** (~750 pages of content)  
 - **Unlimited client profiles**
 - **200 MB document storage**
 - **Unlimited documents per month**
 - **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
-- **Cost structure**: Max AI cost $14.40 → **15% profit margin**
+- **Cost structure**: Max AI cost $9.00 → **55% profit margin**
 
-### Business Plan ($43/month)
-- **4.5M tokens per month** (~3,400 pages of content)
+### Business Plan ($50/month)
+- **4M tokens per month** (~3,000 pages of content)
 - **Unlimited client profiles**
 - **2 GB document storage**
 - **Unlimited documents per month**
 - **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
-- **Cost structure**: Max AI cost $40.50 → **6% profit margin**
+- **Cost structure**: Max AI cost $36.00 → **27% profit margin**
 
 ## Model Tier Cost Structure
 
