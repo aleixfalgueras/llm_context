@@ -34,34 +34,34 @@ export const SUBSCRIPTION_PLANS = {
   [SubscriptionPlan.PRO]: {
     id: SubscriptionPlan.PRO,
     name: 'Pro',
-    price: 17,
+    price: 20,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxTokensPerMonth: 1600000,       // 1.6M tokens - sustainable with premium models
+    maxTokensPerMonth: 1000000,       // 1M tokens - sustainable with premium models
     // Pricing calculation: Claude 3.5 Sonnet (most expensive pro) = $0.009/1K tokens
-    // Max cost: 1600K * $0.009 = $14.40, leaving $2.60 profit (15% margin)
+    // Max cost: 1000K * $0.009 = $9.00, leaving $11.00 profit (55% margin)
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
       '💾 200 MB document storage',
-      '🔤 1.6M tokens (~1,200 pages of content)',
+      '🔤 1M tokens (~750 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
   },
   [SubscriptionPlan.BUSINESS]: {
     id: SubscriptionPlan.BUSINESS,
     name: 'Business',
-    price: 43,
+    price: 50,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxTokensPerMonth: 4500000,       // 4.5M tokens - generous allowance for enterprise
+    maxTokensPerMonth: 4000000,       // 4M tokens - generous allowance for enterprise
     // Pricing calculation: Claude 3.5 Sonnet = $0.009/1K tokens
-    // Max cost: 4500K * $0.009 = $40.50, leaving $2.50 profit (6% margin)
+    // Max cost: 4000K * $0.009 = $36.00, leaving $14.00 profit (28% margin)
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',
       '💾 2 GB document storage',
-      '🔤 4.5M tokens (~3,400 pages of content)',
+      '🔤 4M tokens (~3,000 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
   }
