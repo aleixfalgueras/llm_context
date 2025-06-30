@@ -5,6 +5,7 @@ export interface AIModel {
   provider: 'openai' | 'anthropic' | 'google' | 'meta' | 'other'
   contextLength?: number
   pricing?: { input: number; output: number }
+  tier?: 'basic' | 'pro'
 }
 
 // Model ID Constants - Use these instead of literal strings throughout the codebase
@@ -31,43 +32,37 @@ export const MODEL_IDS = {
   PERPLEXITY_SONAR_HUGE: 'perplexity/llama-3.1-sonar-huge-128k-online'
 } as const
 
+// Model Tiers Configuration
+export const MODEL_TIERS = {
+  basic: [
+    MODEL_IDS.OPENAI_GPT_4O_MINI,
+    MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
+    MODEL_IDS.GOOGLE_GEMINI_FLASH,
+  ],
+  pro: [
+    MODEL_IDS.OPENAI_GPT_4O,
+    MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
+    MODEL_IDS.GOOGLE_GEMINI_PRO,
+    // Pro tier also includes basic tier models
+    MODEL_IDS.OPENAI_GPT_4O_MINI,
+    MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
+    MODEL_IDS.GOOGLE_GEMINI_FLASH,
+  ],
+} as const
+
 // Create array of all model IDs for validation  
 export const ALL_MODEL_IDS = Object.values(MODEL_IDS) as string[]
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // OpenAI models via OpenRouter
-  {
-    id: MODEL_IDS.OPENAI_GPT_4O,
-    name: 'GPT-4o',
-    description: 'Most capable OpenAI model, best for complex tasks',
-    provider: 'openai',
-    contextLength: 128000,
-    pricing: { input: 0.0025, output: 0.01 }
-  },
+  // Basic Tier Models (Cost-effective)
   {
     id: MODEL_IDS.OPENAI_GPT_4O_MINI,
     name: 'GPT-4o Mini',
     description: 'Faster and more cost-effective OpenAI model',
     provider: 'openai',
     contextLength: 128000,
-    pricing: { input: 0.00015, output: 0.0006 }
-  },
-  {
-    id: MODEL_IDS.OPENAI_GPT_4_TURBO,
-    name: 'GPT-4 Turbo',
-    description: 'High-performance OpenAI model with large context',
-    provider: 'openai',
-    contextLength: 128000,
-    pricing: { input: 0.01, output: 0.03 }
-  },
-  // Anthropic models via OpenRouter
-  {
-    id: MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
-    name: 'Claude 3.5 Sonnet',
-    description: 'High-performance Claude model with exceptional reasoning',
-    provider: 'anthropic',
-    contextLength: 200000,
-    pricing: { input: 0.003, output: 0.015 }
+    pricing: { input: 0.00015, output: 0.0006 },
+    tier: 'basic'
   },
   {
     id: MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
@@ -75,24 +70,8 @@ export const AVAILABLE_MODELS: AIModel[] = [
     description: 'Fastest and most cost-effective Claude model',
     provider: 'anthropic',
     contextLength: 200000,
-    pricing: { input: 0.00025, output: 0.00125 }
-  },
-  {
-    id: MODEL_IDS.ANTHROPIC_CLAUDE_3_OPUS,
-    name: 'Claude 3 Opus',
-    description: 'Most capable Claude model for complex reasoning',
-    provider: 'anthropic',
-    contextLength: 200000,
-    pricing: { input: 0.015, output: 0.075 }
-  },
-  // Google models via OpenRouter
-  {
-    id: MODEL_IDS.GOOGLE_GEMINI_PRO,
-    name: 'Gemini Pro',
-    description: 'Google\'s flagship model for text and reasoning',
-    provider: 'google',
-    contextLength: 32000,
-    pricing: { input: 0.0005, output: 0.0015 }
+    pricing: { input: 0.00025, output: 0.00125 },
+    tier: 'basic'
   },
   {
     id: MODEL_IDS.GOOGLE_GEMINI_FLASH,
@@ -100,37 +79,41 @@ export const AVAILABLE_MODELS: AIModel[] = [
     description: 'Fast and efficient Google model',
     provider: 'google',
     contextLength: 32000,
-    pricing: { input: 0.00025, output: 0.00075 }
+    pricing: { input: 0.00025, output: 0.00075 },
+    tier: 'basic'
   },
-  // Meta models via OpenRouter
+  
+  // Pro Tier Models (Premium)
   {
-    id: MODEL_IDS.META_LLAMA_3_1_405B,
-    name: 'Llama 3.1 405B',
-    description: 'Meta\'s largest and most capable open-source model',
-    provider: 'meta',
-    contextLength: 32000,
-    pricing: { input: 0.005, output: 0.005 }
-  },
-  {
-    id: MODEL_IDS.META_LLAMA_3_1_70B,
-    name: 'Llama 3.1 70B',
-    description: 'High-performance open-source model from Meta',
-    provider: 'meta',
-    contextLength: 32000,
-    pricing: { input: 0.0009, output: 0.0009 }
-  },
-  // Other notable models
-  {
-    id: MODEL_IDS.PERPLEXITY_SONAR_HUGE,
-    name: 'Perplexity Sonar Huge (Online)',
-    description: 'Web-connected model with real-time information access',
-    provider: 'other',
+    id: MODEL_IDS.OPENAI_GPT_4O,
+    name: 'GPT-4o',
+    description: 'Most capable OpenAI model, best for complex tasks',
+    provider: 'openai',
     contextLength: 128000,
-    pricing: { input: 0.005, output: 0.005 }
+    pricing: { input: 0.0025, output: 0.01 },
+    tier: 'pro'
+  },
+  {
+    id: MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
+    name: 'Claude 3.5 Sonnet',
+    description: 'High-performance Claude model with exceptional reasoning',
+    provider: 'anthropic',
+    contextLength: 200000,
+    pricing: { input: 0.003, output: 0.015 },
+    tier: 'pro'
+  },
+  {
+    id: MODEL_IDS.GOOGLE_GEMINI_PRO,
+    name: 'Gemini Pro',
+    description: 'Google\'s flagship model for text and reasoning',
+    provider: 'google',
+    contextLength: 32000,
+    pricing: { input: 0.0005, output: 0.0015 },
+    tier: 'pro'
   }
 ]
 
-// OpenRouter Configuration Constants
+// OpenRouter Configuration Constants - Default to basic tier model
 export const DEFAULT_MODEL = MODEL_IDS.OPENAI_GPT_4O_MINI
 export const DEFAULT_TEMPERATURE = 0.7
 export const DEFAULT_PRESENCE_PENALTY = 0.1
@@ -248,4 +231,52 @@ export function getModelCost(modelId: string, inputTokens: number, outputTokens:
   const fallbackOutputCost = 0.0006
   
   return (inputTokens / 1000) * fallbackInputCost + (outputTokens / 1000) * fallbackOutputCost
+}
+
+/**
+ * Get models available for a specific subscription tier
+ */
+export function getModelsByTier(tier: 'basic' | 'pro'): AIModel[] {
+  if (tier === 'basic') {
+    return AVAILABLE_MODELS.filter(model => model.tier === 'basic')
+  } else {
+    // Pro tier includes both basic and pro models
+    return AVAILABLE_MODELS
+  }
+}
+
+/**
+ * Check if a model is available for a specific subscription tier
+ */
+export function isModelAvailableForTier(modelId: string, tier: 'basic' | 'pro'): boolean {
+  const availableModels = getModelsByTier(tier)
+  return availableModels.some(model => model.id === modelId)
+}
+
+/**
+ * Get the most expensive model cost in a tier (for pricing calculations)
+ */
+export function getMaxTierCost(tier: 'basic' | 'pro'): number {
+  const models = getModelsByTier(tier)
+  let maxCost = 0
+  
+  models.forEach(model => {
+    if (model.pricing) {
+      // Calculate average cost per 1K tokens (assuming 50/50 input/output split)
+      const avgCost = (model.pricing.input + model.pricing.output) / 2
+      if (avgCost > maxCost) {
+        maxCost = avgCost
+      }
+    }
+  })
+  
+  return maxCost
+}
+
+/**
+ * Get subscription tier from plan name
+ */
+export function getTierFromPlan(plan: string): 'basic' | 'pro' {
+  if (plan === 'basic') return 'basic'
+  return 'pro' // Both 'pro' and 'business' plans use pro tier models
 } 

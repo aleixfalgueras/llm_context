@@ -29,7 +29,7 @@ export class AIProviderError extends Error {
  */
 export function getAIErrorMessage(error: AIProviderError): { title: string; description: string } {
   const providerName = error.provider === 'openai' ? 'OpenAI' : 
-                      error.provider === 'anthropic' ? 'Anthropic' : 'OpenRouter'
+                      'OpenRouter'
   
   switch (error.type) {
     case 'timeout':

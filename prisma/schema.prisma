@@ -133,7 +133,6 @@ model UserSubscription {
   maxClients              Int @default(3)     // Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
   maxDocumentsPerMonth    Int @default(20)    // Basic: 20, Pro: 200, Business: unlimited (-1)
   maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: unlimited (-1)
-  maxCostPerMonth         Float @default(2.00) // Basic: $2, Pro: $25, Business: unlimited (-1)
   
   // Billing Cycle
   currentPeriodStart DateTime @default(now())
@@ -159,8 +158,7 @@ model UserUsage {
   // Usage Counters
   documentsGenerated Int @default(0) // Total documents generated this month
   
-  // Cost Tracking
-  estimatedCost     Float @default(0.0) // Estimated AI costs this month
+  // Token Tracking (primary limit with OpenRouter)
   tokensUsed        Int   @default(0)   // Total tokens consumed this month
   
   // Timestamps

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { checkUsageLimit, updateUsageTracking } from './subscription-utils'
+import { checkUsageLimit, updateUsageTracking, checkModelAccess } from './subscription-utils'
 import { createUsageLimitResponse } from './ai-wrapper'
 import { prisma } from './prisma'
+import { getModelsByTier, getTierFromPlan } from './models-config'
 
 export interface UsageLimitResponse {
   allowed: boolean
@@ -12,51 +13,93 @@ export interface UsageLimitResponse {
   message?: string
 }
 
-// Middleware to check usage limits before API actions
-export async function enforceUsageLimit(
-  request: NextRequest,
-  action: 'document' | 'client'
-): Promise<{ allowed: boolean; response?: NextResponse; userId?: string }> {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return {
-        allowed: false,
-        response: NextResponse.json(
-          { error: 'Unauthorized', code: 'UNAUTHORIZED' },
+// Middleware to check usage limits and model access before API actions
+export async function withAuthAndUsageCheck(
+  action: 'document' | 'client',
+  handler: (userId: string, req: NextRequest) => Promise<Response>
+) {
+  return async (req: NextRequest) => {
+    try {
+      // Check authentication
+      const { userId } = await auth()
+      
+      if (!userId) {
+        return Response.json(
+          { error: 'Authentication required' },
           { status: 401 }
         )
       }
-    }
 
-    const usageCheck = await checkUsageLimit(userId, action)
-    
-    if (!usageCheck.allowed) {
-      // Use the enhanced createUsageLimitResponse for consistent, detailed error messages
-      const response = createUsageLimitResponse(
-        action, 
-        usageCheck.limit as number | "unlimited",
-        (usageCheck as any).limitType,
-        (usageCheck as any).used
-      )
-      
-      return {
-        allowed: false,
-        response: new NextResponse(response.body, {
-          status: response.status,
-          headers: response.headers
-        })
+      // Check usage limits
+      const usageCheck = await checkUsageLimit(userId, action)
+      if (!usageCheck.allowed) {
+        return Response.json(
+          {
+            error: `You've reached your monthly ${usageCheck.limitType} limit of ${usageCheck.limit}. Upgrade your plan to continue.`,
+            code: 'USAGE_LIMIT_EXCEEDED',
+            limitType: usageCheck.limitType,
+            used: usageCheck.used,
+            limit: usageCheck.limit,
+            upgradeUrl: '/pricing'
+          },
+          { status: 429 }
+        )
       }
-    }
 
-    return { allowed: true, userId }
-  } catch (error) {
-    console.error('Error in usage limit enforcement:', error)
-    return {
-      allowed: false,
-      response: NextResponse.json(
-        { error: 'Internal server error', code: 'INTERNAL_ERROR' },
+      // Execute the handler
+      return await handler(userId, req)
+    } catch (error) {
+      console.error('Error in usage middleware:', error)
+      return Response.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      )
+    }
+  }
+}
+
+// Middleware specifically for model validation (for AI requests)
+export async function withModelAccessCheck(
+  modelId: string,
+  handler: (userId: string, req: NextRequest) => Promise<Response>
+) {
+  return async (req: NextRequest) => {
+    try {
+      // Check authentication
+      const { userId } = await auth()
+      
+      if (!userId) {
+        return Response.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        )
+      }
+
+      // Check model access
+      const modelAccess = await checkModelAccess(userId, modelId)
+      if (!modelAccess.allowed) {
+        const availableModels = getModelsByTier(modelAccess.tier)
+        const modelNames = availableModels.map(m => m.name).join(', ')
+        
+        return Response.json(
+          {
+            error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
+            code: 'MODEL_ACCESS_DENIED',
+            tier: modelAccess.tier,
+            plan: modelAccess.plan,
+            modelId,
+            upgradeUrl: '/pricing'
+          },
+          { status: 403 }
+        )
+      }
+
+      // Execute the handler
+      return await handler(userId, req)
+    } catch (error) {
+      console.error('Error in model access middleware:', error)
+      return Response.json(
+        { error: 'Internal server error' },
         { status: 500 }
       )
     }
@@ -70,7 +113,6 @@ export async function trackUsage(
   resourceId?: string,
   metadata?: {
     tokensUsed?: number
-    estimatedCost?: number
     model?: string
     [key: string]: any
   }
@@ -117,7 +159,7 @@ export async function getUsageInfo(userId: string) {
       remaining: subscription.maxClients === -1 ? undefined : Math.max(0, subscription.maxClients - clientCount)
     };
 
-    // Check token limits - important for actual usage tracking
+    // Check token limits - primary limit for OpenRouter usage
     const tokenUsage = {
       allowed: subscription.maxTokensPerMonth === -1 || usage.tokensUsed < subscription.maxTokensPerMonth,
       limit: subscription.maxTokensPerMonth === -1 ? 'unlimited' as const : subscription.maxTokensPerMonth,
@@ -125,19 +167,10 @@ export async function getUsageInfo(userId: string) {
       remaining: subscription.maxTokensPerMonth === -1 ? undefined : Math.max(0, subscription.maxTokensPerMonth - usage.tokensUsed)
     };
 
-    // Check cost limits
-    const costUsage = {
-      allowed: subscription.maxCostPerMonth === -1 || usage.estimatedCost < subscription.maxCostPerMonth,
-      limit: subscription.maxCostPerMonth === -1 ? 'unlimited' as const : subscription.maxCostPerMonth,
-      used: usage.estimatedCost,
-      remaining: subscription.maxCostPerMonth === -1 ? undefined : Math.max(0, subscription.maxCostPerMonth - usage.estimatedCost)
-    };
-
     return {
       documents: documentUsage,
       clients: clientUsage,
       tokens: tokenUsage,
-      cost: costUsage
     }
   } catch (error) {
     console.error('Error getting usage info:', error)

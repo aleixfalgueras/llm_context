@@ -13,7 +13,7 @@ export type { UsageTrackingOptions, StreamChunk }
 
 /**
  * Unified AI API wrapper using OpenRouter
- * This replaces the previous dual OpenAI/Anthropic implementation
+ * Unified AI wrapper using OpenRouter for 400+ models
  */
 export async function createAICompletion(
   completionOptions: AICompletionOptions,
@@ -24,7 +24,6 @@ export async function createAICompletion(
     promptTokens: number
     completionTokens: number
     totalTokens: number
-    estimatedCost: number
   } | null
 }> {
   try {
@@ -89,10 +88,6 @@ export function createUsageLimitResponse(action: string, limit: number | 'unlimi
     case 'tokens':
       errorMessage = `You've used ${used?.toLocaleString()} tokens and reached your monthly token limit of ${limit === 'unlimited' ? 'unlimited' : (limit as number).toLocaleString()}. `
       upgradeMessage = 'Upgrade to Pro for 2M tokens per month or Business for unlimited tokens.'
-      break
-    case 'cost':
-      errorMessage = `You've spent $${used?.toFixed(2)} and reached your monthly AI cost limit of $${limit === 'unlimited' ? 'unlimited' : (limit as number).toFixed(2)}. `
-      upgradeMessage = 'Upgrade to Pro for $25/month limit or Business for unlimited AI usage.'
       break
     case 'documents':
       errorMessage = `You've reached your monthly document limit of ${limit} documents. `

@@ -86,7 +86,6 @@ async function getUserSubscription(userId: string) {
         maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
         maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
         maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
-        maxCostPerMonth: SUBSCRIPTION_PLANS.basic.maxCostPerMonth,
       }
     })
     
@@ -120,23 +119,19 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
   // Start with current values or 0
   let documentsGenerated = currentUsage?.documentsGenerated || 0
   let tokensUsed = currentUsage?.tokensUsed || 0
-  let estimatedCost = currentUsage?.estimatedCost || 0
   
   // Determine target values based on plan and limit type
   let targetDocuments: number
   let targetTokens: number
-  let targetCost: number
   
   if (planName === 'business') {
     // For business plan, use high but finite values for unlimited fields
     targetDocuments = 1000  // High but finite number (since unlimited = -1 in DB)
     targetTokens = 10000000  // High but finite number (since unlimited = -1 in DB)
-    targetCost = plan.maxCostPerMonth  // Use actual $40 limit
   } else {
     // For basic and pro plans, use exact maximum limits
     targetDocuments = plan.maxDocumentsPerMonth
     targetTokens = plan.maxTokensPerMonth
-    targetCost = plan.maxCostPerMonth
   }
   
   // Set specific limit(s) to maximum based on limitType
@@ -146,7 +141,6 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
       console.log(`📊 Setting DOCUMENTS to maximum:`)
       console.log(`   Documents: ${documentsGenerated} (at limit)`)
       console.log(`   Tokens: ${tokensUsed.toLocaleString()} (preserved)`)
-      console.log(`   Cost: $${estimatedCost} (preserved)`)
       break
       
     case 'tokens':
@@ -154,32 +148,25 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
       console.log(`📊 Setting TOKENS to maximum:`)
       console.log(`   Documents: ${documentsGenerated} (preserved)`)
       console.log(`   Tokens: ${tokensUsed.toLocaleString()} (at limit)`)
-      console.log(`   Cost: $${estimatedCost} (preserved)`)
       break
       
     case 'cost':
-      estimatedCost = targetCost
-      console.log(`📊 Setting COST to maximum:`)
-      console.log(`   Documents: ${documentsGenerated} (preserved)`)
-      console.log(`   Tokens: ${tokensUsed.toLocaleString()} (preserved)`)
-      console.log(`   Cost: $${estimatedCost} (at limit)`)
+      console.log(`⚠️  Cost tracking removed - OpenRouter handles billing automatically`)
+      console.log(`   No action taken for cost limit`)
       break
       
     case 'all':
       documentsGenerated = targetDocuments
       tokensUsed = targetTokens
-      estimatedCost = targetCost
       
       if (planName === 'business') {
-        console.log(`📊 Business plan - setting ALL limits to maximum:`)
+        console.log(`📊 Business plan - setting document and token limits to maximum:`)
         console.log(`   Documents: ${documentsGenerated} (simulating heavy usage)`)
         console.log(`   Tokens: ${tokensUsed.toLocaleString()} (simulating heavy usage)`)
-        console.log(`   Cost: $${estimatedCost} (at limit - $${plan.maxCostPerMonth})`)
       } else {
-        console.log(`📊 ${planName} plan - setting ALL limits to maximum:`)
+        console.log(`📊 ${planName} plan - setting document and token limits to maximum:`)
         console.log(`   Documents: ${documentsGenerated}/${plan.maxDocumentsPerMonth}`)
         console.log(`   Tokens: ${tokensUsed.toLocaleString()}/${plan.maxTokensPerMonth.toLocaleString()}`)
-        console.log(`   Cost: $${estimatedCost}/$${plan.maxCostPerMonth}`)
       }
       break
   }
@@ -196,7 +183,6 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
     update: {
       documentsGenerated,
       tokensUsed,
-      estimatedCost,
       updatedAt: now
     },
     create: {
@@ -205,7 +191,6 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
       month: currentMonth,
       documentsGenerated,
       tokensUsed,
-      estimatedCost
     }
   })
   
@@ -222,7 +207,6 @@ async function updateUserSubscriptionPlan(userId: string, planName: PlanName) {
       maxClients: plan.maxClients,
       maxDocumentsPerMonth: plan.maxDocumentsPerMonth,
       maxTokensPerMonth: plan.maxTokensPerMonth,
-      maxCostPerMonth: plan.maxCostPerMonth,
       updatedAt: new Date()
     }
   })
@@ -259,7 +243,6 @@ async function main() {
     console.log(`   Period: ${updatedUsage.year}-${updatedUsage.month.toString().padStart(2, '0')}`)
     console.log(`   Documents Generated: ${updatedUsage.documentsGenerated}`)
     console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
-    console.log(`   Estimated Cost: $${updatedUsage.estimatedCost.toFixed(2)}`)
     
     console.log('\n🧪 Testing Tips:')
     

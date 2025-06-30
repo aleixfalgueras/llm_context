@@ -48,7 +48,6 @@ async function resetUserUsage(userId: string) {
     update: {
       documentsGenerated: 0,
       tokensUsed: 0,
-      estimatedCost: 0.0,
       updatedAt: now
     },
     create: {
@@ -57,7 +56,6 @@ async function resetUserUsage(userId: string) {
       month: currentMonth,
       documentsGenerated: 0,
       tokensUsed: 0,
-      estimatedCost: 0.0
     }
   })
   
@@ -82,7 +80,6 @@ async function main() {
     console.log(`   Period: ${updatedUsage.year}-${updatedUsage.month.toString().padStart(2, '0')}`)
     console.log(`   Documents Generated: ${updatedUsage.documentsGenerated}`)
     console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
-    console.log(`   Estimated Cost: $${updatedUsage.estimatedCost.toFixed(2)}`)
     
     console.log('\n🧪 Testing Tips:')
     console.log('   • User can now create documents again')

@@ -1,5 +1,7 @@
 import { prisma } from './prisma'
 import { logger, withTiming } from './logger'
+import { getTierFromPlan, isModelAvailableForTier } from './models-config'
+
 import { 
   getCachedSubscription, 
   cacheSubscription, 
@@ -18,13 +20,15 @@ export const SUBSCRIPTION_PLANS = {
     currency: 'USD',
     maxClients: 3,
     maxDocumentsPerMonth: 20,
-    maxTokensPerMonth: 100000,        // 100K tokens (~75 pages of text
-    maxCostPerMonth: 2.00,            // $2 OpenAI spending limit
+    maxTokensPerMonth: 100000,        // 100K tokens - very profitable with basic tier models
+    // Pricing calculation: Claude 3 Haiku (most expensive basic) = $0.000875/1K tokens
+    // Max cost: 100K * $0.000875 = $0.875, leaving $9.12 profit (91% margin)
     description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
       '👥 3 client profiles',
       '📄 20 documents per month',
-      '🔤 100K tokens (~75 pages of content)'
+      '🔤 100K tokens (~75 pages of content)',
+      '🤖 Cost-effective models: GPT-4o Mini, Claude Haiku, Gemini Flash'
     ]
   },
   pro: {
@@ -34,13 +38,15 @@ export const SUBSCRIPTION_PLANS = {
     currency: 'USD',
     maxClients: -1, // unlimited
     maxDocumentsPerMonth: 200,
-    maxTokensPerMonth: 2000000,       // 2M tokens (~1,500 pages of text)
-    maxCostPerMonth: 12.00,           // $12 OpenAI spending limit
+    maxTokensPerMonth: 1600000,       // 1.6M tokens - sustainable with premium models
+    // Pricing calculation: Claude 3.5 Sonnet (most expensive pro) = $0.009/1K tokens
+    // Max cost: 1600K * $0.009 = $14.40, leaving $2.60 profit (15% margin)
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
       '📄 200 documents per month',
-      '🔤 2M tokens (~1,500 pages of content)'
+      '🔤 1.6M tokens (~1,200 pages of content)',
+      '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
   },
   business: {
@@ -50,13 +56,15 @@ export const SUBSCRIPTION_PLANS = {
     currency: 'USD',
     maxClients: -1, // unlimited
     maxDocumentsPerMonth: -1, // unlimited
-    maxTokensPerMonth: -1,            // unlimited tokens
-    maxCostPerMonth: 35.00,           // $35 OpenAI spending limit
+    maxTokensPerMonth: 4500000,       // 4.5M tokens - generous allowance for enterprise
+    // Pricing calculation: Claude 3.5 Sonnet = $0.009/1K tokens
+    // Max cost: 4500K * $0.009 = $40.50, leaving $2.50 profit (6% margin)
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',
       '📄 Unlimited documents per month',
-      '🔤 Unlimited tokens'
+      '🔤 4.5M tokens (~3,400 pages of content)',
+      '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
   }
 } as const
@@ -104,7 +112,6 @@ export async function getUserSubscription(userId: string) {
             maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
             maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
             maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
-            maxCostPerMonth: SUBSCRIPTION_PLANS.basic.maxCostPerMonth,
           }
         }),
         { userId },
@@ -177,7 +184,6 @@ export async function getCurrentMonthUsage(userId: string) {
             year,
             month,
             documentsGenerated: 0,
-            estimatedCost: 0,
             tokensUsed: 0,
           }
         }),
@@ -243,29 +249,12 @@ export async function checkUsageLimit(userId: string, action: 'document' | 'clie
           }
         }
         
-        // Check cost limit (documents also consume API costs)
-        const maxCostDoc = subscription.maxCostPerMonth
-        if (maxCostDoc !== -1 && usage.estimatedCost >= maxCostDoc) {
-          return {
-            allowed: false,
-            limit: maxCostDoc,
-            used: usage.estimatedCost,
-            remaining: 0,
-            limitType: 'cost'
-          }
-        }
-        
-        // All limits passed
         return {
           allowed: true,
-          limit: maxDocuments === -1 ? 'unlimited' : maxDocuments,
+          limit: maxDocuments,
           used: usage.documentsGenerated,
-          remaining: maxDocuments === -1 ? 'unlimited' : maxDocuments - usage.documentsGenerated,
-          limitType: 'documents',
-          additionalUsage: {
-            tokens: { used: usage.tokensUsed, limit: maxTokensDoc, remaining: maxTokensDoc === -1 ? 'unlimited' : maxTokensDoc - usage.tokensUsed },
-            cost: { used: usage.estimatedCost, limit: maxCostDoc, remaining: maxCostDoc === -1 ? 'unlimited' : maxCostDoc - usage.estimatedCost }
-          }
+          remaining: Math.max(0, maxDocuments - usage.documentsGenerated),
+          limitType: 'documents'
         }
 
       case 'client':
@@ -306,7 +295,7 @@ export async function updateUsageTracking(
   eventType: 'document_generation',
   metadata?: {
     tokensUsed?: number
-    estimatedCost?: number
+    // Removed estimatedCost - OpenRouter handles billing automatically
     [key: string]: any
   }
 ) {
@@ -329,9 +318,7 @@ export async function updateUsageTracking(
     if (metadata?.tokensUsed) {
       updateData.tokensUsed = { increment: metadata.tokensUsed }
     }
-    if (metadata?.estimatedCost) {
-      updateData.estimatedCost = { increment: metadata.estimatedCost }
-    }
+    // Removed estimatedCost increment - OpenRouter handles billing automatically
 
     await prisma.userUsage.upsert({
       where: {
@@ -347,7 +334,7 @@ export async function updateUsageTracking(
         month,
         documentsGenerated: eventType === 'document_generation' ? 1 : 0,
         tokensUsed: metadata?.tokensUsed || 0,
-        estimatedCost: metadata?.estimatedCost || 0,
+        // Removed estimatedCost - OpenRouter handles billing automatically
       },
       update: updateData
     })
@@ -367,59 +354,34 @@ export async function updateUsageTracking(
   }
 }
 
-
-
-// Calculate estimated cost for OpenRouter usage
-// Note: OpenRouter has dynamic pricing. This is a fallback estimation.
-// For accurate pricing, consider fetching real-time pricing from OpenRouter API
-export function calculateOpenRouterCost(model: string, inputTokens: number, outputTokens: number): number {
-  // OpenRouter model pricing (approximate, based on common models)
-  // These should ideally be fetched from OpenRouter's API for accuracy
-  const openRouterPricing = {
-    // OpenAI models via OpenRouter
-    [MODEL_IDS.OPENAI_GPT_4O]: {
-      input: 0.0025,
-      output: 0.01
-    },
-    [MODEL_IDS.OPENAI_GPT_4O_MINI]: {
-      input: 0.00015,
-      output: 0.0006
-    },
-    // Anthropic models via OpenRouter
-    [MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET]: {
-      input: 0.003,
-      output: 0.015
-    },
-    [MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU]: {
-      input: 0.00025,
-      output: 0.00125
-    },
-    // Other popular models on OpenRouter
-    [MODEL_IDS.GOOGLE_GEMINI_PRO]: {
-      input: 0.0005,
-      output: 0.0015
-    },
-    [MODEL_IDS.META_LLAMA_3_1_70B]: {
-      input: 0.0009,
-      output: 0.0009  
+// Check if user can access a specific model based on their subscription
+export async function checkModelAccess(userId: string, modelId: string) {
+  const endTiming = logger.startTiming('Check Model Access', { userId });
+  
+  try {
+    const subscription = await getUserSubscription(userId)
+    const tier = getTierFromPlan(subscription.plan)
+    const hasAccess = isModelAvailableForTier(modelId, tier)
+    
+    endTiming();
+    return {
+      allowed: hasAccess,
+      tier,
+      plan: subscription.plan,
+      modelId
     }
+  } catch (error) {
+    logger.error('Error checking model access', error as Error, { 
+      userId,
+      metadata: { modelId }
+    });
+    endTiming();
+    return { allowed: false, tier: 'basic' as const, plan: 'basic', modelId }
   }
-
-  // Try to find specific model pricing
-  const modelPricing = openRouterPricing[model as keyof typeof openRouterPricing]
-  
-  // If no specific pricing found, use a reasonable default (similar to GPT-4o-mini)
-  const fallbackPricing = {
-    input: 0.0005,
-    output: 0.002
-  }
-  
-  const pricing = modelPricing || fallbackPricing
-  
-  return (inputTokens / 1000) * pricing.input + (outputTokens / 1000) * pricing.output
 }
 
-
+// Note: OpenRouter handles billing automatically based on actual usage
+// The cost tracking in this app is for display/limit purposes only
 
 // Get usage analytics for dashboard
 export async function getUserUsageAnalytics(userId: string) {
@@ -441,11 +403,11 @@ export async function getUserUsageAnalytics(userId: string) {
         documents: subscription.maxDocumentsPerMonth,
         clients: subscription.maxClients,
         tokens: subscription.maxTokensPerMonth,
-        cost: subscription.maxCostPerMonth,
+        // Removed cost limit - OpenRouter handles billing automatically
       },
       usage: {
         documents: currentUsage.documentsGenerated,
-        estimatedCost: currentUsage.estimatedCost,
+        // Removed estimatedCost - OpenRouter handles billing automatically
         tokensUsed: currentUsage.tokensUsed,
       },
       planDetails: plan
