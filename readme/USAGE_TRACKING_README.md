@@ -1,6 +1,6 @@
-# Model Tiers Usage Tracking System
+# Usage Tracking System
 
-This document explains how the model tiers usage tracking system works for the LLM Context application, focusing on **token consumption monitoring**, **tier-based model access**, and **sustainable business operations**.
+This document explains how the usage tracking system works for the LLM Context application, focusing on **token consumption monitoring**, **tier-based model access**, and **cost management**.
 
 ## Overview
 
@@ -12,79 +12,76 @@ The usage tracking system operates across **four primary dimensions**:
 
 **Key Features:**
 - ✅ **Model tiers** restrict access to expensive models by subscription level
-- ✅ **Business pays OpenRouter** costs from subscription revenue
 - ✅ **Token limits calculated** based on most expensive model in each tier
-- ✅ **Storage limits** prevent runaway storage costs and ensure sustainable operations
-- ✅ **Guaranteed profit margins** at all subscription levels
+- ✅ **Storage limits** prevent runaway storage costs
 - ✅ **Server-side validation** ensures users only access models in their tier
+- ✅ **Guaranteed profit margins** at all subscription levels
 
 ## Database Schema
 
 ### UserSubscription Table
-Stores subscription plan details and limits:
-
 ```sql
 model UserSubscription {
-  -- Plan Limits (Model Tiers Based)
-  maxClients              Int     -- Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
-  maxDocumentsPerMonth    Int     -- All plans: unlimited (-1)
-  maxTokensPerMonth       Int     -- Basic: 100K, Pro: 1.6M, Business: 4.5M
-  
-  -- Token limits calculated based on most expensive model in tier for profitability
-  -- Storage limits are enforced separately through storage-utils.ts
+  plan            SubscriptionPlan   @default(basic)
+  status          SubscriptionStatus @default(active)
+  maxClients      Int @default(3)     // Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
+  maxTokensPerMonth Int @default(100000) // Basic: 100K, Pro: 1.6M, Business: 4.5M
 }
 ```
 
 ### UserUsage Table
-Tracks monthly usage aggregates:
-
 ```sql
 model UserUsage {
-  -- documentsGenerated field removed - documents are unlimited
-  tokensUsed        Int     -- Total tokens consumed this month (primary metric)
-  
-  -- No cost tracking - business pays OpenRouter directly
+  tokensUsed     Int @default(0)   // Total tokens consumed this month
+  year           Int
+  month          Int
 }
 ```
 
 ### Storage Usage Tracking
-Storage usage is tracked separately from monthly usage aggregates:
-
-- **Real-time calculation**: Storage usage is calculated on-demand by measuring actual file sizes
+- **Real-time calculation**: Storage usage calculated on-demand by measuring actual file sizes
 - **Per-user tracking**: Total storage consumption across all documents
 - **Per-client breakdown**: Storage usage segmented by client for analytics
 - **Plan-based limits**: Storage limits enforced based on subscription plan
-- **Efficient validation**: Storage checks performed before document save operations
 
-## Service-Specific Usage Tracking
+## Subscription Plans & Model Tiers
 
-### Document Generation Services
-All AI services that generate content track:
+### Basic Plan ($10/month)
+- **100K tokens per month** (~75 pages of content)
+- **3 client profiles**
+- **50 MB document storage**
+- **Unlimited documents per month**
+- **Basic tier models**: GPT-4o Mini, Claude Haiku, Gemini Flash
+- **Cost structure**: Max AI cost $0.875 → **91% profit margin**
 
-1. **Meeting Report Generator**
-   - Document count increment
-   - Token usage (prompt + completion)
-   - Model used (for analytics)
+### Pro Plan ($17/month)
+- **1.6M tokens per month** (~1,200 pages of content)  
+- **Unlimited client profiles**
+- **200 MB document storage**
+- **Unlimited documents per month**
+- **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
+- **Cost structure**: Max AI cost $14.40 → **15% profit margin**
 
-2. **Custom Document Generator**
-   - Document count increment  
-   - Token usage (prompt + completion)
-   - Template used (for analytics)
+### Business Plan ($43/month)
+- **4.5M tokens per month** (~3,400 pages of content)
+- **Unlimited client profiles**
+- **2 GB document storage**
+- **Unlimited documents per month**
+- **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
+- **Cost structure**: Max AI cost $40.50 → **6% profit margin**
 
-3. **Chat/Assistant Service**
-   - Treated as document generation
-   - Token usage tracking across all models
-   - Conversation context tracking
+## Model Tier Cost Structure
 
-### Client Management
-- **Limit Type**: Real-time count of existing client profiles
-- **No Usage Tracking**: Users can delete/recreate clients up to their limit
-- **Enforcement**: Checked before client creation
+### Basic Tier Models (Cost-Effective)
+- **GPT-4o Mini**: $0.000375 per 1K tokens
+- **Claude 3 Haiku**: $0.000875 per 1K tokens (most expensive basic)
+- **Gemini Flash**: $0.0005 per 1K tokens
 
-### Prompt Management
-- **No Limits**: Users can create unlimited custom prompts
-- **No Usage Tracking**: Prompts are treated as templates, not AI services
-- **Storage Only**: Prompts stored in database without restrictions
+### Pro Tier Models (Premium)
+- **GPT-4o**: $0.006125 per 1K tokens
+- **Claude 3.5 Sonnet**: $0.009 per 1K tokens (most expensive pro)
+- **Gemini Pro**: $0.001 per 1K tokens
+- **Plus all basic tier models**
 
 ## Usage Tracking Flow
 
@@ -98,7 +95,6 @@ if (!usageCheck.allowed) {
 
 // Check storage limits for document saving operations
 await validateDocumentStorage(documentContent, userId)
-// Throws error if storage limit would be exceeded
 ```
 
 ### 2. Model Access Validation & Processing
@@ -112,7 +108,7 @@ if (!modelAccess.allowed) {
 // Process with OpenRouter and track tokens automatically
 const result = await createOpenRouterCompletion({
   prompt,
-  model: selectedModel, // Validated model from user's tier
+  model: selectedModel,
   usageTracking: {
     userId,
     eventType: 'document_generation',
@@ -126,106 +122,19 @@ const result = await createOpenRouterCompletion({
 // Update monthly usage aggregates (tokens only)
 await updateUsageTracking(userId, 'document_generation', {
   tokensUsed: result.usage.total_tokens
-  // No cost tracking - business pays OpenRouter directly
 })
 ```
 
-## Subscription Plans & Model Tiers
+## Limit System Implementation
 
-### Basic Plan ($10/month)
-- **100K tokens per month** (~75 pages of content)
-- **3 client profiles**
-- **50 MB document storage**
-- **Unlimited documents per month**
-- **Basic tier models**: GPT-4o Mini, Claude Haiku, Gemini Flash
-- **91% profit margin** (worst-case: $0.875 AI cost)
-
-### Pro Plan ($17/month)
-- **1.6M tokens per month** (~1,200 pages of content)  
-- **Unlimited client profiles**
-- **200 MB document storage**
-- **Unlimited documents per month**
-- **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
-- **15% profit margin** (worst-case: $14.40 AI cost)
-
-### Business Plan ($43/month)
-- **4.5M tokens per month** (~3,400 pages of content)
-- **Unlimited client profiles**
-- **2 GB document storage**
-- **Unlimited documents per month**
-- **Pro tier models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
-- **6% profit margin** (worst-case: $40.50 AI cost)
-
-## Simplified Limit System: Dual-Constraint Model
-
-### Limit Hierarchy & Enforcement
+### Primary Limits Enforced
 The system enforces **three primary limits** (whichever hits first blocks further usage):
 
-1. **Document Limits** - Simple count-based restriction
-2. **Token Limits** - Raw token consumption (fair across all models)
-3. **Storage Limits** - Total document storage consumption
+1. **Token Limits** - Raw token consumption (fair across all models)
+2. **Storage Limits** - Total document storage consumption  
+3. **Client Limits** - Number of client profiles (Basic plan only)
 
-### Why This Works Better
-
-**Token Limit Benefits:**
-- **Fair across models**: 1 token = 1 token regardless of model cost
-- **Predictable**: Users understand token consumption patterns
-- **No gaming**: Can't exploit cheap models for massive content generation
-- **Resource protection**: Limits total API calls and processing load
-
-**Storage Limit Benefits:**
-- **Cost control**: Prevents runaway storage infrastructure costs
-- **Resource management**: Ensures server storage capacity planning
-- **Fair usage**: Storage limits scale appropriately with plan pricing
-- **Sustainable growth**: Storage costs remain predictable as user base grows
-
-**Example: Model Tier Cost Management**
-```
-Basic Tier Models (Cost-Effective):
-• GPT-4o Mini: $0.000375 per 1K tokens
-• Claude 3 Haiku: $0.000875 per 1K tokens (most expensive basic)
-• Gemini Flash: $0.0005 per 1K tokens
-
-Pro Tier Models (Premium):
-• GPT-4o: $0.006125 per 1K tokens
-• Claude 3.5 Sonnet: $0.009 per 1K tokens (most expensive pro)
-• Gemini Pro: $0.001 per 1K tokens
-
-Token limits calculated based on worst-case model in each tier → guaranteed profitability
-```
-
-**Limit Analysis:**
-
-**Basic Plan Example** (20 docs, 100K tokens):
-```
-Token limit ensures fair usage:
-- 50 standard documents (2K tokens each) OR
-- 25 complex documents (4K tokens each) OR  
-- 100 short posts (1K tokens each)
-
-Document limit provides baseline protection:
-- Unlimited documents
-```
-
-**Pro Plan Example** (200 docs, 2M tokens):
-```
-Professional usage support:
-- 1,000 standard documents (2K tokens each) OR
-- 500 comprehensive reports (4K tokens each)
-- Unlimited documents
-```
-
-**Business Plan** (unlimited):
-```
-Enterprise flexibility:
-- No token restrictions
-- No document restrictions
-- Direct OpenRouter billing for actual usage
-```
-
-## Model Access Control Implementation
-
-### Tier-Based Model Validation
+### Model Access Control
 ```typescript
 // Check if user can access specific model
 export async function checkModelAccess(userId: string, modelId: string) {
@@ -245,29 +154,19 @@ export async function checkModelAccess(userId: string, modelId: string) {
 ### Model Tier Configuration
 ```typescript
 export const MODEL_TIERS = {
-  basic: [
+  [ModelTier.BASIC]: [
     'openai/gpt-4o-mini',        // $0.000375/1K tokens
     'anthropic/claude-3-haiku',   // $0.000875/1K tokens (most expensive)
     'google/gemini-flash',        // $0.0005/1K tokens
   ],
-  pro: [
+  [ModelTier.PRO]: [
     'openai/gpt-4o',             // $0.006125/1K tokens  
     'anthropic/claude-3.5-sonnet', // $0.009/1K tokens (most expensive)
     'google/gemini-pro',         // $0.001/1K tokens
     // Pro tier also includes all basic tier models
-    ...MODEL_TIERS.basic
+    ...MODEL_TIERS[ModelTier.BASIC]
   ],
 }
-```
-
-### Frontend Model Selector
-```typescript
-// Enhanced model selector with tier-based filtering
-<ModelSelector 
-  selectedModel={selectedModel}
-  onModelSelect={handleModelChange}
-  userTier={subscription.tier} // 'basic' or 'pro'
-/>
 ```
 
 ## Analytics and Reporting
@@ -277,14 +176,12 @@ export const MODEL_TIERS = {
 const usage = await getUsageInfo(userId)
 // Returns current usage for: documents, clients, tokens, storage
 // Plus subscription tier and model access information
-// Storage usage includes: used bytes, formatted display, percentage used
 ```
 
 ### Monthly Analytics
 ```typescript
 const analytics = await getUserUsageAnalytics(userId)  
 // Returns: subscription info, limits, current usage, plan details, tier access
-// Metrics focused on consumption patterns and model usage
 ```
 
 ## Implementation Guidelines
@@ -294,53 +191,30 @@ const analytics = await getUserUsageAnalytics(userId)
 2. Implement with `createOpenRouterCompletion()` for automatic tracking
 3. Focus on token consumption metrics
 
-### Token Management
-- All OpenRouter calls track tokens automatically
-- Monthly token limits prevent resource abuse
-- Document limits provide secondary protection
-
 ### Performance Considerations
 - Usage checking uses efficient database queries
 - Monthly aggregates prevent expensive historical calculations
 - Token-only tracking reduces database complexity
 
-## Security Considerations
-
-### Rate Limiting
+### Security Considerations
 - Token limits act as natural rate limiting
 - Document limits prevent bulk generation abuse
-- Gradual upgrade path encourages proper usage
-
-### Data Privacy
 - Usage tracking respects user privacy
 - No content storage in usage tracking
-- Aggregated metrics only for business intelligence
 
-### Error Handling
-- Usage tracking failures don't break core functionality
-- Graceful degradation when tracking is unavailable
-- Comprehensive logging for troubleshooting
+## Storage Management
 
-## Benefits of Simplified Approach
+### Storage Limits by Plan
+```typescript
+export const STORAGE_LIMITS = {
+  [SubscriptionPlan.BASIC]: 50 * 1024 * 1024,    // 50 MB
+  [SubscriptionPlan.PRO]: 200 * 1024 * 1024,     // 200 MB  
+  [SubscriptionPlan.BUSINESS]: 2 * 1024 * 1024 * 1024, // 2 GB
+}
+```
 
-### **For Users:**
-- **Clear resource understanding**: Token consumption is intuitive
-- **Model freedom**: Choose optimal models without billing complexity
-- **Transparent costs**: Direct OpenRouter billing relationship
-- **Predictable experience**: Token limits work consistently across models
-
-### **For Development:**
-- **Reduced complexity**: No cost calculation or estimation logic
-- **Easier maintenance**: OpenRouter handles pricing updates
-- **Better performance**: Fewer database operations and calculations
-- **Focus on features**: Less time on billing infrastructure
-
-### **For Business:**
-- **Zero AI cost risk**: Users pay OpenRouter directly
-- **Higher margins**: 100% subscription revenue
-- **Scalable model**: Growth doesn't increase our AI costs
-- **Operational simplicity**: No cost management overhead
-
----
-
-This simplified token-based usage tracking system provides **accurate resource management** while maintaining excellent performance and user experience. The focus on token consumption ensures fair resource allocation and eliminates the complexity of cost estimation across 400+ models. 
+### Storage Cost Structure
+- **Infrastructure cost**: ~$0.20/GB/month
+- **Basic Plan**: 50 MB → ~$0.01/month storage cost
+- **Pro Plan**: 200 MB → ~$0.04/month storage cost
+- **Business Plan**: 2 GB → ~$0.40/month storage cost 

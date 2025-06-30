@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { logger, withTiming } from './logger'
 import { getTierFromPlan, isModelAvailableForTier } from './models-config'
+import { SubscriptionPlan, SubscriptionStatus, SubscriptionPlanType, ModelTier } from '../types/subscription-types'
 
 import { 
   getCachedSubscription, 
@@ -13,8 +14,8 @@ import {
 
 // Subscription Plans Configuration
 export const SUBSCRIPTION_PLANS = {
-  basic: {
-    id: 'basic',
+  [SubscriptionPlan.BASIC]: {
+    id: SubscriptionPlan.BASIC,
     name: 'Basic',
     price: 10,
     currency: 'USD',
@@ -30,8 +31,8 @@ export const SUBSCRIPTION_PLANS = {
       '🤖 Cost-effective models: GPT-4o Mini, Claude Haiku, Gemini Flash'
     ]
   },
-  pro: {
-    id: 'pro',
+  [SubscriptionPlan.PRO]: {
+    id: SubscriptionPlan.PRO,
     name: 'Pro',
     price: 17,
     currency: 'USD',
@@ -47,8 +48,8 @@ export const SUBSCRIPTION_PLANS = {
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
   },
-  business: {
-    id: 'business',
+  [SubscriptionPlan.BUSINESS]: {
+    id: SubscriptionPlan.BUSINESS,
     name: 'Business',
     price: 43,
     currency: 'USD',
@@ -66,7 +67,7 @@ export const SUBSCRIPTION_PLANS = {
   }
 } as const
 
-export type PlanId = keyof typeof SUBSCRIPTION_PLANS
+export type PlanId = SubscriptionPlan
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string) {
@@ -89,7 +90,7 @@ export async function getUserSubscription(userId: string) {
 
     // Create default basic subscription if none exists using upsert to prevent race conditions
     if (!subscription) {
-      logger.info('Creating new user subscription', { userId, metadata: { plan: 'basic' } });
+      logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.BASIC } });
       
       const now = new Date()
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
@@ -102,12 +103,12 @@ export async function getUserSubscription(userId: string) {
           update: {}, // Don't update if exists
           create: {
             userId,
-            plan: 'basic',
-            status: 'active',
+            plan: SubscriptionPlan.BASIC,
+            status: SubscriptionStatus.ACTIVE,
             currentPeriodStart: now,
             currentPeriodEnd: periodEnd,
-            maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
-            maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
+            maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
+            maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
           }
         }),
         { userId },
@@ -320,7 +321,7 @@ export async function checkModelAccess(userId: string, modelId: string) {
       metadata: { modelId }
     });
     endTiming();
-    return { allowed: false, tier: 'basic' as const, plan: 'basic', modelId }
+    return { allowed: false, tier: ModelTier.BASIC, plan: SubscriptionPlan.BASIC, modelId }
   }
 }
 

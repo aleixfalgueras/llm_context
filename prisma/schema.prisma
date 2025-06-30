@@ -115,14 +115,28 @@ model Prompt {
   @@map("prompts")
 }
 
+// Enums for better type safety
+enum SubscriptionPlan {
+  basic
+  pro
+  business
+}
+
+enum SubscriptionStatus {
+  active
+  canceled
+  past_due
+  incomplete
+}
+
 // NEW: User Subscription Management
 model UserSubscription {
   id              String   @id @default(cuid())
   userId          String   @unique // The user's ID from Clerk
   
   // Subscription Details
-  plan            String   @default("basic") // "basic", "pro", "business"
-  status          String   @default("active") // "active", "canceled", "past_due", "incomplete"
+  plan            SubscriptionPlan   @default(basic)
+  status          SubscriptionStatus @default(active)
   
   // Billing Information
   stripeCustomerId     String?  // Stripe customer ID

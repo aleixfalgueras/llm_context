@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { getTierFromPlan } from '@/lib/models-config'
+import { ModelTier, SubscriptionPlan, ModelTierType, SubscriptionPlanType } from '@/types/subscription-types'
 
 interface SubscriptionInfo {
-  plan: string
-  tier: 'basic' | 'pro'
+  plan: SubscriptionPlanType
+  tier: ModelTierType
   maxTokensPerMonth: number
   maxClients: number
   tokensUsed: number
@@ -19,8 +20,8 @@ interface SubscriptionInfo {
 
 export function useSubscription() {
   const [subscription, setSubscription] = useState<SubscriptionInfo>({
-    plan: 'basic',
-    tier: 'basic',
+    plan: SubscriptionPlan.BASIC,
+    tier: ModelTier.BASIC,
     maxTokensPerMonth: 100000,
     maxClients: 3,
     tokensUsed: 0,

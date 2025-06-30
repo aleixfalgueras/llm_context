@@ -4,10 +4,12 @@ import { auth } from '@clerk/nextjs/server'
 import { getUserSubscription, getCurrentMonthUsage } from './subscription-utils'
 
 // Storage limits per plan (in bytes)
+import { SubscriptionPlan, SubscriptionPlanType } from '../types/subscription-types'
+
 export const STORAGE_LIMITS = {
-  basic: 50 * 1024 * 1024,    // 50 MB for basic plan
-  pro: 200 * 1024 * 1024,     // 200 MB for pro plan
-  business: 2 * 1024 * 1024 * 1024, // 2 GB for business plan
+  [SubscriptionPlan.BASIC]: 50 * 1024 * 1024,    // 50 MB for basic plan
+  [SubscriptionPlan.PRO]: 200 * 1024 * 1024,     // 200 MB for pro plan
+  [SubscriptionPlan.BUSINESS]: 2 * 1024 * 1024 * 1024, // 2 GB for business plan
 } as const
 
 export interface StorageCheckResult {
@@ -126,16 +128,16 @@ export async function getCurrentStorageUsage(userId: string): Promise<StorageUsa
 /**
  * Get storage limit for a subscription plan
  */
-export function getStorageLimitForPlan(plan: string): number {
+export function getStorageLimitForPlan(plan: SubscriptionPlanType): number {
   switch (plan) {
-    case 'basic':
-      return STORAGE_LIMITS.basic
-    case 'pro':
-      return STORAGE_LIMITS.pro
-    case 'business':
-      return STORAGE_LIMITS.business
+    case SubscriptionPlan.BASIC:
+      return STORAGE_LIMITS[SubscriptionPlan.BASIC]
+    case SubscriptionPlan.PRO:
+      return STORAGE_LIMITS[SubscriptionPlan.PRO]
+    case SubscriptionPlan.BUSINESS:
+      return STORAGE_LIMITS[SubscriptionPlan.BUSINESS]
     default:
-      return STORAGE_LIMITS.basic // Default to basic plan limits
+      return STORAGE_LIMITS[SubscriptionPlan.BASIC] // Default to basic plan limits
   }
 }
 

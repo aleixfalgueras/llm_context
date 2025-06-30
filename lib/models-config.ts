@@ -1,3 +1,5 @@
+import { ModelTier, ModelTierType, SubscriptionPlan, SubscriptionPlanType } from '../types/subscription-types'
+
 export interface AIModel {
   id: string
   name: string
@@ -5,7 +7,7 @@ export interface AIModel {
   provider: 'openai' | 'anthropic' | 'google' | 'meta' | 'other'
   contextLength?: number
   pricing?: { input: number; output: number }
-  tier?: 'basic' | 'pro'
+  tier?: ModelTierType
 }
 
 // Model ID Constants - Use these instead of literal strings throughout the codebase
@@ -34,12 +36,12 @@ export const MODEL_IDS = {
 
 // Model Tiers Configuration
 export const MODEL_TIERS = {
-  basic: [
+  [ModelTier.BASIC]: [
     MODEL_IDS.OPENAI_GPT_4O_MINI,
     MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
     MODEL_IDS.GOOGLE_GEMINI_FLASH,
   ],
-  pro: [
+  [ModelTier.PRO]: [
     MODEL_IDS.OPENAI_GPT_4O,
     MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
     MODEL_IDS.GOOGLE_GEMINI_PRO,
@@ -62,7 +64,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'openai',
     contextLength: 128000,
     pricing: { input: 0.00015, output: 0.0006 },
-    tier: 'basic'
+    tier: ModelTier.BASIC
   },
   {
     id: MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
@@ -71,7 +73,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'anthropic',
     contextLength: 200000,
     pricing: { input: 0.00025, output: 0.00125 },
-    tier: 'basic'
+    tier: ModelTier.BASIC
   },
   {
     id: MODEL_IDS.GOOGLE_GEMINI_FLASH,
@@ -80,7 +82,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'google',
     contextLength: 32000,
     pricing: { input: 0.00025, output: 0.00075 },
-    tier: 'basic'
+    tier: ModelTier.BASIC
   },
   
   // Pro Tier Models (Premium)
@@ -91,7 +93,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'openai',
     contextLength: 128000,
     pricing: { input: 0.0025, output: 0.01 },
-    tier: 'pro'
+    tier: ModelTier.PRO
   },
   {
     id: MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
@@ -100,7 +102,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'anthropic',
     contextLength: 200000,
     pricing: { input: 0.003, output: 0.015 },
-    tier: 'pro'
+    tier: ModelTier.PRO
   },
   {
     id: MODEL_IDS.GOOGLE_GEMINI_PRO,
@@ -109,7 +111,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'google',
     contextLength: 32000,
     pricing: { input: 0.0005, output: 0.0015 },
-    tier: 'pro'
+    tier: ModelTier.PRO
   }
 ]
 
@@ -236,9 +238,9 @@ export function getModelCost(modelId: string, inputTokens: number, outputTokens:
 /**
  * Get models available for a specific subscription tier
  */
-export function getModelsByTier(tier: 'basic' | 'pro'): AIModel[] {
-  if (tier === 'basic') {
-    return AVAILABLE_MODELS.filter(model => model.tier === 'basic')
+export function getModelsByTier(tier: ModelTierType): AIModel[] {
+  if (tier === ModelTier.BASIC) {
+    return AVAILABLE_MODELS.filter(model => model.tier === ModelTier.BASIC)
   } else {
     // Pro tier includes both basic and pro models
     return AVAILABLE_MODELS
@@ -248,7 +250,7 @@ export function getModelsByTier(tier: 'basic' | 'pro'): AIModel[] {
 /**
  * Check if a model is available for a specific subscription tier
  */
-export function isModelAvailableForTier(modelId: string, tier: 'basic' | 'pro'): boolean {
+export function isModelAvailableForTier(modelId: string, tier: ModelTierType): boolean {
   const availableModels = getModelsByTier(tier)
   return availableModels.some(model => model.id === modelId)
 }
@@ -256,7 +258,7 @@ export function isModelAvailableForTier(modelId: string, tier: 'basic' | 'pro'):
 /**
  * Get the most expensive model cost in a tier (for pricing calculations)
  */
-export function getMaxTierCost(tier: 'basic' | 'pro'): number {
+export function getMaxTierCost(tier: ModelTierType): number {
   const models = getModelsByTier(tier)
   let maxCost = 0
   
@@ -276,7 +278,7 @@ export function getMaxTierCost(tier: 'basic' | 'pro'): number {
 /**
  * Get subscription tier from plan name
  */
-export function getTierFromPlan(plan: string): 'basic' | 'pro' {
-  if (plan === 'basic') return 'basic'
-  return 'pro' // Both 'pro' and 'business' plans use pro tier models
+export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
+  if (plan === SubscriptionPlan.BASIC) return ModelTier.BASIC
+  return ModelTier.PRO // Both 'pro' and 'business' plans use pro tier models
 } 
