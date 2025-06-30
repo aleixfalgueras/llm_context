@@ -142,12 +142,12 @@ export async function getUsageInfo(userId: string) {
 
     const plan = SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS];
 
-    // Check document limits - use usage events to prevent bypassing limits by deleting documents
+    // Documents are unlimited for all plans - no need to check limits
     const documentUsage = {
-      allowed: subscription.maxDocumentsPerMonth === -1 || usage.documentsGenerated < subscription.maxDocumentsPerMonth,
-      limit: subscription.maxDocumentsPerMonth === -1 ? 'unlimited' as const : subscription.maxDocumentsPerMonth,
+      allowed: true,
+      limit: 'unlimited' as const,
       used: usage.documentsGenerated,
-      remaining: subscription.maxDocumentsPerMonth === -1 ? undefined : Math.max(0, subscription.maxDocumentsPerMonth - usage.documentsGenerated)
+      remaining: undefined
     };
 
     // Check client limits - count current clients instead of creation events

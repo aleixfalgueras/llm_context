@@ -19,14 +19,13 @@ export const SUBSCRIPTION_PLANS = {
     price: 10,
     currency: 'USD',
     maxClients: 3,
-    maxDocumentsPerMonth: 20,
     maxTokensPerMonth: 100000,        // 100K tokens - very profitable with basic tier models
     // Pricing calculation: Claude 3 Haiku (most expensive basic) = $0.000875/1K tokens
     // Max cost: 100K * $0.000875 = $0.875, leaving $9.12 profit (91% margin)
     description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
       '👥 3 client profiles',
-      '📄 20 documents per month',
+      '📄 Unlimited documents per month',
       '🔤 100K tokens (~75 pages of content)',
       '🤖 Cost-effective models: GPT-4o Mini, Claude Haiku, Gemini Flash'
     ]
@@ -37,14 +36,13 @@ export const SUBSCRIPTION_PLANS = {
     price: 17,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxDocumentsPerMonth: 200,
     maxTokensPerMonth: 1600000,       // 1.6M tokens - sustainable with premium models
     // Pricing calculation: Claude 3.5 Sonnet (most expensive pro) = $0.009/1K tokens
     // Max cost: 1600K * $0.009 = $14.40, leaving $2.60 profit (15% margin)
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
-      '📄 200 documents per month',
+      '📄 Unlimited documents per month',
       '🔤 1.6M tokens (~1,200 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
@@ -55,7 +53,6 @@ export const SUBSCRIPTION_PLANS = {
     price: 43,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxDocumentsPerMonth: -1, // unlimited
     maxTokensPerMonth: 4500000,       // 4.5M tokens - generous allowance for enterprise
     // Pricing calculation: Claude 3.5 Sonnet = $0.009/1K tokens
     // Max cost: 4500K * $0.009 = $40.50, leaving $2.50 profit (6% margin)
@@ -110,7 +107,6 @@ export async function getUserSubscription(userId: string) {
             currentPeriodStart: now,
             currentPeriodEnd: periodEnd,
             maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
-            maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
             maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
           }
         }),
@@ -225,19 +221,7 @@ export async function checkUsageLimit(userId: string, action: 'document' | 'clie
 
     switch (action) {
       case 'document':
-        // Check document count limit
-        const maxDocuments = subscription.maxDocumentsPerMonth
-        if (maxDocuments !== -1 && usage.documentsGenerated >= maxDocuments) {
-          return {
-            allowed: false,
-            limit: maxDocuments,
-            used: usage.documentsGenerated,
-            remaining: 0,
-            limitType: 'documents'
-          }
-        }
-        
-        // Check token limit (documents also consume tokens)
+        // Only check token limit for documents (no document count limits)
         const maxTokensDoc = subscription.maxTokensPerMonth
         if (maxTokensDoc !== -1 && usage.tokensUsed >= maxTokensDoc) {
           return {
@@ -251,9 +235,8 @@ export async function checkUsageLimit(userId: string, action: 'document' | 'clie
         
         return {
           allowed: true,
-          limit: maxDocuments,
-          used: usage.documentsGenerated,
-          remaining: Math.max(0, maxDocuments - usage.documentsGenerated),
+          limit: 'unlimited',
+          used: 0,
           limitType: 'documents'
         }
 
@@ -400,7 +383,6 @@ export async function getUserUsageAnalytics(userId: string) {
         currentPeriodEnd: subscription.currentPeriodEnd,
       },
       limits: {
-        documents: subscription.maxDocumentsPerMonth,
         clients: subscription.maxClients,
         tokens: subscription.maxTokensPerMonth,
         // Removed cost limit - OpenRouter handles billing automatically

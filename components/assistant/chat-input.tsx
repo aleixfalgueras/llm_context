@@ -210,13 +210,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
       if (!response.ok) {
         // Handle different error status codes
         const errorText = await response.text()
-        
-        if (response.status === 403) {
-          // Usage limit exceeded
-          throw new Error(errorText || 'Document creation limit exceeded')
-        } else {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
+        throw new Error(errorText || `HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
@@ -257,12 +251,10 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
         clientId: clientData?.id
       });
       
-      // Check if it's a usage limit error
       const errorMessage = error instanceof Error ? error.message : 'Failed to export chat. Please try again.'
-      const isLimitError = errorMessage.includes('limit')
       
       toast({
-        title: isLimitError ? 'Document Limit Reached' : 'Export Failed',
+        title: 'Export Failed',
         description: errorMessage,
         variant: 'destructive',
       })
