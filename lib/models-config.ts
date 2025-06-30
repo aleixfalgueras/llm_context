@@ -15,7 +15,7 @@ export const MODEL_IDS = {
   // Basic Tier Models
   OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano',
   ANTHROPIC_CLAUDE_3_HAIKU: 'anthropic/claude-3-haiku',
-  GOOGLE_GEMINI_1_5_FLASH: 'google/gemini-1.5-flash',
+  GOOGLE_GEMINI_1_5_FLASH: 'google/gemini-flash-1.5',
   
   // Pro/Business Tier Models
   OPENAI_GPT_4_1: 'openai/gpt-4.1',
