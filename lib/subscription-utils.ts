@@ -26,6 +26,7 @@ export const SUBSCRIPTION_PLANS = {
     features_list: [
       '👥 3 client profiles',
       '📄 Unlimited documents per month',
+      '💾 50 MB document storage',
       '🔤 100K tokens (~75 pages of content)',
       '🤖 Cost-effective models: GPT-4o Mini, Claude Haiku, Gemini Flash'
     ]
@@ -43,6 +44,7 @@ export const SUBSCRIPTION_PLANS = {
     features_list: [
       '👥 Unlimited client profiles',
       '📄 Unlimited documents per month',
+      '💾 200 MB document storage',
       '🔤 1.6M tokens (~1,200 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]
@@ -60,6 +62,7 @@ export const SUBSCRIPTION_PLANS = {
     features_list: [
       '👥 Unlimited client profiles',
       '📄 Unlimited documents per month',
+      '💾 2 GB document storage',
       '🔤 4.5M tokens (~3,400 pages of content)',
       '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
     ]

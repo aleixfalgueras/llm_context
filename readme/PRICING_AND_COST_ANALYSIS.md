@@ -44,44 +44,56 @@
 
 ### Basic Plan - $10/month
 **Token Allocation**: 100,000 tokens (~75 pages of content)
+**Storage Allocation**: 50 MB document storage
 
 **Worst-Case Cost Scenario:**
 - User exclusively uses **Claude 3 Haiku** (most expensive basic model)
-- Maximum monthly cost: 100,000 × $0.000875 = **$0.875**
-- **Net Profit**: $10.00 - $0.875 = **$9.125**
-- **Profit Margin**: **91.25%**
+- Maximum monthly AI cost: 100,000 × $0.000875 = **$0.875**
+- Storage infrastructure cost: ~$0.01/month (50 MB @ $0.20/GB)
+- **Total Maximum Cost**: $0.875 + $0.01 = **$0.885**
+- **Net Profit**: $10.00 - $0.885 = **$9.115**
+- **Profit Margin**: **91.15%**
 
 **Value Proposition:**
 - Extremely profitable even with worst-case model usage
 - Generous token allowance for cost-effective models
+- Sufficient storage for typical individual/small business use
 - Perfect for individual users and small businesses
 
 ### Pro Plan - $17/month  
 **Token Allocation**: 1,600,000 tokens (~1,200 pages of content)
+**Storage Allocation**: 200 MB document storage
 
 **Worst-Case Cost Scenario:**
 - User exclusively uses **Claude 3.5 Sonnet** (most expensive pro model)
-- Maximum monthly cost: 1,600,000 × $0.009 = **$14.40**
-- **Net Profit**: $17.00 - $14.40 = **$2.60**
-- **Profit Margin**: **15.29%**
+- Maximum monthly AI cost: 1,600,000 × $0.009 = **$14.40**
+- Storage infrastructure cost: ~$0.04/month (200 MB @ $0.20/GB)
+- **Total Maximum Cost**: $14.40 + $0.04 = **$14.44**
+- **Net Profit**: $17.00 - $14.44 = **$2.56**
+- **Profit Margin**: **15.06%**
 
 **Value Proposition:**
 - Sustainable margins even with premium model usage
 - Access to all models including most expensive options
+- Ample storage for professional document management
 - Ideal for professional marketing work
 
 ### Business Plan - $43/month
 **Token Allocation**: 4,500,000 tokens (~3,400 pages of content)
+**Storage Allocation**: 2 GB document storage
 
 **Worst-Case Cost Scenario:**
 - User exclusively uses **Claude 3.5 Sonnet** (most expensive pro model)
-- Maximum monthly cost: 4,500,000 × $0.009 = **$40.50**
-- **Net Profit**: $43.00 - $40.50 = **$2.50**
-- **Profit Margin**: **5.81%**
+- Maximum monthly AI cost: 4,500,000 × $0.009 = **$40.50**
+- Storage infrastructure cost: ~$0.40/month (2 GB @ $0.20/GB)
+- **Total Maximum Cost**: $40.50 + $0.40 = **$40.90**
+- **Net Profit**: $43.00 - $40.90 = **$2.10**
+- **Profit Margin**: **4.88%**
 
 **Value Proposition:**
-- Minimal but positive margins for enterprise usage
+- Positive margins for enterprise usage with comprehensive storage
 - Massive token allowance for high-volume operations
+- Generous storage allocation for enterprise document management
 - All premium models with generous limits
 
 ## 🔒 Technical Implementation
@@ -174,6 +186,7 @@ Maximum Monthly Costs (Worst Case):
 | **Model Access** | Curated for marketing | Generic/broad |
 | **Pricing** | Predictable monthly | Pay-per-use or limited |
 | **Business Tools** | Client management, templates | Just AI access |
+| **Document Storage** | Included in plans | Not provided |
 | **Cost Control** | Built-in limits | Manual monitoring |
 | **Profit Margin** | 5-91% guaranteed | N/A |
 
@@ -182,6 +195,7 @@ Maximum Monthly Costs (Worst Case):
 |---------|------------------|-------------|
 | **Model Variety** | 6 curated models | Usually 1-2 models |
 | **Tier Flexibility** | Choose model within tier | Fixed model |
+| **Document Storage** | Included with plans | Often extra cost |
 | **Business Model** | Sustainable margins | Often unsustainable |
 | **Feature Set** | Complete marketing suite | Limited features |
 
@@ -204,8 +218,32 @@ Maximum Monthly Costs (Worst Case):
 **Business Plan Users (High-Volume):**
 - Heavy usage but smart model selection
 - Likely 70% basic models, 30% pro models for optimization
-- Average cost per user: ~$18.50/month (54% lower than worst-case)  
-- **Actual profit margin**: ~57%
+- Average AI cost per user: ~$18.50/month (54% lower than worst-case)
+- Average storage usage: ~1.2 GB (~$0.24/month)
+- **Total average cost**: ~$18.74/month
+- **Actual profit margin**: ~56.4%
+
+## 💾 Storage Usage Patterns
+
+### Expected Storage Behavior by Tier
+
+**Basic Plan Users (50 MB limit):**
+- Typical usage: 20-35 MB (~70% of limit)
+- Document types: Short reports, social media content, emails
+- Average document size: 2-5 KB
+- Storage cost per user: ~$0.007/month
+
+**Pro Plan Users (200 MB limit):**
+- Typical usage: 120-160 MB (~75% of limit)
+- Document types: Comprehensive reports, campaigns, presentations
+- Average document size: 8-15 KB
+- Storage cost per user: ~$0.028/month
+
+**Business Plan Users (2 GB limit):**
+- Typical usage: 1.2-1.6 GB (~70% of limit)
+- Document types: Enterprise campaigns, extensive documentation
+- Average document size: 15-30 KB
+- Storage cost per user: ~$0.24/month
 
 ## 📊 Financial Projections
 
@@ -218,13 +256,18 @@ Subscriber Mix:
 Total Revenue: $7,560/month = $90,720/year
 
 Expected Costs (Based on Usage Patterns):
-• Basic users: 500 × $0.40 = $200/month
-• Pro users: 100 × $6.50 = $650/month
-• Business users: 20 × $18.50 = $370/month
+• Basic users AI: 500 × $0.40 = $200/month
+• Pro users AI: 100 × $6.50 = $650/month
+• Business users AI: 20 × $18.50 = $370/month
+• Basic users storage: 500 × $0.01 = $5/month
+• Pro users storage: 100 × $0.04 = $4/month
+• Business users storage: 20 × $0.40 = $8/month
 Total AI Costs: $1,220/month = $14,640/year
+Total Storage Costs: $17/month = $204/year
+Total Operational Costs: $1,237/month = $14,844/year
 
-Gross Profit: $90,720 - $14,640 = $76,080/year
-Gross Margin: 84%
+Gross Profit: $90,720 - $14,844 = $75,876/year
+Gross Margin: 83.6%
 ```
 
 ### Scale Economics
@@ -232,13 +275,16 @@ Gross Margin: 84%
 At 10x Scale (6,000 total subscribers):
 • Revenue: $907,200/year
 • AI Costs: $146,400/year
-• Gross Profit: $760,800/year
-• Gross Margin: 84% (maintained)
+• Storage Costs: $2,040/year
+• Total Operational Costs: $148,440/year
+• Gross Profit: $758,760/year
+• Gross Margin: 83.6% (maintained)
 
 Business becomes more profitable with scale due to:
 • Fixed infrastructure costs spread across more users
 • Better user behavior patterns (mixed model usage)
 • Economies of scale in OpenRouter pricing
+• Storage costs remain minimal relative to AI costs
 ```
 
 ## 🚀 Implementation Benefits

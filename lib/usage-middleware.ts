@@ -4,6 +4,7 @@ import { checkUsageLimit, updateUsageTracking, checkModelAccess } from './subscr
 import { createUsageLimitResponse } from './ai-wrapper'
 import { prisma } from './prisma'
 import { getModelsByTier, getTierFromPlan } from './models-config'
+import { getStorageAnalytics } from './storage-utils'
 
 export interface UsageLimitResponse {
   allowed: boolean
@@ -135,9 +136,10 @@ export async function getUsageInfo(userId: string) {
     const { getUserSubscription, getCurrentMonthUsage, SUBSCRIPTION_PLANS } = await import('./subscription-utils');
     
     // Parallelize all database calls for better performance
-    const [subscription, usage] = await Promise.all([
+    const [subscription, usage, storageAnalytics] = await Promise.all([
       getUserSubscription(userId),
-      getCurrentMonthUsage(userId)
+      getCurrentMonthUsage(userId),
+      getStorageAnalytics(userId)
     ]);
 
     const plan = SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS];
@@ -167,10 +169,23 @@ export async function getUsageInfo(userId: string) {
       remaining: subscription.maxTokensPerMonth === -1 ? undefined : Math.max(0, subscription.maxTokensPerMonth - usage.tokensUsed)
     };
 
+    // Storage usage information
+    const storageUsage = {
+      allowed: storageAnalytics.usage.totalBytes < storageAnalytics.limit,
+      limit: storageAnalytics.limit,
+      used: storageAnalytics.usage.totalBytes,
+      usedFormatted: storageAnalytics.usedFormatted,
+      limitFormatted: storageAnalytics.limitFormatted,
+      remaining: Math.max(0, storageAnalytics.limit - storageAnalytics.usage.totalBytes),
+      remainingFormatted: storageAnalytics.remainingFormatted,
+      usagePercentage: storageAnalytics.usagePercentage
+    };
+
     return {
       documents: documentUsage,
       clients: clientUsage,
       tokens: tokenUsage,
+      storage: storageUsage,
     }
   } catch (error) {
     console.error('Error getting usage info:', error)
