@@ -98,7 +98,6 @@ export function ClientDocuments({
 
   // Document creation handlers
   const handleCreateNew = async () => {
-    // Proceed with document creation - storage limits will be checked server-side
     documentState.setIsCreating(true)
     documentState.setIsEditing(false)
     documentState.setSelectedDocument(null)

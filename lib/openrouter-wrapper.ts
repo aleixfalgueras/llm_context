@@ -30,7 +30,6 @@ export interface OpenRouterCompletionOptions {
 
 export interface UsageTrackingOptions {
   userId: string
-  eventType: 'document_generation'
   resourceId?: string
   additionalMetadata?: Record<string, any>
 }
@@ -155,8 +154,8 @@ export async function createOpenRouterCompletion(
     serviceSource = 'custom-document-generator'
   } else if (trackingOptions.resourceId && trackingOptions.resourceId.startsWith('chat')) {
     serviceSource = 'chat-assistant'
-  } else if (trackingOptions.eventType === 'document_generation') {
-    serviceSource = 'document-generation'
+  } else {
+    serviceSource = 'content-generation'
   }
   
   // Log model usage information
@@ -187,7 +186,7 @@ export async function createOpenRouterCompletion(
       }
 
       // Track token usage only - OpenRouter will charge actual cost to your account
-      await trackUsage(trackingOptions.userId, trackingOptions.eventType, trackingOptions.resourceId, {
+      await trackUsage(trackingOptions.userId, {
         tokensUsed: usage.total_tokens,
         // Removed estimatedCost - OpenRouter handles billing automatically
         model,
@@ -237,8 +236,8 @@ export async function* createOpenRouterCompletionStream(
     serviceSource = 'custom-document-generator'
   } else if (trackingOptions.resourceId && trackingOptions.resourceId.startsWith('chat')) {
     serviceSource = 'chat-assistant'
-  } else if (trackingOptions.eventType === 'document_generation') {
-    serviceSource = 'document-generation'
+  } else {
+    serviceSource = 'content-generation'
   }
   
   // Log model usage information
@@ -285,7 +284,7 @@ export async function* createOpenRouterCompletionStream(
       }
 
       // Track token usage only - OpenRouter will charge actual cost to your account
-      await trackUsage(trackingOptions.userId, trackingOptions.eventType, trackingOptions.resourceId, {
+      await trackUsage(trackingOptions.userId, {
         tokensUsed: usage.total_tokens,
         model,
         promptTokens: usage.prompt_tokens,

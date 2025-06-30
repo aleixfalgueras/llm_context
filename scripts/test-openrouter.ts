@@ -73,7 +73,6 @@ async function testOpenRouterIntegration() {
       },
       {
         userId: 'test-user',
-        eventType: 'document_generation',
         resourceId: 'test-completion'
       }
     )
@@ -100,7 +99,6 @@ async function testOpenRouterIntegration() {
       },
       {
         userId: 'test-user',
-        eventType: 'document_generation',
         resourceId: 'test-error'
       }
     )

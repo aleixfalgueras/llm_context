@@ -64,20 +64,33 @@ export async function withAuthUsageAndClient(
   response?: Response
 }> {
   // Import here to avoid circular dependencies
-  const { withAuthAndUsageCheck } = await import('./api-middleware')
+  const { auth } = await import('@clerk/nextjs/server')
   
-  // First check auth and usage
-  const authCheck = await withAuthAndUsageCheck(action)
+  // Check authentication only (no usage limits for documents)
+  const { userId } = await auth()
   
-  if (!authCheck.success) {
+  if (!userId) {
     return {
       success: false,
-      response: authCheck.response
+      response: new Response('Unauthorized', { status: 401 })
     }
   }
 
-  // Then check client access
-  const clientCheck = await withClientAccess(authCheck.userId!, clientId, clientOptions)
+  // Check usage limits only for client actions (not documents)
+  if (action === 'client') {
+    const { withAuthAndUsageCheck } = await import('./api-middleware')
+    const authCheck = await withAuthAndUsageCheck(action)
+    
+    if (!authCheck.success) {
+      return {
+        success: false,
+        response: authCheck.response
+      }
+    }
+  }
+
+  // Check client access
+  const clientCheck = await withClientAccess(userId, clientId, clientOptions)
   
   if (!clientCheck.success) {
     return {
@@ -88,7 +101,7 @@ export async function withAuthUsageAndClient(
 
   return {
     success: true,
-    userId: authCheck.userId,
+    userId: userId,
     client: clientCheck.client
   }
 } 

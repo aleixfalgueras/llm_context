@@ -135,7 +135,6 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
       },
       {
         userId: validUserId,
-        eventType: 'document_generation',
         resourceId: clientId,
         additionalMetadata: {
           documentType: 'custom-document',
