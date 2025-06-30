@@ -4,12 +4,11 @@ import { Send, Loader2, Download, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { PromptSelector } from '@/components/prompts/prompt-selector'
-import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
 import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { AVAILABLE_MODELS, getDefaultModelForNewChats, saveDefaultModelForNewChats, MODEL_IDS, ALL_MODEL_IDS, DEFAULT_MODEL } from '@/lib/models-config'
+import { getDefaultModel } from '@/lib/models-config'
 import { useSubscription } from '@/hooks/use-subscription'
 
 interface Prompt {
@@ -47,27 +46,6 @@ interface ChatInputProps {
 export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
   const subscription = useSubscription()
   const [isExporting, setIsExporting] = useState(false)
-  const [selectedModel, setSelectedModel] = useState(() => {
-    // If this is an existing chat with a lastUsedModel, use that
-    if (lastUsedModel) {
-      return lastUsedModel
-    }
-    
-    // For new chats, read localStorage directly (client-side only)
-    if (typeof window !== 'undefined') {
-      const savedModel = localStorage.getItem('chat-default-model')
-      if (savedModel) {
-        // Validate the saved model exists in available models
-        const isValidModel = ALL_MODEL_IDS.includes(savedModel)
-        if (isValidModel) {
-          return savedModel
-        }
-      }
-    }
-    
-    // Default fallback
-    return DEFAULT_MODEL
-  })
   
   const { toast } = useToast()
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
@@ -102,12 +80,13 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
+      const defaultModel = getDefaultModel()
       clientLogger.userInteraction('Submit message', { 
         chatId,
         component: 'ChatInput',
-        metadata: { messageLength: input.trim().length, model: selectedModel }
+        metadata: { messageLength: input.trim().length, model: defaultModel }
       });
-      sendMessage(input, selectedModel)
+      sendMessage(input, defaultModel)
     } else {
       clientLogger.warn('Submit attempted with invalid conditions', { 
         chatId,
@@ -294,36 +273,6 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
     };
   }, [chatId]);
 
-  // Update selected model when switching between chats
-  useEffect(() => {
-    // If switching to an existing chat with a specific model, use that
-    if (lastUsedModel) {
-      setSelectedModel(lastUsedModel)
-      return
-    }
-    
-    // For new chats, check localStorage
-    if (typeof window !== 'undefined') {
-      const savedModel = localStorage.getItem('chat-default-model')
-      if (savedModel) {
-        const isValidModel = ALL_MODEL_IDS.includes(savedModel)
-        if (isValidModel) {
-          setSelectedModel(savedModel)
-          return
-        }
-      }
-    }
-    
-    // Fallback to default
-          setSelectedModel(DEFAULT_MODEL)
-    
-    clientLogger.debug('Model selection updated', { 
-      chatId,
-      component: 'ChatInput',
-      metadata: { model: selectedModel, source: lastUsedModel ? 'chat-specific' : 'localStorage' }
-    });
-  }, [lastUsedModel, chatId])
-
   // Auto-resize when input changes
   useEffect(() => {
     if (input.trim()) {
@@ -338,22 +287,6 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
     }
   }, [input])
 
-  // Handle model selection - save to localStorage for future new chats
-  const handleModelSelect = (modelId: string) => {
-    setSelectedModel(modelId)
-    
-    // Save to localStorage directly for future new chats
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('chat-default-model', modelId)
-    }
-    
-    clientLogger.debug('Model saved as default for new chats', { 
-      chatId,
-      component: 'ChatInput',
-      metadata: { model: modelId }
-    });
-  }
-
   const handleStop = () => {
     clientLogger.userInteraction('Stop generation', { 
       chatId,
@@ -364,7 +297,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
 
   return (
     <div className="space-y-2">
-      {/* Prompt Selector, Model Selector, and Export Button */}
+      {/* Prompt Selector and Export Button */}
       <div className="flex justify-between items-center gap-2 flex-wrap">
         <div className="flex gap-2">
           <PromptSelector onPromptSelect={handlePromptSelect} />
@@ -386,11 +319,6 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
             </Button>
           )}
         </div>
-        <ModelSelector 
-          selectedModel={selectedModel}
-          onModelSelect={handleModelSelect}
-          userTier={subscription.tier}
-        />
       </div>
       
       {/* Chat Input Form */}

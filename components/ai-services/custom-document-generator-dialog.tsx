@@ -18,6 +18,8 @@ import { ClientContextSelection, defaultClientContextSelections } from '@/types/
 import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 import type { Client } from '@/types/client'
+import { getDefaultModel } from '@/lib/models-config'
+import { clientLogger } from '@/lib/client-logger'
 
 interface Prompt {
   id: string
@@ -32,7 +34,6 @@ interface CustomDocumentGeneratorDialogProps {
   onClose: () => void
   clients: Client[]
   onDocumentCreated?: (clientId: string, documentId: string) => void
-  selectedModel: string
 }
 
 export function CustomDocumentGeneratorDialog({
@@ -40,7 +41,6 @@ export function CustomDocumentGeneratorDialog({
   onClose,
   clients,
   onDocumentCreated,
-  selectedModel,
 }: CustomDocumentGeneratorDialogProps) {
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [documentTitle, setDocumentTitle] = useState('')
@@ -49,6 +49,7 @@ export function CustomDocumentGeneratorDialog({
   const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isRegenerating, setIsRegenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
   const [generatedContent, setGeneratedContent] = useState('')
@@ -56,6 +57,7 @@ export function CustomDocumentGeneratorDialog({
   const [useCustomPrompt, setUseCustomPrompt] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const { toast } = useToast()
+  const [error, setError] = useState('')
 
   // Load prompts when dialog opens
   useEffect(() => {
@@ -99,8 +101,10 @@ export function CustomDocumentGeneratorDialog({
     }
   }
 
-  const handleGenerateDocument = async () => {
-    if (!selectedClient || !documentTitle || (!selectedPrompt && !customPrompt.trim())) {
+  const generateDocument = async () => {
+    const finalPrompt = useCustomPrompt ? customPrompt : prompts.find(p => p.id === selectedPrompt)?.content || ''
+    
+    if (!selectedClient || !documentTitle || !finalPrompt.trim()) {
       toast({
         title: 'Missing Information',
         description: 'Please select a client, enter a document title, and choose a prompt or write custom instructions.',
@@ -110,15 +114,14 @@ export function CustomDocumentGeneratorDialog({
     }
 
     setIsGenerating(true)
-
-    // Show toast notification
-    toast({
-      title: `📄 Generating custom document for ${selectedClientData?.name}`,
-      description: 'This usually takes 30-60 seconds...',
-      duration: 5000,
-    })
+    setError('')
 
     try {
+      clientLogger.apiCall('POST', '/api/ai-services/generate-custom-document', {
+        clientId: selectedClient,
+        component: 'CustomDocumentGeneratorDialog'
+      });
+
       const response = await fetch('/api/ai-services/generate-custom-document', {
         method: 'POST',
         headers: {
@@ -126,11 +129,9 @@ export function CustomDocumentGeneratorDialog({
         },
         body: JSON.stringify({
           clientId: selectedClient,
-          promptId: useCustomPrompt ? null : selectedPrompt,
-          customPrompt: useCustomPrompt ? customPrompt : null,
-          documentTitle,
-          selectedContextFields: Object.keys(clientContext).filter(key => clientContext[key as keyof ClientContextSelection]),
-          model: selectedModel,
+          clientContext,
+          prompt: finalPrompt,
+          model: getDefaultModel()
         }),
       })
 
@@ -154,7 +155,7 @@ export function CustomDocumentGeneratorDialog({
 
       const data = await response.json()
       setGeneratedContent(data.content)
-      setPromptName(data.promptName)
+      setPromptName(data.promptName || (useCustomPrompt ? 'Custom Prompt' : prompts.find(p => p.id === selectedPrompt)?.name || ''))
     } catch (error) {
       console.error('Error generating document:', error)
       
@@ -509,7 +510,7 @@ export function CustomDocumentGeneratorDialog({
           </Button>
           {!generatedContent ? (
             <Button
-              onClick={handleGenerateDocument}
+              onClick={generateDocument}
               disabled={isGenerating || !selectedClient || !documentTitle || (!selectedPrompt && !customPrompt.trim())}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
@@ -529,7 +530,7 @@ export function CustomDocumentGeneratorDialog({
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={handleGenerateDocument}
+                onClick={generateDocument}
                 disabled={isGenerating}
                 className="border-blue-600 text-blue-600 hover:bg-blue-50"
               >
