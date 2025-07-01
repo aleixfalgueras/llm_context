@@ -10,43 +10,21 @@ export interface AIModel {
   tier?: ModelTierType
 }
 
-// Model ID Constants - Use these instead of literal strings throughout the codebase
+// Model ID Constants - Using only Gemini Flash 1.5 for all AI functionalities
 export const MODEL_IDS = {
-  // Basic Tier Models
-  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano',
-  ANTHROPIC_CLAUDE_3_HAIKU: 'anthropic/claude-3-haiku',
+  // Primary Model - Used for all AI functionalities
   GOOGLE_GEMINI_1_5_FLASH: 'google/gemini-flash-1.5',
-  
-  // Pro/Business Tier Models
-  OPENAI_GPT_4_1: 'openai/gpt-4.1',
-  ANTHROPIC_CLAUDE_3_5_SONNET: 'anthropic/claude-3.5-sonnet',
-  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash',
 } as const
 
-// Model Tiers Configuration
+// Model Tiers Configuration - All tiers use the same model
 export const MODEL_TIERS = {
   [ModelTier.BASIC]: [
-    MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
     MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
   ],
   [ModelTier.PRO]: [
-    // Pro tier models
-    MODEL_IDS.OPENAI_GPT_4_1,
-    MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
-    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    // Pro tier also includes basic tier models
-    MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
     MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
   ],
   [ModelTier.BUSINESS]: [
-    // Business tier has same model access as Pro tier
-    MODEL_IDS.OPENAI_GPT_4_1,
-    MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
-    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
     MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
   ],
 }
@@ -55,66 +33,19 @@ export const MODEL_TIERS = {
 export const ALL_MODEL_IDS = Object.values(MODEL_IDS) as string[]
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // Basic Tier Models (Cost-effective)
-  {
-    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    name: 'GPT-4.1 Nano',
-    description: 'Fastest and cheapest GPT-4.1 model, ideal for classification and autocompletion',
-    provider: 'openai',
-    contextLength: 1047576,
-    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
-    tier: ModelTier.BASIC
-  },
-  {
-    id: MODEL_IDS.ANTHROPIC_CLAUDE_3_HAIKU,
-    name: 'Claude 3 Haiku',
-    description: 'Fastest and most cost-effective Claude model',
-    provider: 'anthropic',
-    contextLength: 200000,
-    pricing: { input: 0.00025, output: 0.00125 }, // $0.25/M input, $1.25/M output
-    tier: ModelTier.BASIC
-  },
+  // Primary Model - Google Gemini Flash 1.5
   {
     id: MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
-    name: 'Gemini 1.5 Flash',
-    description: 'Fast and efficient Google model, excellent value',
+    name: 'Gemini Flash 1.5',
+    description: 'Fast and efficient Google model with excellent performance and cost-effectiveness',
     provider: 'google',
     contextLength: 1000000,
     pricing: { input: 0.000075, output: 0.0003 }, // $0.075/M input, $0.30/M output
     tier: ModelTier.BASIC
-  },
-  
-  // Pro/Business Tier Models (Premium Performance)
-  {
-    id: MODEL_IDS.OPENAI_GPT_4_1,
-    name: 'GPT-4.1',
-    description: 'Flagship model optimized for advanced instruction following and coding',
-    provider: 'openai',
-    contextLength: 1047576,
-    pricing: { input: 0.002, output: 0.008 }, // $2/M input, $8/M output
-    tier: ModelTier.PRO
-  },
-  {
-    id: MODEL_IDS.ANTHROPIC_CLAUDE_3_5_SONNET,
-    name: 'Claude 3.5 Sonnet',
-    description: 'High-performance Claude model with exceptional reasoning',
-    provider: 'anthropic',
-    contextLength: 200000,
-    pricing: { input: 0.003, output: 0.015 }, // $3/M input, $15/M output
-    tier: ModelTier.PRO
-  },
-  {
-    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    name: 'Gemini 2.0 Flash',
-    description: 'Enhanced multimodal capabilities with excellent performance/cost ratio',
-    provider: 'google',
-    contextLength: 1000000,
-    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
-    tier: ModelTier.PRO
   }
 ]
 
-// OpenRouter Configuration Constants - Default to best value basic tier model
+// OpenRouter Configuration Constants - Default to Gemini Flash 1.5
 export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH
 export const DEFAULT_TEMPERATURE = 0.7
 export const DEFAULT_PRESENCE_PENALTY = 0.1

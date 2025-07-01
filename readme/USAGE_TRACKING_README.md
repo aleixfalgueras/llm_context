@@ -1,210 +1,206 @@
 # Usage Tracking System
 
-This document explains how the usage tracking system works for the LLM Context application, focusing on **token consumption monitoring**, **tier-based model access**, and **cost management**.
+This document explains how the usage tracking system works for the LLM Context application, focusing on **token consumption monitoring** using **Google Gemini Flash 1.5** for all AI functionalities.
 
-**⚠️ UPDATED JANUARY 2025**: Simplified model selection - one model per provider per tier for clarity
+**⚠️ UPDATED JANUARY 2025**: Simplified to use only Google Gemini Flash 1.5 for all AI functionalities
 
 ## Overview
 
-The usage tracking system operates across **four primary dimensions**:
-- **Model tier access control** (subscription-based)
+The usage tracking system operates across **three primary dimensions**:
 - **Token consumption tracking** (usage-based)
-- **Document generation limits** (count-based)
+- **Document generation limits** (count-based)  
 - **Storage usage tracking** (storage-based)
 
 **Key Features:**
-- ✅ **Simplified model tiers** - one model per provider per tier
-- ✅ **Token limits calculated** based on most expensive model in each tier
-- ✅ **Guaranteed profit margins** at all subscription levels
-- ✅ **Clear model selection** with excellent options across all price points
+- ✅ **Single model architecture** - Google Gemini Flash 1.5 for all AI operations
+- ✅ **Generous token limits** based on highly cost-effective model pricing
+- ✅ **Excellent profit margins** at all subscription levels
+- ✅ **Simplified user experience** with consistent AI performance
 
-## Model Access Tiers
+## Model Configuration
 
-### Basic Tier Models ($9/month)
-**Available Models (3 total - one per provider):**
-- **OpenAI GPT-4.1 Nano**: $0.0003 per 1K tokens ← **Best OpenAI value!**
-- **Anthropic Claude 3 Haiku**: $0.00058 per 1K tokens (most expensive)
-- **Google Gemini 1.5 Flash**: $0.000158 per 1K tokens ← **Extremely cost-effective!**
+### Single Model Architecture
+**All AI functionalities powered by:**
+- **Google Gemini Flash 1.5**: $0.075/M input tokens, $0.30/M output tokens
+- **Blended cost**: ~$0.131/M tokens (assuming 3:1 input/output ratio)
+- **Context length**: 1M tokens
+- **Performance**: Fast, efficient, and cost-effective
 
-**Token Limit**: 15,517 tokens/month (based on Claude 3 Haiku)
+### Benefits of Single Model Approach
+- **Consistent experience**: Same AI behavior across all features
+- **Simplified maintenance**: No model selection complexity
+- **Predictable costs**: Clear understanding of usage implications
+- **Optimized performance**: Single model allows for better optimization
 
-### Pro/Business Tier Models ($29/$79/month)
-**Available Models (6 total - includes all Basic tier + 3 premium):**
+## Subscription Plans and Token Limits
 
-**Basic Tier Models:**
-- **OpenAI GPT-4.1 Nano**: $0.0003 per 1K tokens
-- **Anthropic Claude 3 Haiku**: $0.00058 per 1K tokens
-- **Google Gemini 1.5 Flash**: $0.000158 per 1K tokens
+### Basic Plan - $10/month
+- **Token Limit**: 500,000 tokens/month (~375 pages of content)
+- **Cost at limit**: ~$0.066 (99.3% profit margin)
+- **Storage**: 50 MB
+- **Clients**: 3 profiles
+- **Perfect for**: Individual users and small businesses
 
-**Premium Models:**
-- **OpenAI GPT-4.1**: $0.006 per 1K tokens ← **Flagship performance!**
-- **Anthropic Claude 3.5 Sonnet**: $0.011 per 1K tokens (most expensive)
-- **Google Gemini 2.0 Flash**: $0.0003 per 1K tokens ← **Outstanding value!**
+### Pro Plan - $25/month  
+- **Token Limit**: 10,000,000 tokens/month (~7,500 pages of content)
+- **Cost at limit**: ~$1.31 (94.8% profit margin)
+- **Storage**: 200 MB
+- **Clients**: Unlimited
+- **Perfect for**: Growing businesses and marketing professionals
 
-**Pro Token Limit**: 2,636 tokens/month (based on Claude 3.5 Sonnet)
-**Business Token Limit**: 7,182 tokens/month (based on Claude 3.5 Sonnet)
+### Business Plan - $50/month
+- **Token Limit**: 25,000,000 tokens/month (~18,750 pages of content)
+- **Cost at limit**: ~$3.28 (93.4% profit margin)
+- **Storage**: 2 GB
+- **Clients**: Unlimited
+- **Perfect for**: Agencies and large teams
 
-**Smart Choice Advantages for Pro Users**: 
-- **Gemini 2.0 Flash**: 96,667 tokens (37x more!)
-- **GPT-4.1**: 4,833 tokens (2x more!)
-- **Basic tier models**: Up to 183,544 tokens (70x more with Gemini 1.5 Flash!)
+## Token Usage Examples
 
-## Token Usage Optimization
+### Content Generation Examples
+With Google Gemini Flash 1.5 token efficiency:
 
-### Model Selection Impact on Usage
+**Basic Plan (500K tokens/month):**
+- ~375 full blog posts (1,330 tokens each)
+- ~125 detailed marketing strategies (4,000 tokens each)
+- ~50 comprehensive client reports (10,000 tokens each)
 
-**Pro Plan ($29/month) - Token Comparison:**
-```
-Claude 3.5 Sonnet:    2,636 tokens/month (most expensive)
-GPT-4.1:              4,833 tokens/month ← 2x more usage!
-Gemini 2.0 Flash:    96,667 tokens/month ← 37x more usage!
-GPT-4.1 Nano:        96,667 tokens/month ← 37x more usage!
-Claude 3 Haiku:      50,000 tokens/month ← 19x more usage!
-Gemini 1.5 Flash:   183,544 tokens/month ← 70x more usage!
-```
+**Pro Plan (10M tokens/month):**
+- ~7,500 full blog posts
+- ~2,500 detailed marketing strategies  
+- ~1,000 comprehensive client reports
 
-**Business Plan ($79/month) - Token Comparison:**
-```
-Claude 3.5 Sonnet:     7,182 tokens/month (most expensive)
-GPT-4.1:              13,167 tokens/month ← 2x more usage!
-Gemini 2.0 Flash:    263,333 tokens/month ← 37x more usage!
-GPT-4.1 Nano:        263,333 tokens/month ← 37x more usage!
-Claude 3 Haiku:      136,207 tokens/month ← 19x more usage!
-Gemini 1.5 Flash:   500,000 tokens/month ← 70x more usage!
-```
+**Business Plan (25M tokens/month):**
+- ~18,750 full blog posts
+- ~6,250 detailed marketing strategies
+- ~2,500 comprehensive client reports
 
-### Strategic Usage Patterns
+### Practical Usage Patterns
 
-**Cost-Conscious Users:**
-- Use Gemini 1.5 Flash for routine tasks (70x more tokens!)
-- Use GPT-4.1 Nano for quality + efficiency
-- Reserve premium models for critical work
+**Light User (Basic Plan):**
+- 5-10 documents per week
+- Regular client context updates
+- Occasional AI-powered brainstorming
 
-**Quality-First Users:**
-- Use Claude 3.5 Sonnet for creative work
-- Use GPT-4.1 for coding and analysis
-- Hit token limits with premium models
+**Professional User (Pro Plan):**
+- 20-50 documents per week
+- Multiple client campaigns
+- Regular content creation workflows
 
-**Mixed Strategy (Recommended):**
-- Gemini 1.5 Flash for drafting and ideation
-- GPT-4.1 for balanced performance
-- Claude 3.5 Sonnet for final polish
+**Enterprise User (Business Plan):**
+- 100+ documents per week
+- Large-scale content operations
+- Team collaboration and sharing
 
 ## Implementation Details
 
 ### Database Schema
 ```prisma
-model Subscription {
+model UserSubscription {
   id                   String            @id @default(cuid())
   userId               String            @unique
   plan                 SubscriptionPlan  // BASIC, PRO, BUSINESS
-  tokensUsed           Int               @default(0)
-  maxTokens            Int               // Tier-based limits
-  documentsGenerated   Int               @default(0)
-  maxDocuments         Int               // Tier-based limits
-  storageUsed          BigInt            @default(0)
-  maxStorage           BigInt            // Tier-based limits
+  maxTokensPerMonth    Int               // Plan-based limits
+  maxClients           Int               // Plan-based limits
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
+}
+
+model UserUsage {
+  id                   String   @id @default(cuid())
+  userId               String
+  year                 Int
+  month                Int
+  tokensUsed           Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 ```
 
 ### Token Limit Configuration
 ```typescript
-export const SUBSCRIPTION_LIMITS = {
+export const SUBSCRIPTION_PLANS = {
   [SubscriptionPlan.BASIC]: {
-    maxTokens: 15517,        // Based on Claude 3 Haiku cost
-    maxDocuments: 20,
-    maxStorage: 52428800,    // 50 MB
+    maxTokensPerMonth: 500000,        // 500K tokens
+    maxClients: 3,
+    price: 10,
   },
   [SubscriptionPlan.PRO]: {
-    maxTokens: 2636,         // Based on Claude 3.5 Sonnet cost
-    maxDocuments: 100,
-    maxStorage: 209715200,   // 200 MB
+    maxTokensPerMonth: 10000000,      // 10M tokens
+    maxClients: -1, // unlimited
+    price: 25,
   },
   [SubscriptionPlan.BUSINESS]: {
-    maxTokens: 7182,         // Based on Claude 3.5 Sonnet cost
-    maxDocuments: 500,
-    maxStorage: 2147483648,  // 2 GB
+    maxTokensPerMonth: 25000000,      // 25M tokens
+    maxClients: -1, // unlimited
+    price: 50,
   },
 } as const;
 ```
 
-### Model Access Control
+### Model Configuration
 ```typescript
-export const MODEL_TIER_ACCESS = {
-  [ModelTier.BASIC]: [
-    'openai/gpt-4.1-nano',
-    'anthropic/claude-3-haiku',
-    'google/gemini-1.5-flash'
-  ],
-  [ModelTier.PRO]: [
-    // Pro tier models (same for Business)
-    'openai/gpt-4.1',
-    'anthropic/claude-3.5-sonnet',
-    'google/gemini-2.0-flash',
-    // Also includes Basic tier models
-    'openai/gpt-4.1-nano',
-    'anthropic/claude-3-haiku',
-    'google/gemini-1.5-flash'
-  ],
-  [ModelTier.BUSINESS]: [
-    // Same as Pro tier
-    'openai/gpt-4.1',
-    'anthropic/claude-3.5-sonnet',
-    'google/gemini-2.0-flash',
-    'openai/gpt-4.1-nano',
-    'anthropic/claude-3-haiku',
-    'google/gemini-1.5-flash'
-  ],
+export const MODEL_IDS = {
+  GOOGLE_GEMINI_1_5_FLASH: 'google/gemini-flash-1.5',
 } as const;
+
+export const AVAILABLE_MODELS: AIModel[] = [
+  {
+    id: MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
+    name: 'Gemini Flash 1.5',
+    provider: 'google',
+    pricing: { input: 0.000075, output: 0.0003 },
+    contextLength: 1000000,
+  }
+];
 ```
 
 ## Usage Monitoring
 
 ### Real-Time Tracking
 - **Token consumption** tracked per API call
-- **Model costs** calculated dynamically
 - **Usage warnings** at 80% and 95% of limits
 - **Hard limits** prevent overage
+- **Monthly reset** for billing cycles
 
 ### Analytics Dashboard
-- **Usage patterns** by model type
+- **Current usage** vs. plan limits
+- **Usage trends** over time
 - **Cost efficiency** metrics
-- **Trend analysis** over time
-- **Optimization recommendations**
+- **Upgrade recommendations** when approaching limits
 
 ### Performance Optimization
+- **Efficient prompting** strategies
+- **Token usage** optimization
 - **Batch processing** for multiple requests
 - **Caching strategies** for repeated queries
-- **Model routing** based on cost/performance
-- **Fallback systems** for high availability
 
-## Revenue Protection
+## Cost Efficiency Benefits
 
-### Break-Even Strategy
-Each subscription tier is priced to break even when users exclusively use the most expensive model in that tier:
+### Simplified Pricing Model
+- **No model selection complexity**: All features use the same highly efficient model
+- **Predictable costs**: Clear token usage patterns
+- **Generous limits**: Excellent value at all plan levels
+- **High margins**: Sustainable business model
 
-- **Basic**: Breaks even with Claude 3 Haiku usage
-- **Pro**: Breaks even with Claude 3.5 Sonnet usage  
-- **Business**: Higher margin with Claude 3.5 Sonnet usage
+### Token Efficiency Tips
+1. **Concise prompts**: Get better results with fewer tokens
+2. **Batch operations**: Process multiple items together
+3. **Reuse content**: Build on previous generations
+4. **Smart templates**: Use efficient prompt structures
 
-### Profit Generation
-Profits come from users choosing more efficient models:
-- **Gemini usage** generates extremely high margins (70x efficiency!)
-- **Mixed usage patterns** create natural profitability
-- **Simplified choice** reduces decision fatigue
-
-## Key Benefits of Simplified Model Selection
+## Key Benefits
 
 ### For Users:
-- **Clear choices**: One proven model per provider per tier
-- **No decision paralysis**: Best options pre-selected
-- **Predictable costs**: Easy to understand pricing
-- **Performance guaranteed**: All models vetted for quality
+- **Consistent experience**: Same AI quality across all features
+- **No confusion**: Single model, no selection paralysis
+- **Generous limits**: Much higher token allowances than before
+- **Fast performance**: Optimized for speed and efficiency
 
 ### For Business:
-- **Simplified support**: Fewer models to maintain
-- **Clear profit margins**: Predictable cost structure
-- **Better user experience**: Less complexity
-- **Focus on value**: Best models at each price point 
+- **Simplified operations**: Easier to maintain and support
+- **Predictable costs**: Clear cost structure with excellent margins
+- **Better user experience**: No complexity around model choices
+- **Scalable pricing**: Plans that grow with user needs
+
+This simplified approach provides excellent value while maintaining strong profit margins and delivering a consistent, high-quality AI experience across all functionalities. 

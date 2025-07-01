@@ -20,15 +20,15 @@ export const SUBSCRIPTION_PLANS = {
     price: 10,
     currency: 'USD',
     maxClients: 3,
-    maxTokensPerMonth: 100000,        // 100K tokens - very profitable with basic tier models
-    // Pricing calculation: Claude 3 Haiku (most expensive basic) = $0.000875/1K tokens
-    // Max cost: 100K * $0.000875 = $0.875, leaving $9.12 profit (91% margin)
+    maxTokensPerMonth: 500000,        // 500K tokens - generous allowance with Gemini Flash 1.5
+    // Pricing calculation: Gemini Flash 1.5 = ~$0.000131/1K tokens (blended)
+    // Max cost: 500K * $0.000131 = $0.066, leaving $9.93 profit (99% margin)
     description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
       '👥 3 client profiles',
       '💾 50 MB document storage',
-      '🔤 100K tokens (~75 pages of content)',
-      '🤖 Cost-effective models: GPT-4o Mini, Claude Haiku, Gemini Flash'
+      '🔤 500K tokens (~375 pages of content)',
+      '🤖 Powered by Google Gemini Flash 1.5 - fast and efficient AI'
     ]
   },
   [SubscriptionPlan.PRO]: {
@@ -37,15 +37,15 @@ export const SUBSCRIPTION_PLANS = {
     price: 25,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxTokensPerMonth: 2000000,       // 2M tokens - sustainable with premium models
-    // Pricing calculation: Claude 3.5 Sonnet (most expensive pro) = $0.009/1K tokens
-    // Max cost: 2000K * $0.009 = $18.00, leaving $7.00 profit (28% margin)
+    maxTokensPerMonth: 10000000,       // 10M tokens - excellent value with Gemini Flash 1.5
+    // Pricing calculation: Gemini Flash 1.5 = ~$0.000131/1K tokens (blended)
+    // Max cost: 10M * $0.000131 = $1.31, leaving $23.69 profit (95% margin)
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
       '💾 200 MB document storage',
-      '🔤 2M tokens (~1,500 pages of content)',
-      '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
+      '🔤 10M tokens (~7,500 pages of content)',
+      '🤖 Powered by Google Gemini Flash 1.5 - fast and efficient AI'
     ]
   },
   [SubscriptionPlan.BUSINESS]: {
@@ -54,15 +54,15 @@ export const SUBSCRIPTION_PLANS = {
     price: 50,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxTokensPerMonth: 4000000,       // 4M tokens - generous allowance for enterprise
-    // Pricing calculation: Claude 3.5 Sonnet = $0.009/1K tokens
-    // Max cost: 4000K * $0.009 = $36.00, leaving $14.00 profit (28% margin)
+    maxTokensPerMonth: 25000000,       // 25M tokens - enterprise-level allowance
+    // Pricing calculation: Gemini Flash 1.5 = ~$0.000131/1K tokens (blended)
+    // Max cost: 25M * $0.000131 = $3.28, leaving $46.72 profit (93% margin)
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',
       '💾 2 GB document storage',
-      '🔤 4M tokens (~3,000 pages of content)',
-      '🤖 Premium models: GPT-4o, Claude Sonnet, Gemini Pro + all basic models'
+      '🔤 25M tokens (~18,750 pages of content)',
+      '🤖 Powered by Google Gemini Flash 1.5 - fast and efficient AI'
     ]
   }
 } as const

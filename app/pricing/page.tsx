@@ -64,7 +64,7 @@ export default function PricingPage() {
             Choose Your Plan
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Scale your marketing efforts with AI-powered assistance. Start with our Basic plan (first month free), upgrade when you need more.
+            Scale your marketing efforts with Google Gemini Flash 1.5 AI assistance. Start with our Basic plan (first month free), upgrade when you need more.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function PricingPage() {
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <CardDescription className="text-sm">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">€{plan.price}</span>
+                  <span className="text-4xl font-bold">${plan.price}</span>
                   {plan.price > 0 && <span className="text-gray-500">/month</span>}
                 </div>
               </CardHeader>
