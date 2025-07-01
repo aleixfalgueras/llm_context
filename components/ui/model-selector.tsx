@@ -40,11 +40,11 @@ export function ModelSelector({ selectedModel, onModelSelect, userTier, classNam
           <CommandList>
             <CommandEmpty>No models found.</CommandEmpty>
             
-            {/* Single Model - Available to all tiers */}
+            {/* Available Models */}
             <CommandGroup heading={
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-green-500" />
-                Google Gemini 2.0 Flash
+                Available Models
               </div>
             }>
               {AVAILABLE_MODELS.map((model) => (
@@ -61,19 +61,9 @@ export function ModelSelector({ selectedModel, onModelSelect, userTier, classNam
                   )}
                 >
                   <div className="flex flex-col gap-1 flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium">{model.name}</div>
-                    </div>
+                    <div className="font-medium">{model.name}</div>
                     <div className="text-sm text-muted-foreground">
                       {model.description}
-                    </div>
-                    {model.pricing && (
-                      <div className="text-xs text-green-600 dark:text-green-400">
-                        Input: ${model.pricing.input.toFixed(6)}/1K • Output: ${model.pricing.output.toFixed(4)}/1K
-                      </div>
-                    )}
-                    <div className="text-xs text-blue-600 dark:text-blue-400">
-                      Available on all plans • Optimized for speed and efficiency
                     </div>
                   </div>
                 </CommandItem>
