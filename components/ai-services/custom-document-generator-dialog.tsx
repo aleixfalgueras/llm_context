@@ -380,6 +380,20 @@ export function CustomDocumentGeneratorDialog({
                   variant="outline"
                   size="sm"
                   onClick={() => setClientContext({
+                    country: true,
+                    general_context: true,
+                    specific_context_1: true,
+                    specific_context_2: true,
+                    specific_context_3: true
+                  })}
+                >
+                  Select All
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setClientContext({
                     country: false,
                     general_context: false,
                     specific_context_1: false,

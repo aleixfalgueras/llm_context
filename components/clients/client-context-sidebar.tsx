@@ -264,7 +264,13 @@ export function ClientContextSidebar({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => onClientContextChange(defaultClientContextSelections.general)}
+                          onClick={() => onClientContextChange({
+                            country: true,
+                            general_context: true,
+                            specific_context_1: true,
+                            specific_context_2: true,
+                            specific_context_3: true
+                          })}
                         >
                           Select All
                         </Button>
