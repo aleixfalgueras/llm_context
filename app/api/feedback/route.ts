@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { 
+  FeedbackType, 
+  Priority, 
+  FEEDBACK_TYPE_VALUES, 
+  PRIORITY_VALUES,
+  isValidFeedbackType,
+  isValidPriority 
+} from '@/types/enums'
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,8 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate feedback type
-    const validTypes = ['feature', 'bug', 'complaint']
-    if (!validTypes.includes(type)) {
+    if (!isValidFeedbackType(type)) {
       return NextResponse.json(
         { error: 'Invalid feedback type' }, 
         { status: 400 }
@@ -37,8 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate priority values
-    const validPriorities = ['low', 'medium', 'high']
-    if (!validPriorities.includes(priority)) {
+    if (!isValidPriority(priority)) {
       return NextResponse.json(
         { error: 'Invalid priority value' }, 
         { status: 400 }
@@ -60,8 +66,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    const feedbackTypeLabel = type === 'feature' ? 'feature request' : 
-                             type === 'bug' ? 'bug report' : 'feedback'
+    const feedbackTypeLabel = type === FeedbackType.FEATURE ? 'feature request' : 
+                             type === FeedbackType.BUG ? 'bug report' : 'feedback'
 
     return NextResponse.json({ 
       success: true, 

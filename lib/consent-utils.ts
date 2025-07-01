@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { ConsentAction, ConsentType } from '@/types/enums'
 
 // Current policy versions - update these when you change Terms/Privacy Policy
 export const CURRENT_TERMS_VERSION = '1.0'
@@ -130,7 +131,7 @@ async function createConsentAuditLog(
     // New consent record
     auditLogs.push({
       userId,
-      action: 'granted',
+      action: ConsentAction.GRANTED,
       consentType: 'initial_consent',
       previousValue: null,
       newValue: true,
@@ -141,12 +142,12 @@ async function createConsentAuditLog(
   } else {
     // Check for changes and log them
     const changes = [
-      { field: 'dataProcessing', type: 'data_processing', newValue: newConsent.dataProcessing },
-      { field: 'analytics', type: 'analytics', newValue: newConsent.analytics },
-      { field: 'marketing', type: 'marketing', newValue: newConsent.marketing },
-      { field: 'cookiesAnalytics', type: 'cookies_analytics', newValue: newConsent.cookiesAnalytics },
-      { field: 'cookiesMarketing', type: 'cookies_marketing', newValue: newConsent.cookiesMarketing },
-      { field: 'cookiesFunctional', type: 'cookies_functional', newValue: newConsent.cookiesFunctional },
+      { field: 'dataProcessing', type: ConsentType.DATA_PROCESSING, newValue: newConsent.dataProcessing },
+      { field: 'analytics', type: ConsentType.ANALYTICS, newValue: newConsent.analytics },
+      { field: 'marketing', type: ConsentType.MARKETING, newValue: newConsent.marketing },
+      { field: 'cookiesAnalytics', type: ConsentType.COOKIES_ANALYTICS, newValue: newConsent.cookiesAnalytics },
+      { field: 'cookiesMarketing', type: ConsentType.COOKIES_MARKETING, newValue: newConsent.cookiesMarketing },
+      { field: 'cookiesFunctional', type: ConsentType.COOKIES_FUNCTIONAL, newValue: newConsent.cookiesFunctional },
     ]
 
     for (const change of changes) {
@@ -156,7 +157,7 @@ async function createConsentAuditLog(
       if (oldValue !== newValue) {
         auditLogs.push({
           userId,
-          action: newValue ? 'granted' : 'withdrawn',
+          action: newValue ? ConsentAction.GRANTED : ConsentAction.WITHDRAWN,
           consentType: change.type,
           previousValue: oldValue,
           newValue,
@@ -197,7 +198,7 @@ export async function withdrawAllConsent(userId: string, reason: string = 'user_
     await prisma.consentAuditLog.create({
       data: {
         userId,
-        action: 'withdrawn',
+        action: ConsentAction.WITHDRAWN,
         consentType: 'all_consent',
         previousValue: true,
         newValue: false,

@@ -9,18 +9,27 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
+import { 
+  FeedbackType, 
+  Priority, 
+  ToastVariant,
+  FEEDBACK_TYPE_LABELS,
+  FEEDBACK_TYPE_DESCRIPTIONS,
+  PRIORITY_LABELS,
+  FEEDBACK_TYPE_VALUES,
+  PRIORITY_VALUES
+} from '@/types/enums'
 
-const feedbackTypes = [
-  { value: 'feature', label: 'Feature Request', description: 'Suggest a new feature or improvement' },
-  { value: 'bug', label: 'Bug Report', description: 'Report a problem or error' },
-  { value: 'complaint', label: 'General Feedback', description: 'Share your thoughts or concerns' },
-]
+const feedbackTypes = FEEDBACK_TYPE_VALUES.map(type => ({
+  value: type,
+  label: FEEDBACK_TYPE_LABELS[type],
+  description: FEEDBACK_TYPE_DESCRIPTIONS[type]
+}))
 
-const priorities = [
-  { value: 'low', label: 'Low Priority - Minor issue' },
-  { value: 'medium', label: 'Medium Priority - Moderate impact' },
-  { value: 'high', label: 'High Priority - Major issue' },
-]
+const priorities = PRIORITY_VALUES.map(priority => ({
+  value: priority,
+  label: PRIORITY_LABELS[priority]
+}))
 
 export function FeedbackForm() {
   const [formData, setFormData] = useState({
@@ -68,14 +77,14 @@ export function FeedbackForm() {
         toast({
           title: 'Error',
           description: result.error || 'Failed to submit feedback',
-          variant: 'destructive',
+          variant: ToastVariant.DESTRUCTIVE,
         })
       }
     } catch (error) {
       toast({
         title: 'Error',
         description: 'An unexpected error occurred',
-        variant: 'destructive',
+        variant: ToastVariant.DESTRUCTIVE,
       })
     } finally {
       setIsSubmitting(false)
@@ -127,8 +136,8 @@ export function FeedbackForm() {
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">
-              {formData.type === 'feature' ? 'Feature Title' : 
-               formData.type === 'bug' ? 'Bug Title' : 
+              {formData.type === FeedbackType.FEATURE ? 'Feature Title' : 
+               formData.type === FeedbackType.BUG ? 'Bug Title' : 
                'Feedback Title'} *
             </Label>
             <Input
@@ -136,8 +145,8 @@ export function FeedbackForm() {
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder={
-                formData.type === 'feature' ? 'Brief, descriptive title for your feature request' :
-                formData.type === 'bug' ? 'Brief description of the bug or issue' :
+                formData.type === FeedbackType.FEATURE ? 'Brief, descriptive title for your feature request' :
+                formData.type === FeedbackType.BUG ? 'Brief description of the bug or issue' :
                 'Brief title for your feedback'
               }
               required
@@ -147,8 +156,8 @@ export function FeedbackForm() {
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">
-              {formData.type === 'feature' ? 'Feature Description' : 
-               formData.type === 'bug' ? 'Bug Description' : 
+              {formData.type === FeedbackType.FEATURE ? 'Feature Description' : 
+               formData.type === FeedbackType.BUG ? 'Bug Description' : 
                'Feedback Description'} *
             </Label>
             <Textarea
@@ -156,8 +165,8 @@ export function FeedbackForm() {
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder={
-                formData.type === 'feature' ? 'What should it do? How should it work?' :
-                formData.type === 'bug' ? 'What happened? What did you expect to happen?' :
+                formData.type === FeedbackType.FEATURE ? 'What should it do? How should it work?' :
+                formData.type === FeedbackType.BUG ? 'What happened? What did you expect to happen?' :
                 'Please provide details about your feedback'
               }
               rows={5}
@@ -171,8 +180,8 @@ export function FeedbackForm() {
             <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
               <SelectTrigger>
                 <SelectValue placeholder={
-                  formData.type === 'feature' ? 'How important is this feature to you?' :
-                  formData.type === 'bug' ? 'How severe is this bug?' :
+                  formData.type === FeedbackType.FEATURE ? 'How important is this feature to you?' :
+                  formData.type === FeedbackType.BUG ? 'How severe is this bug?' :
                   'How important is this feedback?'
                 } />
               </SelectTrigger>
@@ -187,7 +196,7 @@ export function FeedbackForm() {
           </div>
 
           {/* Steps to Reproduce (Bug Reports Only) */}
-          {formData.type === 'bug' && (
+          {formData.type === FeedbackType.BUG && (
             <div className="space-y-2">
               <Label htmlFor="stepsToReproduce">Steps to Reproduce</Label>
               <Textarea
@@ -201,7 +210,7 @@ export function FeedbackForm() {
           )}
 
           {/* Use Case (Feature Requests Only) */}
-          {formData.type === 'feature' && (
+          {formData.type === FeedbackType.FEATURE && (
             <div className="space-y-2">
               <Label htmlFor="useCase">Use Case</Label>
               <Textarea
@@ -220,8 +229,8 @@ export function FeedbackForm() {
             disabled={isSubmitting || !formData.type || !formData.title || !formData.description || !formData.priority}
           >
             {isSubmitting ? 'Submitting...' : 
-             formData.type === 'feature' ? 'Submit Feature Request' :
-             formData.type === 'bug' ? 'Submit Bug Report' :
+             formData.type === FeedbackType.FEATURE ? 'Submit Feature Request' :
+             formData.type === FeedbackType.BUG ? 'Submit Bug Report' :
              'Submit Feedback'}
           </Button>
         </form>

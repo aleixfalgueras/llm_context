@@ -9,6 +9,7 @@ import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dia
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
 import { useSubscription } from '@/hooks/use-subscription'
+import { ServiceStatus } from '@/types/enums'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -74,7 +75,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       description: 'Generate comprehensive meeting reports with actionable steps from client meeting transcriptions.',
       icon: <MessageSquare className="h-8 w-8" />,
       features: ['Transcription analysis', 'Actionable insights', 'Professional summaries'],
-      status: 'available',
+      status: ServiceStatus.AVAILABLE,
       onClick: () => setIsMeetingReportDialogOpen(true),
       iconColorClass: 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400'
     },
@@ -84,7 +85,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       description: 'Generate custom marketing documents using your own prompts',
       icon: <FileText className="h-8 w-8" />,
       features: ['Custom prompts', 'Variable replacement', 'Professional formatting'],
-      status: 'available',
+      status: ServiceStatus.AVAILABLE,
       onClick: () => setIsCustomDocumentDialogOpen(true),
       iconColorClass: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
     }
@@ -175,17 +176,17 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               <Card 
                 key={service.id} 
                 className={`transition-all duration-200 flex flex-col h-full ${
-                  service.status === 'available' 
+                  service.status === ServiceStatus.AVAILABLE 
                     ? 'hover:shadow-lg cursor-pointer border-blue-200 dark:border-blue-800' 
                     : 'opacity-75 cursor-not-allowed'
                 }`}
-                onClick={service.status === 'available' ? service.onClick : undefined}
+                onClick={service.status === ServiceStatus.AVAILABLE ? service.onClick : undefined}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg ${
-                        service.status === 'available' 
+                        service.status === ServiceStatus.AVAILABLE 
                           ? service.iconColorClass || 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                       }`}>
@@ -211,7 +212,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                       ))}
                     </ul>
                   </div>
-                  {service.status === 'available' && (
+                  {service.status === ServiceStatus.AVAILABLE && (
                     <Button 
                       className={`w-full mt-4 ${
                         service.id === 'meeting-report' ? 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600' :

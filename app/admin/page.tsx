@@ -16,6 +16,7 @@ import {
   XCircle,
   Clock
 } from 'lucide-react'
+import { FeedbackType, Priority, BadgeVariant } from '@/types/enums'
 
 const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 
@@ -280,14 +281,14 @@ export default async function AdminDashboard() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant={
-                          feedback.type === 'bug' ? 'destructive' : 
-                          feedback.type === 'feature' ? 'default' : 'secondary'
+                          feedback.type === FeedbackType.BUG ? BadgeVariant.DESTRUCTIVE : 
+                          feedback.type === FeedbackType.FEATURE ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.type}
                         </Badge>
                         <Badge variant={
-                          feedback.priority === 'high' ? 'destructive' :
-                          feedback.priority === 'medium' ? 'default' : 'secondary'
+                          feedback.priority === Priority.HIGH ? BadgeVariant.DESTRUCTIVE :
+                          feedback.priority === Priority.MEDIUM ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.priority}
                         </Badge>
@@ -297,9 +298,9 @@ export default async function AdminDashboard() {
                         {feedback.userEmail || 'Anonymous'} • {new Date(feedback.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    {feedback.type === 'bug' && <AlertTriangle className="h-4 w-4 text-orange-500" />}
-                    {feedback.type === 'feature' && <TrendingUp className="h-4 w-4 text-blue-500" />}
-                    {feedback.type === 'complaint' && <XCircle className="h-4 w-4 text-red-500" />}
+                    {feedback.type === FeedbackType.BUG && <AlertTriangle className="h-4 w-4 text-orange-500" />}
+                    {feedback.type === FeedbackType.FEATURE && <TrendingUp className="h-4 w-4 text-blue-500" />}
+                    {feedback.type === FeedbackType.COMPLAINT && <XCircle className="h-4 w-4 text-red-500" />}
                   </div>
                 ))
               )}
