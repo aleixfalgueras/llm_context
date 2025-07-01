@@ -255,7 +255,15 @@ Respond naturally and conversationally while keeping this context in mind.`
               
               // Save the assistant's response to the database
               logger.dbQuery('create', 'message', { userId, chatId });
-              await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel, chunk.usage?.totalTokens)
+              await createMessage(
+                chatId, 
+                fullContent, 
+                'ASSISTANT', 
+                selectedModel, 
+                chunk.usage?.totalTokens,
+                chunk.usage?.promptTokens,
+                chunk.usage?.completionTokens
+              )
               logger.info('Assistant message saved', { userId, chatId });
 
               // Send completion signal

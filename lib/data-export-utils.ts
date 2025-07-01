@@ -91,6 +91,9 @@ export async function compileUserDataExport(userId: string, exportId: string): P
               content: true,
               role: true,
               model: true,
+              tokensUsed: true,
+              inputTokens: true,
+              outputTokens: true,
               createdAt: true
             }
           },
@@ -174,7 +177,10 @@ export async function compileUserDataExport(userId: string, exportId: string): P
         })),
         messages: messages.map(m => ({
           ...m,
-          createdAt: m.createdAt.toISOString()
+          createdAt: m.createdAt.toISOString(),
+          tokensUsed: m.tokensUsed || 0,
+          inputTokens: m.inputTokens || 0,
+          outputTokens: m.outputTokens || 0
         })),
         prompts: prompts.map(p => ({
           ...p,

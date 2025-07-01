@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { DEFAULT_MODEL } from '@/lib/models-config'
 import { useSubscription } from '@/hooks/use-subscription'
+import { Message } from '@/types/message-types'
 
 interface Prompt {
   id: string
@@ -20,13 +21,6 @@ interface Prompt {
   category: string
   isActive: boolean
   usageCount: number
-}
-
-interface Message {
-  id: string
-  content: string
-  role: 'USER' | 'ASSISTANT'
-  createdAt: Date
 }
 
 interface ChatInputProps {
