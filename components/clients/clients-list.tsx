@@ -12,6 +12,7 @@ import { ClientTableView } from '@/components/clients/client-table-view'
 import { ClientPagination } from '@/components/clients/client-pagination'
 import { ClientEmptyState } from '@/components/clients/client-empty-state'
 import { UsageInfo, Client, LanguageInfo, ClientActionHandlers, PaginationInfo } from '@/types/client-list-types'
+import { ViewMode, ButtonVariant, ToastVariant, Language, LANGUAGE_INFO } from '@/types/enums'
 
 interface ClientsListProps {
   clients: Client[]
@@ -26,7 +27,7 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.GRID)
   const [currentPage, setCurrentPage] = useState(1)
 
   const itemsPerPage = 12
@@ -54,13 +55,13 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
   // Load saved view preference on component mount
   useEffect(() => {
     const savedViewMode = localStorage.getItem('clients-view-mode')
-    if (savedViewMode && (savedViewMode === 'grid' || savedViewMode === 'table')) {
-      setViewMode(savedViewMode)
+    if (savedViewMode && (savedViewMode === ViewMode.GRID || savedViewMode === ViewMode.TABLE)) {
+      setViewMode(savedViewMode as ViewMode)
     }
   }, [])
 
   // Save view preference whenever it changes
-  const handleViewModeChange = (newViewMode: 'grid' | 'table') => {
+  const handleViewModeChange = (newViewMode: ViewMode) => {
     setViewMode(newViewMode)
     localStorage.setItem('clients-view-mode', newViewMode)
   }
@@ -107,7 +108,7 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to delete client',
-        variant: 'destructive',
+                    variant: ToastVariant.DESTRUCTIVE,
       })
     } finally {
       setIsDeleting(null)
@@ -147,17 +148,17 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
           {/* View Toggle */}
           <div className="flex border border-gray-200 dark:border-gray-700 rounded-lg p-1">
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              variant={viewMode === ViewMode.GRID ? ButtonVariant.DEFAULT : ButtonVariant.GHOST}
               size="sm"
-              onClick={() => handleViewModeChange('grid')}
+              onClick={() => handleViewModeChange(ViewMode.GRID)}
               className="px-3 py-1.5 h-auto"
             >
               <Grid className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              variant={viewMode === ViewMode.TABLE ? ButtonVariant.DEFAULT : ButtonVariant.GHOST}
               size="sm"
-              onClick={() => handleViewModeChange('table')}
+              onClick={() => handleViewModeChange(ViewMode.TABLE)}
               className="px-3 py-1.5 h-auto"
             >
               <List className="h-4 w-4" />
@@ -192,7 +193,7 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
         <ClientEmptyState searchTerm={searchTerm} onAddClient={onAddClient} />
       ) : (
         <div className="space-y-0">
-          {viewMode === 'grid' ? (
+          {viewMode === ViewMode.GRID ? (
             <ClientGridView 
               clients={paginatedClients}
               actionHandlers={actionHandlers}

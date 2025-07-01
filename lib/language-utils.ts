@@ -1,19 +1,9 @@
+import { Language, LANGUAGE_INFO } from '@/types/enums'
+
 // Helper function to get language instruction for AI providers
 export function getLanguageInstruction(language: string): string {
-  const languageMap: Record<string, string> = {
-    'english': 'English',
-    'spanish': 'Spanish (Español)',
-    'french': 'French (Français)',
-    'german': 'German (Deutsch)',
-    'italian': 'Italian (Italiano)',
-    'portuguese': 'Portuguese (Português)',
-    'dutch': 'Dutch (Nederlands)',
-    'polish': 'Polish (Polski)',
-    'russian': 'Russian (Русский)',
-    'catalan': 'Catalan (Català)',
-  }
-  
-  return languageMap[language] || 'English'
+  const langKey = language as Language
+  return LANGUAGE_INFO[langKey]?.label || 'English'
 }
 
 // Helper to generate language requirement section for prompts

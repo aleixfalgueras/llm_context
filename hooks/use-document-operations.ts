@@ -2,6 +2,7 @@
 
 import { deleteDocument, deleteAllDocuments, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
+import { ToastVariant } from '@/types/enums'
 
 interface Document {
   id: string
@@ -48,7 +49,7 @@ export function useDocumentOperations({
       toast({
         title: 'Error',
         description: 'Please fill in all required fields',
-        variant: 'destructive',
+        variant: ToastVariant.DESTRUCTIVE,
       })
       return false
     }
