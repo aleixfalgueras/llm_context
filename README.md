@@ -110,24 +110,19 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 
 ### **Basic Plan - $10/month**
 - **100K tokens per month** (~75 pages of content)
-- **Unlimited documents per month**
 - **3 client profiles**
 - **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
-- **91% profit margin** (most expensive model costs $0.875/month)
 
 ### **Pro Plan - $17/month**  
 - **1.6M tokens per month** (~1,200 pages of content)
-- **Unlimited documents per month**
 - **Unlimited client profiles**
-- **Pro Tier Models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
-- **15% profit margin** (most expensive model costs $14.40/month)
+- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
 
 ### **Business Plan - $43/month**
 - **4.5M tokens per month** (~3,400 pages of content)
-- **Unlimited documents per month**
 - **Unlimited client profiles**
-- **Pro Tier Models**: GPT-4o, Claude Sonnet, Gemini Pro + all basic models
-- **6% profit margin** (most expensive model costs $40.50/month)
+- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
+
 
 ## 📂 Project Structure
 
