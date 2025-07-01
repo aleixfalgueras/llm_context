@@ -1,8 +1,8 @@
 # Usage Tracking System
 
-This document explains how the usage tracking system works for the LLM Context application, focusing on **token consumption monitoring** using **Google Gemini Flash 1.5** for all AI functionalities.
+This document explains how the usage tracking system works for the LLM Context application, focusing on **token consumption monitoring** using **Google Gemini 2.0 Flash** for all AI functionalities.
 
-**⚠️ UPDATED JANUARY 2025**: Simplified to use only Google Gemini Flash 1.5 for all AI functionalities
+**⚠️ UPDATED JANUARY 2025**: Upgraded to Google Gemini 2.0 Flash 001 for enhanced AI capabilities
 
 ## Overview
 
@@ -12,22 +12,24 @@ The usage tracking system operates across **three primary dimensions**:
 - **Storage usage tracking** (storage-based)
 
 **Key Features:**
-- ✅ **Single model architecture** - Google Gemini Flash 1.5 for all AI operations
-- ✅ **Generous token limits** based on highly cost-effective model pricing
+- ✅ **Single model architecture** - Google Gemini 2.0 Flash for all AI operations
+- ✅ **Enhanced capabilities** with the latest Google AI model
+- ✅ **Balanced token limits** based on cost-effective pricing
 - ✅ **Excellent profit margins** at all subscription levels
-- ✅ **Simplified user experience** with consistent AI performance
+- ✅ **Simplified user experience** with consistent, high-quality AI performance
 
 ## Model Configuration
 
 ### Single Model Architecture
 **All AI functionalities powered by:**
-- **Google Gemini Flash 1.5**: $0.075/M input tokens, $0.30/M output tokens
-- **Blended cost**: ~$0.131/M tokens (assuming 3:1 input/output ratio)
+- **Google Gemini 2.0 Flash**: $0.10/M input tokens, $0.40/M output tokens
+- **Blended cost**: ~$0.175/M tokens (assuming 3:1 input/output ratio)
 - **Context length**: 1M tokens
-- **Performance**: Fast, efficient, and cost-effective
+- **Performance**: Latest Google AI with enhanced reasoning and multimodal capabilities
 
 ### Benefits of Single Model Approach
-- **Consistent experience**: Same AI behavior across all features
+- **Consistent experience**: Same high-quality AI behavior across all features
+- **Latest capabilities**: Access to Google's most advanced model
 - **Simplified maintenance**: No model selection complexity
 - **Predictable costs**: Clear understanding of usage implications
 - **Optimized performance**: Single model allows for better optimization
@@ -35,22 +37,22 @@ The usage tracking system operates across **three primary dimensions**:
 ## Subscription Plans and Token Limits
 
 ### Basic Plan - $10/month
-- **Token Limit**: 500,000 tokens/month (~375 pages of content)
-- **Cost at limit**: ~$0.066 (99.3% profit margin)
+- **Token Limit**: 5,000,000 tokens/month (~3,750 pages of content)
+- **Cost at limit**: ~$0.875 (91.25% profit margin)
 - **Storage**: 50 MB
 - **Clients**: 3 profiles
 - **Perfect for**: Individual users and small businesses
 
 ### Pro Plan - $25/month  
-- **Token Limit**: 10,000,000 tokens/month (~7,500 pages of content)
-- **Cost at limit**: ~$1.31 (94.8% profit margin)
+- **Token Limit**: 15,000,000 tokens/month (~11,250 pages of content)
+- **Cost at limit**: ~$2.625 (89.5% profit margin)
 - **Storage**: 200 MB
 - **Clients**: Unlimited
 - **Perfect for**: Growing businesses and marketing professionals
 
 ### Business Plan - $50/month
-- **Token Limit**: 25,000,000 tokens/month (~18,750 pages of content)
-- **Cost at limit**: ~$3.28 (93.4% profit margin)
+- **Token Limit**: 40,000,000 tokens/month (~30,000 pages of content)
+- **Cost at limit**: ~$7 (86% profit margin)
 - **Storage**: 2 GB
 - **Clients**: Unlimited
 - **Perfect for**: Agencies and large teams
@@ -58,37 +60,37 @@ The usage tracking system operates across **three primary dimensions**:
 ## Token Usage Examples
 
 ### Content Generation Examples
-With Google Gemini Flash 1.5 token efficiency:
+With Google Gemini 2.0 Flash token efficiency:
 
-**Basic Plan (500K tokens/month):**
-- ~375 full blog posts (1,330 tokens each)
-- ~125 detailed marketing strategies (4,000 tokens each)
-- ~50 comprehensive client reports (10,000 tokens each)
+**Basic Plan (5M tokens/month):**
+- ~3,750 full blog posts (1,330 tokens each)
+- ~1,250 detailed marketing strategies (4,000 tokens each)
+- ~500 comprehensive client reports (10,000 tokens each)
 
-**Pro Plan (10M tokens/month):**
-- ~7,500 full blog posts
-- ~2,500 detailed marketing strategies  
-- ~1,000 comprehensive client reports
+**Pro Plan (15M tokens/month):**
+- ~11,250 full blog posts
+- ~3,750 detailed marketing strategies  
+- ~1,500 comprehensive client reports
 
-**Business Plan (25M tokens/month):**
-- ~18,750 full blog posts
-- ~6,250 detailed marketing strategies
-- ~2,500 comprehensive client reports
+**Business Plan (40M tokens/month):**
+- ~30,000 full blog posts
+- ~10,000 detailed marketing strategies
+- ~4,000 comprehensive client reports
 
 ### Practical Usage Patterns
 
 **Light User (Basic Plan):**
-- 5-10 documents per week
+- 50-100 documents per week
 - Regular client context updates
-- Occasional AI-powered brainstorming
+- Extensive AI-powered content creation and brainstorming
 
 **Professional User (Pro Plan):**
-- 20-50 documents per week
+- 50-100 documents per week
 - Multiple client campaigns
-- Regular content creation workflows
+- Extensive content creation workflows
 
 **Enterprise User (Business Plan):**
-- 100+ documents per week
+- 200+ documents per week
 - Large-scale content operations
 - Team collaboration and sharing
 
@@ -121,17 +123,17 @@ model UserUsage {
 ```typescript
 export const SUBSCRIPTION_PLANS = {
   [SubscriptionPlan.BASIC]: {
-    maxTokensPerMonth: 500000,        // 500K tokens
+    maxTokensPerMonth: 5000000,        // 5M tokens
     maxClients: 3,
     price: 10,
   },
   [SubscriptionPlan.PRO]: {
-    maxTokensPerMonth: 10000000,      // 10M tokens
+    maxTokensPerMonth: 15000000,      // 15M tokens
     maxClients: -1, // unlimited
     price: 25,
   },
   [SubscriptionPlan.BUSINESS]: {
-    maxTokensPerMonth: 25000000,      // 25M tokens
+    maxTokensPerMonth: 40000000,      // 40M tokens
     maxClients: -1, // unlimited
     price: 50,
   },
@@ -141,15 +143,15 @@ export const SUBSCRIPTION_PLANS = {
 ### Model Configuration
 ```typescript
 export const MODEL_IDS = {
-  GOOGLE_GEMINI_1_5_FLASH: 'google/gemini-flash-1.5',
+  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
 } as const;
 
 export const AVAILABLE_MODELS: AIModel[] = [
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
-    name: 'Gemini Flash 1.5',
+    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    name: 'Gemini 2.0 Flash',
     provider: 'google',
-    pricing: { input: 0.000075, output: 0.0003 },
+    pricing: { input: 0.0001, output: 0.0004 },
     contextLength: 1000000,
   }
 ];
@@ -177,8 +179,14 @@ export const AVAILABLE_MODELS: AIModel[] = [
 
 ## Cost Efficiency Benefits
 
+### Enhanced Model Advantages
+- **Latest AI capabilities**: Access to Google's most advanced model
+- **Better reasoning**: Improved problem-solving and analysis
+- **Enhanced multimodal**: Better handling of different content types
+- **Improved accuracy**: More reliable and consistent outputs
+
 ### Simplified Pricing Model
-- **No model selection complexity**: All features use the same highly efficient model
+- **No model selection complexity**: All features use the same highly capable model
 - **Predictable costs**: Clear token usage patterns
 - **Generous limits**: Excellent value at all plan levels
 - **High margins**: Sustainable business model
@@ -192,15 +200,17 @@ export const AVAILABLE_MODELS: AIModel[] = [
 ## Key Benefits
 
 ### For Users:
-- **Consistent experience**: Same AI quality across all features
+- **Latest AI technology**: Access to Google's most advanced model
+- **Consistent experience**: Same high-quality AI across all features
 - **No confusion**: Single model, no selection paralysis
-- **Generous limits**: Much higher token allowances than before
-- **Fast performance**: Optimized for speed and efficiency
+- **Generous limits**: Substantial token allowances for all use cases
+- **Enhanced performance**: Better reasoning and multimodal capabilities
 
 ### For Business:
+- **Excellent margins**: 86-91.25% gross profit margins across all plans
 - **Simplified operations**: Easier to maintain and support
 - **Predictable costs**: Clear cost structure with excellent margins
 - **Better user experience**: No complexity around model choices
-- **Scalable pricing**: Plans that grow with user needs
+- **Competitive advantage**: Latest AI technology with generous limits
 
-This simplified approach provides excellent value while maintaining strong profit margins and delivering a consistent, high-quality AI experience across all functionalities. 
+This approach provides users with access to the latest Google AI technology while maintaining excellent profit margins and delivering a consistent, high-quality experience across all functionalities. 

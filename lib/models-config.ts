@@ -10,22 +10,22 @@ export interface AIModel {
   tier?: ModelTierType
 }
 
-// Model ID Constants - Using only Gemini Flash 1.5 for all AI functionalities
+// Model ID Constants - Using only Gemini 2.0 Flash 001 for all AI functionalities
 export const MODEL_IDS = {
   // Primary Model - Used for all AI functionalities
-  GOOGLE_GEMINI_1_5_FLASH: 'google/gemini-flash-1.5',
+  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
 } as const
 
 // Model Tiers Configuration - All tiers use the same model
 export const MODEL_TIERS = {
   [ModelTier.BASIC]: [
-    MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
   ],
   [ModelTier.PRO]: [
-    MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
   ],
   [ModelTier.BUSINESS]: [
-    MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
   ],
 }
 
@@ -33,20 +33,20 @@ export const MODEL_TIERS = {
 export const ALL_MODEL_IDS = Object.values(MODEL_IDS) as string[]
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // Primary Model - Google Gemini Flash 1.5
+  // Primary Model - Google Gemini 2.0 Flash 001
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH,
-    name: 'Gemini Flash 1.5',
-    description: 'Fast and efficient Google model with excellent performance and cost-effectiveness',
+    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    name: 'Gemini 2.0 Flash',
+    description: 'Latest Google model with enhanced performance, reasoning, and multimodal capabilities',
     provider: 'google',
     contextLength: 1000000,
-    pricing: { input: 0.000075, output: 0.0003 }, // $0.075/M input, $0.30/M output
+    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
     tier: ModelTier.BASIC
   }
 ]
 
-// OpenRouter Configuration Constants - Default to Gemini Flash 1.5
-export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_1_5_FLASH
+// OpenRouter Configuration Constants - Default to Gemini 2.0 Flash 001
+export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH
 export const DEFAULT_TEMPERATURE = 0.7
 export const DEFAULT_PRESENCE_PENALTY = 0.1
 export const DEFAULT_FREQUENCY_PENALTY = 0.1

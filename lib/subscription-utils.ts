@@ -20,15 +20,15 @@ export const SUBSCRIPTION_PLANS = {
     price: 10,
     currency: 'USD',
     maxClients: 3,
-    maxTokensPerMonth: 500000,        // 500K tokens - generous allowance with Gemini Flash 1.5
-    // Pricing calculation: Gemini Flash 1.5 = ~$0.000131/1K tokens (blended)
-    // Max cost: 500K * $0.000131 = $0.066, leaving $9.93 profit (99% margin)
+    maxTokensPerMonth: 5000000,        // 5M tokens - generous allowance with Gemini 2.0 Flash
+    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
+    // Max cost: 5M * $0.000175 = $0.875, leaving $9.125 profit (91.25% margin)
     description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
       '👥 3 client profiles',
       '💾 50 MB document storage',
-      '🔤 500K tokens (~375 pages of content)',
-      '🤖 Powered by Google Gemini Flash 1.5 - fast and efficient AI'
+      '🔤 5M tokens (~3,750 pages of content)',
+      '🤖 Powered by Google Gemini 2.0 Flash - latest AI with enhanced capabilities'
     ]
   },
   [SubscriptionPlan.PRO]: {
@@ -37,15 +37,15 @@ export const SUBSCRIPTION_PLANS = {
     price: 25,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxTokensPerMonth: 10000000,       // 10M tokens - excellent value with Gemini Flash 1.5
-    // Pricing calculation: Gemini Flash 1.5 = ~$0.000131/1K tokens (blended)
-    // Max cost: 10M * $0.000131 = $1.31, leaving $23.69 profit (95% margin)
+    maxTokensPerMonth: 15000000,       // 15M tokens - excellent value with Gemini 2.0 Flash
+    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
+    // Max cost: 15M * $0.000175 = $2.625, leaving $22.375 profit (89.5% margin)
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
       '💾 200 MB document storage',
-      '🔤 10M tokens (~7,500 pages of content)',
-      '🤖 Powered by Google Gemini Flash 1.5 - fast and efficient AI'
+      '🔤 15M tokens (~11,250 pages of content)',
+      '🤖 Powered by Google Gemini 2.0 Flash - latest AI with enhanced capabilities'
     ]
   },
   [SubscriptionPlan.BUSINESS]: {
@@ -54,15 +54,15 @@ export const SUBSCRIPTION_PLANS = {
     price: 50,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxTokensPerMonth: 25000000,       // 25M tokens - enterprise-level allowance
-    // Pricing calculation: Gemini Flash 1.5 = ~$0.000131/1K tokens (blended)
-    // Max cost: 25M * $0.000131 = $3.28, leaving $46.72 profit (93% margin)
+    maxTokensPerMonth: 40000000,       // 40M tokens - enterprise-level allowance
+    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
+    // Max cost: 40M * $0.000175 = $7, leaving $43 profit (86% margin)
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',
       '💾 2 GB document storage',
-      '🔤 25M tokens (~18,750 pages of content)',
-      '🤖 Powered by Google Gemini Flash 1.5 - fast and efficient AI'
+      '🔤 40M tokens (~30,000 pages of content)',
+      '🤖 Powered by Google Gemini 2.0 Flash - latest AI with enhanced capabilities'
     ]
   }
 } as const
