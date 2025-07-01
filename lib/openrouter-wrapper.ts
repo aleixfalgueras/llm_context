@@ -185,6 +185,9 @@ export async function createOpenRouterCompletion(
         // Removed estimatedCost - OpenRouter handles billing automatically
       }
 
+      // DEBUG: Log token usage to verify context size
+      console.log(`📊 OpenRouter Usage: ${usage.prompt_tokens} prompt (input tokens) + ${usage.completion_tokens} completion (output tokens) = ${usage.total_tokens} total tokens | Messages: ${completionOptions.messages.length}`)
+
       // Track token usage only - OpenRouter will charge actual cost to your account
       await trackUsage(trackingOptions.userId, {
         tokensUsed: usage.total_tokens,

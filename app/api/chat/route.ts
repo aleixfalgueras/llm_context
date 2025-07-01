@@ -64,9 +64,9 @@ export async function POST(req: Request) {
     });
 
     // CLIENT CONTEXT FLOW:
-    // 1. Client context is ONLY added as system message on the FIRST user message
-    // 2. Subsequent messages rely on conversation memory (no repeated context)
-    // 3. This ensures optimal token usage and conversation flow
+    // 1. Client context is added as system message on EVERY request for consistency
+    // 2. This ensures the AI always has access to client information
+    // 3. System message is rebuilt from chat.contextFields for each request
 
     // Get existing messages and chat info from the database
     logger.dbQuery('findFirst', 'chat', { userId, chatId });
@@ -115,24 +115,24 @@ export async function POST(req: Request) {
     
     const client = clientAccess.client!
 
-    // Add system message with client context ONLY on first message
-    if (isFirstUserMessage) {
-      logger.info('Adding client context system message', { 
-        userId, 
-        chatId, 
-        clientId: client.id,
-        metadata: { 
-          clientName: client.name,
-          selectedContextFields: (chat as any).contextFields || []
-        }
-      });
-      
-      // Build chat system prompt with user-selected client context
-      const selectedContextFields = (chat as any).contextFields || []
-      const clientContextSection = buildClientContextSection(client, selectedContextFields)
-      const hasContext = hasClientContext(selectedContextFields)
-      
-      const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their business.${hasContext ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
+    // Build and add system message with client context for ALL messages (not just first)
+    logger.info('Adding client context system message', { 
+      userId, 
+      chatId, 
+      clientId: client.id,
+      metadata: { 
+        clientName: client.name,
+        selectedContextFields: (chat as any).contextFields || [],
+        isFirstMessage: isFirstUserMessage
+      }
+    });
+    
+    // Build chat system prompt with user-selected client context
+    const selectedContextFields = (chat as any).contextFields || []
+    const clientContextSection = buildClientContextSection(client, selectedContextFields)
+    const hasContext = hasClientContext(selectedContextFields)
+    
+    const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their business.${hasContext ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
 
 INSTRUCTIONS:
 - ${hasContext ? 'Use this client information to personalize your responses when relevant' : 'Provide helpful general business advice'}
@@ -144,31 +144,26 @@ INSTRUCTIONS:
 
 Respond naturally and conversationally while keeping this context in mind.`
 
-      // Log the complete system prompt for the first message
-      logger.info('System prompt created for chat', { 
-        userId, 
-        chatId, 
-        clientId: client.id,
-        metadata: { 
-          systemPrompt,
-          promptLength: systemPrompt.length,
-          hasClientContext: hasContext,
-          contextFields: selectedContextFields,
-          clientName: client.name
-        }
-      });
+    // Log the complete system prompt
+    logger.info('System prompt created for chat', { 
+      userId, 
+      chatId, 
+      clientId: client.id,
+      metadata: { 
+        systemPrompt,
+        promptLength: systemPrompt.length,
+        hasClientContext: hasContext,
+        contextFields: selectedContextFields,
+        clientName: client.name,
+        isFirstMessage: isFirstUserMessage
+      }
+    });
 
-      aiMessages.unshift({
-        role: 'system',
-        content: systemPrompt,
-      })
-    } else {
-      logger.info('Continuing conversation without client context', { 
-        userId, 
-        chatId,
-        metadata: { previousMessageCount: existingMessages.length }
-      });
-    }
+    // Always add system message for consistent client context
+    aiMessages.unshift({
+      role: 'system',
+      content: systemPrompt,
+    })
 
     // Add the new user message
     const lastMessage = messages[messages.length - 1]
