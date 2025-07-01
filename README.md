@@ -413,3 +413,28 @@ For support and questions:
 ---
 
 **Built with ❤️ for marketing professionals who want to scale their content creation with AI while maintaining the highest standards of privacy and security.**
+
+## Setting up Prisma Migrations for Deployment
+
+If you want to use proper Prisma migrations instead of `prisma db push` for deployments:
+
+1. **Create a baseline migration** (run this locally):
+   ```bash
+   # Create the migrations directory and baseline migration
+   npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
+   
+   # Mark the migration as applied in your database
+   npx prisma migrate resolve --applied 0_init
+   ```
+
+2. **Update your vercel-build script** in package.json:
+   ```json
+   "vercel-build": "npx prisma migrate deploy && npx prisma generate && next build"
+   ```
+
+3. **For future schema changes**, use:
+   ```bash
+   npx prisma migrate dev --name describe_your_change
+   ```
+
+This ensures your database changes are tracked properly and can be reliably deployed.
