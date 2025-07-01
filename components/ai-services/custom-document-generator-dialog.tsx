@@ -20,14 +20,7 @@ import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 import type { Client } from '@/types/client'
 import { getDefaultModel } from '@/lib/models-config'
 import { clientLogger } from '@/lib/client-logger'
-
-interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-}
+import { Prompt } from '@/types/component-types'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean

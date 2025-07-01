@@ -8,17 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Search, Edit, Trash2, Download, Calendar, TrashIcon, Plus } from 'lucide-react'
 import { DOCUMENT_TYPES, ALL_DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { Document } from '@/types/component-types'
 
 interface DocumentListProps {
   documents: Document[]

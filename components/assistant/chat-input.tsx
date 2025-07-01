@@ -12,16 +12,7 @@ import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { DEFAULT_MODEL } from '@/lib/models-config'
 import { useSubscription } from '@/hooks/use-subscription'
 import { Message } from '@/types/message-types'
-
-interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-  isActive: boolean
-  usageCount: number
-}
+import { Prompt } from '@/types/component-types'
 
 interface ChatInputProps {
   chatId: string

@@ -10,19 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
 import { Plus, Edit2, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-
-interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-  isActive: boolean
-  usageCount: number
-}
+import { Prompt, PromptBasic } from '@/types/component-types'
 
 interface PromptDialogProps {
-  prompt?: Prompt
+  prompt?: Prompt | PromptBasic
   trigger?: React.ReactNode
   onSuccess?: () => void
   isTemplate?: boolean
