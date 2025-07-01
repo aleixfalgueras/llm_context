@@ -64,7 +64,7 @@ export default function PricingPage() {
             Choose Your Plan
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Scale your marketing efforts with Google Gemini Flash 1.5 AI assistance. Start with our Basic plan (first month free), upgrade when you need more.
+            Scale your marketing efforts with Google Gemini 2.0 Flash AI assistance. Start with our Basic plan (first month free), upgrade when you need more.
           </p>
         </div>
 

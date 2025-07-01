@@ -30,7 +30,7 @@ export function ModelSelector({ selectedModel, onModelSelect, userTier, classNam
           className={cn("justify-between", className)}
         >
           <Cpu className="w-4 h-4 mr-2" />
-          {currentModel?.name || 'Gemini Flash 1.5'}
+          {currentModel?.name || 'Gemini 2.0 Flash'}
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </PopoverTrigger>
@@ -44,7 +44,7 @@ export function ModelSelector({ selectedModel, onModelSelect, userTier, classNam
             <CommandGroup heading={
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-green-500" />
-                Google Gemini Flash 1.5
+                Google Gemini 2.0 Flash
               </div>
             }>
               {AVAILABLE_MODELS.map((model) => (
