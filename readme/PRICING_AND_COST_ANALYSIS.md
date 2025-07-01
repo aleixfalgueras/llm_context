@@ -3,7 +3,7 @@
 ## Overview
 
 **Enhanced Cost Management Strategy:**
-- ✅ **Single model architecture** - Google Gemini 2.0 Flash for all AI functionalities
+- ✅ **Dual model architecture** - Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
 - ✅ **Latest AI technology** with enhanced capabilities and performance
 - ✅ **Balanced token limits** providing excellent value while maintaining high margins
 - ✅ **Excellent profit margins** at all subscription levels  
@@ -13,13 +13,13 @@
 
 ## Model Configuration
 
-### Single Model Architecture
-**All AI functionalities powered by Google Gemini 2.0 Flash:**
-- **Input cost**: $0.10 per 1M tokens
-- **Output cost**: $0.40 per 1M tokens
+### Dual Model Architecture
+**All AI functionalities powered by Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano:**
+- **Input cost**: $0.10 per 1M tokens (both models)
+- **Output cost**: $0.40 per 1M tokens (both models)
 - **Blended cost**: ~$0.175 per 1M tokens (assuming 3:1 input/output ratio)
-- **Context length**: 1,000,000 tokens
-- **Performance**: Latest Google AI with enhanced reasoning and multimodal capabilities
+- **Context length**: 1,000,000 tokens (Gemini), 200,000 tokens (GPT-4.1 Nano)
+- **Performance**: Latest Google and OpenAI models with enhanced reasoning capabilities
 
 ### Cost Calculation Methodology
 ```
@@ -133,16 +133,27 @@ Social media content: ~200,000 posts/month
 
 ### Model Configuration
 ```typescript
-export const MODEL_CONFIG = {
-  id: 'google/gemini-2.0-flash-001',
-  name: 'Gemini 2.0 Flash',
-  provider: 'google',
-  pricing: {
-    input: 0.0001,  // $0.10 per 1M tokens
-    output: 0.0004, // $0.40 per 1M tokens
-  },
-  contextLength: 1000000,
+export const MODEL_IDS = {
+  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
+  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano-2025-04-14',
 } as const;
+
+export const AVAILABLE_MODELS = [
+  {
+    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    name: 'Gemini 2.0 Flash',
+    provider: 'google',
+    pricing: { input: 0.0001, output: 0.0004 },
+    contextLength: 1000000,
+  },
+  {
+    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    name: 'GPT-4.1 Nano',
+    provider: 'openai',
+    pricing: { input: 0.0001, output: 0.0004 }, // Same cost
+    contextLength: 200000,
+  }
+];
 ```
 
 ### Cost Calculation

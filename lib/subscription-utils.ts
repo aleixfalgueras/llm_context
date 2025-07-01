@@ -28,7 +28,7 @@ export const SUBSCRIPTION_PLANS = {
       '👥 3 client profiles',
       '💾 50 MB document storage',
       '🔤 5M tokens (~3,750 pages of content)',
-      '🤖 Powered by Google Gemini 2.0 Flash - latest AI with enhanced capabilities'
+      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   },
   [SubscriptionPlan.PRO]: {
@@ -45,7 +45,7 @@ export const SUBSCRIPTION_PLANS = {
       '👥 Unlimited client profiles',
       '💾 200 MB document storage',
       '🔤 15M tokens (~11,250 pages of content)',
-      '🤖 Powered by Google Gemini 2.0 Flash - latest AI with enhanced capabilities'
+      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   },
   [SubscriptionPlan.BUSINESS]: {
@@ -62,7 +62,7 @@ export const SUBSCRIPTION_PLANS = {
       '👥 Unlimited client profiles',
       '💾 2 GB document storage',
       '🔤 40M tokens (~30,000 pages of content)',
-      '🤖 Powered by Google Gemini 2.0 Flash - latest AI with enhanced capabilities'
+      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   }
 } as const

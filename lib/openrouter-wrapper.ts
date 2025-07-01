@@ -8,6 +8,7 @@ import {
   getDefaultFrequencyPenalty 
 } from './models-config'
 import { AIProviderError } from './ai-errors'
+import { logger } from './logger'
 
 // OpenRouter client using OpenAI SDK (OpenRouter is OpenAI-compatible)
 const openrouter = new OpenAI({
@@ -158,8 +159,20 @@ export async function createOpenRouterCompletion(
     serviceSource = 'content-generation'
   }
   
-  // Log model usage information
-  console.log(`🚀 OpenRouter Request: ${model} | Service: ${serviceSource} | User: ${trackingOptions.userId}`)
+  // Log AI request start using centralized logger
+  logger.aiRequest(model, undefined, {
+    userId: trackingOptions.userId,
+    operation: 'ai_completion',
+    metadata: {
+      service: serviceSource,
+      provider: 'openrouter',
+      temperature,
+      maxTokens,
+      messageCount: completionOptions.messages.length,
+      resourceId: trackingOptions.resourceId,
+      ...trackingOptions.additionalMetadata
+    }
+  })
 
   try {
     const response = await openrouter.chat.completions.create({
@@ -185,8 +198,22 @@ export async function createOpenRouterCompletion(
         // Removed estimatedCost - OpenRouter handles billing automatically
       }
 
-      // DEBUG: Log token usage to verify context size
-      console.log(`📊 OpenRouter Usage: ${usage.prompt_tokens} prompt (input tokens) + ${usage.completion_tokens} completion (output tokens) = ${usage.total_tokens} total tokens | Messages: ${completionOptions.messages.length}`)
+      // Log completion success with token usage
+      logger.info(`AI completion successful`, {
+        userId: trackingOptions.userId,
+        model,
+        tokensUsed: usage.total_tokens,
+        operation: 'ai_completion',
+        metadata: {
+          service: serviceSource,
+          provider: 'openrouter',
+          promptTokens: usage.prompt_tokens,
+          completionTokens: usage.completion_tokens,
+          messageCount: completionOptions.messages.length,
+          resourceId: trackingOptions.resourceId,
+          contentLength: content.length
+        }
+      })
 
       // Track token usage only - OpenRouter will charge actual cost to your account
       await trackUsage(trackingOptions.userId, {
@@ -204,6 +231,19 @@ export async function createOpenRouterCompletion(
       usage: usageInfo
     }
   } catch (error) {
+    // Log AI error using centralized logger
+    logger.aiError(model, error as Error, {
+      userId: trackingOptions.userId,
+      operation: 'ai_completion',
+      metadata: {
+        service: serviceSource,
+        provider: 'openrouter',
+        streaming: false,
+        resourceId: trackingOptions.resourceId,
+        ...trackingOptions.additionalMetadata
+      }
+    })
+
     // Re-throw AIProviderError as-is
     if (error instanceof AIProviderError) {
       throw error
@@ -243,8 +283,21 @@ export async function* createOpenRouterCompletionStream(
     serviceSource = 'content-generation'
   }
   
-  // Log model usage information
-  console.log(`🚀 OpenRouter Streaming Request: ${model} | Service: ${serviceSource} | User: ${trackingOptions.userId}`)
+  // Log AI streaming request start using centralized logger
+  logger.aiRequest(model, undefined, {
+    userId: trackingOptions.userId,
+    operation: 'ai_completion_stream',
+    metadata: {
+      service: serviceSource,
+      provider: 'openrouter',
+      streaming: true,
+      temperature,
+      maxTokens,
+      messageCount: completionOptions.messages.length,
+      resourceId: trackingOptions.resourceId,
+      ...trackingOptions.additionalMetadata
+    }
+  })
 
   try {
     const stream = await openrouter.chat.completions.create({
@@ -286,6 +339,24 @@ export async function* createOpenRouterCompletionStream(
         totalTokens: usage.total_tokens,
       }
 
+      // Log streaming completion success with token usage
+      logger.info(`AI streaming completion successful`, {
+        userId: trackingOptions.userId,
+        model,
+        tokensUsed: usage.total_tokens,
+        operation: 'ai_completion_stream',
+        metadata: {
+          service: serviceSource,
+          provider: 'openrouter',
+          streaming: true,
+          promptTokens: usage.prompt_tokens,
+          completionTokens: usage.completion_tokens,
+          messageCount: completionOptions.messages.length,
+          resourceId: trackingOptions.resourceId,
+          contentLength: fullContent.length
+        }
+      })
+
       // Track token usage only - OpenRouter will charge actual cost to your account
       await trackUsage(trackingOptions.userId, {
         tokensUsed: usage.total_tokens,
@@ -303,6 +374,19 @@ export async function* createOpenRouterCompletionStream(
       usage: usageInfo || undefined
     }
   } catch (error) {
+    // Log AI streaming error using centralized logger
+    logger.aiError(model, error as Error, {
+      userId: trackingOptions.userId,
+      operation: 'ai_completion_stream',
+      metadata: {
+        service: serviceSource,
+        provider: 'openrouter',
+        streaming: true,
+        resourceId: trackingOptions.resourceId,
+        ...trackingOptions.additionalMetadata
+      }
+    })
+
     // Re-throw AIProviderError as-is
     if (error instanceof AIProviderError) {
       throw error
