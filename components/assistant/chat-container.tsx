@@ -4,13 +4,7 @@ import { useEffect } from 'react'
 import { useChat } from '@/hooks/use-chat'
 import { ChatMessages } from '@/components/assistant/chat-messages'
 import { ChatInput } from '@/components/assistant/chat-input'
-
-interface Message {
-  id: string
-  content: string
-  role: 'USER' | 'ASSISTANT'
-  createdAt: Date
-}
+import { Message } from '@/types/message-types'
 
 interface ChatContainerProps {
   chatId: string

@@ -5,14 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User, Loader2 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
-
-interface Message {
-  id: string
-  content: string
-  role: 'USER' | 'ASSISTANT'
-  createdAt: Date
-  isStreaming?: boolean
-}
+import { Message } from '@/types/message-types'
 
 interface ChatMessagesProps {
   messages: Message[]

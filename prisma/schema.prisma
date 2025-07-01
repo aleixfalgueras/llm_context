@@ -35,7 +35,9 @@ model Message {
   content   String
   role      Role
   model     String?  // AI model used for this message (e.g., 'gpt-4o', 'gpt-4o-mini', 'claude-3-5-haiku')
-  tokensUsed Int     @default(0) // Number of tokens consumed for this message
+  tokensUsed Int     @default(0) // Number of tokens consumed for this message (total)
+  inputTokens Int    @default(0) // Number of input tokens for this message
+  outputTokens Int   @default(0) // Number of output tokens for this message
   chatId    String
   createdAt DateTime @default(now())
 

@@ -5,14 +5,7 @@ import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 import { DEFAULT_MODEL } from '@/lib/models-config'
-
-interface Message {
-  id: string
-  content: string
-  role: 'USER' | 'ASSISTANT'
-  createdAt: Date
-  isStreaming?: boolean // Add flag for streaming messages
-}
+import { Message } from '@/types/message-types'
 
 export function useChat(chatId: string, initialMessages: Message[] = []) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
