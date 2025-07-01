@@ -4,11 +4,12 @@ import { Send, Loader2, Download, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { PromptSelector } from '@/components/prompts/prompt-selector'
+import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
 import { useState, useEffect, useRef } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { getDefaultModel } from '@/lib/models-config'
+import { DEFAULT_MODEL } from '@/lib/models-config'
 import { useSubscription } from '@/hooks/use-subscription'
 
 interface Prompt {
@@ -46,6 +47,14 @@ interface ChatInputProps {
 export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
   const subscription = useSubscription()
   const [isExporting, setIsExporting] = useState(false)
+  const [selectedModel, setSelectedModel] = useState(() => {
+    // For new chats (no messages), use DEFAULT_MODEL
+    // For existing chats with messages, use lastUsedModel or fallback to DEFAULT_MODEL
+    if (messages.length === 0) {
+      return DEFAULT_MODEL
+    }
+    return lastUsedModel || DEFAULT_MODEL
+  })
   
   const { toast } = useToast()
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
@@ -80,13 +89,12 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
-      const defaultModel = getDefaultModel()
       clientLogger.userInteraction('Submit message', { 
         chatId,
         component: 'ChatInput',
-        metadata: { messageLength: input.trim().length, model: defaultModel }
+        metadata: { messageLength: input.trim().length, model: selectedModel }
       });
-      sendMessage(input, defaultModel)
+      sendMessage(input, selectedModel)
     } else {
       clientLogger.warn('Submit attempted with invalid conditions', { 
         chatId,
@@ -297,10 +305,17 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
 
   return (
     <div className="space-y-2">
-      {/* Prompt Selector and Export Button */}
+      {/* Prompt Selector, Model Selector and Export Button */}
       <div className="flex justify-between items-center gap-2 flex-wrap">
         <div className="flex gap-2">
           <PromptSelector onPromptSelect={handlePromptSelect} />
+          <ModelSelector 
+            selectedModel={selectedModel}
+            onModelSelect={setSelectedModel}
+            userTier={subscription.tier}
+          />
+        </div>
+        <div className="flex gap-2">
           {/* Export Chat Button - only show if client is associated and has messages */}
           {clientData?.id && messages.length > 0 && (
             <Button 
