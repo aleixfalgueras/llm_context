@@ -112,7 +112,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **100K tokens per month** (~75 pages of content)
 - **Unlimited documents per month**
 - **3 client profiles**
-- **Basic Tier Models**: GPT-4o Mini, Claude Haiku, Gemini Flash
+- **Single Model Architecture**: Google Gemini Flash 1.5 for all AI functionalities
 - **91% profit margin** (most expensive model costs $0.875/month)
 
 ### **Pro Plan - $17/month**  
