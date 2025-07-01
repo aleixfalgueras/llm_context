@@ -9,16 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { FileText, Search, Star, TrendingUp, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-  isActive: boolean
-  usageCount: number
-}
+import { Prompt } from '@/types/component-types'
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void

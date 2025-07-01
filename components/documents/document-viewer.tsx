@@ -8,17 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Edit, Save, X, Eye } from 'lucide-react'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { Document } from '@/types/component-types'
 
 interface DocumentViewerProps {
   document: Document | null

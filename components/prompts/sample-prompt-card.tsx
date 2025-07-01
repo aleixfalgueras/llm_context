@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Lightbulb, Copy } from 'lucide-react'
 import { samplePrompts } from '@/lib/sample-prompts'
 import { PromptDialog } from '@/components/prompts/prompt-dialog'
+import { PromptBasic } from '@/types/component-types'
 
 interface SamplePromptCardProps {
   prompt: typeof samplePrompts[0]
