@@ -206,7 +206,14 @@ class Logger {
 
   // AI service logging
   aiRequest(model: string, tokensUsed?: number, context?: LogContext): void {
-    const modelIcon = model.includes('gpt-4o') ? '🧠' : '🤖';
+    // Enhanced model icon selection for supported models
+    let modelIcon = '🤖'; // default
+     if (model.includes('gpt-4')) {
+      modelIcon = '🧠'; // GPT-4
+    } else if (model.includes('gemini')) {
+      modelIcon = '⚡'; // Google models
+    } 
+
     const tokensStr = tokensUsed ? ` (${colors.cyan}${tokensUsed} tokens${colors.reset})` : '';
     this.info(`${modelIcon} AI Request: ${colors.magenta}${model}${colors.reset}${tokensStr}`, { ...context, tokensUsed });
   }

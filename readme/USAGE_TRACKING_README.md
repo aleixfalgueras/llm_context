@@ -12,7 +12,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Storage usage tracking** (storage-based)
 
 **Key Features:**
-- ✅ **Single model architecture** - Google Gemini 2.0 Flash for all AI operations
+- ✅ **Dual model architecture** - Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI operations
 - ✅ **Enhanced capabilities** with the latest Google AI model
 - ✅ **Balanced token limits** based on cost-effective pricing
 - ✅ **Excellent profit margins** at all subscription levels
@@ -20,19 +20,20 @@ The usage tracking system operates across **three primary dimensions**:
 
 ## Model Configuration
 
-### Single Model Architecture
+### Dual Model Architecture
 **All AI functionalities powered by:**
 - **Google Gemini 2.0 Flash**: $0.10/M input tokens, $0.40/M output tokens
+- **OpenAI GPT-4.1 Nano**: $0.10/M input tokens, $0.40/M output tokens (same cost)
 - **Blended cost**: ~$0.175/M tokens (assuming 3:1 input/output ratio)
 - **Context length**: 1M tokens
 - **Performance**: Latest Google AI with enhanced reasoning and multimodal capabilities
 
-### Benefits of Single Model Approach
-- **Consistent experience**: Same high-quality AI behavior across all features
-- **Latest capabilities**: Access to Google's most advanced model
-- **Simplified maintenance**: No model selection complexity
-- **Predictable costs**: Clear understanding of usage implications
-- **Optimized performance**: Single model allows for better optimization
+### Benefits of Dual Model Approach
+- **Model choice**: Users can choose between Google and OpenAI providers
+- **Latest capabilities**: Access to both Google's and OpenAI's advanced models
+- **Cost consistency**: Both models have identical pricing for predictable costs
+- **Provider diversity**: Reduces dependency on a single AI provider
+- **Enhanced reliability**: Fallback options if one provider experiences issues
 
 ## Subscription Plans and Token Limits
 

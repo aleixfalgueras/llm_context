@@ -10,22 +10,27 @@ export interface AIModel {
   tier?: ModelTierType
 }
 
-// Model ID Constants - Using only Gemini 2.0 Flash 001 for all AI functionalities
+// Model ID Constants - Available models for all AI functionalities
 export const MODEL_IDS = {
   // Primary Model - Used for all AI functionalities
   GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
+  // Secondary Model - Same capabilities as Gemini 2.0 Flash
+  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano-2025-04-14',
 } as const
 
-// Model Tiers Configuration - All tiers use the same model
+// Model Tiers Configuration - All tiers use both models
 export const MODEL_TIERS = {
   [ModelTier.BASIC]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
   ],
   [ModelTier.PRO]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
   ],
   [ModelTier.BUSINESS]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
   ],
 }
 
@@ -41,6 +46,16 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'google',
     contextLength: 1000000,
     pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
+    tier: ModelTier.BASIC
+  },
+  // Secondary Model - OpenAI GPT-4.1 Nano
+  {
+    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    name: 'GPT-4.1 Nano',
+    description: 'Efficient OpenAI model with excellent performance and reasoning capabilities',
+    provider: 'openai',
+    contextLength: 200000,
+    pricing: { input: 0.0001, output: 0.0004 }, // Same cost as Gemini 2.0 Flash
     tier: ModelTier.BASIC
   }
 ]
