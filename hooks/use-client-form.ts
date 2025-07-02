@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { useFormState } from './use-form-state'
-import { useToast } from '@/hooks/use-toast'
+import { useFormOperations } from './use-async-operation'
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
+import { validateClientForm } from '@/lib/validation-helpers'
 import { capitalizeName } from '@/lib/utils'
 
 interface UseClientFormProps {
@@ -20,11 +20,13 @@ interface UseClientFormReturn {
   
   // Loading state
   isLoading: boolean
+  error: string | null
   
   // Actions
   updateField: (field: keyof ClientData, value: string) => void
   handleSubmit: (e: React.FormEvent) => Promise<void>
   resetForm: () => void
+  clearError: () => void
   
   // Available options
   languages: Array<{ value: string; label: string; flag: string }>
@@ -51,8 +53,7 @@ const validationRules: Partial<Record<keyof ClientData, (value: any) => string |
 }
 
 export function useClientForm({ client, onSuccess }: UseClientFormProps): UseClientFormReturn {
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
+  const { isLoading, error, clearError, save, create } = useFormOperations()
 
   const initialData: ClientData = {
     name: client?.name || '',
@@ -101,46 +102,34 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please fix the errors in the form before submitting.',
-        variant: 'destructive',
-      })
+    // Use centralized validation
+    const validation = validateClientForm(formData)
+    if (!validation.isValid) {
+      // Show first validation error (toast will be shown by async operation)
       return
     }
 
-    setIsLoading(true)
+    // Format the name before saving
+    const formattedData = {
+      ...formData,
+      name: capitalizeName(formData.name)
+    }
 
-    try {
-      // Format the name before saving
-      const formattedData = {
-        ...formData,
-        name: capitalizeName(formData.name)
-      }
+    let result
+    if (client?.id) {
+      result = await save(
+        () => updateClient(client.id, formattedData),
+        'client'
+      )
+    } else {
+      result = await create(
+        () => createClient(formattedData),
+        'client'
+      )
+    }
 
-      if (client?.id) {
-        await updateClient(client.id, formattedData)
-        toast({
-          title: 'Success',
-          description: 'Client updated successfully',
-        })
-      } else {
-        await createClient(formattedData)
-        toast({
-          title: 'Success',
-          description: 'Client created successfully',
-        })
-      }
+    if (result.success) {
       onSuccess?.()
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Something went wrong',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -158,11 +147,13 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     
     // Loading state
     isLoading,
+    error,
     
     // Actions
     updateField,
     handleSubmit,
     resetForm,
+    clearError,
     
     // Available options
     languages,

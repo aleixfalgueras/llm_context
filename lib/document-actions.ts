@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
 import { validateDocumentStorage } from '@/lib/storage-utils'
+import { DocumentOperations, DatabaseOperations } from './database-operations'
+import { logger } from './logger'
 
 export async function getClientDocuments(clientId: string, options?: { includeContent?: boolean; limit?: number }) {
   const { userId } = await auth()
@@ -13,34 +15,36 @@ export async function getClientDocuments(clientId: string, options?: { includeCo
     throw new Error('Unauthorized')
   }
 
-  try {
-    const documents = await prisma.document.findMany({
-      where: { 
-        clientId,
-        userId 
-      },
-      select: {
-        id: true,
-        documentName: true,
-        documentType: true,
-        createdAt: true,
-        updatedAt: true,
-        startDate: true,
-        endDate: true,
-        // Only include heavy fields when needed
-        ...(options?.includeContent && {
-          documentPath: true
-        })
-      },
-      orderBy: { createdAt: 'desc' },
-      ...(options?.limit && { take: options.limit })
-    })
+  const pagination = options?.limit ? 
+    { page: 1, limit: options.limit, skip: 0 } : 
+    undefined
 
-    return documents
-  } catch (error) {
-    console.error('Error fetching documents:', error)
-    throw new Error('Failed to fetch documents')
+  const config = {
+    context: 'Get client documents',
+    select: {
+      id: true,
+      documentName: true,
+      documentType: true,
+      createdAt: true,
+      updatedAt: true,
+      startDate: true,
+      endDate: true,
+      // Only include heavy fields when needed
+      ...(options?.includeContent && {
+        documentPath: true
+      })
+    },
+    orderBy: { createdAt: 'desc' }
   }
+
+  const result = await DocumentOperations.findUserDocuments(userId, clientId, pagination, config)
+  
+  if (!result.success) {
+    logger.error('Error fetching documents', new Error(result.error), { userId, clientId })
+    throw new Error(result.error || 'Failed to fetch documents')
+  }
+
+  return result.data!.records
 }
 
 export async function deleteDocument(documentId: string) {
@@ -50,42 +54,40 @@ export async function deleteDocument(documentId: string) {
     throw new Error('Unauthorized')
   }
 
-  try {
-    // Get the document to verify ownership and get file path
-    const document = await prisma.document.findFirst({
-      where: { 
-        id: documentId,
-        userId 
-      }
-    })
+  // Get the document to verify ownership and get file path
+  const documentResult = await DatabaseOperations.findUserOwnedRecord(
+    prisma.document,
+    documentId,
+    userId,
+    { context: 'Get document for deletion' }
+  )
 
-    if (!document) {
-      throw new Error('Document not found or unauthorized')
-    }
-
-    // Delete from Supabase storage
-    const { error: storageError } = await supabaseServer.storage
-      .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
-      .remove([document.documentPath])
-
-    if (storageError) {
-      console.error('Error deleting from storage:', storageError)
-      // Continue with database deletion even if storage deletion fails
-    }
-
-    // Delete from database
-    await prisma.document.delete({
-      where: { 
-        id: documentId,
-        userId // Ensure user can only delete their own documents
-      }
-    })
-
-    return { success: true }
-  } catch (error) {
-    console.error('Error deleting document:', error)
-    throw new Error('Failed to delete document')
+  if (!documentResult.success) {
+    logger.error('Error fetching document for deletion', new Error(documentResult.error), { userId })
+    throw new Error(documentResult.error || 'Document not found or unauthorized')
   }
+
+  const document = documentResult.data! as any
+
+  // Delete from Supabase storage
+  const { error: storageError } = await supabaseServer.storage
+    .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+    .remove([document.documentPath])
+
+  if (storageError) {
+    logger.error('Error deleting from storage', storageError, { userId })
+    // Continue with database deletion even if storage deletion fails
+  }
+
+  // Delete from database
+  const deleteResult = await DocumentOperations.deleteDocument(documentId, userId)
+  
+  if (!deleteResult.success) {
+    logger.error('Error deleting document from database', new Error(deleteResult.error), { userId })
+    throw new Error(deleteResult.error || 'Failed to delete document')
+  }
+
+  return { success: true }
 }
 
 export async function deleteAllDocuments(clientId: string) {

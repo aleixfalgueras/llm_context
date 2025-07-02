@@ -1,12 +1,12 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { checkUsageLimit } from './subscription-utils'
 import { logger } from './logger'
-
+import { ClientOperations } from './database-operations'
 import { ClientFormData } from '@/types/client'
+import { prisma } from './prisma'
 
 export type ClientData = ClientFormData
 
@@ -22,32 +22,21 @@ export async function createClient(data: ClientFormData) {
     throw new Error(`You've reached your client limit of ${usageCheck.limit}. Upgrade to Pro for unlimited clients.`)
   }
 
-  try {
-    const client = await prisma.client.create({
-      data: {
-        userId,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        country: data.country,
-        generalContext: data.generalContext,
-        specifiContext1: data.specifiContext1,
-        specifiContext2: data.specifiContext2,
-        specifiContext3: data.specifiContext3,
-        documentsLanguage: data.documentsLanguage || 'english',
-      },
-    })
-
-    // No longer tracking client creation events - we check total client count instead
-
-
-
-    revalidatePath('/clients')
-    return { success: true, client }
-  } catch (error) {
-    logger.error('Error creating client', error as Error, { userId })
-    throw new Error('Failed to create client')
+  // Prepare client data with defaults
+  const clientData = {
+    ...data,
+    documentsLanguage: data.documentsLanguage || 'english',
   }
+
+  const result = await ClientOperations.createClient(userId, clientData)
+  
+  if (!result.success) {
+    logger.error('Error creating client', new Error(result.error), { userId })
+    throw new Error(result.error || 'Failed to create client')
+  }
+
+  revalidatePath('/clients')
+  return { success: true, client: result.data }
 }
 
 export async function updateClient(clientId: string, data: ClientFormData) {
@@ -56,40 +45,21 @@ export async function updateClient(clientId: string, data: ClientFormData) {
     throw new Error('User not authenticated')
   }
 
-  try {
-    // Verify client belongs to user
-    const existingClient = await prisma.client.findFirst({
-      where: {
-        id: clientId,
-        userId,
-      },
-    })
-
-    if (!existingClient) {
-      throw new Error('Client not found or access denied')
-    }
-
-    const client = await prisma.client.update({
-      where: { id: clientId },
-      data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        country: data.country,
-        generalContext: data.generalContext,
-        specifiContext1: data.specifiContext1,
-        specifiContext2: data.specifiContext2,
-        specifiContext3: data.specifiContext3,
-        documentsLanguage: data.documentsLanguage || 'english',
-      },
-    })
-
-    revalidatePath('/clients')
-    return { success: true, client }
-  } catch (error) {
-    console.error('Error updating client:', error)
-    throw new Error('Failed to update client')
+  // Prepare client data with defaults
+  const clientData = {
+    ...data,
+    documentsLanguage: data.documentsLanguage || 'english',
   }
+
+  const result = await ClientOperations.updateClient(clientId, userId, clientData)
+  
+  if (!result.success) {
+    logger.error('Error updating client', new Error(result.error), { userId, clientId })
+    throw new Error(result.error || 'Failed to update client')
+  }
+
+  revalidatePath('/clients')
+  return { success: true, client: result.data }
 }
 
 export async function deleteClient(id: string) {
@@ -99,26 +69,15 @@ export async function deleteClient(id: string) {
     throw new Error('Unauthorized')
   }
 
-  try {
-    // Verify the client belongs to the user
-    const existingClient = await prisma.client.findFirst({
-      where: { id, userId }
-    })
-
-    if (!existingClient) {
-      throw new Error('Client not found or unauthorized')
-    }
-
-    await prisma.client.delete({
-      where: { id }
-    })
-
-    revalidatePath('/clients')
-    return { success: true }
-  } catch (error) {
-    console.error('Error deleting client:', error)
-    throw new Error('Failed to delete client')
+  const result = await ClientOperations.deleteClient(id, userId)
+  
+  if (!result.success) {
+    logger.error('Error deleting client', new Error(result.error), { userId, clientId: id })
+    throw new Error(result.error || 'Failed to delete client')
   }
+
+  revalidatePath('/clients')
+  return { success: true }
 }
 
 export async function getClients(options?: { includeDetails?: boolean; limit?: number }) {
@@ -128,35 +87,40 @@ export async function getClients(options?: { includeDetails?: boolean; limit?: n
     throw new Error('Unauthorized')
   }
 
-  try {
-    const clients = await prisma.client.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        country: true,
-        documentsLanguage: true,
-        createdAt: true,
-        updatedAt: true,
-        // Include heavy fields only when requested
-        ...(options?.includeDetails && {
-          phone: true,
-          generalContext: true,
-          specifiContext1: true,
-          specifiContext2: true,
-          specifiContext3: true
-        })
-      },
-      orderBy: { createdAt: 'desc' },
-      ...(options?.limit && { take: options.limit })
-    })
+  const pagination = options?.limit ? 
+    { page: 1, limit: options.limit, skip: 0 } : 
+    undefined
 
-    return clients
-  } catch (error) {
-    console.error('Error fetching clients:', error)
-    throw new Error('Failed to fetch clients')
+  const config = {
+    context: 'Get clients with options',
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      country: true,
+      documentsLanguage: true,
+      createdAt: true,
+      updatedAt: true,
+      // Include heavy fields only when requested
+      ...(options?.includeDetails && {
+        phone: true,
+        generalContext: true,
+        specifiContext1: true,
+        specifiContext2: true,
+        specifiContext3: true
+      })
+    },
+    orderBy: { createdAt: 'desc' }
   }
+
+  const result = await ClientOperations.findUserClients(userId, pagination, undefined, config)
+  
+  if (!result.success) {
+    logger.error('Error fetching clients', new Error(result.error), { userId })
+    throw new Error(result.error || 'Failed to fetch clients')
+  }
+
+  return result.data!.records
 }
 
 export async function getClient(id: string) {
@@ -166,18 +130,17 @@ export async function getClient(id: string) {
     throw new Error('Unauthorized')
   }
 
-  try {
-    const client = await prisma.client.findFirst({
-      where: { id, userId }
-    })
-
-    if (!client) {
-      throw new Error('Client not found')
-    }
-
-    return client
-  } catch (error) {
-    console.error('Error fetching client:', error)
-    throw new Error('Failed to fetch client')
+  const result = await ClientOperations.findUserOwnedRecord(
+    prisma.client,
+    id,
+    userId,
+    { context: 'Get client by ID' }
+  )
+  
+  if (!result.success) {
+    logger.error('Error fetching client', new Error(result.error), { userId, clientId: id })
+    throw new Error(result.error || 'Failed to fetch client')
   }
+
+  return result.data!
 } 
