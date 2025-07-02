@@ -3,6 +3,8 @@
  * across forms and API routes. Provides consistent validation logic and error messages.
  */
 
+import { ValidationResult } from '@/types/api-types'
+
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -83,14 +85,7 @@ export const validators = {
   }
 }
 
-/**
- * Validation result interface
- */
-export interface ValidationResult {
-  isValid: boolean
-  errors: Record<string, string>
-  firstError?: string
-}
+// ValidationResult is now imported from @/types/api-types for single source of truth
 
 /**
  * Validates multiple fields at once and returns consolidated result
@@ -188,4 +183,66 @@ export function hasFieldError(
   field: string
 ): boolean {
   return Boolean(errors[field])
+}
+
+/**
+ * API validation helpers to eliminate duplicate validation patterns in API routes
+ */
+export const apiValidation = {
+  /**
+   * Validate required fields for AI service document generation
+   */
+  aiServiceDocument: (data: {
+    clientId?: string | null
+    content?: string | null
+    documentTitle?: string | null
+  }) => {
+    const missing: string[] = []
+    
+    if (!data.clientId) missing.push('clientId')
+    if (!data.content) missing.push('content')
+    if (!data.documentTitle) missing.push('documentTitle')
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing required fields: ${missing.join(', ')}`)
+    }
+  },
+
+  /**
+   * Validate required fields for meeting report generation
+   */
+  meetingReport: (data: {
+    clientId?: string | null
+    meetingDate?: string | null
+    reportContent?: string | null
+  }) => {
+    const missing: string[] = []
+    
+    if (!data.clientId) missing.push('clientId')
+    if (!data.meetingDate) missing.push('meetingDate')
+    if (!data.reportContent) missing.push('reportContent')
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing required fields: ${missing.join(', ')}`)
+    }
+  },
+
+  /**
+   * Validate required fields for chat export
+   */
+  chatExport: (data: {
+    clientId?: string | null
+    content?: string | null
+    chatTitle?: string | null
+  }) => {
+    const missing: string[] = []
+    
+    if (!data.clientId) missing.push('clientId')
+    if (!data.content) missing.push('content')
+    if (!data.chatTitle) missing.push('chatTitle')
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing required fields: ${missing.join(', ')}`)
+    }
+  }
 }

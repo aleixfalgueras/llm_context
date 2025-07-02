@@ -1,10 +1,10 @@
-# OpenRouter AI Marketing Services Documentation
+# AI Marketing Services Documentation
 
-This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents using 400+ AI models through OpenRouter with granular client context control and professional output formatting.
+This document provides detailed information about the AI Services feature for marketing content generation. The AI Services allow users to generate personalized marketing documents using Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter with granular client context control and professional output formatting.
 
 ## 🎯 Overview
 
-AI Services provide automated marketing content generation using client profiles and custom prompts through OpenRouter's 400+ models. The feature leverages a unified client context system while each service maintains its own specialized prompts to generate personalized, professional marketing documents that are ready for client delivery.
+AI Services provide automated marketing content generation using client profiles and custom prompts through the dual-model architecture (Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano). The feature leverages a unified client context system while each service maintains its own specialized prompts to generate personalized, professional marketing documents that are ready for client delivery.
 
 ## 🏗️ Core Technology
 
@@ -23,25 +23,27 @@ AI Services provide automated marketing content generation using client profiles
 - **Privacy-First**: Only selected data is sent to AI provider APIs
 - **Centralized Privacy Logic**: `buildClientContextSection()` ensures consistent privacy respect
 
-### **OpenRouter AI Processing**
-- **400+ Model Access**: Access OpenAI, Anthropic, Google, Meta, and many other providers through unified interface
-- **Unified Model Selection**: User-friendly interface to choose optimal AI model from any provider
-- **Transparent Cost Tracking**: Real-time pricing and usage monitoring across all models
-- **Performance-Based Recommendations**: Model descriptions include provider, cost, and optimal use cases
-- **Per-Service Model Choice**: Select different models for different AI services
+### **AI Processing Architecture**
+- **Dual Model System**: All subscription tiers use Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for optimal cost efficiency
+- **OpenRouter Integration**: Unified API access through OpenRouter with business-sustainable pricing
+- **Cost-Optimized Selection**: Models chosen for 89-91% profit margins while maintaining high quality
+- **Token Usage Tracking**: Real-time monitoring without confusing cost estimates
+- **Business Sustainability**: Pricing ensures long-term platform viability
 - **Model Persistence**: Selected models are remembered across sessions
-- **Automatic Fallbacks**: Better uptime through provider redundancy
+- **Error Handling**: Comprehensive error management with fallback capabilities
 - **Client Variable Replacement**: Automatic substitution of client variables in prompts
 - **Professional Output**: Production-ready marketing content formatted for client delivery
 - **Real-time Generation**: Interactive content creation with immediate feedback
 - **Multi-language Support**: Generate content in 10+ languages based on client preferences
 
-### **Document Management**
+### **Document Management Module** (`/lib/documents/`)
+- **Modular Architecture**: Separated into repository, storage service, server service, and client service
 - **Automatic Storage**: All generated content saved to Supabase with organized structure
 - **Document Export**: Download documents in original Markdown format
 - **Version Control**: Document history and metadata tracking
 - **File Organization**: Structured storage by user/client/document type
 - **Document Editing**: Update content and rename documents after creation
+- **Server/Client Separation**: Clean separation for Next.js App Router compatibility
 
 ## 🚀 Currently Implemented Services
 
@@ -212,15 +214,15 @@ AI Services API Structure:
 │   └── save-chat-export/           # Save exported chat conversations
 ```
 
-### **Multi-AI Integration**
-- **Provider Support**: Seamless integration with 400+ models via OpenRouter API
-- **Model Selection**: Choose from GPT-4o, GPT-4o-mini, Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Haiku
-- **Cross-Provider Cost Tracking**: Unified usage monitoring across all AI providers
-- **Token Optimization**: Efficient prompt construction for all models
-- **Temperature Control**: Configurable creativity settings per provider
-- **Max Tokens**: Controlled output length (8,000 tokens) across different model architectures
-- **Robust Error Handling**: Comprehensive error management with provider fallback capabilities
-- **Performance Monitoring**: Track response times and quality across providers
+### **AI Integration Module** (`/lib/openrouter/`)
+- **Modular Architecture**: Separated into client, service, error handler, and stream handler
+- **Dual Model System**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano across all tiers
+- **OpenRouter Integration**: Unified API access with automatic usage tracking
+- **Token Optimization**: Efficient prompt construction optimized for cost
+- **Temperature Control**: Configurable creativity settings (default 0.7)
+- **Max Tokens**: Controlled output length (8,000 tokens) for consistent quality
+- **Robust Error Handling**: Comprehensive error management with AI-specific error types
+- **Performance Monitoring**: Track response times and token usage with detailed logging
 
 ### **Security Features**
 - **User Verification**: All operations verify user ownership
@@ -238,13 +240,13 @@ AI Services API Structure:
 - **User Engagement**: Track feature adoption and usage patterns
 - **Privacy Compliance**: Monitor client context selection patterns
 
-### **Multi-AI Cost Management**
-- **Comprehensive Usage Tracking**: Monitor API consumption across 400+ models via OpenRouter
-- **Unified Cost Analytics**: Track expenses across all AI providers and models
-- **Provider Performance Comparison**: Compare costs and quality across different providers
-- **Per-User Multi-Cloud Analytics**: Track usage per user across all providers for billing
-- **Cost Optimization Insights**: Identify opportunities to reduce expenses across providers
-- **Provider ROI Analysis**: Measure return on investment for different AI providers
+### **Cost Management & Analytics**
+- **Token Usage Tracking**: Monitor consumption patterns for Gemini 2.0 Flash and GPT-4.1 Nano
+- **Cost-Optimized Pricing**: Subscription pricing covers AI costs with 89-91% profit margins
+- **Per-User Analytics**: Track usage per user for billing and limit enforcement
+- **Real-time Monitoring**: Live token consumption tracking without confusing cost estimates
+- **Business Sustainability**: Pricing model ensures long-term platform viability
+- **Usage Limits**: Fair token limits based on subscription tier with automatic enforcement
 
 ## 🚀 Future Enhancements
 
@@ -311,32 +313,37 @@ AI Services API Structure:
 - **Data Retention**: Configurable retention policies
 - **Deletion Rights**: Complete data removal capabilities
 
-## 🎛️ Model Selection System
+## 🎛️ Dual Model Architecture
 
 ### **Available Models**
-- **GPT-4o**: Most capable model, best for complex tasks requiring higher reasoning
-- **GPT-4o Mini**: Faster and more cost-effective, ideal for standard content generation
+- **Google Gemini 2.0 Flash**: Cost-optimized model for standard content generation
+- **OpenAI GPT-4.1 Nano**: High-quality model for complex tasks and analysis
 
 ### **Model Selection Interface**
-- **Service Dashboard**: Global model selector affects all AI services
-- **Per-Chat Selection**: Different model choice per chat conversation in Assistant
-- **Persistent Preferences**: Your model choice is saved and remembered
-- **Visual Indicators**: Clear model names and descriptions help with selection
+- **Unified Access**: All subscription tiers have access to both models
+- **Per-Service Selection**: Choose appropriate model for each AI service
+- **Persistent Preferences**: Model choices are saved and remembered
+- **Business-Sustainable Pricing**: Models selected for optimal cost efficiency
 
-### **Cost Considerations**
+### **Subscription Pricing**
 ```
-GPT-4o Pricing:
-- Input: $0.0025 per 1K tokens (~750 words)
-- Output: $0.01 per 1K tokens (~750 words)
+Basic Plan - $10/month:
+- 5M tokens per month (91.25% profit margin)
+- 3 client profiles
 
-GPT-4o-mini Pricing:
-- Input: $0.00015 per 1K tokens
-- Output: $0.0006 per 1K tokens
+Pro Plan - $25/month:  
+- 15M tokens per month (89.5% profit margin)
+- Unlimited client profiles
+
+Business Plan - $50/month:
+- 40M tokens per month (86% profit margin)
+- Unlimited client profiles
 ```
 
-### **When to Use Each Model**
-- **Use GPT-4o for**: Complex strategy documents, detailed analysis, technical content
-- **Use GPT-4o-mini for**: Standard marketing content, simple reports, routine communications
+### **Token Management**
+- **Fair Usage Limits**: Token limits calculated based on most expensive models
+- **Real-time Tracking**: Monitor consumption without confusing cost estimates
+- **Automatic Enforcement**: Usage limits enforced at API level
 
 ---
 

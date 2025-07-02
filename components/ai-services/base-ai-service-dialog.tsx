@@ -15,14 +15,7 @@ import { ClientCombobox } from '@/components/ui/client-combobox'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 import { getDefaultModel } from '@/lib/models-config'
 import type { Client } from '@/types/client'
-
-/**
- * Validation result interface
- */
-interface ValidationResult {
-  isValid: boolean
-  message?: string
-}
+import { ValidationResult } from '@/types/api-types'
 
 /**
  * Base configuration for AI service dialogs

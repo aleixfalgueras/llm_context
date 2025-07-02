@@ -3,17 +3,7 @@
 import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/types/enums'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { Document } from '@/types/component-types'
 
 interface UseDocumentOperationsProps {
   clientId: string

@@ -131,6 +131,15 @@ export const LANGUAGE_INFO: Record<Language, { label: string; flag: string }> = 
   [Language.CATALAN]: { label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' }
 }
 
+// Helper function to get language options for forms
+export function getLanguageOptions() {
+  return Object.entries(LANGUAGE_INFO).map(([value, info]) => ({
+    value,
+    label: info.label,
+    flag: info.flag
+  }))
+}
+
 // =============================================================================
 // UTILITY TYPES FOR BACKWARDS COMPATIBILITY
 // =============================================================================

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { AIProviderError } from '@/lib/ai-errors'
+import { logger } from './logger'
 
 /**
  * Centralized API error handler to eliminate duplicate error handling patterns
@@ -29,7 +30,11 @@ export function handleApiError(
   } = options
 
   if (logError) {
-    console.error(`Error in ${context}:`, error)
+    if (error instanceof AIProviderError) {
+      logger.aiError(error.provider || 'unknown', error, { context })
+    } else {
+      logger.error(`Error in ${context}`, error as Error, { context })
+    }
   }
 
   // Handle AI provider errors with specific formatting

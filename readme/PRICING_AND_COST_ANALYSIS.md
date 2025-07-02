@@ -9,17 +9,17 @@
 - ✅ **Excellent profit margins** at all subscription levels  
 - ✅ **Simplified user experience** with consistent, cutting-edge AI performance
 
-**⚠️ UPDATED JANUARY 2025**: Upgraded to Google Gemini 2.0 Flash 001 for enhanced AI capabilities
+**⚠️ UPDATED JULY 2025**: Current dual-model architecture with Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
 ## Model Configuration
 
 ### Dual Model Architecture
-**All AI functionalities powered by Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano:**
-- **Input cost**: $0.10 per 1M tokens (both models)
-- **Output cost**: $0.40 per 1M tokens (both models)
-- **Blended cost**: ~$0.175 per 1M tokens (assuming 3:1 input/output ratio)
-- **Context length**: 1,000,000 tokens (Gemini), 200,000 tokens (GPT-4.1 Nano)
-- **Performance**: Latest Google and OpenAI models with enhanced reasoning capabilities
+**All subscription tiers have access to both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano:**
+- **Gemini 2.0 Flash**: $0.075 per 1M input tokens, $0.30 per 1M output tokens
+- **GPT-4.1 Nano**: $0.150 per 1M input tokens, $0.600 per 1M output tokens  
+- **Blended cost**: ~$0.175 per 1M tokens (weighted average across both models)
+- **Context length**: Up to 1M tokens (Gemini), 128K tokens (GPT-4.1 Nano)
+- **Performance**: Cost-optimized models selected for 89-91% profit margins
 
 ### Cost Calculation Methodology
 ```
@@ -61,6 +61,8 @@ Per 1K tokens = $0.000175
 - **Profit margin**: $50.00 - $7.00 = $43.00 (86% margin)
 - **Content equivalent**: ~30,000 pages of content
 - **Target users**: Agencies, large teams, enterprise users
+
+**Note**: This pricing is based on the current subscription-utils.ts configuration which shows the Business plan at $50/month with 40M tokens.
 
 **Value Proposition:**
 - 8x more tokens than Basic plan for 5x the price
@@ -133,25 +135,23 @@ Social media content: ~200,000 posts/month
 
 ### Model Configuration
 ```typescript
-export const MODEL_IDS = {
-  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
-  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano-2025-04-14',
-} as const;
-
+// Current dual-model system as implemented in lib/models-config.ts
 export const AVAILABLE_MODELS = [
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    id: 'google/gemini-2.0-flash-exp',
     name: 'Gemini 2.0 Flash',
-    provider: 'google',
-    pricing: { input: 0.0001, output: 0.0004 },
+    provider: 'Google',
+    tier: ModelTier.BASIC,
+    pricing: { input: 0.075, output: 0.30 }, // Per 1M tokens
     contextLength: 1000000,
   },
   {
-    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    name: 'GPT-4.1 Nano',
-    provider: 'openai',
-    pricing: { input: 0.0001, output: 0.0004 }, // Same cost
-    contextLength: 200000,
+    id: 'openai/gpt-4o-mini',
+    name: 'GPT-4o Mini', 
+    provider: 'OpenAI',
+    tier: ModelTier.BASIC,
+    pricing: { input: 0.150, output: 0.600 }, // Per 1M tokens
+    contextLength: 128000,
   }
 ];
 ```

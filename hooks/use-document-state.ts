@@ -4,17 +4,7 @@ import { useState, useEffect } from 'react'
 import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { Document } from '@/types/component-types'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()
