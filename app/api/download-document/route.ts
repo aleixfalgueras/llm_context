@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { getDocumentContent } from '@/lib/document-actions'
+import { DocumentService } from '@/lib/documents/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get document content
-    const documentContent = await getDocumentContent(document.documentPath)
+    const documentContent = await DocumentService.getDocumentContent(documentId)
 
     // Return markdown file as a blob for download
     return new NextResponse(documentContent, {

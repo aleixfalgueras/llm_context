@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getClientDocuments } from '@/lib/document-actions'
+import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 
@@ -41,7 +41,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const docs = await getClientDocuments(clientId)
+      const docs = await DocumentClientService.getClientDocuments(clientId)
       setDocuments(docs as unknown as Document[])
     } catch (error) {
       toast({
