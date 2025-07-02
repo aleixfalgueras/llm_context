@@ -6,7 +6,7 @@ import {
   parseJsonBody,
   ApiContext 
 } from '@/lib/api-middleware'
-import { PromptOperations } from '@/lib/database-operations'
+import { PromptOperations } from '@/lib/database'
 import { validatePromptForm } from '@/lib/validation-helpers'
 import { logger, withTiming } from '@/lib/logger'
 

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
 import { validateDocumentStorage } from '@/lib/storage-utils'
-import { DocumentOperations, DatabaseOperations } from './database-operations'
+import { DocumentOperations, BaseOperations } from './database'
 import { logger } from './logger'
 
 export async function getClientDocuments(clientId: string, options?: { includeContent?: boolean; limit?: number }) {
@@ -55,7 +55,7 @@ export async function deleteDocument(documentId: string) {
   }
 
   // Get the document to verify ownership and get file path
-  const documentResult = await DatabaseOperations.findUserOwnedRecord(
+  const documentResult = await BaseOperations.findUserOwnedRecord(
     prisma.document,
     documentId,
     userId,

@@ -4,7 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { checkUsageLimit } from './subscription-utils'
 import { logger } from './logger'
-import { ClientOperations } from './database-operations'
+import { ClientOperations } from './database'
 import { ClientFormData } from '@/types/client'
 import { prisma } from './prisma'
 
