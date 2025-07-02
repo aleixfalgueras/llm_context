@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,6 +9,7 @@ import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dia
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
 import { ServiceStatus } from '@/types/enums'
+import { useLocalStorage } from '@/hooks/use-local-storage'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -28,33 +29,15 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
     'custom-document': true,
   }
 
-  const [visibleServices, setVisibleServices] = useState<Record<string, boolean>>(defaultVisibility)
-
-  // Load saved service visibility preferences on component mount
-  useEffect(() => {
-    const savedVisibility = localStorage.getItem('ai-services-visibility')
-    
-    if (savedVisibility) {
-      try {
-        const parsed = JSON.parse(savedVisibility)
-        // Merge saved preferences with default visibility to ensure new services are visible
-        const mergedVisibility = { ...defaultVisibility, ...parsed }
-        setVisibleServices(mergedVisibility)
-        // Update localStorage to include any new services
-        localStorage.setItem('ai-services-visibility', JSON.stringify(mergedVisibility))
-      } catch (error) {
-        console.error('Failed to parse saved service visibility:', error)
-        // Fall back to default visibility on error
-        setVisibleServices(defaultVisibility)
-      }
-    }
-  }, [])
+  const { 
+    value: visibleServices, 
+    setValue: setVisibleServices 
+  } = useLocalStorage('ai-services-visibility', defaultVisibility)
 
   // Save service visibility preferences whenever they change
   const handleServiceVisibilityChange = (serviceId: string, visible: boolean) => {
     const newVisibility = { ...visibleServices, [serviceId]: visible }
     setVisibleServices(newVisibility)
-    localStorage.setItem('ai-services-visibility', JSON.stringify(newVisibility))
   }
 
   const handleDocumentCreated = (clientId: string, documentId: string) => {
@@ -90,7 +73,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   ]
 
   // Filter services based on visibility preferences
-  const filteredServices = services.filter(service => visibleServices[service.id])
+  const filteredServices = services.filter(service => visibleServices[service.id as keyof typeof visibleServices])
 
   return (
     <>
@@ -134,7 +117,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                   <Checkbox
                     key={service.id}
                     id={service.id}
-                    checked={visibleServices[service.id]}
+                    checked={visibleServices[service.id as keyof typeof visibleServices]}
                     onChange={(e) => 
                       handleServiceVisibilityChange(service.id, e.target.checked)
                     }
