@@ -1,10 +1,9 @@
 import { 
-  createOpenRouterCompletion, 
-  createOpenRouterCompletionStream,
-  OpenRouterCompletionOptions,
-  UsageTrackingOptions,
-  StreamChunk
-} from './openrouter-wrapper'
+  openRouterService,
+  type OpenRouterCompletionOptions,
+  type UsageTrackingOptions,
+  type StreamChunk
+} from './openrouter'
 import { AIProviderError } from './ai-errors'
 
 // Re-export interfaces for backward compatibility
@@ -27,7 +26,11 @@ export async function createAICompletion(
   } | null
 }> {
   try {
-    return await createOpenRouterCompletion(completionOptions, trackingOptions)
+    const result = await openRouterService.createCompletion(completionOptions, trackingOptions)
+    return {
+      content: result.content,
+      usage: result.usage || null
+    }
   } catch (error) {
     // Re-throw AIProviderError as-is
     if (error instanceof AIProviderError) {
@@ -52,7 +55,7 @@ export async function* createAICompletionStream(
   trackingOptions: UsageTrackingOptions
 ): AsyncGenerator<StreamChunk, void, unknown> {
   try {
-    yield* createOpenRouterCompletionStream(completionOptions, trackingOptions)
+    yield* openRouterService.createStreamingCompletion(completionOptions, trackingOptions)
   } catch (error) {
     // Re-throw AIProviderError as-is
     if (error instanceof AIProviderError) {

@@ -6,7 +6,7 @@
  */
 
 import { config } from 'dotenv'
-import { createOpenRouterCompletion } from '../lib/openrouter-wrapper'
+import { openRouterService } from '../lib/openrouter'
 import { MODEL_IDS } from '../lib/models-config'
 
 // Load environment variables
@@ -25,7 +25,7 @@ async function testModelLogging() {
   // Test 1: Gemini 2.0 Flash logging
   console.log('1. Testing Gemini 2.0 Flash model logging...')
   try {
-    await createOpenRouterCompletion(
+    await openRouterService.createCompletion(
       {
         model: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
         messages: [
@@ -51,7 +51,7 @@ async function testModelLogging() {
   // Test 2: GPT-4.1 Nano logging
   console.log('2. Testing GPT-4.1 Nano model logging...')
   try {
-    await createOpenRouterCompletion(
+    await openRouterService.createCompletion(
       {
         model: MODEL_IDS.OPENAI_GPT_4_1_NANO,
         messages: [
@@ -79,7 +79,7 @@ async function testModelLogging() {
   
   // Test chat assistant
   try {
-    await createOpenRouterCompletion(
+    await openRouterService.createCompletion(
       {
         model: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
         messages: [
@@ -102,7 +102,7 @@ async function testModelLogging() {
 
   // Test meeting report generator
   try {
-    await createOpenRouterCompletion(
+    await openRouterService.createCompletion(
       {
         model: MODEL_IDS.OPENAI_GPT_4_1_NANO,
         messages: [
@@ -126,7 +126,7 @@ async function testModelLogging() {
 
   // Test custom document generator
   try {
-    await createOpenRouterCompletion(
+    await openRouterService.createCompletion(
       {
         model: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
         messages: [

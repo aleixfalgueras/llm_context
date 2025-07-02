@@ -1,6 +1,6 @@
 'use client'
 
-import { deleteDocument, deleteAllDocuments, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
+import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/types/enums'
 
@@ -53,13 +53,15 @@ export function useDocumentOperations({
     }
 
     try {
-      await createDocument(
+      await DocumentClientService.createDocument(
         clientId,
         documentName,
         documentType,
         documentContent,
-        startDate ? new Date(startDate) : undefined,
-        endDate ? new Date(endDate) : undefined
+        {
+          startDate: startDate ? new Date(startDate) : undefined,
+          endDate: endDate ? new Date(endDate) : undefined
+        }
       )
       toast({
         title: 'Success',
@@ -105,7 +107,9 @@ export function useDocumentOperations({
     }
 
     try {
-      await updateDocumentNameAndContent(selectedDocument.id, editedDocumentName, editedContent)
+      await DocumentClientService.updateDocument(selectedDocument.id, {
+        documentName: editedDocumentName
+      })
       setDocumentContent(editedContent)
       setSelectedDocument({ ...selectedDocument, documentName: editedDocumentName })
       toast({
@@ -130,7 +134,7 @@ export function useDocumentOperations({
     }
 
     try {
-      await deleteDocument(document.id)
+      await DocumentClientService.deleteDocument(document.id)
       toast({
         title: 'Success',
         description: 'Document deleted successfully',
@@ -162,7 +166,7 @@ export function useDocumentOperations({
 
     if (showDeleteAllConfirm) {
       try {
-        await deleteAllDocuments(clientId)
+        await DocumentClientService.deleteAllDocuments(clientId)
         toast({
           title: 'Success',
           description: 'All documents deleted successfully',

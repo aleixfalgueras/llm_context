@@ -6,7 +6,7 @@
  */
 
 import { config } from 'dotenv'
-import { createOpenRouterCompletion, fetchOpenRouterModels, getOpenRouterCredits } from '../lib/openrouter-wrapper'
+import { openRouterService } from '../lib/openrouter'
 import { DEFAULT_MODEL } from '../lib/models-config'
 
 // Load environment variables
@@ -28,7 +28,10 @@ async function testOpenRouterIntegration() {
   // Test 2: Check Credits
   console.log('\n2. Checking Account Credits...')
   try {
-    const credits = await getOpenRouterCredits()
+    const creditsData = await openRouterService.getCredits()
+    const credits = {
+      credits: creditsData.data?.limit || 0
+    }
     if (credits) {
       console.log(`✅ Account Credits: $${credits.credits.toFixed(2)}`)
     } else {
@@ -41,7 +44,15 @@ async function testOpenRouterIntegration() {
   // Test 3: Fetch Available Models
   console.log('\n3. Fetching Available Models...')
   try {
-    const models = await fetchOpenRouterModels()
+    const modelsResponse = await openRouterService.getModels()
+    const models = modelsResponse.data.map((model: any) => ({
+      id: model.id,
+      name: model.id,
+      description: model.description || 'No description available',
+      context_length: model.context_length || 4096,
+      pricing: model.pricing || { prompt: '0', completion: '0' },
+      top_provider: model.top_provider || {}
+    }))
     console.log(`✅ Found ${models.length} available models`)
     
     // Show some popular models
@@ -62,7 +73,7 @@ async function testOpenRouterIntegration() {
   // Test 4: Simple Completion Test
   console.log('\n4. Testing AI Completion...')
   try {
-    const testCompletion = await createOpenRouterCompletion(
+    const testCompletion = await openRouterService.createCompletion(
       {
         model: DEFAULT_MODEL,
         messages: [
@@ -81,8 +92,8 @@ async function testOpenRouterIntegration() {
     console.log(`   Response: ${testCompletion.content}`)
     if (testCompletion.usage) {
       console.log(`   Tokens: ${testCompletion.usage.totalTokens}`)
-      console.log(`   Note: OpenRouter handles billing automatically`)
     }
+    console.log(`   Note: OpenRouter handles billing automatically`)
   } catch (error) {
     console.error('❌ Error in AI completion test:', error)
   }
@@ -90,7 +101,7 @@ async function testOpenRouterIntegration() {
   // Test 5: Test Error Handling
   console.log('\n5. Testing Error Handling...')
   try {
-    await createOpenRouterCompletion(
+    await openRouterService.createCompletion(
       {
         model: 'invalid/model-name',
         messages: [
