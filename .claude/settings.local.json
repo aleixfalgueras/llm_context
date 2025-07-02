@@ -6,7 +6,9 @@
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
       "Bash(node:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

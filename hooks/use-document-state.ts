@@ -42,7 +42,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setLoading(true)
     try {
       const docs = await getClientDocuments(clientId)
-      setDocuments(docs)
+      setDocuments(docs as unknown as Document[])
     } catch (error) {
       toast({
         title: 'Error',
