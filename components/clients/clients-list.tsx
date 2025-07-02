@@ -12,7 +12,7 @@ import { ClientTableView } from '@/components/clients/client-table-view'
 import { ClientPagination } from '@/components/clients/client-pagination'
 import { ClientEmptyState } from '@/components/clients/client-empty-state'
 import { UsageInfo, Client, LanguageInfo, ClientActionHandlers, PaginationInfo } from '@/types/client-list-types'
-import { ViewMode, ButtonVariant, ToastVariant, Language, LANGUAGE_INFO } from '@/types/enums'
+import { ViewMode, ButtonVariant, ToastVariant } from '@/types/enums'
 
 interface ClientsListProps {
   clients: Client[]
@@ -23,7 +23,7 @@ interface ClientsListProps {
   onViewDocuments: (client: Client) => void
 }
 
-export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
+export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [isDeleting, setIsDeleting] = useState<string | null>(null)

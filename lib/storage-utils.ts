@@ -1,7 +1,7 @@
 import { prisma } from './prisma'
 import { logger } from './logger'
 import { auth } from '@clerk/nextjs/server'
-import { getUserSubscription, getCurrentMonthUsage } from './subscription-utils'
+import { getUserSubscription } from './subscription-utils'
 
 // Storage limits per plan (in bytes)
 import { SubscriptionPlan, SubscriptionPlanType } from '../types/subscription-types'

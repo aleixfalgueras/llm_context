@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,15 +8,12 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Loader2, User, Wand2, Calendar, Upload, Edit, Eye, CheckCircle, RefreshCw } from 'lucide-react'
+import { FileText, Loader2, Wand2, Calendar, Upload, Edit, Eye, RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { DatePicker } from '@/components/ui/date-picker'
-import { getClientDocuments } from '@/lib/document-actions'
-import { DocumentCombobox } from '@/components/ui/document-combobox'
 import { ClientCombobox } from '@/components/ui/client-combobox'
 import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
-import type { Document } from '@/types/client-document-types'
 import { getDefaultModel } from '@/lib/models-config'
 
 interface MeetingReportDialogProps {
@@ -48,8 +45,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
   const [generatedContent, setGeneratedContent] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [clientDocuments, setClientDocuments] = useState<Document[]>([])
-  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
   const [isUploadingFile, setIsUploadingFile] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
 
@@ -99,32 +94,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
     }
   }
 
-  // Load client documents when client is selected
-  useEffect(() => {
-    const loadClientDocuments = async () => {
-      if (formData.clientId) {
-        setIsLoadingDocuments(true)
-        try {
-          const documents = await getClientDocuments(formData.clientId)
-          setClientDocuments(documents)
-        } catch (error) {
-          console.error('Error loading client documents:', error)
-          toast({
-            title: 'Error',
-            description: 'Failed to load client documents',
-            variant: 'destructive'
-          })
-        } finally {
-          setIsLoadingDocuments(false)
-        }
-      } else {
-        setClientDocuments([])
-        setFormData(prev => ({ ...prev, formatDocumentId: '' }))
-      }
-    }
-
-    loadClientDocuments()
-  }, [formData.clientId, toast])
 
   const handleGenerate = async () => {
     if (!formData.clientId || !formData.meetingDate || !formData.meetingTranscription.trim()) {
@@ -302,13 +271,6 @@ export function MeetingReportDialog({ open, onOpenChange, clients, onDocumentCre
     onOpenChange(false)
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

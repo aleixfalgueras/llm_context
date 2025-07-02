@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Lightbulb, Copy } from 'lucide-react'
 import { samplePrompts } from '@/lib/sample-prompts'
 import { PromptDialog } from '@/components/prompts/prompt-dialog'
-import { PromptBasic } from '@/types/component-types'
 
 interface SamplePromptCardProps {
   prompt: typeof samplePrompts[0]
@@ -14,7 +13,7 @@ interface SamplePromptCardProps {
   onSuccess: () => void
 }
 
-export function SamplePromptCard({ prompt, onUseAsTemplate, onSuccess }: SamplePromptCardProps) {
+export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
   return (
     <Card className="h-[240px] hover:shadow-lg transition-all duration-200 hover:border-amber-200 dark:hover:border-amber-800 hover:bg-amber-50/30 dark:hover:bg-amber-950/10 border-amber-100 dark:border-amber-900 bg-amber-50/20 dark:bg-amber-950/5 flex flex-col">
       <CardHeader className="pb-3 flex-1 flex flex-col">

@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return new Response('Authentication required', { status: 401 })
     }
 
-    const { clientId, meetingDate, reportContent, additionalInfo, documentName } = await req.json()
+    const { clientId, meetingDate, reportContent, additionalInfo: _additionalInfo, documentName } = await req.json()
 
     if (!clientId || !meetingDate || !reportContent) {
       return new Response('Missing required fields', { status: 400 })

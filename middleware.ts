@@ -16,14 +16,11 @@ const isPublicRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, request) => {
   const url = new URL(request.url)
-  const startTime = Date.now()
-  
 
 
   if (!isPublicRoute(request)) {
     try {
     await auth.protect()
-      const authData = await auth();
       // Removed authentication successful log to reduce noise
     } catch (error) {
       logger.warn('🚫 Authentication failed', { 
@@ -34,7 +31,6 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  const duration = Date.now() - startTime;
   // Removed middleware completed log to reduce noise
 })
 

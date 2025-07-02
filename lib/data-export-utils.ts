@@ -1,5 +1,4 @@
 import { prisma } from './prisma'
-import { CLIENT_SELECT_DETAILED } from '@/types/client'
 import fs from 'fs/promises'
 import path from 'path'
 

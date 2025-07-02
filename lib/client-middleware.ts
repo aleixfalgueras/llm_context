@@ -17,8 +17,7 @@ export interface ClientAccessResult {
  */
 export async function withClientAccess(
   userId: string,
-  clientId: string,
-  options: ClientAccessOptions = {}
+  clientId: string
 ): Promise<ClientAccessResult> {
   try {
     // Fetch and validate client belongs to user
@@ -55,8 +54,7 @@ export async function withClientAccess(
  */
 export async function withAuthUsageAndClient(
   action: 'document' | 'client',
-  clientId: string,
-  clientOptions: ClientAccessOptions = {}
+  clientId: string
 ): Promise<{
   success: boolean
   userId?: string
@@ -90,7 +88,7 @@ export async function withAuthUsageAndClient(
   }
 
   // Check client access
-  const clientCheck = await withClientAccess(userId, clientId, clientOptions)
+  const clientCheck = await withClientAccess(userId, clientId)
   
   if (!clientCheck.success) {
     return {

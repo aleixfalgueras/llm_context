@@ -49,8 +49,7 @@ export async function saveDocumentToStorage({
   const finalDocumentName = documentName || generateDefaultDocumentName(
     client.name,
     documentType,
-    startDate,
-    endDate
+    startDate
   )
   
   const fileName = `${finalDocumentName}.md`
@@ -111,8 +110,7 @@ export async function saveDocumentToStorage({
 function generateDefaultDocumentName(
   clientName: string,
   documentType: DocumentType,
-  startDate?: Date | string,
-  endDate?: Date | string
+  startDate?: Date | string
 ): string {
   switch (documentType) {
     case DOCUMENT_TYPES.MEETING:

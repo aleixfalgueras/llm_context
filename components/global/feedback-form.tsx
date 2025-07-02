@@ -8,10 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { Badge } from '@/components/ui/badge'
 import { 
   FeedbackType, 
-  Priority, 
   ToastVariant,
   FEEDBACK_TYPE_LABELS,
   FEEDBACK_TYPE_DESCRIPTIONS,

@@ -1,14 +1,13 @@
 import { prisma } from './prisma'
 import { logger, withTiming } from './logger'
 import { getTierFromPlan, isModelAvailableForTier } from './models-config'
-import { SubscriptionPlan, SubscriptionStatus, SubscriptionPlanType, ModelTier } from '../types/subscription-types'
+import { SubscriptionPlan, SubscriptionStatus, ModelTier } from '../types/subscription-types'
 
 import { 
   getCachedSubscription, 
   cacheSubscription, 
   getCachedUsage, 
   cacheUsage,
-  invalidateSubscriptionCache,
   invalidateUsageCache
 } from './subscription-cache'
 

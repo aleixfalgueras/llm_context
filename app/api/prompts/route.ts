@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { NextRequest } from 'next/server'
-import { logger, createRequestContext, withTiming } from '@/lib/logger'
+import { logger, withTiming } from '@/lib/logger'
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'

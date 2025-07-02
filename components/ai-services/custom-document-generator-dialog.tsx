@@ -7,10 +7,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2, FileText, Save, Download, RefreshCw, Lightbulb, Plus, Edit, Eye } from 'lucide-react'
+import { Loader2, FileText, Save, RefreshCw, Edit, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
@@ -42,7 +42,7 @@ export function CustomDocumentGeneratorDialog({
   const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
-  const [isRegenerating, setIsRegenerating] = useState(false)
+  const [_isRegenerating, _setIsRegenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
   const [generatedContent, setGeneratedContent] = useState('')
@@ -50,7 +50,7 @@ export function CustomDocumentGeneratorDialog({
   const [useCustomPrompt, setUseCustomPrompt] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const { toast } = useToast()
-  const [error, setError] = useState('')
+  const [_error, _setError] = useState('')
 
   // Load prompts when dialog opens
   useEffect(() => {
@@ -107,7 +107,7 @@ export function CustomDocumentGeneratorDialog({
     }
 
     setIsGenerating(true)
-    setError('')
+    _setError('')
 
     try {
       clientLogger.apiCall('POST', '/api/ai-services/generate-custom-document', {

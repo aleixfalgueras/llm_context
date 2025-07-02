@@ -2,7 +2,7 @@
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createAICompletion } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
-import { logger, createRequestContext, withTiming } from '@/lib/logger'
+import { logger, withTiming } from '@/lib/logger'
 import { DEFAULT_MODEL } from '@/lib/models-config'
 
 export async function POST(req: Request) {
