@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Users, FileText, Edit, Megaphone, Video, Target, Layers, TrendingUp, BarChart3, PenTool } from 'lucide-react'
+import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Megaphone, Target, TrendingUp, BarChart3, PenTool } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/global/theme-toggle'

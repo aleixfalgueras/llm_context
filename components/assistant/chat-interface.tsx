@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, MessageSquare, Shield } from 'lucide-react'
+import { Bot, Shield } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 
 export function ChatInterface() {

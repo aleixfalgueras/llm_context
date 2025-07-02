@@ -24,7 +24,6 @@ interface BenchmarkResult {
 }
 
 async function benchmarkOperation<T>(
-  name: string, 
   operation: () => Promise<T>,
   iterations: number = 3
 ): Promise<{ result: T; averageMs: number }> {
@@ -83,8 +82,8 @@ async function testFieldSelection() {
   }
 
   try {
-    const oldResult = await benchmarkOperation('Old Prompts Query', oldPromptsQuery)
-    const newResult = await benchmarkOperation('New Prompts Query', newPromptsQuery)
+    const oldResult = await benchmarkOperation(oldPromptsQuery)
+    const newResult = await benchmarkOperation(newPromptsQuery)
 
     const improvement = ((oldResult.averageMs - newResult.averageMs) / oldResult.averageMs * 100).toFixed(1)
 
@@ -115,21 +114,21 @@ async function testCaching() {
   const { getUserSubscription, getCurrentMonthUsage } = await import('../lib/subscription-utils')
 
   // First call (cache miss)
-  const firstCall = await benchmarkOperation('First Subscription Call', async () => {
+  const firstCall = await benchmarkOperation(async () => {
     return await getUserSubscription(testUserId)
   }, 1)
 
   // Second call (cache hit)
-  const secondCall = await benchmarkOperation('Second Subscription Call', async () => {
+  const secondCall = await benchmarkOperation(async () => {
     return await getUserSubscription(testUserId)
   }, 1)
 
   // Usage call cache test
-  const firstUsageCall = await benchmarkOperation('First Usage Call', async () => {
+  const firstUsageCall = await benchmarkOperation(async () => {
     return await getCurrentMonthUsage(testUserId)
   }, 1)
 
-  const secondUsageCall = await benchmarkOperation('Second Usage Call', async () => {
+  const secondUsageCall = await benchmarkOperation(async () => {
     return await getCurrentMonthUsage(testUserId)
   }, 1)
 
@@ -184,8 +183,8 @@ async function testBatchOperations() {
     return { users, clients, documents, prompts }
   }
 
-  const sequentialResult = await benchmarkOperation('Sequential Queries', sequentialQuery)
-  const parallelResult = await benchmarkOperation('Parallel Queries', parallelQuery)
+  const sequentialResult = await benchmarkOperation(sequentialQuery)
+  const parallelResult = await benchmarkOperation(parallelQuery)
 
   const improvement = ((sequentialResult.averageMs - parallelResult.averageMs) / sequentialResult.averageMs * 100).toFixed(1)
 

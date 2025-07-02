@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { checkUsageLimit, updateUsageTracking, checkModelAccess } from './subscription-utils'
-import { createUsageLimitResponse } from './ai-wrapper'
 import { prisma } from './prisma'
-import { getModelsByTier, getTierFromPlan } from './models-config'
+import { getModelsByTier } from './models-config'
 import { getStorageAnalytics } from './storage-utils'
 
 export interface UsageLimitResponse {
@@ -129,7 +128,7 @@ export async function getUsageInfo(userId: string) {
   try {
     // Get subscription and usage data once, then check all limits
     // This prevents the race condition of 4 parallel checkUsageLimit calls
-    const { getUserSubscription, getCurrentMonthUsage, SUBSCRIPTION_PLANS } = await import('./subscription-utils');
+    const { getUserSubscription, getCurrentMonthUsage } = await import('./subscription-utils');
     
     // Parallelize all database calls for better performance
     const [subscription, usage, storageAnalytics] = await Promise.all([
@@ -138,7 +137,7 @@ export async function getUsageInfo(userId: string) {
       getStorageAnalytics(userId)
     ]);
 
-    const plan = SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS];
+    // Plan details stored in subscription object
 
 
 

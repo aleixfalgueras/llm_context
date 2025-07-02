@@ -16,7 +16,7 @@ interface ClientsPageClientProps {
 // No longer need to store usage info at component level
 
 export function ClientsPageClient({ clients: initialClients }: ClientsPageClientProps) {
-  const [clients, setClients] = useState(initialClients)
+  const [clients] = useState(initialClients)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<any>(null)
   const [selectedClient, setSelectedClient] = useState<any>(null)

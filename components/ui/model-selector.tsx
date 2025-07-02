@@ -16,7 +16,7 @@ interface ModelSelectorProps {
   className?: string
 }
 
-export function ModelSelector({ selectedModel, onModelSelect, userTier, className }: ModelSelectorProps) {
+export function ModelSelector({ selectedModel, onModelSelect, className }: ModelSelectorProps) {
   const [open, setOpen] = useState(false)
 
   const currentModel = AVAILABLE_MODELS.find(model => model.id === selectedModel)

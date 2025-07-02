@@ -8,7 +8,7 @@ import { Plus, FileText, Lightbulb, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { samplePrompts, getSamplePromptsByCategory } from '@/lib/sample-prompts'
+import { getSamplePromptsByCategory } from '@/lib/sample-prompts'
 import { PromptStatsCards } from '@/components/prompts/prompt-stats-cards'
 import { PromptFiltersBar } from '@/components/prompts/prompt-filters-bar'
 import { PromptCard } from '@/components/prompts/prompt-card'
@@ -18,7 +18,6 @@ import {
   Prompt, 
   PromptStats, 
   PromptFilters, 
-  PromptActionHandlers, 
   FilterActionHandlers 
 } from '@/types/prompt-management-types'
 
@@ -180,11 +179,6 @@ export function PromptsManagement() {
     mostUsed: prompts.reduce((max, p) => p.usageCount > (max?.usageCount || 0) ? p : max, prompts[0] || null),
   }
 
-  const promptActionHandlers: PromptActionHandlers = {
-    onEdit: () => fetchPrompts(),
-    onDelete: deletePrompt,
-    onToggleStatus: togglePromptStatus
-  }
 
   const filterActionHandlers: FilterActionHandlers = {
     onSearchChange: (search) => setFilters(prev => ({ ...prev, searchTerm: search })),
@@ -220,7 +214,7 @@ export function PromptsManagement() {
     setShowPromptDialog(true)
   }
 
-  const useAsTemplate = (samplePrompt: typeof samplePrompts[0]) => {
+  const useAsTemplate = () => {
     // This will be handled by the PromptDialog component
     // We'll pass the sample prompt data to pre-fill the form
   }
@@ -267,7 +261,7 @@ export function PromptsManagement() {
               <SamplePromptCard
                 key={samplePrompt.id}
                 prompt={samplePrompt}
-                onUseAsTemplate={() => useAsTemplate(samplePrompt)}
+                onUseAsTemplate={() => useAsTemplate()}
                 onSuccess={fetchPrompts}
               />
             ))}

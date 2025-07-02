@@ -6,7 +6,7 @@ interface RouteParams {
 }
 
 // GET /api/prompts/[id] - Get specific prompt
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   try {
     const { userId } = await auth()
     
@@ -82,7 +82,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 }
 
 // DELETE /api/prompts/[id] - Delete prompt
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   try {
     const { userId } = await auth()
     

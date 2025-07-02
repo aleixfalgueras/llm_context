@@ -9,10 +9,10 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
-import { CLIENT_FIELD_LABELS, CLIENT_FIELD_PLACEHOLDERS } from '@/types/client'
+import { CLIENT_FIELD_LABELS } from '@/types/client'
 import { useToast } from '@/hooks/use-toast'
 import { capitalizeName } from '@/lib/utils'
-import { Globe, HelpCircle, Upload, FileText, CheckCircle, Loader2, Shield } from 'lucide-react'
+import { Globe, HelpCircle, Shield } from 'lucide-react'
 
 interface ClientFormProps {
   client?: any

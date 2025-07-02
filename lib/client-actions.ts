@@ -3,10 +3,10 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { checkUsageLimit, updateUsageTracking } from './subscription-utils'
+import { checkUsageLimit } from './subscription-utils'
 import { logger } from './logger'
 
-import { ClientFormData, CLIENT_SELECT_DETAILED } from '@/types/client'
+import { ClientFormData } from '@/types/client'
 
 export type ClientData = ClientFormData
 

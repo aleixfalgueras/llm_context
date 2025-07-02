@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Edit3 } from 'lucide-react'
+import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp } from 'lucide-react'
 import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dialog'
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
-import { useSubscription } from '@/hooks/use-subscription'
 import { ServiceStatus } from '@/types/enums'
 
 interface AIServicesClientProps {
@@ -16,7 +15,6 @@ interface AIServicesClientProps {
 }
 
 export function AIServicesClient({ clients }: AIServicesClientProps) {
-  const subscription = useSubscription()
   const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
   const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)

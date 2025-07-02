@@ -24,7 +24,6 @@ interface ClientContextSidebarProps {
 }
 
 export function ClientContextSidebar({ 
-  chatId,
   selectedClientId = null, 
   onClientSelect,
   clients = [],
@@ -85,7 +84,7 @@ export function ClientContextSidebar({
     try {
       // Convert clientContext selections to array of field names
       const selectedFields = Object.entries(clientContext)
-        .filter(([key, value]) => value)
+        .filter(([, value]) => value)
         .map(([key]) => key)
       
       const newChatId = await createChatAndReturn('New Chat', selectedClientId, selectedFields)

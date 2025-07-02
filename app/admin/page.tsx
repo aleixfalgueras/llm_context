@@ -10,11 +10,8 @@ import {
   MessageSquare, 
   TrendingUp, 
   DollarSign, 
-  Calendar,
   AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock
+  XCircle
 } from 'lucide-react'
 import { FeedbackType, Priority, BadgeVariant } from '@/types/enums'
 

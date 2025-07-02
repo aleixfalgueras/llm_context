@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import { SubscriptionPlan } from '@/types/subscription-types'
 
 
 export default function PricingPage() {
-  const { user } = useUser()
+  const { user: _user } = useUser()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
 
   const handleUpgrade = async (planId: string) => {

@@ -1,10 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Edit, Save, X, Eye } from 'lucide-react'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { getDocumentTypeLabel, type DocumentType } from '@/types/document-types'

@@ -4,7 +4,7 @@ import { replaceClientVariables } from '@/lib/variable-replacement'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createAICompletion } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
-import { getDefaultTemperature, getDefaultMaxTokens, DEFAULT_MODEL } from '@/lib/models-config'
+import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 import { logger } from '@/lib/logger'
 

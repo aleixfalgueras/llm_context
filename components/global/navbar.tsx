@@ -7,7 +7,7 @@ import { ThemeToggle } from '@/components/global/theme-toggle'
 import { cn } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Menu, Shield } from 'lucide-react'
+import { Menu } from 'lucide-react'
 
 export function Navbar() {
   const pathname = usePathname()

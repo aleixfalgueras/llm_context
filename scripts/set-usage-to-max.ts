@@ -95,7 +95,7 @@ async function getUserSubscription(userId: string) {
   return subscription
 }
 
-async function updateUserUsageToMax(userId: string, planName: PlanName, limitType: LimitType) {
+async function updateUserUsageToMax(userId: string, planName: PlanName) {
   const plan = SUBSCRIPTION_PLANS[planName]
   const now = new Date()
   const currentYear = now.getFullYear()
@@ -104,8 +104,8 @@ async function updateUserUsageToMax(userId: string, planName: PlanName, limitTyp
   console.log(`🎯 Setting token usage to maximum for plan: ${planName}`)
   console.log(`📅 Target period: ${currentYear}-${currentMonth.toString().padStart(2, '0')}`)
   
-  // Get current usage to preserve what we can
-  const currentUsage = await prisma.userUsage.findUnique({
+  // Check if current usage record exists for reference
+  await prisma.userUsage.findUnique({
     where: {
       userId_year_month: {
         userId,
@@ -189,7 +189,7 @@ async function main() {
     
     // Step 2: Set usage to maximum for the plan
     console.log(`\n📊 Step 2: Setting ${limitType} usage to maximum limits...`)
-    const updatedUsage = await updateUserUsageToMax(userId, planName, limitType)
+    const updatedUsage = await updateUserUsageToMax(userId, planName)
     
     console.log(`\n✅ Success! Token usage set to maximum.`)
     console.log('\n📋 Final Usage Summary:')

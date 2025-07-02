@@ -28,10 +28,8 @@ interface UseDocumentOperationsProps {
 
 export function useDocumentOperations({
   clientId,
-  clientName,
   loadDocuments,
   resetCreateState,
-  resetEditState,
   setSelectedDocument,
   setDocumentContent,
   setDocuments,

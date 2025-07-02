@@ -38,8 +38,7 @@ export function ClientCombobox({
   placeholder = "Choose a client",
   searchPlaceholder = "Search clients...",
   emptyMessage = "No clients found.",
-  disabled = false,
-  required = false
+  disabled = false
 }: ClientComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
