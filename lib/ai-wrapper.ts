@@ -5,6 +5,7 @@ import {
   type StreamChunk
 } from './openrouter'
 import { AIProviderError } from './ai-errors'
+import { logger } from './logger'
 
 // Re-export interfaces for backward compatibility
 export interface AICompletionOptions extends OpenRouterCompletionOptions {}
@@ -38,7 +39,7 @@ export async function createAICompletion(
     }
     
     // Handle unexpected errors
-    console.error('Unexpected error in AI completion:', error)
+    logger.aiError('openrouter', error as Error, { operation: 'createAICompletion' })
     throw new AIProviderError(
       'Unexpected AI service error',
       'openrouter',
@@ -63,7 +64,7 @@ export async function* createAICompletionStream(
     }
     
     // Handle unexpected errors
-    console.error('Unexpected error in AI completion stream:', error)
+    logger.aiError('openrouter', error as Error, { operation: 'createAICompletionStream' })
     throw new AIProviderError(
       'Unexpected AI service error',
       'openrouter',

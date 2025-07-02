@@ -5,6 +5,7 @@ import { useFormOperations } from './use-async-operation'
 import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
 import { validateClientForm } from '@/lib/validation-helpers'
 import { capitalizeName } from '@/lib/utils'
+import { getLanguageOptions } from '@/types/enums'
 
 interface UseClientFormProps {
   client?: any
@@ -81,19 +82,8 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     validationRules,
   })
 
-  // Available languages for document generation
-  const languages = [
-    { value: 'english', label: 'English', flag: '🇺🇸' },
-    { value: 'spanish', label: 'Spanish (Español)', flag: '🇪🇸' },
-    { value: 'french', label: 'French (Français)', flag: '🇫🇷' },
-    { value: 'german', label: 'German (Deutsch)', flag: '🇩🇪' },
-    { value: 'italian', label: 'Italian (Italiano)', flag: '🇮🇹' },
-    { value: 'portuguese', label: 'Portuguese (Português)', flag: '🇵🇹' },
-    { value: 'dutch', label: 'Dutch (Nederlands)', flag: '🇳🇱' },
-    { value: 'polish', label: 'Polish (Polski)', flag: '🇵🇱' },
-    { value: 'russian', label: 'Russian (Русский)', flag: '🇷🇺' },
-    { value: 'catalan', label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
-  ]
+  // Use centralized language options from enums - single source of truth
+  const languages = getLanguageOptions()
 
   const updateField = (field: keyof ClientData, value: string) => {
     updateFormField(field, value)

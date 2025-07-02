@@ -1,21 +1,16 @@
-# SpeedBrand
+# LLM Context
 
-A modern AI-powered marketing assistant built with Next.js 14, React 18, and OpenRouter AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations with curated AI models organized by subscription tiers.
+A production-ready AI-powered marketing assistant platform built with Next.js 14, React 18, and OpenRouter AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations efficiently with enterprise-grade privacy compliance and modular architecture.
 
 ## ✨ Key Features
 
-### 🤖 **Tiered AI Model Access**
-- **Basic Tier Models**: Cost-effective options for everyday tasks
-  - GPT-4o Mini: Fastest OpenAI model for general content
-  - Claude 3 Haiku: Efficient Anthropic model for quick responses  
-  - Gemini Flash: Google's speed-optimized model
-- **Pro Tier Models**: Premium options for complex work + all basic models
-  - GPT-4o: OpenAI's most capable model for complex reasoning
-  - Claude 3.5 Sonnet: Anthropic's premium model for sophisticated writing
-  - Gemini Pro: Google's flagship model for advanced tasks
-- **Smart Model Selection**: Visual indicators showing which models are available in your plan
-- **Upgrade Prompts**: Clear guidance on accessing premium models with plan upgrades
-- **Cost Optimization**: Token limits calculated to ensure profitability while maximizing user value
+### 🤖 **Optimized AI Model Architecture**
+- **Dual Model System**: All subscription tiers use Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for maximum cost efficiency
+- **Unified AI Integration**: Single interface through OpenRouter providing access to 400+ models
+- **Cost-Optimized Selection**: Models chosen for 89-91% profit margins while maintaining high quality
+- **Intelligent Routing**: Automatic model selection based on task requirements
+- **Real-time Usage Tracking**: Token consumption monitoring without confusing cost estimates
+- **Business Sustainability**: Pricing ensures long-term platform viability
 
 ### 👥 **Comprehensive Client Management**
 - **Rich Client Profiles**: Store business information, contact details, general context, and up to 3 specific context fields
@@ -73,6 +68,41 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 - **User Feedback System**: Built-in feedback collection for continuous improvement
 - **Performance Monitoring**: Logging and timing analysis across all models
 
+## 🏗️ Modular Architecture
+
+### **Recently Refactored Modular Structure**
+The codebase has been completely refactored to follow the Single Responsibility Principle with clean modular architecture:
+
+#### **Database Operations Module** (`/lib/database/`)
+- **base-operations.ts**: Generic CRUD operations with ownership verification
+- **client-operations.ts**: Client-specific database logic and search
+- **document-operations.ts**: Document lifecycle management
+- **prompt-operations.ts**: Prompt library operations with analytics
+- **Purpose**: Centralized, type-safe database operations with consistent error handling
+
+#### **OpenRouter Integration Module** (`/lib/openrouter/`)
+- **client.ts**: Low-level OpenRouter API client with streaming support
+- **service.ts**: High-level AI service with usage tracking and orchestration
+- **error-handler.ts**: Comprehensive AI-specific error handling and recovery
+- **stream-handler.ts**: Real-time streaming response processing
+- **Purpose**: Complete abstraction of OpenRouter API with usage tracking and error resilience
+
+#### **Document Management Module** (`/lib/documents/`)
+- **repository.ts**: Database document operations and querying
+- **storage-service.ts**: Supabase file storage operations and validation
+- **service.ts**: Server-side document orchestration with authentication
+- **client-service.ts**: Client-side document operations via API calls
+- **server.ts**: Server-only exports for API routes
+- **Purpose**: Complete document lifecycle management from creation to storage and retrieval
+
+### **Architectural Benefits**
+- **Single Responsibility**: Each module handles one specific concern
+- **Type Safety**: Comprehensive TypeScript implementation throughout
+- **Better Testability**: Smaller, focused units that are easier to test
+- **Enhanced Maintainability**: Changes to one responsibility don't affect others
+- **Improved Reusability**: Individual services can be reused across features
+- **Clean Separation**: Clear boundaries between UI, business logic, and data access
+
 ## 🏗️ Tech Stack
 
 ### **Frontend**
@@ -109,19 +139,19 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 ## 💰 Pricing Strategy
 
 ### **Basic Plan - $10/month**
-- **100K tokens per month** (~75 pages of content)
+- **5M tokens per month** (91.25% profit margin)
 - **3 client profiles**
-- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
+- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
-### **Pro Plan - $17/month**  
-- **1.6M tokens per month** (~1,200 pages of content)
+### **Pro Plan - $25/month**  
+- **15M tokens per month** (89.5% profit margin)
 - **Unlimited client profiles**
-- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
+- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
 ### **Business Plan - $43/month**
-- **4.5M tokens per month** (~3,400 pages of content)
+- **Higher token limits** with enterprise features
 - **Unlimited client profiles**
-- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
+- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
 
 ## 📂 Project Structure
@@ -154,10 +184,28 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 │   ├── ai-services/       # AI services components
 │   ├── documents/         # Document management components
 │   └── global/            # Shared components
-├── lib/                   # Utility libraries
+├── lib/                   # Utility libraries (modular architecture)
+│   ├── database/          # Database operations module
+│   │   ├── base-operations.ts    # Generic CRUD operations
+│   │   ├── client-operations.ts  # Client-specific database logic
+│   │   ├── document-operations.ts # Document management operations
+│   │   ├── prompt-operations.ts  # Prompt library operations
+│   │   └── index.ts             # Unified exports
+│   ├── openrouter/        # AI provider integration module
+│   │   ├── client.ts            # Low-level OpenRouter API client
+│   │   ├── service.ts           # High-level AI service with usage tracking
+│   │   ├── error-handler.ts     # AI-specific error handling
+│   │   ├── stream-handler.ts    # Streaming response processing
+│   │   └── index.ts             # Unified exports
+│   ├── documents/         # Document management module
+│   │   ├── repository.ts        # Database document operations
+│   │   ├── storage-service.ts   # Supabase file storage operations
+│   │   ├── service.ts           # Server-side document service
+│   │   ├── client-service.ts    # Client-side document operations
+│   │   ├── server.ts            # Server-only exports
+│   │   └── index.ts             # Client-safe exports
 │   ├── actions.ts         # Server actions for chat
 │   ├── client-actions.ts  # Client CRUD operations
-│   ├── document-actions.ts # Document management
 │   ├── client-context-utils.ts # Centralized client context handling
 │   ├── consent-utils.ts   # GDPR utilities
 │   ├── subscription-utils.ts # Usage tracking & limits
@@ -165,8 +213,7 @@ A modern AI-powered marketing assistant built with Next.js 14, React 18, and Ope
 │   ├── language-utils.ts  # Multi-language support
 │   ├── models-config.ts   # Multi-AI model configuration
 │   ├── logger.ts          # Comprehensive logging system
-│   ├── ai-wrapper.ts      # Unified AI integration (OpenRouter)
-│   ├── openrouter-wrapper.ts # OpenRouter API integration
+│   ├── ai-wrapper.ts      # Unified AI integration abstraction
 │   └── variable-replacement.ts # Variable substitution
 ├── prisma/               # Database
 │   ├── schema.prisma     # Complete database schema

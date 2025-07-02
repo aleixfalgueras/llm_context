@@ -1,22 +1,15 @@
 import { saveDocumentToStorage } from '@/lib/document-save-utils'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-import { auth } from '@clerk/nextjs/server'
+import { withEnhancedApi, parseJsonBody, apiSuccess, ApiErrors } from '@/lib/api-middleware'
+import { apiValidation } from '@/lib/validation-helpers'
 
-export async function POST(req: Request) {
+export const POST = withEnhancedApi(async ({ userId, req }) => {
+  const { clientId, meetingDate, reportContent, additionalInfo: _additionalInfo, documentName } = await parseJsonBody(req)
+
+  // Use centralized validation to eliminate duplicate validation patterns
+  apiValidation.meetingReport({ clientId, meetingDate, reportContent })
+
   try {
-    // Check authentication only - no usage limits for documents
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return new Response('Authentication required', { status: 401 })
-    }
-
-    const { clientId, meetingDate, reportContent, additionalInfo: _additionalInfo, documentName } = await req.json()
-
-    if (!clientId || !meetingDate || !reportContent) {
-      return new Response('Missing required fields', { status: 400 })
-    }
-
     // Use the shared document save utility with tracking enabled
     const result = await saveDocumentToStorage({
       clientId,
@@ -28,21 +21,19 @@ export async function POST(req: Request) {
       trackUsage: true // Explicitly enable usage tracking
     })
 
-    return Response.json({
+    return apiSuccess({
       ...result,
       documentId: result.document.id
-    })
+    }, 201)
   } catch (error) {
-    console.error('Error saving meeting report:', error)
-    
     // Check for storage limit errors
     if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
-      return new Response(error.message, { status: 413 }) // 413 Payload Too Large
+      return ApiErrors.payloadTooLarge(error.message)
     }
-    
-    return new Response(
-      error instanceof Error ? error.message : 'Internal Server Error', 
-      { status: 500 }
-    )
+    throw error // Let enhanced middleware handle other errors
   }
-} 
+}, {
+  context: 'Save meeting report',
+  allowedMethods: ['POST'],
+  expectedContentType: 'application/json'
+}) 

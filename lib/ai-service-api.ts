@@ -4,13 +4,8 @@
 
 import { AIProviderError, getAIErrorMessage } from './ai-errors'
 import type { Client } from '@/types/client'
-
-interface APIResponse<T = any> {
-  success: boolean
-  data?: T
-  error?: string
-  details?: any
-}
+import { APIResponse } from '@/types/api-types'
+import { logger } from './logger'
 
 export class AIServiceAPI {
   /**
@@ -64,7 +59,7 @@ export class AIServiceAPI {
         content: result.data
       }
     } catch (error) {
-      console.error('Generation error:', error)
+      logger.error('AI service generation error', error as Error)
       
       if (error instanceof AIProviderError) {
         const errorMsg = getAIErrorMessage(error)
@@ -117,7 +112,7 @@ export class AIServiceAPI {
         documentId: result.data?.id
       }
     } catch (error) {
-      console.error('Save error:', error)
+      logger.error('AI service save error', error as Error)
       return {
         success: false,
         error: 'Network error. Please check your connection and try again.'

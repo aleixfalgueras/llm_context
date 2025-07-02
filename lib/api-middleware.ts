@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { checkUsageLimit } from './subscription-utils'
 import { createUsageLimitResponse } from './ai-wrapper'
 import { handleApiError, ApiErrors } from './api-error-handler'
+import { logger } from './logger'
 
 export interface ApiMiddlewareResult {
   success: boolean
@@ -50,7 +51,7 @@ export async function withAuthAndUsageCheck(
       userId
     }
   } catch (error) {
-    console.error('Error in API middleware:', error)
+    logger.error('Error in API middleware', error as Error, { operation: action })
     return {
       success: false,
       response: new Response('Internal Server Error', { status: 500 })
@@ -69,7 +70,7 @@ export async function trackApiUsage(
     const { trackUsage } = await import('./usage-middleware')
     await trackUsage(userId, metadata)
   } catch (error) {
-    console.error('Error tracking API usage:', error)
+    logger.error('Error tracking API usage', error as Error, { userId, metadata })
     // Don't throw - usage tracking failures shouldn't break the API
   }
 }
@@ -300,4 +301,22 @@ export function extractPagination(
   const skip = (page - 1) * limit
   
   return { page, limit, skip }
+}
+
+/**
+ * Extract client IP and user agent for audit trails
+ * Eliminates duplicate code across routes that need this information
+ */
+export function extractClientInfo(req: NextRequest): { 
+  ipAddress: string; 
+  userAgent: string 
+} {
+  const ipAddress = req.headers.get('x-forwarded-for') || 
+                   req.headers.get('x-real-ip') || 
+                   req.ip ||
+                   'unknown'
+  
+  const userAgent = req.headers.get('user-agent') || 'unknown'
+  
+  return { ipAddress, userAgent }
 } 

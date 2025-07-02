@@ -4,11 +4,7 @@
 
 import { useState, useCallback } from 'react'
 import type { Client } from '@/types/client'
-
-interface ValidationResult {
-  isValid: boolean
-  message?: string
-}
+import { ValidationResult } from '@/types/api-types'
 
 interface UseAIServiceFormProps<TFormData> {
   initialData: TFormData
