@@ -1,99 +1,34 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
-import { 
-  FeedbackType, 
-  ToastVariant,
-  FEEDBACK_TYPE_LABELS,
-  FEEDBACK_TYPE_DESCRIPTIONS,
-  PRIORITY_LABELS,
-  FEEDBACK_TYPE_VALUES,
-  PRIORITY_VALUES
-} from '@/types/enums'
-
-const feedbackTypes = FEEDBACK_TYPE_VALUES.map(type => ({
-  value: type,
-  label: FEEDBACK_TYPE_LABELS[type],
-  description: FEEDBACK_TYPE_DESCRIPTIONS[type]
-}))
-
-const priorities = PRIORITY_VALUES.map(priority => ({
-  value: priority,
-  label: PRIORITY_LABELS[priority]
-}))
+import { FeedbackType } from '@/types/enums'
+import { useFeedbackForm } from '@/hooks/use-feedback-form'
 
 export function FeedbackForm() {
-  const [formData, setFormData] = useState({
-    type: '',
-    title: '',
-    description: '',
-    priority: '',
-    useCase: '',
-    stepsToReproduce: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        const typeLabel = feedbackTypes.find(t => t.value === formData.type)?.label || 'Feedback'
-        toast({
-          title: `${typeLabel} Submitted`,
-          description: 'Thank you for your feedback! We\'ll review it carefully.',
-        })
-        // Reset form
-        setFormData({
-          type: '',
-          title: '',
-          description: '',
-          priority: '',
-          useCase: '',
-          stepsToReproduce: ''
-        })
-      } else {
-        toast({
-          title: 'Error',
-          description: result.error || 'Failed to submit feedback',
-          variant: ToastVariant.DESTRUCTIVE,
-        })
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: ToastVariant.DESTRUCTIVE,
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const {
+    // Form state
+    formData,
+    errors,
+    
+    // Loading state
+    isSubmitting,
+    
+    // Actions
+    updateField,
+    handleSubmit,
+    
+    // Static data
+    feedbackTypes,
+    priorities,
+  } = useFeedbackForm()
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    updateField(field as keyof typeof formData, value)
   }
 
   const selectedType = feedbackTypes.find(t => t.value === formData.type)
@@ -112,7 +47,7 @@ export function FeedbackForm() {
           <div className="space-y-2">
             <Label htmlFor="type">Feedback Type *</Label>
             <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
-              <SelectTrigger>
+              <SelectTrigger className={errors.type ? 'border-red-500' : ''}>
                 <SelectValue placeholder="What type of feedback are you providing?">
                   {selectedType ? selectedType.label : "What type of feedback are you providing?"}
                 </SelectValue>
@@ -128,7 +63,9 @@ export function FeedbackForm() {
                 ))}
               </SelectContent>
             </Select>
-
+            {errors.type && (
+              <p className="text-sm text-red-500">{errors.type}</p>
+            )}
           </div>
 
           {/* Title */}
@@ -147,8 +84,12 @@ export function FeedbackForm() {
                 formData.type === FeedbackType.BUG ? 'Brief description of the bug or issue' :
                 'Brief title for your feedback'
               }
+              className={errors.title ? 'border-red-500' : ''}
               required
             />
+            {errors.title && (
+              <p className="text-sm text-red-500">{errors.title}</p>
+            )}
           </div>
 
           {/* Description */}
@@ -167,16 +108,20 @@ export function FeedbackForm() {
                 formData.type === FeedbackType.BUG ? 'What happened? What did you expect to happen?' :
                 'Please provide details about your feedback'
               }
+              className={errors.description ? 'border-red-500' : ''}
               rows={5}
               required
             />
+            {errors.description && (
+              <p className="text-sm text-red-500">{errors.description}</p>
+            )}
           </div>
 
           {/* Priority */}
           <div className="space-y-2">
             <Label htmlFor="priority">Priority Level *</Label>
             <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
-              <SelectTrigger>
+              <SelectTrigger className={errors.priority ? 'border-red-500' : ''}>
                 <SelectValue placeholder={
                   formData.type === FeedbackType.FEATURE ? 'How important is this feature to you?' :
                   formData.type === FeedbackType.BUG ? 'How severe is this bug?' :
@@ -191,6 +136,9 @@ export function FeedbackForm() {
                 ))}
               </SelectContent>
             </Select>
+            {errors.priority && (
+              <p className="text-sm text-red-500">{errors.priority}</p>
+            )}
           </div>
 
           {/* Steps to Reproduce (Bug Reports Only) */}

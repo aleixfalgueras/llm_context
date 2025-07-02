@@ -1,0 +1,170 @@
+'use client'
+
+import { useState } from 'react'
+import { useFormState } from './use-form-state'
+import { useToast } from '@/hooks/use-toast'
+import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
+import { capitalizeName } from '@/lib/utils'
+
+interface UseClientFormProps {
+  client?: any
+  onSuccess?: () => void
+}
+
+interface UseClientFormReturn {
+  // Form state
+  formData: ClientData
+  errors: Partial<Record<keyof ClientData, string>>
+  isValid: boolean
+  isDirty: boolean
+  
+  // Loading state
+  isLoading: boolean
+  
+  // Actions
+  updateField: (field: keyof ClientData, value: string) => void
+  handleSubmit: (e: React.FormEvent) => Promise<void>
+  resetForm: () => void
+  
+  // Available options
+  languages: Array<{ value: string; label: string; flag: string }>
+}
+
+const validationRules: Partial<Record<keyof ClientData, (value: any) => string | null>> = {
+  name: (value: string) => {
+    if (!value?.trim()) return 'Name is required'
+    if (value.trim().length < 2) return 'Name must be at least 2 characters'
+    return null
+  },
+  email: (value: string) => {
+    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return 'Please enter a valid email address'
+    }
+    return null
+  },
+  phone: (value: string) => {
+    if (value && !/^[\+]?[\d\s\-\(\)]+$/.test(value)) {
+      return 'Please enter a valid phone number'
+    }
+    return null
+  },
+}
+
+export function useClientForm({ client, onSuccess }: UseClientFormProps): UseClientFormReturn {
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const initialData: ClientData = {
+    name: client?.name || '',
+    email: client?.email || '',
+    phone: client?.phone || '',
+    country: client?.country || '',
+    generalContext: client?.generalContext || '',
+    specifiContext1: client?.specifiContext1 || '',
+    specifiContext2: client?.specifiContext2 || '',
+    specifiContext3: client?.specifiContext3 || '',
+    documentsLanguage: client?.documentsLanguage || 'english'
+  }
+
+  const {
+    formData,
+    errors,
+    isValid,
+    isDirty,
+    updateField: updateFormField,
+    validateForm,
+    resetForm: resetFormData,
+    setFormData,
+  } = useFormState({
+    initialData,
+    validationRules,
+  })
+
+  // Available languages for document generation
+  const languages = [
+    { value: 'english', label: 'English', flag: '🇺🇸' },
+    { value: 'spanish', label: 'Spanish (Español)', flag: '🇪🇸' },
+    { value: 'french', label: 'French (Français)', flag: '🇫🇷' },
+    { value: 'german', label: 'German (Deutsch)', flag: '🇩🇪' },
+    { value: 'italian', label: 'Italian (Italiano)', flag: '🇮🇹' },
+    { value: 'portuguese', label: 'Portuguese (Português)', flag: '🇵🇹' },
+    { value: 'dutch', label: 'Dutch (Nederlands)', flag: '🇳🇱' },
+    { value: 'polish', label: 'Polish (Polski)', flag: '🇵🇱' },
+    { value: 'russian', label: 'Russian (Русский)', flag: '🇷🇺' },
+    { value: 'catalan', label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
+  ]
+
+  const updateField = (field: keyof ClientData, value: string) => {
+    updateFormField(field, value)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors in the form before submitting.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Format the name before saving
+      const formattedData = {
+        ...formData,
+        name: capitalizeName(formData.name)
+      }
+
+      if (client?.id) {
+        await updateClient(client.id, formattedData)
+        toast({
+          title: 'Success',
+          description: 'Client updated successfully',
+        })
+      } else {
+        await createClient(formattedData)
+        toast({
+          title: 'Success',
+          description: 'Client created successfully',
+        })
+      }
+      onSuccess?.()
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    resetFormData()
+    setFormData(initialData)
+  }
+
+  return {
+    // Form state
+    formData,
+    errors,
+    isValid,
+    isDirty,
+    
+    // Loading state
+    isLoading,
+    
+    // Actions
+    updateField,
+    handleSubmit,
+    resetForm,
+    
+    // Available options
+    languages,
+  }
+}
