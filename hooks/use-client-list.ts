@@ -57,10 +57,10 @@ export function useClientList({
 
   // Filter clients based on search term
   const filteredClients = useMemo(() => {
-    if (!searchTerm.trim()) return clients
+    if (!searchTerm.trim()) return clients || []
 
     const searchLower = searchTerm.toLowerCase()
-    return clients.filter(client =>
+    return (clients || []).filter(client =>
       client.name.toLowerCase().includes(searchLower) ||
       client.generalContext?.toLowerCase().includes(searchLower) ||
       client.country?.toLowerCase().includes(searchLower) ||

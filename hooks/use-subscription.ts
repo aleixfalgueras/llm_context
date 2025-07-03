@@ -44,17 +44,23 @@ export function useSubscription() {
 
         if (response.ok) {
           const data = await response.json()
+          
+          // API now returns { subscription: {...}, clients: {...}, tokens: {...}, storage: {...} }
+          const subscription = data.subscription || {}
+          const tokens = data.tokens || {}
+          const storage = data.storage || {}
+          
           setSubscription({
-            plan: data.subscription.plan,
-            tier: getTierFromPlan(data.subscription.plan),
-            maxTokensPerMonth: data.subscription.maxTokensPerMonth,
-            maxClients: data.subscription.maxClients,
-            tokensUsed: data.usage.tokensUsed,
-            storageUsed: data.storage?.used || 0,
-            storageUsedFormatted: data.storage?.usedFormatted || '0 Bytes',
-            storageLimit: data.storage?.limit || 0,
-            storageLimitFormatted: data.storage?.limitFormatted || '0 Bytes',
-            storageUsagePercentage: data.storage?.usagePercentage || 0,
+            plan: subscription.plan || 'free',
+            tier: getTierFromPlan(subscription.plan || 'free'),
+            maxTokensPerMonth: subscription.maxTokensPerMonth || 0,
+            maxClients: subscription.maxClients || 0,
+            tokensUsed: tokens.used || 0,
+            storageUsed: storage.used || 0,
+            storageUsedFormatted: storage.usedFormatted || '0 Bytes',
+            storageLimit: storage.limit || 0,
+            storageLimitFormatted: storage.limitFormatted || '0 Bytes',
+            storageUsagePercentage: storage.usagePercentage || 0,
             isLoading: false
           })
         } else {

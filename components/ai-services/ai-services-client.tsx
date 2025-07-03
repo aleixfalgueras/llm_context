@@ -73,7 +73,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   ]
 
   // Filter services based on visibility preferences
-  const filteredServices = services.filter(service => visibleServices[service.id as keyof typeof visibleServices])
+  const filteredServices = (services || []).filter(service => visibleServices[service.id as keyof typeof visibleServices])
 
   return (
     <>

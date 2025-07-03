@@ -44,7 +44,7 @@ export function useLocalStorage<T>(
     } finally {
       setLoading(false)
     }
-  }, [key, defaultValue, deserialize])
+  }, [key])
 
   const setValue = useCallback((newValue: T | ((prev: T) => T)) => {
     try {

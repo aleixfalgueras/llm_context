@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 import { Document } from '@/types/component-types'
@@ -31,8 +30,24 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const docs = await DocumentClientService.getClientDocuments(clientId)
-      setDocuments(docs as unknown as Document[])
+      const response = await fetch('/api/documents/client', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ clientId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch client documents')
+      }
+
+      const result = await response.json()
+      
+      // Handle DbOperationResult structure
+      const docs = result.data?.records || result.records || result.data || result || []
+      
+      setDocuments(Array.isArray(docs) ? docs : [])
     } catch (error) {
       toast({
         title: 'Error',

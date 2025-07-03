@@ -14,20 +14,26 @@ export class DocumentOperations extends BaseOperations {
   ) {
     const filters = clientId ? { clientId } : {}
     
+    // If config has select, use it instead of include
+    const queryConfig = config.select ? {
+      context: 'Find user documents',
+      ...config
+    } : {
+      context: 'Find user documents',
+      include: {
+        client: {
+          select: { id: true, name: true }
+        }
+      },
+      ...config
+    }
+    
     return this.findUserOwnedRecords(
       prisma.document,
       userId,
       filters,
       pagination,
-      { 
-        context: 'Find user documents',
-        include: {
-          client: {
-            select: { id: true, name: true }
-          }
-        },
-        ...config
-      }
+      queryConfig
     )
   }
 
