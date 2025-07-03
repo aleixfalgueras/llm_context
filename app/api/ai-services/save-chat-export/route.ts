@@ -1,9 +1,10 @@
 import { saveDocumentToStorage } from '@/lib/document-save-utils'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-import { withEnhancedApi, parseJsonBody, apiSuccess, ApiErrors } from '@/lib/api-middleware'
+import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api-middleware'
+import { ApiErrors } from '@/lib/api-error-handler'
 import { apiValidation } from '@/lib/validation-helpers'
 
-export const POST = withEnhancedApi(async ({ userId, req }) => {
+export const POST = withEnhancedApi(async ({ req }) => {
   const { clientId, content, chatTitle } = await parseJsonBody(req)
 
   // Use centralized validation to eliminate duplicate validation patterns

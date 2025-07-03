@@ -10,7 +10,10 @@
       "Bash(find:*)",
       "Bash(rg:*)",
       "Bash(grep:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npx ts-unused-exports:*)",
+      "Bash(npx ts-prune:*)",
+      "Bash(npx unimport:*)"
     ],
     "deny": []
   }

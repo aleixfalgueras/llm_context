@@ -6,10 +6,9 @@ import {
   parseJsonBody,
   ApiContext 
 } from '@/lib/api-middleware'
-import { ApiErrors } from '@/lib/api-error-handler'
 
 export const POST = withEnhancedApi(
-  async ({ userId, req }: ApiContext) => {
+  async ({ req }: ApiContext) => {
     const body = await parseJsonBody(req)
     
     const { 

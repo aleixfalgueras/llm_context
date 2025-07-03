@@ -3,7 +3,6 @@
  */
 
 import { AIProviderError, getAIErrorMessage } from './ai-errors'
-import type { Client } from '@/types/client'
 import { APIResponse } from '@/types/api-types'
 import { logger } from './logger'
 
@@ -11,7 +10,7 @@ export class AIServiceAPI {
   /**
    * Generate content using AI service
    */
-  static async generateContent<TFormData>(
+  static async generateContent(
     endpoint: string,
     payload: any
   ): Promise<{ success: boolean; content?: string; error?: string }> {

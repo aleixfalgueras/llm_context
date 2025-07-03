@@ -74,7 +74,6 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     isValid,
     isDirty,
     updateField: updateFormField,
-    validateForm,
     resetForm: resetFormData,
     setFormData,
   } = useFormState({
