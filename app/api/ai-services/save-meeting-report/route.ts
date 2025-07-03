@@ -29,7 +29,7 @@ export const POST = withEnhancedApi(async ({ req }) => {
   } catch (error) {
     // Check for storage limit errors
     if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
-      return ApiErrors.payloadTooLarge(error.message)
+      throw new Error(error.message) // Let enhanced middleware handle as standard error
     }
     throw error // Let enhanced middleware handle other errors
   }
