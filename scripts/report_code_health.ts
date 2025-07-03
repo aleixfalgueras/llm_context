@@ -167,7 +167,7 @@ function detectDuplicateCode(allFiles: string[]): CodeQualityIssue[] {
   }
   
   // Find duplicates
-  codeBlocks.forEach((locations, block) => {
+  codeBlocks.forEach((locations) => {
     if (locations.length > 1) {
       locations.forEach(location => {
         issues.push({

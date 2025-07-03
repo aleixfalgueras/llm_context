@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
-import { withEnhancedApi, apiSuccess, ApiErrors } from '@/lib/api-middleware'
+import { withEnhancedApi, apiSuccess } from '@/lib/api-middleware'
+import { ApiErrors } from '@/lib/api-error-handler'
 
 // Create a new data export request
 export const POST = withEnhancedApi(async ({ userId }) => {
