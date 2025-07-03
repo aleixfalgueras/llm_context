@@ -40,7 +40,7 @@ export function DocumentList({
   const [searchTerm, setSearchTerm] = useState('')
   const [documentTypeFilter, setDocumentTypeFilter] = useState('')
 
-  const filteredDocuments = documents.filter((doc) => {
+  const filteredDocuments = (documents || []).filter((doc) => {
     const matchesSearch = searchTerm === '' || 
       doc.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.documentType.toLowerCase().includes(searchTerm.toLowerCase())

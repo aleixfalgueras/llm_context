@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { DocumentList } from '@/components/documents/document-list'
 import { DocumentViewer } from '@/components/documents/document-viewer'
 import { DocumentCreationForm } from '@/components/documents/document-creation-form'
@@ -129,6 +129,9 @@ export function ClientDocuments({
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Documents for {clientName}</DialogTitle>
+          <DialogDescription>
+            View, edit, and manage documents for this client
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex h-[80vh] gap-0">

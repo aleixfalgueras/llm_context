@@ -171,6 +171,11 @@ export async function getUsageInfo(userId: string) {
     };
 
     return {
+      subscription: {
+        plan: subscription.plan,
+        maxTokensPerMonth: subscription.maxTokensPerMonth,
+        maxClients: subscription.maxClients
+      },
       clients: clientUsage,
       tokens: tokenUsage,
       storage: storageUsage,

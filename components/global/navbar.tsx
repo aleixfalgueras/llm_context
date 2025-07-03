@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Menu } from 'lucide-react'
+import { useMemo } from 'react'
 
 export function Navbar() {
   const pathname = usePathname()
@@ -16,13 +17,13 @@ export function Navbar() {
   // Check if current user is admin
   const isAdmin = user?.emailAddresses[0]?.emailAddress === 'feina.aleix@gmail.com'
 
-  const navigation = [
+  const navigation = useMemo(() => [
     { name: 'Clients', href: '/clients', icon: '👥' },
     { name: 'Prompts', href: '/prompts', icon: '📝' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
     { name: 'AI Services', href: '/ai-services', icon: '⚡' },
     ...(isAdmin ? [{ name: 'Admin', href: '/admin', icon: '🛡️' }] : []),
-  ]
+  ], [isAdmin])
 
   // Helper function to determine if a nav item is active
   const isActive = (href: string) => {
