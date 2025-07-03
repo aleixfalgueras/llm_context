@@ -24,6 +24,7 @@ interface ConsentData {
 export function ConsentManager() {
   const { user } = useUser()
   const [isVisible, setIsVisible] = useState(false)
+  const [isChecking, setIsChecking] = useState(false)
   const [consent, setConsent] = useState<ConsentData>({
     dataProcessing: true, // Pre-selected since it's required
     analytics: false,
@@ -60,6 +61,9 @@ export function ConsentManager() {
     }
 
     const checkConsentStatus = async () => {
+      if (isChecking) return // Prevent multiple simultaneous checks
+      
+      setIsChecking(true)
       try {
         // Create user-specific localStorage key to prevent cross-user consent sharing
         const userConsentKey = `user-consent-${user.id}`
@@ -73,6 +77,7 @@ export function ConsentManager() {
           const hasCurrentPrivacy = consent.agreedToPrivacy && consent.privacyVersion === CURRENT_PRIVACY_VERSION
           
           if (consent.dataProcessing && hasCurrentTerms && hasCurrentPrivacy) {
+            setIsChecking(false)
             return // Valid current version consent exists in localStorage
           }
         }
@@ -83,7 +88,8 @@ export function ConsentManager() {
         })
         
         if (response.ok) {
-          const consentData = await response.json()
+          const responseData = await response.json()
+          const consentData = responseData.data || responseData // Handle both direct and wrapped response
           // Check if user has current version consent (not just any consent)
           const hasCurrentTerms = consentData.agreedToTerms && consentData.termsVersion === CURRENT_TERMS_VERSION
           const hasCurrentPrivacy = consentData.agreedToPrivacy && consentData.privacyVersion === CURRENT_PRIVACY_VERSION
@@ -99,23 +105,28 @@ export function ConsentManager() {
               termsVersion: CURRENT_TERMS_VERSION,
               privacyVersion: CURRENT_PRIVACY_VERSION
             }))
+            setIsChecking(false)
             return // Valid current consent exists
           }
         } else if (response.status === 401) {
-          // User not authenticated yet - retry after a short delay
-          console.log('User not authenticated yet, retrying consent check...')
-          const retryTimer = setTimeout(() => checkConsentStatus(), 1000)
-          return () => clearTimeout(retryTimer)
+          // User not authenticated yet - don't show consent dialog
+          console.log('User not authenticated yet, skipping consent check')
+          setIsChecking(false)
+          return
         }
         
         // Show consent dialog after a delay
-        const timer = setTimeout(() => setIsVisible(true), 2000)
-        return () => clearTimeout(timer)
+        setTimeout(() => {
+          setIsVisible(true)
+          setIsChecking(false)
+        }, 2000)
       } catch (error) {
         // If API fails, show consent to be safe (GDPR compliance)
         console.log('Consent check failed, showing consent dialog:', error)
-        const timer = setTimeout(() => setIsVisible(true), 2000)
-        return () => clearTimeout(timer)
+        setTimeout(() => {
+          setIsVisible(true)
+          setIsChecking(false)
+        }, 2000)
       }
     }
 
