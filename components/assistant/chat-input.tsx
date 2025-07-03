@@ -125,16 +125,6 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
 
   const handleExportChat = async () => {
     if (!clientData?.id || !messages.length || !chatTitle) {
-      clientLogger.warn('Export attempted with missing requirements', { 
-        chatId,
-        component: 'ChatInput',
-        metadata: { 
-          hasClientId: !!clientData?.id, 
-          hasMessages: !!messages.length, 
-          hasChatTitle: !!chatTitle 
-        }
-      });
-      
       toast({
         title: 'Export Not Available',
         description: 'Cannot export chat without client association and messages.',
@@ -143,26 +133,9 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
       return
     }
 
-    clientLogger.exportInitiated('chat', { 
-      chatId,
-      clientId: clientData.id,
-      component: 'ChatInput',
-      metadata: { messageCount: messages.length, chatTitle }
-    });
-
     setIsExporting(true)
     try {
-      // Format messages for export
-      const chatContent = await withClientTiming(
-        'Format chat for export',
-        () => formatChatForExport(messages, chatTitle, clientData),
-        { chatId, clientId: clientData.id }
-      );
-      
-      clientLogger.apiCall('POST', '/api/ai-services/save-chat-export', { 
-        chatId,
-        clientId: clientData.id
-      });
+      const chatContent = formatChatForExport(messages, chatTitle, clientData)
       
       const response = await fetch('/api/ai-services/save-chat-export', {
         method: 'POST',
@@ -176,24 +149,13 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
         }),
       })
 
-      clientLogger.apiResponse('POST', '/api/ai-services/save-chat-export', response.status, { 
-        chatId,
-        clientId: clientData.id
-      });
-
       if (!response.ok) {
-        // Handle different error status codes
         const errorText = await response.text()
         throw new Error(errorText || `HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
-
-      clientLogger.exportCompleted('chat', { 
-        chatId,
-        clientId: clientData.id,
-        metadata: { documentId: data.documentId }
-      });
+      const documentId = data.data?.documentId
 
       toast({
         title: 'Chat Exported 📄',
@@ -202,11 +164,8 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
             <p>Chat "{chatTitle}" has been saved as a document.</p>
             <button 
               onClick={() => {
-                if (onDocumentCreated && data.documentId) {
-                  onDocumentCreated(clientData.id, data.documentId)
-                } else {
-                  // Navigate to clients page - user can find document there
-                  router.push('/clients')
+                if (onDocumentCreated && documentId) {
+                  onDocumentCreated(clientData.id, documentId)
                 }
               }}
               className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
@@ -219,11 +178,6 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
       })
 
     } catch (error) {
-      clientLogger.error('Error exporting chat', error as Error, { 
-        chatId,
-        clientId: clientData?.id
-      });
-      
       const errorMessage = error instanceof Error ? error.message : 'Failed to export chat. Please try again.'
       
       toast({
