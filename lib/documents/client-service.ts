@@ -9,11 +9,12 @@ export class DocumentClientService {
    * Get client documents via API
    */
   static async getClientDocuments(clientId: string, options?: DocumentQueryOptions) {
-    const response = await fetch('/api/documents/client', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId, options })
-    })
+    const params = new URLSearchParams({ clientId })
+    if (options?.limit) {
+      params.append('limit', options.limit.toString())
+    }
+    
+    const response = await fetch(`/api/documents?${params}`)
 
     if (!response.ok) {
       throw new Error('Failed to fetch client documents')
@@ -26,11 +27,7 @@ export class DocumentClientService {
    * Get document content via API
    */
   static async getDocumentContent(documentId: string): Promise<string> {
-    const response = await fetch('/api/document-content', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ documentId })
-    })
+    const response = await fetch(`/api/documents/${documentId}/content`)
 
     if (!response.ok) {
       throw new Error('Failed to fetch document content')
@@ -74,12 +71,12 @@ export class DocumentClientService {
    */
   static async updateDocument(
     documentId: string,
-    updates: Partial<{ documentName: string; documentType: string; metadata: Record<string, any> }>
+    updates: Partial<{ documentName: string; documentType: string }>
   ) {
-    const response = await fetch('/api/documents/update', {
+    const response = await fetch(`/api/documents/${documentId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ documentId, updates })
+      body: JSON.stringify(updates)
     })
 
     if (!response.ok) {
@@ -93,10 +90,9 @@ export class DocumentClientService {
    * Delete document via API
    */
   static async deleteDocument(documentId: string) {
-    const response = await fetch('/api/documents/delete', {
+    const response = await fetch(`/api/documents/${documentId}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ documentId })
+      headers: { 'Content-Type': 'application/json' }
     })
 
     if (!response.ok) {

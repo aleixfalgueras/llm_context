@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { DocumentService } from '@/lib/documents/server'
+import { DocumentService } from '@/lib/documents/service'
 
-export async function POST(request: NextRequest) {
+interface RouteParams {
+  params: { id: string }
+}
+
+// GET /api/documents/[id]/download - Download document as file
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await auth()
     
@@ -11,16 +16,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { documentId } = await request.json()
+    const documentId = params.id
 
-    if (!documentId) {
-      return NextResponse.json(
-        { error: 'Document ID is required' }, 
-        { status: 400 }
-      )
-    }
-
-    // Get the document from database to verify ownership
+    // Get the document from database to verify ownership and get name
     const document = await prisma.document.findFirst({
       where: { 
         id: documentId,
@@ -53,4 +51,5 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}
+

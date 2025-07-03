@@ -182,15 +182,7 @@ export function useDocumentOperations({
 
   const handleDownloadDocument = async (doc: Document) => {
     try {
-      const response = await fetch('/api/download-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          documentId: doc.id,
-        }),
-      })
+      const response = await fetch(`/api/documents/${doc.id}/download`)
 
       if (!response.ok) {
         throw new Error('Failed to download document')

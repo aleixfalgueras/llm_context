@@ -107,8 +107,7 @@ export class DocumentService {
       documentName,
       documentType,
       documentPath: storageResult.path,
-      clientId,
-      metadata
+      clientId
     }
 
     const result = await DocumentRepository.createDocument(userId, documentData)
@@ -131,7 +130,7 @@ export class DocumentService {
    */
   static async updateDocument(
     documentId: string,
-    updates: Partial<Pick<DocumentData, 'documentName' | 'documentType' | 'metadata'>>
+    updates: Partial<Pick<DocumentData, 'documentName' | 'documentType'>>
   ) {
     const { userId } = await auth()
     

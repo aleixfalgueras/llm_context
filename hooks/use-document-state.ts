@@ -30,13 +30,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/documents/client', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ clientId }),
-      })
+      const response = await fetch(`/api/documents?clientId=${encodeURIComponent(clientId)}`)
 
       if (!response.ok) {
         throw new Error('Failed to fetch client documents')
@@ -61,13 +55,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
 
   const handleViewDocument = async (document: Document) => {
     try {
-      const response = await fetch('/api/document-content', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ documentId: document.id }),
-      })
+      const response = await fetch(`/api/documents/${document.id}/content`)
 
       if (!response.ok) {
         throw new Error('Failed to load document content')

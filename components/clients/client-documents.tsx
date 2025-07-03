@@ -40,13 +40,7 @@ export function ClientDocuments({
   // Document editing handlers
   const handleEditDocument = async (document: Document) => {
     try {
-      const response = await fetch('/api/document-content', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ documentId: document.id }),
-      })
+      const response = await fetch(`/api/documents/${document.id}/content`)
 
       if (!response.ok) {
         throw new Error('Failed to load document content')
