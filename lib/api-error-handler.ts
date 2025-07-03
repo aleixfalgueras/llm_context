@@ -31,9 +31,9 @@ export function handleApiError(
 
   if (logError) {
     if (error instanceof AIProviderError) {
-      logger.aiError(error.provider || 'unknown', error, { context })
+      logger.aiError(error.provider || 'unknown', error, { operation: context })
     } else {
-      logger.error(`Error in ${context}`, error as Error, { context })
+      logger.error(`Error in ${context}`, error as Error, { operation: context })
     }
   }
 
