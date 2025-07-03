@@ -267,15 +267,28 @@ export function BaseAIServiceDialog<TFormData = any>({
 
       const savedDocument = await response.json()
       
+      const documentId = savedDocument.data?.documentId || savedDocument.id
+      
       toast({
-        title: 'Document Saved',
-        description: `"${documentName}" has been saved successfully`
+        title: 'Document Saved 📄',
+        description: (
+          <div>
+            <p>"{documentName}" has been saved successfully.</p>
+            <button 
+              onClick={() => {
+                if (onDocumentCreated && documentId && selectedClient) {
+                  onDocumentCreated(selectedClient.id, documentId)
+                }
+              }}
+              className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+            >
+              📄 View Document
+            </button>
+          </div>
+        ),
+        duration: 10000,
       })
 
-      // Call the document created callback if available
-      if (savedDocument.id && selectedClient && onDocumentCreated) {
-        onDocumentCreated(selectedClient.id, savedDocument.id)
-      }
 
       // Reset form and close dialog
       if (customGeneratedContent === undefined) {
