@@ -13,8 +13,10 @@
       "Bash(ls:*)",
       "Bash(npx ts-unused-exports:*)",
       "Bash(npx ts-prune:*)",
-      "Bash(npx unimport:*)"
+      "Bash(npx unimport:*)",
+      "Bash(timeout 300 npm run build)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "allowEdits"
   }
 }

@@ -82,7 +82,7 @@ export class BaseOperations {
         data: record
       }
     } catch (error) {
-      logger.dbError('BaseOperations', 'unknown', error as Error, { context: config.context })
+      logger.dbError('BaseOperations', 'unknown', error as Error, { operation: config.context })
       return {
         success: false,
         error: 'Database operation failed'
@@ -125,7 +125,7 @@ export class BaseOperations {
         data: { records, total }
       }
     } catch (error) {
-      logger.dbError('BaseOperations', 'unknown', error as Error, { context: config.context })
+      logger.dbError('BaseOperations', 'unknown', error as Error, { operation: config.context })
       return {
         success: false,
         error: 'Database operation failed'
@@ -156,7 +156,7 @@ export class BaseOperations {
         data: record
       }
     } catch (error) {
-      logger.dbError('BaseOperations', 'unknown', error as Error, { context: config.context })
+      logger.dbError('BaseOperations', 'unknown', error as Error, { operation: config.context })
       
       // Handle unique constraint violations
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -214,7 +214,7 @@ export class BaseOperations {
         data: record
       }
     } catch (error) {
-      logger.dbError('BaseOperations', 'unknown', error as Error, { context: config.context })
+      logger.dbError('BaseOperations', 'unknown', error as Error, { operation: config.context })
       
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
@@ -273,7 +273,7 @@ export class BaseOperations {
         data: { id: recordId }
       }
     } catch (error) {
-      logger.dbError('BaseOperations', 'unknown', error as Error, { context: config.context })
+      logger.dbError('BaseOperations', 'unknown', error as Error, { operation: config.context })
       
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
@@ -334,7 +334,7 @@ export class BaseOperations {
         data: { deletedCount: result.count }
       }
     } catch (error) {
-      logger.dbError('BaseOperations', 'unknown', error as Error, { context: config.context })
+      logger.dbError('BaseOperations', 'unknown', error as Error, { operation: config.context })
       return {
         success: false,
         error: 'Bulk delete operation failed'

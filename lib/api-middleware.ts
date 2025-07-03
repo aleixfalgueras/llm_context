@@ -127,7 +127,7 @@ export interface EnhancedApiConfig {
  */
 export type EnhancedApiHandler<T = any> = (
   context: ApiContext
-) => Promise<NextResponse<T>> | NextResponse<T>
+) => Promise<NextResponse<T | { error: string }>> | NextResponse<T | { error: string }>
 
 /**
  * Enhanced API middleware that consolidates auth, usage checking, error handling,
