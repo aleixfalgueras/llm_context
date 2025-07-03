@@ -13,7 +13,6 @@ export interface DocumentData {
   clientId?: string
   startDate?: string
   endDate?: string
-  metadata?: Record<string, any>
 }
 
 export interface DocumentQueryOptions {

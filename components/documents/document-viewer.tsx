@@ -91,6 +91,7 @@ export function DocumentViewer({
                 size="sm"
                 onClick={onSave}
                 disabled={!editedDocumentName.trim() || !editedContent.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Save className="h-4 w-4 mr-1" />
                 Save

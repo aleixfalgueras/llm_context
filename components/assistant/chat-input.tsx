@@ -8,6 +8,7 @@ import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { DEFAULT_MODEL } from '@/lib/models-config'
 import { useSubscription } from '@/hooks/use-subscription'
@@ -42,6 +43,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
   })
   
   const { toast } = useToast()
+  const router = useRouter()
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   // Auto-resize textarea function
@@ -193,29 +195,28 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
         metadata: { documentId: data.documentId }
       });
 
-      if (onDocumentCreated && data.documentId) {
-        toast({
-          title: 'Chat Exported 📄',
-          description: (
-            <div>
-              <p>Chat "{chatTitle}" has been saved as a document.</p>
-              <button 
-                onClick={() => onDocumentCreated(clientData.id, data.documentId)}
-                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
-              >
-                📄 View Document
-              </button>
-            </div>
-          ),
-          duration: 10000,
-        })
-      } else {
-        toast({
-          title: 'Chat Exported 📄',
-          description: `Chat "${chatTitle}" has been saved as a document. You can find it in the client's documents.`,
-          duration: 8000,
-        })
-      }
+      toast({
+        title: 'Chat Exported 📄',
+        description: (
+          <div>
+            <p>Chat "{chatTitle}" has been saved as a document.</p>
+            <button 
+              onClick={() => {
+                if (onDocumentCreated && data.documentId) {
+                  onDocumentCreated(clientData.id, data.documentId)
+                } else {
+                  // Navigate to clients page - user can find document there
+                  router.push('/clients')
+                }
+              }}
+              className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+            >
+              📄 View Document
+            </button>
+          </div>
+        ),
+        duration: 10000,
+      })
 
     } catch (error) {
       clientLogger.error('Error exporting chat', error as Error, { 
