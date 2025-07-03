@@ -85,10 +85,6 @@ export function MeetingReportDialog({
     try {
       const text = await file.text()
       updateFormData({ meetingTranscription: text })
-      toast({
-        title: 'File Uploaded',
-        description: `${file.name} has been loaded successfully`
-      })
     } catch (error) {
       toast({
         title: 'Upload Failed',
