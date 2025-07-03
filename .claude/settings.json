@@ -14,7 +14,8 @@
       "Bash(npx ts-unused-exports:*)",
       "Bash(npx ts-prune:*)",
       "Bash(npx unimport:*)",
-      "Bash(timeout 300 npm run build)"
+      "Bash(timeout 300 npm run build)",
+      "WebFetch(domain:openrouter.ai)"
     ],
     "deny": [],
     "defaultMode": "allowEdits"

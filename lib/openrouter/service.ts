@@ -135,6 +135,7 @@ export class OpenRouterService {
       max_tokens: options.max_tokens ?? getDefaultMaxTokens(),
       presence_penalty: options.presence_penalty ?? getDefaultPresencePenalty(),
       frequency_penalty: options.frequency_penalty ?? getDefaultFrequencyPenalty(),
+      usage: options.usage ?? { include: true }, // Enable usage tracking by default
       messages: options.messages
     }
   }
