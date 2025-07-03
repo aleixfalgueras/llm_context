@@ -67,7 +67,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
       const response = await fetch(`/api/prompts?${params.toString()}`)
       if (response.ok) {
         const data = await response.json()
-        setPrompts(data)
+        setPrompts(data.data.prompts || [])
       }
     } catch (error) {
       console.error('Error fetching prompts:', error)
@@ -94,7 +94,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
     fetchPrompts()
   }, [filters.selectedCategory, filters.showInactive])
 
-  const filteredAndSortedPrompts = prompts
+  const filteredAndSortedPrompts = (Array.isArray(prompts) ? prompts : [])
     .filter((prompt) => {
       return (
         prompt.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
