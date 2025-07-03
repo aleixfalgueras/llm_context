@@ -11,6 +11,7 @@ export interface OpenRouterCompletionOptions {
   max_tokens?: number
   presence_penalty?: number
   frequency_penalty?: number
+  usage?: { include: boolean }
 }
 
 export interface StreamChunk {
@@ -21,6 +22,7 @@ export interface StreamChunk {
     completionTokens: number
     totalTokens: number
   }
+  generationId?: string // For fallback usage queries
 }
 
 /**
@@ -94,5 +96,29 @@ export class OpenRouterClient {
     }
     
     return response.json()
+  }
+
+  /**
+   * Get generation stats by ID (for token usage fallback)
+   */
+  async getGenerationStats(generationId: string) {    
+    // Use query parameter instead of path parameter based on OpenRouter docs
+    const url = new URL('https://openrouter.ai/api/v1/generation');
+    url.searchParams.append('id', generationId);
+    
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+      }
+    })
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch generation stats: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    return data
   }
 }

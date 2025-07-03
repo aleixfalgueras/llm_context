@@ -172,9 +172,9 @@ Respond naturally and conversationally while keeping this context in mind.`
       content: lastMessage.content,
     })
 
-    // Save the user message to the database
+    // Save the user message to the database (tokens will be updated after AI response)
     logger.dbQuery('create', 'message', { userId, chatId });
-    await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
+    const userMessage = await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
     logger.info('User message saved', { 
       userId, 
       chatId, 
@@ -253,6 +253,60 @@ Respond naturally and conversationally while keeping this context in mind.`
                 }
               });
               
+              let finalUsage = chunk.usage;
+              
+              // Fallback: Query generation stats if usage data is missing
+              if (!finalUsage && chunk.generationId) {
+                try {                  
+                  // Add a small delay - generation stats might not be immediately available
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  
+                  const { OpenRouterClient } = await import('@/lib/openrouter/client');
+                  const client = new OpenRouterClient();
+                  const stats = await client.getGenerationStats(chunk.generationId);
+                  
+                  if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
+                    finalUsage = {
+                      promptTokens: stats.data.tokens_prompt || 0,
+                      completionTokens: stats.data.tokens_completion || 0,
+                      totalTokens: (stats.data.tokens_prompt || 0) + (stats.data.tokens_completion || 0)
+                    };
+                  } else {
+                    console.log('DEBUG: Generation stats available but no token data:', stats);
+                  }
+                } catch (error) {
+                  console.log('DEBUG: Failed to get generation stats:', error);
+                  
+                  // If generation stats fail, provide a rough estimate based on content length
+                  // This is a very rough estimate: ~4 characters per token for English text
+                  const estimatedCompletionTokens = Math.ceil(fullContent.length / 4);
+                  const estimatedPromptTokens = Math.ceil(JSON.stringify(aiMessages).length / 4);
+                  
+                  finalUsage = {
+                    promptTokens: estimatedPromptTokens,
+                    completionTokens: estimatedCompletionTokens,
+                    totalTokens: estimatedPromptTokens + estimatedCompletionTokens
+                  };
+                  
+                  console.log('DEBUG: Using estimated token counts:', finalUsage);
+                }
+              }
+
+              // Update user message with input tokens and save assistant's response
+              logger.dbQuery('update', 'message', { userId, chatId });
+              await prisma.message.update({
+                where: { id: userMessage.id },
+                data: {
+                  inputTokens: finalUsage?.promptTokens || 0,
+                  tokensUsed: finalUsage?.promptTokens || 0
+                }
+              })
+              logger.info('User message updated with token info', { 
+                userId, 
+                chatId, 
+                metadata: { inputTokens: finalUsage?.promptTokens }
+              });
+
               // Save the assistant's response to the database
               logger.dbQuery('create', 'message', { userId, chatId });
               await createMessage(
@@ -260,9 +314,9 @@ Respond naturally and conversationally while keeping this context in mind.`
                 fullContent, 
                 'ASSISTANT', 
                 selectedModel, 
-                chunk.usage?.totalTokens,
-                chunk.usage?.promptTokens,
-                chunk.usage?.completionTokens
+                finalUsage?.completionTokens,
+                0, // inputTokens for assistant message
+                finalUsage?.completionTokens
               )
               logger.info('Assistant message saved', { userId, chatId });
 

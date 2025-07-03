@@ -15,10 +15,25 @@ export async function* processOpenRouterStream(
 ): AsyncGenerator<StreamChunk, void, unknown> {
   let totalContent = ''
   let finalUsage: StreamChunk['usage'] | undefined
+  let generationId: string | undefined
   
   try {
     for await (const chunk of stream) {
       try {
+        // Capture generation ID for fallback usage queries
+        if (chunk.id && !generationId) {
+          generationId = chunk.id
+        }
+        
+        // Check every chunk for usage data
+        if (chunk.usage) {
+          finalUsage = {
+            promptTokens: chunk.usage.prompt_tokens || 0,
+            completionTokens: chunk.usage.completion_tokens || 0,
+            totalTokens: chunk.usage.total_tokens || 0
+          }
+        }
+        
         const choice = chunk.choices?.[0]
         
         if (!choice) {
@@ -39,29 +54,15 @@ export async function* processOpenRouterStream(
         
         // Check for completion
         if (choice.finish_reason) {
-          // Extract usage from final chunk if available
-          if (chunk.usage) {
-            finalUsage = {
-              promptTokens: chunk.usage.prompt_tokens || 0,
-              completionTokens: chunk.usage.completion_tokens || 0,
-              totalTokens: chunk.usage.total_tokens || 0
-            }
-          }
           
           // Final chunk with completion info
           yield {
             content: '',
             isComplete: true,
-            usage: finalUsage
+            usage: finalUsage,
+            generationId: generationId
           }
           
-          logger.debug('Stream completed', {
-            metadata: {
-              totalTokens: finalUsage?.totalTokens,
-              serviceSource,
-              contentLength: totalContent.length
-            }
-          })
           
           return
         }
