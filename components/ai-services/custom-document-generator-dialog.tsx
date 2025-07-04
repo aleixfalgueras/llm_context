@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { FileText } from 'lucide-react'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
-import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
+import { CLIENT_CONTEXT_FIELD_LABELS, CLIENT_CONTEXT_FIELDS } from '@/types/client'
 import type { Client } from '@/types/client'
-import { ClientContextSelection } from '@/types/client-context'
+import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 import { useDocumentGenerator } from '@/hooks/use-document-generator'
 import { BaseAIServiceDialog } from './base-ai-service-dialog'
 import type { BaseAIServiceDialogConfig, ValidationResult } from './base-ai-service-dialog'
@@ -113,6 +113,8 @@ export function CustomDocumentGeneratorDialog({
   // Handle client selection
   const handleClientChange = (clientId: string) => {
     setSelectedClient(clientId)
+    // Reset client context when client changes
+    setClientContext(defaultClientContextSelections.general)
   }
 
   // Custom wrapper for generation that uses hook logic
@@ -266,28 +268,28 @@ export function CustomDocumentGeneratorDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(CLIENT_CONTEXT_FIELD_LABELS).map(([key, label]) => {
-              const fieldValue = selectedClientData[key as keyof Client]
+              const actualFieldName = CLIENT_CONTEXT_FIELDS[key as keyof typeof CLIENT_CONTEXT_FIELDS]
+              const fieldValue = selectedClientData[actualFieldName as keyof Client]
               const hasValue = fieldValue && String(fieldValue).trim() !== ''
+              
+              // Only render fields that have values
+              if (!hasValue) return null
               
               return (
                 <div key={key} className="flex items-center space-x-2">
                   <Checkbox
                     id={`context-${key}`}
                     checked={clientContext[key as keyof ClientContextSelection] || false}
-                    onChange={(e) => 
-                      setClientContext({ 
+                    onChange={(e) => {
+                      const newClientContext = { 
                         ...clientContext, 
                         [key as keyof ClientContextSelection]: e.target.checked 
-                      })
-                    }
-                    disabled={!hasValue}
+                      }
+                      setClientContext(newClientContext)
+                    }}
                   />
-                  <Label 
-                    htmlFor={`context-${key}`} 
-                    className={!hasValue ? 'text-muted-foreground' : ''}
-                  >
+                  <Label htmlFor={`context-${key}`}>
                     {label}
-                    {!hasValue && ' (empty)'}
                   </Label>
                 </div>
               )
