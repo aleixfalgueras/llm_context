@@ -320,6 +320,7 @@ Respond naturally and conversationally while keeping this context in mind.`
               )
               logger.info('Assistant message saved', { userId, chatId });
 
+
               // Send completion signal
               const completionData = {
                 type: 'complete',
