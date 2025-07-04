@@ -24,16 +24,16 @@ AI Services provide automated marketing content generation using client profiles
 - **Centralized Privacy Logic**: `buildClientContextSection()` ensures consistent privacy respect
 
 ### **AI Processing Architecture**
-- **Dual Model System**: All subscription tiers use Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for optimal cost efficiency
-- **OpenRouter Integration**: Unified API access through OpenRouter with business-sustainable pricing
-- **Cost-Optimized Selection**: Models chosen for 89-91% profit margins while maintaining high quality
-- **Token Usage Tracking**: Real-time monitoring without confusing cost estimates
-- **Business Sustainability**: Pricing ensures long-term platform viability
-- **Model Persistence**: Selected models are remembered across sessions
-- **Error Handling**: Comprehensive error management with fallback capabilities
+- **Dual Model System**: Google Gemini 2.0 Flash ($0.10/M input, $0.40/M output) and OpenAI GPT-4.1 Nano (same pricing) for optimal cost efficiency
+- **OpenRouter Integration**: Unified API access through OpenRouter with business-sustainable pricing across both models
+- **Cost-Optimized Selection**: Models chosen for 86-91% profit margins while maintaining high quality
+- **Token Usage Tracking**: Real-time monitoring across both models without confusing cost estimates
+- **Business Sustainability**: Pricing ensures long-term platform viability with excellent margins
+- **Model Choice**: Users can select preferred model per service, with preferences saved across sessions
+- **Error Handling**: Comprehensive error management with fallback capabilities across both providers
 - **Client Variable Replacement**: Automatic substitution of client variables in prompts
 - **Professional Output**: Production-ready marketing content formatted for client delivery
-- **Real-time Generation**: Interactive content creation with immediate feedback
+- **Real-time Generation**: Interactive content creation with immediate feedback via streaming
 - **Multi-language Support**: Generate content in 10+ languages based on client preferences
 
 ### **Document Management Module** (`/lib/documents/`)
@@ -215,13 +215,14 @@ AI Services API Structure:
 ```
 
 ### **AI Integration Module** (`/lib/openrouter/`)
-- **Modular Architecture**: Separated into client, service, error handler, and stream handler
-- **Dual Model System**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano across all tiers
-- **OpenRouter Integration**: Unified API access with automatic usage tracking
-- **Token Optimization**: Efficient prompt construction optimized for cost
+- **Modular Architecture**: Clean separation between client, service, error handler, and stream handler
+- **OpenRouter Integration**: Unified API access to Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **Dual Model Support**: Both premium models available with identical pricing ($0.10/M input, $0.40/M output)
+- **Usage Tracking**: Automatic token consumption monitoring across both models
 - **Temperature Control**: Configurable creativity settings (default 0.7)
 - **Max Tokens**: Controlled output length (8,000 tokens) for consistent quality
-- **Robust Error Handling**: Comprehensive error management with AI-specific error types
+- **Streaming Support**: Real-time response processing for both Google and OpenAI models
+- **Robust Error Handling**: Comprehensive error management with provider-specific fallbacks
 - **Performance Monitoring**: Track response times and token usage with detailed logging
 
 ### **Security Features**
@@ -316,28 +317,31 @@ AI Services API Structure:
 ## 🎛️ Dual Model Architecture
 
 ### **Available Models**
-- **Google Gemini 2.0 Flash**: Cost-optimized model for standard content generation
-- **OpenAI GPT-4.1 Nano**: High-quality model for complex tasks and analysis
+- **Google Gemini 2.0 Flash**: Latest Google model with enhanced reasoning and 1M context length
+- **OpenAI GPT-4.1 Nano**: Efficient OpenAI model with excellent performance and 200K context length
 
 ### **Model Selection Interface**
-- **Unified Access**: All subscription tiers have access to both models
-- **Per-Service Selection**: Choose appropriate model for each AI service
-- **Persistent Preferences**: Model choices are saved and remembered
-- **Business-Sustainable Pricing**: Models selected for optimal cost efficiency
+- **Unified Access**: All subscription tiers have access to both premium models
+- **Per-Service Selection**: Choose appropriate model for each AI service type
+- **Persistent Preferences**: Model choices are saved and remembered across sessions
+- **Cost Consistency**: Both models have identical pricing for predictable costs
 
 ### **Subscription Pricing**
 ```
 Basic Plan - $10/month:
 - 5M tokens per month (91.25% profit margin)
 - 3 client profiles
+- 50 MB storage
 
 Pro Plan - $25/month:  
 - 15M tokens per month (89.5% profit margin)
 - Unlimited client profiles
+- 200 MB storage
 
 Business Plan - $50/month:
 - 40M tokens per month (86% profit margin)
 - Unlimited client profiles
+- 2 GB storage
 ```
 
 ### **Token Management**

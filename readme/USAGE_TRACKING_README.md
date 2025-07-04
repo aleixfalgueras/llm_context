@@ -2,7 +2,7 @@
 
 This document explains how the usage tracking system works for the LLM Context application, focusing on **token consumption monitoring** using **Google Gemini 2.0 Flash** for all AI functionalities.
 
-**⚠️ UPDATED JANUARY 2025**: Upgraded to Google Gemini 2.0 Flash 001 for enhanced AI capabilities
+**⚠️ UPDATED JANUARY 2025**: Upgraded to dual-model architecture with Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
 ## Overview
 
@@ -12,21 +12,21 @@ The usage tracking system operates across **three primary dimensions**:
 - **Storage usage tracking** (storage-based)
 
 **Key Features:**
-- ✅ **Dual model architecture** - Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI operations
-- ✅ **Enhanced capabilities** with the latest Google AI model
+- ✅ **Dual model architecture** - Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter
+- ✅ **Enhanced capabilities** with latest AI models from both Google and OpenAI
 - ✅ **Balanced token limits** based on cost-effective pricing
-- ✅ **Excellent profit margins** at all subscription levels
-- ✅ **Simplified user experience** with consistent, high-quality AI performance
+- ✅ **Excellent profit margins** at all subscription levels (86-91%)
+- ✅ **User choice** between premium models with consistent pricing
 
 ## Model Configuration
 
 ### Dual Model Architecture
 **All AI functionalities powered by:**
-- **Google Gemini 2.0 Flash**: $0.10/M input tokens, $0.40/M output tokens
-- **OpenAI GPT-4.1 Nano**: $0.10/M input tokens, $0.40/M output tokens (same cost)
+- **Google Gemini 2.0 Flash**: $0.10/M input tokens, $0.40/M output tokens, 1M context length
+- **OpenAI GPT-4.1 Nano**: $0.10/M input tokens, $0.40/M output tokens, 200K context length
 - **Blended cost**: ~$0.175/M tokens (assuming 3:1 input/output ratio)
-- **Context length**: 1M tokens
-- **Performance**: Latest Google AI with enhanced reasoning and multimodal capabilities
+- **OpenRouter Integration**: Unified API access to both premium models
+- **Performance**: Latest AI capabilities from both Google and OpenAI
 
 ### Benefits of Dual Model Approach
 - **Model choice**: Users can choose between Google and OpenAI providers
@@ -42,6 +42,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Cost at limit**: ~$0.875 (91.25% profit margin)
 - **Storage**: 50 MB
 - **Clients**: 3 profiles
+- **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Individual users and small businesses
 
 ### Pro Plan - $25/month  
@@ -49,6 +50,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Cost at limit**: ~$2.625 (89.5% profit margin)
 - **Storage**: 200 MB
 - **Clients**: Unlimited
+- **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Growing businesses and marketing professionals
 
 ### Business Plan - $50/month
@@ -56,6 +58,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Cost at limit**: ~$7 (86% profit margin)
 - **Storage**: 2 GB
 - **Clients**: Unlimited
+- **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Agencies and large teams
 
 ## Token Usage Examples
