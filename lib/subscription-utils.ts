@@ -76,7 +76,7 @@ export async function getUserSubscription(userId: string) {
     // Check cache first
     const cached = getCachedSubscription(userId)
     if (cached) {
-      logger.debug('Returning cached subscription', { userId })
+      logger.info('Returning cached subscription', { userId })
       endTiming();
       return cached
     }

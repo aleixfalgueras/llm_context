@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, memo } from 'react'
 import { useChat } from '@/hooks/use-chat'
 import { ChatMessages } from '@/components/assistant/chat-messages'
 import { ChatInput } from '@/components/assistant/chat-input'
@@ -18,8 +18,8 @@ interface ChatContainerProps {
   lastUsedModel?: string
 }
 
-export function ChatContainer({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel }: ChatContainerProps) {
-  const { messages, isLoading, isStreaming, input, setInput, sendMessage, stopGeneration, setOnTitleUpdate } = useChat(chatId, initialMessages)
+function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel }: ChatContainerProps) {
+  const { messages, isLoading, isStreaming, sendMessage, stopGeneration, setOnTitleUpdate } = useChat(chatId, initialMessages)
   
   // Set up title update callback
   useEffect(() => {
@@ -43,8 +43,6 @@ export function ChatContainer({ chatId, initialMessages, userImageUrl, userName,
       <div className="border-t p-4">
         <ChatInput 
           chatId={chatId}
-          input={input}
-          setInput={setInput}
           sendMessage={sendMessage}
           isLoading={isLoading}
           isStreaming={isStreaming}
@@ -58,4 +56,6 @@ export function ChatContainer({ chatId, initialMessages, userImageUrl, userName,
       </div>
     </>
   )
-} 
+}
+
+export const ChatContainer = memo(ChatContainerComponent) 
