@@ -40,27 +40,18 @@ export class OpenRouterService {
     try {
       const stream = await this.client.createStreamingCompletion(finalOptions)
       
-      let totalTokens = 0
-      let promptTokens = 0
-      let completionTokens = 0
+      let finalChunk: StreamChunk | null = null
       
       for await (const chunk of processOpenRouterStream(stream, 'openrouter')) {
-        yield chunk
-        
-        // Track usage when stream completes
-        if (chunk.isComplete && chunk.usage && usageOptions) {
-          totalTokens = chunk.usage.totalTokens
-          promptTokens = chunk.usage.promptTokens
-          completionTokens = chunk.usage.completionTokens
-          
-          await this.trackUsage(usageOptions, {
-            model: finalOptions.model || getDefaultModel(),
-            totalTokens,
-            promptTokens,
-            completionTokens,
-            serviceSource: 'openrouter'
-          })
+        if (chunk.isComplete) {
+          finalChunk = chunk
         }
+        yield chunk
+      }
+      
+      // Track usage after stream completes - either from stream or fallback
+      if (finalChunk?.isComplete && usageOptions) {
+        await this.handleUsageTracking(finalChunk, finalOptions, usageOptions)
       }
     } catch (error) {
       handleOpenRouterError(error)
@@ -137,6 +128,65 @@ export class OpenRouterService {
       frequency_penalty: options.frequency_penalty ?? getDefaultFrequencyPenalty(),
       usage: options.usage ?? { include: true }, // Enable usage tracking by default
       messages: options.messages
+    }
+  }
+
+  /**
+   * Handle usage tracking with fallback to generation stats API
+   */
+  private async handleUsageTracking(
+    finalChunk: StreamChunk,
+    options: OpenRouterCompletionOptions,
+    usageOptions: UsageTrackingOptions
+  ): Promise<void> {
+    let usage = finalChunk.usage
+    
+    // Fallback: Query generation stats if usage data is missing
+    if (!usage && finalChunk.generationId) {
+      try {
+        logger.info('No usage data in stream, querying generation stats', { 
+          metadata: { generationId: finalChunk.generationId }
+        });
+        
+        // Add a small delay - generation stats might not be immediately available
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const stats = await this.client.getGenerationStats(finalChunk.generationId);
+        
+        if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
+          usage = {
+            promptTokens: stats.data.tokens_prompt || 0,
+            completionTokens: stats.data.tokens_completion || 0,
+            totalTokens: (stats.data.tokens_prompt || 0) + (stats.data.tokens_completion || 0)
+          };
+          
+          logger.info('Retrieved usage from generation stats', { 
+            metadata: { generationId: finalChunk.generationId, usage }
+          });
+        } else {
+          logger.warn('Generation stats available but no token data', { 
+            metadata: { generationId: finalChunk.generationId, stats }
+          });
+        }
+      } catch (error) {
+        logger.warn('Failed to get generation stats, using content-based estimation', { 
+          metadata: { 
+            generationId: finalChunk.generationId,
+            error: error instanceof Error ? error.message : String(error)
+          }
+        });
+      }
+    }
+    
+    // Track usage if we have data
+    if (usage && usage.totalTokens > 0) {
+      await this.trackUsage(usageOptions, {
+        model: options.model || getDefaultModel(),
+        totalTokens: usage.totalTokens,
+        promptTokens: usage.promptTokens,
+        completionTokens: usage.completionTokens,
+        serviceSource: 'openrouter'
+      })
     }
   }
 
