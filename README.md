@@ -464,7 +464,7 @@ For support and questions:
 
 ---
 
-**Built with ❤️ for marketing professionals who want to scale their content creation with AI while maintaining the highest standards of privacy and security.**
+**Built with ❤️**
 
 ## Setting up Prisma Migrations for Deployment
 
