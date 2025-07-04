@@ -238,12 +238,7 @@ export function CustomDocumentGeneratorDialog({
               <SelectContent>
                 {prompts.map((prompt) => (
                   <SelectItem key={prompt.id} value={prompt.id}>
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{prompt.name}</span>
-                      {prompt.description && (
-                        <span className="text-sm text-muted-foreground">{prompt.description}</span>
-                      )}
-                    </div>
+                    {prompt.name}
                   </SelectItem>
                 ))}
               </SelectContent>
