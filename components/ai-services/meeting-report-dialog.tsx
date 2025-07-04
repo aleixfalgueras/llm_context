@@ -116,7 +116,7 @@ export function MeetingReportDialog({
     buildSavePayload: (data: MeetingFormData, content: string) => ({
       clientId: data.clientId,
       documentName: data.documentName,
-      content,
+      reportContent: content,
       meetingDate: data.meetingDate,
       additionalInfo: data.additionalInfo
     }),

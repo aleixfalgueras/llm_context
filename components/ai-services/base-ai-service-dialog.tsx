@@ -191,7 +191,7 @@ export function BaseAIServiceDialog<TFormData = any>({
       }
 
       const data = await response.json()
-      setInternalGeneratedContent(data.content || '')
+      setInternalGeneratedContent(data.content || data.report || '')
       
       // Auto-generate document name if not provided
       if (!documentName && config.generateDefaultName) {
