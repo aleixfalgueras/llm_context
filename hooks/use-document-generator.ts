@@ -89,7 +89,7 @@ export function useDocumentGenerator({
       const response = await fetch('/api/prompts?active=true&includeContent=true')
       if (response.ok) {
         const data = await response.json()
-        setPrompts(data || [])
+        setPrompts(data.data.prompts || [])
       }
     } catch (error) {
       console.error('Error loading prompts:', error)
