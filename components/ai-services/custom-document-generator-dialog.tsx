@@ -62,7 +62,6 @@ export function CustomDocumentGeneratorDialog({
     setUseCustomPrompt,
     setIsEditMode,
     generateDocument,
-    handleSaveDocument,
     resetForm,
     selectAllContext,
     deselectAllContext,
@@ -122,10 +121,6 @@ export function CustomDocumentGeneratorDialog({
     return await generateDocument()
   }
 
-  // Custom wrapper for save that uses hook logic 
-  const handleCustomSave = async () => {
-    return await handleSaveDocument()
-  }
 
   // Handle edit mode changes
   const handleEditModeChange = (editMode: boolean) => {
@@ -154,9 +149,14 @@ export function CustomDocumentGeneratorDialog({
       return {}
     },
     
-    buildSavePayload: () => {
-      // This won't be used as we override with custom handler  
-      return {}
+    buildSavePayload: (formData: CustomDocumentFormData, content: string, client?: Client) => {
+      const prompt = prompts.find(p => p.id === formData.selectedPrompt)
+      return {
+        clientId: formData.clientId,
+        content: content,
+        documentTitle: formData.documentTitle,
+        promptName: formData.useCustomPrompt ? 'Custom Prompt' : prompt?.name || '',
+      }
     },
     
     validateGeneration: (data: CustomDocumentFormData): ValidationResult => {
@@ -230,7 +230,7 @@ export function CustomDocumentGeneratorDialog({
           </div>
         ) : (
           <div className="space-y-2">
-            <Label htmlFor="prompt-select">Select Prompt *</Label>
+            <Label htmlFor="prompt-select">Select Prompt</Label>
             <Select value={selectedPrompt} onValueChange={handlePromptChange} disabled={isLoadingPrompts}>
               <SelectTrigger>
                 <SelectValue placeholder={isLoadingPrompts ? "Loading prompts..." : "Choose a prompt..."} />
@@ -308,7 +308,6 @@ export function CustomDocumentGeneratorDialog({
       onClientChange={handleClientChange}
       renderCustomFields={renderCustomFields}
       customGenerateHandler={handleCustomGenerate}
-      customSaveHandler={handleCustomSave}
       customGeneratedContent={generatedContent}
       customIsGenerating={isGenerating}
       customIsSaving={isSaving}
