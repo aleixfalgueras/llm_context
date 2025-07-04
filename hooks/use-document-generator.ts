@@ -43,7 +43,6 @@ interface UseDocumentGeneratorReturn {
   setGeneratedContent: (content: string) => void
   setIsEditMode: (edit: boolean) => void
   generateDocument: () => Promise<void>
-  handleSaveDocument: () => Promise<void>
   resetForm: () => void
   selectAllContext: () => void
   deselectAllContext: () => void
@@ -138,8 +137,14 @@ export function useDocumentGenerator({
         },
         body: JSON.stringify({
           clientId: selectedClient,
-          clientContext,
-          prompt: finalPrompt,
+          documentTitle: documentTitle,
+          ...(useCustomPrompt 
+            ? { customPrompt: finalPrompt }
+            : { promptId: selectedPrompt }
+          ),
+          selectedContextFields: Object.entries(clientContext)
+            .filter(([, value]) => value)
+            .map(([key]) => key),
           model: getDefaultModel()
         }),
       })
@@ -191,70 +196,6 @@ export function useDocumentGenerator({
     }
   }
 
-  const handleSaveDocument = async () => {
-    if (!generatedContent || !selectedClient || !documentTitle) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please generate a document first.',
-        variant: 'destructive',
-      })
-      return
-    }
-
-    setIsSaving(true)
-    try {
-      const response = await fetch('/api/ai-services/save-custom-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientId: selectedClient,
-          content: generatedContent,
-          documentTitle,
-          promptName,
-        }),
-      })
-
-      if (!response.ok) {
-        // Handle storage limit errors specifically
-        if (response.status === 413) {
-          const errorText = await response.text()
-          throw new Error(errorText)
-        }
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (onDocumentCreated && data.documentId) {
-        toast({
-          title: 'Document Saved 📄',
-          description: 'Custom document has been saved successfully. Click to view the document.',
-          duration: 10000,
-        })
-        // Call the callback to view the document
-        onDocumentCreated(selectedClient, data.documentId)
-      } else {
-        toast({
-          title: 'Document Saved 📄',
-          description: `Custom document has been saved successfully. You can find it in the Clients page under ${clients.find(c => c.id === selectedClient)?.name}'s documents.`,
-          duration: 8000,
-        })
-      }
-
-      // Don't auto-reset form, let component handle it
-    } catch (error) {
-      console.error('Error saving document:', error)
-      toast({
-        title: 'Save Failed',
-        description: 'Failed to save document. Please try again.',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsSaving(false)
-    }
-  }
 
   const resetForm = () => {
     setSelectedClient('')
@@ -316,7 +257,6 @@ export function useDocumentGenerator({
     setGeneratedContent,
     setIsEditMode,
     generateDocument,
-    handleSaveDocument,
     resetForm,
     selectAllContext,
     deselectAllContext,
