@@ -4,12 +4,14 @@ A production-ready AI-powered marketing assistant platform built with Next.js 14
 
 ## ✨ Key Features
 
-### 🤖 **Optimized AI Model Architecture**
-- **Dual Model System**: All subscription tiers use Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for maximum cost efficiency
-- **Unified AI Integration**: Single interface through OpenRouter providing access to 400+ models
-- **Cost-Optimized Selection**: Models chosen for 89-91% profit margins while maintaining high quality
-- **Intelligent Routing**: Automatic model selection based on task requirements
-- **Real-time Usage Tracking**: Token consumption monitoring without confusing cost estimates
+### 🤖 **Dual AI Model Architecture**
+- **Dual Model System**: All subscription tiers use Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter
+- **Latest AI Technology**: Google Gemini 2.0 Flash ($0.10/M input, $0.40/M output) with 1M context length
+- **Alternative Choice**: OpenAI GPT-4.1 Nano ($0.10/M input, $0.40/M output) with 200K context length
+- **Unified Integration**: Single OpenRouter interface providing access to both premium models
+- **Cost-Optimized Pricing**: Models chosen for 86-91% profit margins while maintaining high quality
+- **User Choice**: Select preferred model per conversation or use system default
+- **Real-time Usage Tracking**: Token consumption monitoring across both models
 - **Business Sustainability**: Pricing ensures long-term platform viability
 
 ### 👥 **Comprehensive Client Management**
@@ -122,12 +124,12 @@ The codebase has been completely refactored to follow the Single Responsibility 
 - **Middleware**: Authentication and usage protection
 
 ### **OpenRouter AI Platform**
-- **OpenRouter Integration**: Access to curated AI models through unified API with cost management
-- **Tiered Model Access**: Server-side validation ensuring users only access models in their subscription tier
-- **Business-Sustainable Pricing**: Token limits calculated to cover AI costs with profitable margins
-- **Unified AI Wrapper**: Single interface handling multiple models through OpenRouter seamlessly
-- **Token Tracking**: Accurate usage monitoring without confusing cost estimates
-- **AI SDK**: Streamlined OpenRouter integration with streaming support
+- **OpenRouter Integration**: Unified API access to Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **Dual Model Access**: Both premium models available across all subscription tiers
+- **Business-Sustainable Pricing**: Token limits calculated to cover AI costs with 86-91% profit margins
+- **Modular AI Architecture**: Clean separation between AI client, service, error handling, and streaming
+- **Token Tracking**: Accurate usage monitoring across both models without confusing cost estimates
+- **Streaming Support**: Real-time response streaming for both Google and OpenAI models
 
 ### **Authentication & Security**
 - **Clerk**: Complete authentication solution with user management
@@ -141,17 +143,20 @@ The codebase has been completely refactored to follow the Single Responsibility 
 ### **Basic Plan - $10/month**
 - **5M tokens per month** (91.25% profit margin)
 - **3 client profiles**
-- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **50 MB storage**
+- **Both AI Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
 ### **Pro Plan - $25/month**  
 - **15M tokens per month** (89.5% profit margin)
 - **Unlimited client profiles**
-- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **200 MB storage**
+- **Both AI Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
-### **Business Plan - $43/month**
-- **Higher token limits** with enterprise features
+### **Business Plan - $50/month**
+- **40M tokens per month** (86% profit margin)
 - **Unlimited client profiles**
-- **Dual Model Architecture**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **2 GB storage**
+- **Both AI Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 
 
 ## 📂 Project Structure
@@ -191,7 +196,7 @@ The codebase has been completely refactored to follow the Single Responsibility 
 │   │   ├── document-operations.ts # Document management operations
 │   │   ├── prompt-operations.ts  # Prompt library operations
 │   │   └── index.ts             # Unified exports
-│   ├── openrouter/        # AI provider integration module
+│   ├── openrouter/        # OpenRouter AI integration module
 │   │   ├── client.ts            # Low-level OpenRouter API client
 │   │   ├── service.ts           # High-level AI service with usage tracking
 │   │   ├── error-handler.ts     # AI-specific error handling
@@ -211,7 +216,7 @@ The codebase has been completely refactored to follow the Single Responsibility 
 │   ├── subscription-utils.ts # Usage tracking & limits
 │   ├── data-export-utils.ts # Data export functionality
 │   ├── language-utils.ts  # Multi-language support
-│   ├── models-config.ts   # Multi-AI model configuration
+│   ├── models-config.ts   # Dual-model configuration (Gemini 2.0 Flash + GPT-4.1 Nano)
 │   ├── logger.ts          # Comprehensive logging system
 │   ├── ai-wrapper.ts      # Unified AI integration abstraction
 │   └── variable-replacement.ts # Variable substitution

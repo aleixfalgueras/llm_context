@@ -9,23 +9,24 @@
 - ✅ **Excellent profit margins** at all subscription levels  
 - ✅ **Simplified user experience** with consistent, cutting-edge AI performance
 
-**⚠️ UPDATED JULY 2025**: Current dual-model architecture with Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+**⚠️ UPDATED JANUARY 2025**: Current dual-model architecture with Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter
 
 ## Model Configuration
 
 ### Dual Model Architecture
-**All subscription tiers have access to both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano:**
-- **Gemini 2.0 Flash**: $0.075 per 1M input tokens, $0.30 per 1M output tokens
-- **GPT-4.1 Nano**: $0.150 per 1M input tokens, $0.600 per 1M output tokens  
-- **Blended cost**: ~$0.175 per 1M tokens (weighted average across both models)
-- **Context length**: Up to 1M tokens (Gemini), 128K tokens (GPT-4.1 Nano)
-- **Performance**: Cost-optimized models selected for 89-91% profit margins
+**All subscription tiers have access to both premium models through OpenRouter:**
+- **Gemini 2.0 Flash**: $0.10 per 1M input tokens, $0.40 per 1M output tokens
+- **GPT-4.1 Nano**: $0.10 per 1M input tokens, $0.40 per 1M output tokens  
+- **Consistent pricing**: Both models have identical costs for predictable expenses
+- **Context length**: Up to 1M tokens (Gemini), 200K tokens (GPT-4.1 Nano)
+- **Performance**: Latest AI technology with 86-91% profit margins
 
 ### Cost Calculation Methodology
 ```
 Typical usage pattern: 75% input tokens, 25% output tokens
 Blended rate = (0.75 × $0.10) + (0.25 × $0.40) = $0.075 + $0.10 = $0.175 per 1M tokens
 Per 1K tokens = $0.000175
+(Same cost calculation applies to both models due to identical pricing)
 ```
 
 ## Subscription Plans Analysis
