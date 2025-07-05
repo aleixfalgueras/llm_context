@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 // Simple in-memory cache for usage info to prevent excessive DB queries
 const usageCache = new Map<string, { data: any; timestamp: number }>()
-const CACHE_DURATION = 30 * 1000 // 30 seconds
+const CACHE_DURATION = 2 * 60 * 1000 // 2 minutes (increased from 30 seconds for better performance)
 
 export async function GET() {
   const endTiming = logger.startTiming('Usage Info API');
