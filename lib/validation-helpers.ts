@@ -192,17 +192,17 @@ export function processClientData<T extends Record<string, any>>(data: T): T {
   const processed = { ...data }
   
   // Trim context fields if they exist
-  if (processed.generalContext) {
-    processed.generalContext = sanitizeString(processed.generalContext)
+  if ('generalContext' in processed && processed.generalContext) {
+    (processed as any).generalContext = sanitizeString((processed as any).generalContext)
   }
-  if (processed.specifiContext1) {
-    processed.specifiContext1 = sanitizeString(processed.specifiContext1)
+  if ('specificContext1' in processed && processed.specificContext1) {
+    (processed as any).specificContext1 = sanitizeString((processed as any).specificContext1)
   }
-  if (processed.specifiContext2) {
-    processed.specifiContext2 = sanitizeString(processed.specifiContext2)
+  if ('specificContext2' in processed && processed.specificContext2) {
+    (processed as any).specificContext2 = sanitizeString((processed as any).specificContext2)
   }
-  if (processed.specifiContext3) {
-    processed.specifiContext3 = sanitizeString(processed.specifiContext3)
+  if ('specificContext3' in processed && processed.specificContext3) {
+    (processed as any).specificContext3 = sanitizeString((processed as any).specificContext3)
   }
   
   return processed
