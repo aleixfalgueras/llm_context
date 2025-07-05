@@ -141,8 +141,14 @@ export async function getUsageInfo(userId: string) {
 
 
 
-    // Check client limits - count current clients instead of creation events
-    const clientCount = await prisma.client.count({ where: { userId } })
+    // Check client limits - count current clients with caching
+    const { getCachedClientCount, cacheClientCount } = await import('./subscription-cache')
+    let clientCount = getCachedClientCount(userId)
+    if (clientCount === null) {
+      clientCount = await prisma.client.count({ where: { userId } })
+      cacheClientCount(userId, clientCount)
+    }
+    
     const clientUsage = {
       allowed: subscription.maxClients === -1 || clientCount < subscription.maxClients,
       limit: subscription.maxClients === -1 ? 'unlimited' as const : subscription.maxClients,

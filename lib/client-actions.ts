@@ -36,6 +36,14 @@ export async function createClient(data: ClientFormData) {
     throw new Error(result.error || 'Failed to create client')
   }
 
+  // Invalidate client count cache since client count has changed
+  try {
+    const { invalidateClientCountCache } = await import('./subscription-cache')
+    invalidateClientCountCache(userId)
+  } catch (error) {
+    console.error('Error invalidating client count cache:', error)
+  }
+
   revalidatePath('/clients')
   return { success: true, client: result.data }
 }
@@ -75,6 +83,14 @@ export async function deleteClient(id: string) {
   if (!result.success) {
     logger.error('Error deleting client', new Error(result.error), { userId, clientId: id })
     throw new Error(result.error || 'Failed to delete client')
+  }
+
+  // Invalidate client count cache since client count has changed
+  try {
+    const { invalidateClientCountCache } = await import('./subscription-cache')
+    invalidateClientCountCache(userId)
+  } catch (error) {
+    console.error('Error invalidating client count cache:', error)
   }
 
   revalidatePath('/clients')
