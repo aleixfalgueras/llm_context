@@ -23,7 +23,7 @@ export function LandingPage() {
             <Link href="/sign-in">Sign in</Link>
           </Button>
           <Button asChild>
-            <Link href="/sign-up">Start Free Trial</Link>
+            <Link href="/sign-up">Sign up</Link>
           </Button>
         </div>
       </nav>
@@ -48,7 +48,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8" asChild>
               <Link href="/sign-up">
-                Start right now
+                Start Free Trial
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
@@ -239,71 +239,7 @@ export function LandingPage() {
             </p>
           </Card>
         </div>
-
-        {/* Pricing Section */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Transparent Pricing, Maximum Value</h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              All plans include both premium AI models with identical pricing. Excellent profit margins ensure platform sustainability.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
-              <h3 className="text-2xl font-bold mb-2">Basic</h3>
-              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-4">$10<span className="text-lg text-gray-500">/month</span></div>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center justify-center">
-                  <span className="font-medium">5M tokens</span>
-                </div>
-                <div>3 client profiles</div>
-                <div>50 MB storage</div>
-                <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">Both AI Models Included</div>
-              </div>
-              <Button className="w-full" variant="outline" asChild>
-                <Link href="/sign-up">Start Basic Plan</Link>
-              </Button>
-            </Card>
-
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 border-purple-200 dark:border-purple-800 relative">
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 -translate-y-6">
-                <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Most Popular
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold mb-2">Pro</h3>
-              <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-4">$25<span className="text-lg text-gray-500">/month</span></div>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center justify-center">
-                  <span className="font-medium">15M tokens</span>
-                </div>
-                <div>Unlimited clients</div>
-                <div>200 MB storage</div>
-                <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">Both AI Models Included</div>
-              </div>
-              <Button className="w-full" asChild>
-                <Link href="/sign-up">Start Pro Plan</Link>
-              </Button>
-            </Card>
-
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-green-200 dark:hover:border-green-800">
-              <h3 className="text-2xl font-bold mb-2">Business</h3>
-              <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-4">$50<span className="text-lg text-gray-500">/month</span></div>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center justify-center">
-                  <span className="font-medium">40M tokens</span>
-                </div>
-                <div>Unlimited clients</div>
-                <div>2 GB storage</div>
-                <div className="text-sm text-green-600 dark:text-green-400 font-medium">Both AI Models Included</div>
-              </div>
-              <Button className="w-full" variant="outline" asChild>
-                <Link href="/sign-up">Start Business Plan</Link>
-              </Button>
-            </Card>
-          </div>
-        </div>
-
+        
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -315,7 +251,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link href="/sign-up">
-                Start with Dual AI Models
+                Start Free Trial
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
