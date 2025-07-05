@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
 import { Plus, Edit2, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useFormState } from '@/hooks/use-form-state'
 import { Prompt, PromptBasic } from '@/types/component-types'
 
 interface PromptDialogProps {
@@ -28,6 +29,34 @@ const CATEGORIES = [
   { value: 'analysis', label: 'Analysis' },
 ]
 
+interface PromptFormData {
+  name: string
+  description: string
+  content: string
+  category: string
+}
+
+const getValidationRules = () => ({
+  name: (value: string) => {
+    if (!value || value.trim().length === 0) {
+      return 'Name is required'
+    }
+    if (value.trim().length < 3) {
+      return 'Name must be at least 3 characters'
+    }
+    return null
+  },
+  content: (value: string) => {
+    if (!value || value.trim().length === 0) {
+      return 'Prompt content is required'
+    }
+    if (value.trim().length < 10) {
+      return 'Prompt content must be at least 10 characters'
+    }
+    return null
+  },
+})
+
 export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, open: externalOpen, onOpenChange: externalOnOpenChange }: PromptDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   
@@ -35,18 +64,54 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
   const open = externalOpen !== undefined ? externalOpen : internalOpen
   const setOpen = externalOnOpenChange || setInternalOpen
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
+  
+  // Initialize form data
+  const initialFormData: PromptFormData = {
     name: prompt?.name || '',
     description: prompt?.description || '',
     content: prompt?.content || '',
     category: prompt?.category || 'general',
+  }
+  
+  const {
+    formData,
+    errors,
+    isValid,
+    isDirty,
+    updateField,
+    updateFormData,
+    validateForm,
+    resetForm,
+    setFormData,
+  } = useFormState({
+    initialData: initialFormData,
+    validationRules: getValidationRules(),
   })
+  
   const { toast } = useToast()
+  
+  // Update form data when prompt changes (for editing or template usage)
+  useEffect(() => {
+    if (prompt) {
+      setFormData({
+        name: prompt.name || '',
+        description: prompt.description || '',
+        content: prompt.content || '',
+        category: prompt.category || 'general',
+      })
+    }
+  }, [prompt, setFormData])
 
   const isEditing = Boolean(prompt) && !isTemplate
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate form before submitting
+    if (!validateForm()) {
+      return
+    }
+    
     setLoading(true)
 
     try {
@@ -75,12 +140,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       
       // Reset form if creating new prompt (but not from template)
       if (!isEditing && !isTemplate) {
-        setFormData({
-          name: '',
-          description: '',
-          content: '',
-          category: 'general',
-        })
+        resetForm()
       }
     } catch (error) {
       toast({
@@ -132,17 +192,21 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
               <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
-                                  placeholder="e.g., Generate Marketing Strategy Report"
+                placeholder="e.g., Generate Marketing Strategy Report"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => updateField('name', e.target.value)}
+                className={errors.name ? 'border-red-500' : ''}
                 required
               />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select
                 value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                onValueChange={(value) => updateField('category', value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -164,8 +228,12 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
               id="description"
               placeholder="Brief description of what this prompt does"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) => updateField('description', e.target.value)}
+              className={errors.description ? 'border-red-500' : ''}
             />
+            {errors.description && (
+              <p className="text-sm text-red-500">{errors.description}</p>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -177,10 +245,13 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
               id="content"
               placeholder="Enter your prompt template here."
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="min-h-[200px]"
+              onChange={(e) => updateField('content', e.target.value)}
+              className={`min-h-[200px] ${errors.content ? 'border-red-500' : ''}`}
               required
             />
+            {errors.content && (
+              <p className="text-sm text-red-500">{errors.content}</p>
+            )}
           </div>
           
           <div className="flex justify-end gap-2 pt-4">
@@ -194,7 +265,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
             </Button>
             <Button 
               type="submit" 
-              disabled={loading}
+              disabled={loading || !isValid}
               className={isTemplate ? "bg-amber-600 hover:bg-amber-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
             >
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

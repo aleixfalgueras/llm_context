@@ -19,9 +19,7 @@ interface UsePromptManagementReturn {
   loading: boolean
   
   // Dialog states
-  showLimitDialog: boolean
   showPromptDialog: boolean
-  limitMessage: string
   
   // Actions
   fetchPrompts: () => Promise<void>
@@ -30,7 +28,6 @@ interface UsePromptManagementReturn {
   handleNewPrompt: () => Promise<void>
   clearFilters: () => void
   setShowPromptDialog: (show: boolean) => void
-  setShowLimitDialog: (show: boolean) => void
   
   // Filter handlers
   filterActionHandlers: FilterActionHandlers
@@ -47,8 +44,6 @@ export function usePromptManagement(): UsePromptManagementReturn {
     showInactive: false,
     showTemplates: true
   })
-  const [showLimitDialog, setShowLimitDialog] = useState(false)
-  const [limitMessage, setLimitMessage] = useState('')
   const [showPromptDialog, setShowPromptDialog] = useState(false)
   const { toast } = useToast()
 
@@ -218,9 +213,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
     loading,
     
     // Dialog states
-    showLimitDialog,
     showPromptDialog,
-    limitMessage,
     
     // Actions
     fetchPrompts,
@@ -229,7 +222,6 @@ export function usePromptManagement(): UsePromptManagementReturn {
     handleNewPrompt,
     clearFilters,
     setShowPromptDialog,
-    setShowLimitDialog,
     
     // Filter handlers
     filterActionHandlers,
