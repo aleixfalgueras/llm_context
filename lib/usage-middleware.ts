@@ -130,12 +130,14 @@ export async function getUsageInfo(userId: string) {
     // This prevents the race condition of 4 parallel checkUsageLimit calls
     const { getUserSubscription, getCurrentMonthUsage } = await import('./subscription-utils');
     
-    // Parallelize all database calls for better performance
-    const [subscription, usage, storageAnalytics] = await Promise.all([
+    // Parallelize database calls for better performance
+    const [subscription, usage] = await Promise.all([
       getUserSubscription(userId),
-      getCurrentMonthUsage(userId),
-      getStorageAnalytics(userId)
+      getCurrentMonthUsage(userId)
     ]);
+    
+    // Pass subscription to getStorageAnalytics to avoid duplicate query
+    const storageAnalytics = await getStorageAnalytics(userId, subscription);
 
     // Plan details stored in subscription object
 

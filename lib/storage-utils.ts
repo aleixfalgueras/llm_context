@@ -146,7 +146,7 @@ export function formatBytes(bytes: number): string {
 /**
  * Get storage analytics for a user
  */
-export async function getStorageAnalytics(userId: string) {
+export async function getStorageAnalytics(userId: string, subscription?: any) {
   try {
     // Check cache first
     const { getCachedStorageAnalytics, cacheStorageAnalytics } = await import('./subscription-cache')
@@ -155,12 +155,13 @@ export async function getStorageAnalytics(userId: string) {
       return cached
     }
 
-    const [subscription, storageUsage] = await Promise.all([
-      getUserSubscription(userId),
+    // If subscription is provided, use it; otherwise fetch it
+    const [userSubscription, storageUsage] = await Promise.all([
+      subscription ? Promise.resolve(subscription) : getUserSubscription(userId),
       getCurrentStorageUsage(userId)
     ])
 
-    const storageLimit = getStorageLimitForPlan(subscription.plan)
+    const storageLimit = getStorageLimitForPlan(userSubscription.plan)
     
     const analytics = {
       usage: storageUsage,
@@ -202,11 +203,11 @@ export async function validateDocumentStorage(content: string, userId?: string):
 /**
  * Check if user is approaching storage limit (80% threshold)
  */
-export async function isApproachingStorageLimit(userId: string): Promise<boolean> {
+export async function isApproachingStorageLimit(userId: string, subscription?: any): Promise<boolean> {
   try {
-    const subscription = await getUserSubscription(userId)
+    const userSubscription = subscription || await getUserSubscription(userId)
     const storageUsage = await getCurrentStorageUsage(userId)
-    const storageLimit = getStorageLimitForPlan(subscription.plan)
+    const storageLimit = getStorageLimitForPlan(userSubscription.plan)
 
     const usagePercentage = (storageUsage.totalBytes / storageLimit) * 100
     return usagePercentage >= 80
