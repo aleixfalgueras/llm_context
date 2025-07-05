@@ -218,7 +218,7 @@ export function ClientContextSidebar({
                             />
                           </div>
                         )}
-                        {selectedClient?.specifiContext1 && (
+                        {selectedClient?.specificContext1 && (
                           <div className="flex items-center space-x-2">
                             <Checkbox
                               id="context-specific-context-1"
@@ -231,7 +231,7 @@ export function ClientContextSidebar({
                             />
                           </div>
                         )}
-                        {selectedClient?.specifiContext2 && (
+                        {selectedClient?.specificContext2 && (
                           <div className="flex items-center space-x-2">
                             <Checkbox
                               id="context-specific-context-2"
@@ -244,7 +244,7 @@ export function ClientContextSidebar({
                             />
                           </div>
                         )}
-                        {selectedClient?.specifiContext3 && (
+                        {selectedClient?.specificContext3 && (
                           <div className="flex items-center space-x-2">
                             <Checkbox
                               id="context-specific-context-3"

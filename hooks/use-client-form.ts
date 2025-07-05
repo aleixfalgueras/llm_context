@@ -62,9 +62,9 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     phone: client?.phone || '',
     country: client?.country || '',
     generalContext: client?.generalContext || '',
-    specifiContext1: client?.specifiContext1 || '',
-    specifiContext2: client?.specifiContext2 || '',
-    specifiContext3: client?.specifiContext3 || '',
+    specificContext1: client?.specificContext1 || '',
+    specificContext2: client?.specificContext2 || '',
+    specificContext3: client?.specificContext3 || '',
     documentsLanguage: client?.documentsLanguage || 'english'
   }
 

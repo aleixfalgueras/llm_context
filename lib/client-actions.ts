@@ -122,9 +122,9 @@ export async function getClients(options?: { includeDetails?: boolean; limit?: n
       ...(options?.includeDetails && {
         phone: true,
         generalContext: true,
-        specifiContext1: true,
-        specifiContext2: true,
-        specifiContext3: true
+        specificContext1: true,
+        specificContext2: true,
+        specificContext3: true
       })
     },
     orderBy: { createdAt: 'desc' }

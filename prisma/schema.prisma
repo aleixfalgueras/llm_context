@@ -55,9 +55,9 @@ model Client {
   country     String?  // Client's country/location
 
   generalContext String?  // General context about the client
-  specifiContext1 String? // Specific context 1 about the client
-  specifiContext2 String? // Specific context 2 about the client  
-  specifiContext3 String? // Specific context 3 about the client
+  specificContext1 String? // Specific context 1 about the client
+  specificContext2 String? // Specific context 2 about the client  
+  specificContext3 String? // Specific context 3 about the client
   documentsLanguage String @default("english") // Preferred language for generated documents
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

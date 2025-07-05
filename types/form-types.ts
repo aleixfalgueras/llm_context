@@ -113,9 +113,9 @@ export interface ClientFormData {
   country: string
   language: string
   generalContext?: string
-  specifiContext1?: string
-  specifiContext2?: string
-  specifiContext3?: string
+  specificContext1?: string
+  specificContext2?: string
+  specificContext3?: string
 }
 
 /**

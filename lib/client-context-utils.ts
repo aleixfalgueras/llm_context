@@ -32,14 +32,14 @@ export function buildClientContextSection(client: Client, selectedFields: string
   if (shouldIncludeGeneralContext && client.generalContext) {
     contextParts.push(client.generalContext)
   }
-  if (shouldIncludeSpecificContext1 && client.specifiContext1) {
-    contextParts.push(client.specifiContext1)
+  if (shouldIncludeSpecificContext1 && client.specificContext1) {
+    contextParts.push(client.specificContext1)
   }
-  if (shouldIncludeSpecificContext2 && client.specifiContext2) {
-    contextParts.push(client.specifiContext2)
+  if (shouldIncludeSpecificContext2 && client.specificContext2) {
+    contextParts.push(client.specificContext2)
   }
-  if (shouldIncludeSpecificContext3 && client.specifiContext3) {
-    contextParts.push(client.specifiContext3)
+  if (shouldIncludeSpecificContext3 && client.specificContext3) {
+    contextParts.push(client.specificContext3)
   }
   
   // Build the context line based on whether country is selected
