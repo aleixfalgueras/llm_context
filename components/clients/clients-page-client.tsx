@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ClientsList } from '@/components/clients/clients-list'
 import { ClientForm } from '@/components/clients/client-form'
 import { ClientDocuments } from '@/components/clients/client-documents'
@@ -18,6 +19,7 @@ interface ClientsPageClientProps {
 
 export function ClientsPageClient({ clients: initialClients }: ClientsPageClientProps) {
   const [clients] = useState(initialClients)
+  const router = useRouter()
   
   const {
     // State
@@ -47,6 +49,11 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
 
   const handleCancel = () => {
     setIsDialogOpen(false)
+  }
+
+  const handleUpgrade = () => {
+    setShowLimitDialog(false)
+    router.push('/pricing')
   }
 
   return (
@@ -95,8 +102,8 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
             <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
               Close
             </Button>
-            <Button onClick={() => window.open('/pricing', '_blank')}>
-              View Plans
+            <Button onClick={handleUpgrade}>
+              Upgrade Plan
             </Button>
           </div>
         </DialogContent>

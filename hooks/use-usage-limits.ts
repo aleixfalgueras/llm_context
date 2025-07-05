@@ -6,12 +6,15 @@ import { useToast } from '@/hooks/use-toast'
 interface UsageInfo {
   clientsUsed: number
   clientsLimit: number
-  promptsUsed: number
-  promptsLimit: number
   storageUsed: number
   storageLimit: number
   plan: string
   tier: string
+}
+
+interface LimitCheckResult {
+  canAdd: boolean
+  message: string
 }
 
 interface UseUsageLimitsReturn {
@@ -20,8 +23,7 @@ interface UseUsageLimitsReturn {
   loading: boolean
   
   // Actions
-  checkClientLimit: () => Promise<boolean>
-  checkPromptLimit: () => Promise<boolean>
+  checkClientLimit: () => Promise<LimitCheckResult>
   checkStorageLimit: () => Promise<boolean>
   refreshUsageInfo: () => Promise<void>
   getUsageInfo: () => Promise<UsageInfo | null>
@@ -56,47 +58,22 @@ export function useUsageLimits(): UseUsageLimitsReturn {
     }
   }, [getUsageInfo])
 
-  const checkClientLimit = useCallback(async (): Promise<boolean> => {
+  const checkClientLimit = useCallback(async (): Promise<LimitCheckResult> => {
     try {
       const usage = await getUsageInfo()
-      if (!usage) return true // Allow if we can't check
+      if (!usage) return { canAdd: true, message: '' } // Allow if we can't check
 
       if (usage.clientsUsed >= usage.clientsLimit) {
-        toast({
-          title: 'Client Limit Reached',
-          description: `You've reached your client limit (${usage.clientsLimit}). Please upgrade your plan or delete some existing clients to create new ones.`,
-          variant: 'destructive',
-          duration: 8000,
-        })
-        return false
+        const message = `You've reached your client limit (${usage.clientsLimit}). Please upgrade your plan or delete some existing clients to create new ones.`
+        return { canAdd: false, message }
       }
-      return true
+      return { canAdd: true, message: '' }
     } catch (error) {
       console.error('Error checking client limit:', error)
-      return true // Allow if check fails
+      return { canAdd: true, message: '' } // Allow if check fails
     }
-  }, [getUsageInfo, toast])
+  }, [getUsageInfo])
 
-  const checkPromptLimit = useCallback(async (): Promise<boolean> => {
-    try {
-      const usage = await getUsageInfo()
-      if (!usage) return true // Allow if we can't check
-
-      if (usage.promptsUsed >= usage.promptsLimit) {
-        toast({
-          title: 'Prompt Limit Reached',
-          description: `You've reached your prompt limit (${usage.promptsLimit}). Please upgrade your plan or delete some existing prompts to create new ones.`,
-          variant: 'destructive',
-          duration: 8000,
-        })
-        return false
-      }
-      return true
-    } catch (error) {
-      console.error('Error checking prompt limit:', error)
-      return true // Allow if check fails
-    }
-  }, [getUsageInfo, toast])
 
   const checkStorageLimit = useCallback(async (): Promise<boolean> => {
     try {
@@ -126,7 +103,6 @@ export function useUsageLimits(): UseUsageLimitsReturn {
     
     // Actions
     checkClientLimit,
-    checkPromptLimit,
     checkStorageLimit,
     refreshUsageInfo,
     getUsageInfo,

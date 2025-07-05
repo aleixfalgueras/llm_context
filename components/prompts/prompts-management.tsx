@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PromptDialog } from '@/components/prompts/prompt-dialog'
 import { Plus, FileText, Lightbulb, AlertTriangle } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { PromptStatsCards } from '@/components/prompts/prompt-stats-cards'
 import { PromptFiltersBar } from '@/components/prompts/prompt-filters-bar'
 import { PromptCard } from '@/components/prompts/prompt-card'
@@ -23,9 +21,7 @@ export function PromptsManagement() {
     loading,
     
     // Dialog states
-    showLimitDialog,
     showPromptDialog,
-    limitMessage,
     
     // Actions
     fetchPrompts,
@@ -34,7 +30,6 @@ export function PromptsManagement() {
     handleNewPrompt,
     clearFilters,
     setShowPromptDialog,
-    setShowLimitDialog,
     
     // Filter handlers
     filterActionHandlers,
@@ -141,32 +136,6 @@ export function PromptsManagement() {
         }}
       />
 
-      {/* Prompt Limit Alert Dialog */}
-      <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
-              Prompt Limit Reached
-            </DialogTitle>
-          </DialogHeader>
-          <Alert variant="destructive" className="mt-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Upgrade Required</AlertTitle>
-            <AlertDescription>
-              {limitMessage}
-            </AlertDescription>
-          </Alert>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
-              Close
-            </Button>
-            <Button onClick={() => window.open('/pricing', '_blank')}>
-              View Plans
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 } 
