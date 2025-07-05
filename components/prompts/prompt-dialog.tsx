@@ -73,8 +73,8 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       setOpen(false)
       onSuccess?.()
       
-      // Reset form if creating new prompt
-      if (!isEditing) {
+      // Reset form if creating new prompt (but not from template)
+      if (!isEditing && !isTemplate) {
         setFormData({
           name: '',
           description: '',
