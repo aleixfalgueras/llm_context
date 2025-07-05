@@ -15,9 +15,9 @@ export interface Client {
   phone?: string
   country?: string
   generalContext?: string
-  specifiContext1?: string
-  specifiContext2?: string
-  specifiContext3?: string
+  specificContext1?: string
+  specificContext2?: string
+  specificContext3?: string
   documentsLanguage?: string
 }
 
@@ -35,9 +35,9 @@ export interface ClientWithContext {
   name?: string | null
   country?: string | null
   generalContext?: string | null
-  specifiContext1?: string | null
-  specifiContext2?: string | null
-  specifiContext3?: string | null
+  specificContext1?: string | null
+  specificContext2?: string | null
+  specificContext3?: string | null
 }
 
 export interface ClientFormData {
@@ -46,9 +46,9 @@ export interface ClientFormData {
   phone?: string
   country?: string
   generalContext?: string
-  specifiContext1?: string
-  specifiContext2?: string
-  specifiContext3?: string
+  specificContext1?: string
+  specificContext2?: string
+  specificContext3?: string
   documentsLanguage?: string
 }
 
@@ -63,9 +63,9 @@ export const CLIENT_FIELD_LABELS = {
   phone: 'Phone',
   country: 'Country',
   generalContext: 'General Context',
-  specifiContext1: 'Specific Context 1',
-  specifiContext2: 'Specific Context 2',
-  specifiContext3: 'Specific Context 3',
+  specificContext1: 'Specific Context 1',
+  specificContext2: 'Specific Context 2',
+  specificContext3: 'Specific Context 3',
   documentsLanguage: 'Documents Language'
 } as const
 
@@ -76,9 +76,9 @@ export const CLIENT_FIELD_PLACEHOLDERS = {
   phone: 'Enter phone number',
   country: 'Select country',
   generalContext: 'Add general context about this client...',
-  specifiContext1: 'Add specific context...',
-  specifiContext2: 'Add specific context...',
-  specifiContext3: 'Add specific context...',
+  specificContext1: 'Add specific context...',
+  specificContext2: 'Add specific context...',
+  specificContext3: 'Add specific context...',
   documentsLanguage: 'Select language'
 } as const
 
@@ -89,17 +89,17 @@ export const CLIENT_FIELD_PLACEHOLDERS = {
 export const CLIENT_CONTEXT_FIELDS = {
   country: 'country',
   general_context: 'generalContext',
-  specific_context_1: 'specifiContext1',
-  specific_context_2: 'specifiContext2',
-  specific_context_3: 'specifiContext3'
+  specific_context_1: 'specificContext1',
+  specific_context_2: 'specificContext2',
+  specific_context_3: 'specificContext3'
 } as const
 
 export const CLIENT_CONTEXT_FIELD_LABELS = {
   country: CLIENT_FIELD_LABELS.country,
   general_context: CLIENT_FIELD_LABELS.generalContext,
-  specific_context_1: CLIENT_FIELD_LABELS.specifiContext1,
-  specific_context_2: CLIENT_FIELD_LABELS.specifiContext2,
-  specific_context_3: CLIENT_FIELD_LABELS.specifiContext3
+  specific_context_1: CLIENT_FIELD_LABELS.specificContext1,
+  specific_context_2: CLIENT_FIELD_LABELS.specificContext2,
+  specific_context_3: CLIENT_FIELD_LABELS.specificContext3
 } as const
 
 // =============================================================================
@@ -119,9 +119,9 @@ export const CLIENT_SELECT_DETAILED = {
   phone: true,
   country: true,
   generalContext: true,
-  specifiContext1: true,
-  specifiContext2: true,
-  specifiContext3: true,
+  specificContext1: true,
+  specificContext2: true,
+  specificContext3: true,
   documentsLanguage: true
 } as const
 

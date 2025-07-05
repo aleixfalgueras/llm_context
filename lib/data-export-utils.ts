@@ -56,9 +56,9 @@ export async function compileUserDataExport(userId: string, exportId: string): P
           phone: true,
           country: true,
           generalContext: true,
-          specifiContext1: true,
-          specifiContext2: true,
-          specifiContext3: true,
+          specificContext1: true,
+          specificContext2: true,
+          specificContext3: true,
           documentsLanguage: true,
           createdAt: true,
           updatedAt: true

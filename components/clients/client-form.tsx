@@ -180,33 +180,33 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="specifiContext1">{CLIENT_FIELD_LABELS.specifiContext1}</Label>
+            <Label htmlFor="specificContext1">{CLIENT_FIELD_LABELS.specificContext1}</Label>
             <Textarea
-              id="specifiContext1"
-              value={formData.specifiContext1}
-              onChange={handleChange('specifiContext1')}
+              id="specificContext1"
+              value={formData.specificContext1}
+              onChange={handleChange('specificContext1')}
               placeholder="Specific context 1 about the client..."
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="specifiContext2">{CLIENT_FIELD_LABELS.specifiContext2}</Label>
+            <Label htmlFor="specificContext2">{CLIENT_FIELD_LABELS.specificContext2}</Label>
             <Textarea
-              id="specifiContext2"
-              value={formData.specifiContext2}
-              onChange={handleChange('specifiContext2')}
+              id="specificContext2"
+              value={formData.specificContext2}
+              onChange={handleChange('specificContext2')}
               placeholder="Specific context 2 about the client..."
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="specifiContext3">{CLIENT_FIELD_LABELS.specifiContext3}</Label>
+            <Label htmlFor="specificContext3">{CLIENT_FIELD_LABELS.specificContext3}</Label>
             <Textarea
-              id="specifiContext3"
-              value={formData.specifiContext3}
-              onChange={handleChange('specifiContext3')}
+              id="specificContext3"
+              value={formData.specificContext3}
+              onChange={handleChange('specificContext3')}
               placeholder="Specific context 3 about the client..."
               rows={3}
             />

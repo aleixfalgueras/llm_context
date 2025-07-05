@@ -108,7 +108,7 @@ The custom document service:
 {country}         → Client's country/location
 {general_context} → Client's general context
 
-Note: The 3 specific context fields (specifiContext1, specifiContext2, specifiContext3) 
+Note: The 3 specific context fields (specificContext1, specificContext2, specificContext3) 
 are available for context selection but do not have corresponding template variables 
 for security reasons. Their content is included in the context section when selected.
 ```
