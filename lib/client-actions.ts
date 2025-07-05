@@ -7,6 +7,7 @@ import { logger } from './logger'
 import { ClientOperations } from './database'
 import { ClientFormData } from '@/types/client'
 import { prisma } from './prisma'
+import { processClientData } from './validation-helpers'
 
 export type ClientData = ClientFormData
 
@@ -22,11 +23,11 @@ export async function createClient(data: ClientFormData) {
     throw new Error(`You've reached your client limit of ${usageCheck.limit}. Upgrade to Pro for unlimited clients.`)
   }
 
-  // Prepare client data with defaults
-  const clientData = {
+  // Prepare client data with defaults and trim context fields
+  const clientData = processClientData({
     ...data,
     documentsLanguage: data.documentsLanguage || 'english',
-  }
+  })
 
   const result = await ClientOperations.createClient(userId, clientData)
   
@@ -45,11 +46,11 @@ export async function updateClient(clientId: string, data: ClientFormData) {
     throw new Error('User not authenticated')
   }
 
-  // Prepare client data with defaults
-  const clientData = {
+  // Prepare client data with defaults and trim context fields
+  const clientData = processClientData({
     ...data,
     documentsLanguage: data.documentsLanguage || 'english',
-  }
+  })
 
   const result = await ClientOperations.updateClient(clientId, userId, clientData)
   

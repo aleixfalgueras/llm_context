@@ -186,6 +186,29 @@ export function hasFieldError(
 }
 
 /**
+ * Process client data by trimming context fields
+ */
+export function processClientData<T extends Record<string, any>>(data: T): T {
+  const processed = { ...data }
+  
+  // Trim context fields if they exist
+  if (processed.generalContext) {
+    processed.generalContext = sanitizeString(processed.generalContext)
+  }
+  if (processed.specifiContext1) {
+    processed.specifiContext1 = sanitizeString(processed.specifiContext1)
+  }
+  if (processed.specifiContext2) {
+    processed.specifiContext2 = sanitizeString(processed.specifiContext2)
+  }
+  if (processed.specifiContext3) {
+    processed.specifiContext3 = sanitizeString(processed.specifiContext3)
+  }
+  
+  return processed
+}
+
+/**
  * API validation helpers to eliminate duplicate validation patterns in API routes
  */
 export const apiValidation = {
