@@ -7,72 +7,28 @@ import { PromptSelector } from '@/components/prompts/prompt-selector'
 import { ModelSelector } from '@/components/ui/model-selector'
 import { replaceClientVariables } from '@/lib/variable-replacement'
 import { useToast } from '@/hooks/use-toast'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { AVAILABLE_MODELS, getDefaultModelForNewChats, saveDefaultModelForNewChats } from '@/lib/models-config'
+import { DEFAULT_MODEL } from '@/lib/models-config'
+import { useSubscription } from '@/hooks/use-subscription'
+import { Message } from '@/types/message-types'
+import { Prompt } from '@/types/component-types'
 
-interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-  isActive: boolean
-  usageCount: number
-}
-
-interface Message {
-  id: string
-  content: string
-  role: 'USER' | 'ASSISTANT'
-  createdAt: Date
-}
-
-interface ChatInputProps {
-  chatId: string
-  input: string
-  setInput: (value: string) => void
-  sendMessage: (content: string, selectedModel?: string) => Promise<void>
+// Separate component for just the textarea input to isolate re-renders
+interface TextareaInputProps {
+  onChange: (value: string) => void
+  onSubmit: () => void
   isLoading: boolean
-  isStreaming: boolean
-  stopGeneration: () => void
-  clientData?: any // Optional client context for prompt variable replacement
-  messages?: Message[] // Messages for export functionality
-  chatTitle?: string // Chat title for export
-  onDocumentCreated?: (clientId: string, documentId: string) => void // Callback for when chat is exported
-  lastUsedModel?: string // Last model used in this chat
+  placeholder?: string
+  inputRef: React.RefObject<HTMLTextAreaElement>
 }
 
-export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
-  const [isExporting, setIsExporting] = useState(false)
-  const [selectedModel, setSelectedModel] = useState(() => {
-    // If this is an existing chat with a lastUsedModel, use that
-    if (lastUsedModel) {
-      return lastUsedModel
-    }
-    
-    // For new chats, read localStorage directly (client-side only)
-    if (typeof window !== 'undefined') {
-      const savedModel = localStorage.getItem('chat-default-model')
-      if (savedModel) {
-        // Validate the saved model exists in available models
-        const isValidModel = ['gpt-4o', 'gpt-4o-mini', 'claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'].includes(savedModel)
-        if (isValidModel) {
-          return savedModel
-        }
-      }
-    }
-    
-    // Default fallback
-    return 'gpt-4o-mini'
-  })
+const TextareaInput = memo(({ onChange, onSubmit, isLoading, placeholder, inputRef }: TextareaInputProps) => {
   
-  const { toast } = useToast()
-  const textAreaRef = useRef<HTMLTextAreaElement>(null)
-
   // Auto-resize textarea function
-  const autoResize = () => {
-    const textArea = textAreaRef.current
+  const autoResize = useCallback(() => {
+    const textArea = inputRef.current
     if (textArea) {
       textArea.style.height = 'auto'
       const newHeight = Math.min(textArea.scrollHeight, 200)
@@ -85,44 +41,99 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
         textArea.style.overflowY = 'hidden'
       }
     }
-  }
+  }, [inputRef])
 
   // Handle input change with auto-resize
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value)
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange(e.target.value)
     autoResize()
-    clientLogger.messageInput(e.target.value.length, { 
+  }, [onChange, autoResize])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      onSubmit()
+    }
+  }, [onSubmit])
+
+  return (
+    <Textarea
+      onChange={handleInputChange}
+      onKeyDown={handleKeyDown}
+      placeholder={placeholder}
+      className="flex-1 min-h-[60px] resize-none"
+      style={{ height: '60px' }}
+      disabled={isLoading}
+      ref={inputRef}
+    />
+  )
+})
+
+interface ChatInputProps {
+  chatId: string
+  sendMessage: (content: string, selectedModel?: string) => Promise<void>
+  isLoading: boolean
+  isStreaming: boolean
+  stopGeneration: () => void
+  clientData?: any // Optional client context for prompt variable replacement
+  messages?: Message[] // Messages for export functionality
+  chatTitle?: string // Chat title for export
+  onDocumentCreated?: (clientId: string, documentId: string) => void // Callback for when chat is exported
+  lastUsedModel?: string // Last model used in this chat
+}
+
+function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
+  const subscription = useSubscription()
+  const [isExporting, setIsExporting] = useState(false)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const [selectedModel, setSelectedModel] = useState(() => {
+    // For new chats (no messages), use DEFAULT_MODEL
+    // For existing chats with messages, use lastUsedModel or fallback to DEFAULT_MODEL
+    if (messages.length === 0) {
+      return DEFAULT_MODEL
+    }
+    return lastUsedModel || DEFAULT_MODEL
+  })
+  
+  const { toast } = useToast()
+  const router = useRouter()
+
+  // Handle input change with logging - use ref to avoid re-renders
+  const handleInputChange = useCallback((value: string) => {
+    clientLogger.messageInput(value.length, { 
       chatId,
       component: 'ChatInput'
     });
-  }
+  }, [chatId])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (input.trim() && !isLoading) {
+  const handleSubmit = useCallback(() => {
+    const currentInput = inputRef.current?.value || ''
+    if (currentInput.trim() && !isLoading) {
       clientLogger.userInteraction('Submit message', { 
         chatId,
         component: 'ChatInput',
-        metadata: { messageLength: input.trim().length, model: selectedModel }
+        metadata: { messageLength: currentInput.trim().length, model: selectedModel }
       });
-      sendMessage(input, selectedModel)
+      sendMessage(currentInput, selectedModel)
+      if (inputRef.current) {
+        inputRef.current.value = ''
+        inputRef.current.style.height = '60px'
+      }
     } else {
       clientLogger.warn('Submit attempted with invalid conditions', { 
         chatId,
         component: 'ChatInput',
-        metadata: { hasInput: !!input.trim(), isLoading }
+        metadata: { hasInput: !!currentInput.trim(), isLoading }
       });
     }
-  }
+  }, [isLoading, chatId, selectedModel, sendMessage])
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit(e)
-    }
-  }
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault()
+    handleSubmit()
+  }, [handleSubmit])
 
-  const handlePromptSelect = (prompt: Prompt) => {
+  const handlePromptSelect = useCallback((prompt: Prompt) => {
     clientLogger.promptSelected(prompt.name, { 
       chatId,
       component: 'ChatInput',
@@ -135,30 +146,23 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
       : prompt.content
 
     // If there's existing input, add the prompt on a new line
-    const newInput = input.trim() 
-      ? `${input}\n\n${processedContent}`
+    const currentInput = inputRef.current?.value || ''
+    const newInput = currentInput.trim() 
+      ? `${currentInput}\n\n${processedContent}`
       : processedContent
 
-    setInput(newInput)
+    if (inputRef.current) {
+      inputRef.current.value = newInput
+    }
     clientLogger.debug('Prompt content added to input', { 
       chatId,
       component: 'ChatInput',
       metadata: { finalLength: newInput.length, hasVariables: !!clientData }
     });
-  }
+  }, [chatId, clientData])
 
   const handleExportChat = async () => {
     if (!clientData?.id || !messages.length || !chatTitle) {
-      clientLogger.warn('Export attempted with missing requirements', { 
-        chatId,
-        component: 'ChatInput',
-        metadata: { 
-          hasClientId: !!clientData?.id, 
-          hasMessages: !!messages.length, 
-          hasChatTitle: !!chatTitle 
-        }
-      });
-      
       toast({
         title: 'Export Not Available',
         description: 'Cannot export chat without client association and messages.',
@@ -167,26 +171,9 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
       return
     }
 
-    clientLogger.exportInitiated('chat', { 
-      chatId,
-      clientId: clientData.id,
-      component: 'ChatInput',
-      metadata: { messageCount: messages.length, chatTitle }
-    });
-
     setIsExporting(true)
     try {
-      // Format messages for export
-      const chatContent = await withClientTiming(
-        'Format chat for export',
-        () => formatChatForExport(messages, chatTitle, clientData),
-        { chatId, clientId: clientData.id }
-      );
-      
-      clientLogger.apiCall('POST', '/api/ai-services/save-chat-export', { 
-        chatId,
-        clientId: clientData.id
-      });
+      const chatContent = formatChatForExport(messages, chatTitle, clientData)
       
       const response = await fetch('/api/ai-services/save-chat-export', {
         method: 'POST',
@@ -200,67 +187,39 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
         }),
       })
 
-      clientLogger.apiResponse('POST', '/api/ai-services/save-chat-export', response.status, { 
-        chatId,
-        clientId: clientData.id
-      });
-
       if (!response.ok) {
-        // Handle different error status codes
         const errorText = await response.text()
-        
-        if (response.status === 403) {
-          // Usage limit exceeded
-          throw new Error(errorText || 'Document creation limit exceeded')
-        } else {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
+        throw new Error(errorText || `HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
+      const documentId = data.data?.documentId
 
-      clientLogger.exportCompleted('chat', { 
-        chatId,
-        clientId: clientData.id,
-        metadata: { documentId: data.documentId }
-      });
-
-      if (onDocumentCreated && data.documentId) {
-        toast({
-          title: 'Chat Exported 📄',
-          description: (
-            <div>
-              <p>Chat "{chatTitle}" has been saved as a document.</p>
-              <button 
-                onClick={() => onDocumentCreated(clientData.id, data.documentId)}
-                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
-              >
-                📄 View Document
-              </button>
-            </div>
-          ),
-          duration: 10000,
-        })
-      } else {
-        toast({
-          title: 'Chat Exported 📄',
-          description: `Chat "${chatTitle}" has been saved as a document. You can find it in the client's documents.`,
-          duration: 8000,
-        })
-      }
+      toast({
+        title: 'Chat Exported 📄',
+        description: (
+          <div>
+            <p>Chat "{chatTitle}" has been saved as a document.</p>
+            <button 
+              onClick={() => {
+                if (onDocumentCreated && documentId) {
+                  onDocumentCreated(clientData.id, documentId)
+                }
+              }}
+              className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+            >
+              📄 View Document
+            </button>
+          </div>
+        ),
+        duration: 10000,
+      })
 
     } catch (error) {
-      clientLogger.error('Error exporting chat', error as Error, { 
-        chatId,
-        clientId: clientData?.id
-      });
-      
-      // Check if it's a usage limit error
       const errorMessage = error instanceof Error ? error.message : 'Failed to export chat. Please try again.'
-      const isLimitError = errorMessage.includes('limit')
       
       toast({
-        title: isLimitError ? 'Document Limit Reached' : 'Export Failed',
+        title: 'Export Failed',
         description: errorMessage,
         variant: 'destructive',
       })
@@ -300,80 +259,27 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
     };
   }, [chatId]);
 
-  // Update selected model when switching between chats
-  useEffect(() => {
-    // If switching to an existing chat with a specific model, use that
-    if (lastUsedModel) {
-      setSelectedModel(lastUsedModel)
-      return
-    }
-    
-    // For new chats, check localStorage
-    if (typeof window !== 'undefined') {
-      const savedModel = localStorage.getItem('chat-default-model')
-      if (savedModel) {
-        const isValidModel = ['gpt-4o', 'gpt-4o-mini', 'claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'].includes(savedModel)
-        if (isValidModel) {
-          setSelectedModel(savedModel)
-          return
-        }
-      }
-    }
-    
-    // Fallback to default
-    setSelectedModel('gpt-4o-mini')
-    
-    clientLogger.debug('Model selection updated', { 
-      chatId,
-      component: 'ChatInput',
-      metadata: { model: selectedModel, source: lastUsedModel ? 'chat-specific' : 'localStorage' }
-    });
-  }, [lastUsedModel, chatId])
-
-  // Auto-resize when input changes
-  useEffect(() => {
-    if (input.trim()) {
-      autoResize()
-    } else {
-      // Reset to initial height when input is cleared
-      const textArea = textAreaRef.current
-      if (textArea) {
-        textArea.style.height = '60px'
-        textArea.style.overflowY = 'hidden'
-      }
-    }
-  }, [input])
-
-  // Handle model selection - save to localStorage for future new chats
-  const handleModelSelect = (modelId: string) => {
-    setSelectedModel(modelId)
-    
-    // Save to localStorage directly for future new chats
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('chat-default-model', modelId)
-    }
-    
-    clientLogger.debug('Model saved as default for new chats', { 
-      chatId,
-      component: 'ChatInput',
-      metadata: { model: modelId }
-    });
-  }
-
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
     clientLogger.userInteraction('Stop generation', { 
       chatId,
       component: 'ChatInput'
     });
     stopGeneration()
-  }
+  }, [chatId, stopGeneration])
 
   return (
     <div className="space-y-2">
-      {/* Prompt Selector, Model Selector, and Export Button */}
+      {/* Prompt Selector, Model Selector and Export Button */}
       <div className="flex justify-between items-center gap-2 flex-wrap">
         <div className="flex gap-2">
           <PromptSelector onPromptSelect={handlePromptSelect} />
+          <ModelSelector 
+            selectedModel={selectedModel}
+            onModelSelect={setSelectedModel}
+            userTier={subscription.tier}
+          />
+        </div>
+        <div className="flex gap-2">
           {/* Export Chat Button - only show if client is associated and has messages */}
           {clientData?.id && messages.length > 0 && (
             <Button 
@@ -392,23 +298,16 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
             </Button>
           )}
         </div>
-        <ModelSelector 
-          selectedModel={selectedModel}
-          onModelSelect={handleModelSelect}
-        />
       </div>
       
       {/* Chat Input Form */}
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <Textarea
-          value={input}
+      <form onSubmit={handleFormSubmit} className="flex gap-2">
+        <TextareaInput
           onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
           placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-          className="flex-1 min-h-[60px] resize-none"
-          style={{ height: '60px' }}
-          disabled={isLoading}
-          ref={textAreaRef}
+          inputRef={inputRef}
         />
         {isStreaming ? (
           <Button 
@@ -424,7 +323,7 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
             type="submit" 
             size="icon" 
             className="h-[60px] w-[60px]"
-            disabled={!input.trim() || isLoading}
+            disabled={isLoading}
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -436,4 +335,6 @@ export function ChatInput({ chatId, input, setInput, sendMessage, isLoading, isS
       </form>
     </div>
   )
-} 
+}
+
+export const ChatInput = memo(ChatInputComponent) 

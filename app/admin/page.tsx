@@ -10,12 +10,10 @@ import {
   MessageSquare, 
   TrendingUp, 
   DollarSign, 
-  Calendar,
   AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock
+  XCircle
 } from 'lucide-react'
+import { FeedbackType, Priority, BadgeVariant } from '@/types/enums'
 
 const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 
@@ -82,8 +80,6 @@ async function getAdminDashboardData() {
         month: new Date().getMonth() + 1
       },
       select: {
-        documentsGenerated: true,
-        estimatedCost: true,
         tokensUsed: true
       }
     }),
@@ -101,11 +97,9 @@ async function getAdminDashboardData() {
   // Calculate monthly totals
   const monthlyStats = monthlyUsage.reduce(
     (acc, usage) => ({
-      documents: acc.documents + usage.documentsGenerated,
-      cost: acc.cost + usage.estimatedCost,
       tokens: acc.tokens + usage.tokensUsed
     }),
-    { documents: 0, cost: 0, tokens: 0 }
+    { tokens: 0 }
   )
 
   return {
@@ -182,13 +176,13 @@ export default async function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Documents Generated</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{data.totalDocuments}</div>
               <p className="text-xs text-muted-foreground">
-                {data.monthlyStats.documents} this month
+                Unlimited for all plans
               </p>
             </CardContent>
           </Card>
@@ -218,15 +212,14 @@ export default async function AdminDashboard() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm">Documents:</span>
-                  <span className="font-medium">{data.monthlyStats.documents}</span>
+                  <span className="font-medium">Unlimited</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm">Tokens:</span>
                   <span className="font-medium">{data.monthlyStats.tokens.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Est. Cost:</span>
-                  <span className="font-medium">${data.monthlyStats.cost.toFixed(2)}</span>
+                <div className="text-xs text-muted-foreground mt-2">
+                  OpenRouter handles billing automatically
                 </div>
               </div>
             </CardContent>
@@ -285,14 +278,14 @@ export default async function AdminDashboard() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant={
-                          feedback.type === 'bug' ? 'destructive' : 
-                          feedback.type === 'feature' ? 'default' : 'secondary'
+                          feedback.type === FeedbackType.BUG ? BadgeVariant.DESTRUCTIVE : 
+                          feedback.type === FeedbackType.FEATURE ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.type}
                         </Badge>
                         <Badge variant={
-                          feedback.priority === 'high' ? 'destructive' :
-                          feedback.priority === 'medium' ? 'default' : 'secondary'
+                          feedback.priority === Priority.HIGH ? BadgeVariant.DESTRUCTIVE :
+                          feedback.priority === Priority.MEDIUM ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.priority}
                         </Badge>
@@ -302,9 +295,9 @@ export default async function AdminDashboard() {
                         {feedback.userEmail || 'Anonymous'} • {new Date(feedback.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    {feedback.type === 'bug' && <AlertTriangle className="h-4 w-4 text-orange-500" />}
-                    {feedback.type === 'feature' && <TrendingUp className="h-4 w-4 text-blue-500" />}
-                    {feedback.type === 'complaint' && <XCircle className="h-4 w-4 text-red-500" />}
+                    {feedback.type === FeedbackType.BUG && <AlertTriangle className="h-4 w-4 text-orange-500" />}
+                    {feedback.type === FeedbackType.FEATURE && <TrendingUp className="h-4 w-4 text-blue-500" />}
+                    {feedback.type === FeedbackType.COMPLAINT && <XCircle className="h-4 w-4 text-red-500" />}
                   </div>
                 ))
               )}

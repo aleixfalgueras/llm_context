@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Edit3 } from 'lucide-react'
+import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp } from 'lucide-react'
 import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dialog'
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
-import { ModelSelector } from '@/components/ui/model-selector'
-import { getDefaultModel, AVAILABLE_MODELS } from '@/lib/models-config'
+import { ServiceStatus } from '@/types/enums'
+import { useLocalStorage } from '@/hooks/use-local-storage'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -22,7 +22,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
   const [isConfigOpen, setIsConfigOpen] = useState(false)
-  const [selectedModel, setSelectedModel] = useState(getDefaultModel())
   
   // Default visibility - all services visible by default
   const defaultVisibility = {
@@ -30,62 +29,15 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
     'custom-document': true,
   }
 
-  const [visibleServices, setVisibleServices] = useState<Record<string, boolean>>(defaultVisibility)
-
-  // Load saved service visibility preferences on component mount
-  useEffect(() => {
-    const savedVisibility = localStorage.getItem('ai-services-visibility')
-    
-    if (savedVisibility) {
-      try {
-        const parsed = JSON.parse(savedVisibility)
-        // Merge saved preferences with default visibility to ensure new services are visible
-        const mergedVisibility = { ...defaultVisibility, ...parsed }
-        setVisibleServices(mergedVisibility)
-        // Update localStorage to include any new services
-        localStorage.setItem('ai-services-visibility', JSON.stringify(mergedVisibility))
-      } catch (error) {
-        console.error('Failed to parse saved service visibility:', error)
-        // Fall back to default visibility on error
-        setVisibleServices(defaultVisibility)
-      }
-    }
-  }, [])
-
-  // Load saved model selection on component mount
-  useEffect(() => {
-    const savedModel = localStorage.getItem('ai-services-selected-model')
-    
-    if (savedModel) {
-      try {
-        // Validate that the saved model is still available
-        const isValidModel = AVAILABLE_MODELS.some(model => model.id === savedModel)
-        if (isValidModel) {
-          setSelectedModel(savedModel)
-        } else {
-          // Remove invalid model from localStorage and use default
-          localStorage.removeItem('ai-services-selected-model')
-          setSelectedModel(getDefaultModel())
-        }
-      } catch (error) {
-        console.error('Failed to load saved model selection:', error)
-        // Fall back to default model on error
-        setSelectedModel(getDefaultModel())
-      }
-    }
-  }, [])
+  const { 
+    value: visibleServices, 
+    setValue: setVisibleServices 
+  } = useLocalStorage('ai-services-visibility', defaultVisibility)
 
   // Save service visibility preferences whenever they change
   const handleServiceVisibilityChange = (serviceId: string, visible: boolean) => {
     const newVisibility = { ...visibleServices, [serviceId]: visible }
     setVisibleServices(newVisibility)
-    localStorage.setItem('ai-services-visibility', JSON.stringify(newVisibility))
-  }
-
-  // Save model selection whenever it changes
-  const handleModelChange = (modelId: string) => {
-    setSelectedModel(modelId)
-    localStorage.setItem('ai-services-selected-model', modelId)
   }
 
   const handleDocumentCreated = (clientId: string, documentId: string) => {
@@ -104,7 +56,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       description: 'Generate comprehensive meeting reports with actionable steps from client meeting transcriptions.',
       icon: <MessageSquare className="h-8 w-8" />,
       features: ['Transcription analysis', 'Actionable insights', 'Professional summaries'],
-      status: 'available',
+      status: ServiceStatus.AVAILABLE,
       onClick: () => setIsMeetingReportDialogOpen(true),
       iconColorClass: 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400'
     },
@@ -114,14 +66,14 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       description: 'Generate custom marketing documents using your own prompts',
       icon: <FileText className="h-8 w-8" />,
       features: ['Custom prompts', 'Variable replacement', 'Professional formatting'],
-      status: 'available',
+      status: ServiceStatus.AVAILABLE,
       onClick: () => setIsCustomDocumentDialogOpen(true),
       iconColorClass: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
     }
   ]
 
   // Filter services based on visibility preferences
-  const filteredServices = services.filter(service => visibleServices[service.id])
+  const filteredServices = (services || []).filter(service => visibleServices[service.id as keyof typeof visibleServices])
 
   return (
     <>
@@ -134,10 +86,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               <h1 className="text-3xl font-bold">AI Services</h1>
             </div>
             <div className="flex items-center gap-3">
-              <ModelSelector 
-                selectedModel={selectedModel}
-                onModelSelect={handleModelChange}
-              />
               <Button
                 variant="outline"
                 onClick={() => setIsConfigOpen(!isConfigOpen)}
@@ -169,7 +117,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                   <Checkbox
                     key={service.id}
                     id={service.id}
-                    checked={visibleServices[service.id]}
+                    checked={visibleServices[service.id as keyof typeof visibleServices]}
                     onChange={(e) => 
                       handleServiceVisibilityChange(service.id, e.target.checked)
                     }
@@ -209,17 +157,17 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               <Card 
                 key={service.id} 
                 className={`transition-all duration-200 flex flex-col h-full ${
-                  service.status === 'available' 
+                  service.status === ServiceStatus.AVAILABLE 
                     ? 'hover:shadow-lg cursor-pointer border-blue-200 dark:border-blue-800' 
                     : 'opacity-75 cursor-not-allowed'
                 }`}
-                onClick={service.status === 'available' ? service.onClick : undefined}
+                onClick={service.status === ServiceStatus.AVAILABLE ? service.onClick : undefined}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg ${
-                        service.status === 'available' 
+                        service.status === ServiceStatus.AVAILABLE 
                           ? service.iconColorClass || 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                       }`}>
@@ -245,7 +193,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                       ))}
                     </ul>
                   </div>
-                  {service.status === 'available' && (
+                  {service.status === ServiceStatus.AVAILABLE && (
                     <Button 
                       className={`w-full mt-4 ${
                         service.id === 'meeting-report' ? 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600' :
@@ -299,25 +247,23 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       </div>
 
       {/* Meeting Report Dialog */}
-      <MeetingReportDialog 
+      <MeetingReportDialog
         open={isMeetingReportDialogOpen}
         onOpenChange={setIsMeetingReportDialogOpen}
         clients={clients}
         onDocumentCreated={handleDocumentCreated}
-        selectedModel={selectedModel}
       />
 
       {/* Document Generator Dialog */}
-      <CustomDocumentGeneratorDialog 
+      <CustomDocumentGeneratorDialog
         isOpen={isCustomDocumentDialogOpen}
         onClose={() => setIsCustomDocumentDialogOpen(false)}
         clients={clients}
         onDocumentCreated={handleDocumentCreated}
-        selectedModel={selectedModel}
       />
 
-      {/* Client Documents Dialog */}
-      {selectedClient && (
+      {/* Client Documents */}
+      {isDocumentsOpen && selectedClient && (
         <ClientDocuments
           clientId={selectedClient.id}
           clientName={selectedClient.name}

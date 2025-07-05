@@ -1,415 +1,232 @@
-# 💰 Multi-AI Pricing & Cost Analysis - SpeedBrand
+# Pricing and Cost Analysis
 
-## 📊 Subscription Plans Overview
+## Overview
 
-### Basic Plan - $10/month (First Month FREE)
-**Target**: Individual marketers, small business owners, freelancers testing AI assistance
+**Enhanced Cost Management Strategy:**
+- ✅ **Dual model architecture** - Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano for all AI functionalities
+- ✅ **Latest AI technology** with enhanced capabilities and performance
+- ✅ **Balanced token limits** providing excellent value while maintaining high margins
+- ✅ **Excellent profit margins** at all subscription levels  
+- ✅ **Simplified user experience** with consistent, cutting-edge AI performance
 
-**Limits:**
-- 100K tokens per month (~75 pages of content)
-- $2 AI usage limit per month (across all providers)
-- 20 documents per month  
-- 3 client profiles
-- Unlimited custom prompts
+**⚠️ UPDATED JANUARY 2025**: Current dual-model architecture with Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter
 
-**Cost Analysis:**
-- Revenue: $10/month × 12 = $120/year
-- AI Cost: Max $2/month = $24/year (OpenAI + Anthropic)
-- Gross Margin: ~80%
+## Model Configuration
 
-### Pro Plan - $17/month  
-**Target**: Marketing professionals, growing agencies, active content creators
+### Dual Model Architecture
+**All subscription tiers have access to both premium models through OpenRouter:**
+- **Gemini 2.0 Flash**: $0.10 per 1M input tokens, $0.40 per 1M output tokens
+- **GPT-4.1 Nano**: $0.10 per 1M input tokens, $0.40 per 1M output tokens  
+- **Consistent pricing**: Both models have identical costs for predictable expenses
+- **Context length**: Up to 1M tokens (Gemini), 200K tokens (GPT-4.1 Nano)
+- **Performance**: Latest AI technology with 86-91% profit margins
 
-**Limits:**
-- 2M tokens per month (~1,500 pages of content)
-- $12 AI usage limit per month (across all providers)
-- 200 documents per month
-- Unlimited client profiles  
-- Unlimited custom prompts
+### Cost Calculation Methodology
+```
+Typical usage pattern: 75% input tokens, 25% output tokens
+Blended rate = (0.75 × $0.10) + (0.25 × $0.40) = $0.075 + $0.10 = $0.175 per 1M tokens
+Per 1K tokens = $0.000175
+(Same cost calculation applies to both models due to identical pricing)
+```
 
-**Cost Analysis:**
-- Revenue: $17/month × 12 = $204/year
-- AI Cost: Max $12/month = $144/year (OpenAI + Anthropic)
-- Gross Margin: ~70% (positive for all users)
+## Subscription Plans Analysis
 
-### Business Plan - $43/month
-**Target**: Marketing agencies, enterprise teams, high-volume users
+### Basic Plan - $10/month
+- **Token Limit**: 5,000,000 tokens/month
+- **Cost at limit**: 5M × $0.000175 = $0.875
+- **Profit margin**: $10.00 - $0.875 = $9.125 (91.25% margin)
+- **Content equivalent**: ~3,750 pages of content
+- **Target users**: Individual users, small businesses
 
-**Limits:**
-- Unlimited tokens and documents
-- $35 AI usage limit per month (across all providers)
+**Value Proposition:**
+- Exceptional value with 5M tokens at entry-level pricing
+- Access to latest Google AI technology 
+- Generous allowance suitable for serious content creators
+- 5M tokens supports extensive monthly content generation
+
+### Pro Plan - $25/month  
+- **Token Limit**: 15,000,000 tokens/month
+- **Cost at limit**: 15M × $0.000175 = $2.625
+- **Profit margin**: $25.00 - $2.625 = $22.375 (89.5% margin)
+- **Content equivalent**: ~11,250 pages of content
+- **Target users**: Marketing professionals, growing businesses
+
+**Value Proposition:**
+- 3x more tokens than Basic plan for 2.5x the price
 - Unlimited client profiles
-- Unlimited custom prompts
+- Suitable for professional content creation at scale
 
-**Cost Analysis:**
-- Revenue: $43/month × 12 = $516/year
-- AI Cost: Max $35/month = $420/year (OpenAI + Anthropic)
-- Gross Margin: ~18% minimum, 65-75% typical usage
+### Business Plan - $50/month
+- **Token Limit**: 40,000,000 tokens/month
+- **Cost at limit**: 40M × $0.000175 = $7.00
+- **Profit margin**: $50.00 - $7.00 = $43.00 (86% margin)
+- **Content equivalent**: ~30,000 pages of content
+- **Target users**: Agencies, large teams, enterprise users
 
-## Updated Limit Philosophy
+**Note**: This pricing is based on the current subscription-utils.ts configuration which shows the Business plan at $50/month with 40M tokens.
 
-### Primary Restrictions (Cost-Based)
-1. **Token Limits**: Primary usage metric, directly correlates with content generation
-2. **Cost Limits**: Direct AI spending caps across all providers for budget protection
-3. **Document Limits**: Output-based restrictions for service value
+**Value Proposition:**
+- 8x more tokens than Basic plan for 5x the price
+- Enterprise-level token allowance with latest AI
+- 2GB storage for comprehensive document management
 
-### Secondary Restrictions (Resource-Based)  
-4. **Client Limits**: Organization tool limits, not AI-related
+## Cost Efficiency Analysis
 
-## Customer Acquisition Strategy
+### Token Usage Examples
 
-### Basic Plan (Entry Point)
-- **Free First Month**: Removes barrier to entry
-- **Low Commitment**: $10 is accessible for most users
-- **Value Demonstration**: Sufficient limits to show platform value
-- **Natural Upgrade**: Limits encourage growth to Pro
-
-### Pro Plan (Sweet Spot)
-- **Professional Target**: Priced for marketing professionals
-- **High Value**: 20x token increase for 1.67x price increase
-- **Premium Features**: Access to advanced tools
-- **Retention Focus**: Most profitable segment
-
-### Business Plan (Enterprise)
-- **Unlimited Usage**: Removes all usage concerns
-- **Team Features**: Supports organizational needs
-- **Premium Support**: Enterprise-level service
-- **Custom Solutions**: Flexible for large customers
-
-## Competitive Analysis
-
-### Advantages Over Competitors
-1. **Transparent Pricing**: Clear limits, no hidden fees
-2. **First Month Free**: Risk-free trial period
-3. **Unlimited Prompts**: Better than competitors with prompt limits
-4. **Cost Caps**: Protected spending vs. pay-per-use models
-5. **USD Pricing**: Simplified billing aligned with multi-cloud AI costs
-
-### Market Positioning
-- **Basic**: Competitive with entry-level AI writing tools
-- **Pro**: Premium positioning vs. general AI assistants  
-- **Business**: Enterprise alternative to custom AI solutions
-
-## Multi-AI Cost Management
-
-### AI Provider Expenses (OpenAI + Anthropic)
-- **Basic**: Max $24/user/year (capped at $2/month across all providers)
-- **Pro**: Max $144/user/year (capped at $12/month across all providers)  
-- **Business**: Max $420/user/year (capped at $35/month across all providers)
-
-### Infrastructure Costs
-- **Database**: Supabase Pro ~$27/month
-- **Hosting**: Vercel Pro ~$22/month
-- **Storage**: Minimal document storage costs
-- **Support**: Customer service tools and time
-
-### Target Margins
-- **Basic**: 80% gross margin (after multi-AI costs)
-- **Pro**: 70% gross margin (after multi-AI costs)
-- **Business**: 75% gross margin (after all costs)
-
-## Future Considerations
-
-### Potential Optimizations
-1. **Annual Plans**: 20% discount for annual payment
-2. **Team Discounts**: Volume pricing for Business plan
-3. **Add-ons**: Additional tokens/documents for existing plans
-4. **API Tiers**: Separate pricing for API access
-
-### Market Expansion
-1. **Localization**: Multi-language support
-2. **Integrations**: CRM, marketing tools, social media
-3. **White-label**: Custom branding for agencies
-4. **Enterprise**: Custom solutions for large organizations
-
----
-
-## 💡 Multi-AI Cost Structure & Profit Analysis
-
-### AI API Costs (Our Expenses)
-
-#### OpenAI Pricing:
-**GPT-4o:**
-- **Input**: $0.0025 per 1K tokens (~750 words)
-- **Output**: $0.01 per 1K tokens (~750 words)
-- **Average Cost**: $0.006 per 1K tokens (mixed input/output)
-
-**GPT-4o-mini (Default):**
-- **Input**: $0.00015 per 1K tokens 
-- **Output**: $0.0006 per 1K tokens
-- **Average Cost**: $0.0004 per 1K tokens (mixed input/output)
-
-#### Anthropic Pricing:
-**Claude 4 Opus:**
-- **Input**: $0.015 per 1K tokens (~750 words)
-- **Output**: $0.075 per 1K tokens (~750 words)
-- **Average Cost**: $0.045 per 1K tokens (mixed input/output)
-
-**Claude 4 Sonnet:**
-- **Input**: $0.003 per 1K tokens (~750 words)
-- **Output**: $0.015 per 1K tokens (~750 words)
-- **Average Cost**: $0.009 per 1K tokens (mixed input/output)
-
-**Claude 3.5 Haiku:**
-- **Input**: $0.0008 per 1K tokens (~750 words)
-- **Output**: $0.004 per 1K tokens (~750 words)
-- **Average Cost**: $0.0024 per 1K tokens (mixed input/output)
-
-### Real Usage Examples:
-
-#### Typical Conversation (GPT-4o-mini):
-- **Input**: 800 tokens (context + user message)
-- **Output**: 400 tokens (AI response)
-- **Total Cost**: $0.00036 per conversation
-- **Monthly Cost (50 conversations)**: $0.018
-
-#### Document Generation (GPT-4o-mini):
-- **Input**: 1,200 tokens (prompt + context)
-- **Output**: 800 tokens (generated document)
-- **Total Cost**: $0.00066 per document
-- **Monthly Cost (20 documents)**: $0.0132
-
-#### Heavy User Scenario (GPT-4o):
-- **Monthly Usage**: 100K tokens
-- **Estimated Cost**: $0.60 (if all GPT-4o)
-- **Realistic Cost**: $0.06 (90% GPT-4o-mini mix)
-
----
-
-## 📈 Profit Margins & Unit Economics
-
-### Basic Plan Economics:
+**Basic Plan (5M tokens):**
 ```
-Revenue: $10/month ($0 first month)
-Avg AI Cost: $0.15/month (mixed usage across providers)
-Infrastructure Cost: $0.05/month (hosting, DB)
-Net Profit: $9.80/month (98% margin)
-```
-**Strategy**: High margin entry point for conversion
-
-### Pro Plan Economics:
-```
-Revenue: $17/month
-Max AI Cost: $12/month (if user hits limit across all providers)
-Avg AI Cost: $6/month (typical usage across OpenAI + Anthropic)
-Infrastructure Cost: $0.20/month
-Net Profit: $10.80/month (63% margin typical)
+Blog posts (1,330 tokens each):     ~3,750 posts/month
+Marketing strategies (4,000 tokens): ~1,250 strategies/month
+Client reports (10,000 tokens):      ~500 reports/month
+Social media content (200 tokens):   ~25,000 posts/month
 ```
 
-### Business Plan Economics:
+**Pro Plan (15M tokens):**
 ```
-Revenue: $43/month  
-Max AI Cost: $35/month (capped limit across all providers)
-Avg AI Cost: $15/month (typical heavy usage across providers)
-Infrastructure Cost: $0.50/month
-Net Profit: $27.50/month (64% margin typical)
+Blog posts:           ~11,250 posts/month
+Marketing strategies: ~3,750 strategies/month
+Client reports:       ~1,500 reports/month
+Social media content: ~75,000 posts/month
 ```
 
----
+**Business Plan (40M tokens):**
+```
+Blog posts:           ~30,000 posts/month
+Marketing strategies: ~10,000 strategies/month
+Client reports:       ~4,000 reports/month
+Social media content: ~200,000 posts/month
+```
 
-## 🔍 User Expense Tracking System
+### Enhanced Model Benefits
 
-### Real-Time Cost Calculation
+**Gemini 2.0 Flash Advantages:**
+- **Enhanced reasoning**: Better problem-solving and analysis capabilities
+- **Improved multimodal**: Superior handling of text, images, and other content types
+- **Latest training**: More current knowledge and improved performance
+- **Better accuracy**: More reliable and consistent outputs across all use cases
 
-Our system tracks every API call with precise cost calculation:
+**Compared to Previous Generation:**
+- **33% cost increase** but **significantly better capabilities**
+- **Latest AI features**: Access to Google's most advanced model
+- **Future-proof**: Built on Google's newest AI architecture
+- **Enhanced performance**: Better results justify the modest cost increase
 
+## Revenue Protection Strategy
+
+### Profit Margin Analysis
+- **Basic Plan**: 91.25% gross margin - exceptional entry-level profitability
+- **Pro Plan**: 89.5% gross margin - strong professional tier margins
+- **Business Plan**: 86% gross margin - excellent enterprise pricing
+
+### Risk Management
+- **Generous but controlled limits**: Prevent unlimited usage while providing excellent value
+- **Single model**: Eliminates pricing complexity and cost variation
+- **Usage monitoring**: Real-time tracking prevents unexpected overages
+- **Clear upgrade path**: Compelling value progression encourages plan upgrades
+
+### Business Model Benefits
+- **Latest technology**: Users get access to cutting-edge AI capabilities
+- **Predictable costs**: Single model pricing eliminates variability
+- **Scalable margins**: Excellent profitability at all tiers
+- **User satisfaction**: Latest AI + generous limits = exceptional value
+- **Growth potential**: Room for plan expansion and feature additions
+
+## Technical Implementation
+
+### Model Configuration
 ```typescript
-// Example: GPT-4o conversation
-Input tokens: 850
-Output tokens: 397
-Model: "gpt-4o"
-
-Cost = (850/1000 * $0.0025) + (397/1000 * $0.01)
-Cost = $0.002125 + $0.00397 = $0.006095
+// Current dual-model system as implemented in lib/models-config.ts
+export const AVAILABLE_MODELS = [
+  {
+    id: 'google/gemini-2.0-flash-exp',
+    name: 'Gemini 2.0 Flash',
+    provider: 'Google',
+    tier: ModelTier.BASIC,
+    pricing: { input: 0.075, output: 0.30 }, // Per 1M tokens
+    contextLength: 1000000,
+  },
+  {
+    id: 'openai/gpt-4o-mini',
+    name: 'GPT-4o Mini', 
+    provider: 'OpenAI',
+    tier: ModelTier.BASIC,
+    pricing: { input: 0.150, output: 0.600 }, // Per 1M tokens
+    contextLength: 128000,
+  }
+];
 ```
 
-### Database Tracking Tables
-
-#### 1. **UserUsage** (Monthly Aggregates)
-```sql
-userId: "user_123"
-year: 2024, month: 6
-conversationsUsed: 23
-documentsGenerated: 8  
-tokensUsed: 47,382
-estimatedCost: 2.14
-```
-
-#### 2. **Monthly Usage Tracking**
-```sql
-userId: "user_123"
-eventType: "conversation"
-resourceId: "chat_456" 
-tokensUsed: 1,247
-estimatedCost: 0.0075
-model: "gpt-4o-mini"
-metadata: {"promptTokens": 850, "completionTokens": 397}
-createdAt: "2024-06-23T10:30:00Z"
-```
-
-### Limit Enforcement Logic
-
-Our system enforces **triple limits** - whichever hits first:
-
-1. **Conversation Count**: Simple usage counter
-2. **Token Limit**: Prevents heavy prompt/context abuse  
-3. **Cost Limit**: Prevents expensive model overuse
-
+### Cost Calculation
 ```typescript
-// Free user approaching limits:
-conversationsUsed: 45/50 ✅ (5 remaining)
-tokensUsed: 98,500/100,000 ⚠️ (1,500 remaining) 
-estimatedCost: $1.89/$2.00 ⚠️ ($0.11 remaining)
+export function calculateTokenCost(inputTokens: number, outputTokens: number): number {
+  const inputCost = inputTokens * 0.0001 / 1000;
+  const outputCost = outputTokens * 0.0004 / 1000;
+  return inputCost + outputCost;
+}
 
-// Next API call would be blocked by cost limit
+export function getBlendedRate(): number {
+  // Assuming 3:1 input/output ratio
+  return (3 * 0.0001 + 1 * 0.0004) / 4 / 1000; // $0.000175 per 1K tokens
+}
 ```
 
----
-
-## 📊 Revenue Protection Strategies
-
-### 1. **Smart Rate Limiting**
-- Block users before they exceed our profit margins
-- Cost limits prevent expensive model abuse
-- Token limits prevent context stuffing attacks
-
-### 2. **Model Selection Strategy**
-
-**GPT-4o vs GPT-4o-mini Usage:**
-
-#### **Cost Comparison:**
-- **GPT-4o**: $0.0025 input + $0.01 output per 1K tokens
-- **GPT-4o-mini**: $0.00015 input + $0.0006 output per 1K tokens
-- **Cost Ratio**: GPT-4o costs ~17x more than GPT-4o-mini
-
-#### **Recommended Usage:**
-- **GPT-4o for**: Complex strategy documents, detailed analysis, technical content requiring higher reasoning
-- **GPT-4o-mini for**: Standard marketing content, meeting reports, routine communications (80% of use cases)
-
-#### **User Interface:**
-- **Clear Model Selection**: Users see cost implications and recommendations
-- **Per-Service Choice**: Different models for different AI services
-- **Smart Defaults**: GPT-4o-mini as default for cost efficiency
-- **Education**: In-app guidance on when to use each model
-
-#### **Cost Impact:**
-```
-Typical Document Generation:
-- GPT-4o-mini: $0.0015 average cost
-- GPT-4o: $0.025 average cost
-
-Monthly Cost Estimates (200 docs):
-- 100% GPT-4o-mini: $3.00
-- 100% GPT-4o: $50.00
-- 80% mini + 20% GPT-4o: $12.40
+### Subscription Limits
+```typescript
+export const SUBSCRIPTION_LIMITS = {
+  [SubscriptionPlan.BASIC]: {
+    maxTokens: 5000000,     // 5M tokens
+    maxCost: 0.875,        // $0.875 at limit
+    profitMargin: 0.9125,   // 91.25%
+  },
+  [SubscriptionPlan.PRO]: {
+    maxTokens: 15000000,   // 15M tokens  
+    maxCost: 2.625,        // $2.625 at limit
+    profitMargin: 0.895,   // 89.5%
+  },
+  [SubscriptionPlan.BUSINESS]: {
+    maxTokens: 40000000,   // 40M tokens
+    maxCost: 7.00,         // $7.00 at limit  
+    profitMargin: 0.86,    // 86%
+  },
+} as const;
 ```
 
-This strategy allows users to optimize costs while having access to premium capabilities when needed.
+## Recommendations
 
-### 3. **Context Optimization**
-- Only inject client context on first message
-- Limit context size to prevent token bloat
-- Smart prompt engineering to reduce token usage
+### For Product Strategy:
+1. **Emphasize latest technology**: Highlight access to Google's most advanced AI
+2. **Showcase capabilities**: Demonstrate enhanced reasoning and multimodal features
+3. **Focus on value**: Show generous limits with cutting-edge technology
+4. **Encourage upgrades**: Clear benefits and value progression between plans
+5. **Build confidence**: Transparent pricing with excellent profit margins
 
-### 4. **Usage Analytics**
-- Real-time cost monitoring per user
-- Automated alerts for high-cost users
-- Predictive modeling for plan upgrades
+### For Cost Optimization:
+1. **Monitor usage patterns**: Track actual input/output ratios to refine blended cost
+2. **Optimize prompts**: Help users leverage enhanced capabilities efficiently
+3. **Batch processing**: Encourage efficient usage patterns
+4. **Usage education**: Provide guidance on maximizing the new model's capabilities
 
----
+### For Business Growth:
+1. **Competitive advantage**: Latest AI technology + generous limits = market leadership
+2. **Room for expansion**: Excellent margins allow for feature additions and improvements
+3. **Premium positioning**: Latest Google AI justifies premium value proposition
+4. **Sustainable model**: Strong margins ensure long-term viability and growth
 
-## 🎯 Customer Lifetime Value (CLV)
+## Key Benefits Summary
 
-### Basic to Pro Conversion Funnel:
-```
-Basic Users: 1,000 
-Conversion Rate: 8%
-Pro Subscribers: 80
-Monthly Revenue: 80 × $17 = $1,360
-Annual Revenue: $16,320
-```
+### For Users:
+- **Cutting-edge AI**: Access to Google's latest and most capable model
+- **Exceptional value**: Generous token limits with advanced capabilities
+- **Consistent experience**: Same high-quality AI across all features  
+- **Enhanced performance**: Better reasoning, accuracy, and multimodal capabilities
+- **Future-proof**: Built on Google's newest AI architecture
 
-### Retention & Churn:
-```
-Pro Plan Churn: 5%/month
-Avg Subscription Length: 20 months
-CLV (Pro): $17 × 20 = $340
-Customer Acquisition Cost: $50 (marketing)
-Net CLV: $290 per converted user
-```
+### For Business:
+- **Excellent margins**: 86-91.25% gross profit margins across all plans
+- **Latest technology**: Competitive advantage through advanced AI capabilities
+- **Simplified operations**: Single model reduces complexity while maximizing performance
+- **Scalable pricing**: Clear upgrade path for growing customers
+- **Market leadership**: Best-in-class AI with generous limits beats competitors
 
----
-
-## 🚨 Cost Monitoring & Alerts
-
-### Automated Monitoring:
-- **Yellow Alert**: User reaches 80% of any limit
-- **Red Alert**: User reaches 95% of cost limit
-- **Emergency Block**: User exceeds 110% of cost limit
-
-### Admin Dashboard Metrics:
-- Total OpenAI costs per day/month
-- Average cost per user by plan
-- Highest spending users (potential Business plan targets)
-- Profit margins by plan
-
-### Cost Optimization Opportunities:
-- Implement response caching for similar prompts
-- Use function calling to reduce output tokens
-- A/B test shorter system prompts
-- Implement smart context truncation
-
----
-
-## 📋 Pricing Strategy Rationale
-
-### Why These Price Points?
-
-#### **Basic Plan ($2 OpenAI limit)**:
-- Allows ~300 conversations with GPT-4o-mini
-- Or ~20 document generations
-- Sufficient for meaningful trial experience
-- Low enough cost to absorb as marketing expense
-
-#### **Pro Plan ($12 OpenAI limit)**:  
-- Supports ~2,400 conversations with GPT-4o-mini
-- Or ~900 document generations
-- Covers 95% of professional use cases
-- $17 price point competitive with industry
-- Ensures positive unit economics
-
-#### **Business Plan ($35 OpenAI limit)**:
-- For agencies with 10+ team members
-- Cost absorbed across team subscription
-- Premium features justify higher price point
-- Target market can afford $43/month easily
-- Maintains healthy profit margins
-
-### Competitive Analysis:
-- **ChatGPT Plus**: $20/month, no business features
-- **Claude Pro**: $20/month, limited API access
-- **Jasper**: $39/month, marketing-focused but limited
-- **Copy.ai**: $36/month, similar features but no client management
-
-**Our Advantage**: Marketing-specific features + client management + transparent usage tracking + fair pricing model.
-
----
-
-## 🔄 Future Pricing Considerations
-
-### Potential Optimizations:
-1. **Pay-per-use add-ons** for users who exceed limits
-2. **Annual discounts** (2 months free)
-3. **Team plan pricing** (per seat discounts)
-4. **Enterprise custom pricing** for large agencies
-5. **Token packages** as alternatives to monthly limits
-
-### Monitoring KPIs:
-- Cost per user by plan
-- Conversion rates at each tier
-- Monthly recurring revenue (MRR)
-- Customer acquisition cost (CAC)
-- Churn rate by plan
-- Support ticket volume by plan
-
-This pricing model ensures sustainable growth while providing genuine value to marketing professionals at every level. 
+This upgrade to Gemini 2.0 Flash provides users with access to the latest AI technology while maintaining excellent profit margins and delivering superior performance across all functionalities. 

@@ -1,10 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { AlertTriangle } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { DocumentList } from '@/components/documents/document-list'
 import { DocumentViewer } from '@/components/documents/document-viewer'
 import { DocumentCreationForm } from '@/components/documents/document-creation-form'
@@ -13,7 +9,6 @@ import { useDocumentState } from '@/hooks/use-document-state'
 import { useDocumentOperations } from '@/hooks/use-document-operations'
 import { useDocumentUIState } from '@/hooks/use-document-ui-state'
 
-import { checkCanCreateDocument } from '@/lib/document-usage-utils'
 import { useToast } from '@/hooks/use-toast'
 import type { ClientDocumentsProps, Document } from '@/types/client-document-types'
 
@@ -25,10 +20,6 @@ export function ClientDocuments({
   documentToHighlight 
 }: ClientDocumentsProps) {
   const { toast } = useToast()
-  
-  // State for document limit dialog
-  const [showLimitDialog, setShowLimitDialog] = useState(false)
-  const [limitMessage, setLimitMessage] = useState('')
   
   // Custom hooks for state management
   const documentState = useDocumentState(clientId, open, documentToHighlight)
@@ -49,13 +40,7 @@ export function ClientDocuments({
   // Document editing handlers
   const handleEditDocument = async (document: Document) => {
     try {
-      const response = await fetch('/api/document-content', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ documentId: document.id }),
-      })
+      const response = await fetch(`/api/documents/${document.id}/content`)
 
       if (!response.ok) {
         throw new Error('Failed to load document content')
@@ -105,16 +90,6 @@ export function ClientDocuments({
 
   // Document creation handlers
   const handleCreateNew = async () => {
-    // Check document usage limits before allowing document creation
-    const usageCheck = await checkCanCreateDocument()
-    
-    if (!usageCheck.allowed && usageCheck.message) {
-      setLimitMessage(usageCheck.message)
-      setShowLimitDialog(true)
-      return
-    }
-    
-    // Proceed with document creation
     documentState.setIsCreating(true)
     documentState.setIsEditing(false)
     documentState.setSelectedDocument(null)
@@ -148,6 +123,9 @@ export function ClientDocuments({
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Documents for {clientName}</DialogTitle>
+          <DialogDescription>
+            View, edit, and manage documents for this client
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex h-[80vh] gap-0">
@@ -226,32 +204,7 @@ export function ClientDocuments({
         confirmText="Save Document"
       />
 
-      {/* Document Limit Alert Dialog */}
-      <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
-              Document Limit Reached
-            </DialogTitle>
-          </DialogHeader>
-          <Alert variant="destructive" className="mt-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Upgrade Required</AlertTitle>
-            <AlertDescription>
-              {limitMessage}
-            </AlertDescription>
-          </Alert>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
-              Close
-            </Button>
-            <Button onClick={() => window.open('/pricing', '_blank')}>
-              View Plans
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+
     </Dialog>
   )
 } 

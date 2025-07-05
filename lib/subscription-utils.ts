@@ -1,67 +1,72 @@
 import { prisma } from './prisma'
 import { logger, withTiming } from './logger'
+import { getTierFromPlan, isModelAvailableForTier } from './models-config'
+import { SubscriptionPlan, SubscriptionStatus, ModelTier } from '../types/subscription-types'
+
 import { 
   getCachedSubscription, 
   cacheSubscription, 
   getCachedUsage, 
   cacheUsage,
-  invalidateSubscriptionCache,
   invalidateUsageCache
 } from './subscription-cache'
 
 // Subscription Plans Configuration
 export const SUBSCRIPTION_PLANS = {
-  basic: {
-    id: 'basic',
+  [SubscriptionPlan.BASIC]: {
+    id: SubscriptionPlan.BASIC,
     name: 'Basic',
     price: 10,
     currency: 'USD',
     maxClients: 3,
-    maxDocumentsPerMonth: 20,
-    maxTokensPerMonth: 100000,        // 100K tokens (~75 pages of text
-    maxCostPerMonth: 2.00,            // $2 OpenAI spending limit
+    maxTokensPerMonth: 5000000,        // 5M tokens - generous allowance with Gemini 2.0 Flash
+    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
+    // Max cost: 5M * $0.000175 = $0.875, leaving $9.125 profit (91.25% margin)
     description: 'Perfect for getting started with AI marketing assistance',
     features_list: [
       '👥 3 client profiles',
-      '📄 20 documents per month',
-      '🔤 100K tokens (~75 pages of content)'
+      '💾 50 MB document storage',
+      '🔤 5M tokens (~3,750 pages of content)',
+      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   },
-  pro: {
-    id: 'pro',
+  [SubscriptionPlan.PRO]: {
+    id: SubscriptionPlan.PRO,
     name: 'Pro',
-    price: 17,
+    price: 25,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxDocumentsPerMonth: 200,
-    maxTokensPerMonth: 2000000,       // 2M tokens (~1,500 pages of text)
-    maxCostPerMonth: 12.00,           // $12 OpenAI spending limit
+    maxTokensPerMonth: 15000000,       // 15M tokens - excellent value with Gemini 2.0 Flash
+    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
+    // Max cost: 15M * $0.000175 = $2.625, leaving $22.375 profit (89.5% margin)
     description: 'For marketing professionals scaling their business',
     features_list: [
       '👥 Unlimited client profiles',
-      '📄 200 documents per month',
-      '🔤 2M tokens (~1,500 pages of content)'
+      '💾 200 MB document storage',
+      '🔤 15M tokens (~11,250 pages of content)',
+      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   },
-  business: {
-    id: 'business',
+  [SubscriptionPlan.BUSINESS]: {
+    id: SubscriptionPlan.BUSINESS,
     name: 'Business',
-    price: 43,
+    price: 50,
     currency: 'USD',
     maxClients: -1, // unlimited
-    maxDocumentsPerMonth: -1, // unlimited
-    maxTokensPerMonth: -1,            // unlimited tokens
-    maxCostPerMonth: 35.00,           // $35 OpenAI spending limit
+    maxTokensPerMonth: 40000000,       // 40M tokens - enterprise-level allowance
+    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
+    // Max cost: 40M * $0.000175 = $7, leaving $43 profit (86% margin)
     description: 'For agencies and teams with advanced needs',
     features_list: [
       '👥 Unlimited client profiles',
-      '📄 Unlimited documents per month',
-      '🔤 Unlimited tokens'
+      '💾 2 GB document storage',
+      '🔤 40M tokens (~30,000 pages of content)',
+      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   }
 } as const
 
-export type PlanId = keyof typeof SUBSCRIPTION_PLANS
+export type PlanId = SubscriptionPlan
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string) {
@@ -71,7 +76,7 @@ export async function getUserSubscription(userId: string) {
     // Check cache first
     const cached = getCachedSubscription(userId)
     if (cached) {
-      logger.debug('Returning cached subscription', { userId })
+      logger.info('Returning cached subscription', { userId })
       endTiming();
       return cached
     }
@@ -84,7 +89,7 @@ export async function getUserSubscription(userId: string) {
 
     // Create default basic subscription if none exists using upsert to prevent race conditions
     if (!subscription) {
-      logger.info('Creating new user subscription', { userId, metadata: { plan: 'basic' } });
+      logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.BASIC } });
       
       const now = new Date()
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
@@ -97,14 +102,12 @@ export async function getUserSubscription(userId: string) {
           update: {}, // Don't update if exists
           create: {
             userId,
-            plan: 'basic',
-            status: 'active',
+            plan: SubscriptionPlan.BASIC,
+            status: SubscriptionStatus.ACTIVE,
             currentPeriodStart: now,
             currentPeriodEnd: periodEnd,
-            maxClients: SUBSCRIPTION_PLANS.basic.maxClients,
-            maxDocumentsPerMonth: SUBSCRIPTION_PLANS.basic.maxDocumentsPerMonth,
-            maxTokensPerMonth: SUBSCRIPTION_PLANS.basic.maxTokensPerMonth,
-            maxCostPerMonth: SUBSCRIPTION_PLANS.basic.maxCostPerMonth,
+            maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
+            maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
           }
         }),
         { userId },
@@ -172,14 +175,12 @@ export async function getCurrentMonthUsage(userId: string) {
             }
           },
           update: {}, // Don't update if exists
-          create: {
-            userId,
-            year,
-            month,
-            documentsGenerated: 0,
-            estimatedCost: 0,
-            tokensUsed: 0,
-          }
+                  create: {
+          userId,
+          year,
+          month,
+          tokensUsed: 0,
+        }
         }),
         { userId },
         500 // Database operations should be fast - warn if >500ms
@@ -202,72 +203,13 @@ export async function getCurrentMonthUsage(userId: string) {
 }
 
 // Check usage limits for different actions
-export async function checkUsageLimit(userId: string, action: 'document' | 'client') {
+export async function checkUsageLimit(userId: string, action: 'client') {
   const endTiming = logger.startTiming('Check Usage Limit', { userId });
   
   try {
-
-    
-    const [subscription, usage] = await Promise.all([
-      getUserSubscription(userId),
-      getCurrentMonthUsage(userId)
-    ])
-    
-
-
-    const plan = SUBSCRIPTION_PLANS[subscription.plan as PlanId]
+    const subscription = await getUserSubscription(userId)
 
     switch (action) {
-      case 'document':
-        // Check document count limit
-        const maxDocuments = subscription.maxDocumentsPerMonth
-        if (maxDocuments !== -1 && usage.documentsGenerated >= maxDocuments) {
-          return {
-            allowed: false,
-            limit: maxDocuments,
-            used: usage.documentsGenerated,
-            remaining: 0,
-            limitType: 'documents'
-          }
-        }
-        
-        // Check token limit (documents also consume tokens)
-        const maxTokensDoc = subscription.maxTokensPerMonth
-        if (maxTokensDoc !== -1 && usage.tokensUsed >= maxTokensDoc) {
-          return {
-            allowed: false,
-            limit: maxTokensDoc,
-            used: usage.tokensUsed,
-            remaining: 0,
-            limitType: 'tokens'
-          }
-        }
-        
-        // Check cost limit (documents also consume API costs)
-        const maxCostDoc = subscription.maxCostPerMonth
-        if (maxCostDoc !== -1 && usage.estimatedCost >= maxCostDoc) {
-          return {
-            allowed: false,
-            limit: maxCostDoc,
-            used: usage.estimatedCost,
-            remaining: 0,
-            limitType: 'cost'
-          }
-        }
-        
-        // All limits passed
-        return {
-          allowed: true,
-          limit: maxDocuments === -1 ? 'unlimited' : maxDocuments,
-          used: usage.documentsGenerated,
-          remaining: maxDocuments === -1 ? 'unlimited' : maxDocuments - usage.documentsGenerated,
-          limitType: 'documents',
-          additionalUsage: {
-            tokens: { used: usage.tokensUsed, limit: maxTokensDoc, remaining: maxTokensDoc === -1 ? 'unlimited' : maxTokensDoc - usage.tokensUsed },
-            cost: { used: usage.estimatedCost, limit: maxCostDoc, remaining: maxCostDoc === -1 ? 'unlimited' : maxCostDoc - usage.estimatedCost }
-          }
-        }
-
       case 'client':
         const clientCount = await prisma.client.count({ where: { userId } })
         const maxClients = subscription.maxClients
@@ -303,10 +245,9 @@ export async function checkUsageLimit(userId: string, action: 'document' | 'clie
 // Track usage by updating monthly usage only (no individual events)
 export async function updateUsageTracking(
   userId: string,
-  eventType: 'document_generation',
   metadata?: {
     tokensUsed?: number
-    estimatedCost?: number
+    // Removed estimatedCost - OpenRouter handles billing automatically
     [key: string]: any
   }
 ) {
@@ -320,18 +261,10 @@ export async function updateUsageTracking(
 
     const updateData: any = {}
     
-    switch (eventType) {
-      case 'document_generation':
-        updateData.documentsGenerated = { increment: 1 }
-        break
-    }
-
     if (metadata?.tokensUsed) {
       updateData.tokensUsed = { increment: metadata.tokensUsed }
     }
-    if (metadata?.estimatedCost) {
-      updateData.estimatedCost = { increment: metadata.estimatedCost }
-    }
+    // Removed estimatedCost increment - OpenRouter handles billing automatically
 
     await prisma.userUsage.upsert({
       where: {
@@ -345,9 +278,8 @@ export async function updateUsageTracking(
         userId,
         year,
         month,
-        documentsGenerated: eventType === 'document_generation' ? 1 : 0,
         tokensUsed: metadata?.tokensUsed || 0,
-        estimatedCost: metadata?.estimatedCost || 0,
+        // Removed estimatedCost - OpenRouter handles billing automatically
       },
       update: updateData
     })
@@ -359,48 +291,41 @@ export async function updateUsageTracking(
     endTiming();
   } catch (error) {
     logger.error('Error updating usage tracking', error as Error, { 
-      userId,
-      metadata: { eventType }
+      userId
     });
     endTiming();
     throw error
   }
 }
 
-// Calculate estimated cost for AI usage (OpenAI and Claude)
-export function calculateAICost(model: string, inputTokens: number, outputTokens: number): number {
-  const pricing = {
-    // OpenAI pricing
-    'gpt-4o': {
-      input: 0.0025,  // $0.0025 per 1K input tokens
-      output: 0.01    // $0.01 per 1K output tokens
-    },
-    'gpt-4o-mini': {
-      input: 0.00015, // $0.00015 per 1K input tokens
-      output: 0.0006  // $0.0006 per 1K output tokens
-    },
-    // Claude pricing (latest models)
-    'claude-opus-4-20250514': {
-      input: 0.015,   // $15 per 1M tokens = $0.015 per 1K tokens
-      output: 0.075   // $75 per 1M tokens = $0.075 per 1K tokens
-    },
-    'claude-sonnet-4-20250514': {
-      input: 0.003,   // $3 per 1M tokens = $0.003 per 1K tokens
-      output: 0.015   // $15 per 1M tokens = $0.015 per 1K tokens
-    },
-
-    'claude-3-5-haiku-20241022': {
-      input: 0.0008,  // $0.80 per 1M tokens = $0.0008 per 1K tokens  
-      output: 0.004   // $4 per 1M tokens = $0.004 per 1K tokens
-    }
-  }
-
-  const modelPricing = pricing[model as keyof typeof pricing] || pricing['gpt-4o-mini']
+// Check if user can access a specific model based on their subscription
+export async function checkModelAccess(userId: string, modelId: string) {
+  const endTiming = logger.startTiming('Check Model Access', { userId });
   
-  return (inputTokens / 1000) * modelPricing.input + (outputTokens / 1000) * modelPricing.output
+  try {
+    const subscription = await getUserSubscription(userId)
+    const tier = getTierFromPlan(subscription.plan)
+    const hasAccess = isModelAvailableForTier(modelId, tier)
+    
+    endTiming();
+    return {
+      allowed: hasAccess,
+      tier,
+      plan: subscription.plan,
+      modelId
+    }
+  } catch (error) {
+    logger.error('Error checking model access', error as Error, { 
+      userId,
+      metadata: { modelId }
+    });
+    endTiming();
+    return { allowed: false, tier: ModelTier.BASIC, plan: SubscriptionPlan.BASIC, modelId }
+  }
 }
 
-
+// Note: OpenRouter handles billing automatically based on actual usage
+// The cost tracking in this app is for display/limit purposes only
 
 // Get usage analytics for dashboard
 export async function getUserUsageAnalytics(userId: string) {
@@ -419,14 +344,11 @@ export async function getUserUsageAnalytics(userId: string) {
         currentPeriodEnd: subscription.currentPeriodEnd,
       },
       limits: {
-        documents: subscription.maxDocumentsPerMonth,
         clients: subscription.maxClients,
         tokens: subscription.maxTokensPerMonth,
-        cost: subscription.maxCostPerMonth,
+        // Removed cost limit - OpenRouter handles billing automatically
       },
       usage: {
-        documents: currentUsage.documentsGenerated,
-        estimatedCost: currentUsage.estimatedCost,
         tokensUsed: currentUsage.tokensUsed,
       },
       planDetails: plan

@@ -1,46 +1,67 @@
+import { ModelTier, ModelTierType, SubscriptionPlan, SubscriptionPlanType } from '../types/subscription-types'
+
 export interface AIModel {
   id: string
   name: string
   description: string
-  provider: 'openai' | 'anthropic'
+  provider: 'openai' | 'anthropic' | 'google' | 'meta' | 'other'
+  contextLength?: number
+  pricing?: { input: number; output: number }
+  tier?: ModelTierType
 }
 
-export const AVAILABLE_MODELS: AIModel[] = [
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    description: 'Most capable OpenAI model, best for complex tasks',
-    provider: 'openai'
-  },
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    description: 'Faster and more cost-effective OpenAI model',
-    provider: 'openai'
-  },
-  {
-    id: 'claude-opus-4-20250514',
-    name: 'Claude 4 Opus',
-    description: 'Most capable Claude model for complex reasoning and analysis',
-    provider: 'anthropic'
-  },
-  {
-    id: 'claude-sonnet-4-20250514',
-    name: 'Claude 4 Sonnet',
-    description: 'High-performance Claude model with exceptional reasoning capabilities',
-    provider: 'anthropic'
-  },
+// Model ID Constants - Available models for all AI functionalities
+export const MODEL_IDS = {
+  // Primary Model - Used for all AI functionalities
+  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
+  // Secondary Model - Same capabilities as Gemini 2.0 Flash
+  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano-2025-04-14',
+} as const
 
+// Model Tiers Configuration - All tiers use both models
+export const MODEL_TIERS = {
+  [ModelTier.BASIC]: [
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
+  ],
+  [ModelTier.PRO]: [
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
+  ],
+  [ModelTier.BUSINESS]: [
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
+  ],
+}
+
+// Create array of all model IDs for validation  
+export const ALL_MODEL_IDS = Object.values(MODEL_IDS) as string[]
+
+export const AVAILABLE_MODELS: AIModel[] = [
+  // Primary Model - Google Gemini 2.0 Flash 001
   {
-    id: 'claude-3-5-haiku-20241022',
-    name: 'Claude 3.5 Haiku',
-    description: 'Fastest and most cost-effective Claude model',
-    provider: 'anthropic'
+    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    name: 'Gemini 2.0 Flash',
+    description: 'Latest Google model with enhanced performance, reasoning, and multimodal capabilities',
+    provider: 'google',
+    contextLength: 1000000,
+    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
+    tier: ModelTier.BASIC
+  },
+  // Secondary Model - OpenAI GPT-4.1 Nano
+  {
+    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    name: 'GPT-4.1 Nano',
+    description: 'Efficient OpenAI model with excellent performance and reasoning capabilities',
+    provider: 'openai',
+    contextLength: 200000,
+    pricing: { input: 0.0001, output: 0.0004 }, // Same cost as Gemini 2.0 Flash
+    tier: ModelTier.BASIC
   }
 ]
 
-// OpenAI Configuration Constants
-export const DEFAULT_MODEL = 'gpt-4o-mini'
+// OpenRouter Configuration Constants - Default to Gemini 2.0 Flash 001
+export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH
 export const DEFAULT_TEMPERATURE = 0.7
 export const DEFAULT_PRESENCE_PENALTY = 0.1
 export const DEFAULT_FREQUENCY_PENALTY = 0.1
@@ -51,17 +72,17 @@ export const DEFAULT_MAX_TOKENS = 8000
 
 /**
  * Get the default model, with optional environment override
- * Environment variable: OPENAI_API_DEFAULT_MODEL
+ * Environment variable: OPENROUTER_DEFAULT_MODEL
  */
 export function getDefaultModel(): string {
-  return process.env.OPENAI_API_DEFAULT_MODEL || DEFAULT_MODEL
+  return process.env.OPENROUTER_DEFAULT_MODEL || DEFAULT_MODEL
 }
 
 /**
  * Get the default temperature, with optional environment override
  */
 export function getDefaultTemperature(): number {
-  return parseFloat(process.env.OPENAI_TEMPERATURE || DEFAULT_TEMPERATURE.toString())
+  return parseFloat(process.env.OPENROUTER_TEMPERATURE || DEFAULT_TEMPERATURE.toString())
 }
 
 /**
@@ -75,14 +96,14 @@ export function getDefaultMaxTokens(): number {
  * Get the default presence penalty, with optional environment override
  */
 export function getDefaultPresencePenalty(): number {
-  return parseFloat(process.env.OPENAI_PRESENCE_PENALTY || DEFAULT_PRESENCE_PENALTY.toString())
+  return parseFloat(process.env.OPENROUTER_PRESENCE_PENALTY || DEFAULT_PRESENCE_PENALTY.toString())
 }
 
 /**
  * Get the default frequency penalty, with optional environment override
  */
 export function getDefaultFrequencyPenalty(): number {
-  return parseFloat(process.env.OPENAI_FREQUENCY_PENALTY || DEFAULT_FREQUENCY_PENALTY.toString())
+  return parseFloat(process.env.OPENROUTER_FREQUENCY_PENALTY || DEFAULT_FREQUENCY_PENALTY.toString())
 }
 
 export function getModelById(modelId: string): AIModel | undefined {
@@ -92,6 +113,13 @@ export function getModelById(modelId: string): AIModel | undefined {
 export function getModelDisplayName(modelId: string): string {
   const model = getModelById(modelId)
   return model?.name || modelId
+}
+
+/**
+ * Get models by provider
+ */
+export function getModelsByProvider(provider: AIModel['provider']): AIModel[] {
+  return AVAILABLE_MODELS.filter(model => model.provider === provider)
 }
 
 /**
@@ -127,16 +155,79 @@ export function getDefaultModelForNewChats(): string {
  */
 export function saveDefaultModelForNewChats(modelId: string): void {
   if (typeof window === 'undefined') return // Server-side safety
-
+  
   try {
-    // Validate model before saving
-    const isValidModel = AVAILABLE_MODELS.some(model => model.id === modelId)
-    if (isValidModel) {
-      localStorage.setItem('chat-default-model', modelId)
-    } else {
-      console.error('Attempted to save invalid model as default:', modelId)
-    }
+    localStorage.setItem('chat-default-model', modelId)
   } catch (error) {
-    console.error('Failed to save default model to localStorage:', error)
+    console.error('Failed to save default model:', error)
+  }
+}
+
+/**
+ * Get estimated cost for a model based on tokens
+ */
+export function getModelCost(modelId: string, inputTokens: number, outputTokens: number): number {
+  const model = getModelById(modelId)
+  
+  if (model?.pricing) {
+    return (inputTokens / 1000) * model.pricing.input + (outputTokens / 1000) * model.pricing.output
+  }
+  
+  // Fallback pricing similar to Gemini 1.5 Flash if no specific pricing
+  const fallbackInputCost = 0.000075
+  const fallbackOutputCost = 0.0003
+  
+  return (inputTokens / 1000) * fallbackInputCost + (outputTokens / 1000) * fallbackOutputCost
+}
+
+/**
+ * Get models available for a specific subscription tier
+ */
+export function getModelsByTier(tier: ModelTierType): AIModel[] {
+  const tierModels = MODEL_TIERS[tier] || []
+  return AVAILABLE_MODELS.filter(model => (tierModels as string[]).includes(model.id))
+}
+
+/**
+ * Check if a model is available for a specific subscription tier
+ */
+export function isModelAvailableForTier(modelId: string, tier: ModelTierType): boolean {
+  const tierModels = MODEL_TIERS[tier] || []
+  return (tierModels as string[]).includes(modelId)
+}
+
+/**
+ * Get the most expensive model cost in a tier (for pricing calculations)
+ */
+export function getMaxTierCost(tier: ModelTierType): number {
+  const models = getModelsByTier(tier)
+  let maxCost = 0
+  
+  models.forEach(model => {
+    if (model.pricing) {
+      // Calculate cost per 1K tokens (assuming 1:2 input:output ratio)
+      const avgCost = (model.pricing.input + 2 * model.pricing.output) / 3
+      if (avgCost > maxCost) {
+        maxCost = avgCost
+      }
+    }
+  })
+  
+  return maxCost
+}
+
+/**
+ * Get subscription tier from plan name
+ */
+export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
+  switch (plan) {
+    case SubscriptionPlan.BASIC:
+      return ModelTier.BASIC
+    case SubscriptionPlan.PRO:
+      return ModelTier.PRO
+    case SubscriptionPlan.BUSINESS:
+      return ModelTier.BUSINESS
+    default:
+      return ModelTier.BASIC
   }
 } 

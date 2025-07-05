@@ -1,15 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { currentUser } from '@clerk/nextjs/server'
+import { 
+  withEnhancedApi, 
+  apiSuccess, 
+  parseJsonBody,
+  ApiContext 
+} from '@/lib/api-middleware'
 import { prisma } from '@/lib/prisma'
+import { 
+  FeedbackType, 
+  isValidFeedbackType,
+  isValidPriority 
+} from '@/types/enums'
 
-export async function POST(request: NextRequest) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+export const POST = withEnhancedApi(
+  async ({ userId, req }: ApiContext) => {
     // Get the current user information
     const user = await currentUser()
     const userName = user?.firstName && user?.lastName 
@@ -17,32 +21,22 @@ export async function POST(request: NextRequest) {
       : user?.firstName || 'Anonymous'
     const userEmail = user?.emailAddresses[0]?.emailAddress
 
-    const { type, title, description, priority, useCase, stepsToReproduce } = await request.json()
+    const body = await parseJsonBody(req)
+    const { type, title, description, priority, useCase, stepsToReproduce } = body
 
     // Validate required fields
     if (!type || !title || !description || !priority) {
-      return NextResponse.json(
-        { error: 'Missing required fields' }, 
-        { status: 400 }
-      )
+      throw new Error('Missing required fields: type, title, description, and priority are required')
     }
 
     // Validate feedback type
-    const validTypes = ['feature', 'bug', 'complaint']
-    if (!validTypes.includes(type)) {
-      return NextResponse.json(
-        { error: 'Invalid feedback type' }, 
-        { status: 400 }
-      )
+    if (!isValidFeedbackType(type)) {
+      throw new Error('Invalid feedback type')
     }
 
     // Validate priority values
-    const validPriorities = ['low', 'medium', 'high']
-    if (!validPriorities.includes(priority)) {
-      return NextResponse.json(
-        { error: 'Invalid priority value' }, 
-        { status: 400 }
-      )
+    if (!isValidPriority(priority)) {
+      throw new Error('Invalid priority value')
     }
 
     // Save feedback to database
@@ -60,45 +54,33 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    const feedbackTypeLabel = type === 'feature' ? 'feature request' : 
-                             type === 'bug' ? 'bug report' : 'feedback'
+    const feedbackTypeLabel = type === FeedbackType.FEATURE ? 'feature request' : 
+                             type === FeedbackType.BUG ? 'bug report' : 'feedback'
 
-    return NextResponse.json({ 
-      success: true, 
+    return apiSuccess({ 
       feedbackId: feedback.id,
       message: `${feedbackTypeLabel.charAt(0).toUpperCase() + feedbackTypeLabel.slice(1)} submitted successfully`
     })
-
-  } catch (error) {
-    console.error('Feedback submission error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    )
+  },
+  {
+    context: 'Submit Feedback',
+    allowedMethods: ['POST'],
+    expectedContentType: 'application/json'
   }
-}
+)
 
-export async function GET(request: NextRequest) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+export const GET = withEnhancedApi(
+  async ({ userId }: ApiContext) => {
     // Get feedback for the current user
     const feedbacks = await prisma.feedback.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json({ feedbacks })
-
-  } catch (error) {
-    console.error('Feedback retrieval error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    )
+    return apiSuccess({ feedbacks })
+  },
+  {
+    context: 'Get User Feedback',
+    allowedMethods: ['GET']
   }
-} 
+) 

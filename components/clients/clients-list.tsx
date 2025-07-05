@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, Plus, User, Grid, List } from 'lucide-react'
-import { deleteClient } from '@/lib/client-actions'
-import { useToast } from '@/hooks/use-toast'
 
 import { ClientGridView } from '@/components/clients/client-grid-view'
 import { ClientTableView } from '@/components/clients/client-table-view'
 import { ClientPagination } from '@/components/clients/client-pagination'
 import { ClientEmptyState } from '@/components/clients/client-empty-state'
-import { UsageInfo, Client, LanguageInfo, ClientActionHandlers, PaginationInfo } from '@/types/client-list-types'
+import { UsageInfo, Client, ClientActionHandlers } from '@/types/client-list-types'
+import { ViewMode, ButtonVariant } from '@/types/enums'
+import { useClientList } from '@/hooks/use-client-list'
 
 interface ClientsListProps {
   clients: Client[]
@@ -22,66 +22,24 @@ interface ClientsListProps {
   onViewDocuments: (client: Client) => void
 }
 
-export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState('')
+export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
-  const [currentPage, setCurrentPage] = useState(1)
 
-  const itemsPerPage = 12
-
-  // Available languages for document generation
-  const languages = [
-    { value: 'english', label: 'English', flag: '🇺🇸' },
-    { value: 'spanish', label: 'Spanish', flag: '🇪🇸' },
-    { value: 'french', label: 'French', flag: '🇫🇷' },
-    { value: 'german', label: 'German', flag: '🇩🇪' },
-    { value: 'italian', label: 'Italian', flag: '🇮🇹' },
-    { value: 'portuguese', label: 'Portuguese', flag: '🇵🇹' },
-    { value: 'dutch', label: 'Dutch', flag: '🇳🇱' },
-    { value: 'polish', label: 'Polish', flag: '🇵🇱' },
-    { value: 'russian', label: 'Russian', flag: '🇷🇺' },
-    { value: 'catalan', label: 'Catalan', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
-  ]
-
-  // Helper to get language display info
-  const getLanguageInfo = (languageValue: string): LanguageInfo => {
-    const language = languages.find(lang => lang.value === languageValue)
-    return language || { value: 'english', label: 'English', flag: '🇺🇸' }
-  }
-
-  // Load saved view preference on component mount
-  useEffect(() => {
-    const savedViewMode = localStorage.getItem('clients-view-mode')
-    if (savedViewMode && (savedViewMode === 'grid' || savedViewMode === 'table')) {
-      setViewMode(savedViewMode)
-    }
-  }, [])
-
-  // Save view preference whenever it changes
-  const handleViewModeChange = (newViewMode: 'grid' | 'table') => {
-    setViewMode(newViewMode)
-    localStorage.setItem('clients-view-mode', newViewMode)
-  }
-
-  const filteredClients = clients
-    .filter(client =>
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => a.name.localeCompare(b.name))
-
-  // Reset to page 1 when search changes
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm])
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredClients.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedClients = filteredClients.slice(startIndex, endIndex)
+  const {
+    // State
+    searchTerm,
+    viewMode,
+    filteredClients,
+    paginatedClients,
+    paginationInfo,
+    
+    // Actions
+    setSearchTerm,
+    setViewMode,
+    setCurrentPage,
+    deleteClient,
+    getLanguageInfo,
+  } = useClientList({ clients, itemsPerPage: 12 })
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -96,19 +54,10 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
 
     setIsDeleting(clientId)
     try {
-      await deleteClient(clientId)
-      toast({
-        title: 'Success',
-        description: 'Client deleted successfully',
-      })
-
+      await deleteClient(clientId, clientName)
       onRefresh()
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete client',
-        variant: 'destructive',
-      })
+      console.error('Delete error handled by hook:', error)
     } finally {
       setIsDeleting(null)
     }
@@ -119,15 +68,6 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
     onEditClient,
     onViewDocuments,
     onDeleteClient: handleDelete
-  }
-
-  const paginationInfo: PaginationInfo = {
-    currentPage,
-    totalPages,
-    itemsPerPage,
-    totalItems: filteredClients.length,
-    startIndex,
-    endIndex
   }
 
   return (
@@ -147,17 +87,17 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
           {/* View Toggle */}
           <div className="flex border border-gray-200 dark:border-gray-700 rounded-lg p-1">
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              variant={viewMode === ViewMode.GRID ? ButtonVariant.DEFAULT : ButtonVariant.GHOST}
               size="sm"
-              onClick={() => handleViewModeChange('grid')}
+              onClick={() => setViewMode(ViewMode.GRID)}
               className="px-3 py-1.5 h-auto"
             >
               <Grid className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              variant={viewMode === ViewMode.TABLE ? ButtonVariant.DEFAULT : ButtonVariant.GHOST}
               size="sm"
-              onClick={() => handleViewModeChange('table')}
+              onClick={() => setViewMode(ViewMode.TABLE)}
               className="px-3 py-1.5 h-auto"
             >
               <List className="h-4 w-4" />
@@ -192,7 +132,7 @@ export function ClientsList({ clients, usageInfo = null, onEditClient, onAddClie
         <ClientEmptyState searchTerm={searchTerm} onAddClient={onAddClient} />
       ) : (
         <div className="space-y-0">
-          {viewMode === 'grid' ? (
+          {viewMode === ViewMode.GRID ? (
             <ClientGridView 
               clients={paginatedClients}
               actionHandlers={actionHandlers}

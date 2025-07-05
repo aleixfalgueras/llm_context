@@ -1,18 +1,9 @@
 'use client'
 
-import { deleteDocument, deleteAllDocuments, updateDocumentNameAndContent, createDocument } from '@/lib/document-actions'
+import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { ToastVariant } from '@/types/enums'
+import { Document } from '@/types/component-types'
 
 interface UseDocumentOperationsProps {
   clientId: string
@@ -27,10 +18,8 @@ interface UseDocumentOperationsProps {
 
 export function useDocumentOperations({
   clientId,
-  clientName,
   loadDocuments,
   resetCreateState,
-  resetEditState,
   setSelectedDocument,
   setDocumentContent,
   setDocuments,
@@ -48,19 +37,21 @@ export function useDocumentOperations({
       toast({
         title: 'Error',
         description: 'Please fill in all required fields',
-        variant: 'destructive',
+        variant: ToastVariant.DESTRUCTIVE,
       })
       return false
     }
 
     try {
-      await createDocument(
+      await DocumentClientService.createDocument(
         clientId,
         documentName,
         documentType,
         documentContent,
-        startDate ? new Date(startDate) : undefined,
-        endDate ? new Date(endDate) : undefined
+        {
+          startDate: startDate ? new Date(startDate) : undefined,
+          endDate: endDate ? new Date(endDate) : undefined
+        }
       )
       toast({
         title: 'Success',
@@ -70,11 +61,22 @@ export function useDocumentOperations({
       await loadDocuments()
       return true
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create document',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create document'
+      
+      // Check for storage limit errors
+      if (errorMessage.includes('Storage limit exceeded')) {
+        toast({
+          title: 'Storage Limit Exceeded',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+      }
       return false
     }
   }
@@ -95,7 +97,9 @@ export function useDocumentOperations({
     }
 
     try {
-      await updateDocumentNameAndContent(selectedDocument.id, editedDocumentName, editedContent)
+      await DocumentClientService.updateDocument(selectedDocument.id, {
+        documentName: editedDocumentName
+      })
       setDocumentContent(editedContent)
       setSelectedDocument({ ...selectedDocument, documentName: editedDocumentName })
       toast({
@@ -120,7 +124,7 @@ export function useDocumentOperations({
     }
 
     try {
-      await deleteDocument(document.id)
+      await DocumentClientService.deleteDocument(document.id)
       toast({
         title: 'Success',
         description: 'Document deleted successfully',
@@ -152,7 +156,7 @@ export function useDocumentOperations({
 
     if (showDeleteAllConfirm) {
       try {
-        await deleteAllDocuments(clientId)
+        await DocumentClientService.deleteAllDocuments(clientId)
         toast({
           title: 'Success',
           description: 'All documents deleted successfully',
@@ -178,15 +182,7 @@ export function useDocumentOperations({
 
   const handleDownloadDocument = async (doc: Document) => {
     try {
-      const response = await fetch('/api/download-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          documentId: doc.id,
-        }),
-      })
+      const response = await fetch(`/api/documents/${doc.id}/download`)
 
       if (!response.ok) {
         throw new Error('Failed to download document')

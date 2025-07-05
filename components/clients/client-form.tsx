@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -8,11 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
-import { CLIENT_FIELD_LABELS, CLIENT_FIELD_PLACEHOLDERS } from '@/types/client'
-import { useToast } from '@/hooks/use-toast'
-import { capitalizeName } from '@/lib/utils'
-import { Globe, HelpCircle, Upload, FileText, CheckCircle, Loader2, Shield } from 'lucide-react'
+import { CLIENT_FIELD_LABELS } from '@/types/client'
+import { Globe, HelpCircle, Shield } from 'lucide-react'
+import { useClientForm } from '@/hooks/use-client-form'
 
 interface ClientFormProps {
   client?: any
@@ -22,87 +19,30 @@ interface ClientFormProps {
 }
 
 export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFormProps) {
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState<ClientData>({
-    name: client?.name || '',
-    email: client?.email || '',
-    phone: client?.phone || '',
-    country: client?.country || '',
-    generalContext: client?.generalContext || '',
-    specifiContext1: client?.specifiContext1 || '',
-    specifiContext2: client?.specifiContext2 || '',
-    specifiContext3: client?.specifiContext3 || '',
-    documentsLanguage: client?.documentsLanguage || 'english'
-  })
+  const {
+    // Form state
+    formData,
+    errors,
+    
+    // Loading state
+    isLoading,
+    
+    // Actions
+    updateField,
+    handleSubmit,
+    
+    // Available options
+    languages,
+  } = useClientForm({ client, onSuccess })
 
-  // Available languages for document generation
-  const languages = [
-    { value: 'english', label: 'English', flag: '🇺🇸' },
-    { value: 'spanish', label: 'Spanish (Español)', flag: '🇪🇸' },
-    { value: 'french', label: 'French (Français)', flag: '🇫🇷' },
-    { value: 'german', label: 'German (Deutsch)', flag: '🇩🇪' },
-    { value: 'italian', label: 'Italian (Italiano)', flag: '🇮🇹' },
-    { value: 'portuguese', label: 'Portuguese (Português)', flag: '🇵🇹' },
-    { value: 'dutch', label: 'Dutch (Nederlands)', flag: '🇳🇱' },
-    { value: 'polish', label: 'Polish (Polski)', flag: '🇵🇱' },
-    { value: 'russian', label: 'Russian (Русский)', flag: '🇷🇺' },
-    { value: 'catalan', label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
-  ]
-
-
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // Format the name before saving
-      const formattedData = {
-        ...formData,
-        name: capitalizeName(formData.name)
-      }
-
-      if (client?.id) {
-        await updateClient(client.id, formattedData)
-        toast({
-          title: 'Success',
-          description: 'Client updated successfully',
-        })
-      } else {
-        await createClient(formattedData)
-        toast({
-          title: 'Success',
-          description: 'Client created successfully',
-        })
-      }
-      onSuccess?.()
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Something went wrong',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleChange = (field: keyof ClientData) => (
+  const handleChange = (field: keyof typeof formData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const value = e.target.value
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    updateField(field, e.target.value)
   }
 
-  const handleSelectChange = (field: keyof ClientData) => (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+  const handleSelectChange = (field: keyof typeof formData) => (value: string) => {
+    updateField(field, value)
   }
 
   return (
@@ -137,7 +77,11 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
                   onChange={handleChange('name')}
                   required
                   placeholder="Client's full name"
+                  className={errors.name ? 'border-red-500' : ''}
                 />
+                {errors.name && (
+                  <p className="text-sm text-red-500">{errors.name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -148,7 +92,11 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
                   value={formData.email}
                   onChange={handleChange('email')}
                   placeholder="client@example.com"
+                  className={errors.email ? 'border-red-500' : ''}
                 />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -158,7 +106,11 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle }: ClientFor
                   value={formData.phone}
                   onChange={handleChange('phone')}
                   placeholder="+1 (555) 123-4567"
+                  className={errors.phone ? 'border-red-500' : ''}
                 />
+                {errors.phone && (
+                  <p className="text-sm text-red-500">{errors.phone}</p>
+                )}
               </div>
             </div>
           </div>

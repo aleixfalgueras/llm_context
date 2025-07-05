@@ -9,7 +9,8 @@ import { AIProviderError } from '@/lib/ai-errors'
 import { logger } from '@/lib/logger'
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { getDefaultModel } from '@/lib/models-config'
+import { getDefaultModel, getModelsByTier } from '@/lib/models-config'
+import { checkModelAccess } from '@/lib/subscription-utils'
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Chat API');
@@ -27,12 +28,45 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    logger.info('Chat request authenticated', { userId, chatId, model });
+    // Use the model from the request, with fallback to centralized default
+    const selectedModel = model || getDefaultModel()
+    
+    // Validate model access based on user's subscription tier
+    const modelAccess = await checkModelAccess(userId, selectedModel)
+    if (!modelAccess.allowed) {
+      const availableModels = getModelsByTier(modelAccess.tier)
+      const modelNames = availableModels.map(m => m.name).join(', ')
+      
+      logger.warn('Model access denied', { 
+        userId, 
+        chatId,
+        metadata: {
+          requestedModel: selectedModel,
+          userTier: modelAccess.tier,
+          userPlan: modelAccess.plan
+        }
+      });
+      
+      return NextResponse.json({
+        error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
+        code: 'MODEL_ACCESS_DENIED',
+        tier: modelAccess.tier,
+        plan: modelAccess.plan,
+        modelId: selectedModel,
+        upgradeUrl: '/pricing'
+      }, { status: 403 })
+    }
+    
+    logger.info('Chat request authenticated and model access validated', { 
+      userId, 
+      chatId, 
+      model: selectedModel
+    });
 
     // CLIENT CONTEXT FLOW:
-    // 1. Client context is ONLY added as system message on the FIRST user message
-    // 2. Subsequent messages rely on conversation memory (no repeated context)
-    // 3. This ensures optimal token usage and conversation flow
+    // 1. Client context is added as system message on EVERY request for consistency
+    // 2. This ensures the AI always has access to client information
+    // 3. System message is rebuilt from chat.contextFields for each request
 
     // Get existing messages and chat info from the database
     logger.dbQuery('findFirst', 'chat', { userId, chatId });
@@ -81,24 +115,24 @@ export async function POST(req: Request) {
     
     const client = clientAccess.client!
 
-    // Add system message with client context ONLY on first message
-    if (isFirstUserMessage) {
-      logger.info('Adding client context system message', { 
-        userId, 
-        chatId, 
-        clientId: client.id,
-        metadata: { 
-          clientName: client.name,
-          selectedContextFields: (chat as any).contextFields || []
-        }
-      });
-      
-      // Build chat system prompt with user-selected client context
-      const selectedContextFields = (chat as any).contextFields || []
-      const clientContextSection = buildClientContextSection(client, selectedContextFields)
-      const hasContext = hasClientContext(selectedContextFields)
-      
-      const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their business.${hasContext ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
+    // Build and add system message with client context for ALL messages (not just first)
+    logger.info('Adding client context system message', { 
+      userId, 
+      chatId, 
+      clientId: client.id,
+      metadata: { 
+        clientName: client.name,
+        selectedContextFields: (chat as any).contextFields || [],
+        isFirstMessage: isFirstUserMessage
+      }
+    });
+    
+    // Build chat system prompt with user-selected client context
+    const selectedContextFields = (chat as any).contextFields || []
+    const clientContextSection = buildClientContextSection(client, selectedContextFields)
+    const hasContext = hasClientContext(selectedContextFields)
+    
+    const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their business.${hasContext ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
 
 INSTRUCTIONS:
 - ${hasContext ? 'Use this client information to personalize your responses when relevant' : 'Provide helpful general business advice'}
@@ -110,31 +144,26 @@ INSTRUCTIONS:
 
 Respond naturally and conversationally while keeping this context in mind.`
 
-      // Log the complete system prompt for the first message
-      logger.info('System prompt created for chat', { 
-        userId, 
-        chatId, 
-        clientId: client.id,
-        metadata: { 
-          systemPrompt,
-          promptLength: systemPrompt.length,
-          hasClientContext: hasContext,
-          contextFields: selectedContextFields,
-          clientName: client.name
-        }
-      });
+    // Log the complete system prompt
+    logger.info('System prompt created for chat', { 
+      userId, 
+      chatId, 
+      clientId: client.id,
+      metadata: { 
+        systemPrompt,
+        promptLength: systemPrompt.length,
+        hasClientContext: hasContext,
+        contextFields: selectedContextFields,
+        clientName: client.name,
+        isFirstMessage: isFirstUserMessage
+      }
+    });
 
-      aiMessages.unshift({
-        role: 'system',
-        content: systemPrompt,
-      })
-    } else {
-      logger.info('Continuing conversation without client context', { 
-        userId, 
-        chatId,
-        metadata: { previousMessageCount: existingMessages.length }
-      });
-    }
+    // Always add system message for consistent client context
+    aiMessages.unshift({
+      role: 'system',
+      content: systemPrompt,
+    })
 
     // Add the new user message
     const lastMessage = messages[messages.length - 1]
@@ -143,12 +172,9 @@ Respond naturally and conversationally while keeping this context in mind.`
       content: lastMessage.content,
     })
 
-    // Use the model from the request, with fallback to centralized default
-    const selectedModel = model || getDefaultModel()
-
-    // Save the user message to the database
+    // Save the user message to the database (tokens will be updated after AI response)
     logger.dbQuery('create', 'message', { userId, chatId });
-    await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
+    const userMessage = await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
     logger.info('User message saved', { 
       userId, 
       chatId, 
@@ -210,7 +236,6 @@ Respond naturally and conversationally while keeping this context in mind.`
             },
             {
               userId,
-              eventType: 'document_generation', // Track as document generation since it's content creation
               resourceId: chatId
             }
           );
@@ -228,10 +253,73 @@ Respond naturally and conversationally while keeping this context in mind.`
                 }
               });
               
+              let finalUsage = chunk.usage;
+              
+              // Fallback: Query generation stats if usage data is missing
+              if (!finalUsage && chunk.generationId) {
+                try {                  
+                  // Add a small delay - generation stats might not be immediately available
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  
+                  const { OpenRouterClient } = await import('@/lib/openrouter/client');
+                  const client = new OpenRouterClient();
+                  const stats = await client.getGenerationStats(chunk.generationId);
+                  
+                  if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
+                    finalUsage = {
+                      promptTokens: stats.data.tokens_prompt || 0,
+                      completionTokens: stats.data.tokens_completion || 0,
+                      totalTokens: (stats.data.tokens_prompt || 0) + (stats.data.tokens_completion || 0)
+                    };
+                  } else {
+                    console.log('DEBUG: Generation stats available but no token data:', stats);
+                  }
+                } catch (error) {
+                  console.log('DEBUG: Failed to get generation stats:', error);
+                  
+                  // If generation stats fail, provide a rough estimate based on content length
+                  // This is a very rough estimate: ~4 characters per token for English text
+                  const estimatedCompletionTokens = Math.ceil(fullContent.length / 4);
+                  const estimatedPromptTokens = Math.ceil(JSON.stringify(aiMessages).length / 4);
+                  
+                  finalUsage = {
+                    promptTokens: estimatedPromptTokens,
+                    completionTokens: estimatedCompletionTokens,
+                    totalTokens: estimatedPromptTokens + estimatedCompletionTokens
+                  };
+                  
+                  console.log('DEBUG: Using estimated token counts:', finalUsage);
+                }
+              }
+
+              // Update user message with input tokens and save assistant's response
+              logger.dbQuery('update', 'message', { userId, chatId });
+              await prisma.message.update({
+                where: { id: userMessage.id },
+                data: {
+                  inputTokens: finalUsage?.promptTokens || 0,
+                  tokensUsed: finalUsage?.promptTokens || 0
+                }
+              })
+              logger.info('User message updated with token info', { 
+                userId, 
+                chatId, 
+                metadata: { inputTokens: finalUsage?.promptTokens }
+              });
+
               // Save the assistant's response to the database
               logger.dbQuery('create', 'message', { userId, chatId });
-              await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel)
+              await createMessage(
+                chatId, 
+                fullContent, 
+                'ASSISTANT', 
+                selectedModel, 
+                finalUsage?.completionTokens,
+                0, // inputTokens for assistant message
+                finalUsage?.completionTokens
+              )
               logger.info('Assistant message saved', { userId, chatId });
+
 
               // Send completion signal
               const completionData = {
@@ -265,7 +353,7 @@ Respond naturally and conversationally while keeping this context in mind.`
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
                   logger.dbQuery('create', 'message', { userId, chatId });
-                  await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel)
+                  await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
                   logger.info('Partial assistant message saved', { userId, chatId });
                 }
                 

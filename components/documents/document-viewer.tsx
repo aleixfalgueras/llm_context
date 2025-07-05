@@ -1,24 +1,12 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Edit, Save, X, Eye } from 'lucide-react'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
 import { getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { Document } from '@/types/component-types'
 
 interface DocumentViewerProps {
   document: Document | null
@@ -103,6 +91,7 @@ export function DocumentViewer({
                 size="sm"
                 onClick={onSave}
                 disabled={!editedDocumentName.trim() || !editedContent.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Save className="h-4 w-4 mr-1" />
                 Save

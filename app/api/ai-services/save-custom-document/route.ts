@@ -1,54 +1,55 @@
 import { saveDocumentToStorage } from '@/lib/document-save-utils'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-import { withAuthAndUsageCheck } from '@/lib/api-middleware'
+import { 
+  withEnhancedApi, 
+  apiSuccess, 
+  parseJsonBody,
+  ApiContext 
+} from '@/lib/api-middleware'
 
-export async function POST(request: Request) {
-  try {
-    // Use unified middleware for auth and usage checking
-    const middleware = await withAuthAndUsageCheck('document')
-    if (!middleware.success) {
-      return middleware.response!
-    }
+export const POST = withEnhancedApi(
+  async ({ req }: ApiContext) => {
+    const body = await parseJsonBody(req)
     
-    const userId = middleware.userId!
-
     const { 
       clientId, 
       content, 
       documentTitle, 
       promptName
-    } = await request.json()
+    } = body
 
+    // Validate required fields
     if (!clientId || !content || !documentTitle) {
-      return new Response('Missing required fields', { status: 400 })
+      throw new Error('Missing required fields: clientId, content, and documentTitle are required')
     }
 
-    // Use the shared document save utility with tracking enabled
-    const result = await saveDocumentToStorage({
-      clientId,
-      content,
-      documentName: documentTitle,
-      documentType: DOCUMENT_TYPES.CUSTOM_DOCUMENT,
-      trackUsage: true // Explicitly enable usage tracking
-    })
+    try {
+      // Use the shared document save utility with tracking enabled
+      const result = await saveDocumentToStorage({
+        clientId,
+        content,
+        documentName: documentTitle,
+        documentType: DOCUMENT_TYPES.CUSTOM_DOCUMENT,
+        trackUsage: true // Explicitly enable usage tracking
+      })
 
-    return Response.json({
-      ...result,
-      documentId: result.document.id,
-      promptName,
-      message: 'Custom document saved successfully'
-    })
-  } catch (error) {
-    console.error('Error saving custom document:', error)
-    
-    // Check if it's a usage limit error
-    if (error instanceof Error && error.message.includes('limit')) {
-      return new Response(error.message, { status: 403 })
+      return apiSuccess({
+        ...result,
+        documentId: result.document.id,
+        promptName,
+        message: 'Custom document saved successfully'
+      })
+    } catch (error) {
+      // Check for storage limit errors
+      if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
+        throw new Error(`Storage limit exceeded: ${error.message}`)
+      }
+      throw error
     }
-    
-    return new Response(
-      error instanceof Error ? error.message : 'Internal Server Error',
-      { status: 500 }
-    )
+  },
+  {
+    context: 'Save Custom Document',
+    allowedMethods: ['POST'],
+    expectedContentType: 'application/json'
   }
-} 
+) 

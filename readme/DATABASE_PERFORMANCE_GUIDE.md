@@ -201,7 +201,7 @@ await prisma.$executeRaw`
     COUNT(DISTINCT c.id) as total_clients,
     COUNT(DISTINCT d.id) as total_documents,
     COUNT(DISTINCT ch.id) as total_chats,
-    SUM(uu.documentsGenerated) as documents_generated,
+    -- Documents are unlimited, no longer tracked
     SUM(uu.estimatedCost) as total_cost
   FROM user_subscriptions u
   LEFT JOIN clients c ON c.userId = u.userId

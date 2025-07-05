@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Users, FileText, Edit, Megaphone, Video, Target, Layers, TrendingUp, BarChart3, PenTool } from 'lucide-react'
+import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Megaphone, Target, TrendingUp, BarChart3, PenTool } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/global/theme-toggle'
@@ -38,21 +38,17 @@ export function LandingPage() {
             </h1>
           </div>
           
-          
-          <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
-            Smart Client Context
+
+          <p className="text-xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+            Create personalized marketing content 
             <br />
-            for Marketing Teams
-          </h2>
-          
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-            Store essential client information and create campaigns, content, and strategies with an AI that actually understand and use your clients' business context.
+            with an AI that understands your clients' business context.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8" asChild>
               <Link href="/sign-up">
-                Start Creating Better Campaigns
+                Start right now
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
@@ -61,7 +57,7 @@ export function LandingPage() {
 
         {/* Core Features Grid */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Context-Driven Marketing Intelligence</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Advanced AI Marketing Platform</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="p-6 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
               <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -108,19 +104,22 @@ export function LandingPage() {
         {/* AI Models Section */}
         <div className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Powered by the Best AI Models</h2>
+            <h2 className="text-3xl font-bold mb-4">Dual Premium AI Models Available</h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Choose the AI model that works best for your campaigns. Switch between models based on your specific needs and client requirements.
+              All subscription tiers include both Google Gemini 2.0 and OpenAI GPT-4.1 through our unified OpenRouter platform. Identical pricing, maximum flexibility.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
               <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                <Sparkles className="w-10 h-10 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Claude</h3>
+              <h3 className="text-xl font-semibold mb-2">Google Gemini 2.0</h3>
+              <div className="mb-4 text-sm text-blue-600 dark:text-blue-400 font-medium">
+                1M Context Length
+              </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Exceptional at analysis and detailed reasoning, ideal for complex campaign strategies and comprehensive client reports.
+                Latest Google AI with enhanced reasoning, multimodal capabilities, and superior performance for complex marketing strategies.
               </p>
             </Card>
 
@@ -128,26 +127,23 @@ export function LandingPage() {
               <div className="w-20 h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Bot className="w-10 h-10 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">OpenAI GPT</h3>
+              <h3 className="text-xl font-semibold mb-2">OpenAI GPT-4.1</h3>
+              <div className="mb-4 text-sm text-green-600 dark:text-green-400 font-medium">
+                200K Context Length
+              </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Industry-leading language model perfect for creative campaign content, strategic planning, and versatile marketing copy.
+                Efficient OpenAI model perfect for creative campaign content, strategic planning, and versatile marketing copy.
               </p>
             </Card>
-
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-purple-200 dark:hover:border-purple-800 relative">
-              <div className="absolute top-3 right-3">
-                <span className="bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full text-xs font-medium">
-                  Coming Soon
-                </span>
-              </div>
-              <div className="w-20 h-20 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-10 h-10 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Gemini</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Google's powerful multimodal AI, excellent for data-driven insights and integrating with Google's marketing ecosystem.
-              </p>
-            </Card>
+          </div>
+          
+          <div className="text-center mt-8">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                Switch between models seamlessly
+              </span>
+            </div>
           </div>
         </div>
         
@@ -211,51 +207,115 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* Security & Privacy */}
+        {/* Technology Benefits */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-green-200 dark:hover:border-green-800">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
               <Shield className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Client Data Security</h3>
+            <h3 className="text-xl font-semibold mb-2">Enterprise Privacy</h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Your client information is protected with enterprise-grade security. Perfect for agencies handling sensitive client data.
+              GDPR-compliant with granular client context selection. Your data never leaves your control with privacy-first design.
             </p>
           </Card>
 
           <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
             <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Scale Your Agency</h3>
+            <h3 className="text-xl font-semibold mb-2">Latest AI Technology</h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Handle more clients without losing quality. Organized workflows and context management for growing marketing teams.
+              Access to cutting-edge Google and OpenAI models through unified OpenRouter platform with business-sustainable pricing.
             </p>
           </Card>
 
           <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-purple-200 dark:hover:border-purple-800">
             <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+              <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">10x Faster Campaigns</h3>
+            <h3 className="text-xl font-semibold mb-2">Modular Architecture</h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Create comprehensive marketing campaigns in minutes, not hours. More time for strategy, less time on execution.
+              Enterprise-grade system with clean separation of concerns, comprehensive error handling, and real-time usage tracking.
             </p>
           </Card>
+        </div>
+
+        {/* Pricing Section */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Transparent Pricing, Maximum Value</h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              All plans include both premium AI models with identical pricing. Excellent profit margins ensure platform sustainability.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
+              <h3 className="text-2xl font-bold mb-2">Basic</h3>
+              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-4">$10<span className="text-lg text-gray-500">/month</span></div>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center justify-center">
+                  <span className="font-medium">5M tokens</span>
+                </div>
+                <div>3 client profiles</div>
+                <div>50 MB storage</div>
+                <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">Both AI Models Included</div>
+              </div>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/sign-up">Start Basic Plan</Link>
+              </Button>
+            </Card>
+
+            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 border-purple-200 dark:border-purple-800 relative">
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 -translate-y-6">
+                <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                  Most Popular
+                </span>
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Pro</h3>
+              <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-4">$25<span className="text-lg text-gray-500">/month</span></div>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center justify-center">
+                  <span className="font-medium">15M tokens</span>
+                </div>
+                <div>Unlimited clients</div>
+                <div>200 MB storage</div>
+                <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">Both AI Models Included</div>
+              </div>
+              <Button className="w-full" asChild>
+                <Link href="/sign-up">Start Pro Plan</Link>
+              </Button>
+            </Card>
+
+            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-green-200 dark:hover:border-green-800">
+              <h3 className="text-2xl font-bold mb-2">Business</h3>
+              <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-4">$50<span className="text-lg text-gray-500">/month</span></div>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center justify-center">
+                  <span className="font-medium">40M tokens</span>
+                </div>
+                <div>Unlimited clients</div>
+                <div>2 GB storage</div>
+                <div className="text-sm text-green-600 dark:text-green-400 font-medium">Both AI Models Included</div>
+              </div>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/sign-up">Start Business Plan</Link>
+              </Button>
+            </Card>
+          </div>
         </div>
 
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Transform Your Marketing Process?
+            Ready to Choose Your AI Provider?
           </h2>
           <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Join marketing agencies and teams who are creating better campaigns with AI that actually understands their clients' business context and goals.
+            Join marketing professionals using both Google Gemini 2.0 and OpenAI GPT-4.1 to create better campaigns with maximum flexibility and business sustainability.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link href="/sign-up">
-                Start Your Free Trial Today
+                Start with Dual AI Models
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>

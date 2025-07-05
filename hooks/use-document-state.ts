@@ -1,20 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getClientDocuments } from '@/lib/document-actions'
 import { useToast } from '@/hooks/use-toast'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { Document } from '@/types/component-types'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()
@@ -41,8 +30,18 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const docs = await getClientDocuments(clientId)
-      setDocuments(docs)
+      const response = await fetch(`/api/documents?clientId=${encodeURIComponent(clientId)}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch client documents')
+      }
+
+      const result = await response.json()
+      
+      // Handle DbOperationResult structure
+      const docs = result.data?.records || result.records || result.data || result || []
+      
+      setDocuments(Array.isArray(docs) ? docs : [])
     } catch (error) {
       toast({
         title: 'Error',
@@ -56,13 +55,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
 
   const handleViewDocument = async (document: Document) => {
     try {
-      const response = await fetch('/api/document-content', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ documentId: document.id }),
-      })
+      const response = await fetch(`/api/documents/${document.id}/content`)
 
       if (!response.ok) {
         throw new Error('Failed to load document content')

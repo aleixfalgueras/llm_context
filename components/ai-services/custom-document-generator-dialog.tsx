@@ -1,38 +1,33 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2, FileText, Save, Download, RefreshCw, Lightbulb, Plus, Edit, Eye } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { FileText } from 'lucide-react'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
-import { MarkdownRenderer } from '@/components/global/markdown-renderer'
-import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
-import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
+import { CLIENT_CONTEXT_FIELD_LABELS, CLIENT_CONTEXT_FIELDS } from '@/types/client'
 import type { Client } from '@/types/client'
-
-interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-}
+import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
+import { useDocumentGenerator } from '@/hooks/use-document-generator'
+import { BaseAIServiceDialog } from './base-ai-service-dialog'
+import type { BaseAIServiceDialogConfig, ValidationResult } from './base-ai-service-dialog'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
   onClose: () => void
   clients: Client[]
   onDocumentCreated?: (clientId: string, documentId: string) => void
-  selectedModel: string
+}
+
+interface CustomDocumentFormData {
+  clientId: string
+  documentTitle: string
+  selectedPrompt: string
+  customPrompt: string
+  useCustomPrompt: boolean
+  clientContext: ClientContextSelection
 }
 
 export function CustomDocumentGeneratorDialog({
@@ -40,544 +35,284 @@ export function CustomDocumentGeneratorDialog({
   onClose,
   clients,
   onDocumentCreated,
-  selectedModel,
 }: CustomDocumentGeneratorDialogProps) {
-  const [selectedClient, setSelectedClient] = useState<string>('')
-  const [documentTitle, setDocumentTitle] = useState('')
-  const [selectedPrompt, setSelectedPrompt] = useState<string>('')
-  const [customPrompt, setCustomPrompt] = useState('')
-  const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
-  const [prompts, setPrompts] = useState<Prompt[]>([])
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
-  const [generatedContent, setGeneratedContent] = useState('')
-  const [promptName, setPromptName] = useState('')
-  const [useCustomPrompt, setUseCustomPrompt] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const { toast } = useToast()
+  const {
+    // State from hook
+    selectedClient,
+    documentTitle,
+    selectedPrompt,
+    customPrompt,
+    clientContext,
+    prompts,
+    generatedContent,
+    useCustomPrompt,
+    isEditMode,
+    
+    // Loading states
+    isGenerating,
+    isSaving,
+    isLoadingPrompts,
+    
+    // Actions
+    setSelectedClient,
+    setDocumentTitle,
+    handlePromptChange,
+    setClientContext,
+    setCustomPrompt,
+    setUseCustomPrompt,
+    setIsEditMode,
+    generateDocument,
+    resetForm,
+    selectAllContext,
+    deselectAllContext,
+  } = useDocumentGenerator({
+    isOpen,
+    clients,
+    onDocumentCreated,
+  })
 
-  // Load prompts when dialog opens
-  useEffect(() => {
-    if (isOpen) {
-      loadPrompts()
+  // Convert hook state to form data format for base component
+  const formData: CustomDocumentFormData = {
+    clientId: selectedClient,
+    documentTitle: documentTitle,
+    selectedPrompt: selectedPrompt,
+    customPrompt: customPrompt,
+    useCustomPrompt: useCustomPrompt,
+    clientContext: clientContext
+  }
+
+  // Get selected client
+  const getSelectedClient = (data: CustomDocumentFormData) => 
+    clients.find(c => c.id === data.clientId)
+
+  const selectedClientData = getSelectedClient(formData)
+
+  // Handle form data changes (sync with hook)
+  const handleFormDataChange = (newData: CustomDocumentFormData) => {
+    if (newData.clientId !== selectedClient) {
+      setSelectedClient(newData.clientId)
     }
-  }, [isOpen])
-
-  const loadPrompts = async () => {
-    setIsLoadingPrompts(true)
-    try {
-      const response = await fetch('/api/prompts?active=true&includeContent=true')
-      if (response.ok) {
-        const data = await response.json()
-        setPrompts(data || [])
-      }
-    } catch (error) {
-      console.error('Error loading prompts:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to load prompts',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsLoadingPrompts(false)
+    if (newData.documentTitle !== documentTitle) {
+      setDocumentTitle(newData.documentTitle)
+    }
+    if (newData.selectedPrompt !== selectedPrompt) {
+      handlePromptChange(newData.selectedPrompt)
+    }
+    if (newData.customPrompt !== customPrompt) {
+      setCustomPrompt(newData.customPrompt)
+    }
+    if (newData.useCustomPrompt !== useCustomPrompt) {
+      setUseCustomPrompt(newData.useCustomPrompt)
+    }
+    if (JSON.stringify(newData.clientContext) !== JSON.stringify(clientContext)) {
+      setClientContext(newData.clientContext)
     }
   }
 
-  // Reset client context when client changes
-  useEffect(() => {
-    if (selectedClient) {
-      setClientContext(defaultClientContextSelections.general)
-    }
-  }, [selectedClient])
-
-  const handlePromptChange = (promptId: string) => {
-    setSelectedPrompt(promptId)
-    const prompt = prompts.find(p => p.id === promptId)
-    if (prompt) {
-      setCustomPrompt(prompt.content)
-    }
+  // Handle client selection
+  const handleClientChange = (clientId: string) => {
+    setSelectedClient(clientId)
+    // Reset client context when client changes
+    setClientContext(defaultClientContextSelections.general)
   }
 
-  const handleGenerateDocument = async () => {
-    if (!selectedClient || !documentTitle || (!selectedPrompt && !customPrompt.trim())) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please select a client, enter a document title, and choose a prompt or write custom instructions.',
-        variant: 'destructive',
-      })
-      return
-    }
-
-    setIsGenerating(true)
-
-    // Show toast notification
-    toast({
-      title: `📄 Generating custom document for ${selectedClientData?.name}`,
-      description: 'This usually takes 30-60 seconds...',
-      duration: 5000,
-    })
-
-    try {
-      const response = await fetch('/api/ai-services/generate-custom-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientId: selectedClient,
-          promptId: useCustomPrompt ? null : selectedPrompt,
-          customPrompt: useCustomPrompt ? customPrompt : null,
-          documentTitle,
-          selectedContextFields: Object.keys(clientContext).filter(key => clientContext[key as keyof ClientContextSelection]),
-          model: selectedModel,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null)
-        
-        // Handle AI provider errors from API
-        if (errorData?.error && errorData?.provider) {
-          const aiError = new AIProviderError(
-            errorData.error,
-            errorData.provider,
-            errorData.type || 'unknown',
-            response.status,
-            errorData.retryAfter
-          )
-          throw aiError
-        }
-        
-        throw new Error(errorData?.error || `HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      setGeneratedContent(data.content)
-      setPromptName(data.promptName)
-    } catch (error) {
-      console.error('Error generating document:', error)
-      
-      // Handle AI provider errors with specific messages
-      if (error instanceof AIProviderError) {
-        const { title, description } = getAIErrorMessage(error)
-        toast({
-          title,
-          description,
-          variant: 'destructive',
-          duration: error.type === 'rate_limit' ? 10000 : 8000, // Longer duration for rate limits
-        })
-      } else {
-        // Generic error handling
-        const errorMessage = error instanceof Error ? error.message : 'Failed to generate document. Please try again.'
-        toast({
-          title: 'Generation Failed',
-          description: errorMessage,
-          variant: 'destructive',
-        })
-      }
-    } finally {
-      setIsGenerating(false)
-    }
+  // Custom wrapper for generation that uses hook logic
+  const handleCustomGenerate = async () => {
+    return await generateDocument()
   }
 
-  const handleSaveDocument = async () => {
-    if (!generatedContent || !selectedClient || !documentTitle) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please generate a document first.',
-        variant: 'destructive',
-      })
-      return
-    }
 
-    setIsSaving(true)
-    try {
-      const response = await fetch('/api/ai-services/save-custom-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientId: selectedClient,
-          content: generatedContent,
-          documentTitle,
-          promptName,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (onDocumentCreated && data.documentId) {
-        toast({
-          title: 'Document Saved 📄',
-          description: (
-            <div>
-              <p>Custom document has been saved successfully.</p>
-              <button 
-                onClick={() => onDocumentCreated(selectedClient, data.documentId)}
-                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
-              >
-                📄 View Document
-              </button>
-            </div>
-          ),
-          duration: 10000,
-        })
-      } else {
-        toast({
-          title: 'Document Saved 📄',
-          description: `Custom document has been saved successfully. You can find it in the Clients page under ${clients.find(c => c.id === selectedClient)?.name}'s documents.`,
-          duration: 8000,
-        })
-      }
-
-      // Reset form
-      setSelectedClient('')
-      setDocumentTitle('')
-      setSelectedPrompt('')
-      setCustomPrompt('')
-      setClientContext(defaultClientContextSelections.general)
-      setGeneratedContent('')
-      setPromptName('')
-      setUseCustomPrompt(false)
-      setIsEditMode(false)
-      onClose()
-    } catch (error) {
-      console.error('Error saving document:', error)
-      toast({
-        title: 'Save Failed',
-        description: 'Failed to save document. Please try again.',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsSaving(false)
-    }
+  // Handle edit mode changes
+  const handleEditModeChange = (editMode: boolean) => {
+    setIsEditMode(editMode)
   }
 
-  const selectedClientData = clients.find(c => c.id === selectedClient)
-
+  // Override base dialog close behavior
   const handleClose = () => {
-    setIsEditMode(false)
+    resetForm()
     onClose()
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Document Generator</DialogTitle>
-          <DialogDescription>
-            Generate professional documents using your custom prompts with client-specific information.
-          </DialogDescription>
-        </DialogHeader>
+  // Configuration for the base dialog
+  const config: BaseAIServiceDialogConfig<CustomDocumentFormData> = {
+    title: 'Document Generator',
+    description: 'Generate professional documents using your custom prompts with client-specific information.',
+    icon: FileText,
+    themeColor: 'blue',
+    
+    generateEndpoint: '/api/ai-services/generate-custom-document',
+    saveEndpoint: '/api/ai-services/save-custom-document',
+    
+    // Use custom handlers that delegate to hook
+    buildGeneratePayload: () => {
+      // This won't be used as we override with custom handler
+      return {}
+    },
+    
+    buildSavePayload: (formData: CustomDocumentFormData, content: string, client?: Client) => {
+      const prompt = prompts.find(p => p.id === formData.selectedPrompt)
+      return {
+        clientId: formData.clientId,
+        content: content,
+        documentTitle: formData.documentTitle,
+        promptName: formData.useCustomPrompt ? 'Custom Prompt' : prompt?.name || '',
+      }
+    },
+    
+    validateGeneration: (data: CustomDocumentFormData): ValidationResult => {
+      if (!data.clientId) {
+        return { isValid: false, message: 'Please select a client' }
+      }
+      if (data.useCustomPrompt && !data.customPrompt.trim()) {
+        return { isValid: false, message: 'Please provide a custom prompt' }
+      }
+      if (!data.useCustomPrompt && !data.selectedPrompt) {
+        return { isValid: false, message: 'Please select a prompt or write a custom one' }
+      }
+      return { isValid: true }
+    },
+    
+    validateSave: (data: CustomDocumentFormData, content: string): ValidationResult => {
+      if (!content.trim()) {
+        return { isValid: false, message: 'Please generate content before saving' }
+      }
+      if (!data.documentTitle.trim()) {
+        return { isValid: false, message: 'Please provide a document title' }
+      }
+      return { isValid: true }
+    },
+    
+    generateDefaultName: (data: CustomDocumentFormData, client?: Client) => {
+      if (client) {
+        const promptTitle = data.useCustomPrompt ? 'Custom Document' : 
+          (prompts.find(p => p.id === data.selectedPrompt)?.name || 'Document')
+        return `${client.name} - ${promptTitle}`
+      }
+      return 'Custom Document'
+    },
+    
+    getDocumentNameField: (data: CustomDocumentFormData) => data.documentTitle,
+    
+    setDocumentNameField: (data: CustomDocumentFormData, name: string) => ({
+      ...data,
+      documentTitle: name
+    }),
+    
+    getSuccessMessage: (client?: Client) => 
+      client ? `📄 Generating document for ${client.name}` : 'Generating document...'
+  }
 
-        <div className="space-y-6">
-          {/* Client Selection */}
+  // Custom fields for document generator
+  const renderCustomFields = () => (
+    <>
+      {/* Prompt Selection */}
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="use-custom-prompt"
+            checked={useCustomPrompt}
+            onChange={(e) => setUseCustomPrompt(e.target.checked)}
+          />
+          <Label htmlFor="use-custom-prompt">Use custom prompt</Label>
+        </div>
+
+        {useCustomPrompt ? (
           <div className="space-y-2">
-            <Label htmlFor="client">Select Client *</Label>
-            <Select value={selectedClient} onValueChange={setSelectedClient}>
+            <Label htmlFor="custom-prompt">Custom Prompt *</Label>
+            <Textarea
+              id="custom-prompt"
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              placeholder="Write your custom prompt here..."
+              className="min-h-[120px]"
+            />
+            <ClientVariablesTooltip />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="prompt-select">Select Prompt</Label>
+            <Select value={selectedPrompt} onValueChange={handlePromptChange} disabled={isLoadingPrompts}>
               <SelectTrigger>
-                <SelectValue placeholder="Choose a client..." />
+                <SelectValue placeholder={isLoadingPrompts ? "Loading prompts..." : "Choose a prompt..."} />
               </SelectTrigger>
               <SelectContent>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
+                {prompts.map((prompt) => (
+                  <SelectItem key={prompt.id} value={prompt.id}>
+                    {prompt.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+        )}
+      </div>
 
-          {/* Client Context Selection */}
-          {selectedClientData && (
-            <div className="space-y-3">
-              <Label className="text-base font-medium">Client Context Selection</Label>
-              <p className="text-sm text-muted-foreground">
-                Choose which client information to include for document generation:
-              </p>
-              <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                {selectedClientData?.country && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-country"
-                      checked={clientContext.country}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        country: e.target.checked
-                      }))}
-                      label={`Country (${selectedClientData.country})`}
-                    />
-                  </div>
-                )}
-                {selectedClientData?.generalContext && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-general-context"
-                      checked={clientContext.general_context}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        general_context: e.target.checked
-                      }))}
-                                              label={CLIENT_CONTEXT_FIELD_LABELS.general_context}
-                    />
-                  </div>
-                )}
-                {selectedClientData?.specifiContext1 && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-specific-context-1"
-                      checked={clientContext.specific_context_1}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        specific_context_1: e.target.checked
-                      }))}
-                                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_1}
-                    />
-                  </div>
-                )}
-                {selectedClientData?.specifiContext2 && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-specific-context-2"
-                      checked={clientContext.specific_context_2}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        specific_context_2: e.target.checked
-                      }))}
-                                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_2}
-                    />
-                  </div>
-                )}
-                {selectedClientData?.specifiContext3 && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="context-specific-context-3"
-                      checked={clientContext.specific_context_3}
-                      onChange={(e) => setClientContext(prev => ({
-                        ...prev,
-                        specific_context_3: e.target.checked
-                      }))}
-                                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_3}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setClientContext({
-                    country: false,
-                    general_context: false,
-                    specific_context_1: false,
-                    specific_context_2: false,
-                    specific_context_3: false
-                  })}
-                >
-                  Deselect All
-                </Button>
-              </div>
+      {/* Client Context */}
+      {selectedClientData && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Client Context</Label>
+            <div className="space-x-2">
+              <Button variant="outline" size="sm" onClick={selectAllContext}>
+                Select All
+              </Button>
+              <Button variant="outline" size="sm" onClick={deselectAllContext}>
+                Deselect All
+              </Button>
             </div>
-          )}
-
-          {/* Document Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title">Document Title *</Label>
-            <Input
-              id="title"
-              value={documentTitle}
-              onChange={(e) => setDocumentTitle(e.target.value)}
-              placeholder="Enter document title..."
-            />
           </div>
-
-          {/* Prompt Selection */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Choose Prompt Source</Label>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="useCustom"
-                  checked={useCustomPrompt}
-                  onChange={(e) => setUseCustomPrompt(e.target.checked)}
-                />
-                <Label htmlFor="useCustom" className="text-sm">Write custom prompt</Label>
-              </div>
-            </div>
-
-            {!useCustomPrompt ? (
-              <div className="space-y-2">
-                <Label htmlFor="prompt">Select Existing Prompt</Label>
-                <Select value={selectedPrompt} onValueChange={handlePromptChange} disabled={isLoadingPrompts}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={isLoadingPrompts ? "Loading prompts..." : prompts.length === 0 ? "No prompts available" : "Choose a prompt..."} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {prompts.length === 0 ? (
-                      <div className="p-4 text-center text-gray-500">
-                        No active prompts found. Create some prompts in the Prompts page first.
-                      </div>
-                    ) : (
-                      prompts.map((prompt) => (
-                        <SelectItem key={prompt.id} value={prompt.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{prompt.name}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {prompt.category}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                {selectedPrompt && (
-                  <div className="mt-2 p-3 bg-blue-50 rounded-lg border">
-                    <p className="text-sm text-gray-600">
-                      {prompts.find(p => p.id === selectedPrompt)?.description || 'No description available'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="customPrompt">Custom Prompt *</Label>
-                  <ClientVariablesTooltip />
-                </div>
-                <Textarea
-                  id="customPrompt"
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="Write your custom prompt here... You can use variables like {country}, {general_context}, {specific_context_1}, {specific_context_2}, {specific_context_3}."
-                  rows={4}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Generated Content */}
-          {generatedContent && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Generated Document
-                  {promptName && (
-                    <Badge variant="outline" className="ml-2">
-                      {promptName}
-                    </Badge>
-                  )}
-                  <Badge variant="outline" className="ml-auto">
-                    {isEditMode ? 'Edit Mode' : 'Preview Mode'}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isEditMode ? (
-                  <Textarea
-                    value={generatedContent}
-                    onChange={(e) => setGeneratedContent(e.target.value)}
-                    className="min-h-96 font-mono text-sm"
-                    placeholder="Edit your document content here..."
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(CLIENT_CONTEXT_FIELD_LABELS).map(([key, label]) => {
+              const actualFieldName = CLIENT_CONTEXT_FIELDS[key as keyof typeof CLIENT_CONTEXT_FIELDS]
+              const fieldValue = selectedClientData[actualFieldName as keyof Client]
+              const hasValue = fieldValue && String(fieldValue).trim() !== ''
+              
+              // Only render fields that have values
+              if (!hasValue) return null
+              
+              return (
+                <div key={key} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`context-${key}`}
+                    checked={clientContext[key as keyof ClientContextSelection] || false}
+                    onChange={(e) => {
+                      const newClientContext = { 
+                        ...clientContext, 
+                        [key as keyof ClientContextSelection]: e.target.checked 
+                      }
+                      setClientContext(newClientContext)
+                    }}
                   />
-                ) : (
-                  <div className="max-h-96 overflow-y-auto">
-                    <MarkdownRenderer content={generatedContent} />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  <Label htmlFor={`context-${key}`}>
+                    {label}
+                  </Label>
+                </div>
+              )
+            })}
+          </div>
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
-          {!generatedContent ? (
-            <Button
-              onClick={handleGenerateDocument}
-              disabled={isGenerating || !selectedClient || !documentTitle || (!selectedPrompt && !customPrompt.trim())}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Generate Document
-                </>
-              )}
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleGenerateDocument}
-                disabled={isGenerating}
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Regenerating...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Regenerate
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsEditMode(!isEditMode)}
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
-              >
-                {isEditMode ? (
-                  <>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview Document
-                  </>
-                ) : (
-                  <>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </>
-                )}
-              </Button>
-              <Button
-                onClick={handleSaveDocument}
-                disabled={isSaving}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   )
-} 
+
+  return (
+    <BaseAIServiceDialog
+      open={isOpen}
+      onOpenChange={handleClose}
+      clients={clients}
+      onDocumentCreated={onDocumentCreated}
+      config={config}
+      formData={formData}
+      onFormDataChange={handleFormDataChange}
+      getSelectedClient={getSelectedClient}
+      onClientChange={handleClientChange}
+      renderCustomFields={renderCustomFields}
+      customGenerateHandler={handleCustomGenerate}
+      customGeneratedContent={generatedContent}
+      customIsGenerating={isGenerating}
+      customIsSaving={isSaving}
+      customIsEditMode={isEditMode}
+      onCustomEditModeChange={handleEditModeChange}
+    />
+  )
+}

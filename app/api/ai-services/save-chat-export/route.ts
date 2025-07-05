@@ -1,27 +1,16 @@
 import { saveDocumentToStorage } from '@/lib/document-save-utils'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-import { withAuthAndUsageCheck } from '@/lib/api-middleware'
+import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api-middleware'
+import { ApiErrors } from '@/lib/api-error-handler'
+import { apiValidation } from '@/lib/validation-helpers'
 
-export async function POST(request: Request) {
+export const POST = withEnhancedApi(async ({ req }) => {
+  const { clientId, content, chatTitle } = await parseJsonBody(req)
+
+  // Use centralized validation to eliminate duplicate validation patterns
+  apiValidation.chatExport({ clientId, content, chatTitle })
+
   try {
-    // Use unified middleware for auth and usage checking
-    const middleware = await withAuthAndUsageCheck('document')
-    if (!middleware.success) {
-      return middleware.response!
-    }
-    
-    const userId = middleware.userId!
-
-    const { 
-      clientId, 
-      content, 
-      chatTitle
-    } = await request.json()
-
-    if (!clientId || !content || !chatTitle) {
-      return new Response('Missing required fields', { status: 400 })
-    }
-
     // Use the shared document save utility with tracking enabled
     const result = await saveDocumentToStorage({
       clientId,
@@ -31,22 +20,20 @@ export async function POST(request: Request) {
       trackUsage: true // Explicitly enable usage tracking
     })
 
-    return Response.json({
+    return apiSuccess({
       ...result,
       documentId: result.document.id,
       message: 'Chat export saved successfully'
-    })
+    }, 201)
   } catch (error) {
-    console.error('Error saving chat export:', error)
-    
-    // Check if it's a usage limit error
-    if (error instanceof Error && error.message.includes('limit')) {
-      return new Response(error.message, { status: 403 })
+    // Check for storage limit errors
+    if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
+      throw new Error(error.message) // Let enhanced middleware handle as standard error
     }
-    
-    return new Response(
-      error instanceof Error ? error.message : 'Internal Server Error',
-      { status: 500 }
-    )
+    throw error // Let enhanced middleware handle other errors
   }
-} 
+}, {
+  context: 'Save chat export',
+  allowedMethods: ['POST'],
+  expectedContentType: 'application/json'
+}) 

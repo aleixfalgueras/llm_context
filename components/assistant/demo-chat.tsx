@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Bot, User } from 'lucide-react'
+import { User } from 'lucide-react'
 import Image from 'next/image'
 
 const demoMessages = [

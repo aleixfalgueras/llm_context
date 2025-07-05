@@ -45,8 +45,7 @@ class ClientLogger {
   private createLogEntry(
     level: ClientLogEntry['level'],
     message: string,
-    context?: ClientLogContext,
-    error?: Error
+    context?: ClientLogContext
   ): ClientLogEntry {
     return {
       timestamp: this.formatTimestamp(),
@@ -137,7 +136,7 @@ class ClientLogger {
 
   error(message: string, error?: Error, context?: ClientLogContext): void {
     if (typeof window !== 'undefined') {
-      const entry = this.createLogEntry('ERROR', message, context, error);
+      const entry = this.createLogEntry('ERROR', message, context);
       const { message: formattedMessage, styles } = this.formatLogOutput(entry);
       console.error(formattedMessage, ...styles);
       if (error?.stack) {

@@ -4,7 +4,7 @@ import { replaceClientVariables } from '@/lib/variable-replacement'
 import { withAuthUsageAndClient } from '@/lib/client-middleware'
 import { createAICompletion } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
-import { getDefaultTemperature, getDefaultMaxTokens } from '@/lib/models-config'
+import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 import { logger } from '@/lib/logger'
 
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       documentTitle,
       additionalInstructions,
       selectedContextFields = [],
-      model: selectedModel = 'gpt-4o-mini'
+      model: selectedModel = DEFAULT_MODEL
     } = await request.json()
 
     // Validate required fields
@@ -135,7 +135,6 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
       },
       {
         userId: validUserId,
-        eventType: 'document_generation',
         resourceId: clientId,
         additionalMetadata: {
           documentType: 'custom-document',

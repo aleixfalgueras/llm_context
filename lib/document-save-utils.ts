@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
+import { validateDocumentStorage } from '@/lib/storage-utils'
 
 export interface SaveDocumentParams {
   clientId: string
@@ -31,12 +32,8 @@ export async function saveDocumentToStorage({
     throw new Error('Unauthorized')
   }
 
-  if (trackUsage) {
-    const usageCheck = await checkDocumentUsageLimit(userId)
-    if (!usageCheck.allowed) {
-      throw new Error(usageCheck.message || 'Document creation limit exceeded')
-    }
-  }
+  // Check storage limits before proceeding
+  await validateDocumentStorage(content, userId)
 
   const client = await prisma.client.findFirst({
     where: {
@@ -52,8 +49,7 @@ export async function saveDocumentToStorage({
   const finalDocumentName = documentName || generateDefaultDocumentName(
     client.name,
     documentType,
-    startDate,
-    endDate
+    startDate
   )
   
   const fileName = `${finalDocumentName}.md`
@@ -86,13 +82,13 @@ export async function saveDocumentToStorage({
   if (trackUsage) {
     try {
       const { trackUsage: trackUsageEvent } = await import('./usage-middleware')
-      await trackUsageEvent(userId, 'document_generation', document.id, {
+      await trackUsageEvent(userId, {
         documentType,
         clientId,
         documentName: finalDocumentName
       })
     } catch (error) {
-      console.error('Error tracking document creation usage:', error)
+      console.error('Error tracking usage:', error)
     }
   }
 
@@ -109,35 +105,12 @@ export async function saveDocumentToStorage({
   }
 }
 
-async function checkDocumentUsageLimit(userId: string) {
-  try {
-    const { getUsageInfo } = await import('./usage-middleware')
-    const usageInfo = await getUsageInfo(userId)
-    
-    if (!usageInfo?.documents) {
-      return { allowed: true, limit: 'unlimited' as const, used: 0 }
-    }
-    
-    return {
-      allowed: usageInfo.documents.allowed,
-      limit: usageInfo.documents.limit,
-      used: usageInfo.documents.used,
-      remaining: usageInfo.documents.remaining,
-      message: usageInfo.documents.allowed 
-        ? undefined
-        : `You've reached your document limit of ${usageInfo.documents.limit} for this month. Upgrade your plan to create more documents.`
-    }
-  } catch (error) {
-    console.error('Error checking document usage limit:', error)
-    return { allowed: true, limit: 'unlimited' as const, used: 0 }
-  }
-}
+
 
 function generateDefaultDocumentName(
   clientName: string,
   documentType: DocumentType,
-  startDate?: Date | string,
-  endDate?: Date | string
+  startDate?: Date | string
 ): string {
   switch (documentType) {
     case DOCUMENT_TYPES.MEETING:
