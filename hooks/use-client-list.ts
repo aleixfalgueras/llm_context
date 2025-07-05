@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useLocalStorage } from './use-local-storage'
 import { useToast } from '@/hooks/use-toast'
+import { deleteClient as deleteClientAction } from '@/lib/client-actions'
 import type { Client } from '@/types/client'
 import type { PaginationInfo, LanguageInfo } from '@/types/client-list-types'
 
@@ -100,21 +101,14 @@ export function useClientList({
 
   const deleteClient = useCallback(async (id: string, name: string) => {
     try {
-      const response = await fetch(`/api/clients/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete client')
-      }
+      await deleteClientAction(id)
 
       toast({
         title: 'Client Deleted',
         description: `"${name}" has been deleted successfully.`,
       })
 
-      // Refresh the page to update the client list
-      window.location.reload()
+      // The server action already handles revalidation, so we don't need to reload
     } catch (error) {
       console.error('Error deleting client:', error)
       toast({
