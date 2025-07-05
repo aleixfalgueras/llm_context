@@ -259,8 +259,8 @@ export default function PrivacySettingsPage() {
                   Have questions about your privacy or need assistance with your data rights?
                 </p>
                 <div className="space-y-2 text-sm">
-                  <p><strong>Privacy Email:</strong> privacy@aimarketingassistant.com</p>
-                  <p><strong>Data Protection Officer:</strong> dpo@aimarketingassistant.com</p>
+                  <p><strong>Privacy Email:</strong> falguerasaleix@gmail.com</p>
+                  <p><strong>Data Protection Officer:</strong> falguerasaleix@gmail.com</p>
                   <p><strong>Support:</strong> <Link href="/feedback" className="text-blue-600 dark:text-blue-400 hover:underline">Submit a request</Link></p>
                 </div>
               </CardContent>
