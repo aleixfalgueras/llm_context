@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { supabaseServer } from '@/lib/supabase'
 import { STORAGE_CONFIG } from '@/lib/config'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-import { validateDocumentStorage } from '@/lib/storage-utils'
+import { validateDocumentStorage, calculateDocumentSize } from '@/lib/storage-utils'
 
 export interface SaveDocumentParams {
   clientId: string
@@ -55,6 +55,9 @@ export async function saveDocumentToStorage({
   const fileName = `${finalDocumentName}.md`
   const filePath = `${userId}/${clientId}/${fileName}`
 
+  // Calculate file size before uploading
+  const fileSize = calculateDocumentSize(content)
+
   const { error: uploadError } = await supabaseServer.storage
     .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
     .upload(filePath, content, {
@@ -74,6 +77,7 @@ export async function saveDocumentToStorage({
       documentName: finalDocumentName,
       documentPath: filePath,
       documentType,
+      fileSize: fileSize, // Store file size in database
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
     },
@@ -90,6 +94,14 @@ export async function saveDocumentToStorage({
     } catch (error) {
       console.error('Error tracking usage:', error)
     }
+  }
+
+  // Invalidate storage cache since storage usage has changed
+  try {
+    const { invalidateStorageCache } = await import('./subscription-cache')
+    invalidateStorageCache(userId)
+  } catch (error) {
+    console.error('Error invalidating storage cache:', error)
   }
 
   return {

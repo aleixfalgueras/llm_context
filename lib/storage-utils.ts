@@ -70,48 +70,29 @@ export async function checkStorageLimit(userId: string, documentSizeBytes: numbe
  */
 export async function getCurrentStorageUsage(userId: string): Promise<StorageUsage> {
   try {
-    // Get all documents for the user
+    // Get all documents for the user with file sizes from database
     const documents = await prisma.document.findMany({
       where: { userId },
       select: {
         id: true,
         clientId: true,
-        documentPath: true
+        documentPath: true,
+        fileSize: true
       }
     })
 
     let totalBytes = 0
     const usageByClient: Record<string, number> = {}
 
-    // Calculate storage usage by fetching document content
-    // Note: In a production system, you might want to store file sizes in the database
-    // for better performance, but for now we'll calculate on demand
-    const { supabaseServer } = await import('./supabase')
-    const { STORAGE_CONFIG } = await import('./config')
-
+    // Calculate storage usage from database file sizes
     for (const doc of documents) {
-      try {
-        // Get file info from Supabase to get file size
-        const { data: fileData, error } = await supabaseServer.storage
-          .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
-          .download(doc.documentPath)
-
-        if (!error && fileData) {
-          const fileSize = fileData.size
-          totalBytes += fileSize
-          
-          if (!usageByClient[doc.clientId]) {
-            usageByClient[doc.clientId] = 0
-          }
-          usageByClient[doc.clientId] += fileSize
-        }
-      } catch (error) {
-        // Log error but continue processing other documents
-        logger.error('Error getting document size', error as Error, { 
-          userId, 
-          metadata: { documentId: doc.id }
-        })
+      const fileSize = doc.fileSize || 0
+      totalBytes += fileSize
+      
+      if (!usageByClient[doc.clientId]) {
+        usageByClient[doc.clientId] = 0
       }
+      usageByClient[doc.clientId] += fileSize
     }
 
     return {
@@ -167,6 +148,13 @@ export function formatBytes(bytes: number): string {
  */
 export async function getStorageAnalytics(userId: string) {
   try {
+    // Check cache first
+    const { getCachedStorageAnalytics, cacheStorageAnalytics } = await import('./subscription-cache')
+    const cached = getCachedStorageAnalytics(userId)
+    if (cached) {
+      return cached
+    }
+
     const [subscription, storageUsage] = await Promise.all([
       getUserSubscription(userId),
       getCurrentStorageUsage(userId)
@@ -174,7 +162,7 @@ export async function getStorageAnalytics(userId: string) {
 
     const storageLimit = getStorageLimitForPlan(subscription.plan)
     
-    return {
+    const analytics = {
       usage: storageUsage,
       limit: storageLimit,
       limitFormatted: formatBytes(storageLimit),
@@ -182,6 +170,11 @@ export async function getStorageAnalytics(userId: string) {
       usagePercentage: Math.round((storageUsage.totalBytes / storageLimit) * 100),
       remainingFormatted: formatBytes(Math.max(0, storageLimit - storageUsage.totalBytes))
     }
+
+    // Cache the result
+    cacheStorageAnalytics(userId, analytics)
+    
+    return analytics
   } catch (error) {
     logger.error('Error getting storage analytics', error as Error, { userId })
     throw error
