@@ -309,7 +309,7 @@ export default function PrivacyPolicyPage() {
                   If you have any questions about this Privacy Policy or our data practices, please contact us:
                 </p>
                 <div className="space-y-2 text-sm">
-                  <p><strong>Email:</strong> privacy@aimarketingassistant.com</p>
+                  <p><strong>Email:</strong> falguerasaleix@gmail.com</p>
                   <p><strong>Support:</strong> <Link href="/feedback" className="text-blue-600 dark:text-blue-400 hover:underline">Provide feedback</Link></p>
                 </div>
               </CardContent>
