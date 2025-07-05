@@ -1,0 +1,258 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useToast } from '@/hooks/use-toast'
+import { getSamplePromptsByCategory } from '@/lib/sample-prompts'
+import { 
+  Prompt, 
+  PromptStats, 
+  PromptFilters, 
+  FilterActionHandlers 
+} from '@/types/prompt-management-types'
+
+interface UsePromptManagementReturn {
+  // State
+  prompts: Prompt[]
+  filteredAndSortedPrompts: Prompt[]
+  filters: PromptFilters
+  stats: PromptStats
+  loading: boolean
+  
+  // Dialog states
+  showLimitDialog: boolean
+  showPromptDialog: boolean
+  limitMessage: string
+  
+  // Actions
+  fetchPrompts: () => Promise<void>
+  deletePrompt: (id: string) => Promise<void>
+  togglePromptStatus: (prompt: Prompt) => Promise<void>
+  handleNewPrompt: () => Promise<void>
+  clearFilters: () => void
+  setShowPromptDialog: (show: boolean) => void
+  setShowLimitDialog: (show: boolean) => void
+  
+  // Filter handlers
+  filterActionHandlers: FilterActionHandlers
+  filteredSamplePrompts: any[]
+}
+
+export function usePromptManagement(): UsePromptManagementReturn {
+  const [prompts, setPrompts] = useState<Prompt[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState<PromptFilters>({
+    searchTerm: '',
+    selectedCategory: 'all',
+    sortBy: 'usage',
+    showInactive: false,
+    showTemplates: true
+  })
+  const [showLimitDialog, setShowLimitDialog] = useState(false)
+  const [limitMessage, setLimitMessage] = useState('')
+  const [showPromptDialog, setShowPromptDialog] = useState(false)
+  const { toast } = useToast()
+
+  const fetchPrompts = async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filters.selectedCategory !== 'all') {
+        params.append('category', filters.selectedCategory)
+      }
+      if (!filters.showInactive) {
+        params.append('active', 'true')
+      }
+      params.append('includeContent', 'true')
+
+      const response = await fetch(`/api/prompts?${params.toString()}`)
+      if (response.ok) {
+        const data = await response.json()
+        setPrompts(data.data.prompts || [])
+      }
+    } catch (error) {
+      console.error('Error fetching prompts:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to load prompts.',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load showTemplates preference from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('showTemplates')
+    if (saved !== null) {
+      setFilters(prev => ({ ...prev, showTemplates: JSON.parse(saved) }))
+    }
+  }, [])
+
+  // Fetch prompts on mount and when filters change
+  useEffect(() => {
+    fetchPrompts()
+  }, [filters.selectedCategory, filters.showInactive])
+
+  const filteredAndSortedPrompts = (Array.isArray(prompts) ? prompts : [])
+    .filter((prompt) => {
+      return (
+        prompt.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        prompt.description?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        prompt.content.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      )
+    })
+    .sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'usage':
+          return b.usageCount - a.usageCount
+        case 'recent':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'created':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        default:
+          return 0
+      }
+    })
+
+  const deletePrompt = async (promptId: string) => {
+    try {
+      const response = await fetch(`/api/prompts/${promptId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        toast({
+          title: 'Prompt deleted',
+          description: 'Prompt has been deleted successfully.',
+        })
+        fetchPrompts()
+      } else {
+        throw new Error('Failed to delete prompt')
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete prompt.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const togglePromptStatus = async (prompt: Prompt) => {
+    try {
+      const response = await fetch(`/api/prompts/${prompt.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...prompt,
+          isActive: !prompt.isActive,
+        }),
+      })
+
+      if (response.ok) {
+        toast({
+          title: prompt.isActive ? 'Prompt disabled' : 'Prompt enabled',
+          description: `"${prompt.name}" has been ${prompt.isActive ? 'disabled' : 'enabled'}.`,
+        })
+        fetchPrompts()
+      } else {
+        throw new Error('Failed to update prompt')
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update prompt status.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const toggleTemplates = () => {
+    const newValue = !filters.showTemplates
+    setFilters(prev => ({ ...prev, showTemplates: newValue }))
+    localStorage.setItem('showTemplates', JSON.stringify(newValue))
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      searchTerm: '',
+      selectedCategory: 'all',
+      sortBy: 'usage',
+      showInactive: false,
+      showTemplates: filters.showTemplates
+    })
+  }
+
+  const handleNewPrompt = async () => {
+    // Check usage limits only when user tries to create a prompt
+    try {
+      const response = await fetch('/api/subscription/usage-info')
+      if (response.ok) {
+        const usageInfo = await response.json()
+        
+        // Check prompt limits
+        if (usageInfo.promptsUsed >= usageInfo.promptsLimit) {
+          setLimitMessage(
+            `You've reached your prompt limit (${usageInfo.promptsLimit}). ` +
+            `Please upgrade your plan or delete some existing prompts to create new ones.`
+          )
+          setShowLimitDialog(true)
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Error checking usage limits:', error)
+    }
+
+    setShowPromptDialog(true)
+  }
+
+  // Prepare data for child components
+  const stats: PromptStats = {
+    total: prompts.length,
+    active: prompts.filter(p => p.isActive).length,
+    mostUsed: prompts.reduce((max, p) => p.usageCount > (max?.usageCount || 0) ? p : max, prompts[0] || null),
+  }
+
+  const filterActionHandlers: FilterActionHandlers = {
+    onSearchChange: (search) => setFilters(prev => ({ ...prev, searchTerm: search })),
+    onCategoryChange: (category) => setFilters(prev => ({ ...prev, selectedCategory: category })),
+    onSortChange: (sort) => setFilters(prev => ({ ...prev, sortBy: sort })),
+    onToggleInactive: () => setFilters(prev => ({ ...prev, showInactive: !prev.showInactive })),
+    onToggleTemplates: toggleTemplates
+  }
+
+  const filteredSamplePrompts = getSamplePromptsByCategory(filters.selectedCategory)
+
+  return {
+    // State
+    prompts,
+    filteredAndSortedPrompts,
+    filters,
+    stats,
+    loading,
+    
+    // Dialog states
+    showLimitDialog,
+    showPromptDialog,
+    limitMessage,
+    
+    // Actions
+    fetchPrompts,
+    deletePrompt,
+    togglePromptStatus,
+    handleNewPrompt,
+    clearFilters,
+    setShowPromptDialog,
+    setShowLimitDialog,
+    
+    // Filter handlers
+    filterActionHandlers,
+    filteredSamplePrompts,
+  }
+}

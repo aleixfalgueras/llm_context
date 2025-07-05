@@ -16,6 +16,8 @@ Each AI service defines its own explicit prompt within its route file, while cli
 
 ## 🏗️ Technical Implementation
 
+The prompt architecture leverages the modular structure with clean separation between AI services, client context handling, and the dual-model system (Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano).
+
 ### **Client Context Utilities** (`lib/client-context-utils.ts`)
 
 #### `buildClientContextSection(client, selectedFields)`
@@ -109,6 +111,7 @@ export function hasClientContext(selectedFields: string[] = []): boolean {
 ### **1. Chat Assistant** (`app/api/chat/route.ts`)
 
 ```typescript
+// Uses the modular AI wrapper (lib/ai-wrapper.ts) with OpenRouter integration
 // Build chat system prompt with user-selected client context
 const selectedContextFields = (chat as any).contextFields || []
 const clientContextSection = buildClientContextSection(client, selectedContextFields)
@@ -136,6 +139,7 @@ Respond naturally and conversationally while keeping this context in mind.`
 ### **2. Custom Document Generator** (`app/api/ai-services/generate-custom-document/route.ts`)
 
 ```typescript
+// Uses the modular OpenRouter service (lib/openrouter/service.ts) with usage tracking
 // Build client context section if fields are selected - RESPECTS user privacy choices
 const clientContextSection = buildClientContextSection(validClient, selectedContextFields)
 
@@ -156,6 +160,7 @@ if (clientContextSection) {
 ### **3. Meeting Report Generator** (`app/api/ai-services/generate-meeting-report/route.ts`)
 
 ```typescript
+// Uses the unified AI wrapper (lib/ai-wrapper.ts) with automatic usage tracking
 // Build the meeting report prompt (always in English)
 const meetingReportPrompt = `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
 
@@ -182,7 +187,7 @@ INSTRUCTIONS:
 - Base recommendations solely on what was discussed in the meeting${additionalInfo ? `
 - Pay special attention to the additional context provided above` : ''}
 - Provide the response in markdown format for easy reading
-- DO NOT include any disclaimers or OpenAI-related content
+- DO NOT include any disclaimers or AI provider-related content
 - Provide ONLY the meeting report content in a delivery-ready format
 - Make the action items specific, measurable, and achievable
 - Focus on practical next steps that can be implemented immediately

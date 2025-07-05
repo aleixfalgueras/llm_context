@@ -7,18 +7,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Search, Edit, Trash2, Download, Calendar, TrashIcon, Plus } from 'lucide-react'
-import { DOCUMENT_TYPES, ALL_DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-  documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { ALL_DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
+import { Document } from '@/types/component-types'
 
 interface DocumentListProps {
   documents: Document[]
@@ -50,7 +40,7 @@ export function DocumentList({
   const [searchTerm, setSearchTerm] = useState('')
   const [documentTypeFilter, setDocumentTypeFilter] = useState('')
 
-  const filteredDocuments = documents.filter((doc) => {
+  const filteredDocuments = (documents || []).filter((doc) => {
     const matchesSearch = searchTerm === '' || 
       doc.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.documentType.toLowerCase().includes(searchTerm.toLowerCase())

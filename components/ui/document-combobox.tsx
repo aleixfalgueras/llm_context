@@ -18,15 +18,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-
-interface Document {
-  id: string
-  documentName: string
-  documentType: string
-}
+import { DocumentBasic } from "@/types/component-types"
 
 interface DocumentComboboxProps {
-  documents: Document[]
+  documents: DocumentBasic[]
   value?: string
   onValueChange?: (value: string) => void
   placeholder?: string

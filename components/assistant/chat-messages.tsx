@@ -3,16 +3,9 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User, Loader2 } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, memo, useMemo } from 'react'
 import { MarkdownRenderer } from '@/components/global/markdown-renderer'
-
-interface Message {
-  id: string
-  content: string
-  role: 'USER' | 'ASSISTANT'
-  createdAt: Date
-  isStreaming?: boolean
-}
+import { Message } from '@/types/message-types'
 
 interface ChatMessagesProps {
   messages: Message[]
@@ -20,15 +13,15 @@ interface ChatMessagesProps {
   userName?: string
 }
 
-export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesProps) {
+function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isInitialLoad = useRef(true)
 
-  const scrollToBottom = (smooth = true) => {
+  const scrollToBottom = useMemo(() => (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ 
       behavior: smooth ? 'smooth' : 'instant' 
     })
-  }
+  }, [])
 
   useEffect(() => {
     if (isInitialLoad.current) {
@@ -109,4 +102,6 @@ export function ChatMessages({ messages, userImageUrl, userName }: ChatMessagesP
       </div>
     </ScrollArea>
   )
-} 
+}
+
+export const ChatMessages = memo(ChatMessagesComponent) 

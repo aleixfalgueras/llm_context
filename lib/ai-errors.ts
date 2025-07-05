@@ -4,7 +4,7 @@
  */
 export class AIProviderError extends Error {
   public readonly provider: string
-  public readonly type: 'timeout' | 'rate_limit' | 'service_unavailable' | 'authentication' | 'quota_exceeded' | 'unknown'
+  public readonly type: 'timeout' | 'rate_limit' | 'service_unavailable' | 'authentication' | 'quota_exceeded' | 'insufficient_credits' | 'invalid_model' | 'unknown'
   public readonly statusCode?: number
   public readonly retryAfter?: number
 
@@ -28,7 +28,8 @@ export class AIProviderError extends Error {
  * Utility function to create user-friendly error messages for different AI provider errors
  */
 export function getAIErrorMessage(error: AIProviderError): { title: string; description: string } {
-  const providerName = error.provider === 'openai' ? 'OpenAI' : 'Anthropic'
+  const providerName = error.provider === 'openai' ? 'OpenAI' : 
+                      'OpenRouter'
   
   switch (error.type) {
     case 'timeout':
@@ -55,6 +56,16 @@ export function getAIErrorMessage(error: AIProviderError): { title: string; desc
       return {
         title: `${providerName} Quota Exceeded`,
         description: `The ${providerName} usage quota has been exceeded. Please try again later or contact support.`
+      }
+    case 'insufficient_credits':
+      return {
+        title: `${providerName} Insufficient Credits`,
+        description: `Your ${providerName} account has insufficient credits. Please add more credits to continue using AI services.`
+      }
+    case 'invalid_model':
+      return {
+        title: `${providerName} Invalid Model`,
+        description: `The specified AI model is not available or invalid. Please try selecting a different model.`
       }
     default:
       return {

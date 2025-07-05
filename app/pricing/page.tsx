@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckIcon, StarIcon, CrownIcon, ZapIcon } from 'lucide-react'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
+import { SubscriptionPlan } from '@/types/subscription-types'
 
 
 
 export default function PricingPage() {
-  const { user } = useUser()
+  const { user: _user } = useUser()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
 
   const handleUpgrade = async (planId: string) => {
@@ -39,16 +40,16 @@ export default function PricingPage() {
 
   const getPlanIcon = (planId: string) => {
     switch (planId) {
-      case 'basic': return <ZapIcon className="h-6 w-6" />
-      case 'pro': return <StarIcon className="h-6 w-6" />
-      case 'business': return <CrownIcon className="h-6 w-6" />
+      case SubscriptionPlan.BASIC: return <ZapIcon className="h-6 w-6" />
+      case SubscriptionPlan.PRO: return <StarIcon className="h-6 w-6" />
+      case SubscriptionPlan.BUSINESS: return <CrownIcon className="h-6 w-6" />
       default: return <ZapIcon className="h-6 w-6" />
     }
   }
 
   const getPlanBadge = (planId: string) => {
-    if (planId === 'pro') return <Badge className="bg-blue-500">Most Popular</Badge>
-    if (planId === 'business') return <Badge className="bg-purple-500">Enterprise</Badge>
+    if (planId === SubscriptionPlan.PRO) return <Badge className="bg-blue-500">Most Popular</Badge>
+    if (planId === SubscriptionPlan.BUSINESS) return <Badge className="bg-purple-500">Enterprise</Badge>
     return null
   }
 
@@ -63,7 +64,7 @@ export default function PricingPage() {
             Choose Your Plan
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Scale your marketing efforts with AI-powered assistance. Start with our Basic plan (first month free), upgrade when you need more.
+            Scale your marketing efforts with Google Gemini 2.0 Flash AI assistance. Start with our Basic plan (first month free), upgrade when you need more.
           </p>
         </div>
 
@@ -74,7 +75,7 @@ export default function PricingPage() {
           {Object.entries(SUBSCRIPTION_PLANS).map(([planId, plan]) => (
             <Card 
               key={planId} 
-              className={`relative ${planId === 'pro' ? 'border-blue-500 shadow-lg scale-105' : ''}`}
+              className={`relative ${planId === SubscriptionPlan.PRO ? 'border-blue-500 shadow-lg scale-105' : ''}`}
             >
               <CardHeader className="text-center">
                 {getPlanBadge(planId)}
@@ -84,7 +85,7 @@ export default function PricingPage() {
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <CardDescription className="text-sm">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">€{plan.price}</span>
+                  <span className="text-4xl font-bold">${plan.price}</span>
                   {plan.price > 0 && <span className="text-gray-500">/month</span>}
                 </div>
               </CardHeader>
@@ -103,7 +104,7 @@ export default function PricingPage() {
                   onClick={() => handleUpgrade(plan.id)}
                   disabled={upgradeLoading === plan.id}
                   className="w-full"
-                  variant={plan.id === 'pro' ? 'default' : 'outline'}
+                  variant={plan.id === SubscriptionPlan.PRO ? 'default' : 'outline'}
                 >
                   {upgradeLoading === plan.id ? (
                     <div className="flex items-center gap-2">
@@ -111,7 +112,7 @@ export default function PricingPage() {
                       Processing...
                     </div>
                   ) : (
-                    planId === 'basic' ? 'First Month Free 🚀' : 'Upgrade Now')}
+                    planId === SubscriptionPlan.BASIC ? 'First Month Free 🚀' : 'Upgrade Now')}
                 </Button>
               </CardContent>
             </Card>
@@ -152,24 +153,6 @@ export default function PricingPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-2">How do token limits and AI model choices affect my usage?</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-3">
-                  Each plan includes token limits that prevent usage once reached. Depending on which AI model you choose, 
-                  you may hit these limits at different rates:
-                </p>
-                <ul className="text-gray-600 dark:text-gray-400 space-y-2 text-sm">
-                  <li><strong>• Efficient models</strong> (like GPT-4o-mini, Claude Haiku): Let you maximize content creation within your token allowance.</li>
-                  <li><strong>• Premium models</strong> (like GPT-4o, Claude Opus): May reach token limits sooner due to higher processing costs, but deliver superior quality.</li>
-                  <li><strong>• Token counting</strong>: All models count tokens equally (~750 words per 1,000 tokens), ensuring fair usage regardless of model choice.</li>
-                </ul>
-                <p className="text-gray-600 dark:text-gray-400 mt-3">
-                  Choose efficient models for routine content and premium models when you need the highest quality output. 
-                  This flexibility helps you optimize your monthly token allowance based on your specific needs.
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

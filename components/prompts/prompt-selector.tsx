@@ -6,19 +6,9 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { FileText, Search, Star, TrendingUp, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-  isActive: boolean
-  usageCount: number
-}
+import { Prompt } from '@/types/component-types'
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void
@@ -38,7 +28,9 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
       const response = await fetch('/api/prompts?active=true&includeContent=true')
       if (response.ok) {
         const data = await response.json()
-        setPrompts(data)
+        // Handle API response structure - API returns { data: { prompts: [...] } }
+        const promptsData = data.data?.prompts || data.prompts || []
+        setPrompts(Array.isArray(promptsData) ? promptsData : [])
       }
     } catch (error) {
       console.error('Error fetching prompts:', error)
@@ -53,7 +45,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
     }
   }, [open])
 
-  const filteredPrompts = prompts.filter((prompt) => {
+  const filteredPrompts = (prompts || []).filter((prompt) => {
     const matchesSearch = prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          prompt.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          prompt.content.toLowerCase().includes(searchTerm.toLowerCase())
@@ -61,9 +53,9 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
     return matchesSearch && matchesCategory
   })
 
-  const categories = Array.from(new Set(prompts.map(p => p.category)))
-  const popularPrompts = prompts.filter(p => p.usageCount > 0).slice(0, 3)
-  const recentPrompts = prompts.slice(0, 3)
+  const categories = Array.from(new Set((prompts || []).map(p => p.category)))
+  const popularPrompts = (prompts || []).filter(p => p.usageCount > 0).slice(0, 3)
+  const recentPrompts = (prompts || []).slice(0, 3)
 
   const handlePromptSelect = async (prompt: Prompt) => {
     try {

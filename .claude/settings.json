@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npx next lint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(npx ts-unused-exports:*)",
+      "Bash(npx ts-prune:*)",
+      "Bash(npx unimport:*)",
+      "Bash(timeout 300 npm run build)",
+      "WebFetch(domain:openrouter.ai)",
+      "WebFetch(domain:ui.shadcn.com)"
+    ],
+    "deny": [],
+    "defaultMode": "allowEdits"
+  }
+}

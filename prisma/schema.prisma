@@ -35,6 +35,9 @@ model Message {
   content   String
   role      Role
   model     String?  // AI model used for this message (e.g., 'gpt-4o', 'gpt-4o-mini', 'claude-3-5-haiku')
+  tokensUsed Int     @default(0) // Number of tokens consumed for this message (total)
+  inputTokens Int    @default(0) // Number of input tokens for this message
+  outputTokens Int   @default(0) // Number of output tokens for this message
   chatId    String
   createdAt DateTime @default(now())
 
@@ -115,14 +118,28 @@ model Prompt {
   @@map("prompts")
 }
 
+// Enums for better type safety
+enum SubscriptionPlan {
+  basic
+  pro
+  business
+}
+
+enum SubscriptionStatus {
+  active
+  canceled
+  past_due
+  incomplete
+}
+
 // NEW: User Subscription Management
 model UserSubscription {
   id              String   @id @default(cuid())
   userId          String   @unique // The user's ID from Clerk
   
   // Subscription Details
-  plan            String   @default("basic") // "basic", "pro", "business"
-  status          String   @default("active") // "active", "canceled", "past_due", "incomplete"
+  plan            SubscriptionPlan   @default(basic)
+  status          SubscriptionStatus @default(active)
   
   // Billing Information
   stripeCustomerId     String?  // Stripe customer ID
@@ -131,9 +148,7 @@ model UserSubscription {
   
   // Plan Limits
   maxClients              Int @default(3)     // Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
-  maxDocumentsPerMonth    Int @default(20)    // Basic: 20, Pro: 200, Business: unlimited (-1)
-  maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: unlimited (-1)
-  maxCostPerMonth         Float @default(2.00) // Basic: $2, Pro: $25, Business: unlimited (-1)
+  maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: 4M
   
   // Billing Cycle
   currentPeriodStart DateTime @default(now())
@@ -156,11 +171,7 @@ model UserUsage {
   year     Int
   month    Int
   
-  // Usage Counters
-  documentsGenerated Int @default(0) // Total documents generated this month
-  
-  // Cost Tracking
-  estimatedCost     Float @default(0.0) // Estimated AI costs this month
+  // Token Tracking (primary limit with OpenRouter)
   tokensUsed        Int   @default(0)   // Total tokens consumed this month
   
   // Timestamps

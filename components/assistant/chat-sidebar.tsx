@@ -10,12 +10,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
-
-interface Chat {
-  id: string
-  title: string
-  updatedAt: Date
-}
+import { Chat } from '@/types/component-types'
 
 interface ChatSidebarProps {
   chats: Chat[]

@@ -6,7 +6,7 @@ interface RouteParams {
 }
 
 // POST /api/prompts/[id]/use - Track prompt usage
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(_request: Request, { params }: RouteParams) {
   try {
     const { userId } = await auth()
     

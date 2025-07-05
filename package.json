@@ -12,7 +12,6 @@
     "vercel-build": "npx prisma migrate deploy && npx prisma generate && next build"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.55.0",
     "@clerk/nextjs": "^6.22.0",
     "@prisma/client": "^6.9.0",
     "@radix-ui/react-avatar": "^1.1.10",
