@@ -177,14 +177,22 @@ export async function getUsageInfo(userId: string) {
     };
 
     return {
-      subscription: {
-        plan: subscription.plan,
-        maxTokensPerMonth: subscription.maxTokensPerMonth,
-        maxClients: subscription.maxClients
-      },
-      clients: clientUsage,
-      tokens: tokenUsage,
-      storage: storageUsage,
+      // Plan info
+      plan: subscription.plan,
+      tier: subscription.tier || 'basic',
+      
+      // Client limits (flat structure for frontend compatibility)
+      clientsUsed: clientUsage.used,
+      clientsLimit: clientUsage.limit === 'unlimited' ? -1 : clientUsage.limit,
+      
+      // Token limits (flat structure for frontend compatibility)
+      tokensUsed: tokenUsage.used,
+      tokensLimit: tokenUsage.limit === 'unlimited' ? -1 : tokenUsage.limit,
+      
+      // Storage limits (flat structure for frontend compatibility)
+      storageUsed: Math.round(storageUsage.used / (1024 * 1024)), // Convert to MB
+      storageLimit: Math.round(storageUsage.limit / (1024 * 1024)), // Convert to MB
+      
     }
   } catch (error) {
     console.error('Error getting usage info:', error)

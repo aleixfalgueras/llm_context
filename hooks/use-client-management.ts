@@ -32,14 +32,17 @@ export function useClientManagement(): UseClientManagementReturn {
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [showLimitDialog, setShowLimitDialog] = useState(false)
-  const [limitMessage] = useState('')
+  const [limitMessage, setLimitMessage] = useState('')
   
   const { checkClientLimit } = useUsageLimits()
 
   const handleAddClient = useCallback(async () => {
     // Check usage limits only when user tries to add a client
-    const canAdd = await checkClientLimit()
-    if (!canAdd) {
+    const limitCheck = await checkClientLimit()
+    if (!limitCheck.canAdd) {
+      // Show limit dialog instead of toast
+      setLimitMessage(limitCheck.message)
+      setShowLimitDialog(true)
       return
     }
     
@@ -59,7 +62,8 @@ export function useClientManagement(): UseClientManagementReturn {
   }, [])
 
   const checkUsageLimits = useCallback(async (): Promise<boolean> => {
-    return await checkClientLimit()
+    const limitCheck = await checkClientLimit()
+    return limitCheck.canAdd
   }, [checkClientLimit])
 
   const refreshClients = useCallback(() => {

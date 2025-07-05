@@ -189,26 +189,6 @@ export function usePromptManagement(): UsePromptManagementReturn {
   }
 
   const handleNewPrompt = async () => {
-    // Check usage limits only when user tries to create a prompt
-    try {
-      const response = await fetch('/api/subscription/usage-info')
-      if (response.ok) {
-        const usageInfo = await response.json()
-        
-        // Check prompt limits
-        if (usageInfo.promptsUsed >= usageInfo.promptsLimit) {
-          setLimitMessage(
-            `You've reached your prompt limit (${usageInfo.promptsLimit}). ` +
-            `Please upgrade your plan or delete some existing prompts to create new ones.`
-          )
-          setShowLimitDialog(true)
-          return
-        }
-      }
-    } catch (error) {
-      console.error('Error checking usage limits:', error)
-    }
-
     setShowPromptDialog(true)
   }
 
