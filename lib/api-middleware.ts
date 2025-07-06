@@ -166,7 +166,7 @@ export function withEnhancedApi<T = any>(
 
   return async (
     req: NextRequest,
-    { params }: { params?: Record<string, string | string[]> } = {}
+    { params }: { params?: Promise<Record<string, string | string[]>> } = {}
   ): Promise<NextResponse> => {
     try {
       // Method validation
@@ -206,10 +206,12 @@ export function withEnhancedApi<T = any>(
       }
 
       // Create context and call handler
+      const resolvedParams = params ? await params : undefined
+      
       const apiContext: ApiContext = {
         userId,
         req,
-        params
+        params: resolvedParams
       }
 
       return await handler(apiContext)

@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/documents/service'
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // GET /api/documents/[id] - Get document metadata
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const documentId = params.id
+    const { id } = await params
 
     // This would need to be implemented in DocumentService
     // For now, we'll return a not implemented response
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/documents/[id] - Update document
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const documentId = params.id
+    const { id } = await params
     const updates = await request.json()
 
     if (!updates || Object.keys(updates).length === 0) {
@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const result = await DocumentService.updateDocument(documentId, updates)
+    const result = await DocumentService.updateDocument(id, updates)
     return NextResponse.json(result)
   } catch (error) {
     console.error('Failed to update document:', error)
@@ -52,9 +52,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/documents/[id] - Delete document
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const documentId = params.id
+    const { id } = await params
 
-    const result = await DocumentService.deleteDocument(documentId)
+    const result = await DocumentService.deleteDocument(id)
     return NextResponse.json(result)
   } catch (error) {
     console.error('Failed to delete document:', error)
