@@ -17,6 +17,7 @@ export interface FeedbackItem {
   userName: string | null
   description: string
   createdAt: Date
+  isUpdating?: boolean // For loading states during status updates
 }
 
 // =============================================================================
@@ -59,6 +60,32 @@ export interface FeedbackFilterHandlers {
   onTypeChange: (type: string) => void
   onPriorityChange: (priority: string) => void
   onStateChange: (state: string) => void
+}
+
+// =============================================================================
+// STATUS UPDATE TYPES
+// =============================================================================
+
+export interface FeedbackStatusUpdate {
+  feedbackId: string
+  newState: string
+}
+
+export interface StatusUpdateHandlers {
+  onStatusChange: (feedbackId: string, newState: string) => Promise<void>
+}
+
+export interface StatusUpdateResponse {
+  feedback: {
+    id: string
+    state: string
+    title: string
+    type: string
+    priority: string
+    userEmail: string | null
+    userName: string | null
+  }
+  message: string
 }
 
 // =============================================================================
