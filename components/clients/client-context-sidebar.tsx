@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, GripVertical, ChevronDown, Plus } from 'lucide-react'
+import { User, GripVertical, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { ClientCombobox } from '@/components/ui/client-combobox'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
 import { createChatAndReturn } from '@/lib/actions'
@@ -143,42 +143,18 @@ export function ClientContextSidebar({
           {!hasActiveChat ? (
             // Show client selector and context when no active chat (Assistant page)  
             <div className="space-y-4">
-              {/* Client Selector Dropdown */}
+              {/* Client Selector */}
               {clients.length > 0 && onClientSelect && (
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Select Client</Label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full justify-between">
-                        <div className="flex items-center">
-                          <User className="w-4 h-4 mr-2" />
-                          <span className="truncate">
-                            {selectedClient ? selectedClient.name : 'Choose a client...'}
-                          </span>
-                        </div>
-                        <ChevronDown className="w-4 h-4 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-full" align="start">
-                      <DropdownMenuLabel>Select Client</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {clients.map((client) => (
-                        <DropdownMenuItem
-                          key={client.id}
-                          onClick={() => onClientSelect(client.id)}
-                          className={selectedClient?.id === client.id ? 'bg-blue-50 dark:bg-blue-950/20' : ''}
-                        >
-                          <User className="w-4 h-4 mr-2" />
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium truncate">{client.name}</div>
-                            {client.email && (
-                              <div className="text-xs text-muted-foreground truncate">{client.email}</div>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <ClientCombobox
+                    clients={clients}
+                    value={selectedClientId || ''}
+                    onValueChange={(value) => onClientSelect(value || null)}
+                    placeholder="Choose a client..."
+                    searchPlaceholder="Search clients..."
+                    emptyMessage="No clients found."
+                  />
                 </div>
               )}
 
@@ -306,39 +282,17 @@ export function ClientContextSidebar({
           ) : hasActiveChat && selectedClient ? (
             // Show selected client information when chat has started
             <div className="space-y-4">
-              {/* Client Selector Dropdown */}
+              {/* Client Selector */}
               {clients.length > 0 && onClientSelect && (
                 <div className="mb-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full justify-between">
-                        <div className="flex items-center">
-                          <User className="w-4 h-4 mr-2" />
-                          <span className="truncate">{selectedClient.name}</span>
-                        </div>
-                        <ChevronDown className="w-4 h-4 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-full" align="start">
-                      <DropdownMenuLabel>Switch Client</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {clients.map((client) => (
-                        <DropdownMenuItem
-                          key={client.id}
-                          onClick={() => onClientSelect(client.id)}
-                          className={selectedClient.id === client.id ? 'bg-blue-50 dark:bg-blue-950/20' : ''}
-                        >
-                          <User className="w-4 h-4 mr-2" />
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium truncate">{client.name}</div>
-                            {client.email && (
-                              <div className="text-xs text-muted-foreground truncate">{client.email}</div>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <ClientCombobox
+                    clients={clients}
+                    value={selectedClientId || ''}
+                    onValueChange={(value) => onClientSelect(value || null)}
+                    placeholder="Switch client..."
+                    searchPlaceholder="Search clients..."
+                    emptyMessage="No clients found."
+                  />
                 </div>
               )}
 
