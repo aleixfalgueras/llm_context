@@ -12,12 +12,13 @@ export class DocumentStorageService {
    */
   static async storeDocument(
     userId: string,
+    clientId: string,
     fileName: string,
     content: string,
     mimeType: string = 'text/plain'
   ): Promise<{ path: string; url?: string }> {
     try {
-      const filePath = `${userId}/${fileName}`
+      const filePath = `${userId}/${clientId}/${fileName}`
       const contentBuffer = Buffer.from(content, 'utf-8')
 
       const { data, error } = await supabaseServer.storage
@@ -82,13 +83,41 @@ export class DocumentStorageService {
    */
   static async deleteDocument(documentPath: string): Promise<void> {
     try {
+      // Try to delete the document at the given path
       const { error } = await supabaseServer.storage
         .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
         .remove([documentPath])
 
       if (error) {
+        // If the error is "file not found", it might be using the old path format
+        if (error.message.includes('not found') || error.message.includes('does not exist')) {
+          logger.info(`Document not found at ${documentPath}, checking for old path format`)
+          
+          // Try to construct and delete from old path format (userId/fileName)
+          const pathParts = documentPath.split('/')
+          if (pathParts.length >= 3) {
+            const userId = pathParts[0]
+            const fileName = pathParts[pathParts.length - 1] // Last part is the filename
+            const oldPath = `${userId}/${fileName}`
+            
+            logger.info(`Trying to delete from old path format: ${oldPath}`)
+            const { error: oldPathError } = await supabaseServer.storage
+              .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+              .remove([oldPath])
+            
+            if (oldPathError) {
+              throw new Error(`Storage deletion failed for both new and old path formats: ${error.message}`)
+            }
+            
+            logger.info(`Successfully deleted document from old path format: ${oldPath}`)
+            return
+          }
+        }
+        
         throw new Error(`Storage deletion failed: ${error.message}`)
       }
+      
+      logger.info(`Successfully deleted document from storage: ${documentPath}`)
     } catch (error) {
       logger.error('Document deletion error', error instanceof Error ? error : new Error(String(error)))
       throw new Error(`Failed to delete document: ${error instanceof Error ? error.message : 'Unknown error'}`)
