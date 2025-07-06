@@ -20,6 +20,7 @@ interface UseDocumentGeneratorReturn {
   selectedClient: string
   documentTitle: string
   selectedPrompt: string
+  selectedPromptContent: string
   customPrompt: string
   clientContext: ClientContextSelection
   prompts: Prompt[]
@@ -37,6 +38,7 @@ interface UseDocumentGeneratorReturn {
   setSelectedClient: (id: string) => void
   setDocumentTitle: (title: string) => void
   handlePromptChange: (promptId: string) => void
+  setSelectedPromptContent: (content: string) => void
   setClientContext: (context: ClientContextSelection) => void
   setCustomPrompt: (prompt: string) => void
   setUseCustomPrompt: (use: boolean) => void
@@ -56,6 +58,7 @@ export function useDocumentGenerator({
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [documentTitle, setDocumentTitle] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<string>('')
+  const [selectedPromptContent, setSelectedPromptContent] = useState('')
   const [customPrompt, setCustomPrompt] = useState('')
   const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
   const [prompts, setPrompts] = useState<Prompt[]>([])
@@ -106,12 +109,12 @@ export function useDocumentGenerator({
     setSelectedPrompt(promptId)
     const prompt = prompts.find(p => p.id === promptId)
     if (prompt) {
-      setCustomPrompt(prompt.content)
+      setSelectedPromptContent(prompt.content)
     }
   }
 
   const generateDocument = async () => {
-    const finalPrompt = useCustomPrompt ? customPrompt : prompts.find(p => p.id === selectedPrompt)?.content || ''
+    const finalPrompt = useCustomPrompt ? customPrompt : selectedPromptContent || ''
     
     if (!selectedClient || !documentTitle || !finalPrompt.trim()) {
       toast({
@@ -138,10 +141,7 @@ export function useDocumentGenerator({
         body: JSON.stringify({
           clientId: selectedClient,
           documentTitle: documentTitle,
-          ...(useCustomPrompt 
-            ? { customPrompt: finalPrompt }
-            : { promptId: selectedPrompt }
-          ),
+          customPrompt: finalPrompt,
           selectedContextFields: Object.entries(clientContext)
             .filter(([, value]) => value)
             .map(([key]) => key),
@@ -201,6 +201,7 @@ export function useDocumentGenerator({
     setSelectedClient('')
     setDocumentTitle('')
     setSelectedPrompt('')
+    setSelectedPromptContent('')
     setCustomPrompt('')
     setClientContext(defaultClientContextSelections.general)
     setGeneratedContent('')
@@ -234,6 +235,7 @@ export function useDocumentGenerator({
     selectedClient,
     documentTitle,
     selectedPrompt,
+    selectedPromptContent,
     customPrompt,
     clientContext,
     prompts,
@@ -251,6 +253,7 @@ export function useDocumentGenerator({
     setSelectedClient,
     setDocumentTitle,
     handlePromptChange,
+    setSelectedPromptContent,
     setClientContext,
     setCustomPrompt,
     setUseCustomPrompt,

@@ -25,6 +25,7 @@ interface CustomDocumentFormData {
   clientId: string
   documentTitle: string
   selectedPrompt: string
+  selectedPromptContent: string
   customPrompt: string
   useCustomPrompt: boolean
   clientContext: ClientContextSelection
@@ -41,6 +42,7 @@ export function CustomDocumentGeneratorDialog({
     selectedClient,
     documentTitle,
     selectedPrompt,
+    selectedPromptContent,
     customPrompt,
     clientContext,
     prompts,
@@ -57,6 +59,7 @@ export function CustomDocumentGeneratorDialog({
     setSelectedClient,
     setDocumentTitle,
     handlePromptChange,
+    setSelectedPromptContent,
     setClientContext,
     setCustomPrompt,
     setUseCustomPrompt,
@@ -76,6 +79,7 @@ export function CustomDocumentGeneratorDialog({
     clientId: selectedClient,
     documentTitle: documentTitle,
     selectedPrompt: selectedPrompt,
+    selectedPromptContent: selectedPromptContent,
     customPrompt: customPrompt,
     useCustomPrompt: useCustomPrompt,
     clientContext: clientContext
@@ -97,6 +101,9 @@ export function CustomDocumentGeneratorDialog({
     }
     if (newData.selectedPrompt !== selectedPrompt) {
       handlePromptChange(newData.selectedPrompt)
+    }
+    if (newData.selectedPromptContent !== selectedPromptContent) {
+      setSelectedPromptContent(newData.selectedPromptContent)
     }
     if (newData.customPrompt !== customPrompt) {
       setCustomPrompt(newData.customPrompt)
@@ -277,20 +284,37 @@ export function CustomDocumentGeneratorDialog({
             <ClientVariablesTooltip />
           </div>
         ) : (
-          <div className="space-y-2">
-            <Label htmlFor="prompt-select">Select Prompt</Label>
-            <Select value={selectedPrompt} onValueChange={handlePromptChange} disabled={isLoadingPrompts}>
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingPrompts ? "Loading prompts..." : "Choose a prompt..."} />
-              </SelectTrigger>
-              <SelectContent>
-                {prompts.map((prompt) => (
-                  <SelectItem key={prompt.id} value={prompt.id}>
-                    {prompt.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="prompt-select">Select Prompt</Label>
+              <Select value={selectedPrompt} onValueChange={handlePromptChange} disabled={isLoadingPrompts}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingPrompts ? "Loading prompts..." : "Choose a prompt..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  {prompts.map((prompt) => (
+                    <SelectItem key={prompt.id} value={prompt.id}>
+                      {prompt.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Prompt Content Preview/Editor */}
+            {selectedPrompt && selectedPromptContent && (
+              <div className="space-y-2">
+                <Label htmlFor="prompt-content">Prompt Content</Label>
+                <Textarea
+                  id="prompt-content"
+                  value={selectedPromptContent}
+                  onChange={(e) => setSelectedPromptContent(e.target.value)}
+                  placeholder="Prompt content will appear here..."
+                  className="min-h-[120px]"
+                />
+                <ClientVariablesTooltip />
+              </div>
+            )}
           </div>
         )}
       </div>
