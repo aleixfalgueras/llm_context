@@ -37,7 +37,7 @@ export function MeetingReportDialog({
   const { toast } = useToast()
   const [formData, setFormData] = useState<MeetingFormData>({
     clientId: '',
-    meetingDate: '',
+    meetingDate: new Date().toISOString().split('T')[0],
     meetingTranscription: '',
     additionalInfo: '',
     formatDocumentId: '',
