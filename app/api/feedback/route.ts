@@ -8,8 +8,10 @@ import {
 import { prisma } from '@/lib/prisma'
 import { 
   FeedbackType, 
+  FeedbackState,
   isValidFeedbackType,
-  isValidPriority 
+  isValidPriority,
+  isValidFeedbackState 
 } from '@/types/enums'
 
 export const POST = withEnhancedApi(

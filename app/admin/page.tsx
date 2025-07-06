@@ -211,15 +211,8 @@ export default async function AdminDashboard() {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm">Documents:</span>
-                  <span className="font-medium">Unlimited</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-sm">Tokens:</span>
                   <span className="font-medium">{data.monthlyStats.tokens.toLocaleString()}</span>
-                </div>
-                <div className="text-xs text-muted-foreground mt-2">
-                  OpenRouter handles billing automatically
                 </div>
               </div>
             </CardContent>

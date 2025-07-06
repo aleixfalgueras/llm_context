@@ -3,7 +3,10 @@
     "allow": [
       "Bash(node:*)",
       "Bash(npx tsc:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
