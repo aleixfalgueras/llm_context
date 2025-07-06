@@ -73,7 +73,6 @@ INSTRUCTIONS:
 - Include specific, actionable steps with clear timelines where applicable
 - Base recommendations solely on what was discussed in the meeting${additionalInfo ? `
 - Pay special attention to the additional information provided above` : ''}
-- Provide the response in markdown format for easy reading
 - DO NOT include any disclaimers or AI provider-related content
 - Provide ONLY the meeting report content in a delivery-ready format
 - Make the action items specific, measurable, and achievable

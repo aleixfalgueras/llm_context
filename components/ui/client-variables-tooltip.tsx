@@ -8,7 +8,7 @@ export function ClientVariablesTooltip() {
         <TooltipTrigger asChild>
           <Info className="h-4 w-4 text-muted-foreground cursor-help" />
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-xs">
+        <TooltipContent side="bottom" className="max-w-xs z-[60]" avoidCollisions={true} collisionPadding={10}>
           <div className="space-y-2">
             <p className="font-medium">Available Variables:</p>
             <div className="text-sm space-y-1">
