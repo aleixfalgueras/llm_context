@@ -266,7 +266,7 @@ export async function updateUsageTracking(
     }
     // Removed estimatedCost increment - OpenRouter handles billing automatically
 
-    await prisma.userUsage.upsert({
+    const result = await prisma.userUsage.upsert({
       where: {
         userId_year_month: {
           userId,
@@ -283,6 +283,11 @@ export async function updateUsageTracking(
       },
       update: updateData
     })
+
+    logger.info('Updated tokensUsed', { 
+      userId, 
+      tokensUsed: result.tokensUsed 
+    });
 
     // Invalidate usage cache after update
     const cacheKey = `${userId}_${year}_${month}`
