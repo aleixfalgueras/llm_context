@@ -98,7 +98,7 @@ ${additionalInstructions}`
 
 ${getLanguageRequirementSection(targetLanguage, 'custom-document')}
 
-Please generate a professional, well-structured document based on the above prompt and client information. Format the content in clear markdown with appropriate headings, sections, and formatting for easy reading and professional presentation. 
+Please generate a professional, well-structured document based on the above prompt and client information. 
 
 IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining professional language and cultural appropriateness for this language.`
 
