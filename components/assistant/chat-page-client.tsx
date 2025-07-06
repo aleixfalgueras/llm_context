@@ -5,6 +5,7 @@ import { ChatSidebar } from '@/components/assistant/chat-sidebar'
 import { ChatContainer } from '@/components/assistant/chat-container'
 import { ClientContextSidebar } from '@/components/clients/client-context-sidebar'
 import { ClientDocuments } from '@/components/clients/client-documents'
+import { ErrorBoundary } from '@/components/error-boundary'
 
 interface ChatPageClientProps {
   chat: {
@@ -39,54 +40,68 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
   }
 
   return (
-    <div className="flex h-full">
-      <ChatSidebar 
-        chats={chats}
-        currentChatId={chat.id}
-      />
-      <div className="flex-1 flex flex-col">
-        {/* Enhanced Chat Header */}
-        <div className="border-b p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <h1 className="font-semibold text-lg truncate">{currentTitle}</h1>
+    <ErrorBoundary 
+      onError={(error, errorInfo) => {
+        console.error('Chat page error:', error, errorInfo)
+        // Could add error reporting here
+      }}
+    >
+      <div className="flex h-full">
+        <ErrorBoundary>
+          <ChatSidebar 
+            chats={chats}
+            currentChatId={chat.id}
+          />
+        </ErrorBoundary>
+        
+        <div className="flex-1 flex flex-col">
+          {/* Enhanced Chat Header */}
+          <div className="border-b p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <h1 className="font-semibold text-lg truncate">{currentTitle}</h1>
+              </div>
             </div>
           </div>
+
+          {/* Chat Container with Messages and Input */}
+          <ChatContainer 
+            chatId={chat.id} 
+            initialMessages={chat.messages}
+            userImageUrl={userImageUrl}
+            userName={userName}
+            clientData={selectedClient}
+            onTitleUpdate={setCurrentTitle}
+            chatTitle={currentTitle}
+            onDocumentCreated={handleDocumentCreated}
+            lastUsedModel={lastUsedModel}
+          />
         </div>
+        
+        {/* Client Context Sidebar - Always visible */}
+        <ErrorBoundary>
+          <ClientContextSidebar 
+            chatId={chat.id}
+            selectedClientId={chat.clientId}
+            clients={clients}
+            hasActiveChat={true}
+            chatContextFields={chat.contextFields}
+          />
+        </ErrorBoundary>
 
-        {/* Chat Container with Messages and Input */}
-        <ChatContainer 
-          chatId={chat.id} 
-          initialMessages={chat.messages}
-          userImageUrl={userImageUrl}
-          userName={userName}
-          clientData={selectedClient}
-          onTitleUpdate={setCurrentTitle}
-          chatTitle={currentTitle}
-          onDocumentCreated={handleDocumentCreated}
-          lastUsedModel={lastUsedModel}
-        />
+        {/* Client Documents Dialog */}
+        {selectedClient && (
+          <ErrorBoundary>
+            <ClientDocuments
+              clientId={selectedClient.id}
+              clientName={selectedClient.name}
+              open={isDocumentsOpen}
+              onOpenChange={setIsDocumentsOpen}
+              documentToHighlight={documentToHighlight}
+            />
+          </ErrorBoundary>
+        )}
       </div>
-      
-      {/* Client Context Sidebar - Always visible */}
-      <ClientContextSidebar 
-        chatId={chat.id}
-        selectedClientId={chat.clientId}
-        clients={clients}
-        hasActiveChat={true}
-        chatContextFields={chat.contextFields}
-      />
-
-      {/* Client Documents Dialog */}
-      {selectedClient && (
-        <ClientDocuments
-          clientId={selectedClient.id}
-          clientName={selectedClient.name}
-          open={isDocumentsOpen}
-          onOpenChange={setIsDocumentsOpen}
-          documentToHighlight={documentToHighlight}
-        />
-      )}
-    </div>
+    </ErrorBoundary>
   )
 } 
