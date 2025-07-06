@@ -7,6 +7,44 @@ import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
 import { DEFAULT_MODEL } from '@/lib/models-config'
 import { Message } from '@/types/message-types'
 
+// Helper function to check if messages are likely duplicates
+function areMessagesSimilar(msg1: Message, msg2: Message): boolean {
+  return (
+    msg1.content === msg2.content &&
+    msg1.role === msg2.role &&
+    Math.abs(new Date(msg1.createdAt).getTime() - new Date(msg2.createdAt).getTime()) < 30000 // Within 30 seconds
+  )
+}
+
+// Helper function to merge messages avoiding duplicates
+function mergeMessages(serverMessages: Message[], currentMessages: Message[]): Message[] {
+  const mergedMessages = [...serverMessages]
+  
+  // Add optimistic messages that don't have server equivalents
+  for (const currentMsg of currentMessages) {
+    // Check if this is an optimistic message (has temporary ID format)
+    const isOptimistic = currentMsg.id.startsWith('temp-user-') || 
+                        currentMsg.id.startsWith('temp-assistant-')
+    
+    if (isOptimistic) {
+      // Check if there's already a server message with similar content and timestamp
+      const hasServerEquivalent = serverMessages.some(serverMsg => 
+        areMessagesSimilar(serverMsg, currentMsg)
+      )
+      
+      // If no server equivalent found, keep the optimistic message
+      if (!hasServerEquivalent) {
+        mergedMessages.push(currentMsg)
+      }
+    }
+  }
+  
+  // Sort by creation time to maintain order
+  mergedMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+  
+  return mergedMessages
+}
+
 export function useChat(chatId: string, initialMessages: Message[] = []) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [isLoading, setIsLoading] = useState(false)
@@ -15,11 +53,24 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
   const { toast } = useToast()
 
   // Update messages when initialMessages changes (for server-side updates)
+  // Use merge strategy to avoid overwriting optimistic updates
   useEffect(() => {
-    setMessages(initialMessages)
-    clientLogger.info('Chat messages updated', { 
+    setMessages(currentMessages => {
+      // If no current messages, just use initial messages
+      if (currentMessages.length === 0) {
+        return initialMessages
+      }
+      
+      // Use helper function to merge messages
+      return mergeMessages(initialMessages, currentMessages)
+    })
+    
+    clientLogger.info('Chat messages updated with merge strategy', { 
       chatId,
-      metadata: { messageCount: initialMessages.length }
+      metadata: { 
+        initialMessageCount: initialMessages.length,
+        currentMessageCount: messages.length 
+      }
     });
   }, [initialMessages, chatId])
 
@@ -62,9 +113,9 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
 
     setIsLoading(true)
 
-    // Create user message
+    // Create user message with more unique temporary ID
     const userMessage: Message = {
-      id: `user-${Date.now()}`,
+      id: `temp-user-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       content,
       role: 'USER',
       createdAt: new Date(),
@@ -72,7 +123,7 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
 
     // Create initial assistant message (will be updated as content streams)
     const assistantMessage: Message = {
-      id: `assistant-${Date.now()}`,
+      id: `temp-assistant-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       content: '',
       role: 'ASSISTANT',
       createdAt: new Date(),

@@ -4,6 +4,7 @@ import { useEffect, memo } from 'react'
 import { useChat } from '@/hooks/use-chat'
 import { ChatMessages } from '@/components/assistant/chat-messages'
 import { ChatInput } from '@/components/assistant/chat-input'
+import { ErrorBoundary } from '@/components/error-boundary'
 import { Message } from '@/types/message-types'
 
 interface ChatContainerProps {
@@ -29,32 +30,41 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
   }, [onTitleUpdate, setOnTitleUpdate])
 
   return (
-    <>
+    <ErrorBoundary 
+      onError={(error, errorInfo) => {
+        console.error('Chat container error:', error, errorInfo)
+        // Could add error reporting here
+      }}
+    >
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden">
-        <ChatMessages 
-          messages={messages} 
-          userImageUrl={userImageUrl}
-          userName={userName}
-        />
+        <ErrorBoundary>
+          <ChatMessages 
+            messages={messages} 
+            userImageUrl={userImageUrl}
+            userName={userName}
+          />
+        </ErrorBoundary>
       </div>
 
       {/* Input Area */}
       <div className="border-t p-4">
-        <ChatInput 
-          chatId={chatId}
-          sendMessage={sendMessage}
-          isLoading={isLoading}
-          isStreaming={isStreaming}
-          stopGeneration={stopGeneration}
-          clientData={clientData}
-          messages={messages}
-          chatTitle={chatTitle}
-          onDocumentCreated={onDocumentCreated}
-          lastUsedModel={lastUsedModel}
-        />
+        <ErrorBoundary>
+          <ChatInput 
+            chatId={chatId}
+            sendMessage={sendMessage}
+            isLoading={isLoading}
+            isStreaming={isStreaming}
+            stopGeneration={stopGeneration}
+            clientData={clientData}
+            messages={messages}
+            chatTitle={chatTitle}
+            onDocumentCreated={onDocumentCreated}
+            lastUsedModel={lastUsedModel}
+          />
+        </ErrorBoundary>
       </div>
-    </>
+    </ErrorBoundary>
   )
 }
 

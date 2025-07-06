@@ -213,6 +213,7 @@ Respond naturally and conversationally while keeping this context in mind.`
       async start(controller) {
         const encoder = new TextEncoder()
         let fullContent = ''
+        let completionStream: any = null
         
         // Helper function to safely enqueue data
         const safeEnqueue = (data: Uint8Array) => {
@@ -229,7 +230,7 @@ Respond naturally and conversationally while keeping this context in mind.`
           // Use unified AI wrapper with automatic usage tracking (streaming version)
           logger.aiRequest(selectedModel, undefined, { userId, chatId });
           
-          const completionStream = createAICompletionStream(
+          completionStream = createAICompletionStream(
             {
               model: selectedModel,
               messages: aiMessages
@@ -364,6 +365,18 @@ Respond naturally and conversationally while keeping this context in mind.`
         } catch (error) {
           logger.error('Error in streaming chat', error as Error, { chatId });
           
+          // Abort the completion stream if still active
+          try {
+            if (completionStream) {
+              // Try to cancel/abort the stream if possible
+              if (typeof completionStream.return === 'function') {
+                await completionStream.return()
+              }
+            }
+          } catch (streamAbortError) {
+            logger.warn('Failed to abort completion stream', { chatId, metadata: { error: (streamAbortError as Error).message } });
+          }
+          
           // Handle AI provider errors specifically
           if (error instanceof AIProviderError) {
             const errorData = {
@@ -373,13 +386,21 @@ Respond naturally and conversationally while keeping this context in mind.`
               errorType: error.type,
               retryAfter: error.retryAfter
             }
-            safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
+            if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
+              // Client disconnected, just log and exit
+              logger.info('Client disconnected during error response', { userId, chatId });
+              return
+            }
           } else {
             const errorData = {
               type: 'error',
               error: 'Internal Server Error'
             }
-            safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))
+            if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
+              // Client disconnected, just log and exit
+              logger.info('Client disconnected during error response', { userId, chatId });
+              return
+            }
           }
           
           try {
