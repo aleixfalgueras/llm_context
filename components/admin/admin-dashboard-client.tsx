@@ -14,7 +14,8 @@ import {
   AlertTriangle,
   XCircle,
   Filter,
-  RotateCcw
+  RotateCcw,
+  Loader2
 } from 'lucide-react'
 import { FeedbackType, Priority, FeedbackState, BadgeVariant } from '@/types/enums'
 import { AdminDashboardClientProps, FeedbackItem, AdminDashboardData } from '@/types/admin-types'
@@ -23,6 +24,8 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [stateFilter, setStateFilter] = useState<string>('active') // Default to PENDING + IN_PROGRESS
+  const [feedbackData, setFeedbackData] = useState<FeedbackItem[]>(data.allFeedback)
+  const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
 
   const clearFilters = () => {
     setTypeFilter('all')
@@ -32,8 +35,52 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
 
   const hasActiveFilters = typeFilter !== 'all' || priorityFilter !== 'all' || stateFilter !== 'active'
 
+  const updateFeedbackStatus = async (feedbackId: string, newState: string) => {
+    // Add to updating items
+    setUpdatingItems(prev => new Set(prev).add(feedbackId))
+
+    try {
+      const response = await fetch(`/api/admin/feedback/${feedbackId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ state: newState }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update feedback status')
+      }
+
+      const result = await response.json()
+
+      // Update local state
+      setFeedbackData(prev => 
+        prev.map(item => 
+          item.id === feedbackId 
+            ? { ...item, state: newState }
+            : item
+        )
+      )
+
+      // Show success message (you could add toast here)
+      console.log('Status updated successfully:', result.message)
+
+    } catch (error) {
+      console.error('Error updating feedback status:', error)
+      // Handle error (you could add toast here)
+    } finally {
+      // Remove from updating items
+      setUpdatingItems(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(feedbackId)
+        return newSet
+      })
+    }
+  }
+
   const filteredAndSortedFeedback = useMemo(() => {
-    let filtered = data.allFeedback
+    let filtered = feedbackData
 
     // Apply filters
     if (typeFilter !== 'all') {
@@ -64,7 +111,7 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
       if (b.state === FeedbackState.PENDING && a.state !== FeedbackState.PENDING) return 1
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
-  }, [data.allFeedback, typeFilter, priorityFilter, stateFilter])
+  }, [feedbackData, typeFilter, priorityFilter, stateFilter])
 
   const getBadgeVariant = (type: string, priority: string, state: string): BadgeVariant => {
     if (type === FeedbackType.BUG) return BadgeVariant.DESTRUCTIVE
@@ -211,7 +258,7 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
               Feedback Management
             </CardTitle>
             <CardDescription>
-              Filter and manage user feedback ({filteredAndSortedFeedback.length} of {data.allFeedback.length} shown)
+              Filter and manage user feedback ({filteredAndSortedFeedback.length} of {feedbackData.length} shown)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -298,10 +345,36 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                         {feedback.userName || feedback.userEmail || 'Anonymous'} • {new Date(feedback.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="ml-4">
-                      {feedback.type === FeedbackType.BUG && <AlertTriangle className="h-4 w-4 text-orange-500" />}
-                      {feedback.type === FeedbackType.FEATURE && <TrendingUp className="h-4 w-4 text-blue-500" />}
-                      {feedback.type === FeedbackType.COMPLAINT && <XCircle className="h-4 w-4 text-red-500" />}
+                    <div className="ml-4 flex flex-col items-end gap-2 min-w-[140px]">
+                      <div className="flex items-center gap-1">
+                        {feedback.type === FeedbackType.BUG && <AlertTriangle className="h-4 w-4 text-orange-500" />}
+                        {feedback.type === FeedbackType.FEATURE && <TrendingUp className="h-4 w-4 text-blue-500" />}
+                        {feedback.type === FeedbackType.COMPLAINT && <XCircle className="h-4 w-4 text-red-500" />}
+                      </div>
+                      
+                      <div className="relative">
+                        {updatingItems.has(feedback.id) ? (
+                          <div className="flex items-center gap-2 px-3 py-1.5 text-xs bg-muted rounded-md">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Updating...
+                          </div>
+                        ) : (
+                          <Select 
+                            value={feedback.state} 
+                            onValueChange={(newState) => updateFeedbackStatus(feedback.id, newState)}
+                          >
+                            <SelectTrigger className="w-32 h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={FeedbackState.PENDING}>Pending</SelectItem>
+                              <SelectItem value={FeedbackState.IN_PROGRESS}>In Progress</SelectItem>
+                              <SelectItem value={FeedbackState.COMPLETED}>Completed</SelectItem>
+                              <SelectItem value={FeedbackState.FALSE_ALARM}>False Alarm</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
