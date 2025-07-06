@@ -1,0 +1,2 @@
+-- AddColumn
+ALTER TABLE "feedbacks" ADD COLUMN "state" TEXT NOT NULL DEFAULT 'PENDING';

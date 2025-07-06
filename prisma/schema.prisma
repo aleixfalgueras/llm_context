@@ -99,6 +99,7 @@ model Feedback {
   title       String   // Title of the feedback
   description String   // Detailed description of the feedback
   priority    String   // Priority level: "low", "medium", "high"
+  state       String   @default("PENDING") // State of feedback: "COMPLETED", "IN_PROGRESS", "PENDING", "FALSE_ALARM"
   useCase     String?  // Use case or scenario (for feature requests)
   stepsToReproduce String? // Steps to reproduce (for bug reports)
   createdAt   DateTime @default(now())
