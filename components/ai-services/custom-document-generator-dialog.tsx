@@ -202,7 +202,55 @@ export function CustomDocumentGeneratorDialog({
       client ? `📄 Generating document for ${client.name}` : 'Generating document...'
   }
 
-  // Custom fields for document generator
+  // Client Context section
+  const renderClientContext = () => (
+    selectedClientData && (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>Client Context</Label>
+          <div className="space-x-2">
+            <Button variant="outline" size="sm" onClick={selectAllContext}>
+              Select All
+            </Button>
+            <Button variant="outline" size="sm" onClick={deselectAllContext}>
+              Deselect All
+            </Button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {Object.entries(CLIENT_CONTEXT_FIELD_LABELS).map(([key, label]) => {
+            const actualFieldName = CLIENT_CONTEXT_FIELDS[key as keyof typeof CLIENT_CONTEXT_FIELDS]
+            const fieldValue = selectedClientData[actualFieldName as keyof Client]
+            const hasValue = fieldValue && String(fieldValue).trim() !== ''
+            
+            // Only render fields that have values
+            if (!hasValue) return null
+            
+            return (
+              <div key={key} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`context-${key}`}
+                  checked={clientContext[key as keyof ClientContextSelection] || false}
+                  onChange={(e) => {
+                    const newClientContext = { 
+                      ...clientContext, 
+                      [key as keyof ClientContextSelection]: e.target.checked 
+                    }
+                    setClientContext(newClientContext)
+                  }}
+                />
+                <Label htmlFor={`context-${key}`}>
+                  {label}
+                </Label>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  )
+
+  // Custom fields for document generator (Prompt Selection only)
   const renderCustomFields = () => (
     <>
       {/* Prompt Selection */}
@@ -246,52 +294,6 @@ export function CustomDocumentGeneratorDialog({
           </div>
         )}
       </div>
-
-      {/* Client Context */}
-      {selectedClientData && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label>Client Context</Label>
-            <div className="space-x-2">
-              <Button variant="outline" size="sm" onClick={selectAllContext}>
-                Select All
-              </Button>
-              <Button variant="outline" size="sm" onClick={deselectAllContext}>
-                Deselect All
-              </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {Object.entries(CLIENT_CONTEXT_FIELD_LABELS).map(([key, label]) => {
-              const actualFieldName = CLIENT_CONTEXT_FIELDS[key as keyof typeof CLIENT_CONTEXT_FIELDS]
-              const fieldValue = selectedClientData[actualFieldName as keyof Client]
-              const hasValue = fieldValue && String(fieldValue).trim() !== ''
-              
-              // Only render fields that have values
-              if (!hasValue) return null
-              
-              return (
-                <div key={key} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`context-${key}`}
-                    checked={clientContext[key as keyof ClientContextSelection] || false}
-                    onChange={(e) => {
-                      const newClientContext = { 
-                        ...clientContext, 
-                        [key as keyof ClientContextSelection]: e.target.checked 
-                      }
-                      setClientContext(newClientContext)
-                    }}
-                  />
-                  <Label htmlFor={`context-${key}`}>
-                    {label}
-                  </Label>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </>
   )
 
@@ -306,6 +308,7 @@ export function CustomDocumentGeneratorDialog({
       onFormDataChange={handleFormDataChange}
       getSelectedClient={getSelectedClient}
       onClientChange={handleClientChange}
+      renderClientContext={renderClientContext}
       renderCustomFields={renderCustomFields}
       customGenerateHandler={handleCustomGenerate}
       customGeneratedContent={generatedContent}
