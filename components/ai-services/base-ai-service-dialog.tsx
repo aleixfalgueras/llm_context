@@ -68,6 +68,7 @@ interface BaseAIServiceDialogProps<TFormData = any> {
   onClientChange: (clientId: string) => void
   
   // Custom content slots
+  renderClientContext?: () => React.ReactNode
   renderCustomFields?: () => React.ReactNode
   renderAdditionalActions?: () => React.ReactNode
   renderCustomContent?: () => React.ReactNode
@@ -102,6 +103,7 @@ export function BaseAIServiceDialog<TFormData = any>({
   onFormDataChange,
   getSelectedClient,
   onClientChange,
+  renderClientContext,
   renderCustomFields,
   renderAdditionalActions,
   renderCustomContent,
@@ -354,6 +356,9 @@ export function BaseAIServiceDialog<TFormData = any>({
               placeholder="Choose a client..."
             />
           </div>
+
+          {/* Client Context */}
+          {renderClientContext?.()}
 
           {/* Document Name */}
           <div className="space-y-2">
