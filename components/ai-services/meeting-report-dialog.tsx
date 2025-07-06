@@ -234,12 +234,12 @@ export function MeetingReportDialog({
 
       {/* Additional Information */}
       <div className="space-y-2">
-        <Label htmlFor="additional-info">Additional Context (Optional)</Label>
+        <Label htmlFor="additional-info">Additional Instructions (Optional)</Label>
         <Textarea
           id="additional-info"
           value={formData.additionalInfo}
           onChange={(e) => updateFormData({ additionalInfo: e.target.value })}
-          placeholder="Any additional context or specific requirements for the report..."
+          placeholder="Any additional context or specific requirements for the report... Per example: Add a sentiment analysis section"
           className="min-h-[80px]"
         />
       </div>
