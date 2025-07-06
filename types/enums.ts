@@ -147,47 +147,24 @@ export function getLanguageOptions() {
   }))
 }
 
-// =============================================================================
-// UTILITY TYPES FOR BACKWARDS COMPATIBILITY
-// =============================================================================
-
-export type RequestStatusType = `${RequestStatus}`
-export type ServiceStatusType = `${ServiceStatus}`
-export type FeedbackTypeType = `${FeedbackType}`
-export type PriorityType = `${Priority}`
-export type FeedbackStateType = `${FeedbackState}`
-export type ConsentActionType = `${ConsentAction}`
-export type ConsentTypeType = `${ConsentType}`
-export type ToastVariantType = `${ToastVariant}`
-export type ButtonVariantType = `${ButtonVariant}`
-export type BadgeVariantType = `${BadgeVariant}`
-export type ViewModeType = `${ViewMode}`
-export type LogLevelType = `${LogLevel}`
-export type LanguageType = `${Language}`
 
 // =============================================================================
 // VALIDATION HELPERS
 // =============================================================================
 
-export function isValidRequestStatus(status: string): status is RequestStatusType {
-  return Object.values(RequestStatus).includes(status as RequestStatus)
-}
 
-export function isValidFeedbackType(type: string): type is FeedbackTypeType {
+export function isValidFeedbackType(type: string): type is FeedbackType {
   return Object.values(FeedbackType).includes(type as FeedbackType)
 }
 
-export function isValidPriority(priority: string): priority is PriorityType {
+export function isValidPriority(priority: string): priority is Priority {
   return Object.values(Priority).includes(priority as Priority)
 }
 
-export function isValidFeedbackState(state: string): state is FeedbackStateType {
+export function isValidFeedbackState(state: string): state is FeedbackState {
   return Object.values(FeedbackState).includes(state as FeedbackState)
 }
 
-export function isValidLanguage(language: string): language is LanguageType {
-  return Object.values(Language).includes(language as Language)
-}
 
 // =============================================================================
 // FEEDBACK HELPERS
@@ -211,21 +188,11 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
   [Priority.HIGH]: 'High Priority - Major issue'
 }
 
-export const FEEDBACK_STATE_LABELS: Record<FeedbackState, string> = {
-  [FeedbackState.PENDING]: 'Pending - Awaiting review',
-  [FeedbackState.IN_PROGRESS]: 'In Progress - Being worked on',
-  [FeedbackState.COMPLETED]: 'Completed - Resolved',
-  [FeedbackState.FALSE_ALARM]: 'False Alarm - Not an issue'
-}
 
 // =============================================================================
 // ARRAYS FOR ITERATION (USEFUL FOR DROPDOWNS, ETC.)
 // =============================================================================
 
-export const REQUEST_STATUS_VALUES = Object.values(RequestStatus)
 export const FEEDBACK_TYPE_VALUES = Object.values(FeedbackType)
 export const PRIORITY_VALUES = Object.values(Priority)
-export const FEEDBACK_STATE_VALUES = Object.values(FeedbackState)
-export const LANGUAGE_VALUES = Object.values(Language)
-export const CONSENT_TYPE_VALUES = Object.values(ConsentType)
-export const CONSENT_ACTION_VALUES = Object.values(ConsentAction) 
+ 
