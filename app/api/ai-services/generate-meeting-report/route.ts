@@ -14,6 +14,11 @@ export async function POST(req: Request) {
     clientId = requestClientId;
     logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
 
+    // Log additional instructions if provided
+    if (additionalInfo && additionalInfo.trim()) {
+      logger.info(`Meeting Report - Additional Instructions provided: ${additionalInfo}`);
+    }
+
     if (!clientId || !meetingTranscription || !meetingDate) {
       logger.warn('Missing required fields for meeting report', { 
         clientId,
@@ -53,7 +58,7 @@ MEETING INFORMATION:
 - Meeting Transcription:
 ${meetingTranscription}${additionalInfo ? `
 
-ADDITIONAL CONTEXT:
+ADDITIONAL INFORMATION:
 ${additionalInfo}` : ''}
 
 INSTRUCTIONS:
@@ -67,7 +72,7 @@ INSTRUCTIONS:
   5. Follow-up Requirements
 - Include specific, actionable steps with clear timelines where applicable
 - Base recommendations solely on what was discussed in the meeting${additionalInfo ? `
-- Pay special attention to the additional context provided above` : ''}
+- Pay special attention to the additional information provided above` : ''}
 - Provide the response in markdown format for easy reading
 - DO NOT include any disclaimers or AI provider-related content
 - Provide ONLY the meeting report content in a delivery-ready format
