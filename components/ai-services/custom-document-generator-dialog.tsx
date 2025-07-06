@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FileText } from 'lucide-react'
 import { ClientVariablesTooltip } from '@/components/ui/client-variables-tooltip'
@@ -13,6 +12,9 @@ import { ClientContextSelection, defaultClientContextSelections } from '@/types/
 import { useDocumentGenerator } from '@/hooks/use-document-generator'
 import { BaseAIServiceDialog } from './base-ai-service-dialog'
 import type { BaseAIServiceDialogConfig, ValidationResult } from './base-ai-service-dialog'
+import { PromptSelector } from '@/components/prompts/prompt-selector'
+import type { Prompt } from '@/types/component-types'
+import { replaceClientVariables } from '@/lib/variable-replacement'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
@@ -262,13 +264,25 @@ export function CustomDocumentGeneratorDialog({
     <>
       {/* Prompt Selection */}
       <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="use-custom-prompt"
-            checked={useCustomPrompt}
-            onChange={(e) => setUseCustomPrompt(e.target.checked)}
+        <div className="flex items-center space-x-4">
+          <PromptSelector
+            onPromptSelect={(prompt: Prompt) => {
+              handlePromptChange(prompt.id)
+              // Replace variables with client data if available
+              const processedContent = selectedClientData 
+                ? replaceClientVariables(prompt.content, selectedClientData)
+                : prompt.content
+              setSelectedPromptContent(processedContent)
+            }}
           />
-          <Label htmlFor="use-custom-prompt">Use custom prompt</Label>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="use-custom-prompt"
+              checked={useCustomPrompt}
+              onChange={(e) => setUseCustomPrompt(e.target.checked)}
+            />
+            <Label htmlFor="use-custom-prompt">Use custom prompt</Label>
+          </div>
         </div>
 
         {useCustomPrompt ? (
@@ -285,21 +299,6 @@ export function CustomDocumentGeneratorDialog({
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="prompt-select">Select Prompt</Label>
-              <Select value={selectedPrompt} onValueChange={handlePromptChange} disabled={isLoadingPrompts}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isLoadingPrompts ? "Loading prompts..." : "Choose a prompt..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {prompts.map((prompt) => (
-                    <SelectItem key={prompt.id} value={prompt.id}>
-                      {prompt.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             
             {/* Prompt Content Preview/Editor */}
             {selectedPrompt && selectedPromptContent && (
