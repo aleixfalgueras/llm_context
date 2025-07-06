@@ -6,7 +6,8 @@
       "Bash(rg:*)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(ls:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
