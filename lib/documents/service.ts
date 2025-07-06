@@ -97,6 +97,7 @@ export class DocumentService {
     const fileName = `${documentName}.txt`
     const storageResult = await DocumentStorageService.storeDocument(
       userId,
+      clientId,
       fileName,
       content,
       'text/plain'
@@ -219,18 +220,27 @@ export class DocumentService {
       throw new Error(deleteResult.error || 'Failed to bulk delete documents')
     }
 
-    // Delete from storage (best effort)
-    const storagePromises = validDocuments
-      .filter(doc => doc.documentPath)
-      .map(doc => 
-        DocumentStorageService.deleteDocument(doc.documentPath)
-          .catch(error => {
-            logger.error(`Failed to delete document ${doc.id} from storage`, error instanceof Error ? error : new Error(String(error)))
-          })
-      )
+    // Delete from storage (critical operation - must succeed)
+    const documentsWithStoragePaths = validDocuments.filter(doc => doc.documentPath)
+    const storageErrors: string[] = []
+    
+    for (const doc of documentsWithStoragePaths) {
+      try {
+        await DocumentStorageService.deleteDocument(doc.documentPath)
+        logger.info(`Successfully deleted document ${doc.id} from storage`)
+      } catch (error) {
+        const errorMessage = `Failed to delete document ${doc.id} from storage: ${error instanceof Error ? error.message : 'Unknown error'}`
+        logger.error(errorMessage, error instanceof Error ? error : new Error(String(error)))
+        storageErrors.push(errorMessage)
+      }
+    }
 
-    await Promise.allSettled(storagePromises)
+    // If any storage deletions failed, throw an error
+    if (storageErrors.length > 0) {
+      throw new Error(`Storage deletion failed for ${storageErrors.length} documents: ${storageErrors.join('; ')}`)
+    }
 
+    logger.info(`Successfully deleted ${validDocuments.length} documents (${documentsWithStoragePaths.length} from storage)`)
     return deleteResult.data
   }
 }
