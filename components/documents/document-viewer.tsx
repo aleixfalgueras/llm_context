@@ -67,7 +67,7 @@ export function DocumentViewer({
             </div>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-4">
           {isEditing ? (
             <>
               <Button
