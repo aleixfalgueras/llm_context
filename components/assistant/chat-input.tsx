@@ -22,26 +22,10 @@ interface TextareaInputProps {
   isLoading: boolean
   placeholder?: string
   inputRef: React.RefObject<HTMLTextAreaElement>
+  autoResize: () => void
 }
 
-const TextareaInput = memo(({ onChange, onSubmit, isLoading, placeholder, inputRef }: TextareaInputProps) => {
-  
-  // Auto-resize textarea function
-  const autoResize = useCallback(() => {
-    const textArea = inputRef.current
-    if (textArea) {
-      textArea.style.height = 'auto'
-      const newHeight = Math.min(textArea.scrollHeight, 200)
-      textArea.style.height = `${newHeight}px`
-      
-      // Enable scroll if content exceeds max height
-      if (textArea.scrollHeight > 200) {
-        textArea.style.overflowY = 'auto'
-      } else {
-        textArea.style.overflowY = 'hidden'
-      }
-    }
-  }, [inputRef])
+const TextareaInput = memo(({ onChange, onSubmit, isLoading, placeholder, inputRef, autoResize }: TextareaInputProps) => {
 
   // Handle input change with auto-resize
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -86,6 +70,23 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
   const subscription = useSubscription()
   const [isExporting, setIsExporting] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-resize textarea function
+  const autoResize = useCallback(() => {
+    const textArea = inputRef.current
+    if (textArea) {
+      textArea.style.height = 'auto'
+      const newHeight = Math.min(textArea.scrollHeight, 200)
+      textArea.style.height = `${newHeight}px`
+      
+      // Enable scroll if content exceeds max height
+      if (textArea.scrollHeight > 200) {
+        textArea.style.overflowY = 'auto'
+      } else {
+        textArea.style.overflowY = 'hidden'
+      }
+    }
+  }, [inputRef])
   const [selectedModel, setSelectedModel] = useState(() => {
     // For new chats (no messages), use DEFAULT_MODEL
     // For existing chats with messages, use lastUsedModel or fallback to DEFAULT_MODEL
@@ -153,13 +154,15 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
 
     if (inputRef.current) {
       inputRef.current.value = newInput
+      // Trigger auto-resize after setting prompt content
+      autoResize()
     }
     clientLogger.debug('Prompt content added to input', { 
       chatId,
       component: 'ChatInput',
       metadata: { finalLength: newInput.length, hasVariables: !!clientData }
     });
-  }, [chatId, clientData])
+  }, [chatId, clientData, autoResize])
 
   const handleExportChat = async () => {
     if (!clientData?.id || !messages.length || !chatTitle) {
@@ -308,6 +311,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
           isLoading={isLoading}
           placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
           inputRef={inputRef}
+          autoResize={autoResize}
         />
         {isStreaming ? (
           <Button 
