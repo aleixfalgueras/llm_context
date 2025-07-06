@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { DocumentService } from '@/lib/documents/service'
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // GET /api/documents/[id]/download - Download document as file
@@ -16,12 +16,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const documentId = params.id
+    const { id } = await params
 
     // Get the document from database to verify ownership and get name
     const document = await prisma.document.findFirst({
       where: { 
-        id: documentId,
+        id,
         userId 
       }
     })
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Get document content
-    const documentContent = await DocumentService.getDocumentContent(documentId)
+    const documentContent = await DocumentService.getDocumentContent(id)
 
     // Return markdown file as a blob for download
     return new NextResponse(documentContent, {

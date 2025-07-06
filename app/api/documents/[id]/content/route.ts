@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/documents/service'
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // GET /api/documents/[id]/content - Get document content as JSON
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const documentId = params.id
+    const { id } = await params
 
-    const content = await DocumentService.getDocumentContent(documentId)
+    const content = await DocumentService.getDocumentContent(id)
     return NextResponse.json({ content })
   } catch (error) {
     console.error('Failed to get document content:', error)
