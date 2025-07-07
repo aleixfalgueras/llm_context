@@ -15,6 +15,7 @@ import type { BaseAIServiceDialogConfig, ValidationResult } from './base-ai-serv
 import { PromptSelector } from '@/components/prompts/prompt-selector'
 import type { Prompt } from '@/types/component-types'
 import { replaceClientVariables } from '@/lib/variable-replacement'
+import { getDefaultModel } from '@/lib/models-config'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
@@ -48,13 +49,9 @@ export function CustomDocumentGeneratorDialog({
     customPrompt,
     clientContext,
     prompts,
-    generatedContent,
     useCustomPrompt,
-    isEditMode,
     
     // Loading states
-    isGenerating,
-    isSaving,
     isLoadingPrompts,
     
     // Actions
@@ -65,7 +62,6 @@ export function CustomDocumentGeneratorDialog({
     setClientContext,
     setCustomPrompt,
     setUseCustomPrompt,
-    setIsEditMode,
     generateDocument,
     resetForm,
     selectAllContext,
@@ -125,16 +121,6 @@ export function CustomDocumentGeneratorDialog({
     setClientContext(defaultClientContextSelections.general)
   }
 
-  // Custom wrapper for generation that uses hook logic
-  const handleCustomGenerate = async () => {
-    return await generateDocument()
-  }
-
-
-  // Handle edit mode changes
-  const handleEditModeChange = (editMode: boolean) => {
-    setIsEditMode(editMode)
-  }
 
   // Override base dialog close behavior
   const handleClose = () => {
@@ -152,10 +138,19 @@ export function CustomDocumentGeneratorDialog({
     generateEndpoint: '/api/ai-services/generate-custom-document',
     saveEndpoint: '/api/ai-services/save-custom-document',
     
-    // Use custom handlers that delegate to hook
-    buildGeneratePayload: () => {
-      // This won't be used as we override with custom handler
-      return {}
+    buildGeneratePayload: (formData: CustomDocumentFormData, client?: Client) => {
+      // Always send the current content from the textarea (either custom or modified selected prompt)
+      const finalPrompt = formData.useCustomPrompt ? formData.customPrompt : formData.selectedPromptContent || ''
+      
+      return {
+        clientId: formData.clientId,
+        documentTitle: formData.documentTitle,
+        customPrompt: finalPrompt,
+        selectedContextFields: Object.entries(formData.clientContext)
+          .filter(([, value]) => value)
+          .map(([key]) => key),
+        model: getDefaultModel()
+      }
     },
     
     buildSavePayload: (formData: CustomDocumentFormData, content: string, client?: Client) => {
@@ -333,12 +328,6 @@ export function CustomDocumentGeneratorDialog({
       onClientChange={handleClientChange}
       renderClientContext={renderClientContext}
       renderCustomFields={renderCustomFields}
-      customGenerateHandler={handleCustomGenerate}
-      customGeneratedContent={generatedContent}
-      customIsGenerating={isGenerating}
-      customIsSaving={isSaving}
-      customIsEditMode={isEditMode}
-      onCustomEditModeChange={handleEditModeChange}
     />
   )
 }

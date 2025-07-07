@@ -24,14 +24,10 @@ interface UseDocumentGeneratorReturn {
   customPrompt: string
   clientContext: ClientContextSelection
   prompts: Prompt[]
-  generatedContent: string
   promptName: string
   useCustomPrompt: boolean
-  isEditMode: boolean
   
   // Loading states
-  isGenerating: boolean
-  isSaving: boolean
   isLoadingPrompts: boolean
   
   // Actions
@@ -42,9 +38,7 @@ interface UseDocumentGeneratorReturn {
   setClientContext: (context: ClientContextSelection) => void
   setCustomPrompt: (prompt: string) => void
   setUseCustomPrompt: (use: boolean) => void
-  setGeneratedContent: (content: string) => void
-  setIsEditMode: (edit: boolean) => void
-  generateDocument: () => Promise<void>
+  generateDocument: () => Promise<string>
   resetForm: () => void
   selectAllContext: () => void
   deselectAllContext: () => void
@@ -62,13 +56,9 @@ export function useDocumentGenerator({
   const [customPrompt, setCustomPrompt] = useState('')
   const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
   const [prompts, setPrompts] = useState<Prompt[]>([])
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
-  const [generatedContent, setGeneratedContent] = useState('')
   const [promptName, setPromptName] = useState('')
   const [useCustomPrompt, setUseCustomPrompt] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
   const { toast } = useToast()
 
   // Load prompts when dialog opens
@@ -113,7 +103,7 @@ export function useDocumentGenerator({
     }
   }
 
-  const generateDocument = async () => {
+  const generateDocument = async (): Promise<string> => {
     const finalPrompt = useCustomPrompt ? customPrompt : selectedPromptContent || ''
     
     if (!selectedClient || !documentTitle || !finalPrompt.trim()) {
@@ -122,10 +112,8 @@ export function useDocumentGenerator({
         description: 'Please select a client, enter a document title, and choose a prompt or write custom instructions.',
         variant: 'destructive',
       })
-      return
+      throw new Error('Missing required fields')
     }
-
-    setIsGenerating(true)
 
     try {
       clientLogger.apiCall('POST', '/api/ai-services/generate-custom-document', {
@@ -168,8 +156,8 @@ export function useDocumentGenerator({
       }
 
       const data = await response.json()
-      setGeneratedContent(data.content)
       setPromptName(data.promptName || (useCustomPrompt ? 'Custom Prompt' : prompts.find(p => p.id === selectedPrompt)?.name || ''))
+      return data.content
     } catch (error) {
       console.error('Error generating document:', error)
       
@@ -191,8 +179,7 @@ export function useDocumentGenerator({
           variant: 'destructive',
         })
       }
-    } finally {
-      setIsGenerating(false)
+      throw error
     }
   }
 
@@ -204,10 +191,8 @@ export function useDocumentGenerator({
     setSelectedPromptContent('')
     setCustomPrompt('')
     setClientContext(defaultClientContextSelections.general)
-    setGeneratedContent('')
     setPromptName('')
     setUseCustomPrompt(false)
-    setIsEditMode(false)
   }
 
   const selectAllContext = () => {
@@ -239,14 +224,10 @@ export function useDocumentGenerator({
     customPrompt,
     clientContext,
     prompts,
-    generatedContent,
     promptName,
     useCustomPrompt,
-    isEditMode,
     
     // Loading states
-    isGenerating,
-    isSaving,
     isLoadingPrompts,
     
     // Actions
@@ -257,8 +238,6 @@ export function useDocumentGenerator({
     setClientContext,
     setCustomPrompt,
     setUseCustomPrompt,
-    setGeneratedContent,
-    setIsEditMode,
     generateDocument,
     resetForm,
     selectAllContext,
