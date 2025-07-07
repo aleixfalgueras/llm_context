@@ -78,8 +78,6 @@ model Document {
   documentPath String  // Path in Supabase storage: user_id/client_id/document_name.md
   documentType String  // Type of document (e.g., "meeting-report", "custom-document", "proposal")
   fileSize    Int      @default(0) // File size in bytes for storage calculations
-  startDate   DateTime? // For time-based documents like campaigns
-  endDate     DateTime? // For time-based documents like campaigns
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

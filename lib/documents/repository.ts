@@ -11,8 +11,6 @@ export interface DocumentData {
   documentType: string
   documentPath: string
   clientId?: string
-  startDate?: string
-  endDate?: string
 }
 
 export interface DocumentQueryOptions {
@@ -43,8 +41,6 @@ export class DocumentRepository {
         documentType: true,
         createdAt: true,
         updatedAt: true,
-        startDate: true,
-        endDate: true,
         ...(options?.includeContent && {
           documentPath: true
         })
@@ -76,8 +72,6 @@ export class DocumentRepository {
         documentType: true,
         createdAt: true,
         updatedAt: true,
-        startDate: true,
-        endDate: true,
         clientId: true,
         ...(options?.includeContent && {
           documentPath: true

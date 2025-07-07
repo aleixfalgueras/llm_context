@@ -12,8 +12,6 @@ export interface SaveDocumentParams {
   content: string
   documentName?: string
   documentType: DocumentType
-  startDate?: Date | string
-  endDate?: Date | string
   trackUsage?: boolean
 }
 
@@ -22,8 +20,6 @@ export async function saveDocumentToStorage({
   content,
   documentName,
   documentType,
-  startDate,
-  endDate,
   trackUsage = true
 }: SaveDocumentParams) {
   const { userId } = await auth()
@@ -48,8 +44,7 @@ export async function saveDocumentToStorage({
 
   const finalDocumentName = documentName || generateDefaultDocumentName(
     client.name,
-    documentType,
-    startDate
+    documentType
   )
   
   const fileName = `${finalDocumentName}.md`
@@ -78,8 +73,6 @@ export async function saveDocumentToStorage({
       documentPath: filePath,
       documentType,
       fileSize: fileSize, // Store file size in database
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
     },
   })
 
@@ -110,9 +103,7 @@ export async function saveDocumentToStorage({
       id: document.id,
       name: finalDocumentName,
       path: filePath,
-      type: documentType,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined
+      type: documentType
     }
   }
 }
@@ -121,16 +112,12 @@ export async function saveDocumentToStorage({
 
 function generateDefaultDocumentName(
   clientName: string,
-  documentType: DocumentType,
-  startDate?: Date | string
+  documentType: DocumentType
 ): string {
   switch (documentType) {
     case DOCUMENT_TYPES.MEETING:
-      if (startDate) {
-        const meetingDateFormatted = new Date(startDate).toISOString().split('T')[0]
-        return `${clientName} Meeting Report ${meetingDateFormatted}`
-      }
-      return `${clientName} Meeting Report`
+      const meetingDateFormatted = new Date().toISOString().split('T')[0]
+      return `${clientName} Meeting Report ${meetingDateFormatted}`
     
     case DOCUMENT_TYPES.CUSTOM_DOCUMENT:
       return `${clientName} Custom Document`

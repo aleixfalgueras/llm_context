@@ -24,8 +24,6 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const [newDocumentName, setNewDocumentName] = useState('')
   const [newDocumentContent, setNewDocumentContent] = useState('')
   const [newDocumentType, setNewDocumentType] = useState<string>(DOCUMENT_TYPES.MANUAL)
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
 
   const loadDocuments = async () => {
     setLoading(true)
@@ -82,8 +80,6 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setNewDocumentName('')
     setNewDocumentContent('')
     setNewDocumentType(DOCUMENT_TYPES.MANUAL)
-    setStartDate('')
-    setEndDate('')
   }
 
   const resetEditState = () => {
@@ -137,10 +133,6 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setNewDocumentContent,
     newDocumentType,
     setNewDocumentType,
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
     
     // Actions
     loadDocuments,
