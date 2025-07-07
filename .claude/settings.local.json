@@ -1,14 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node:*)",
+      "Bash(npm run lint)",
+      "Bash(npx next lint:*)",
       "Bash(npx tsc:*)",
-      "Bash(rg:*)",
-      "Bash(npx prisma migrate dev:*)",
-      "Bash(ls:*)",
-      "Bash(grep:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
       "Bash(find:*)",
-      "Bash(mkdir:*)"
+      "Bash(rg:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(npx ts-unused-exports:*)",
+      "Bash(npx ts-prune:*)",
+      "Bash(npx unimport:*)",
+      "Bash(timeout 300 npm run build)",
+      "WebFetch(domain:openrouter.ai)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:www.prisma.io)",
+      "Bash(DATABASE_URL='postgresql://postgres.wgeohahwwszibtdtduul:llm_context_Temporal123!@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1' npx prisma migrate resolve --applied 20250705140623_add_performance_indexes_and_filesize)"
     ],
     "deny": []
   }
