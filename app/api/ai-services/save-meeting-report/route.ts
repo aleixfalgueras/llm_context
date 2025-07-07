@@ -1,4 +1,4 @@
-import { saveDocumentToStorage } from '@/lib/document-save-utils'
+import { DocumentService } from '@/lib/documents/service'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api-middleware'
 import { ApiErrors } from '@/lib/api-error-handler'
@@ -11,14 +11,14 @@ export const POST = withEnhancedApi(async ({ req }) => {
   apiValidation.meetingReport({ clientId, meetingDate, reportContent })
 
   try {
-    // Use the shared document save utility with tracking enabled
-    const result = await saveDocumentToStorage({
+    // Use the unified document service with tracking enabled
+    const result = await DocumentService.createDocument(
       clientId,
-      content: reportContent,
       documentName,
-      documentType: DOCUMENT_TYPES.MEETING,
-      trackUsage: true // Explicitly enable usage tracking
-    })
+      DOCUMENT_TYPES.MEETING,
+      reportContent,
+      { trackUsage: true }
+    )
 
     return apiSuccess({
       ...result,

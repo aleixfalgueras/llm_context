@@ -11,6 +11,7 @@ export interface DocumentData {
   documentType: string
   documentPath: string
   clientId?: string
+  fileSize?: number
 }
 
 export interface DocumentQueryOptions {

@@ -1,4 +1,4 @@
-import { saveDocumentToStorage } from '@/lib/document-save-utils'
+import { DocumentService } from '@/lib/documents/service'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 import { 
   withEnhancedApi, 
@@ -24,14 +24,14 @@ export const POST = withEnhancedApi(
     }
 
     try {
-      // Use the shared document save utility with tracking enabled
-      const result = await saveDocumentToStorage({
+      // Use the unified document service with tracking enabled
+      const result = await DocumentService.createDocument(
         clientId,
+        documentTitle,
+        DOCUMENT_TYPES.CUSTOM_DOCUMENT,
         content,
-        documentName: documentTitle,
-        documentType: DOCUMENT_TYPES.CUSTOM_DOCUMENT,
-        trackUsage: true // Explicitly enable usage tracking
-      })
+        { trackUsage: true }
+      )
 
       return apiSuccess({
         ...result,
