@@ -9,7 +9,7 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:deploy": "prisma migrate deploy",
-    "vercel-build": "npx prisma migrate resolve --applied 0_init && npx prisma migrate resolve --applied 20250705140623_add_performance_indexes_and_filesize && npx prisma migrate resolve --applied 20250705181335_fix_specific_context_field_names && npx prisma migrate resolve --applied 20250706145545_add_feedback_state_field && npx prisma migrate deploy && npx prisma generate && next build"
+    "vercel-build": "npx prisma migrate deploy && npx prisma generate && next build"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.22.0",
