@@ -202,15 +202,6 @@ export function DocumentList({
                     <p className="text-xs text-muted-foreground">
                       Updated: {formatDate(doc.updatedAt.toString())}
                     </p>
-                    {doc.startDate && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(doc.startDate.toString())}
-                          {doc.endDate && ` - ${formatDate(doc.endDate.toString())}`}
-                        </span>
-                      </div>
-                    )}
                   </div>
                   <div className="flex flex-col gap-1">
                     {/* Top row: Edit and Delete */}

@@ -29,9 +29,7 @@ export function useDocumentOperations({
   const handleCreateDocument = async (
     documentName: string,
     documentType: string,
-    documentContent: string,
-    startDate?: string,
-    endDate?: string
+    documentContent: string
   ) => {
     if (!documentName.trim() || !documentContent.trim()) {
       toast({
@@ -47,11 +45,7 @@ export function useDocumentOperations({
         clientId,
         documentName,
         documentType,
-        documentContent,
-        {
-          startDate: startDate ? new Date(startDate) : undefined,
-          endDate: endDate ? new Date(endDate) : undefined
-        }
+        documentContent
       )
       toast({
         title: 'Success',

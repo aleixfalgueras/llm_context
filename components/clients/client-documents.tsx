@@ -99,9 +99,7 @@ export function ClientDocuments({
     await operations.handleCreateDocument(
       documentState.newDocumentName,
       documentState.newDocumentType,
-      documentState.newDocumentContent,
-      documentState.startDate,
-      documentState.endDate
+      documentState.newDocumentContent
     )
   }
 
@@ -152,15 +150,11 @@ export function ClientDocuments({
                   documentName={documentState.newDocumentName}
                   documentContent={documentState.newDocumentContent}
                   documentType={documentState.newDocumentType}
-                  startDate={documentState.startDate}
-                  endDate={documentState.endDate}
                   isCreating={documentState.isCreating}
                   hideDocumentType={true}
                   onNameChange={documentState.setNewDocumentName}
                   onContentChange={documentState.setNewDocumentContent}
                   onTypeChange={documentState.setNewDocumentType}
-                  onStartDateChange={documentState.setStartDate}
-                  onEndDateChange={documentState.setEndDate}
                   onCreate={handleCreateDocument}
                   onCancel={documentState.resetCreateState}
                   onPreview={() => uiState.setShowPreview(true)}

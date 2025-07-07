@@ -17,8 +17,6 @@ export const POST = withEnhancedApi(async ({ req }) => {
       content: reportContent,
       documentName,
       documentType: DOCUMENT_TYPES.MEETING,
-      startDate: meetingDate,
-      endDate: meetingDate,
       trackUsage: true // Explicitly enable usage tracking
     })
 
