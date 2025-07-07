@@ -46,12 +46,21 @@ export async function POST(request: NextRequest) {
       documentName,
       documentType,
       content,
-      { metadata }
+      { metadata, trackUsage: true }
     )
 
     return NextResponse.json(result, { status: 201 })
   } catch (error) {
     console.error('Failed to create document:', error)
+    
+    // Check for storage limit errors
+    if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 413 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Failed to create document' },
       { status: 500 }
