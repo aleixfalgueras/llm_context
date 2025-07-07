@@ -71,7 +71,7 @@ export class DocumentClientService {
    */
   static async updateDocument(
     documentId: string,
-    updates: Partial<{ documentName: string; documentType: string }>
+    updates: Partial<{ documentName: string; documentType: string; content: string }>
   ) {
     const response = await fetch(`/api/documents/${documentId}`, {
       method: 'PUT',
@@ -80,7 +80,8 @@ export class DocumentClientService {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to update document')
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || 'Failed to update document')
     }
 
     return response.json()

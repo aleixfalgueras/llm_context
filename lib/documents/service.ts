@@ -185,11 +185,11 @@ export class DocumentService {
   }
 
   /**
-   * Update document metadata
+   * Update document metadata and/or content
    */
   static async updateDocument(
     documentId: string,
-    updates: Partial<Pick<DocumentData, 'documentName' | 'documentType'>>
+    updates: Partial<Pick<DocumentData, 'documentName' | 'documentType'>> & { content?: string }
   ) {
     const { userId } = await auth()
     
@@ -197,13 +197,69 @@ export class DocumentService {
       throw new Error('Unauthorized')
     }
 
-    const result = await DocumentRepository.updateDocument(userId, documentId, updates)
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update document')
+    // Get current document to check permissions and get storage path
+    const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
+    
+    if (!documentResult.success || !documentResult.data) {
+      throw new Error('Document not found or access denied')
     }
 
-    return result.data
+    const currentDocument = documentResult.data as any
+
+    // Handle content update if provided
+    if (updates.content !== undefined) {
+      if (!currentDocument.documentPath) {
+        throw new Error('Document path not found for content update')
+      }
+
+      // Validate storage constraints for content update
+      await validateDocumentStorage(updates.content, userId)
+
+      // Update content in storage
+      await DocumentStorageService.updateDocument(
+        currentDocument.documentPath,
+        updates.content,
+        'text/markdown'
+      )
+
+      // Calculate new file size for database update
+      const newFileSize = calculateDocumentSize(updates.content)
+      
+      // Add file size to metadata updates
+      const metadataUpdates = {
+        ...updates,
+        fileSize: newFileSize
+      }
+      
+      // Remove content from metadata updates since it's not stored in database
+      delete metadataUpdates.content
+
+      // Update metadata in database
+      const result = await DocumentRepository.updateDocument(userId, documentId, metadataUpdates)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update document')
+      }
+
+      // Invalidate storage cache since storage usage may have changed
+      try {
+        const { invalidateStorageCache } = await import('../subscription-cache')
+        invalidateStorageCache(userId)
+      } catch (error) {
+        logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))
+      }
+
+      return result.data
+    } else {
+      // Only metadata updates
+      const result = await DocumentRepository.updateDocument(userId, documentId, updates)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update document')
+      }
+
+      return result.data
+    }
   }
 
   /**
