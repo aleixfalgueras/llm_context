@@ -201,10 +201,6 @@ export function BaseAIServiceDialog<TFormData = any>({
         onFormDataChange(config.setDocumentNameField(formData, defaultName))
       }
 
-      toast({
-        title: 'Success',
-        description: config.getSuccessMessage?.(selectedClient) || 'Content generated successfully'
-      })
     } catch (error) {
       console.error('Generation error:', error)
       
