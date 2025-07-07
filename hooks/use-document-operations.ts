@@ -90,10 +90,21 @@ export function useDocumentOperations({
       return false
     }
 
+    if (!editedContent.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Document content cannot be empty',
+        variant: 'destructive',
+      })
+      return false
+    }
+
     try {
       await DocumentClientService.updateDocument(selectedDocument.id, {
-        documentName: editedDocumentName
+        documentName: editedDocumentName,
+        content: editedContent
       })
+      
       setDocumentContent(editedContent)
       setSelectedDocument({ ...selectedDocument, documentName: editedDocumentName })
       toast({
@@ -103,11 +114,22 @@ export function useDocumentOperations({
       await loadDocuments()
       return true
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update document',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update document'
+      
+      // Check for storage limit errors
+      if (errorMessage.includes('Storage limit exceeded')) {
+        toast({
+          title: 'Storage Limit Exceeded',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+      }
       return false
     }
   }

@@ -143,6 +143,49 @@ export class DocumentStorageService {
   }
 
   /**
+   * Update document content in storage
+   */
+  static async updateDocument(
+    documentPath: string,
+    content: string,
+    mimeType: string = 'text/markdown'
+  ): Promise<{ path: string; url?: string }> {
+    try {
+      const contentBuffer = Buffer.from(content, 'utf-8')
+
+      const { data, error } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .upload(documentPath, contentBuffer, {
+          contentType: mimeType,
+          upsert: true // This overwrites existing files
+        })
+
+      if (error) {
+        throw new Error(`Storage update failed: ${error.message}`)
+      }
+
+      // Get public URL if needed
+      let publicUrl: string | undefined
+      try {
+        const { data: urlData } = supabaseServer.storage
+          .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+          .getPublicUrl(documentPath)
+        publicUrl = urlData.publicUrl
+      } catch (urlError) {
+        logger.warn('Failed to get public URL for updated document')
+      }
+
+      return {
+        path: data.path,
+        url: publicUrl
+      }
+    } catch (error) {
+      logger.error('Document update error', error instanceof Error ? error : new Error(String(error)))
+      throw new Error(`Failed to update document: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
    * Generate storage file path for document
    */
   static generateFilePath(userId: string, fileName: string): string {
