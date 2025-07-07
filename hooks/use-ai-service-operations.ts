@@ -37,10 +37,6 @@ export function useAIServiceOperations<TFormData>({
       if (result.success && result.content) {
         setGeneratedContent(result.content)
         setHasGenerated(true)
-        toast({
-          title: "Content Generated",
-          description: "Your content has been generated successfully."
-        })
         return true
       } else {
         toast({
@@ -81,10 +77,6 @@ export function useAIServiceOperations<TFormData>({
       const result = await AIServiceAPI.saveDocument(saveEndpoint, payload)
       
       if (result.success && result.documentId) {
-        toast({
-          title: "Document Saved",
-          description: "Your document has been saved successfully."
-        })
         onSaveSuccess?.(result.documentId)
         return true
       } else {
