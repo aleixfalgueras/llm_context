@@ -6,8 +6,6 @@ export interface Document {
   documentName: string
   documentType: string
   documentPath: string
-  startDate?: Date | null
-  endDate?: Date | null
   createdAt: Date
   updatedAt: Date
 }

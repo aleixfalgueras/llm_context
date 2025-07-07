@@ -72,8 +72,6 @@ export async function compileUserDataExport(userId: string, exportId: string): P
           documentType: true,
           createdAt: true,
           updatedAt: true,
-          startDate: true,
-          endDate: true,
           client: {
             select: {
               name: true
@@ -165,9 +163,7 @@ export async function compileUserDataExport(userId: string, exportId: string): P
         documents: documents.map(d => ({
           ...d,
           createdAt: d.createdAt.toISOString(),
-          updatedAt: d.updatedAt.toISOString(),
-          startDate: d.startDate?.toISOString(),
-          endDate: d.endDate?.toISOString()
+          updatedAt: d.updatedAt.toISOString()
         })),
         chats: chats.map(c => ({
           ...c,

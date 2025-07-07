@@ -112,8 +112,6 @@ export interface DocumentData {
   content: string
   clientId: string
   documentPath?: string
-  startDate?: Date | null
-  endDate?: Date | null
   metadata?: Record<string, any>
 }
 
@@ -123,10 +121,6 @@ export interface DocumentData {
 export interface DocumentQueryOptions extends QueryOptions {
   clientId?: string
   documentType?: string
-  dateRange?: {
-    start: Date
-    end: Date
-  }
   hasContent?: boolean
 }
 
