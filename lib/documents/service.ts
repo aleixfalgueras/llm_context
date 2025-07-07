@@ -5,8 +5,10 @@
 import { auth } from '@clerk/nextjs/server'
 import { DocumentRepository, DocumentData, DocumentQueryOptions } from './repository'
 import { DocumentStorageService } from './storage-service'
-import { validateDocumentStorage } from '../storage-utils'
+import { validateDocumentStorage, calculateDocumentSize } from '../storage-utils'
 import { logger } from '../logger'
+import { prisma } from '../prisma'
+import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
 export class DocumentService {
   /**
@@ -79,10 +81,13 @@ export class DocumentService {
    */
   static async createDocument(
     clientId: string,
-    documentName: string,
-    documentType: string,
+    documentName: string | undefined,
+    documentType: DocumentType,
     content: string,
-    metadata?: Record<string, any>
+    options?: {
+      metadata?: Record<string, any>
+      trackUsage?: boolean
+    }
   ) {
     const { userId } = await auth()
     
@@ -93,22 +98,44 @@ export class DocumentService {
     // Validate storage constraints (throws error if validation fails)
     await validateDocumentStorage(content, userId)
 
+    // Validate client exists and belongs to user
+    const client = await prisma.client.findFirst({
+      where: {
+        id: clientId,
+        userId,
+      },
+    })
+    
+    if (!client) {
+      throw new Error('Client not found')
+    }
+
+    // Generate document name if not provided
+    const finalDocumentName = documentName || this.generateDefaultDocumentName(
+      client.name,
+      documentType
+    )
+
+    // Calculate file size before uploading
+    const fileSize = calculateDocumentSize(content)
+
     // Store content in Supabase
-    const fileName = `${documentName}.txt`
+    const fileName = `${finalDocumentName}.md`
     const storageResult = await DocumentStorageService.storeDocument(
       userId,
       clientId,
       fileName,
       content,
-      'text/plain'
+      'text/markdown'
     )
 
     // Create database record
     const documentData: DocumentData = {
-      documentName,
+      documentName: finalDocumentName,
       documentType,
       documentPath: storageResult.path,
-      clientId
+      clientId,
+      fileSize: fileSize
     }
 
     const result = await DocumentRepository.createDocument(userId, documentData)
@@ -123,7 +150,38 @@ export class DocumentService {
       throw new Error(result.error || 'Failed to create document')
     }
 
-    return result.data
+    // Track usage if enabled (default: true)
+    const trackUsage = options?.trackUsage !== false
+    if (trackUsage) {
+      try {
+        const { trackUsage: trackUsageEvent } = await import('../usage-middleware')
+        await trackUsageEvent(userId, {
+          documentType,
+          clientId,
+          documentName: finalDocumentName
+        })
+      } catch (error) {
+        logger.error('Error tracking usage', error instanceof Error ? error : new Error(String(error)))
+      }
+    }
+
+    // Invalidate storage cache since storage usage has changed
+    try {
+      const { invalidateStorageCache } = await import('../subscription-cache')
+      invalidateStorageCache(userId)
+    } catch (error) {
+      logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))
+    }
+
+    return {
+      success: true,
+      document: {
+        id: result.data?.id || '',
+        name: finalDocumentName,
+        path: storageResult.path,
+        type: documentType
+      }
+    }
   }
 
   /**
@@ -242,5 +300,31 @@ export class DocumentService {
 
     logger.info(`Successfully deleted ${validDocuments.length} documents (${documentsWithStoragePaths.length} from storage)`)
     return deleteResult.data
+  }
+
+  /**
+   * Generate default document name based on client name and document type
+   */
+  private static generateDefaultDocumentName(
+    clientName: string,
+    documentType: DocumentType
+  ): string {
+    switch (documentType) {
+      case DOCUMENT_TYPES.MEETING:
+        const meetingDateFormatted = new Date().toISOString().split('T')[0]
+        return `${clientName} Meeting Report ${meetingDateFormatted}`
+      
+      case DOCUMENT_TYPES.CUSTOM_DOCUMENT:
+        return `${clientName} Custom Document`
+      
+      case DOCUMENT_TYPES.MANUAL:
+        return `${clientName} Manual Document`
+      
+      case DOCUMENT_TYPES.CHAT:
+        return `${clientName} Chat Export`
+      
+      default:
+        return `${clientName} ${getDocumentTypeLabel(documentType)}`
+    }
   }
 }
