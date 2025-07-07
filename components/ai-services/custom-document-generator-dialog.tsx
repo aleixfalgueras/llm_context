@@ -167,6 +167,9 @@ export function CustomDocumentGeneratorDialog({
       if (!data.clientId) {
         return { isValid: false, message: 'Please select a client' }
       }
+      if (!data.documentTitle.trim()) {
+        return { isValid: false, message: 'Please provide a document title' }
+      }
       if (data.useCustomPrompt && !data.customPrompt.trim()) {
         return { isValid: false, message: 'Please provide a custom prompt' }
       }

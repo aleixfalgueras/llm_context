@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       documentName,
       documentType,
       content,
-      metadata
+      { metadata }
     )
 
     return NextResponse.json(result, { status: 201 })

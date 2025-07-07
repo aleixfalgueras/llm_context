@@ -143,6 +143,102 @@ export class DocumentStorageService {
   }
 
   /**
+   * Update document content in storage
+   */
+  static async updateDocument(
+    documentPath: string,
+    content: string,
+    mimeType: string = 'text/markdown'
+  ): Promise<{ path: string; url?: string }> {
+    try {
+      const contentBuffer = Buffer.from(content, 'utf-8')
+
+      const { data, error } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .upload(documentPath, contentBuffer, {
+          contentType: mimeType,
+          upsert: true // This overwrites existing files
+        })
+
+      if (error) {
+        throw new Error(`Storage update failed: ${error.message}`)
+      }
+
+      // Get public URL if needed
+      let publicUrl: string | undefined
+      try {
+        const { data: urlData } = supabaseServer.storage
+          .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+          .getPublicUrl(documentPath)
+        publicUrl = urlData.publicUrl
+      } catch (urlError) {
+        logger.warn('Failed to get public URL for updated document')
+      }
+
+      return {
+        path: data.path,
+        url: publicUrl
+      }
+    } catch (error) {
+      logger.error('Document update error', error instanceof Error ? error : new Error(String(error)))
+      throw new Error(`Failed to update document: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Delete all documents for a specific client (entire folder)
+   * This is more efficient than deleting documents one by one
+   */
+  static async deleteClientFolder(userId: string, clientId: string): Promise<void> {
+    try {
+      const folderPath = `${userId}/${clientId}`
+      
+      // List all files in the client folder
+      const { data: files, error: listError } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .list(folderPath, {
+          limit: 1000, // Supabase default limit
+          sortBy: { column: 'name', order: 'asc' }
+        })
+
+      if (listError) {
+        // If folder doesn't exist, that's okay - nothing to delete
+        if (listError.message.includes('not found') || listError.message.includes('does not exist')) {
+          logger.info(`Client folder not found at ${folderPath}, nothing to delete`)
+          return
+        }
+        throw new Error(`Failed to list files in client folder: ${listError.message}`)
+      }
+
+      // If no files found, nothing to delete
+      if (!files || files.length === 0) {
+        logger.info(`No files found in client folder ${folderPath}`)
+        return
+      }
+
+      // Build full file paths for deletion
+      const filePaths = files.map(file => `${folderPath}/${file.name}`)
+      
+      logger.info(`Found ${filePaths.length} files to delete in client folder ${folderPath}`)
+
+      // Delete all files in a single batch operation
+      const { error: deleteError } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
+        .remove(filePaths)
+
+      if (deleteError) {
+        throw new Error(`Failed to delete files from client folder: ${deleteError.message}`)
+      }
+
+      logger.info(`Successfully deleted ${filePaths.length} files from client folder ${folderPath}`)
+      
+    } catch (error) {
+      logger.error('Client folder deletion error', error instanceof Error ? error : new Error(String(error)))
+      throw new Error(`Failed to delete client folder: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
    * Generate storage file path for document
    */
   static generateFilePath(userId: string, fileName: string): string {

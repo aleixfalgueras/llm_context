@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DatePicker } from '@/components/ui/date-picker'
 import { Plus, Eye, X } from 'lucide-react'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
@@ -14,15 +13,11 @@ interface DocumentCreationFormProps {
   documentName: string
   documentContent: string
   documentType: string
-  startDate: string
-  endDate: string
   isCreating: boolean
   hideDocumentType?: boolean
   onNameChange: (name: string) => void
   onContentChange: (content: string) => void
   onTypeChange: (type: string) => void
-  onStartDateChange: (date: string) => void
-  onEndDateChange: (date: string) => void
   onCreate: () => void
   onCancel: () => void
   onPreview: () => void
@@ -32,15 +27,11 @@ export function DocumentCreationForm({
   documentName,
   documentContent,
   documentType,
-  startDate,
-  endDate,
   isCreating,
   hideDocumentType,
   onNameChange,
   onContentChange,
   onTypeChange,
-  onStartDateChange,
-  onEndDateChange,
   onCreate,
   onCancel,
   onPreview
@@ -88,27 +79,6 @@ export function DocumentCreationForm({
           </div>
         )}
 
-        {/* Date Range (Optional) */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="startDate">Start Date</Label>
-            <DatePicker
-              id="startDate"
-              value={startDate}
-              onChange={onStartDateChange}
-              placeholder="Select start date"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="endDate">End Date</Label>
-            <DatePicker
-              id="endDate"
-              value={endDate}
-              onChange={onEndDateChange}
-              placeholder="Select end date"
-            />
-          </div>
-        </div>
 
         {/* Document Content */}
         <div className="space-y-2">
