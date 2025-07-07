@@ -324,6 +324,16 @@ export class DocumentService {
       throw new Error('No valid documents found')
     }
 
+    // Get the clientId from the first document (all documents should belong to the same client)
+    const clientId = validDocuments[0].clientId
+    
+    // Verify all documents belong to the same client
+    const allSameClient = validDocuments.every(doc => doc.clientId === clientId)
+    if (!allSameClient) {
+      logger.warn('Documents belong to different clients, falling back to individual deletion')
+      return this.bulkDeleteDocumentsIndividually(userId, validDocuments)
+    }
+
     // Delete from database
     const deleteResult = await DocumentRepository.bulkDeleteDocuments(
       userId,
@@ -334,7 +344,34 @@ export class DocumentService {
       throw new Error(deleteResult.error || 'Failed to bulk delete documents')
     }
 
-    // Delete from storage (critical operation - must succeed)
+    // Delete entire client folder from storage (optimized approach)
+    try {
+      await DocumentStorageService.deleteClientFolder(userId, clientId)
+      logger.info(`Successfully deleted client folder for client ${clientId} with ${validDocuments.length} documents`)
+    } catch (error) {
+      const errorMessage = `Failed to delete client folder for client ${clientId}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      logger.error(errorMessage, error instanceof Error ? error : new Error(String(error)))
+      throw new Error(errorMessage)
+    }
+
+    return deleteResult.data
+  }
+
+  /**
+   * Fallback method for individual document deletion (used when documents belong to different clients)
+   */
+  private static async bulkDeleteDocumentsIndividually(userId: string, validDocuments: any[]) {
+    // Delete from database
+    const deleteResult = await DocumentRepository.bulkDeleteDocuments(
+      userId,
+      validDocuments.map(doc => doc.id)
+    )
+
+    if (!deleteResult.success) {
+      throw new Error(deleteResult.error || 'Failed to bulk delete documents')
+    }
+
+    // Delete from storage individually (fallback approach)
     const documentsWithStoragePaths = validDocuments.filter(doc => doc.documentPath)
     const storageErrors: string[] = []
     
@@ -354,7 +391,7 @@ export class DocumentService {
       throw new Error(`Storage deletion failed for ${storageErrors.length} documents: ${storageErrors.join('; ')}`)
     }
 
-    logger.info(`Successfully deleted ${validDocuments.length} documents (${documentsWithStoragePaths.length} from storage)`)
+    logger.info(`Successfully deleted ${validDocuments.length} documents (${documentsWithStoragePaths.length} from storage) individually`)
     return deleteResult.data
   }
 

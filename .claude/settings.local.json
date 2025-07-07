@@ -21,7 +21,8 @@
       "WebFetch(domain:www.prisma.io)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(true)",
-      "Bash(npx prisma generate:*)"
+      "Bash(npx prisma generate:*)",
+      "WebFetch(domain:supabase.com)"
     ],
     "deny": []
   }
