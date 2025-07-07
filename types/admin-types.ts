@@ -2,7 +2,6 @@
  * Type definitions for admin dashboard functionality
  * Contains interfaces for feedback management and dashboard data structures
  */
-
 // =============================================================================
 // FEEDBACK TYPES
 // =============================================================================
