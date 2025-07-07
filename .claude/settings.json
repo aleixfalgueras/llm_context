@@ -17,9 +17,9 @@
       "Bash(npx unimport:*)",
       "Bash(timeout 300 npm run build)",
       "WebFetch(domain:openrouter.ai)",
-      "WebFetch(domain:ui.shadcn.com)"
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:www.prisma.io)"
     ],
-    "deny": [],
-    "defaultMode": "allowEdits"
+    "deny": []
   }
 }
