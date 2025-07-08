@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp } from 'lucide-react'
+import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Mic } from 'lucide-react'
 import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dialog'
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
@@ -27,6 +27,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const defaultVisibility = {
     'meeting-report': true,
     'custom-document': true,
+    'podcast-creator': true,
   }
 
   const { 
@@ -69,6 +70,16 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       status: ServiceStatus.AVAILABLE,
       onClick: () => setIsCustomDocumentDialogOpen(true),
       iconColorClass: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
+    },
+    {
+      id: 'podcast-creator',
+      title: 'Podcast Creator',
+      description: 'Generate engaging podcasts with AI-powered Veo3 technology',
+      icon: <Mic className="h-8 w-8" />,
+      features: ['AI-powered Veo3 integration', 'Automated podcast generation', 'Professional audio quality'],
+      status: ServiceStatus.COMING_SOON,
+      onClick: undefined,
+      iconColorClass: 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
     }
   ]
 
