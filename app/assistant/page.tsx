@@ -1,5 +1,4 @@
 import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { HomePageClient } from '@/components/global/home-page-client'
 import { Navbar } from '@/components/global/navbar'
@@ -8,15 +7,11 @@ import { getClients } from '@/lib/client-actions'
 export default async function AssistantPage() {
   const { userId } = await auth()
 
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
   // Get user's chats and clients
   const [chats, clients] = await Promise.all([
     prisma.chat.findMany({
       where: {
-        userId,
+        userId: userId!,
       },
       orderBy: {
         updatedAt: 'desc',
