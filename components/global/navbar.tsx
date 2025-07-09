@@ -107,11 +107,6 @@ export function Navbar() {
                         <span>Terms of Service</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/privacy#cookies" className="cursor-pointer flex items-center">
-                        <span>Cookie Policy</span>
-                      </Link>
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TooltipProvider>
