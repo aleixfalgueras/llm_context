@@ -8,11 +8,13 @@ import { Badge } from '@/components/ui/badge'
 import { CheckIcon, StarIcon, CrownIcon, ZapIcon, SettingsIcon } from 'lucide-react'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
+import { useSubscription } from '@/hooks/use-subscription'
 
 
 
 export default function PricingPage() {
   const { user: _user } = useUser()
+  const subscription = useSubscription()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
 
@@ -70,7 +72,45 @@ export default function PricingPage() {
     }
   }
 
+  const getButtonText = (planId: string) => {
+    const isCurrentPlan = planId === subscription.plan
+    
+    if (isCurrentPlan) {
+      return 'Current Plan'
+    }
+    
+    if (planId === SubscriptionPlan.BASIC) {
+      return subscription.plan === SubscriptionPlan.PRO || subscription.plan === SubscriptionPlan.BUSINESS 
+        ? 'Downgrade to Basic' 
+        : 'First Month Free 🚀'
+    }
+    
+    // For upgrades
+    const planNames = {
+      [SubscriptionPlan.BASIC]: 'Basic',
+      [SubscriptionPlan.PRO]: 'Pro',
+      [SubscriptionPlan.BUSINESS]: 'Business'
+    }
+    
+    return `Upgrade to ${planNames[planId as keyof typeof planNames]}`
+  }
+
+  const isUpgrade = (planId: string) => {
+    const planOrder = [SubscriptionPlan.BASIC, SubscriptionPlan.PRO, SubscriptionPlan.BUSINESS]
+    const currentIndex = planOrder.indexOf(subscription.plan as SubscriptionPlan)
+    const targetIndex = planOrder.indexOf(planId as SubscriptionPlan)
+    return targetIndex > currentIndex
+  }
+
+  const isCurrentPlan = (planId: string) => planId === subscription.plan
+
   const getPlanBadge = (planId: string) => {
+    const isCurrentPlan = planId === subscription.plan
+    
+    if (isCurrentPlan) {
+      return <Badge className="bg-green-500">Current Plan</Badge>
+    }
+    
     if (planId === SubscriptionPlan.PRO) return <Badge className="bg-blue-500">Most Popular</Badge>
     if (planId === SubscriptionPlan.BUSINESS) return <Badge className="bg-purple-500">Enterprise</Badge>
     return null
@@ -109,7 +149,13 @@ export default function PricingPage() {
           {Object.entries(SUBSCRIPTION_PLANS).map(([planId, plan]) => (
             <Card 
               key={planId} 
-              className={`relative ${planId === SubscriptionPlan.PRO ? 'border-blue-500 shadow-lg scale-105' : ''}`}
+              className={`relative ${
+                isCurrentPlan(planId) 
+                  ? 'border-green-500 shadow-lg scale-105 bg-green-50 dark:bg-green-900/20' 
+                  : planId === SubscriptionPlan.PRO 
+                    ? 'border-blue-500 shadow-lg scale-105' 
+                    : ''
+              }`}
             >
               <CardHeader className="text-center">
                 {getPlanBadge(planId)}
@@ -136,9 +182,9 @@ export default function PricingPage() {
                 
                 <Button 
                   onClick={() => handleUpgrade(plan.id)}
-                  disabled={upgradeLoading === plan.id}
+                  disabled={upgradeLoading === plan.id || isCurrentPlan(planId)}
                   className="w-full"
-                  variant={plan.id === SubscriptionPlan.PRO ? 'default' : 'outline'}
+                  variant={isCurrentPlan(planId) ? 'secondary' : (plan.id === SubscriptionPlan.PRO ? 'default' : 'outline')}
                 >
                   {upgradeLoading === plan.id ? (
                     <div className="flex items-center gap-2">
@@ -146,7 +192,8 @@ export default function PricingPage() {
                       Processing...
                     </div>
                   ) : (
-                    planId === SubscriptionPlan.BASIC ? 'First Month Free 🚀' : 'Upgrade Now')}
+                    getButtonText(planId)
+                  )}
                 </Button>
               </CardContent>
             </Card>
