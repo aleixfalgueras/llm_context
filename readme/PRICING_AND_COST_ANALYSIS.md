@@ -19,7 +19,7 @@
 - **GPT-4.1 Nano**: $0.10 per 1M input tokens, $0.40 per 1M output tokens  
 - **Consistent pricing**: Both models have identical costs for predictable expenses
 - **Context length**: Up to 1M tokens (Gemini), 200K tokens (GPT-4.1 Nano)
-- **Performance**: Latest AI technology with 86-91% profit margins
+- **Performance**: Latest AI technology with 88-93% profit margins
 
 ### Cost Calculation Methodology
 ```
@@ -31,10 +31,10 @@ Per 1K tokens = $0.000175
 
 ## Subscription Plans Analysis
 
-### Basic Plan - $10/month
+### Basic Plan - €10/month ($11.72)
 - **Token Limit**: 5,000,000 tokens/month
 - **Cost at limit**: 5M × $0.000175 = $0.875
-- **Profit margin**: $10.00 - $0.875 = $9.125 (91.25% margin)
+- **Profit margin**: $11.72 - $0.875 = $10.845 (92.5% margin)
 - **Content equivalent**: ~3,750 pages of content
 - **Target users**: Individual users, small businesses
 
@@ -44,10 +44,10 @@ Per 1K tokens = $0.000175
 - Generous allowance suitable for serious content creators
 - 5M tokens supports extensive monthly content generation
 
-### Pro Plan - $25/month  
+### Pro Plan - €25/month ($29.30)
 - **Token Limit**: 15,000,000 tokens/month
 - **Cost at limit**: 15M × $0.000175 = $2.625
-- **Profit margin**: $25.00 - $2.625 = $22.375 (89.5% margin)
+- **Profit margin**: $29.30 - $2.625 = $26.675 (91.0% margin)
 - **Content equivalent**: ~11,250 pages of content
 - **Target users**: Marketing professionals, growing businesses
 
@@ -56,14 +56,14 @@ Per 1K tokens = $0.000175
 - Unlimited client profiles
 - Suitable for professional content creation at scale
 
-### Business Plan - $50/month
+### Business Plan - €50/month ($58.60)
 - **Token Limit**: 40,000,000 tokens/month
 - **Cost at limit**: 40M × $0.000175 = $7.00
-- **Profit margin**: $50.00 - $7.00 = $43.00 (86% margin)
+- **Profit margin**: $58.60 - $7.00 = $51.60 (88.1% margin)
 - **Content equivalent**: ~30,000 pages of content
 - **Target users**: Agencies, large teams, enterprise users
 
-**Note**: This pricing is based on the current subscription-utils.ts configuration which shows the Business plan at $50/month with 40M tokens.
+**Note**: This pricing is based on the current subscription-utils.ts configuration which shows the Business plan at €50/month ($58.60) with 40M tokens.
 
 **Value Proposition:**
 - 8x more tokens than Basic plan for 5x the price
@@ -115,9 +115,9 @@ Social media content: ~200,000 posts/month
 ## Revenue Protection Strategy
 
 ### Profit Margin Analysis
-- **Basic Plan**: 91.25% gross margin - exceptional entry-level profitability
-- **Pro Plan**: 89.5% gross margin - strong professional tier margins
-- **Business Plan**: 86% gross margin - excellent enterprise pricing
+- **Basic Plan**: 92.5% gross margin - exceptional entry-level profitability
+- **Pro Plan**: 91.0% gross margin - strong professional tier margins
+- **Business Plan**: 88.1% gross margin - excellent enterprise pricing
 
 ### Risk Management
 - **Generous but controlled limits**: Prevent unlimited usage while providing excellent value
@@ -177,17 +177,20 @@ export const SUBSCRIPTION_LIMITS = {
   [SubscriptionPlan.BASIC]: {
     maxTokens: 5000000,     // 5M tokens
     maxCost: 0.875,        // $0.875 at limit
-    profitMargin: 0.9125,   // 91.25%
+    profitMargin: 0.925,   // 92.5%
+    eurPrice: 10.00,       // €10 = $11.72
   },
   [SubscriptionPlan.PRO]: {
     maxTokens: 15000000,   // 15M tokens  
     maxCost: 2.625,        // $2.625 at limit
-    profitMargin: 0.895,   // 89.5%
+    profitMargin: 0.910,   // 91.0%
+    eurPrice: 25.00,       // €25 = $29.30
   },
   [SubscriptionPlan.BUSINESS]: {
     maxTokens: 40000000,   // 40M tokens
     maxCost: 7.00,         // $7.00 at limit  
-    profitMargin: 0.86,    // 86%
+    profitMargin: 0.881,   // 88.1%
+    eurPrice: 50.00,       // €50 = $58.60
   },
 } as const;
 ```
@@ -223,10 +226,10 @@ export const SUBSCRIPTION_LIMITS = {
 - **Future-proof**: Built on Google's newest AI architecture
 
 ### For Business:
-- **Excellent margins**: 86-91.25% gross profit margins across all plans
+- **Excellent margins**: 88.1-92.5% gross profit margins across all plans
 - **Latest technology**: Competitive advantage through advanced AI capabilities
 - **Simplified operations**: Single model reduces complexity while maximizing performance
 - **Scalable pricing**: Clear upgrade path for growing customers
 - **Market leadership**: Best-in-class AI with generous limits beats competitors
 
-This upgrade to Gemini 2.0 Flash provides users with access to the latest AI technology while maintaining excellent profit margins and delivering superior performance across all functionalities. 
+This upgrade to Gemini 2.0 Flash provides users with access to the latest AI technology while maintaining excellent profit margins (88.1-92.5%) and delivering superior performance across all functionalities. The EUR pricing provides even better margins than the original USD pricing. 
