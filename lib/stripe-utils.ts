@@ -64,7 +64,7 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
         plan: SubscriptionPlan.BASIC,
         status: SubscriptionStatus.ACTIVE,
         currentPeriodStart: new Date(),
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        currentPeriodEnd: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
         maxClients: 3,
         maxTokensPerMonth: 5000000,
       },
