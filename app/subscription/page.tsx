@@ -83,7 +83,7 @@ export default function SubscriptionPage() {
     if (planId === SubscriptionPlan.BASIC) {
       return subscription.plan === SubscriptionPlan.PRO || subscription.plan === SubscriptionPlan.BUSINESS 
         ? 'Downgrade to Basic' 
-        : 'First Month Free 🚀'
+        : 'First 2 Weeks Free 🚀'
     }
     
     // For upgrades
@@ -129,7 +129,7 @@ export default function SubscriptionPage() {
             Choose Your Plan
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Scale your marketing efforts with Google Gemini 2.0 Flash AI assistance. Start with our Basic plan (first month free), upgrade when you need more.
+            Scale your marketing efforts with Google Gemini 2.0 Flash AI assistance. Start with our Basic plan (first 2 weeks free), upgrade when you need more.
           </p>
           
           {/* Current Subscription Status */}

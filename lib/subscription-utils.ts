@@ -93,7 +93,7 @@ export async function getUserSubscription(userId: string) {
       logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.BASIC } });
       
       const now = new Date()
-      const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
+      const periodEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
       
       logger.dbQuery('upsert', 'userSubscription', { userId });
       subscription = await withTiming(
