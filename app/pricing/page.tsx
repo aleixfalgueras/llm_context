@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CheckIcon, StarIcon, CrownIcon, ZapIcon } from 'lucide-react'
+import { CheckIcon, StarIcon, CrownIcon, ZapIcon, SettingsIcon } from 'lucide-react'
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 
@@ -14,6 +14,7 @@ import { SubscriptionPlan } from '@/types/subscription-types'
 export default function PricingPage() {
   const { user: _user } = useUser()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
 
   const handleUpgrade = async (planId: string) => {
     setUpgradeLoading(planId)
@@ -21,7 +22,7 @@ export default function PricingPage() {
       const response = await fetch('/api/subscription/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId })
+        body: JSON.stringify({ planId, billingInterval: 'monthly' })
       })
       
       if (response.ok) {
@@ -35,6 +36,28 @@ export default function PricingPage() {
       alert('Failed to start upgrade process. Please try again.')
     } finally {
       setUpgradeLoading(null)
+    }
+  }
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true)
+    try {
+      const response = await fetch('/api/subscription/customer-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      
+      if (response.ok) {
+        const { url } = await response.json()
+        window.location.href = url
+      } else {
+        throw new Error('Failed to create portal session')
+      }
+    } catch (error) {
+      console.error('Error accessing customer portal:', error)
+      alert('Failed to access subscription management. Please try again.')
+    } finally {
+      setPortalLoading(false)
     }
   }
 
@@ -66,6 +89,19 @@ export default function PricingPage() {
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Scale your marketing efforts with Google Gemini 2.0 Flash AI assistance. Start with our Basic plan (first month free), upgrade when you need more.
           </p>
+          
+          {/* Manage Subscription Button */}
+          <div className="mt-8">
+            <Button 
+              onClick={handleManageSubscription}
+              disabled={portalLoading}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <SettingsIcon className="h-4 w-4" />
+              {portalLoading ? 'Loading...' : 'Manage Subscription'}
+            </Button>
+          </div>
         </div>
 
         {/* Pricing Cards */}

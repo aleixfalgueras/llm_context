@@ -19,7 +19,11 @@
       "WebFetch(domain:openrouter.ai)",
       "WebFetch(domain:ui.shadcn.com)",
       "WebFetch(domain:www.prisma.io)",
-      "WebFetch(domain:supabase.com)"
+      "WebFetch(domain:supabase.com)",
+      "Bash(npm install:*)",
+      "Bash(npx tsx:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:docs.stripe.com)"
     ],
     "deny": []
   }

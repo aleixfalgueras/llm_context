@@ -22,7 +22,11 @@
       "Bash(npx prisma migrate dev:*)",
       "Bash(true)",
       "Bash(npx prisma generate:*)",
-      "WebFetch(domain:supabase.com)"
+      "WebFetch(domain:supabase.com)",
+      "Bash(npm install:*)",
+      "Bash(npx tsx:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:docs.stripe.com)"
     ],
     "deny": []
   }
