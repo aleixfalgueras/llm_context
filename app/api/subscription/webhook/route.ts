@@ -60,12 +60,6 @@ export async function POST(request: NextRequest) {
         break
       }
 
-      case 'customer.subscription.trial_will_end': {
-        const subscription = event.data.object as Stripe.Subscription
-        await handleTrialWillEnd(subscription)
-        break
-      }
-
       default:
         logger.info('Unhandled webhook event type', { metadata: { type: event.type } })
     }
@@ -196,26 +190,3 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   }
 }
 
-async function handleTrialWillEnd(subscription: Stripe.Subscription) {
-  try {
-    logger.info('Trial will end soon', {
-      metadata: {
-        subscriptionId: subscription.id,
-        customerId: subscription.customer,
-        trialEnd: subscription.trial_end,
-      }
-    })
-    
-    // Here you could implement logic to notify the user about trial ending
-    // For example, send an email or create a notification
-    
-  } catch (error) {
-    logger.error('Failed to handle trial will end', error as Error, {
-      metadata: {
-        subscriptionId: subscription.id,
-        customerId: subscription.customer,
-      }
-    })
-    throw error
-  }
-}
