@@ -40,7 +40,7 @@ export async function withAuthAndUsageCheck(
             limitType: usageCheck.limitType,
             used: usageCheck.used,
             limit: usageCheck.limit,
-            upgradeUrl: '/pricing'
+            upgradeUrl: '/subscription'
           },
           { status: 429 }
         )
@@ -88,7 +88,7 @@ export async function withModelAccessCheck(
             tier: modelAccess.tier,
             plan: modelAccess.plan,
             modelId,
-            upgradeUrl: '/pricing'
+            upgradeUrl: '/subscription'
           },
           { status: 403 }
         )

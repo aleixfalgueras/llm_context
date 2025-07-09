@@ -53,7 +53,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
 
   const handleUpgrade = () => {
     setShowLimitDialog(false)
-    router.push('/pricing')
+    router.push('/subscription')
   }
 
   return (
