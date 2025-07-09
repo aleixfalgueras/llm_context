@@ -53,7 +53,7 @@ export function ConsentManager() {
 
     // Don't show consent dialog on public/informational pages and auth pages
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-    const isPublicPage = ['/', '/terms', '/privacy', '/privacy/cookies', '/privacy/settings'].includes(currentPath)
+    const isPublicPage = ['/', '/terms', '/privacy', '/privacy/settings'].includes(currentPath)
     const isAuthPage = currentPath.startsWith('/sign-in') || currentPath.startsWith('/sign-up')
     
     if (isPublicPage || isAuthPage) {
