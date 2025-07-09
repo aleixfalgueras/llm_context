@@ -223,7 +223,21 @@ export function showCustomToast(
     duration?: number
   }
 ) {
-  const variant = type === 'error' || type === 'warning' ? 'destructive' : undefined
+  let variant: ToastVariant | undefined
+  
+  switch (type) {
+    case 'success':
+      variant = ToastVariant.SUCCESS
+      break
+    case 'error':
+    case 'warning':
+      variant = ToastVariant.DESTRUCTIVE
+      break
+    case 'info':
+    default:
+      variant = ToastVariant.DEFAULT
+      break
+  }
   
   return toast({
     title: message,
