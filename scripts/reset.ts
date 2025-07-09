@@ -140,7 +140,7 @@ async function clearDocumentsBucket() {
   try {
     // Check if Supabase environment variables are available
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseKey = process.env.SUPABASE_KEY
     
     if (!supabaseUrl || !supabaseKey) {
       console.log('⚠️  Supabase environment variables not found, skipping bucket clearing')
@@ -215,11 +215,9 @@ async function main() {
     }
     
     console.log('\n🎉 Reset completed successfully!')
-    console.log('📝 Note: Database schema and migrations preserved')
     if (tablesToKeep.length > 0) {
       console.log(`📝 Note: Data preserved in ${tablesToKeep.length} table${tablesToKeep.length > 1 ? 's' : ''}: ${tablesToKeep.join(', ')}`)
     }
-    console.log('📝 Note: Template prompts are available as hard-coded templates in the UI')
     
   } catch (error) {
     console.error('\n💥 Error during reset process:', error)
