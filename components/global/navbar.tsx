@@ -108,7 +108,7 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/privacy/cookies" className="cursor-pointer flex items-center">
+                      <Link href="/privacy#cookies" className="cursor-pointer flex items-center">
                         <span>Cookie Policy</span>
                       </Link>
                     </DropdownMenuItem>

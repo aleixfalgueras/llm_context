@@ -9,6 +9,7 @@ import { CheckIcon, StarIcon, CrownIcon, ZapIcon, SettingsIcon } from 'lucide-re
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 import { useSubscription } from '@/hooks/use-subscription'
+import { Navbar } from '@/components/global/navbar'
 
 
 
@@ -119,8 +120,9 @@ export default function PricingPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -130,17 +132,21 @@ export default function PricingPage() {
             Scale your marketing efforts with Google Gemini 2.0 Flash AI assistance. Start with our Basic plan (first month free), upgrade when you need more.
           </p>
           
-          {/* Manage Subscription Button */}
-          <div className="mt-8">
-            <Button 
-              onClick={handleManageSubscription}
-              disabled={portalLoading}
-              variant="outline"
-              className="flex items-center gap-2"
+          {/* Manage Subscription Link */}
+          <div className="mt-8 text-center">
+            <a 
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                handleManageSubscription()
+              }}
+              className={`inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 hover:underline transition-colors ${
+                portalLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              }`}
             >
               <SettingsIcon className="h-4 w-4" />
               {portalLoading ? 'Loading...' : 'Manage Subscription'}
-            </Button>
+            </a>
           </div>
         </div>
 
