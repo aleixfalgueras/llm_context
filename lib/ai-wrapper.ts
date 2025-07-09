@@ -6,6 +6,7 @@ import {
 } from './openrouter'
 import { AIProviderError } from './ai-errors'
 import { logger } from './logger'
+import { ApiErrorCode } from '@/types/enums'
 
 // Re-export interfaces for backward compatibility
 export interface AICompletionOptions extends OpenRouterCompletionOptions {}
@@ -100,7 +101,7 @@ export function createUsageLimitResponse(action: string, limit: number | 'unlimi
   return Response.json(
     {
       error: errorMessage + upgradeMessage,
-      code: 'USAGE_LIMIT_EXCEEDED',
+      code: ApiErrorCode.USAGE_LIMIT_EXCEEDED,
       limitType: limitType || 'count',
       used,
       limit,

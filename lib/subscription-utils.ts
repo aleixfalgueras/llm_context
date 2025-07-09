@@ -2,6 +2,7 @@ import { prisma } from './prisma'
 import { logger, withTiming } from './logger'
 import { getTierFromPlan, isModelAvailableForTier } from './models-config'
 import { SubscriptionPlan, SubscriptionStatus, ModelTier } from '../types/subscription-types'
+import { ApiErrorCode } from '@/types/enums'
 
 import { 
   getCachedSubscription, 
@@ -209,6 +210,27 @@ export async function checkUsageLimit(userId: string, action: 'client') {
   try {
     const subscription = await getUserSubscription(userId)
 
+    // Check if subscription is active first
+    if (!isSubscriptionActive(subscription)) {
+      logger.warn('Subscription is not active for usage limit check', { 
+        userId,
+        metadata: { 
+          action,
+          plan: subscription.plan,
+          status: subscription.status,
+          currentPeriodEnd: subscription.currentPeriodEnd
+        }
+      });
+      endTiming();
+      return { 
+        allowed: false, 
+        limit: 0, 
+        used: 0, 
+        limitType: action,
+        reason: ApiErrorCode.SUBSCRIPTION_EXPIRED 
+      }
+    }
+
     switch (action) {
       case 'client':
         const clientCount = await prisma.client.count({ where: { userId } })
@@ -309,6 +331,28 @@ export async function checkModelAccess(userId: string, modelId: string) {
   
   try {
     const subscription = await getUserSubscription(userId)
+    
+    // Check if subscription is active first
+    if (!isSubscriptionActive(subscription)) {
+      logger.warn('Subscription is not active for model access check', { 
+        userId,
+        metadata: { 
+          modelId,
+          plan: subscription.plan,
+          status: subscription.status,
+          currentPeriodEnd: subscription.currentPeriodEnd
+        }
+      });
+      endTiming();
+      return { 
+        allowed: false, 
+        tier: ModelTier.BASIC, 
+        plan: subscription.plan, 
+        modelId,
+        reason: ApiErrorCode.SUBSCRIPTION_EXPIRED 
+      }
+    }
+
     const tier = getTierFromPlan(subscription.plan)
     const hasAccess = isModelAvailableForTier(modelId, tier)
     
@@ -332,6 +376,17 @@ export async function checkModelAccess(userId: string, modelId: string) {
 // Note: OpenRouter handles billing automatically based on actual usage
 // The cost tracking in this app is for display/limit purposes only
 
+// Check if subscription is active and not expired
+export function isSubscriptionActive(subscription: any) {
+  if (!subscription) return false
+  
+  const now = new Date()
+  const isStatusActive = subscription.status === SubscriptionStatus.ACTIVE
+  const isNotExpired = subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd) > now
+  
+  return isStatusActive && isNotExpired
+}
+
 // Get usage analytics for dashboard
 export async function getUserUsageAnalytics(userId: string) {
   try {
@@ -347,6 +402,7 @@ export async function getUserUsageAnalytics(userId: string) {
         plan: subscription.plan,
         status: subscription.status,
         currentPeriodEnd: subscription.currentPeriodEnd,
+        isActive: isSubscriptionActive(subscription),
       },
       limits: {
         clients: subscription.maxClients,

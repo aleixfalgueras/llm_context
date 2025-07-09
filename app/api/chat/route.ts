@@ -11,6 +11,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getDefaultModel, getModelsByTier } from '@/lib/models-config'
 import { checkModelAccess } from '@/lib/subscription-utils'
+import { ApiErrorCode } from '@/types/enums'
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Chat API');
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
       
       return NextResponse.json({
         error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
-        code: 'MODEL_ACCESS_DENIED',
+        code: ApiErrorCode.MODEL_ACCESS_DENIED,
         tier: modelAccess.tier,
         plan: modelAccess.plan,
         modelId: selectedModel,

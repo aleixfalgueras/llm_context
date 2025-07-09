@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { checkUsageLimit, updateUsageTracking, checkModelAccess } from './subscription-utils'
+import { checkUsageLimit, updateUsageTracking, checkModelAccess, getUserSubscription, isSubscriptionActive } from './subscription-utils'
 import { prisma } from './prisma'
 import { getModelsByTier } from './models-config'
 import { getStorageAnalytics } from './storage-utils'
+import { ApiErrorCode } from '@/types/enums'
 
 export interface UsageLimitResponse {
   allowed: boolean
@@ -30,13 +31,29 @@ export async function withAuthAndUsageCheck(
         )
       }
 
+      // Check subscription expiration for write operations
+      const subscription = await getUserSubscription(userId)
+      if (!isSubscriptionActive(subscription)) {
+        return Response.json(
+          {
+            error: 'Your subscription has expired. Please upgrade to continue creating new content.',
+            code: ApiErrorCode.SUBSCRIPTION_EXPIRED,
+            plan: subscription.plan,
+            status: subscription.status,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            upgradeUrl: '/subscription'
+          },
+          { status: 402 }
+        )
+      }
+
       // Check usage limits
       const usageCheck = await checkUsageLimit(userId, action)
       if (!usageCheck.allowed) {
         return Response.json(
           {
             error: `You've reached your monthly ${usageCheck.limitType} limit of ${usageCheck.limit}. Upgrade your plan to continue.`,
-            code: 'USAGE_LIMIT_EXCEEDED',
+            code: ApiErrorCode.USAGE_LIMIT_EXCEEDED,
             limitType: usageCheck.limitType,
             used: usageCheck.used,
             limit: usageCheck.limit,
@@ -75,6 +92,22 @@ export async function withModelAccessCheck(
         )
       }
 
+      // Check subscription expiration for AI requests (write operations)
+      const subscription = await getUserSubscription(userId)
+      if (!isSubscriptionActive(subscription)) {
+        return Response.json(
+          {
+            error: 'Your subscription has expired. Please upgrade to continue using AI features.',
+            code: ApiErrorCode.SUBSCRIPTION_EXPIRED,
+            plan: subscription.plan,
+            status: subscription.status,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            upgradeUrl: '/subscription'
+          },
+          { status: 402 }
+        )
+      }
+
       // Check model access
       const modelAccess = await checkModelAccess(userId, modelId)
       if (!modelAccess.allowed) {
@@ -84,7 +117,7 @@ export async function withModelAccessCheck(
         return Response.json(
           {
             error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
-            code: 'MODEL_ACCESS_DENIED',
+            code: ApiErrorCode.MODEL_ACCESS_DENIED,
             tier: modelAccess.tier,
             plan: modelAccess.plan,
             modelId,
@@ -182,6 +215,11 @@ export async function getUsageInfo(userId: string) {
       // Plan info
       plan: subscription.plan,
       tier: subscription.tier || 'basic',
+      
+      // Subscription status
+      status: subscription.status,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      isActive: isSubscriptionActive(subscription),
       
       // Client limits (flat structure for frontend compatibility)
       clientsUsed: clientUsage.used,

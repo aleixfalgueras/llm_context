@@ -2,12 +2,13 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { checkUsageLimit } from './subscription-utils'
+import { checkUsageLimit, getUserSubscription, isSubscriptionActive } from './subscription-utils'
 import { logger } from './logger'
 import { ClientOperations } from './database'
 import { ClientFormData } from '@/types/client'
 import { prisma } from './prisma'
 import { processClientData } from './validation-helpers'
+import { ApiErrorCode } from '@/types/enums'
 
 export type ClientData = ClientFormData
 
@@ -20,6 +21,12 @@ export async function createClient(data: ClientFormData) {
   // Check usage limits before creating client
   const usageCheck = await checkUsageLimit(userId, 'client')
   if (!usageCheck.allowed) {
+    if (usageCheck.reason === ApiErrorCode.SUBSCRIPTION_EXPIRED) {
+      const error = new Error('Your subscription has expired. Please upgrade to continue creating clients.')
+      ;(error as any).code = ApiErrorCode.SUBSCRIPTION_EXPIRED
+      ;(error as any).upgradeUrl = '/subscription'
+      throw error
+    }
     throw new Error(`You've reached your client limit of ${usageCheck.limit}. Upgrade to Pro for unlimited clients.`)
   }
 
@@ -52,6 +59,15 @@ export async function updateClient(clientId: string, data: ClientFormData) {
   const { userId } = await auth()
   if (!userId) {
     throw new Error('User not authenticated')
+  }
+
+  // Check subscription expiration before updating client
+  const subscription = await getUserSubscription(userId)
+  if (!isSubscriptionActive(subscription)) {
+    const error = new Error('Your subscription has expired. Please upgrade to continue editing clients.')
+    ;(error as any).code = ApiErrorCode.SUBSCRIPTION_EXPIRED
+    ;(error as any).upgradeUrl = '/subscription'
+    throw error
   }
 
   // Prepare client data with defaults and trim context fields

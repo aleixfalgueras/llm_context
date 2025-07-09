@@ -4,52 +4,53 @@
  */
 
 import { toast } from '@/hooks/use-toast'
+import { ApiErrorCode, ToastVariant } from '@/types/enums'
 
 /**
  * Success toast notifications
  */
 export const successToasts = {
   clientCreated: (name: string) => 
-    toast({ title: 'Success', description: `Client "${name}" created successfully` }),
+    toast({ title: 'Success', description: `Client "${name}" created successfully`, variant: ToastVariant.SUCCESS }),
   
   clientUpdated: (name: string) => 
-    toast({ title: 'Success', description: `Client "${name}" updated successfully` }),
+    toast({ title: 'Success', description: `Client "${name}" updated successfully`, variant: ToastVariant.SUCCESS }),
   
   clientDeleted: (name: string) => 
-    toast({ title: 'Success', description: `Client "${name}" deleted successfully` }),
+    toast({ title: 'Success', description: `Client "${name}" deleted successfully`, variant: ToastVariant.SUCCESS }),
   
   promptCreated: (name: string) => 
-    toast({ title: 'Success', description: `Prompt "${name}" created successfully` }),
+    toast({ title: 'Success', description: `Prompt "${name}" created successfully`, variant: ToastVariant.SUCCESS }),
   
   promptUpdated: (name: string) => 
-    toast({ title: 'Success', description: `Prompt "${name}" updated successfully` }),
+    toast({ title: 'Success', description: `Prompt "${name}" updated successfully`, variant: ToastVariant.SUCCESS }),
   
   promptDeleted: (name: string) => 
-    toast({ title: 'Success', description: `Prompt "${name}" deleted successfully` }),
+    toast({ title: 'Success', description: `Prompt "${name}" deleted successfully`, variant: ToastVariant.SUCCESS }),
   
   documentCreated: (name: string) => 
-    toast({ title: 'Success', description: `Document "${name}" created successfully` }),
+    toast({ title: 'Success', description: `Document "${name}" created successfully`, variant: ToastVariant.SUCCESS }),
   
   documentSaved: (name: string) => 
-    toast({ title: 'Success', description: `Document "${name}" saved successfully` }),
+    toast({ title: 'Success', description: `Document "${name}" saved successfully`, variant: ToastVariant.SUCCESS }),
   
   documentDeleted: (name: string) => 
-    toast({ title: 'Success', description: `Document "${name}" deleted successfully` }),
+    toast({ title: 'Success', description: `Document "${name}" deleted successfully`, variant: ToastVariant.SUCCESS }),
   
   chatExported: () => 
-    toast({ title: 'Success', description: 'Chat exported successfully' }),
+    toast({ title: 'Success', description: 'Chat exported successfully', variant: ToastVariant.SUCCESS }),
   
   feedbackSubmitted: () => 
-    toast({ title: 'Success', description: 'Feedback submitted successfully' }),
+    toast({ title: 'Success', description: 'Feedback submitted successfully', variant: ToastVariant.SUCCESS }),
   
   settingsSaved: () => 
-    toast({ title: 'Success', description: 'Settings saved successfully' }),
+    toast({ title: 'Success', description: 'Settings saved successfully', variant: ToastVariant.SUCCESS }),
   
   dataExported: () => 
-    toast({ title: 'Success', description: 'Data exported successfully' }),
+    toast({ title: 'Success', description: 'Data exported successfully', variant: ToastVariant.SUCCESS }),
   
   fileUploaded: (filename: string) => 
-    toast({ title: 'Success', description: `File "${filename}" uploaded successfully` })
+    toast({ title: 'Success', description: `File "${filename}" uploaded successfully`, variant: ToastVariant.SUCCESS })
 }
 
 /**
@@ -57,73 +58,81 @@ export const successToasts = {
  */
 export const errorToasts = {
   generic: (operation: string) => 
-    toast({ title: 'Error', description: `Failed to ${operation}. Please try again.`, variant: 'destructive' }),
+    toast({ title: 'Error', description: `Failed to ${operation}. Please try again.`, variant: ToastVariant.DESTRUCTIVE }),
   
   clientNotFound: () => 
-    toast({ title: 'Error', description: 'Client not found', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Client not found', variant: ToastVariant.DESTRUCTIVE }),
   
   clientCreateFailed: () => 
-    toast({ title: 'Error', description: 'Failed to create client. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to create client. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   clientUpdateFailed: () => 
-    toast({ title: 'Error', description: 'Failed to update client. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to update client. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   clientDeleteFailed: () => 
-    toast({ title: 'Error', description: 'Failed to delete client. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to delete client. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   promptNotFound: () => 
-    toast({ title: 'Error', description: 'Prompt not found', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Prompt not found', variant: ToastVariant.DESTRUCTIVE }),
   
   promptCreateFailed: () => 
-    toast({ title: 'Error', description: 'Failed to create prompt. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to create prompt. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   promptUpdateFailed: () => 
-    toast({ title: 'Error', description: 'Failed to update prompt. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to update prompt. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   promptDeleteFailed: () => 
-    toast({ title: 'Error', description: 'Failed to delete prompt. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to delete prompt. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   documentGenerationFailed: () => 
-    toast({ title: 'Error', description: 'Failed to generate document. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to generate document. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   documentSaveFailed: () => 
-    toast({ title: 'Error', description: 'Failed to save document. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to save document. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   documentLoadFailed: () => 
-    toast({ title: 'Error', description: 'Failed to load document. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to load document. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   chatLoadFailed: () => 
-    toast({ title: 'Error', description: 'Failed to load chat. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to load chat. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   chatSendFailed: () => 
-    toast({ title: 'Error', description: 'Failed to send message. Please try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Failed to send message. Please try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   fileUploadFailed: (reason?: string) => 
-    toast({ title: 'Error', description: `File upload failed${reason ? `: ${reason}` : '. Please try again.'}`, variant: 'destructive' }),
+    toast({ title: 'Error', description: `File upload failed${reason ? `: ${reason}` : '. Please try again.'}`, variant: ToastVariant.DESTRUCTIVE }),
   
   fileTooLarge: (maxSize: string) => 
-    toast({ title: 'Error', description: `File too large. Maximum size is ${maxSize}`, variant: 'destructive' }),
+    toast({ title: 'Error', description: `File too large. Maximum size is ${maxSize}`, variant: ToastVariant.DESTRUCTIVE }),
   
   invalidFileType: (allowedTypes: string) => 
-    toast({ title: 'Error', description: `Invalid file type. Allowed types: ${allowedTypes}`, variant: 'destructive' }),
+    toast({ title: 'Error', description: `Invalid file type. Allowed types: ${allowedTypes}`, variant: ToastVariant.DESTRUCTIVE }),
   
   networkError: () => 
-    toast({ title: 'Error', description: 'Network error. Please check your connection and try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Network error. Please check your connection and try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   unauthorized: () => 
-    toast({ title: 'Error', description: 'You are not authorized to perform this action', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'You are not authorized to perform this action', variant: ToastVariant.DESTRUCTIVE }),
   
   rateLimitExceeded: () => 
-    toast({ title: 'Error', description: 'Rate limit exceeded. Please wait a moment and try again.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Rate limit exceeded. Please wait a moment and try again.', variant: ToastVariant.DESTRUCTIVE }),
   
   validationError: (message: string) => 
-    toast({ title: 'Error', description: `Validation error: ${message}`, variant: 'destructive' }),
+    toast({ title: 'Error', description: `Validation error: ${message}`, variant: ToastVariant.DESTRUCTIVE }),
   
   serverError: () => 
-    toast({ title: 'Error', description: 'Server error. Please try again later.', variant: 'destructive' }),
+    toast({ title: 'Error', description: 'Server error. Please try again later.', variant: ToastVariant.DESTRUCTIVE }),
   
   featureNotAvailable: () => 
-    toast({ title: 'Error', description: 'This feature is not available in your current plan', variant: 'destructive' })
+    toast({ title: 'Error', description: 'This feature is not available in your current plan', variant: ToastVariant.DESTRUCTIVE }),
+  
+  subscriptionExpired: (upgradeUrl: string = '/subscription') => 
+    toast({ 
+      title: 'Subscription Expired', 
+      description: 'Your subscription has expired. Please upgrade to continue using write features. Read-only access is still available.',
+      variant: ToastVariant.DESTRUCTIVE,
+      duration: 10000
+    })
 }
 
 /**
@@ -161,7 +170,7 @@ export const infoToasts = {
     toast({ title: 'No Changes', description: 'No changes detected' }),
   
   sessionExpired: () => 
-    toast({ title: 'Session Expired', description: 'Your session has expired. Please sign in again.', variant: 'destructive' })
+    toast({ title: 'Session Expired', description: 'Your session has expired. Please sign in again.', variant: ToastVariant.DESTRUCTIVE })
 }
 
 /**
@@ -172,14 +181,14 @@ export const warningToasts = {
     toast({ 
       title: 'Unsaved Changes', 
       description: 'Make sure to save before leaving',
-      variant: 'destructive'
+      variant: ToastVariant.DESTRUCTIVE
     }),
   
   confirmDelete: (item: string) => 
     toast({ 
       title: 'Confirm Delete',
       description: `Are you sure you want to delete "${item}"? This action cannot be undone.`,
-      variant: 'destructive'
+      variant: ToastVariant.DESTRUCTIVE
     }),
   
   usageLimitApproaching: (percentage: number) => 
@@ -222,4 +231,60 @@ export function showCustomToast(
     variant,
     duration: options?.duration
   })
+}
+
+/**
+ * Handle API errors with consistent toast notifications
+ */
+export function handleApiError(error: any, fallbackMessage: string = 'An error occurred') {
+  // Handle Response objects
+  if (error.json && typeof error.json === 'function') {
+    return error.json().then((data: any) => {
+      handleApiErrorData(data, fallbackMessage)
+    }).catch(() => {
+      errorToasts.generic(fallbackMessage)
+    })
+  }
+  
+  // Handle plain objects with error data
+  if (typeof error === 'object' && error !== null) {
+    return handleApiErrorData(error, fallbackMessage)
+  }
+  
+  // Handle string errors
+  if (typeof error === 'string') {
+    return errorToasts.generic(error)
+  }
+  
+  // Fallback for unknown error types
+  return errorToasts.generic(fallbackMessage)
+}
+
+/**
+ * Handle API error data objects
+ */
+function handleApiErrorData(data: any, fallbackMessage: string) {
+  switch (data.code) {
+    case ApiErrorCode.SUBSCRIPTION_EXPIRED:
+      return errorToasts.subscriptionExpired(data.upgradeUrl)
+    
+    case ApiErrorCode.USAGE_LIMIT_EXCEEDED:
+      return toast({
+        title: 'Usage Limit Exceeded',
+        description: `${data.error} Please upgrade your plan to continue.`,
+        variant: ToastVariant.DESTRUCTIVE,
+        duration: 10000
+      })
+    
+    case ApiErrorCode.MODEL_ACCESS_DENIED:
+      return toast({
+        title: 'Model Access Denied',
+        description: `${data.error} Please upgrade your plan to continue.`,
+        variant: ToastVariant.DESTRUCTIVE,
+        duration: 10000
+      })
+    
+    default:
+      return errorToasts.generic(data.error || fallbackMessage)
+  }
 }
