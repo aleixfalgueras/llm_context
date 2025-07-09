@@ -32,7 +32,7 @@ const storageCache: StorageCache = {}
 const clientCountCache: ClientCountCache = {}
 
 // Cache durations
-const SUBSCRIPTION_CACHE_TTL = 5 * 60 * 1000 // 5 minutes (subscription data changes rarely)
+const SUBSCRIPTION_CACHE_TTL = 60 * 60 * 1000 // 1 hour (subscription data changes rarely)
 const USAGE_CACHE_TTL = 2 * 60 * 1000 // 2 minutes (increased from 30 seconds)
 const STORAGE_CACHE_TTL = 5 * 60 * 1000 // 5 minutes (storage data changes rarely)
 const CLIENT_COUNT_CACHE_TTL = 1 * 60 * 1000 // 1 minute (client count changes occasionally)
