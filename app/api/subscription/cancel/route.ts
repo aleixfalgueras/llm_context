@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { invalidateSubscriptionCache } from '@/lib/subscription-cache'
 import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
@@ -42,6 +43,9 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       },
     })
+
+    // Invalidate subscription cache after successful cancellation
+    invalidateSubscriptionCache(userId)
 
     logger.info('Subscription canceled successfully', {
       userId,

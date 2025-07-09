@@ -2,6 +2,7 @@ import { stripe } from './stripe'
 import { prisma } from './prisma'
 import { logger } from './logger'
 import { SubscriptionPlan, SubscriptionStatus } from '@/types/subscription-types'
+import { invalidateSubscriptionCache } from './subscription-cache'
 import Stripe from 'stripe'
 
 export const STRIPE_PRICE_IDS = {
@@ -207,6 +208,9 @@ export async function updateSubscriptionInDatabase(
         status: updatedSubscription.status,
       }
     })
+
+    // Invalidate subscription cache after successful update
+    invalidateSubscriptionCache(subscription.userId)
 
     return updatedSubscription
   } catch (error) {

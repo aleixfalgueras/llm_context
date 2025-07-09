@@ -14,6 +14,7 @@
 import { PrismaClient } from '@prisma/client'
 import { SUBSCRIPTION_PLANS } from '../lib/subscription-utils'
 import { SubscriptionPlan } from '../types/subscription-types'
+import { invalidateSubscriptionCache } from '../lib/subscription-cache'
 
 const prisma = new PrismaClient()
 
@@ -166,6 +167,9 @@ async function updateUserSubscriptionPlan(userId: string, planName: PlanName) {
       updatedAt: new Date()
     }
   })
+  
+  // Invalidate subscription cache after plan update
+  invalidateSubscriptionCache(userId)
   
   console.log(`✅ Updated user subscription to ${planName} plan`)
   return updatedSubscription
