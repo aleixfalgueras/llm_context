@@ -13,7 +13,7 @@ import { Navbar } from '@/components/global/navbar'
 
 
 
-export default function PricingPage() {
+export default function SubscriptionPage() {
   const { user: _user } = useUser()
   const subscription = useSubscription()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)

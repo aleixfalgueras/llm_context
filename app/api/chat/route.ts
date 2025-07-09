@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         tier: modelAccess.tier,
         plan: modelAccess.plan,
         modelId: selectedModel,
-        upgradeUrl: '/pricing'
+        upgradeUrl: '/subscription'
       }, { status: 403 })
     }
     

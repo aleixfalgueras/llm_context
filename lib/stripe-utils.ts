@@ -105,8 +105,8 @@ export async function createCheckoutSession(
           planId,
         },
       },
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/pricing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/pricing?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/subscription?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/subscription?canceled=true`,
     })
 
     logger.info('Created checkout session', { userId, metadata: { sessionId: session.id, planId } })
@@ -129,7 +129,7 @@ export async function createCustomerPortalSession(userId: string) {
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: subscription.stripeCustomerId,
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/pricing`,
+      return_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/subscription`,
     })
 
     logger.info('Created customer portal session', { userId, metadata: { sessionId: portalSession.id } })

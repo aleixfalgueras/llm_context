@@ -104,7 +104,7 @@ export function createUsageLimitResponse(action: string, limit: number | 'unlimi
       limitType: limitType || 'count',
       used,
       limit,
-      upgradeUrl: '/pricing'
+      upgradeUrl: '/subscription'
     },
     { status: 429 }
   )
