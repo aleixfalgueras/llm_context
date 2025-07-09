@@ -1,9 +1,11 @@
 'use client'
 
-import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Megaphone, Target, TrendingUp, BarChart3, PenTool } from 'lucide-react'
+import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Megaphone, Target, TrendingUp, BarChart3, PenTool, CheckIcon, StarIcon, CrownIcon, ZapIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/global/theme-toggle'
+import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
+import { SubscriptionPlan } from '@/types/subscription-types'
 import Link from 'next/link'
 
 export function LandingPage() {
@@ -16,9 +18,6 @@ export function LandingPage() {
         </div>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <Button variant="ghost" asChild>
-            <Link href="/pricing">Pricing</Link>
-          </Button>
           <Button variant="ghost" asChild>
             <Link href="/sign-in">Sign in</Link>
           </Button>
@@ -56,7 +55,7 @@ export function LandingPage() {
         </div>
 
         {/* Core Features Grid */}
-        <div className="mb-16">
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-center mb-12">Advanced AI Marketing Platform</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="p-6 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
@@ -98,6 +97,15 @@ export function LandingPage() {
                 Generate comprehensive client reports and campaign summaries with full business context
               </p>
             </Card>
+          </div>
+        </div>
+        
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <Shield className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+              Enterprise-grade privacy and security
+            </span>
           </div>
         </div>
         
@@ -145,6 +153,7 @@ export function LandingPage() {
               </span>
             </div>
           </div>
+
         </div>
         
         {/* How It Works */}
@@ -207,47 +216,61 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* Technology Benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-green-200 dark:hover:border-green-800">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Enterprise Privacy</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              GDPR-compliant with granular client context selection. Your data never leaves your control with privacy-first design.
+        {/* Pricing Section */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Choose the plan that fits your marketing needs. All plans include access to both Google Gemini 2.0 and OpenAI GPT-4.1.
             </p>
-          </Card>
-
-          <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Latest AI Technology</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Access to cutting-edge Google and OpenAI models through unified OpenRouter platform with business-sustainable pricing.
-            </p>
-          </Card>
-
-          <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-purple-200 dark:hover:border-purple-800">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Modular Architecture</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Enterprise-grade system with clean separation of concerns, comprehensive error handling, and real-time usage tracking.
-            </p>
-          </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {Object.entries(SUBSCRIPTION_PLANS).map(([planId, plan]) => {
+              const getPlanIcon = (planId: string) => {
+                switch (planId) {
+                  case SubscriptionPlan.BASIC: return <ZapIcon className="h-8 w-8" />
+                  case SubscriptionPlan.PRO: return <StarIcon className="h-8 w-8" />
+                  case SubscriptionPlan.BUSINESS: return <CrownIcon className="h-8 w-8" />
+                  default: return <ZapIcon className="h-8 w-8" />
+                }
+              }
+              
+              return (
+                <Card key={planId} className="hover:shadow-lg transition-shadow h-full flex flex-col">
+                  <CardHeader className="text-center flex-1">
+                    <div className="flex justify-center mb-4">
+                      {getPlanIcon(planId)}
+                    </div>
+                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                    <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{plan.description}</CardDescription>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold">€{plan.price}</span>
+                      {plan.price > 0 && <span className="text-gray-500">/month</span>}
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {plan.features_list.map((feature, index) => (
+                        <li key={index} className="flex items-center">
+                          <CheckIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
         </div>
         
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Choose Your AI Provider?
+          <h2 className="text-3xl md:text-4xl font-bold mb-8">
+            Ready to Create Content?
           </h2>
-          <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Join marketing professionals using both Google Gemini 2.0 and OpenAI GPT-4.1 to create better campaigns with maximum flexibility and business sustainability.
-          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link href="/sign-up">
@@ -263,11 +286,8 @@ export function LandingPage() {
       <footer className="border-t border-gray-200 dark:border-gray-700 py-8 mt-16">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-600 dark:text-gray-400 text-sm">
-            <p>&copy; 2025 SpeedBrand. Intelligent campaign creation for marketing professionals.</p>
+            <p>&copy; 2025 SpeedBrand. AI platform for marketing professionals.</p>
             <div className="flex items-center gap-6 mt-4 md:mt-0">
-              <Link href="/pricing" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
-                Pricing
-              </Link>
               <Link href="/terms" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
                 Terms of Service
               </Link>
