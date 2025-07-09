@@ -37,25 +37,25 @@ The usage tracking system operates across **three primary dimensions**:
 
 ## Subscription Plans and Token Limits
 
-### Basic Plan - $10/month
+### Basic Plan - €10/month ($11.72)
 - **Token Limit**: 5,000,000 tokens/month (~3,750 pages of content)
-- **Cost at limit**: ~$0.875 (91.25% profit margin)
+- **Cost at limit**: ~$0.875 (92.5% profit margin)
 - **Storage**: 50 MB
 - **Clients**: 3 profiles
 - **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Individual users and small businesses
 
-### Pro Plan - $25/month  
+### Pro Plan - €25/month ($29.30)
 - **Token Limit**: 15,000,000 tokens/month (~11,250 pages of content)
-- **Cost at limit**: ~$2.625 (89.5% profit margin)
+- **Cost at limit**: ~$2.625 (91.0% profit margin)
 - **Storage**: 200 MB
 - **Clients**: Unlimited
 - **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Growing businesses and marketing professionals
 
-### Business Plan - $50/month
+### Business Plan - €50/month ($58.60)
 - **Token Limit**: 40,000,000 tokens/month (~30,000 pages of content)
-- **Cost at limit**: ~$7 (86% profit margin)
+- **Cost at limit**: ~$7 (88.1% profit margin)
 - **Storage**: 2 GB
 - **Clients**: Unlimited
 - **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
@@ -129,17 +129,17 @@ export const SUBSCRIPTION_PLANS = {
   [SubscriptionPlan.BASIC]: {
     maxTokensPerMonth: 5000000,        // 5M tokens
     maxClients: 3,
-    price: 10,
+    price: 11.72,  // €10 = $11.72
   },
   [SubscriptionPlan.PRO]: {
     maxTokensPerMonth: 15000000,      // 15M tokens
     maxClients: -1, // unlimited
-    price: 25,
+    price: 29.30,  // €25 = $29.30
   },
   [SubscriptionPlan.BUSINESS]: {
     maxTokensPerMonth: 40000000,      // 40M tokens
     maxClients: -1, // unlimited
-    price: 50,
+    price: 58.60,  // €50 = $58.60
   },
 } as const;
 ```
