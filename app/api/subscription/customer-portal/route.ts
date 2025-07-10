@@ -23,15 +23,19 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: portalSession.url })
   } catch (error) {
-    logger.error('Failed to create customer portal session', error as Error, { userId: (await auth()).userId ?? undefined })
-    
     if (error instanceof Error && error.message.includes('No Stripe customer found')) {
+      logger.info('Customer portal access attempted during free trial period', { 
+        metadata: {
+          message: 'User has no Stripe customer - expected behavior for free trial users'
+        }
+      })
       return NextResponse.json(
         { error: 'No active subscription found' },
         { status: 404 }
       )
     }
 
+    logger.error('Failed to create customer portal session', error as Error, { userId: (await auth()).userId ?? undefined })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
