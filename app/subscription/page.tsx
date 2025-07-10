@@ -137,7 +137,24 @@ export default function SubscriptionPage() {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 relative">
+          {/* Manage Subscription Link - Top Right */}
+          <div className="absolute top-0 right-0">
+            <a 
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                handleManageSubscription()
+              }}
+              className={`inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 hover:underline transition-colors ${
+                portalLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              }`}
+            >
+              <SettingsIcon className="h-4 w-4" />
+              {portalLoading ? 'Loading...' : 'Manage Subscription'}
+            </a>
+          </div>
+          
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Choose Your Plan
           </h1>
@@ -218,23 +235,6 @@ export default function SubscriptionPage() {
           ))}
         </div>
 
-          
-        {/* Manage Subscription Link */}
-        <div className="mt-16 text-center">
-          <a 
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              handleManageSubscription()
-            }}
-            className={`inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 hover:underline transition-colors ${
-              portalLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            }`}
-          >
-            <SettingsIcon className="h-4 w-4" />
-            {portalLoading ? 'Loading...' : 'Manage Subscription'}
-          </a>
-        </div>
 
         {/* FAQ Section */}
         <div className="mt-16 max-w-3xl mx-auto">
