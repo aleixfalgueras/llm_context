@@ -19,6 +19,8 @@ export interface Client {
   specificContext2?: string
   specificContext3?: string
   documentsLanguage?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 // =============================================================================
@@ -66,7 +68,9 @@ export const CLIENT_FIELD_LABELS = {
   specificContext1: 'Specific Context 1',
   specificContext2: 'Specific Context 2',
   specificContext3: 'Specific Context 3',
-  documentsLanguage: 'Documents Language'
+  documentsLanguage: 'Documents Language',
+  createdAt: 'Created At',
+  updatedAt: 'Updated At'
 } as const
 
 export const CLIENT_FIELD_PLACEHOLDERS = {
@@ -79,7 +83,9 @@ export const CLIENT_FIELD_PLACEHOLDERS = {
   specificContext1: 'Add specific context...',
   specificContext2: 'Add specific context...',
   specificContext3: 'Add specific context...',
-  documentsLanguage: 'Select language'
+  documentsLanguage: 'Select language',
+  createdAt: 'Creation date',
+  updatedAt: 'Last updated'
 } as const
 
 // =============================================================================
@@ -122,7 +128,9 @@ export const CLIENT_SELECT_DETAILED = {
   specificContext1: true,
   specificContext2: true,
   specificContext3: true,
-  documentsLanguage: true
+  documentsLanguage: true,
+  createdAt: true,
+  updatedAt: true
 } as const
 
 // =============================================================================
