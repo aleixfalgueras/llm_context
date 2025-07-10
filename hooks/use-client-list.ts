@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast'
 import { deleteClient as deleteClientAction } from '@/lib/client-actions'
 import type { Client } from '@/types/client'
 import type { PaginationInfo, LanguageInfo } from '@/types/client-list-types'
+import { ClientSortMode } from '@/types/enums'
 
 type ViewMode = 'grid' | 'table'
 
@@ -18,6 +19,7 @@ interface UseClientListReturn {
   // State
   searchTerm: string
   viewMode: ViewMode
+  sortMode: ClientSortMode
   currentPage: number
   filteredClients: Client[]
   paginatedClients: Client[]
@@ -26,6 +28,7 @@ interface UseClientListReturn {
   // Actions
   setSearchTerm: (term: string) => void
   setViewMode: (mode: ViewMode) => void
+  setSortMode: (mode: ClientSortMode) => void
   setCurrentPage: (page: number) => void
   deleteClient: (id: string, name: string) => Promise<void>
   getLanguageInfo: (language: string) => LanguageInfo
@@ -56,18 +59,41 @@ export function useClientList({
     'grid'
   )
 
-  // Filter clients based on search term
-  const filteredClients = useMemo(() => {
-    if (!searchTerm.trim()) return clients || []
+  // Persist sort mode in localStorage
+  const { value: sortMode, setValue: setSortMode } = useLocalStorage<ClientSortMode>(
+    'clientsSortMode', 
+    ClientSortMode.CREATED
+  )
 
-    const searchLower = searchTerm.toLowerCase()
-    return (clients || []).filter(client =>
-      client.name.toLowerCase().includes(searchLower) ||
-      client.generalContext?.toLowerCase().includes(searchLower) ||
-      client.country?.toLowerCase().includes(searchLower) ||
-      client.documentsLanguage?.toLowerCase().includes(searchLower)
-    )
-  }, [clients, searchTerm])
+  // Filter and sort clients
+  const filteredClients = useMemo(() => {
+    let result = clients || []
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      result = result.filter(client =>
+        client.name.toLowerCase().includes(searchLower) ||
+        client.generalContext?.toLowerCase().includes(searchLower) ||
+        client.country?.toLowerCase().includes(searchLower) ||
+        client.documentsLanguage?.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Apply sorting
+    result = [...result].sort((a, b) => {
+      switch (sortMode) {
+        case ClientSortMode.NAME:
+          return a.name.localeCompare(b.name)
+        case ClientSortMode.CREATED:
+        default:
+          // Sort by creation date (newest first)
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
+    })
+
+    return result
+  }, [clients, searchTerm, sortMode])
 
   // Calculate pagination
   const paginationInfo = useMemo((): PaginationInfo => {
@@ -127,6 +153,7 @@ export function useClientList({
     // State
     searchTerm,
     viewMode,
+    sortMode,
     currentPage,
     filteredClients,
     paginatedClients,
@@ -135,6 +162,7 @@ export function useClientList({
     // Actions
     setSearchTerm: setSearchTermWithReset,
     setViewMode,
+    setSortMode,
     setCurrentPage,
     deleteClient,
     getLanguageInfo,

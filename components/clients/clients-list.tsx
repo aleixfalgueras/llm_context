@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Plus, User, Grid, List } from 'lucide-react'
+import { Search, Plus, User, Grid, List, Calendar, ArrowDownAZ } from 'lucide-react'
 
 import { ClientGridView } from '@/components/clients/client-grid-view'
 import { ClientTableView } from '@/components/clients/client-table-view'
 import { ClientPagination } from '@/components/clients/client-pagination'
 import { ClientEmptyState } from '@/components/clients/client-empty-state'
 import { UsageInfo, Client, ClientActionHandlers } from '@/types/client-list-types'
-import { ViewMode, ButtonVariant } from '@/types/enums'
+import { ViewMode, ButtonVariant, ClientSortMode } from '@/types/enums'
 import { useClientList } from '@/hooks/use-client-list'
 
 interface ClientsListProps {
@@ -29,6 +29,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
     // State
     searchTerm,
     viewMode,
+    sortMode,
     filteredClients,
     paginatedClients,
     paginationInfo,
@@ -36,6 +37,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
     // Actions
     setSearchTerm,
     setViewMode,
+    setSortMode,
     setCurrentPage,
     deleteClient,
     getLanguageInfo,
@@ -84,6 +86,27 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Sort Toggle */}
+          <div className="flex border border-gray-200 dark:border-gray-700 rounded-lg p-1">
+            <Button
+              variant={sortMode === ClientSortMode.CREATED ? ButtonVariant.DEFAULT : ButtonVariant.GHOST}
+              size="sm"
+              onClick={() => setSortMode(ClientSortMode.CREATED)}
+              className="px-3 py-1.5 h-auto"
+              title="Sort by creation date"
+            >
+              <Calendar className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={sortMode === ClientSortMode.NAME ? ButtonVariant.DEFAULT : ButtonVariant.GHOST}
+              size="sm"
+              onClick={() => setSortMode(ClientSortMode.NAME)}
+              className="px-3 py-1.5 h-auto"
+              title="Sort by name"
+            >
+              <ArrowDownAZ className="h-4 w-4" />
+            </Button>
+          </div>
           {/* View Toggle */}
           <div className="flex border border-gray-200 dark:border-gray-700 rounded-lg p-1">
             <Button
