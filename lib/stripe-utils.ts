@@ -136,7 +136,12 @@ export async function createCustomerPortalSession(userId: string) {
     logger.info('Created customer portal session', { userId, metadata: { sessionId: portalSession.id } })
     return portalSession
   } catch (error) {
-    logger.error('Failed to create customer portal session', error as Error, { userId })
+    if (error instanceof Error && error.message.includes('No Stripe customer found')) {
+      // Don't log as ERROR for free trial users - this is expected behavior
+      logger.debug('Customer portal session requested for user without Stripe customer', { userId })
+    } else {
+      logger.error('Failed to create customer portal session', error as Error, { userId })
+    }
     throw error
   }
 }

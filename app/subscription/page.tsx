@@ -10,6 +10,8 @@ import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 import { useSubscription } from '@/hooks/use-subscription'
 import { Navbar } from '@/components/global/navbar'
+import { useToast } from '@/hooks/use-toast'
+import { ToastVariant } from '@/types/enums'
 
 
 
@@ -18,6 +20,7 @@ export default function SubscriptionPage() {
   const subscription = useSubscription()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
+  const { toast } = useToast()
 
   const handleUpgrade = async (planId: string) => {
     setUpgradeLoading(planId)
@@ -53,12 +56,22 @@ export default function SubscriptionPage() {
       if (response.ok) {
         const { url } = await response.json()
         window.location.href = url
+      } else if (response.status === 404) {
+        toast({
+          title: 'Free Trial Period',
+          description: "You're currently in your free trial period. No subscription has been created yet. Upgrade to a paid plan to manage your subscription.",
+          variant: ToastVariant.DEFAULT
+        })
       } else {
         throw new Error('Failed to create portal session')
       }
     } catch (error) {
       console.error('Error accessing customer portal:', error)
-      alert('Failed to access subscription management. Please try again.')
+      toast({
+        title: 'Error',
+        description: 'Failed to access subscription management. Please try again.',
+        variant: ToastVariant.DESTRUCTIVE
+      })
     } finally {
       setPortalLoading(false)
     }
@@ -147,23 +160,6 @@ export default function SubscriptionPage() {
               </div>
             </div>
           )}
-          
-          {/* Manage Subscription Link */}
-          <div className="mt-8 text-center">
-            <a 
-              href="#"
-              onClick={(e) => {
-                e.preventDefault()
-                handleManageSubscription()
-              }}
-              className={`inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 hover:underline transition-colors ${
-                portalLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              }`}
-            >
-              <SettingsIcon className="h-4 w-4" />
-              {portalLoading ? 'Loading...' : 'Manage Subscription'}
-            </a>
-          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -222,8 +218,26 @@ export default function SubscriptionPage() {
           ))}
         </div>
 
+          
+        {/* Manage Subscription Link */}
+        <div className="mt-16 text-center">
+          <a 
+            href="#"
+            onClick={(e) => {
+              e.preventDefault()
+              handleManageSubscription()
+            }}
+            className={`inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 hover:underline transition-colors ${
+              portalLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            }`}
+          >
+            <SettingsIcon className="h-4 w-4" />
+            {portalLoading ? 'Loading...' : 'Manage Subscription'}
+          </a>
+        </div>
+
         {/* FAQ Section */}
-        <div className="mt-20 max-w-3xl mx-auto">
+        <div className="mt-16 max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
           <div className="space-y-6">
             <Card>
