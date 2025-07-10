@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { AIProviderError } from '@/lib/ai-errors'
 import { logger } from './logger'
+import { ApiSubscriptionErrorCode } from '@/types/enums'
 
 /**
  * Centralized API error handler to eliminate duplicate error handling patterns
@@ -14,6 +15,14 @@ export interface ApiErrorOptions {
   logError?: boolean
   /** Custom error message for generic errors */
   fallbackMessage?: string
+  /** User ID for context logging */
+  userId?: string
+  /** Resource ID (chatId, clientId, etc.) for context logging */
+  resourceId?: string
+  /** Operation name for logging */
+  operation?: string
+  /** Optional cleanup function to run before returning */
+  cleanup?: () => void
 }
 
 /**
@@ -26,14 +35,46 @@ export function handleApiError(
   const { 
     context = 'API operation', 
     logError = true, 
-    fallbackMessage = 'Internal server error' 
+    fallbackMessage = 'Internal server error',
+    userId,
+    resourceId,
+    operation,
+    cleanup
   } = options
 
+  // Execute cleanup function if provided
+  if (cleanup) {
+    cleanup()
+  }
+
+  // Build logging context
+  const logContext: Record<string, any> = {}
+  if (userId) logContext.userId = userId
+  if (resourceId) logContext[operation === 'chat' ? 'chatId' : 'clientId'] = resourceId
+  if (operation) logContext.operation = operation
+
   if (logError) {
-    if (error instanceof AIProviderError) {
-      logger.aiError(error.provider || 'unknown', error, { operation: context })
+    // Handle expected user limit errors as INFO instead of ERROR
+    if ((error as any).code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED) {
+      logger.info('User reached token limit', { 
+        ...logContext,
+        metadata: {
+          used: (error as any).metadata?.used,
+          limit: (error as any).metadata?.limit,
+          remaining: (error as any).metadata?.remaining
+        }
+      });
+    } else if ((error as any).code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
+      logger.info('User subscription expired', { 
+        ...logContext,
+        metadata: {
+          plan: (error as any).metadata?.plan
+        }
+      });
+    } else if (error instanceof AIProviderError) {
+      logger.aiError(error.provider || 'unknown', error, logContext)
     } else {
-      logger.error(`Error in ${context}`, error as Error, { operation: context })
+      logger.error(`Error in ${context}`, error as Error, logContext)
     }
   }
 

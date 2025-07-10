@@ -6,20 +6,21 @@ import { buildClientContextSection, hasClientContext } from '@/lib/client-contex
 import { createAICompletionStream } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
 import { logger } from '@/lib/logger'
-import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getDefaultModel, getModelsByTier } from '@/lib/models-config'
 import { checkModelAccess } from '@/lib/subscription-utils'
 import { withAuth, withTokenValidation, withClientAccess } from '@/lib/api-middleware'
-import { ApiErrorCode } from '@/types/enums'
+import { handleApiError } from '@/lib/api-error-handler'
+import { ApiSubscriptionErrorCode } from '@/types/enums' 
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Chat API');
   let chatId: string = '';
+  let userId: string = '';
   
   try {
     // Authentication and token validation using composable middleware - FIRST
-    const userId = await withAuth()
+    userId = await withAuth()
     await withTokenValidation(userId)
 
     // Parse request body after authentication
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
       
       return NextResponse.json({
         error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
-        code: ApiErrorCode.MODEL_ACCESS_DENIED,
+        code: ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED,
         tier: modelAccess.tier,
         plan: modelAccess.plan,
         modelId: selectedModel,
@@ -425,35 +426,15 @@ Respond naturally and conversationally while keeping this context in mind.`
     })
     
   } catch (error) {
-    logger.error('Error in chat API', error as Error, { chatId });
-    logger.apiResponse('POST', '/api/chat', 500, { chatId });
-    endTiming();
-    
-    // Handle middleware errors (auth, token validation, etc.)
-    if ((error as any).code && (error as any).status) {
-      return NextResponse.json(
-        {
-          error: (error as Error).message,
-          code: (error as any).code,
-          ...(error as any).metadata
-        },
-        { status: (error as any).status }
-      )
-    }
-    
-    // Handle AI provider errors specifically
-    if (error instanceof AIProviderError) {
-      return Response.json(
-        {
-          error: error.message,
-          provider: error.provider,
-          type: error.type,
-          retryAfter: error.retryAfter
-        },
-        { status: error.statusCode || 500 }
-      )
-    }
-    
-    return new Response('Internal Server Error', { status: 500 })
+    return handleApiError(error, {
+      context: 'chat API',
+      userId,
+      resourceId: chatId,
+      operation: 'chat',
+      cleanup: () => {
+        logger.apiResponse('POST', '/api/chat', 500, { chatId });
+        endTiming();
+      }
+    });
   }
 } 

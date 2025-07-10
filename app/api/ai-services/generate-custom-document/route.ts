@@ -7,11 +7,14 @@ import { AIProviderError } from '@/lib/ai-errors'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 import { logger } from '@/lib/logger'
+import { handleApiError } from '@/lib/api-error-handler'
 
 export async function POST(request: Request) {
+  let userId: string = '';
+  
   try {
     // Use composable middleware for auth and token validation first
-    const userId = await withAuth()
+    userId = await withAuth()
     await withTokenValidation(userId)
 
     // Parse request body after authentication
@@ -154,33 +157,10 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
       documentTitle,
     })
   } catch (error) {
-    console.error('Error generating custom document:', error)
-    
-    // Handle middleware errors (auth, token validation, etc.)
-    if ((error as any).code && (error as any).status) {
-      return Response.json(
-        {
-          error: (error as Error).message,
-          code: (error as any).code,
-          ...(error as any).metadata
-        },
-        { status: (error as any).status }
-      )
-    }
-    
-    // Handle AI provider errors specifically
-    if (error instanceof AIProviderError) {
-      return Response.json(
-        {
-          error: error.message,
-          provider: error.provider,
-          type: error.type,
-          retryAfter: error.retryAfter
-        },
-        { status: error.statusCode || 500 }
-      )
-    }
-    
-    return new Response('Internal Server Error', { status: 500 })
+    return handleApiError(error, {
+      context: 'generate custom document',
+      userId,
+      operation: 'generate-custom-document'
+    });
   }
 } 

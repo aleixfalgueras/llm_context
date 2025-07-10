@@ -147,7 +147,7 @@ export const LANGUAGE_INFO: Record<Language, { label: string; flag: string }> = 
 // API ERROR CODES
 // =============================================================================
 
-export enum ApiErrorCode {
+export enum ApiSubscriptionErrorCode {
   SUBSCRIPTION_EXPIRED = 'SUBSCRIPTION_EXPIRED',
   USAGE_LIMIT_EXCEEDED = 'USAGE_LIMIT_EXCEEDED',
   MODEL_ACCESS_DENIED = 'MODEL_ACCESS_DENIED'
