@@ -82,9 +82,27 @@ export function ClientContextSidebar({
     
     setIsCreatingChat(true)
     try {
-      // Convert clientContext selections to array of field names
+      // Convert clientContext selections to array of field names, but only include fields where client has data
       const selectedFields = Object.entries(clientContext)
-        .filter(([, value]) => value)
+        .filter(([key, value]) => {
+          if (!value) return false
+          
+          // Only include fields where the client actually has data
+          switch (key) {
+            case 'country':
+              return selectedClient?.country
+            case 'general_context':
+              return selectedClient?.generalContext
+            case 'specific_context_1':
+              return selectedClient?.specificContext1
+            case 'specific_context_2':
+              return selectedClient?.specificContext2
+            case 'specific_context_3':
+              return selectedClient?.specificContext3
+            default:
+              return false
+          }
+        })
         .map(([key]) => key)
       
       const newChatId = await createChatAndReturn('New Chat', selectedClientId, selectedFields)
@@ -240,11 +258,11 @@ export function ClientContextSidebar({
                           variant="outline"
                           size="sm"
                           onClick={() => onClientContextChange({
-                            country: true,
-                            general_context: true,
-                            specific_context_1: true,
-                            specific_context_2: true,
-                            specific_context_3: true
+                            country: !!selectedClient?.country,
+                            general_context: !!selectedClient?.generalContext,
+                            specific_context_1: !!selectedClient?.specificContext1,
+                            specific_context_2: !!selectedClient?.specificContext2,
+                            specific_context_3: !!selectedClient?.specificContext3
                           })}
                         >
                           Select All
