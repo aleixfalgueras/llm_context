@@ -6,7 +6,6 @@ import {
 } from './openrouter'
 import { AIProviderError } from './ai-errors'
 import { logger } from './logger'
-import { ApiErrorCode } from '@/types/enums'
 
 // Re-export interfaces for backward compatibility
 export interface AICompletionOptions extends OpenRouterCompletionOptions {}
@@ -74,39 +73,4 @@ export async function* createAICompletionStream(
   }
 }
 
-/**
- * Create usage limit response for OpenRouter API
- */
-export function createUsageLimitResponse(action: string, limit: number | 'unlimited', limitType?: string, used?: number) {
-  const actionMessages = {
-    client: 'clients'
-  }
-
-  const message = actionMessages[action as keyof typeof actionMessages] || action
-  
-  // Enhanced error messages based on limit type
-  let errorMessage = ''
-  let upgradeMessage = ''
-  
-  switch (limitType) {
-    case 'tokens':
-      errorMessage = `You've used ${used?.toLocaleString()} tokens and reached your monthly token limit of ${limit === 'unlimited' ? 'unlimited' : (limit as number).toLocaleString()}. `
-      upgradeMessage = 'Upgrade to Pro for 2M tokens per month or Business for unlimited tokens.'
-      break
-    default:
-      errorMessage = `You've reached your monthly ${message} limit of ${limit}. `
-      upgradeMessage = `Upgrade to Pro for more ${message}.`
-  }
-
-  return Response.json(
-    {
-      error: errorMessage + upgradeMessage,
-      code: ApiErrorCode.USAGE_LIMIT_EXCEEDED,
-      limitType: limitType || 'count',
-      used,
-      limit,
-      upgradeUrl: '/subscription'
-    },
-    { status: 429 }
-  )
-} 
+ 

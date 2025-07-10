@@ -154,7 +154,7 @@ export class DocumentService {
     const trackUsage = options?.trackUsage !== false
     if (trackUsage) {
       try {
-        const { trackUsage: trackUsageEvent } = await import('../usage-middleware')
+        const { trackUsage: trackUsageEvent } = await import('../api-middleware')
         await trackUsageEvent(userId, {
           documentType,
           clientId,

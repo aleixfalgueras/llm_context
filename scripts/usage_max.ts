@@ -4,12 +4,12 @@
  * 
  * Sets a user's token usage to the maximum limits for their subscription plan.
  * 
- * Usage: tsx scripts/set-usage-to-max.ts <userId> <planName> <limitType>
+ * Usage: tsx scripts/usage_max.ts <userId> <planName> <limitType>
  * 
  * Examples:
- *   tsx scripts/set-usage-to-max.ts user_123 basic tokens   # Set token limit to max
- *   tsx scripts/set-usage-to-max.ts user_123 pro tokens     # Set token limit to max
- *   tsx scripts/set-usage-to-max.ts user_123 business tokens # Set token limit to max
+ *   tsx scripts/usage_max.ts user_123 basic tokens   # Set token limit to max
+ *   tsx scripts/usage_max.ts user_123 pro tokens     # Set token limit to max
+ *   tsx scripts/usage_max.ts user_123 business tokens # Set token limit to max
  */
 import { PrismaClient } from '@prisma/client'
 import { SUBSCRIPTION_PLANS } from '../lib/subscription-utils'
@@ -31,13 +31,13 @@ function parseArguments(): ScriptArgs {
   const args = process.argv.slice(2)
   
   if (args.length !== 3) {
-    console.error('❌ Usage: tsx scripts/set-usage-to-max.ts <userId> <planName> <limitType>')
+    console.error('❌ Usage: tsx scripts/usage_max.ts <userId> <planName> <limitType>')
     console.error(`   planName must be one of: ${Object.values(SubscriptionPlan).join(', ')}`)
     console.error('   limitType must be: tokens')
     console.error('   Examples:')
-    console.error(`     tsx scripts/set-usage-to-max.ts user_123abc ${SubscriptionPlan.BASIC} tokens`)
-    console.error(`     tsx scripts/set-usage-to-max.ts user_123abc ${SubscriptionPlan.PRO} tokens`)
-    console.error(`     tsx scripts/set-usage-to-max.ts user_123abc ${SubscriptionPlan.BUSINESS} tokens`)
+    console.error(`     tsx scripts/usage_max.ts user_123abc ${SubscriptionPlan.BASIC} tokens`)
+    console.error(`     tsx scripts/usage_max.ts user_123abc ${SubscriptionPlan.PRO} tokens`)
+    console.error(`     tsx scripts/usage_max.ts user_123abc ${SubscriptionPlan.BUSINESS} tokens`)
     process.exit(1)
   }
 

@@ -3,7 +3,6 @@ import { createMessage } from '@/lib/actions'
 import { revalidatePath } from 'next/cache'
 import { generateChatTitleWithClient } from '@/lib/utils'
 import { buildClientContextSection, hasClientContext } from '@/lib/client-context-utils'
-import { withClientAccess } from '@/lib/client-middleware'
 import { createAICompletionStream } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
 import { logger } from '@/lib/logger'
@@ -11,6 +10,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getDefaultModel, getModelsByTier } from '@/lib/models-config'
 import { checkModelAccess } from '@/lib/subscription-utils'
+import { withAuth, withTokenValidation, withClientAccess } from '@/lib/api-middleware'
 import { ApiErrorCode } from '@/types/enums'
 
 export async function POST(req: Request) {
@@ -18,16 +18,14 @@ export async function POST(req: Request) {
   let chatId: string = '';
   
   try {
+    // Authentication and token validation using composable middleware - FIRST
+    const userId = await withAuth()
+    await withTokenValidation(userId)
+
+    // Parse request body after authentication
     const { messages, chatId: requestChatId, model } = await req.json()
     chatId = requestChatId;
     logger.apiRequest('POST', '/api/chat', { chatId, model });
-
-    // Authentication check only - no conversation limits, token limits will be enforced by AI wrapper
-    const { userId } = await auth()
-    if (!userId) {
-      logger.warn('Authentication failed', { chatId });
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
     
     // Use the model from the request, with fallback to centralized default
     const selectedModel = model || getDefaultModel()
@@ -58,7 +56,7 @@ export async function POST(req: Request) {
       }, { status: 403 })
     }
     
-    logger.info('Chat request authenticated and model access validated', { 
+    logger.info('Chat request authenticated, model access and token usage validated', { 
       userId, 
       chatId, 
       model: selectedModel
@@ -109,12 +107,7 @@ export async function POST(req: Request) {
     }))
 
     // Get client information for this chat (required)
-    const clientAccess = await withClientAccess(userId, (chat as any).clientId)
-    if (!clientAccess.success) {
-      return clientAccess.response!
-    }
-    
-    const client = clientAccess.client!
+    const client = await withClientAccess(userId, (chat as any).clientId)
 
     // Build and add system message with client context for ALL messages (not just first)
     logger.info('Adding client context system message', { 
@@ -435,6 +428,18 @@ Respond naturally and conversationally while keeping this context in mind.`
     logger.error('Error in chat API', error as Error, { chatId });
     logger.apiResponse('POST', '/api/chat', 500, { chatId });
     endTiming();
+    
+    // Handle middleware errors (auth, token validation, etc.)
+    if ((error as any).code && (error as any).status) {
+      return NextResponse.json(
+        {
+          error: (error as Error).message,
+          code: (error as any).code,
+          ...(error as any).metadata
+        },
+        { status: (error as any).status }
+      )
+    }
     
     // Handle AI provider errors specifically
     if (error instanceof AIProviderError) {
