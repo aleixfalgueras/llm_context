@@ -37,6 +37,18 @@ export function handleApiError(
     }
   }
 
+  // Handle structured middleware errors (auth, token validation, etc.)
+  if (error instanceof Error && (error as any).code && (error as any).status) {
+    return NextResponse.json(
+      {
+        error: error.message,
+        code: (error as any).code,
+        ...(error as any).metadata
+      },
+      { status: (error as any).status }
+    )
+  }
+
   // Handle AI provider errors with specific formatting
   if (error instanceof AIProviderError) {
     return NextResponse.json(
@@ -65,21 +77,6 @@ export function handleApiError(
   )
 }
 
-/**
- * Wraps an async API handler function with automatic error handling
- */
-export function withErrorHandler<T extends any[]>(
-  handler: (...args: T) => Promise<NextResponse>,
-  context?: string
-) {
-  return async (...args: T): Promise<NextResponse> => {
-    try {
-      return await handler(...args)
-    } catch (error) {
-      return handleApiError(error, { context })
-    }
-  }
-}
 
 /**
  * Common API error responses for specific scenarios
@@ -121,12 +118,3 @@ export const ApiErrors = {
   )
 }
 
-/**
- * Validates authentication and returns standardized error if not authenticated
- */
-export function requireAuth(userId: string | null | undefined): NextResponse | null {
-  if (!userId) {
-    return ApiErrors.unauthorized()
-  }
-  return null
-}

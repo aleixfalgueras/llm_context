@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { buildClientContextSection } from '@/lib/client-context-utils'
 import { replaceClientVariables } from '@/lib/variable-replacement'
-import { withAuthUsageAndClient } from '@/lib/client-middleware'
+import { withAuth, withTokenValidation, withClientAccess } from '@/lib/api-middleware'
 import { createAICompletion } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/models-config'
@@ -10,6 +10,11 @@ import { logger } from '@/lib/logger'
 
 export async function POST(request: Request) {
   try {
+    // Use composable middleware for auth and token validation first
+    const userId = await withAuth()
+    await withTokenValidation(userId)
+
+    // Parse request body after authentication
     const { 
       clientId, 
       promptId,
@@ -20,20 +25,13 @@ export async function POST(request: Request) {
       model: selectedModel = DEFAULT_MODEL
     } = await request.json()
 
+    // Validate client access after parsing clientId
+    const client = await withClientAccess(userId, clientId)
+
     // Validate required fields
     if (!clientId || (!promptId && !customPrompt) || !documentTitle) {
       return new Response('Missing required fields', { status: 400 })
     }
-
-    // Use unified middleware for auth, usage, and client access
-    const middleware = await withAuthUsageAndClient('document', clientId)
-    if (!middleware.success) {
-      return middleware.response!
-    }
-    
-    const { userId, client } = middleware
-    const validUserId = userId!
-    const validClient = client!
 
     // Get prompt content
     let promptContent = ''
@@ -44,7 +42,7 @@ export async function POST(request: Request) {
       const prompt = await prisma.prompt.findFirst({
         where: {
           id: promptId,
-          userId: validUserId,
+          userId: userId,
           isActive: true,
         },
       })
@@ -71,13 +69,13 @@ export async function POST(request: Request) {
     }
 
     // Replace client variables in prompt using shared utility
-    const processedPrompt = replaceClientVariables(promptContent, validClient)
+    const processedPrompt = replaceClientVariables(promptContent, client)
 
     // Get language instruction from client's documentsLanguage preference
-    const targetLanguage = getLanguageInstruction(validClient.documentsLanguage || 'english')
+    const targetLanguage = getLanguageInstruction(client.documentsLanguage || 'english')
 
     // Build client context section if fields are selected - RESPECTS user privacy choices
-    const clientContextSection = buildClientContextSection(validClient, selectedContextFields)
+    const clientContextSection = buildClientContextSection(client, selectedContextFields)
 
     // Create the complete prompt with client context section
     let completePrompt = processedPrompt
@@ -104,14 +102,14 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
 
     // Log the prompt used for document generation
     logger.info('🤖 Custom Document Generation - Prompt Used', {
-      userId: validUserId,
+      userId: userId,
       clientId,
       operation: 'custom-document-generation',
       model: selectedModel,
       metadata: {
         promptName,
         documentTitle,
-        clientName: validClient.name,
+        clientName: client.name,
         targetLanguage,
         hasCustomPrompt: !!customPrompt,
         hasAdditionalInstructions: !!additionalInstructions,
@@ -134,7 +132,7 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
         temperature: getDefaultTemperature(),
       },
       {
-        userId: validUserId,
+        userId: userId,
         resourceId: clientId,
         additionalMetadata: {
           documentType: 'custom-document',
@@ -152,11 +150,23 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
     return Response.json({
       content: generatedContent,
       promptName,
-      clientName: validClient.name,
+      clientName: client.name,
       documentTitle,
     })
   } catch (error) {
     console.error('Error generating custom document:', error)
+    
+    // Handle middleware errors (auth, token validation, etc.)
+    if ((error as any).code && (error as any).status) {
+      return Response.json(
+        {
+          error: (error as Error).message,
+          code: (error as any).code,
+          ...(error as any).metadata
+        },
+        { status: (error as any).status }
+      )
+    }
     
     // Handle AI provider errors specifically
     if (error instanceof AIProviderError) {

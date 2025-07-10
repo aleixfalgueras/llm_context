@@ -203,6 +203,61 @@ export async function getCurrentMonthUsage(userId: string) {
   }
 }
 
+// Check token usage limits before AI requests
+export async function checkTokenUsageLimit(userId: string) {
+  const endTiming = logger.startTiming('Check Token Usage Limit', { userId });
+  
+  try {
+    const subscription = await getUserSubscription(userId)
+    
+    // Check if subscription is active first
+    if (!isSubscriptionActive(subscription)) {
+      logger.warn('Subscription is not active for token usage limit check', { 
+        userId,
+        metadata: { 
+          plan: subscription.plan,
+          status: subscription.status,
+          currentPeriodEnd: subscription.currentPeriodEnd
+        }
+      });
+      endTiming();
+      return { 
+        allowed: false, 
+        limit: 0, 
+        used: 0, 
+        limitType: 'tokens',
+        reason: ApiErrorCode.SUBSCRIPTION_EXPIRED 
+      }
+    }
+
+    const usage = await getCurrentMonthUsage(userId)
+    const maxTokens = subscription.maxTokensPerMonth
+    
+    if (maxTokens === -1) {
+      endTiming();
+      return { 
+        allowed: true, 
+        limit: 'unlimited', 
+        used: usage.tokensUsed, 
+        limitType: 'tokens' 
+      }
+    }
+    
+    endTiming();
+    return {
+      allowed: usage.tokensUsed < maxTokens,
+      limit: maxTokens,
+      used: usage.tokensUsed,
+      remaining: maxTokens - usage.tokensUsed,
+      limitType: 'tokens'
+    }
+  } catch (error) {
+    logger.error('Error checking token usage limit', error as Error, { userId });
+    endTiming();
+    return { allowed: false, limit: 0, used: 0, limitType: 'tokens' }
+  }
+}
+
 // Check usage limits for different actions
 export async function checkUsageLimit(userId: string, action: 'client') {
   const endTiming = logger.startTiming('Check Usage Limit', { userId });
