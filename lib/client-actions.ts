@@ -8,7 +8,7 @@ import { ClientOperations } from './database'
 import { ClientFormData } from '@/types/client'
 import { prisma } from './prisma'
 import { processClientData } from './validation-helpers'
-import { ApiErrorCode } from '@/types/enums'
+import { ApiSubscriptionErrorCode } from '@/types/enums'
 
 export type ClientData = ClientFormData
 
@@ -21,9 +21,9 @@ export async function createClient(data: ClientFormData) {
   // Check usage limits before creating client
   const usageCheck = await checkUsageLimit(userId, 'client')
   if (!usageCheck.allowed) {
-    if (usageCheck.reason === ApiErrorCode.SUBSCRIPTION_EXPIRED) {
+    if (usageCheck.reason === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
       const error = new Error('Your subscription has expired. Please upgrade to continue creating clients.')
-      ;(error as any).code = ApiErrorCode.SUBSCRIPTION_EXPIRED
+      ;(error as any).code = ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
       ;(error as any).upgradeUrl = '/subscription'
       throw error
     }
@@ -65,7 +65,7 @@ export async function updateClient(clientId: string, data: ClientFormData) {
   const subscription = await getUserSubscription(userId)
   if (!isSubscriptionActive(subscription)) {
     const error = new Error('Your subscription has expired. Please upgrade to continue editing clients.')
-    ;(error as any).code = ApiErrorCode.SUBSCRIPTION_EXPIRED
+    ;(error as any).code = ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
     ;(error as any).upgradeUrl = '/subscription'
     throw error
   }

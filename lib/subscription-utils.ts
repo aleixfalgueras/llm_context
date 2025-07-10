@@ -2,7 +2,7 @@ import { prisma } from './prisma'
 import { logger, withTiming } from './logger'
 import { getTierFromPlan, isModelAvailableForTier } from './models-config'
 import { SubscriptionPlan, SubscriptionStatus, ModelTier } from '../types/subscription-types'
-import { ApiErrorCode } from '@/types/enums'
+import { ApiSubscriptionErrorCode } from '@/types/enums'
 
 import { 
   getCachedSubscription, 
@@ -226,7 +226,7 @@ export async function checkTokenUsageLimit(userId: string) {
         limit: 0, 
         used: 0, 
         limitType: 'tokens',
-        reason: ApiErrorCode.SUBSCRIPTION_EXPIRED 
+        reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED 
       }
     }
 
@@ -282,7 +282,7 @@ export async function checkUsageLimit(userId: string, action: 'client') {
         limit: 0, 
         used: 0, 
         limitType: action,
-        reason: ApiErrorCode.SUBSCRIPTION_EXPIRED 
+        reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED 
       }
     }
 
@@ -404,7 +404,7 @@ export async function checkModelAccess(userId: string, modelId: string) {
         tier: ModelTier.BASIC, 
         plan: subscription.plan, 
         modelId,
-        reason: ApiErrorCode.SUBSCRIPTION_EXPIRED 
+        reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED 
       }
     }
 

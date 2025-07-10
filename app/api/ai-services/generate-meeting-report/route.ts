@@ -4,14 +4,16 @@ import { createAICompletion } from '@/lib/ai-wrapper'
 import { AIProviderError } from '@/lib/ai-errors'
 import { logger, withTiming } from '@/lib/logger'
 import { DEFAULT_MODEL } from '@/lib/models-config'
+import { handleApiError } from '@/lib/api-error-handler'
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Generate Meeting Report API');
   let clientId: string = '';
+  let userId: string = '';
   
   try {
     // Use composable middleware for auth and token validation first
-    const userId = await withAuth()
+    userId = await withAuth()
     await withTokenValidation(userId)
 
     // Parse request body after authentication
@@ -120,35 +122,15 @@ INSTRUCTIONS:
     endTiming();
     return Response.json({ report: meetingReport })
   } catch (error) {
-    logger.error('Error generating meeting report', error as Error, { clientId });
-    logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 500, { clientId });
-    endTiming();
-    
-    // Handle middleware errors (auth, token validation, etc.)
-    if ((error as any).code && (error as any).status) {
-      return Response.json(
-        {
-          error: (error as Error).message,
-          code: (error as any).code,
-          ...(error as any).metadata
-        },
-        { status: (error as any).status }
-      )
-    }
-    
-    // Handle AI provider errors specifically
-    if (error instanceof AIProviderError) {
-      return Response.json(
-        {
-          error: error.message,
-          provider: error.provider,
-          type: error.type,
-          retryAfter: error.retryAfter
-        },
-        { status: error.statusCode || 500 }
-      )
-    }
-    
-    return new Response('Internal Server Error', { status: 500 })
+    return handleApiError(error, {
+      context: 'generate meeting report',
+      userId,
+      resourceId: clientId,
+      operation: 'generate-meeting-report',
+      cleanup: () => {
+        logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 500, { clientId });
+        endTiming();
+      }
+    });
   }
 } 

@@ -64,7 +64,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
     {
       id: 'custom-document',
       title: 'Document Generator',
-      description: 'Generate custom marketing documents using your own prompts',
+      description: 'Generate custom marketing documents using your own prompts and the client\'s language',
       icon: <FileText className="h-8 w-8" />,
       features: ['Custom prompts', 'Variable replacement', 'Professional formatting'],
       status: ServiceStatus.AVAILABLE,
