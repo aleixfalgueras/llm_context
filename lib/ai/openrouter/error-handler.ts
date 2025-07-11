@@ -2,7 +2,7 @@
  * OpenRouter-specific error handling
  */
 
-import { AIProviderError } from '../ai-errors'
+import { AIProviderError } from '../errors'
 
 /**
  * Enhanced error handling for OpenRouter API errors

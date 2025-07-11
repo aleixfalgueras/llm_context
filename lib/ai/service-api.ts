@@ -2,11 +2,11 @@
  * API service for AI service operations (generation and saving)
  */
 
-import { AIProviderError, getAIErrorMessage } from './ai-errors'
+import { AIProviderError, getAIErrorMessage } from './errors'
 import { APIResponse } from '@/types/api-types'
-import { logger } from './logger'
+import { logger } from '../logger'
 
-export class AIServiceAPI {
+export class ServiceApi {
   /**
    * Generate content using AI service
    */

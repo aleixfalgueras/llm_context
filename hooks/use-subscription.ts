@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getTierFromPlan } from '@/lib/models-config'
+import { getTierFromPlan } from '@/lib/ai/models-config'
 import { ModelTier, SubscriptionPlan, ModelTierType, SubscriptionPlanType } from '@/types/subscription-types'
 
 interface SubscriptionInfo {

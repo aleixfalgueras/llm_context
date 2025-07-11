@@ -10,7 +10,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { BaseAIServiceDialog } from './base-ai-service-dialog'
 import type { BaseAIServiceDialogConfig, ValidationResult } from './base-ai-service-dialog'
 import type { Client } from '@/types/client'
-import { getDefaultModel } from '@/lib/models-config'
+import { getDefaultModel } from '@/lib/ai/models-config'
 
 interface MeetingReportDialogProps {
   open: boolean
