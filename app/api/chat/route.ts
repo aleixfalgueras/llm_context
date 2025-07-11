@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { createMessage } from '@/lib/actions/actions'
+import { createMessage } from '@/lib/actions/message'
 import { revalidatePath } from 'next/cache'
 import { generateChatTitleWithClient } from '@/lib/utils/general'
 import { buildClientContextSection, hasClientContext } from '@/lib/utils/client-context'
