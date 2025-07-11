@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { handleApiError, ApiErrors } from './api-error-handler'
+import { handleApiError, ApiErrors } from './error-handler'
 
 export interface UsageLimitResponse {
   allowed: boolean
@@ -247,7 +247,7 @@ export async function withAuth(): Promise<string> {
  * Token usage validation middleware - checks monthly token limits
  */
 export async function withTokenValidation(userId: string): Promise<void> {
-  const { checkTokenUsageLimit } = await import('./subscription-utils')
+  const { checkTokenUsageLimit } = await import('../subscription-utils')
   
   const tokenUsage = await checkTokenUsageLimit(userId)
   
@@ -277,7 +277,7 @@ export async function withTokenValidation(userId: string): Promise<void> {
  * Subscription status validation middleware - checks if subscription is active
  */
 export async function withSubscriptionCheck(userId: string): Promise<void> {
-  const { getUserSubscription, isSubscriptionActive } = await import('./subscription-utils')
+  const { getUserSubscription, isSubscriptionActive } = await import('../subscription-utils')
   
   const subscription = await getUserSubscription(userId)
   
@@ -300,7 +300,7 @@ export async function withSubscriptionCheck(userId: string): Promise<void> {
  * Client access validation middleware - checks if user owns the client
  */
 export async function withClientAccess(userId: string, clientId: string): Promise<any> {
-  const { prisma } = await import('./prisma')
+  const { prisma } = await import('../prisma')
   
   const client = await prisma.client.findFirst({
     where: {
@@ -335,7 +335,7 @@ export async function trackUsage(
   }
 ): Promise<void> {
   try {
-    const { updateUsageTracking } = await import('./subscription-utils')
+    const { updateUsageTracking } = await import('../subscription-utils')
     await updateUsageTracking(userId, metadata)
   } catch (error) {
     console.error('Error tracking usage:', error)
@@ -348,9 +348,9 @@ export async function trackUsage(
  */
 export async function getUsageInfo(userId: string) {
   try {
-    const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('./subscription-utils')
-    const { prisma } = await import('./prisma')
-    const { getStorageAnalytics } = await import('./storage-utils')
+    const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('../subscription-utils')
+    const { prisma } = await import('../prisma')
+    const { getStorageAnalytics } = await import('../storage-utils')
     
     // Get subscription and usage data once, then check all limits
     const [subscription, usage] = await Promise.all([
@@ -362,7 +362,7 @@ export async function getUsageInfo(userId: string) {
     const storageAnalytics = await getStorageAnalytics(userId, subscription);
 
     // Check client limits - count current clients with caching
-    const { getCachedClientCount, cacheClientCount } = await import('./subscription-cache')
+    const { getCachedClientCount, cacheClientCount } = await import('../subscription-cache')
     let clientCount = getCachedClientCount(userId)
     if (clientCount === null) {
       clientCount = await prisma.client.count({ where: { userId } })

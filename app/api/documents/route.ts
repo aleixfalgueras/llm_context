@@ -4,7 +4,7 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 
 // GET /api/documents - List user's documents
 export const GET = withEnhancedApi(

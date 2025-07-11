@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { AIProviderError } from '@/lib/ai/errors'
-import { logger } from './logger'
+import { logger } from '../logger'
 import { ApiSubscriptionErrorCode } from '@/types/enums'
 import { 
   normalizeErrorData, 
@@ -8,7 +8,7 @@ import {
   getErrorMessage,
   shouldLogAsInfo,
   type ErrorData 
-} from './error-code-utils'
+} from '../error-code-utils'
 
 /**
  * Centralized API error handler to eliminate duplicate error handling patterns

@@ -4,7 +4,7 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 
 // GET /api/documents/[id] - Get document metadata
 export const GET = withEnhancedApi(

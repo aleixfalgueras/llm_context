@@ -3,7 +3,7 @@ import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 
 // GET /api/documents/[id]/content - Get document content as JSON
 export const GET = withEnhancedApi(

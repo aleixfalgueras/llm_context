@@ -9,8 +9,8 @@ import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { getDefaultModel, getModelsByTier } from '@/lib/ai/models-config'
 import { checkModelAccess } from '@/lib/subscription-utils'
-import { withAuth, withTokenValidation, withClientAccess } from '@/lib/api-middleware'
-import { handleApiError } from '@/lib/api-error-handler'
+import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
+import { handleApiError } from '@/lib/middleware/error-handler'
 import { ApiSubscriptionErrorCode } from '@/types/enums' 
 
 export async function POST(req: Request) {

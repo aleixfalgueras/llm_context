@@ -3,7 +3,7 @@ import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'
