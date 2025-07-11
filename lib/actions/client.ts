@@ -2,7 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { checkUsageLimit, getUserSubscription, isSubscriptionActive } from '../subscription-utils'
+import { checkUsageLimit, getUserSubscription, isSubscriptionActive } from '../payments/subscription-utils'
 import { logger } from '../logger'
 import { ClientOperations } from '../database'
 import { ClientFormData } from '@/types/client'
@@ -45,7 +45,7 @@ export async function createClient(data: ClientFormData) {
 
   // Invalidate client count cache since client count has changed
   try {
-    const { invalidateClientCountCache } = await import('../subscription-cache')
+    const { invalidateClientCountCache } = await import('../payments/subscription-cache')
     invalidateClientCountCache(userId)
   } catch (error) {
     console.error('Error invalidating client count cache:', error)
@@ -103,7 +103,7 @@ export async function deleteClient(id: string) {
 
   // Invalidate client count cache since client count has changed
   try {
-    const { invalidateClientCountCache } = await import('../subscription-cache')
+    const { invalidateClientCountCache } = await import('../payments/subscription-cache')
     invalidateClientCountCache(userId)
   } catch (error) {
     console.error('Error invalidating client count cache:', error)

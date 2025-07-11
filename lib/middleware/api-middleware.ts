@@ -247,7 +247,7 @@ export async function withAuth(): Promise<string> {
  * Token usage validation middleware - checks monthly token limits
  */
 export async function withTokenValidation(userId: string): Promise<void> {
-  const { checkTokenUsageLimit } = await import('../subscription-utils')
+  const { checkTokenUsageLimit } = await import('../payments/subscription-utils')
   
   const tokenUsage = await checkTokenUsageLimit(userId)
   
@@ -277,7 +277,7 @@ export async function withTokenValidation(userId: string): Promise<void> {
  * Subscription status validation middleware - checks if subscription is active
  */
 export async function withSubscriptionCheck(userId: string): Promise<void> {
-  const { getUserSubscription, isSubscriptionActive } = await import('../subscription-utils')
+  const { getUserSubscription, isSubscriptionActive } = await import('../payments/subscription-utils')
   
   const subscription = await getUserSubscription(userId)
   
@@ -335,7 +335,7 @@ export async function trackUsage(
   }
 ): Promise<void> {
   try {
-    const { updateUsageTracking } = await import('../subscription-utils')
+    const { updateUsageTracking } = await import('../payments/subscription-utils')
     await updateUsageTracking(userId, metadata)
   } catch (error) {
     console.error('Error tracking usage:', error)
@@ -348,7 +348,7 @@ export async function trackUsage(
  */
 export async function getUsageInfo(userId: string) {
   try {
-    const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('../subscription-utils')
+    const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('../payments/subscription-utils')
     const { prisma } = await import('../prisma')
     const { getStorageAnalytics } = await import('../storage-utils')
     
@@ -362,7 +362,7 @@ export async function getUsageInfo(userId: string) {
     const storageAnalytics = await getStorageAnalytics(userId, subscription);
 
     // Check client limits - count current clients with caching
-    const { getCachedClientCount, cacheClientCount } = await import('../subscription-cache')
+    const { getCachedClientCount, cacheClientCount } = await import('../payments/subscription-cache')
     let clientCount = getCachedClientCount(userId)
     if (clientCount === null) {
       clientCount = await prisma.client.count({ where: { userId } })

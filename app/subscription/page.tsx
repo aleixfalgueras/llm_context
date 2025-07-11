@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckIcon, StarIcon, CrownIcon, ZapIcon, SettingsIcon } from 'lucide-react'
-import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
+import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 import { useSubscription } from '@/hooks/use-subscription'
 import { Navbar } from '@/components/global/navbar'

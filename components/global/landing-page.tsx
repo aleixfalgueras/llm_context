@@ -4,7 +4,7 @@ import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Megaphone, Targe
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/global/theme-toggle'
-import { SUBSCRIPTION_PLANS } from '@/lib/subscription-utils'
+import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 import Link from 'next/link'
 
