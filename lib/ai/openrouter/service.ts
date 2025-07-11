@@ -95,28 +95,6 @@ export class OpenRouterService {
   }
 
   /**
-   * Get available models
-   */
-  async getModels() {
-    try {
-      return await this.client.getModels()
-    } catch (error) {
-      handleOpenRouterError(error)
-    }
-  }
-
-  /**
-   * Get credit information
-   */
-  async getCredits() {
-    try {
-      return await this.client.getCredits()
-    } catch (error) {
-      handleOpenRouterError(error)
-    }
-  }
-
-  /**
    * Apply default values to completion options
    */
   private applyDefaults(options: OpenRouterCompletionOptions): OpenRouterCompletionOptions {
