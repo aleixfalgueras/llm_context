@@ -33,7 +33,7 @@ export function ClientContextSidebar({
   chatContextFields = []
 }: ClientContextSidebarProps) {
   const router = useRouter()
-  const [sidebarWidth, setSidebarWidth] = useState(307) // Default 307px (20% larger than original 256px)
+  const [sidebarWidth, setSidebarWidth] = useState(300)
   const [isResizing, setIsResizing] = useState(false)
   const [isCreatingChat, setIsCreatingChat] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -49,8 +49,8 @@ export function ClientContextSidebar({
       if (!isResizing) return
       
       const newWidth = window.innerWidth - e.clientX
-      const minWidth = 307 // Minimum 307px (20% larger than original)
-      const maxWidth = 576 // Maximum 576px (20% larger than original 480px)
+      const minWidth = 300 // Minimum 300px
+      const maxWidth = 576 // Maximum 576px
       
       const constrainedWidth = Math.min(Math.max(newWidth, minWidth), maxWidth)
       setSidebarWidth(constrainedWidth)

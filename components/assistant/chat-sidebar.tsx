@@ -52,7 +52,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false }:
   }
 
   return (
-    <div className="border-r bg-gray-50 dark:bg-gray-900 flex flex-col h-full" style={{ width: '307px' }}>
+    <div className="border-r bg-gray-50 dark:bg-gray-900 flex flex-col h-full" style={{ width: '300px' }}>
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
