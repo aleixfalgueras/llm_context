@@ -6,7 +6,6 @@ import { checkUsageLimit, getUserSubscription, isSubscriptionActive } from '../p
 import { logger } from '../logger'
 import { ClientOperations } from '../database'
 import { ClientFormData } from '@/types/client'
-import { prisma } from '../prisma'
 import { processClientData } from '../utils/validation'
 import { ApiSubscriptionErrorCode } from '@/types/enums'
 
@@ -156,24 +155,4 @@ export async function getClients(options?: { includeDetails?: boolean; limit?: n
   return result.data!.records
 }
 
-export async function getClient(id: string) {
-  const { userId } = await auth()
-  
-  if (!userId) {
-    throw new Error('Unauthorized')
-  }
-
-  const result = await ClientOperations.findUserOwnedRecord(
-    prisma.client,
-    id,
-    userId,
-    { context: 'Get client by ID' }
-  )
-  
-  if (!result.success) {
-    logger.error('Error fetching client', new Error(result.error), { userId, clientId: id })
-    throw new Error(result.error || 'Failed to fetch client')
-  }
-
-  return result.data!
-} 
+ 
