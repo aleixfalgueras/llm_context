@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { withdrawAllConsent } from '@/lib/consent-utils'
+import { withdrawAllConsent } from '@/lib/utils/consent'
 
 // Account deletion request (soft delete with grace period)
 export async function POST(request: NextRequest) {

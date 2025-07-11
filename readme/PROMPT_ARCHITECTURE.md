@@ -18,7 +18,7 @@ Each AI service defines its own explicit prompt within its route file, while cli
 
 The prompt architecture leverages the modular structure with clean separation between AI services, client context handling, and the dual-model system (Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano).
 
-### **Client Context Utilities** (`lib/client-context-utils.ts`)
+### **Client Context Utilities** (`lib/client-context-general.ts`)
 
 #### `buildClientContextSection(client, selectedFields)`
 ```typescript

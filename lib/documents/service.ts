@@ -4,7 +4,7 @@
 
 import { DocumentRepository, DocumentData, DocumentQueryOptions } from './repository'
 import { DocumentStorageService } from './storage-service'
-import { validateDocumentStorage, calculateDocumentSize } from '../storage-utils'
+import { validateDocumentStorage, calculateDocumentSize } from '../utils/storage'
 import { logger } from '../logger'
 import { prisma } from '../prisma'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'

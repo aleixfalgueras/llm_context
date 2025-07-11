@@ -10,7 +10,7 @@ import {
   getErrorMetadata, 
   getErrorMessage,
   type ErrorData 
-} from './error-code-utils'
+} from './error-code'
 
 /**
  * Success toast notifications

@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { prisma } from '../prisma'
 import { ConsentAction, ConsentType } from '@/types/enums'
 
 // Current policy versions - update these when you change Terms/Privacy Policy

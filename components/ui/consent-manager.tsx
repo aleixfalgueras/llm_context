@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Shield, FileText, Mail, BarChart3, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
-import { CURRENT_TERMS_VERSION, CURRENT_PRIVACY_VERSION } from '@/lib/consent-utils'
+import { CURRENT_TERMS_VERSION, CURRENT_PRIVACY_VERSION } from '@/lib/utils/consent'
 
 interface ConsentData {
   dataProcessing: boolean
