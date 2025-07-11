@@ -7,7 +7,7 @@ import { logger } from '../logger'
 import { ClientOperations } from '../database'
 import { ClientFormData } from '@/types/client'
 import { prisma } from '../prisma'
-import { processClientData } from '../validation-helpers'
+import { processClientData } from '../utils/validation'
 import { ApiSubscriptionErrorCode } from '@/types/enums'
 
 export type ClientData = ClientFormData

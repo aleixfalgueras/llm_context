@@ -3,8 +3,8 @@
 import { useFormState } from './use-form-state'
 import { useFormOperations } from './use-async-operation'
 import { createClient, updateClient, type ClientData } from '@/lib/actions/client'
-import { validateClientForm } from '@/lib/validation-helpers'
-import { capitalizeName } from '@/lib/utils'
+import { validateClientForm } from '@/lib/utils/validation'
+import { capitalizeName } from '@/lib/utils/general'
 import { getLanguageOptions } from '@/types/enums'
 
 interface UseClientFormProps {

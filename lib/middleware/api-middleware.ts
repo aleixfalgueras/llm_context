@@ -350,7 +350,7 @@ export async function getUsageInfo(userId: string) {
   try {
     const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('../payments/subscription-utils')
     const { prisma } = await import('../prisma')
-    const { getStorageAnalytics } = await import('../storage-utils')
+    const { getStorageAnalytics } = await import('../utils/storage')
     
     // Get subscription and usage data once, then check all limits
     const [subscription, usage] = await Promise.all([

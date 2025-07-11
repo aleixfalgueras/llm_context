@@ -63,7 +63,7 @@ Per 1K tokens = $0.000175
 - **Content equivalent**: ~30,000 pages of content
 - **Target users**: Agencies, large teams, enterprise users
 
-**Note**: This pricing is based on the current subscription-utils.ts configuration which shows the Business plan at €50/month ($58.60) with 40M tokens.
+**Note**: This pricing is based on the current subscription-general.ts configuration which shows the Business plan at €50/month ($58.60) with 40M tokens.
 
 **Value Proposition:**
 - 8x more tokens than Basic plan for 5x the price

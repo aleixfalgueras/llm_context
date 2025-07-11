@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { prisma } from '../prisma'
 import fs from 'fs/promises'
 import path from 'path'
 

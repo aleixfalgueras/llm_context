@@ -8,7 +8,7 @@ import {
   getErrorMessage,
   shouldLogAsInfo,
   type ErrorData 
-} from '../error-code-utils'
+} from '../utils/error-code'
 
 /**
  * Centralized API error handler to eliminate duplicate error handling patterns

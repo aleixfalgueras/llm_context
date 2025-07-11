@@ -6,7 +6,7 @@ import {
   ApiContext 
 } from '@/lib/middleware/api-middleware'
 import { PromptOperations } from '@/lib/database'
-import { validatePromptForm } from '@/lib/validation-helpers'
+import { validatePromptForm } from '@/lib/utils/validation'
 import { logger, withTiming } from '@/lib/logger'
 
 // Force dynamic rendering since we use auth() which accesses headers

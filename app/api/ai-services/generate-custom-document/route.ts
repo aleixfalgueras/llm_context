@@ -1,11 +1,11 @@
 import { prisma } from '@/lib/prisma'
-import { buildClientContextSection } from '@/lib/client-context-utils'
+import { buildClientContextSection } from '@/lib/utils/client-context'
 import { replaceClientVariables } from '@/lib/ai/variable-replacement'
 import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
 import { createAICompletion } from '@/lib/ai/wrapper'
 import { AIProviderError } from '@/lib/ai/errors'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
-import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
+import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
 import { logger } from '@/lib/logger'
 import { handleApiError } from '@/lib/middleware/error-handler'
 

@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { handleClientApiError } from '@/lib/toast-helpers'
+import { handleClientApiError } from '@/lib/utils/toast'
 
 /**
  * Configuration for async operations

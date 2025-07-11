@@ -1,4 +1,4 @@
-import { getUserConsent, saveUserConsent, withdrawAllConsent, ConsentData } from '@/lib/consent-utils'
+import { getUserConsent, saveUserConsent, withdrawAllConsent, ConsentData } from '@/lib/utils/consent'
 import { withEnhancedApi, parseJsonBody, apiSuccess, extractClientInfo } from '@/lib/middleware/api-middleware'
 
 // Force dynamic rendering since we use auth() which accesses headers
