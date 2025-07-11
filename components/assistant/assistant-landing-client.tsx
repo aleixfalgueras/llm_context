@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChatSidebar } from '@/components/assistant/chat-sidebar'
 import { ChatInterface } from '@/components/assistant/chat-interface'
-import { ClientContextSidebar } from '@/components/clients/client-context-sidebar'
+import { ClientContextSidebar } from '@/components/assistant/client-context-sidebar'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 
 interface AssistantLandingClientProps {

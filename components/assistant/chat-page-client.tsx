@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChatSidebar } from '@/components/assistant/chat-sidebar'
 import { ChatContainer } from '@/components/assistant/chat-container'
-import { ClientContextSidebar } from '@/components/clients/client-context-sidebar'
+import { ClientContextSidebar } from '@/components/assistant/client-context-sidebar'
 import { ClientDocuments } from '@/components/clients/client-documents'
 import { ErrorBoundary } from '@/components/global/error-boundary'
 
