@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 import { Document } from '@/types/component-types'
+import { DocumentClientService } from '@/lib/documents'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()
@@ -13,6 +14,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const [loading, setLoading] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null)
   const [documentContent, setDocumentContent] = useState('')
+  const [loadingContent, setLoadingContent] = useState(false)
   
   // Edit state
   const [isEditing, setIsEditing] = useState(false)
@@ -28,13 +30,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/documents?clientId=${encodeURIComponent(clientId)}`)
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch client documents')
-      }
-
-      const result = await response.json()
+      const result = await DocumentClientService.getClientDocuments(clientId)
       
       // Handle DbOperationResult structure
       const docs = result.data?.records || result.records || result.data || result || []
@@ -51,28 +47,42 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     }
   }
 
-  const handleViewDocument = async (document: Document) => {
+  // Consolidated document content loading function
+  const loadDocumentContent = async (document: Document, enableEditing = false) => {
+    console.log('Loading document content for:', document.documentName, 'ID:', document.id)
+    setLoadingContent(true)
+    
     try {
-      const response = await fetch(`/api/documents/${document.id}/content`)
-
-      if (!response.ok) {
-        throw new Error('Failed to load document content')
-      }
-
-      const { content } = await response.json()
+      const content = await DocumentClientService.getDocumentContent(document.id)
+      
+      // Update all related state atomically
       setDocumentContent(content)
       setSelectedDocument(document)
       setEditedContent(content)
-      setEditedDocumentName(document.documentName)
-      setIsEditing(false)
+      setEditedDocumentName(document.documentName || '')
+      setIsEditing(enableEditing)
       setIsCreating(false)
+      
+      console.log('Document state updated successfully')
     } catch (error) {
+      console.error('Failed to load document content:', error)
+      // Clear states on error
+      setDocumentContent('')
+      setEditedContent('')
+      setEditedDocumentName('')
+      
       toast({
         title: 'Error',
         description: 'Failed to load document content',
         variant: 'destructive',
       })
+    } finally {
+      setLoadingContent(false)
     }
+  }
+
+  const handleViewDocument = async (document: Document) => {
+    await loadDocumentContent(document, false)
   }
 
   const resetCreateState = () => {
@@ -82,16 +92,33 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setNewDocumentType(DOCUMENT_TYPES.MANUAL)
   }
 
+  // Reset all document-related state when dialog opens
+  const resetAllState = () => {
+    console.log('Resetting all document state')
+    setSelectedDocument(null)
+    setDocumentContent('')
+    setIsEditing(false)
+    setEditedContent('')
+    setEditedDocumentName('')
+    setIsCreating(false)
+    setLoadingContent(false)
+    resetCreateState()
+  }
+
   const resetEditState = () => {
     if (selectedDocument) {
-      setEditedContent(documentContent)
-      setEditedDocumentName(selectedDocument.documentName)
+      setEditedContent(documentContent || '')
+      setEditedDocumentName(selectedDocument.documentName || '')
+    } else {
+      setEditedContent('')
+      setEditedDocumentName('')
     }
     setIsEditing(false)
   }
 
   useEffect(() => {
     if (open) {
+      resetAllState()
       loadDocuments()
     }
   }, [open, clientId])
@@ -111,6 +138,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     documents,
     setDocuments,
     loading,
+    loadingContent,
     selectedDocument,
     setSelectedDocument,
     documentContent,
@@ -137,7 +165,9 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     // Actions
     loadDocuments,
     handleViewDocument,
+    loadDocumentContent,
     resetCreateState,
     resetEditState,
+    resetAllState,
   }
 } 
