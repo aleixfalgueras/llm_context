@@ -1,6 +1,6 @@
 import { DocumentService } from '@/lib/documents/service'
 import { DOCUMENT_TYPES } from '@/types/document-types'
-import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api-middleware'
+import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/middleware/api-middleware'
 import { apiValidation } from '@/lib/validation-helpers'
 
 export const POST = withEnhancedApi(async ({ userId, req }) => {

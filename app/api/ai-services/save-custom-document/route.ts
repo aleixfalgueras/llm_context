@@ -5,7 +5,7 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {

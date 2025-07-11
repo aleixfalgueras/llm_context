@@ -1,13 +1,13 @@
 import { prisma } from '@/lib/prisma'
 import { buildClientContextSection } from '@/lib/client-context-utils'
 import { replaceClientVariables } from '@/lib/ai/variable-replacement'
-import { withAuth, withTokenValidation, withClientAccess } from '@/lib/api-middleware'
+import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
 import { createAICompletion } from '@/lib/ai/wrapper'
 import { AIProviderError } from '@/lib/ai/errors'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/language-utils'
 import { logger } from '@/lib/logger'
-import { handleApiError } from '@/lib/api-error-handler'
+import { handleApiError } from '@/lib/middleware/error-handler'
 
 export async function POST(request: Request) {
   let userId: string = '';

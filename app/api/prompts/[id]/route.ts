@@ -4,7 +4,7 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 
 // GET /api/prompts/[id] - Get specific prompt
 export const GET = withEnhancedApi(

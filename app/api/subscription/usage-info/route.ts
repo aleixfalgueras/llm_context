@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { getUsageInfo } from '@/lib/api-middleware'
+import { getUsageInfo } from '@/lib/middleware/api-middleware'
 import { logger, withTiming } from '@/lib/logger'
 
 // Force dynamic rendering since we use auth() which accesses headers

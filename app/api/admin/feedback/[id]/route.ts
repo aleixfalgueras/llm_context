@@ -4,7 +4,7 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 import { prisma } from '@/lib/prisma'
 import { 
   FeedbackState,

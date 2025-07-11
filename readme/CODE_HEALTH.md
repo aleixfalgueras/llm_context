@@ -72,7 +72,7 @@ Found 54 file(s) that exceed the recommended thresholds:
 | `lib\subscription-cache.ts` | 152 | 100 | +52 |
 | `lib\client-actions.ts` | 146 | 100 | +46 |
 | `lib\document-save-utils.ts` | 135 | 100 | +35 |
-| `lib\api-error-handler.ts` | 132 | 100 | +32 |
+| `lib\error-handler.ts` | 132 | 100 | +32 |
 | `lib\documents\client-service.ts` | 125 | 100 | +25 |
 | `lib\documents\storage-service.ts` | 124 | 100 | +24 |
 | `lib\service-api.ts` | 122 | 100 | +22 |
