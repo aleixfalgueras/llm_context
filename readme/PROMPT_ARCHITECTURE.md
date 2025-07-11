@@ -111,7 +111,7 @@ export function hasClientContext(selectedFields: string[] = []): boolean {
 ### **1. Chat Assistant** (`app/api/chat/route.ts`)
 
 ```typescript
-// Uses the modular AI wrapper (lib/ai-wrapper.ts) with OpenRouter integration
+// Uses the modular AI wrapper (lib/ai/wrapper.ts) with OpenRouter integration
 // Build chat system prompt with user-selected client context
 const selectedContextFields = (chat as any).contextFields || []
 const clientContextSection = buildClientContextSection(client, selectedContextFields)
@@ -160,7 +160,7 @@ if (clientContextSection) {
 ### **3. Meeting Report Generator** (`app/api/ai-services/generate-meeting-report/route.ts`)
 
 ```typescript
-// Uses the unified AI wrapper (lib/ai-wrapper.ts) with automatic usage tracking
+// Uses the unified AI wrapper (lib/ai/wrapper.ts) with automatic usage tracking
 // Build the meeting report prompt (always in English)
 const meetingReportPrompt = `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
 

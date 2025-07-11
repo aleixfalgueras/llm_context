@@ -4,8 +4,8 @@ import {
   type UsageTrackingOptions,
   type StreamChunk
 } from './openrouter'
-import { AIProviderError } from './ai-errors'
-import { logger } from './logger'
+import { AIProviderError } from './errors'
+import { logger } from '../logger'
 
 // Re-export interfaces for backward compatibility
 export interface AICompletionOptions extends OpenRouterCompletionOptions {}

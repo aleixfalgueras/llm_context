@@ -3,11 +3,11 @@ import { createMessage } from '@/lib/actions'
 import { revalidatePath } from 'next/cache'
 import { generateChatTitleWithClient } from '@/lib/utils'
 import { buildClientContextSection, hasClientContext } from '@/lib/client-context-utils'
-import { createAICompletionStream } from '@/lib/ai-wrapper'
-import { AIProviderError } from '@/lib/ai-errors'
+import { createAICompletionStream } from '@/lib/ai/wrapper'
+import { AIProviderError } from '@/lib/ai/errors'
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
-import { getDefaultModel, getModelsByTier } from '@/lib/models-config'
+import { getDefaultModel, getModelsByTier } from '@/lib/ai/models-config'
 import { checkModelAccess } from '@/lib/subscription-utils'
 import { withAuth, withTokenValidation, withClientAccess } from '@/lib/api-middleware'
 import { handleApiError } from '@/lib/api-error-handler'
@@ -257,7 +257,7 @@ Respond naturally and conversationally while keeping this context in mind.`
                   // Add a small delay - generation stats might not be immediately available
                   await new Promise(resolve => setTimeout(resolve, 1000));
                   
-                  const { OpenRouterClient } = await import('@/lib/openrouter/client');
+                  const { OpenRouterClient } = await import('@/lib/ai/openrouter/client');
                   const client = new OpenRouterClient();
                   const stats = await client.getGenerationStats(chunk.generationId);
                   

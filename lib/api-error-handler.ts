@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { AIProviderError } from '@/lib/ai-errors'
+import { AIProviderError } from '@/lib/ai/errors'
 import { logger } from './logger'
 import { ApiSubscriptionErrorCode } from '@/types/enums'
 import { 

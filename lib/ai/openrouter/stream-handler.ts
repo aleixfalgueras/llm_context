@@ -2,7 +2,7 @@
  * OpenRouter streaming response handler
  */
 
-import { logger } from '../logger'
+import { logger } from '../../logger'
 import { handleOpenRouterError } from './error-handler'
 import type { StreamChunk } from './client'
 

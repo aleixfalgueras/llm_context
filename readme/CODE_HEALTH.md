@@ -75,8 +75,8 @@ Found 54 file(s) that exceed the recommended thresholds:
 | `lib\api-error-handler.ts` | 132 | 100 | +32 |
 | `lib\documents\client-service.ts` | 125 | 100 | +25 |
 | `lib\documents\storage-service.ts` | 124 | 100 | +24 |
-| `lib\ai-service-api.ts` | 122 | 100 | +22 |
-| `lib\ai-wrapper.ts` | 111 | 100 | +11 |
+| `lib\service-api.ts` | 122 | 100 | +22 |
+| `lib\wrapper.ts` | 111 | 100 | +11 |
 | `lib\openrouter\error-handler.ts` | 106 | 100 | +6 |
 | `lib\client-middleware.ts` | 105 | 100 | +5 |
 

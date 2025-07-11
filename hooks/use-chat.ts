@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
-import { DEFAULT_MODEL } from '@/lib/models-config'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai/errors'
+import { DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { Message } from '@/types/message-types'
 
 // Helper function to check if messages are likely duplicates

@@ -1,4 +1,4 @@
-import { ModelTier, ModelTierType, SubscriptionPlan, SubscriptionPlanType } from '../types/subscription-types'
+import { ModelTier, ModelTierType, SubscriptionPlan, SubscriptionPlanType } from '../../types/subscription-types'
 
 export interface AIModel {
   id: string

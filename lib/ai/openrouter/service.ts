@@ -5,8 +5,8 @@
 import { OpenRouterClient, OpenRouterCompletionOptions, StreamChunk } from './client'
 import { handleOpenRouterError } from './error-handler'
 import { processOpenRouterStream } from './stream-handler'
-import { trackUsage } from '../api-middleware'
-import { logger } from '../logger'
+import { trackUsage } from '../../api-middleware'
+import { logger } from '../../logger'
 import { 
   getDefaultModel, 
   getDefaultTemperature, 
