@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Menu, X, Users, User } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { ChatSidebar } from '@/components/assistant/chat-sidebar'
 import { ChatContainer } from '@/components/assistant/chat-container'
 import { ClientContextSidebar } from '@/components/assistant/client-context-sidebar'
@@ -27,6 +29,8 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
   const [currentTitle, setCurrentTitle] = useState(chat.title)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false)
+  const [isClientSidebarOpen, setIsClientSidebarOpen] = useState(false)
 
   // Get selected client info for context
   const selectedClient = clients.find(client => client.id === chat.clientId)
@@ -47,8 +51,69 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
         // Could add error reporting here
       }}
     >
-      <div className="flex h-full overflow-hidden">
-        <div className="flex-shrink-0 h-full">
+      <div className="flex h-full overflow-hidden relative">
+        {/* Mobile Chat Sidebar Overlay */}
+        {isChatSidebarOpen && (
+          <div className="xl:hidden fixed inset-0 z-50 flex">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setIsChatSidebarOpen(false)} />
+            <div className="relative flex flex-col w-80 bg-background border-r shadow-xl">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="font-semibold">Chats</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsChatSidebarOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <ErrorBoundary>
+                  <ChatSidebar 
+                    chats={chats}
+                    currentChatId={chat.id}
+                    isMobile={true}
+                    onChatSelect={() => setIsChatSidebarOpen(false)}
+                  />
+                </ErrorBoundary>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Client Sidebar Overlay */}
+        {isClientSidebarOpen && (
+          <div className="xl:hidden fixed inset-0 z-50 flex justify-end">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setIsClientSidebarOpen(false)} />
+            <div className="relative flex flex-col w-80 bg-background border-l shadow-xl">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="font-semibold">Client Info</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsClientSidebarOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <ErrorBoundary>
+                  <ClientContextSidebar 
+                    chatId={chat.id}
+                    selectedClientId={chat.clientId}
+                    clients={clients}
+                    hasActiveChat={true}
+                    chatContextFields={chat.contextFields}
+                    isMobile={true}
+                  />
+                </ErrorBoundary>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Chat Sidebar */}
+        <div className="hidden xl:block flex-shrink-0 h-full">
           <ErrorBoundary>
             <ChatSidebar 
               chats={chats}
@@ -57,13 +122,31 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
           </ErrorBoundary>
         </div>
         
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Enhanced Chat Header */}
           <div className="border-b p-4">
             <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2 min-w-0 flex-1">
+                {/* Mobile Chat Sidebar Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="xl:hidden"
+                  onClick={() => setIsChatSidebarOpen(true)}
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
                 <h1 className="font-semibold text-lg truncate">{currentTitle}</h1>
               </div>
+              {/* Mobile Client Sidebar Toggle */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="xl:hidden"
+                onClick={() => setIsClientSidebarOpen(true)}
+              >
+                <User className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
@@ -85,8 +168,8 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
           />
         </div>
         
-        {/* Client Context Sidebar - Always visible */}
-        <div className="flex-shrink-0 h-full">
+        {/* Desktop Client Context Sidebar */}
+        <div className="hidden xl:block flex-shrink-0 h-full">
           <ErrorBoundary>
             <ClientContextSidebar 
               chatId={chat.id}
