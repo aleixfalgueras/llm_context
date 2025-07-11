@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { HomePageClient } from '@/components/global/home-page-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/lib/client-actions'
+import { getClients } from '@/lib/actions/client'
 
 export default async function AssistantPage() {
   const { userId } = await auth()
