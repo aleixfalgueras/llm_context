@@ -21,6 +21,7 @@ interface ClientContextSidebarProps {
   clientContext?: ClientContextSelection
   onClientContextChange?: (context: ClientContextSelection) => void
   chatContextFields?: string[] // Context fields that were selected for an existing chat
+  isMobile?: boolean // Whether this is being rendered in mobile overlay mode
 }
 
 export function ClientContextSidebar({ 
@@ -30,7 +31,8 @@ export function ClientContextSidebar({
   hasActiveChat = false,
   clientContext = defaultClientContextSelections.general,
   onClientContextChange,
-  chatContextFields = []
+  chatContextFields = [],
+  isMobile = false
 }: ClientContextSidebarProps) {
   const router = useRouter()
   const [sidebarWidth, setSidebarWidth] = useState(300)
@@ -122,8 +124,12 @@ export function ClientContextSidebar({
   return (
     <div 
       ref={sidebarRef}
-      className="border-l bg-background flex h-full relative"
-      style={{ width: `${sidebarWidth}px` }}
+      className={`flex h-full relative ${
+        isMobile 
+          ? 'bg-background w-full' 
+          : 'border-l bg-background'
+      }`}
+      style={isMobile ? {} : { width: `${sidebarWidth}px` }}
     >
       {/* Loading Overlay */}
       {isCreatingChat && (
@@ -137,20 +143,22 @@ export function ClientContextSidebar({
           </div>
         </div>
       )}
-      {/* Resize Handle */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 transition-colors z-10 group"
-        onMouseDown={handleMouseDown}
-      >
-        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="bg-blue-500 text-white p-1 rounded">
-            <GripVertical className="h-3 w-3" />
+      {/* Resize Handle - Only show on desktop */}
+      {!isMobile && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 transition-colors z-10 group"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="bg-blue-500 text-white p-1 rounded">
+              <GripVertical className="h-3 w-3" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
       
       {/* Sidebar Content */}
-      <div className="flex flex-col flex-1 ml-1">
+      <div className={`flex flex-col flex-1 ${isMobile ? '' : 'ml-1'}`}>
         {/* Header */}
         <div className="p-2 sm:p-4 border-b">
           <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">

@@ -16,9 +16,11 @@ interface ChatSidebarProps {
   chats: Chat[]
   currentChatId?: string
   hideNewChatButton?: boolean // Hide the new chat button (e.g., when on assistant page)
+  isMobile?: boolean // Whether this is being rendered in mobile overlay mode
+  onChatSelect?: () => void // Callback for when a chat is selected (for closing mobile overlay)
 }
 
-export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false }: ChatSidebarProps) {
+export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, isMobile = false, onChatSelect }: ChatSidebarProps) {
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
@@ -52,7 +54,11 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false }:
   }
 
   return (
-    <div className="border-r bg-gray-50 dark:bg-gray-900 flex flex-col h-full" style={{ width: '300px' }}>
+    <div className={`flex flex-col h-full ${
+      isMobile 
+        ? 'bg-gray-50 dark:bg-gray-900 w-full' 
+        : 'border-r bg-gray-50 dark:bg-gray-900 w-[300px] min-w-[280px] max-w-[350px]'
+    }`}>
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
@@ -113,6 +119,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false }:
                   <Link 
                     href={`/assistant/chat/${chat.id}`} 
                     className="flex-1 min-w-0"
+                    onClick={onChatSelect}
                   >
                     {editingChatId === chat.id ? (
                       <Input
