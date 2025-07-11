@@ -1,5 +1,5 @@
 import { clerkClient } from '@clerk/nextjs/server'
-import { createCheckoutSession, STRIPE_PRICE_IDS } from '@/lib/stripe-utils'
+import { createCheckoutSession, STRIPE_PRICE_IDS } from '@/lib/payments/utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 import { logger } from '@/lib/logger'
 import { 

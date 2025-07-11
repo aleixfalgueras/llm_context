@@ -1,6 +1,6 @@
 import { stripe } from './stripe'
-import { prisma } from './prisma'
-import { logger } from './logger'
+import { prisma } from '../prisma'
+import { logger } from '../logger'
 import { SubscriptionPlan, SubscriptionStatus } from '@/types/subscription-types'
 import { invalidateSubscriptionCache } from './subscription-cache'
 import Stripe from 'stripe'

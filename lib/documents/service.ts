@@ -144,7 +144,7 @@ export class DocumentService {
 
     // Invalidate storage cache since storage usage has changed
     try {
-      const { invalidateStorageCache } = await import('../subscription-cache')
+      const { invalidateStorageCache } = await import('../payments/subscription-cache')
       invalidateStorageCache(userId)
     } catch (error) {
       logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))
@@ -216,7 +216,7 @@ export class DocumentService {
 
       // Invalidate storage cache since storage usage may have changed
       try {
-        const { invalidateStorageCache } = await import('../subscription-cache')
+        const { invalidateStorageCache } = await import('../payments/subscription-cache')
         invalidateStorageCache(userId)
       } catch (error) {
         logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))

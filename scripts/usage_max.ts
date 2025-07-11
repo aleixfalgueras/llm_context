@@ -12,9 +12,9 @@
  *   tsx scripts/usage_max.ts user_123 business tokens # Set token limit to max
  */
 import { PrismaClient } from '@prisma/client'
-import { SUBSCRIPTION_PLANS } from '../lib/subscription-utils'
+import { SUBSCRIPTION_PLANS } from '../lib/payments/subscription-utils'
 import { SubscriptionPlan } from '../types/subscription-types'
-import { invalidateSubscriptionCache } from '../lib/subscription-cache'
+import { invalidateSubscriptionCache } from '../lib/payments/subscription-cache'
 
 const prisma = new PrismaClient()
 

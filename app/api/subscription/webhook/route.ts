@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { stripe } from '@/lib/stripe'
-import { updateSubscriptionInDatabase } from '@/lib/stripe-utils'
+import { stripe } from '@/lib/payments/stripe'
+import { updateSubscriptionInDatabase } from '@/lib/payments/utils'
 import { logger } from '@/lib/logger'
 import Stripe from 'stripe'
 

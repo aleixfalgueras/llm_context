@@ -1,7 +1,7 @@
-import { stripe } from '@/lib/stripe'
+import { stripe } from '@/lib/payments/stripe'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { invalidateSubscriptionCache } from '@/lib/subscription-cache'
+import { invalidateSubscriptionCache } from '@/lib/payments/subscription-cache'
 import Stripe from 'stripe'
 import { 
   withEnhancedApi, 

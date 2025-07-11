@@ -1,7 +1,7 @@
 import { prisma } from './prisma'
 import { logger } from './logger'
 import { auth } from '@clerk/nextjs/server'
-import { getUserSubscription } from './subscription-utils'
+import { getUserSubscription } from './payments/subscription-utils'
 
 // Storage limits per plan (in bytes)
 import { SubscriptionPlan, SubscriptionPlanType } from '../types/subscription-types'
@@ -149,7 +149,7 @@ export function formatBytes(bytes: number): string {
 export async function getStorageAnalytics(userId: string, subscription?: any) {
   try {
     // Check cache first
-    const { getCachedStorageAnalytics, cacheStorageAnalytics } = await import('./subscription-cache')
+    const { getCachedStorageAnalytics, cacheStorageAnalytics } = await import('./payments/subscription-cache')
     const cached = getCachedStorageAnalytics(userId)
     if (cached) {
       return cached
