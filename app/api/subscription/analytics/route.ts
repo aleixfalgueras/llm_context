@@ -1,26 +1,20 @@
-import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { getUserUsageAnalytics } from '@/lib/subscription-utils'
+import { 
+  withEnhancedApi, 
+  apiSuccess,
+  ApiContext 
+} from '@/lib/api-middleware'
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+export const GET = withEnhancedApi(
+  async ({ userId }: ApiContext) => {
     const analytics = await getUserUsageAnalytics(userId)
-    
-    return NextResponse.json(analytics)
-  } catch (error) {
-    console.error('Error fetching subscription analytics:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return apiSuccess(analytics)
+  },
+  { 
+    context: 'Get subscription analytics',
+    allowedMethods: ['GET']
   }
-} 
+) 

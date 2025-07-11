@@ -1,44 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createCustomerPortalSession } from '@/lib/stripe-utils'
 import { logger } from '@/lib/logger'
+import { 
+  withEnhancedApi, 
+  apiSuccess,
+  ApiContext 
+} from '@/lib/api-middleware'
 
-export async function POST(request: NextRequest) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      logger.warn('Unauthorized customer portal attempt')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export const POST = withEnhancedApi(
+  async ({ userId }: ApiContext) => {
+    try {
+      const portalSession = await createCustomerPortalSession(userId)
 
-    const portalSession = await createCustomerPortalSession(userId)
-
-    logger.info('Customer portal session created successfully', { 
-      userId, 
-      metadata: {
-        sessionId: portalSession.id 
-      }
-    })
-
-    return NextResponse.json({ url: portalSession.url })
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('No Stripe customer found')) {
-      logger.info('Customer portal access attempted during free trial period', { 
+      logger.info('Customer portal session created successfully', { 
+        userId, 
         metadata: {
-          message: 'User has no Stripe customer - expected behavior for free trial users'
+          sessionId: portalSession.id 
         }
       })
-      return NextResponse.json(
-        { error: 'No active subscription found' },
-        { status: 404 }
-      )
-    }
 
-    logger.error('Failed to create customer portal session', error as Error, { userId: (await auth()).userId ?? undefined })
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      return apiSuccess({ url: portalSession.url })
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('No Stripe customer found')) {
+        logger.info('Customer portal access attempted during free trial period', { 
+          metadata: {
+            message: 'User has no Stripe customer - expected behavior for free trial users'
+          }
+        })
+        const noCustomerError = new Error('No active subscription found')
+        ;(noCustomerError as any).status = 404
+        throw noCustomerError
+      }
+      throw error
+    }
+  },
+  { 
+    context: 'Create customer portal session',
+    allowedMethods: ['POST']
   }
-}
+)

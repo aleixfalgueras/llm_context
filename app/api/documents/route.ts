@@ -1,69 +1,67 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/documents/service'
+import { 
+  withEnhancedApi, 
+  apiSuccess, 
+  parseJsonBody,
+  ApiContext 
+} from '@/lib/api-middleware'
 
 // GET /api/documents - List user's documents
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = request.nextUrl
+export const GET = withEnhancedApi(
+  async ({ userId, req }: ApiContext) => {
+    const { searchParams } = req.nextUrl
     const clientId = searchParams.get('clientId')
     
     if (!clientId) {
-      return NextResponse.json(
-        { error: 'Client ID is required' },
-        { status: 400 }
-      )
+      throw new Error('Client ID is required')
     }
 
     const options = {
       limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined
     }
 
-    const documents = await DocumentService.getClientDocuments(clientId, options)
-    return NextResponse.json(documents)
-  } catch (error) {
-    console.error('Failed to fetch documents:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch documents' },
-      { status: 500 }
-    )
+    const documents = await DocumentService.getClientDocuments(userId, clientId, options)
+    return apiSuccess(documents)
+  },
+  { 
+    context: 'Get client documents',
+    allowedMethods: ['GET']
   }
-}
+)
 
 // POST /api/documents - Create new document
-export async function POST(request: NextRequest) {
-  try {
-    const { clientId, documentName, documentType, content, metadata } = await request.json()
+export const POST = withEnhancedApi(
+  async ({ userId, req }: ApiContext) => {
+    const { clientId, documentName, documentType, content, metadata } = await parseJsonBody(req)
 
     if (!clientId || !documentName || !documentType || !content) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+      throw new Error('Missing required fields')
     }
 
-    const result = await DocumentService.createDocument(
-      clientId,
-      documentName,
-      documentType,
-      content,
-      { metadata, trackUsage: true }
-    )
-
-    return NextResponse.json(result, { status: 201 })
-  } catch (error) {
-    console.error('Failed to create document:', error)
-    
-    // Check for storage limit errors
-    if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 413 }
+    try {
+      const result = await DocumentService.createDocument(
+        userId,
+        clientId,
+        documentName,
+        documentType,
+        content,
+        { metadata, trackUsage: true }
       )
+
+      return apiSuccess(result, 201)
+    } catch (error) {
+      // Check for storage limit errors
+      if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
+        const storageError = new Error(error.message)
+        ;(storageError as any).status = 413
+        throw storageError
+      }
+      throw error
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to create document' },
-      { status: 500 }
-    )
+  },
+  { 
+    context: 'Create document',
+    allowedMethods: ['POST'],
+    expectedContentType: 'application/json'
   }
-}
+)
