@@ -1,41 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/documents/service'
-
-interface RouteParams {
-  params: Promise<{ id: string }>
-}
+import { 
+  withEnhancedApi, 
+  apiSuccess, 
+  parseJsonBody,
+  ApiContext 
+} from '@/lib/api-middleware'
 
 // GET /api/documents/[id] - Get document metadata
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { id } = await params
+export const GET = withEnhancedApi(
+  async ({ userId, params }: ApiContext) => {
+    const { id } = params!
+    const documentId = id as string
 
     // This would need to be implemented in DocumentService
     // For now, we'll return a not implemented response
-    return NextResponse.json(
-      { error: 'Get document metadata not implemented yet' },
-      { status: 501 }
-    )
-  } catch (error) {
-    console.error('Failed to get document:', error)
-    return NextResponse.json(
-      { error: 'Failed to get document' },
-      { status: 500 }
-    )
+    const error = new Error('Get document metadata not implemented yet')
+    ;(error as any).status = 501
+    throw error
+  },
+  { 
+    context: 'Get document metadata',
+    allowedMethods: ['GET']
   }
-}
+)
 
 // PUT /api/documents/[id] - Update document
-export async function PUT(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { id } = await params
-    const updates = await request.json()
+export const PUT = withEnhancedApi(
+  async ({ userId, req, params }: ApiContext) => {
+    const { id } = params!
+    const documentId = id as string
+    const updates = await parseJsonBody(req)
 
     if (!updates || Object.keys(updates).length === 0) {
-      return NextResponse.json(
-        { error: 'Updates are required' },
-        { status: 400 }
-      )
+      throw new Error('Updates are required')
     }
 
     // Validate update fields
@@ -44,77 +41,59 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const invalidFields = updateKeys.filter(key => !allowedFields.includes(key))
     
     if (invalidFields.length > 0) {
-      return NextResponse.json(
-        { error: `Invalid update fields: ${invalidFields.join(', ')}` },
-        { status: 400 }
-      )
+      throw new Error(`Invalid update fields: ${invalidFields.join(', ')}`)
     }
 
     // Validate content if provided
     if (updates.content !== undefined) {
       if (typeof updates.content !== 'string') {
-        return NextResponse.json(
-          { error: 'Content must be a string' },
-          { status: 400 }
-        )
+        throw new Error('Content must be a string')
       }
       
       if (updates.content.length === 0) {
-        return NextResponse.json(
-          { error: 'Content cannot be empty' },
-          { status: 400 }
-        )
+        throw new Error('Content cannot be empty')
       }
     }
 
-    const result = await DocumentService.updateDocument(id, updates)
-    return NextResponse.json(result)
-  } catch (error) {
-    console.error('Failed to update document:', error)
-    
-    // Handle specific error types
-    if (error instanceof Error) {
-      if (error.message.includes('Storage limit exceeded')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 413 } // Payload Too Large
-        )
+    try {
+      const result = await DocumentService.updateDocument(userId, documentId, updates)
+      return apiSuccess(result)
+    } catch (error) {
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('Storage limit exceeded')) {
+          const storageError = new Error(error.message)
+          ;(storageError as any).status = 413
+          throw storageError
+        }
+        
+        if (error.message.includes('not found')) {
+          const notFoundError = new Error('Document not found')
+          ;(notFoundError as any).status = 404
+          throw notFoundError
+        }
       }
-      
-      if (error.message.includes('Unauthorized')) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        )
-      }
-      
-      if (error.message.includes('not found')) {
-        return NextResponse.json(
-          { error: 'Document not found' },
-          { status: 404 }
-        )
-      }
+      throw error
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to update document' },
-      { status: 500 }
-    )
+  },
+  { 
+    context: 'Update document',
+    allowedMethods: ['PUT'],
+    expectedContentType: 'application/json'
   }
-}
+)
 
 // DELETE /api/documents/[id] - Delete document
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { id } = await params
+export const DELETE = withEnhancedApi(
+  async ({ userId, params }: ApiContext) => {
+    const { id } = params!
+    const documentId = id as string
 
-    const result = await DocumentService.deleteDocument(id)
-    return NextResponse.json(result)
-  } catch (error) {
-    console.error('Failed to delete document:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete document' },
-      { status: 500 }
-    )
+    const result = await DocumentService.deleteDocument(userId, documentId)
+    return apiSuccess(result)
+  },
+  { 
+    context: 'Delete document',
+    allowedMethods: ['DELETE']
   }
-}
+)

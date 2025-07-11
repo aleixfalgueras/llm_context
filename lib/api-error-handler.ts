@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server'
 import { AIProviderError } from '@/lib/ai-errors'
 import { logger } from './logger'
 import { ApiSubscriptionErrorCode } from '@/types/enums'
+import { 
+  normalizeErrorData, 
+  getErrorMetadata, 
+  getErrorMessage,
+  shouldLogAsInfo,
+  type ErrorData 
+} from './error-code-utils'
 
 /**
  * Centralized API error handler to eliminate duplicate error handling patterns
@@ -54,23 +61,25 @@ export function handleApiError(
   if (operation) logContext.operation = operation
 
   if (logError) {
+    // Normalize error data for consistent handling
+    const errorData = error instanceof AIProviderError ? null : normalizeErrorData(error)
+    const errorMetadata = errorData ? getErrorMetadata(errorData) : null
+    
     // Handle expected user limit errors as INFO instead of ERROR
-    if ((error as any).code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED) {
-      logger.info('User reached token limit', { 
-        ...logContext,
-        metadata: {
-          used: (error as any).metadata?.used,
-          limit: (error as any).metadata?.limit,
-          remaining: (error as any).metadata?.remaining
-        }
-      });
-    } else if ((error as any).code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
-      logger.info('User subscription expired', { 
-        ...logContext,
-        metadata: {
-          plan: (error as any).metadata?.plan
-        }
-      });
+    if (errorData && errorMetadata?.shouldLogAsInfo) {
+      if (errorData.code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED) {
+        logger.info('User reached token limit', { 
+          ...logContext,
+          metadata: errorMetadata.usageInfo
+        });
+      } else if (errorData.code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
+        logger.info('User subscription expired', { 
+          ...logContext,
+          metadata: {
+            plan: errorMetadata.plan
+          }
+        });
+      }
     } else if (error instanceof AIProviderError) {
       logger.aiError(error.provider || 'unknown', error, logContext)
     } else {

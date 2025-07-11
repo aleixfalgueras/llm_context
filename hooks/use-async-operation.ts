@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { handleApiError } from '@/lib/toast-helpers'
+import { handleClientApiError } from '@/lib/toast-helpers'
 
 /**
  * Configuration for async operations
@@ -214,7 +214,7 @@ export function useAsyncOperation(): UseAsyncOperationReturn {
           // Handle fetch response errors
           if (error.status === 402 || error.status === 429 || error.status === 403) {
             // Let the API error handler deal with subscription/usage errors
-            handleApiError(error, `${context} failed`)
+            handleClientApiError(error, `${context} failed`)
           } else {
             // Handle other HTTP errors normally
             toast({
@@ -225,7 +225,7 @@ export function useAsyncOperation(): UseAsyncOperationReturn {
           }
         } else if (error && typeof error === 'object' && 'code' in error) {
           // Handle server action errors with codes
-          handleApiError(error, `${context} failed`)
+          handleClientApiError(error, `${context} failed`)
         } else {
           // Handle non-HTTP errors normally
           toast({

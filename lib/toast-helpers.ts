@@ -4,7 +4,13 @@
  */
 
 import { toast } from '@/hooks/use-toast'
-import { ApiErrorCode, ToastVariant } from '@/types/enums'
+import { ApiSubscriptionErrorCode, ToastVariant } from '@/types/enums'
+import { 
+  normalizeErrorData, 
+  getErrorMetadata, 
+  getErrorMessage,
+  type ErrorData 
+} from './error-code-utils'
 
 /**
  * Success toast notifications
@@ -248,57 +254,51 @@ export function showCustomToast(
 }
 
 /**
- * Handle API errors with consistent toast notifications
+ * Handle API errors with consistent toast notifications for client-side usage
  */
-export function handleApiError(error: any, fallbackMessage: string = 'An error occurred') {
+export function handleClientApiError(error: any, fallbackMessage: string = 'An error occurred') {
   // Handle Response objects
   if (error.json && typeof error.json === 'function') {
     return error.json().then((data: any) => {
-      handleApiErrorData(data, fallbackMessage)
+      handleClientApiErrorData(data, fallbackMessage)
     }).catch(() => {
       errorToasts.generic(fallbackMessage)
     })
   }
   
-  // Handle plain objects with error data
-  if (typeof error === 'object' && error !== null) {
-    return handleApiErrorData(error, fallbackMessage)
-  }
-  
-  // Handle string errors
-  if (typeof error === 'string') {
-    return errorToasts.generic(error)
-  }
-  
-  // Fallback for unknown error types
-  return errorToasts.generic(fallbackMessage)
+  // Handle all other error types using shared utility
+  const errorData = normalizeErrorData(error)
+  return handleClientApiErrorData(errorData, fallbackMessage)
 }
 
 /**
- * Handle API error data objects
+ * Handle API error data objects for client-side toast notifications
  */
-function handleApiErrorData(data: any, fallbackMessage: string) {
+function handleClientApiErrorData(data: ErrorData, fallbackMessage: string) {
+  const metadata = getErrorMetadata(data)
+  const message = getErrorMessage(data)
+  
   switch (data.code) {
-    case ApiErrorCode.SUBSCRIPTION_EXPIRED:
-      return errorToasts.subscriptionExpired(data.upgradeUrl)
+    case ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED:
+      return errorToasts.subscriptionExpired(metadata.upgradeUrl)
     
-    case ApiErrorCode.USAGE_LIMIT_EXCEEDED:
+    case ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED:
       return toast({
         title: 'Usage Limit Exceeded',
-        description: `${data.error} Please upgrade your plan to continue.`,
+        description: `${message} Please upgrade your plan to continue.`,
         variant: ToastVariant.DESTRUCTIVE,
         duration: 10000
       })
     
-    case ApiErrorCode.MODEL_ACCESS_DENIED:
+    case ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED:
       return toast({
         title: 'Model Access Denied',
-        description: `${data.error} Please upgrade your plan to continue.`,
+        description: `${message} Please upgrade your plan to continue.`,
         variant: ToastVariant.DESTRUCTIVE,
         duration: 10000
       })
     
     default:
-      return errorToasts.generic(data.error || fallbackMessage)
+      return errorToasts.generic(message || fallbackMessage)
   }
 }

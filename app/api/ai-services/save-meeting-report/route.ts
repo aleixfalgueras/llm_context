@@ -1,10 +1,9 @@
 import { DocumentService } from '@/lib/documents/service'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api-middleware'
-import { ApiErrors } from '@/lib/api-error-handler'
 import { apiValidation } from '@/lib/validation-helpers'
 
-export const POST = withEnhancedApi(async ({ req }) => {
+export const POST = withEnhancedApi(async ({ userId, req }) => {
   const { clientId, meetingDate, reportContent, additionalInfo: _additionalInfo, documentName } = await parseJsonBody(req)
 
   // Use centralized validation to eliminate duplicate validation patterns
@@ -13,6 +12,7 @@ export const POST = withEnhancedApi(async ({ req }) => {
   try {
     // Use the unified document service with tracking enabled
     const result = await DocumentService.createDocument(
+      userId,
       clientId,
       documentName,
       DOCUMENT_TYPES.MEETING,

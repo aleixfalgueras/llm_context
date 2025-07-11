@@ -2,7 +2,6 @@
  * Document service - orchestrates repository and storage operations
  */
 
-import { auth } from '@clerk/nextjs/server'
 import { DocumentRepository, DocumentData, DocumentQueryOptions } from './repository'
 import { DocumentStorageService } from './storage-service'
 import { validateDocumentStorage, calculateDocumentSize } from '../storage-utils'
@@ -12,15 +11,9 @@ import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types
 
 export class DocumentService {
   /**
-   * Get client documents with authentication
+   * Get client documents
    */
-  static async getClientDocuments(clientId: string, options?: DocumentQueryOptions) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
+  static async getClientDocuments(userId: string, clientId: string, options?: DocumentQueryOptions) {
     const result = await DocumentRepository.getClientDocuments(userId, clientId, options)
 
     if (!result.success) {
@@ -31,15 +24,9 @@ export class DocumentService {
   }
 
   /**
-   * Get user documents with authentication
+   * Get user documents
    */
-  static async getUserDocuments(options?: DocumentQueryOptions) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
+  static async getUserDocuments(userId: string, options?: DocumentQueryOptions) {
     const result = await DocumentRepository.getUserDocuments(userId, options)
 
     if (!result.success) {
@@ -50,15 +37,9 @@ export class DocumentService {
   }
 
   /**
-   * Get document content with authentication
+   * Get document content
    */
-  static async getDocumentContent(documentId: string): Promise<string> {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
+  static async getDocumentContent(userId: string, documentId: string): Promise<string> {
     // Get document metadata
     const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
     
@@ -80,6 +61,7 @@ export class DocumentService {
    * Create document with content storage
    */
   static async createDocument(
+    userId: string,
     clientId: string,
     documentName: string | undefined,
     documentType: DocumentType,
@@ -89,11 +71,6 @@ export class DocumentService {
       trackUsage?: boolean
     }
   ) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
 
     // Validate storage constraints (throws error if validation fails)
     await validateDocumentStorage(content, userId)
@@ -188,14 +165,10 @@ export class DocumentService {
    * Update document metadata and/or content
    */
   static async updateDocument(
+    userId: string,
     documentId: string,
     updates: Partial<Pick<DocumentData, 'documentName' | 'documentType'>> & { content?: string }
   ) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
 
     // Get current document to check permissions and get storage path
     const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
@@ -265,12 +238,7 @@ export class DocumentService {
   /**
    * Delete document and its content
    */
-  static async deleteDocument(documentId: string) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
+  static async deleteDocument(userId: string, documentId: string) {
 
     // Get document to find storage path
     const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
@@ -304,12 +272,7 @@ export class DocumentService {
   /**
    * Bulk delete documents
    */
-  static async bulkDeleteDocuments(documentIds: string[]) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
+  static async bulkDeleteDocuments(userId: string, documentIds: string[]) {
 
     // Get all documents first to find storage paths
     const documents = await Promise.all(
