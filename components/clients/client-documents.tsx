@@ -39,27 +39,7 @@ export function ClientDocuments({
 
   // Document editing handlers
   const handleEditDocument = async (document: Document) => {
-    try {
-      const response = await fetch(`/api/documents/${document.id}/content`)
-
-      if (!response.ok) {
-        throw new Error('Failed to load document content')
-      }
-
-      const { content } = await response.json()
-      documentState.setDocumentContent(content)
-      documentState.setSelectedDocument(document)
-      documentState.setEditedContent(content)
-      documentState.setEditedDocumentName(document.documentName)
-      documentState.setIsEditing(true)
-      documentState.setIsCreating(false)
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load document content',
-        variant: 'destructive',
-      })
-    }
+    await documentState.loadDocumentContent(document, true)
   }
 
   const handleEditMode = () => {
@@ -167,6 +147,7 @@ export function ClientDocuments({
                 isEditing={documentState.isEditing}
                 editedContent={documentState.editedContent}
                 editedDocumentName={documentState.editedDocumentName}
+                loadingContent={documentState.loadingContent}
                 onEdit={handleEditMode}
                 onSave={handleSaveDocument}
                 onCancel={handleCancelEdit}

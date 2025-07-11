@@ -49,7 +49,7 @@ export function DocumentPreviewDialog({
                 onConfirm()
               }}
               className="bg-blue-500 hover:bg-blue-600 text-white"
-              disabled={!title.trim() || !content.trim()}
+              disabled={!title?.trim() || !content?.trim()}
             >
               {confirmText}
             </Button>
