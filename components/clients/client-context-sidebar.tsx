@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { ClientCombobox } from '@/components/ui/client-combobox'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
-import { createChatAndReturn } from '@/lib/actions'
+import { createChatAndReturn } from '@/lib/actions/actions'
 import { useRouter } from 'next/navigation'
 
 interface ClientContextSidebarProps {

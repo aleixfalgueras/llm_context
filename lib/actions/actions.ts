@@ -1,11 +1,11 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from './prisma'
+import { prisma } from '../prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { generateChatTitleWithClient } from './utils'
-import { logger, withTiming } from './logger'
+import { generateChatTitleWithClient } from '../utils'
+import { logger, withTiming } from '../logger'
 
 export async function createChat(title: string = 'New Chat', clientId: string, contextFields: string[] = []) {
   const endTiming = logger.startTiming('Create Chat Action');

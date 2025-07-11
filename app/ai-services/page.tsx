@@ -1,6 +1,6 @@
 import { AIServicesClient } from '@/components/ai-services/ai-services-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/lib/client-actions'
+import { getClients } from '@/lib/actions/client'
 
 export default async function AIServicesPage() {
 

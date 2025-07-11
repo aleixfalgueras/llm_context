@@ -2,7 +2,7 @@
 
 import { useFormState } from './use-form-state'
 import { useFormOperations } from './use-async-operation'
-import { createClient, updateClient, type ClientData } from '@/lib/client-actions'
+import { createClient, updateClient, type ClientData } from '@/lib/actions/client'
 import { validateClientForm } from '@/lib/validation-helpers'
 import { capitalizeName } from '@/lib/utils'
 import { getLanguageOptions } from '@/types/enums'

@@ -70,7 +70,7 @@ Found 54 file(s) that exceed the recommended thresholds:
 | `lib\documents\repository.ts` | 180 | 100 | +80 |
 | `lib\openrouter\service.ts` | 173 | 100 | +73 |
 | `lib\subscription-cache.ts` | 152 | 100 | +52 |
-| `lib\client-actions.ts` | 146 | 100 | +46 |
+| `lib\client.ts` | 146 | 100 | +46 |
 | `lib\document-save-utils.ts` | 135 | 100 | +35 |
 | `lib\error-handler.ts` | 132 | 100 | +32 |
 | `lib\documents\client-service.ts` | 125 | 100 | +25 |
