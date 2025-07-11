@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { ClientCombobox } from '@/components/ui/client-combobox'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
-import { createChatAndReturn } from '@/lib/actions/chat'
+// Removed createChatAndReturn - now using lazy chat creation via API
 import { useRouter } from 'next/navigation'
 
 interface ClientContextSidebarProps {
@@ -105,8 +105,13 @@ export function ClientContextSidebar({
         })
         .map(([key]) => key)
       
-      const newChatId = await createChatAndReturn('New Chat', selectedClientId, selectedFields)
-      router.push(`/assistant/chat/${newChatId}`)
+      // Navigate to new chat with client and context data in URL params
+      // The chat will be created when the first message is sent via the API
+      const params = new URLSearchParams({
+        clientId: selectedClientId,
+        contextFields: JSON.stringify(selectedFields)
+      })
+      router.push(`/assistant/chat/new?${params.toString()}`)
     } catch (error) {
       console.error('Failed to create chat:', error)
     } finally {

@@ -1,5 +1,5 @@
 import { Navbar } from '@/components/global/navbar'
-import { FeedbackForm } from '@/components/global/feedback-form'
+import { FeedbackForm } from '@/components/feedback-form'
 
 export default async function FeedbackPage() {
 

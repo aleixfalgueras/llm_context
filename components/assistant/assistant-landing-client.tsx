@@ -6,12 +6,12 @@ import { ChatInterface } from '@/components/assistant/chat-interface'
 import { ClientContextSidebar } from '@/components/clients/client-context-sidebar'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
 
-interface HomePageClientProps {
+interface AssistantLandingClientProps {
   chats: any[]
   clients: any[]
 }
 
-export function HomePageClient({ chats, clients }: HomePageClientProps) {
+export function AssistantLandingClient({ chats, clients }: AssistantLandingClientProps) {
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
   const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
 
@@ -36,4 +36,4 @@ export function HomePageClient({ chats, clients }: HomePageClientProps) {
       />
     </div>
   )
-} 
+}
