@@ -1,9 +1,9 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Eye } from 'lucide-react'
-import { MarkdownRenderer } from '@/components/global/markdown-renderer'
+import {Button} from '@/components/ui/button'
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog'
+import {Eye} from 'lucide-react'
+import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 
 interface DocumentPreviewDialogProps {
   open: boolean

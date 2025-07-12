@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, memo } from 'react'
-import { useChat } from '@/hooks/use-chat'
-import { ChatMessages } from '@/components/assistant/chat-messages'
-import { ChatInput } from '@/components/assistant/chat-input'
-import { ErrorBoundary } from '@/components/global/error-boundary'
-import { Message } from '@/types/message-types'
+import {memo, useEffect} from 'react'
+import {useChat} from '@/hooks/use-chat'
+import {ChatMessages} from '@/components/assistant/chat-messages'
+import {ChatInput} from '@/components/assistant/chat-input'
+import {ErrorBoundary} from '@/components/global/error-boundary'
+import {Message} from '@/types/message-types'
 
 interface NewChatParams {
   clientId: string;

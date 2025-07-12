@@ -1,17 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Search, Plus, User, Grid, List, Calendar, ArrowDownAZ } from 'lucide-react'
+import {useState} from 'react'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {ArrowDownAZ, Calendar, Grid, List, Plus, Search, User} from 'lucide-react'
 
-import { ClientGridView } from '@/components/clients/client-grid-view'
-import { ClientTableView } from '@/components/clients/client-table-view'
-import { ClientPagination } from '@/components/clients/client-pagination'
-import { ClientEmptyState } from '@/components/clients/client-empty-state'
-import { UsageInfo, Client, ClientActionHandlers } from '@/types/client-list-types'
-import { ViewMode, ButtonVariant, ClientSortMode } from '@/types/enums'
-import { useClientList } from '@/hooks/use-client-list'
+import {ClientGridView} from '@/components/clients/client-grid-view'
+import {ClientTableView} from '@/components/clients/client-table-view'
+import {ClientPagination} from '@/components/clients/client-pagination'
+import {ClientEmptyState} from '@/components/clients/client-empty-state'
+import {Client, ClientActionHandlers, UsageInfo} from '@/types/client-list-types'
+import {ButtonVariant, ClientSortMode, ViewMode} from '@/types/enums'
+import {useClientList} from '@/hooks/use-client-list'
 
 interface ClientsListProps {
   clients: Client[]

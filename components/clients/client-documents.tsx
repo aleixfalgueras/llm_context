@@ -1,16 +1,16 @@
 'use client'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { DocumentList } from '@/components/documents/document-list'
-import { DocumentViewer } from '@/components/documents/document-viewer'
-import { DocumentCreationForm } from '@/components/documents/document-creation-form'
-import { DocumentPreviewDialog } from '@/components/documents/document-preview-dialog'
-import { useDocumentState } from '@/hooks/use-document-state'
-import { useDocumentOperations } from '@/hooks/use-document-operations'
-import { useDocumentUIState } from '@/hooks/use-document-ui-state'
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog'
+import {DocumentList} from '@/components/documents/document-list'
+import {DocumentViewer} from '@/components/documents/document-viewer'
+import {DocumentCreationForm} from '@/components/documents/document-creation-form'
+import {DocumentPreviewDialog} from '@/components/documents/document-preview-dialog'
+import {useDocumentState} from '@/hooks/use-document-state'
+import {useDocumentOperations} from '@/hooks/use-document-operations'
+import {useDocumentUIState} from '@/hooks/use-document-ui-state'
 
-import { useToast } from '@/hooks/use-toast'
-import type { ClientDocumentsProps, Document } from '@/types/client-document-types'
+import {useToast} from '@/hooks/use-toast'
+import type {ClientDocumentsProps, Document} from '@/types/client-document-types'
 
 export function ClientDocuments({ 
   clientId, 

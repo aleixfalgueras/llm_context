@@ -1,15 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { ClientsList } from '@/components/clients/clients-list'
-import { ClientForm } from '@/components/clients/client-form'
-import { ClientDocuments } from '@/components/clients/client-documents'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { AlertTriangle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useClientManagement } from '@/hooks/use-client-management'
+import {useState} from 'react'
+import {useRouter} from 'next/navigation'
+import {ClientsList} from '@/components/clients/clients-list'
+import {ClientForm} from '@/components/clients/client-form'
+import {ClientDocuments} from '@/components/clients/client-documents'
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog'
+import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert'
+import {AlertTriangle} from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {useClientManagement} from '@/hooks/use-client-management'
 
 interface ClientsPageClientProps {
   clients: any[]

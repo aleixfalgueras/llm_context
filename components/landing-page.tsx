@@ -1,11 +1,25 @@
 'use client'
 
-import { Bot, MessageSquare, Zap, Shield, Sparkles, ArrowRight, Megaphone, Target, TrendingUp, BarChart3, PenTool, CheckIcon, StarIcon, CrownIcon, ZapIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ThemeToggle } from '@/components/global/theme-toggle'
-import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
-import { SubscriptionPlan } from '@/types/subscription-types'
+import {
+  ArrowRight,
+  BarChart3,
+  Bot,
+  CheckIcon,
+  CrownIcon,
+  Megaphone,
+  PenTool,
+  Shield,
+  Sparkles,
+  StarIcon,
+  Target,
+  Zap,
+  ZapIcon
+} from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
+import {ThemeToggle} from '@/components/global/theme-toggle'
+import {SUBSCRIPTION_PLANS} from '@/lib/payments/subscription-utils'
+import {SubscriptionPlan} from '@/types/subscription-types'
 import Link from 'next/link'
 
 export function LandingPage() {

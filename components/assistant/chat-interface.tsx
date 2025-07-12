@@ -1,7 +1,7 @@
 'use client'
 
-import { Bot, Shield } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import {Bot, Shield} from 'lucide-react'
+import {Card} from '@/components/ui/card'
 
 export function ChatInterface() {
   return (

@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { User, GripVertical, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { ClientCombobox } from '@/components/ui/client-combobox'
-import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
-import { CLIENT_CONTEXT_FIELD_LABELS } from '@/types/client'
+import {useEffect, useRef, useState} from 'react'
+import {GripVertical, Plus, User} from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {Card} from '@/components/ui/card'
+import {Checkbox} from '@/components/ui/checkbox'
+import {Label} from '@/components/ui/label'
+import {ClientCombobox} from '@/components/ui/client-combobox'
+import {ClientContextSelection, defaultClientContextSelections} from '@/types/client-context'
+import {CLIENT_CONTEXT_FIELD_LABELS} from '@/types/client'
 // Removed createChatAndReturn - now using lazy chat creation via API
-import { useRouter } from 'next/navigation'
+import {useRouter} from 'next/navigation'
 
 interface ClientContextSidebarProps {
   chatId?: string
