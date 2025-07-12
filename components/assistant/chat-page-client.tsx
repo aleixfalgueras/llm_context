@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { Menu, X, Users, User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { ChatSidebar } from '@/components/assistant/chat-sidebar'
-import { ChatContainer } from '@/components/assistant/chat-container'
-import { ClientContextSidebar } from '@/components/assistant/client-context-sidebar'
-import { ClientDocuments } from '@/components/clients/client-documents'
-import { ErrorBoundary } from '@/components/global/error-boundary'
+import {useState} from 'react'
+import {Menu, User, X} from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {ChatSidebar} from '@/components/assistant/chat-sidebar'
+import {ChatContainer} from '@/components/assistant/chat-container'
+import {ClientContextSidebar} from '@/components/assistant/client-context-sidebar'
+import {ClientDocuments} from '@/components/clients/client-documents'
+import {ErrorBoundary} from '@/components/global/error-boundary'
 
 interface ChatPageClientProps {
   chat: {

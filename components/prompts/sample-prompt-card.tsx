@@ -1,11 +1,11 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Lightbulb, Copy } from 'lucide-react'
-import { samplePrompts } from '@/lib/sample-prompts'
-import { PromptDialog } from '@/components/prompts/prompt-dialog'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
+import {Badge} from '@/components/ui/badge'
+import {Copy, Lightbulb} from 'lucide-react'
+import {samplePrompts} from '@/lib/sample-prompts'
+import {PromptDialog} from '@/components/prompts/prompt-dialog'
 
 interface SamplePromptCardProps {
   prompt: typeof samplePrompts[0]

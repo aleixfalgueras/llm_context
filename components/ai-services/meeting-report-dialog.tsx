@@ -1,16 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Calendar, Upload, Loader2 } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { DatePicker } from '@/components/ui/date-picker'
-import { BaseAIServiceDialog } from './base-ai-service-dialog'
-import type { BaseAIServiceDialogConfig, ValidationResult } from './base-ai-service-dialog'
-import type { Client } from '@/types/client'
-import { getDefaultModel } from '@/lib/ai/models-config'
+import {useState} from 'react'
+import {Button} from '@/components/ui/button'
+import {Label} from '@/components/ui/label'
+import {Textarea} from '@/components/ui/textarea'
+import {Calendar, Loader2, Upload} from 'lucide-react'
+import {useToast} from '@/hooks/use-toast'
+import {DatePicker} from '@/components/ui/date-picker'
+import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
+import {BaseAIServiceDialog} from './base-ai-service-dialog'
+import type {Client} from '@/types/client'
+import {getDefaultModel} from '@/lib/ai/models-config'
 
 interface MeetingReportDialogProps {
   open: boolean

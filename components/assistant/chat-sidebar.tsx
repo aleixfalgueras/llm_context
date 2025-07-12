@@ -1,16 +1,16 @@
 'use client'
 
-import { MessageSquare, MoreHorizontal, Trash2, Edit2, TrashIcon, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { deleteChat, updateChatTitle, deleteAllChats } from '@/lib/actions/chat'
+import {Edit2, MessageSquare, MoreHorizontal, Plus, Trash2, TrashIcon} from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {Card} from '@/components/ui/card'
+import {ScrollArea} from '@/components/ui/scroll-area'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import {deleteAllChats, deleteChat, updateChatTitle} from '@/lib/actions/chat'
 import Link from 'next/link'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-import { Input } from '@/components/ui/input'
-import { Chat } from '@/types/component-types'
+import {useState} from 'react'
+import {usePathname} from 'next/navigation'
+import {Input} from '@/components/ui/input'
+import {Chat} from '@/types/component-types'
 
 interface ChatSidebarProps {
   chats: Chat[]

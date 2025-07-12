@@ -1,12 +1,12 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { FileText, Edit, Save, X, Eye, Loader2 } from 'lucide-react'
-import { MarkdownRenderer } from '@/components/global/markdown-renderer'
-import { getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-import { Document } from '@/types/component-types'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Textarea} from '@/components/ui/textarea'
+import {Edit, Eye, FileText, Loader2, Save, X} from 'lucide-react'
+import {MarkdownRenderer} from '@/components/global/markdown-renderer'
+import {type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
+import {Document} from '@/types/component-types'
 
 interface DocumentViewerProps {
   document: Document | null
