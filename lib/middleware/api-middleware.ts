@@ -2,15 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { handleApiError, ApiErrors } from './error-handler'
 
-export interface UsageLimitResponse {
-  allowed: boolean
-  limit: number | 'unlimited'
-  used: number
-  remaining?: number
-  message?: string
-}
-
-
 // =============================================================================
 // ENHANCED API MIDDLEWARE FOR DRY ELIMINATION
 // =============================================================================
@@ -125,16 +116,6 @@ export function withEnhancedApi<T = any>(
 }
 
 /**
- * Middleware for public API routes (no authentication required)
- */
-export function withPublicApi<T = any>(
-  handler: EnhancedApiHandler<T>,
-  config: Omit<EnhancedApiConfig, 'requireAuth'> = {}
-) {
-  return withEnhancedApi(handler, { ...config, requireAuth: false })
-}
-
-/**
  * Standard success response helper
  */
 export function apiSuccess<T = any>(
@@ -152,31 +133,6 @@ export function apiSuccess<T = any>(
       }
     }
   )
-}
-
-/**
- * Success response for created resources
- */
-export function apiCreated<T = any>(
-  data: T,
-  headers?: Record<string, string>
-): NextResponse<{ data: T; success: true }> {
-  return apiSuccess(data, 201, headers)
-}
-
-/**
- * Success response with no content
- */
-export function apiNoContent(
-  headers?: Record<string, string>
-): NextResponse {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers
-    }
-  })
 }
 
 /**
@@ -266,29 +222,6 @@ export async function withTokenValidation(userId: string): Promise<void> {
       used: tokenUsage.used,
       limit: tokenUsage.limit,
       remaining: tokenUsage.remaining,
-      upgradeUrl: '/subscription'
-    }
-    
-    throw error
-  }
-}
-
-/**
- * Subscription status validation middleware - checks if subscription is active
- */
-export async function withSubscriptionCheck(userId: string): Promise<void> {
-  const { getUserSubscription, isSubscriptionActive } = await import('../payments/subscription-utils')
-  
-  const subscription = await getUserSubscription(userId)
-  
-  if (!isSubscriptionActive(subscription)) {
-    const error = new Error('Your subscription has expired. Please upgrade to continue.')
-    ;(error as any).code = 'SUBSCRIPTION_EXPIRED'
-    ;(error as any).status = 402
-    ;(error as any).metadata = {
-      plan: subscription.plan,
-      status: subscription.status,
-      currentPeriodEnd: subscription.currentPeriodEnd,
       upgradeUrl: '/subscription'
     }
     
