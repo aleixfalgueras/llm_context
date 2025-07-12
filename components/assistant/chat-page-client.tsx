@@ -54,7 +54,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
       <div className="flex h-full overflow-hidden relative">
         {/* Mobile Chat Sidebar Overlay */}
         {isChatSidebarOpen && (
-          <div className="xl:hidden fixed inset-0 z-50 flex">
+          <div className="wide:hidden fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/50" onClick={() => setIsChatSidebarOpen(false)} />
             <div className="relative flex flex-col w-80 bg-background border-r shadow-xl">
               <div className="flex items-center justify-between p-4 border-b">
@@ -83,7 +83,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
 
         {/* Mobile Client Sidebar Overlay */}
         {isClientSidebarOpen && (
-          <div className="xl:hidden fixed inset-0 z-50 flex justify-end">
+          <div className="wide:hidden fixed inset-0 z-50 flex justify-end">
             <div className="fixed inset-0 bg-black/50" onClick={() => setIsClientSidebarOpen(false)} />
             <div className="relative flex flex-col w-80 bg-background border-l shadow-xl">
               <div className="flex items-center justify-between p-4 border-b">
@@ -113,7 +113,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
         )}
 
         {/* Desktop Chat Sidebar */}
-        <div className="hidden xl:block flex-shrink-0 h-full">
+        <div className="hidden wide:block flex-shrink-0 h-full">
           <ErrorBoundary>
             <ChatSidebar 
               chats={chats}
@@ -131,7 +131,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="xl:hidden"
+                  className="wide:hidden"
                   onClick={() => setIsChatSidebarOpen(true)}
                 >
                   <Menu className="h-4 w-4" />
@@ -142,7 +142,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
               <Button
                 variant="ghost"
                 size="sm"
-                className="xl:hidden"
+                className="wide:hidden"
                 onClick={() => setIsClientSidebarOpen(true)}
               >
                 <User className="h-4 w-4" />
@@ -169,7 +169,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
         </div>
         
         {/* Desktop Client Context Sidebar */}
-        <div className="hidden xl:block flex-shrink-0 h-full">
+        <div className="hidden wide:block flex-shrink-0 h-full">
           <ErrorBoundary>
             <ClientContextSidebar 
               chatId={chat.id}
