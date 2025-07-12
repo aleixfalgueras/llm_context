@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { PromptOperations } from '@/lib/database/prompt-operations'
 import { 
   withEnhancedApi, 
   apiSuccess,
@@ -11,25 +11,7 @@ export const POST = withEnhancedApi(
     const { id } = params!
     const promptId = id as string
 
-    // Increment usage count
-    const prompt = await prisma.prompt.updateMany({
-      where: {
-        id: promptId,
-        userId,
-        isActive: true,
-      },
-      data: {
-        usageCount: {
-          increment: 1,
-        },
-      },
-    })
-
-    if (prompt.count === 0) {
-      const error = new Error('Prompt not found or inactive')
-      ;(error as any).status = 404
-      throw error
-    }
+    await PromptOperations.incrementPromptUsage(promptId, userId)
 
     return apiSuccess({ message: 'Prompt usage tracked' })
   },
