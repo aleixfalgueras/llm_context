@@ -103,51 +103,6 @@ export function getDefaultFrequencyPenalty(): number {
   return parseFloat(process.env.OPENROUTER_FREQUENCY_PENALTY || DEFAULT_FREQUENCY_PENALTY.toString())
 }
 
-export function getModelById(modelId: string): AIModel | undefined {
-  return AVAILABLE_MODELS.find(model => model.id === modelId)
-}
-
-/**
- * Get the default model for new chats from localStorage, with validation
- * Falls back to system default if saved model is invalid or not found
- */
-export function getDefaultModelForNewChats(): string {
-  if (typeof window === 'undefined') {
-    return DEFAULT_MODEL // Server-side fallback
-  }
-
-  try {
-    const savedModel = localStorage.getItem('chat-default-model')
-    if (savedModel) {
-      // Validate that the saved model is still available
-      const isValidModel = AVAILABLE_MODELS.some(model => model.id === savedModel)
-      if (isValidModel) {
-        return savedModel
-      } else {
-        // Remove invalid model from localStorage
-        localStorage.removeItem('chat-default-model')
-      }
-    }
-  } catch (error) {
-    console.error('Failed to load saved default model:', error)
-  }
-  
-  return DEFAULT_MODEL
-}
-
-/**
- * Save the default model for new chats to localStorage
- */
-export function saveDefaultModelForNewChats(modelId: string): void {
-  if (typeof window === 'undefined') return // Server-side safety
-  
-  try {
-    localStorage.setItem('chat-default-model', modelId)
-  } catch (error) {
-    console.error('Failed to save default model:', error)
-  }
-}
-
 /**
  * Get models available for a specific subscription tier
  */
