@@ -5,8 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-
-
 // Capitalize each word in a name (proper case)
 export function capitalizeName(name: string): string {
   if (!name) return name

@@ -209,7 +209,3 @@ export const getSamplePromptsByCategory = (category?: string) => {
   }
   return samplePrompts.filter(prompt => prompt.category === category)
 }
-
-export const getSamplePromptById = (id: string) => {
-  return samplePrompts.find(prompt => prompt.id === id)
-} 
