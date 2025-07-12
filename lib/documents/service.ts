@@ -24,19 +24,6 @@ export class DocumentService {
   }
 
   /**
-   * Get user documents
-   */
-  static async getUserDocuments(userId: string, options?: DocumentQueryOptions) {
-    const result = await DocumentRepository.getUserDocuments(userId, options)
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch documents')
-    }
-
-    return result.data
-  }
-
-  /**
    * Get document content
    */
   static async getDocumentContent(userId: string, documentId: string): Promise<string> {
