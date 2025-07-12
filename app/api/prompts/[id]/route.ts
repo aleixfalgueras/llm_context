@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { PromptOperations } from '@/lib/database/prompt-operations'
 import { 
   withEnhancedApi, 
   apiSuccess, 
@@ -45,29 +46,12 @@ export const PUT = withEnhancedApi(
       throw new Error('Name and content are required')
     }
 
-    const prompt = await prisma.prompt.updateMany({
-      where: {
-        id: promptId,
-        userId,
-      },
-      data: {
-        name,
-        description,
-        content,
-        category,
-        isActive,
-      },
-    })
-
-    if (prompt.count === 0) {
-      const error = new Error('Prompt not found')
-      ;(error as any).status = 404
-      throw error
-    }
-
-    // Fetch and return updated prompt
-    const updatedPrompt = await prisma.prompt.findFirst({
-      where: { id: promptId, userId },
+    const updatedPrompt = await PromptOperations.updatePrompt(promptId, userId, {
+      name,
+      description,
+      content,
+      category,
+      isActive,
     })
 
     return apiSuccess(updatedPrompt)
@@ -85,18 +69,7 @@ export const DELETE = withEnhancedApi(
     const { id } = params!
     const promptId = id as string
 
-    const prompt = await prisma.prompt.deleteMany({
-      where: {
-        id: promptId,
-        userId,
-      },
-    })
-
-    if (prompt.count === 0) {
-      const error = new Error('Prompt not found')
-      ;(error as any).status = 404
-      throw error
-    }
+    await PromptOperations.deletePrompt(promptId, userId)
 
     return apiSuccess({ message: 'Prompt deleted' })
   },
