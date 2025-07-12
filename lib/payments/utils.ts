@@ -20,12 +20,6 @@ export const STRIPE_PRICE_IDS = {
   },
 } as const
 
-export const STRIPE_PRODUCT_IDS = {
-  [SubscriptionPlan.BASIC]: process.env.STRIPE_BASIC_PRODUCT_ID || 'prod_SbaDHyACLICIV4',
-  [SubscriptionPlan.PRO]: process.env.STRIPE_PRO_PRODUCT_ID || 'prod_SdmZxuwq9cxyt5',
-  [SubscriptionPlan.BUSINESS]: process.env.STRIPE_BUSINESS_PRODUCT_ID || 'prod_SdmaweGgtJE2dh',
-} as const
-
 export async function createOrRetrieveCustomer(userId: string, email: string) {
   try {
     const existingSubscription = await prisma.userSubscription.findUnique({
