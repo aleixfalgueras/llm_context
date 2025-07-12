@@ -4,9 +4,9 @@ import { PromptsManagement } from '@/components/prompts/prompts-management'
 export default async function PromptsPage() {
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-hidden flex flex-col">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
+      <div className="flex-1 overflow-auto">
         <PromptsManagement />
       </div>
     </div>
