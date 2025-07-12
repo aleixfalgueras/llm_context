@@ -75,30 +75,6 @@ export class OpenRouterClient {
   }
 
   /**
-   * Get available models
-   */
-  async getModels() {
-    return this.client.models.list()
-  }
-
-  /**
-   * Get credit information
-   */
-  async getCredits() {
-    const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
-      }
-    })
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch credits: ${response.status}`)
-    }
-    
-    return response.json()
-  }
-
-  /**
    * Get generation stats by ID (for token usage fallback)
    */
   async getGenerationStats(generationId: string) {    
