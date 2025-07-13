@@ -1,7 +1,7 @@
 'use client'
 
 import {useEffect, useRef, useState} from 'react'
-import {GripVertical, Plus, User} from 'lucide-react'
+import {GripVertical, Lightbulb, Plus, User} from 'lucide-react'
 import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
 import {Checkbox} from '@/components/ui/checkbox'
@@ -369,6 +369,27 @@ export function ClientContextSidebar({
                   Context is set for the first message only and cannot be changed during the chat.
                 </p>
               </div>
+
+              {/* Tips Section */}
+              <Card className="p-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <span className="font-medium text-amber-900 dark:text-amber-100 text-sm">Tips</span>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <p className="text-amber-800 dark:text-amber-200">
+                      • Start a new chat for different topics to improve response quality
+                    </p>
+                    <p className="text-amber-800 dark:text-amber-200">
+                      • Longer conversations use more tokens and increase costs
+                    </p>
+                    <p className="text-amber-800 dark:text-amber-200">
+                      • Be polite and respectful - good manners improve AI interactions
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </div>
           ) : (
             <div className="text-center text-gray-500 mt-8">
