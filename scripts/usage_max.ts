@@ -2,67 +2,42 @@
 /**
  * Usage Limit Testing Script
  * 
- * Sets a user's token usage to the maximum limits for their subscription plan.
+ * Sets a user's token usage to the maximum limits for their current subscription plan.
  * 
- * Usage: tsx scripts/usage_max.ts <userId> <planName> <limitType>
+ * Usage: tsx scripts/usage_max.ts <userId>
  * 
  * Examples:
- *   tsx scripts/usage_max.ts user_123 basic tokens   # Set token limit to max
- *   tsx scripts/usage_max.ts user_123 pro tokens     # Set token limit to max
- *   tsx scripts/usage_max.ts user_123 business tokens # Set token limit to max
+ *   tsx scripts/usage_max.ts user_123   # Set token usage to max for their current plan
  */
 import { PrismaClient } from '@prisma/client'
-import { SUBSCRIPTION_PLANS } from '../lib/payments/subscription-utils'
-import { SubscriptionPlan } from '../types/subscription-types'
-import { invalidateSubscriptionCache } from '../lib/payments/subscription-cache'
+import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
+import { SubscriptionPlan } from '@/types/subscription-types'
 
 const prisma = new PrismaClient()
 
-type PlanName = SubscriptionPlan
-type LimitType = 'tokens'
-
 interface ScriptArgs {
   userId: string
-  planName: PlanName
-  limitType: LimitType
 }
 
 function parseArguments(): ScriptArgs {
   const args = process.argv.slice(2)
   
-  if (args.length !== 3) {
-    console.error('❌ Usage: tsx scripts/usage_max.ts <userId> <planName> <limitType>')
-    console.error(`   planName must be one of: ${Object.values(SubscriptionPlan).join(', ')}`)
-    console.error('   limitType must be: tokens')
+  if (args.length !== 1) {
+    console.error('❌ Usage: tsx scripts/usage_max.ts <userId>')
     console.error('   Examples:')
-    console.error(`     tsx scripts/usage_max.ts user_123abc ${SubscriptionPlan.BASIC} tokens`)
-    console.error(`     tsx scripts/usage_max.ts user_123abc ${SubscriptionPlan.PRO} tokens`)
-    console.error(`     tsx scripts/usage_max.ts user_123abc ${SubscriptionPlan.BUSINESS} tokens`)
+    console.error('     tsx scripts/usage_max.ts user_123abc')
     process.exit(1)
   }
 
-  const [userId, planName, limitType] = args
+  const [userId] = args
   
   if (!userId || userId.trim() === '') {
     console.error('❌ Error: userId cannot be empty')
     process.exit(1)
   }
 
-  if (!Object.values(SubscriptionPlan).includes(planName as SubscriptionPlan)) {
-    console.error(`❌ Error: planName must be one of: ${Object.values(SubscriptionPlan).join(', ')}`)
-    process.exit(1)
-  }
-
-  const validLimitTypes: LimitType[] = ['tokens']
-  if (!validLimitTypes.includes(limitType as LimitType)) {
-    console.error(`❌ Error: limitType must be: ${validLimitTypes.join(', ')}`)
-    process.exit(1)
-  }
-
   return {
-    userId: userId.trim(),
-    planName: planName as PlanName,
-    limitType: limitType as LimitType
+    userId: userId.trim()
   }
 }
 
@@ -96,13 +71,13 @@ async function getUserSubscription(userId: string) {
   return subscription
 }
 
-async function updateUserUsageToMax(userId: string, planName: PlanName) {
-  const plan = SUBSCRIPTION_PLANS[planName]
+async function updateUserUsageToMax(userId: string, subscription: any) {
+  const plan = SUBSCRIPTION_PLANS[subscription.plan as SubscriptionPlan]
   const now = new Date()
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1 // JavaScript months are 0-based
   
-  console.log(`🎯 Setting token usage to maximum for plan: ${planName}`)
+  console.log(`🎯 Setting token usage to maximum for plan: ${subscription.plan}`)
   console.log(`📅 Target period: ${currentYear}-${currentMonth.toString().padStart(2, '0')}`)
   
   // Check if current usage record exists for reference
@@ -119,7 +94,7 @@ async function updateUserUsageToMax(userId: string, planName: PlanName) {
   // Determine target token usage based on plan
   let targetTokens: number
   
-  if (planName === SubscriptionPlan.BUSINESS) {
+  if (subscription.plan === SubscriptionPlan.BUSINESS) {
     // For business plan, use high but finite value
     targetTokens = 4000000  // Business plan limit
   } else {
@@ -155,57 +130,34 @@ async function updateUserUsageToMax(userId: string, planName: PlanName) {
   return updatedUsage
 }
 
-async function updateUserSubscriptionPlan(userId: string, planName: PlanName) {
-  const plan = SUBSCRIPTION_PLANS[planName]
-  
-  const updatedSubscription = await prisma.userSubscription.update({
-    where: { userId },
-    data: {
-      plan: planName,
-      maxClients: plan.maxClients,
-      maxTokensPerMonth: plan.maxTokensPerMonth,
-      updatedAt: new Date()
-    }
-  })
-  
-  // Invalidate subscription cache after plan update
-  invalidateSubscriptionCache(userId)
-  
-  console.log(`✅ Updated user subscription to ${planName} plan`)
-  return updatedSubscription
-}
 
 async function main() {
   console.log('🚀 Starting usage limit testing setup...\n')
   
   try {
-    const { userId, planName, limitType } = parseArguments()
+    const { userId } = parseArguments()
     
     console.log(`👤 User ID: ${userId}`)
-    console.log(`📋 Plan: ${planName}`)
-    console.log(`📏 Limit Type: ${limitType}`)
     console.log('')
     
-    // Step 1: Ensure user has a subscription and update to correct plan
-    console.log('📝 Step 1: Checking and updating user subscription...')
-    await getUserSubscription(userId)
-    await updateUserSubscriptionPlan(userId, planName)
+    // Step 1: Get user's current subscription
+    console.log('📝 Step 1: Reading user subscription...')
+    const subscription = await getUserSubscription(userId)
+    console.log(`📋 Current Plan: ${subscription.plan}`)
     
-    // Step 2: Set usage to maximum for the plan
-    console.log(`\n📊 Step 2: Setting ${limitType} usage to maximum limits...`)
-    const updatedUsage = await updateUserUsageToMax(userId, planName)
+    // Step 2: Set token usage to maximum for their current plan
+    console.log(`\n📊 Step 2: Setting token usage to maximum limits...`)
+    const updatedUsage = await updateUserUsageToMax(userId, subscription)
     
     console.log(`\n✅ Success! Token usage set to maximum.`)
     console.log('\n📋 Final Usage Summary:')
     console.log(`   User ID: ${userId}`)
-    console.log(`   Plan: ${planName}`)
-    console.log(`   Limit Type: ${limitType}`)
+    console.log(`   Plan: ${subscription.plan}`)
     console.log(`   Period: ${updatedUsage.year}-${updatedUsage.month.toString().padStart(2, '0')}`)
     console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
     
     console.log('\n🧪 Testing Tips:')
     console.log('   • Try creating content that uses many tokens - it should be blocked by token limit')
-    
     console.log('   • Check the usage info API to see limit warnings')
     console.log('   • Test the subscription upgrade flow')
     console.log('   • Use /api/subscription/usage-info to verify limits')
