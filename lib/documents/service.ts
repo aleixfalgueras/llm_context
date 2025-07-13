@@ -83,21 +83,11 @@ export class DocumentService {
     // Calculate file size before uploading
     const fileSize = calculateDocumentSize(content)
 
-    // Store content in Supabase
-    const fileName = `${finalDocumentName}.md`
-    const storageResult = await DocumentStorageService.storeDocument(
-      userId,
-      clientId,
-      fileName,
-      content,
-      'text/markdown'
-    )
-
-    // Create database record
+    // Create database record first to get the generated ID
     const documentData: DocumentData = {
       documentName: finalDocumentName,
       documentType,
-      documentPath: storageResult.path,
+      documentPath: '', // Will be updated after storage
       clientId,
       fileSize: fileSize
     }
@@ -105,13 +95,50 @@ export class DocumentService {
     const result = await DocumentRepository.createDocument(userId, documentData)
 
     if (!result.success) {
-      // Cleanup storage if database creation failed
-      try {
-        await DocumentStorageService.deleteDocument(storageResult.path)
-      } catch (cleanupError) {
-        logger.error('Failed to cleanup storage after database error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
-      }
       throw new Error(result.error || 'Failed to create document')
+    }
+
+    const documentId = result.data?.id
+    if (!documentId) {
+      throw new Error('Failed to get document ID after creation')
+    }
+
+    // Store content in Supabase using the generated document ID
+    const fileName = `${finalDocumentName}.md`
+    let storagePath: string
+    try {
+      const storageResult = await DocumentStorageService.storeDocument(
+        userId,
+        clientId,
+        documentId,
+        fileName,
+        content,
+        'text/markdown'
+      )
+      storagePath = storageResult.path
+
+      // Update document record with storage path
+      const updateResult = await DocumentRepository.updateDocument(userId, documentId, {
+        documentPath: storageResult.path
+      })
+
+      if (!updateResult.success) {
+        // Cleanup storage if database update failed
+        try {
+          await DocumentStorageService.deleteDocument(storageResult.path)
+        } catch (cleanupError) {
+          logger.error('Failed to cleanup storage after database update error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
+        }
+        throw new Error(updateResult.error || 'Failed to update document with storage path')
+      }
+    } catch (storageError) {
+      // Cleanup database record if storage failed
+      try {
+        await DocumentRepository.deleteDocument(userId, documentId)
+      } catch (cleanupError) {
+        logger.error('Failed to cleanup database record after storage error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
+      }
+      throw storageError
     }
 
     // Track usage if enabled (default: true)
@@ -140,9 +167,9 @@ export class DocumentService {
     return {
       success: true,
       document: {
-        id: result.data?.id || '',
+        id: documentId,
         name: finalDocumentName,
-        path: storageResult.path,
+        path: storagePath,
         type: documentType
       }
     }
