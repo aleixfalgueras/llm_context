@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server'
 import { getDefaultModel, getModelsByTier } from '@/lib/ai/models-config'
 import { checkModelAccess } from '@/lib/payments/subscription-utils'
 import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
-import { handleApiError } from '@/lib/middleware/error-handler'
+import { handleApiError } from '@/lib/utils/error-handler'
 import { ApiSubscriptionErrorCode } from '@/types/enums' 
 
 export async function POST(req: Request) {

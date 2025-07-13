@@ -3,7 +3,7 @@
  */
 
 import { OpenRouterClient, OpenRouterCompletionOptions, StreamChunk } from './client'
-import { handleOpenRouterError } from './error-handler'
+import { handleOpenRouterError } from '../../utils/error-handler'
 import { processOpenRouterStream } from './stream-handler'
 import { trackUsage } from '../../middleware/api-middleware'
 import { logger } from '../../logger'

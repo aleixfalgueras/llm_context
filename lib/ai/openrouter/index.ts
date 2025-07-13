@@ -4,7 +4,7 @@
 
 export { OpenRouterClient } from './client'
 export { OpenRouterService } from './service'
-export { handleOpenRouterError } from './error-handler'
+export { handleOpenRouterError } from '../../utils/error-handler'
 export { processOpenRouterStream, streamToString } from './stream-handler'
 
 export type {

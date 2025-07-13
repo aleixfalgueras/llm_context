@@ -3,7 +3,7 @@
  */
 
 import { logger } from '../../logger'
-import { handleOpenRouterError } from './error-handler'
+import { handleOpenRouterError } from '../../utils/error-handler'
 import type { StreamChunk } from './client'
 
 /**
