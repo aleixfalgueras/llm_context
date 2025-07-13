@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { handleApiError, ApiErrors } from './error-handler'
+import { handleApiError, ApiErrors } from '../utils/error-handler'
 
 // =============================================================================
 // ENHANCED API MIDDLEWARE FOR DRY ELIMINATION

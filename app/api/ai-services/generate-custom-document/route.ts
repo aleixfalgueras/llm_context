@@ -7,7 +7,7 @@ import { AIProviderError } from '@/lib/ai/errors'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
 import { logger } from '@/lib/logger'
-import { handleApiError } from '@/lib/middleware/error-handler'
+import { handleApiError } from '@/lib/utils/error-handler'
 
 export async function POST(request: Request) {
   let userId: string = '';
