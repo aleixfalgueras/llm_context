@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 import { PrismaClient } from '@prisma/client'
 import { SubscriptionStatus } from '@prisma/client'
+import {invalidateSubscriptionCache} from "@/lib/payments/subscription-cache";
 
 const prisma = new PrismaClient()
 
@@ -115,6 +116,10 @@ async function main() {
     } else {
       updatedSubscription = await expireSubscriptionByDate(userId)
     }
+
+    // Invalidate cache to ensure changes take effect immediately
+    invalidateSubscriptionCache(userId)
+    console.log('🔄 Subscription cache invalidated')
 
     console.log('\n✅ Success! Subscription has been expired.')
     console.log('\n📋 Updated Subscription Status:')
