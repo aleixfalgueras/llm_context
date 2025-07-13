@@ -150,7 +150,8 @@ export const LANGUAGE_INFO: Record<Language, { label: string; flag: string }> = 
 export enum ApiSubscriptionErrorCode {
   SUBSCRIPTION_EXPIRED = 'SUBSCRIPTION_EXPIRED',
   USAGE_LIMIT_EXCEEDED = 'USAGE_LIMIT_EXCEEDED',
-  MODEL_ACCESS_DENIED = 'MODEL_ACCESS_DENIED'
+  MODEL_ACCESS_DENIED = 'MODEL_ACCESS_DENIED',
+  NO_SUBSCRIPTION_FOUND = 'NO_SUBSCRIPTION_FOUND'
 }
 
 // Helper function to get language options for forms

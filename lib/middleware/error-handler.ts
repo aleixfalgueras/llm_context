@@ -79,6 +79,13 @@ export function handleApiError(
             plan: errorMetadata.plan
           }
         });
+      } else if (errorData.code === ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND) {
+        logger.info('User attempted to access billing portal without subscription', { 
+          ...logContext,
+          metadata: {
+            message: 'Expected behavior for free trial users'
+          }
+        });
       }
     } else if (error instanceof AIProviderError) {
       logger.aiError(error.provider || 'unknown', error, logContext)
