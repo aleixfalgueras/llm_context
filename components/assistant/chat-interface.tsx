@@ -1,6 +1,6 @@
 'use client'
 
-import {Bot, Shield} from 'lucide-react'
+import {Bot, Shield, Users} from 'lucide-react'
 import {Card} from '@/components/ui/card'
 
 export function ChatInterface() {
@@ -13,6 +13,17 @@ export function ChatInterface() {
         <h1 className="text-4xl font-bold mb-4">AI Chat Assistant</h1>
       </div>
       
+      {/* Client Selection Message */}
+      <Card className="mx-4 mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <div className="flex items-center justify-center mb-2">
+          <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+          <h3 className="font-semibold text-blue-800 dark:text-blue-300">Get Started</h3>
+        </div>
+        <p className="text-sm text-blue-700 dark:text-blue-400">
+          Select a client to create a new chat and start your conversation.
+        </p>
+      </Card>
+      
       {/* Privacy Notice */}
       <Card className="mx-4 mb-6 p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
         <div className="flex items-center justify-center mb-2">
@@ -20,7 +31,7 @@ export function ChatInterface() {
           <h3 className="font-semibold text-green-800 dark:text-green-300">Privacy Protected</h3>
         </div>
         <p className="text-sm text-green-700 dark:text-green-400">
-                      We only share selected client information (country, general context) with AI -
+          We only share selected client information (country, general context) with AI -
           no names, emails, or phone numbers are included in the context.
         </p>
       </Card>
