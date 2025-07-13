@@ -159,7 +159,7 @@ export default function SubscriptionPage() {
             Choose Your Plan
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Scale your marketing efforts with Google Gemini 2.0 Flash AI assistance. Start with our Basic plan (first 2 weeks free), upgrade when you need more.
+            Start with our Basic plan (first 2 weeks free), upgrade when you need more. 🚀
           </p>
           
           {/* Current Subscription Status */}

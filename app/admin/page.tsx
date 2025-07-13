@@ -128,9 +128,11 @@ export default async function AdminDashboard() {
   const data = await getAdminDashboardData()
 
   return (
-    <div>
+    <div className="h-screen bg-background overflow-hidden flex flex-col">
       <Navbar />
-      <AdminDashboardClient data={data} />
+      <div className="flex-1 overflow-auto">
+        <AdminDashboardClient data={data} />
+      </div>
     </div>
   )
 } 
