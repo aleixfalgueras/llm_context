@@ -20,7 +20,7 @@ export function ChatInterface() {
           <h3 className="font-semibold text-blue-800 dark:text-blue-300">Get Started</h3>
         </div>
         <p className="text-sm text-blue-700 dark:text-blue-400">
-          Select a client to create a new chat and start your conversation.
+          Select a client to create a new chat and start your conversation ➡️
         </p>
       </Card>
       
