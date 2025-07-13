@@ -11,8 +11,8 @@ function parseArguments(): ScriptArgs {
   const args = process.argv.slice(2)
   
   if (args.length !== 1) {
-    console.error('❌ Usage: tsx scripts/reset-usage.ts <userId>')
-    console.error('   Example: tsx scripts/reset-usage.ts user_123abc')
+    console.error('❌ Usage: tsx scripts/restore-usage.ts <userId>')
+    console.error('   Example: tsx scripts/restore-usage.ts user_123abc')
     process.exit(1)
   }
 
@@ -77,12 +77,7 @@ async function main() {
     console.log(`   User ID: ${userId}`)
     console.log(`   Period: ${updatedUsage.year}-${updatedUsage.month.toString().padStart(2, '0')}`)
     console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
-    
-    console.log('\n🧪 Testing Tips:')
-    console.log('   • User can now create documents again')
-    console.log('   • All limits have been reset for the current month')
-    console.log('   • Use set-usage-to-max.ts to set limits back to maximum')
-    
+
   } catch (error) {
     console.error('\n💥 Error during reset process:', error)
     if (error instanceof Error) {
