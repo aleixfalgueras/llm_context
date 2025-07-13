@@ -67,6 +67,13 @@ export function getErrorMetadata(errorData: ErrorData): ErrorMetadata {
         shouldLogAsInfo: false
       }
     
+    case ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND:
+      return {
+        isUserLimitError: false,
+        isSubscriptionError: true,
+        shouldLogAsInfo: true
+      }
+    
     default:
       return {
         isUserLimitError: false,
@@ -92,6 +99,9 @@ export function getErrorMessage(errorData: ErrorData): string {
     
     case ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED:
       return message || 'Model access denied. Please upgrade your plan to continue.'
+    
+    case ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND:
+      return message || 'No active subscription found. Please upgrade to access billing portal.'
     
     default:
       return message || 'An error occurred'
@@ -119,7 +129,8 @@ export function isSubscriptionError(code?: string): boolean {
  */
 export function shouldLogAsInfo(code?: string): boolean {
   return code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED ||
-         code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
+         code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED ||
+         code === ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
 }
 
 /**
