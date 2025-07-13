@@ -19,13 +19,17 @@ import {
 } from 'lucide-react'
 import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/types/enums'
 import {AdminDashboardClientProps, FeedbackItem} from '@/types/admin-types'
+import { clearAllCaches } from '@/lib/payments/subscription-cache'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AdminDashboardClient({ data }: AdminDashboardClientProps) {
+  const { toast } = useToast()
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [stateFilter, setStateFilter] = useState<string>('active') // Default to PENDING + IN_PROGRESS
   const [feedbackData, setFeedbackData] = useState<FeedbackItem[]>(data.allFeedback)
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
+  const [clearingCaches, setClearingCaches] = useState<boolean>(false)
 
   const clearFilters = () => {
     setTypeFilter('all')
@@ -34,6 +38,26 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
   }
 
   const hasActiveFilters = typeFilter !== 'all' || priorityFilter !== 'all' || stateFilter !== 'active'
+
+  const handleClearCaches = async () => {
+    setClearingCaches(true)
+    try {
+      clearAllCaches()
+      toast({
+        title: 'Success',
+        description: 'All caches cleared successfully'
+      })
+    } catch (error) {
+      console.error('Error clearing caches:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to clear caches. Please try again.',
+        variant: 'destructive'
+      })
+    } finally {
+      setClearingCaches(false)
+    }
+  }
 
   const updateFeedbackStatus = async (feedbackId: string, newState: string) => {
     // Add to updating items
@@ -133,11 +157,31 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            System overview and metrics for LLM Context platform
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              System overview and metrics for LLM Context platform
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleClearCaches}
+            disabled={clearingCaches}
+            className="flex items-center gap-2"
+          >
+            {clearingCaches ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Clearing caches...
+              </>
+            ) : (
+              <>
+                <RotateCcw className="h-4 w-4" />
+                Clear caches
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Key Metrics Cards */}
