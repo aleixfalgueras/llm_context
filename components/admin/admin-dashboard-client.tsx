@@ -20,7 +20,6 @@ import {
 import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/types/enums'
 import {AdminDashboardClientProps, FeedbackItem} from '@/types/admin-types'
 import { useToast } from '@/hooks/use-toast'
-import { clearAllCaches } from '@/lib/payments/subscription-cache'
 
 export default function AdminDashboardClient({ data }: AdminDashboardClientProps) {
   const { toast } = useToast()
@@ -42,10 +41,22 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
   const handleClearCaches = async () => {
     setClearingCaches(true)
     try {
-      clearAllCaches()
+      const response = await fetch('/api/admin/clear-caches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to clear caches: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
       toast({
         title: 'Success',
-        description: 'All caches cleared successfully'
+        description: result.message || 'All caches cleared successfully'
       })
     } catch (error) {
       console.error('Error clearing caches:', error)
