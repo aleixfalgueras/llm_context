@@ -428,15 +428,12 @@ export async function checkModelAccess(userId: string, modelId: string) {
   }
 }
 
-// Note: OpenRouter handles billing automatically based on actual usage
-// The cost tracking in this app is for display/limit purposes only
-
 // Check if subscription is active and not expired
 export function isSubscriptionActive(subscription: any) {
   if (!subscription) return false
   
   const now = new Date()
-  const isStatusActive = subscription.status === SubscriptionStatus.ACTIVE
+  const isStatusActive = subscription.status === SubscriptionStatus.ACTIVE || subscription.status === SubscriptionStatus.CANCELED
   const isNotExpired = subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd) > now
   
   return isStatusActive && isNotExpired
