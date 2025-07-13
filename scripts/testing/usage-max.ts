@@ -4,10 +4,10 @@
  * 
  * Sets a user's token usage to the maximum limits for their current subscription plan.
  * 
- * Usage: tsx scripts/usage_max.ts <userId>
+ * Usage: tsx scripts/usage-max.ts <userId>
  * 
  * Examples:
- *   tsx scripts/usage_max.ts user_123   # Set token usage to max for their current plan
+ *   tsx scripts/usage-max.ts user_123   # Set token usage to max for their current plan
  */
 import { PrismaClient } from '@prisma/client'
 import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
@@ -23,9 +23,9 @@ function parseArguments(): ScriptArgs {
   const args = process.argv.slice(2)
   
   if (args.length !== 1) {
-    console.error('❌ Usage: tsx scripts/usage_max.ts <userId>')
+    console.error('❌ Usage: tsx scripts/usage-max.ts <userId>')
     console.error('   Examples:')
-    console.error('     tsx scripts/usage_max.ts user_123abc')
+    console.error('     tsx scripts/usage-max.ts user_123abc')
     process.exit(1)
   }
 
