@@ -3,6 +3,7 @@ import { prisma } from '../prisma'
 import { logger } from '../logger'
 import { SubscriptionPlan, SubscriptionStatus } from '@/types/subscription-types'
 import { invalidateSubscriptionCache } from './subscription-cache'
+import { SUBSCRIPTION_PLANS } from './subscription-utils'
 import Stripe from 'stripe'
 
 export const STRIPE_PRICE_IDS = {
@@ -186,17 +187,28 @@ export async function updateSubscriptionInDatabase(
     const plan = priceId ? getPlanFromPriceId(priceId) : subscription.plan
     const subscriptionStatus = mapStripeStatusToSubscriptionStatus(status)
 
+    // Get plan limits from SUBSCRIPTION_PLANS when plan changes
+    const planLimits = plan && plan !== subscription.plan ? SUBSCRIPTION_PLANS[plan] : null
+
+    const updateData: any = {
+      stripeSubscriptionId: subscriptionId,
+      plan: plan || subscription.plan,
+      status: subscriptionStatus,
+      currentPeriodStart: new Date(currentPeriodStart * 1000),
+      currentPeriodEnd: new Date(currentPeriodEnd * 1000),
+      stripePriceId: priceId || subscription.stripePriceId,
+      updatedAt: new Date(),
+    }
+
+    // Update plan limits if plan changed
+    if (planLimits) {
+      updateData.maxClients = planLimits.maxClients
+      updateData.maxTokensPerMonth = planLimits.maxTokensPerMonth
+    }
+
     const updatedSubscription = await prisma.userSubscription.update({
       where: { id: subscription.id },
-      data: {
-        stripeSubscriptionId: subscriptionId,
-        plan: plan || subscription.plan,
-        status: subscriptionStatus,
-        currentPeriodStart: new Date(currentPeriodStart * 1000),
-        currentPeriodEnd: new Date(currentPeriodEnd * 1000),
-        stripePriceId: priceId || subscription.stripePriceId,
-        updatedAt: new Date(),
-      },
+      data: updateData,
     })
 
     logger.info('Updated subscription in database', {
@@ -205,6 +217,9 @@ export async function updateSubscriptionInDatabase(
         subscriptionId,
         plan: updatedSubscription.plan,
         status: updatedSubscription.status,
+        maxClients: updatedSubscription.maxClients,
+        maxTokensPerMonth: updatedSubscription.maxTokensPerMonth,
+        planLimitsUpdated: !!planLimits
       }
     })
 
