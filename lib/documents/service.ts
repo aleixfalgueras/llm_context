@@ -2,25 +2,18 @@
  * Document service - orchestrates repository and storage operations
  */
 
-import { auth } from '@clerk/nextjs/server'
 import { DocumentRepository, DocumentData, DocumentQueryOptions } from './repository'
 import { DocumentStorageService } from './storage-service'
-import { validateDocumentStorage, calculateDocumentSize } from '../storage-utils'
+import { validateDocumentStorage, calculateDocumentSize } from '../utils/storage'
 import { logger } from '../logger'
 import { prisma } from '../prisma'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
 
 export class DocumentService {
   /**
-   * Get client documents with authentication
+   * Get client documents
    */
-  static async getClientDocuments(clientId: string, options?: DocumentQueryOptions) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
+  static async getClientDocuments(userId: string, clientId: string, options?: DocumentQueryOptions) {
     const result = await DocumentRepository.getClientDocuments(userId, clientId, options)
 
     if (!result.success) {
@@ -31,34 +24,9 @@ export class DocumentService {
   }
 
   /**
-   * Get user documents with authentication
+   * Get document content
    */
-  static async getUserDocuments(options?: DocumentQueryOptions) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
-    const result = await DocumentRepository.getUserDocuments(userId, options)
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch documents')
-    }
-
-    return result.data
-  }
-
-  /**
-   * Get document content with authentication
-   */
-  static async getDocumentContent(documentId: string): Promise<string> {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
-
+  static async getDocumentContent(userId: string, documentId: string): Promise<string> {
     // Get document metadata
     const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
     
@@ -80,6 +48,7 @@ export class DocumentService {
    * Create document with content storage
    */
   static async createDocument(
+    userId: string,
     clientId: string,
     documentName: string | undefined,
     documentType: DocumentType,
@@ -89,11 +58,6 @@ export class DocumentService {
       trackUsage?: boolean
     }
   ) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
 
     // Validate storage constraints (throws error if validation fails)
     await validateDocumentStorage(content, userId)
@@ -119,21 +83,11 @@ export class DocumentService {
     // Calculate file size before uploading
     const fileSize = calculateDocumentSize(content)
 
-    // Store content in Supabase
-    const fileName = `${finalDocumentName}.md`
-    const storageResult = await DocumentStorageService.storeDocument(
-      userId,
-      clientId,
-      fileName,
-      content,
-      'text/markdown'
-    )
-
-    // Create database record
+    // Create database record first to get the generated ID
     const documentData: DocumentData = {
       documentName: finalDocumentName,
       documentType,
-      documentPath: storageResult.path,
+      documentPath: '', // Will be updated after storage
       clientId,
       fileSize: fileSize
     }
@@ -141,20 +95,57 @@ export class DocumentService {
     const result = await DocumentRepository.createDocument(userId, documentData)
 
     if (!result.success) {
-      // Cleanup storage if database creation failed
-      try {
-        await DocumentStorageService.deleteDocument(storageResult.path)
-      } catch (cleanupError) {
-        logger.error('Failed to cleanup storage after database error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
-      }
       throw new Error(result.error || 'Failed to create document')
+    }
+
+    const documentId = result.data?.id
+    if (!documentId) {
+      throw new Error('Failed to get document ID after creation')
+    }
+
+    // Store content in Supabase using the generated document ID
+    const fileName = `${finalDocumentName}.md`
+    let storagePath: string
+    try {
+      const storageResult = await DocumentStorageService.storeDocument(
+        userId,
+        clientId,
+        documentId,
+        fileName,
+        content,
+        'text/markdown'
+      )
+      storagePath = storageResult.path
+
+      // Update document record with storage path
+      const updateResult = await DocumentRepository.updateDocument(userId, documentId, {
+        documentPath: storageResult.path
+      })
+
+      if (!updateResult.success) {
+        // Cleanup storage if database update failed
+        try {
+          await DocumentStorageService.deleteDocument(storageResult.path)
+        } catch (cleanupError) {
+          logger.error('Failed to cleanup storage after database update error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
+        }
+        throw new Error(updateResult.error || 'Failed to update document with storage path')
+      }
+    } catch (storageError) {
+      // Cleanup database record if storage failed
+      try {
+        await DocumentRepository.deleteDocument(userId, documentId)
+      } catch (cleanupError) {
+        logger.error('Failed to cleanup database record after storage error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
+      }
+      throw storageError
     }
 
     // Track usage if enabled (default: true)
     const trackUsage = options?.trackUsage !== false
     if (trackUsage) {
       try {
-        const { trackUsage: trackUsageEvent } = await import('../usage-middleware')
+        const { trackUsage: trackUsageEvent } = await import('../middleware/api-middleware')
         await trackUsageEvent(userId, {
           documentType,
           clientId,
@@ -167,7 +158,7 @@ export class DocumentService {
 
     // Invalidate storage cache since storage usage has changed
     try {
-      const { invalidateStorageCache } = await import('../subscription-cache')
+      const { invalidateStorageCache } = await import('../payments/subscription-cache')
       invalidateStorageCache(userId)
     } catch (error) {
       logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))
@@ -176,9 +167,9 @@ export class DocumentService {
     return {
       success: true,
       document: {
-        id: result.data?.id || '',
+        id: documentId,
         name: finalDocumentName,
-        path: storageResult.path,
+        path: storagePath,
         type: documentType
       }
     }
@@ -188,14 +179,10 @@ export class DocumentService {
    * Update document metadata and/or content
    */
   static async updateDocument(
+    userId: string,
     documentId: string,
     updates: Partial<Pick<DocumentData, 'documentName' | 'documentType'>> & { content?: string }
   ) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
 
     // Get current document to check permissions and get storage path
     const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
@@ -243,7 +230,7 @@ export class DocumentService {
 
       // Invalidate storage cache since storage usage may have changed
       try {
-        const { invalidateStorageCache } = await import('../subscription-cache')
+        const { invalidateStorageCache } = await import('../payments/subscription-cache')
         invalidateStorageCache(userId)
       } catch (error) {
         logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))
@@ -265,12 +252,7 @@ export class DocumentService {
   /**
    * Delete document and its content
    */
-  static async deleteDocument(documentId: string) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
+  static async deleteDocument(userId: string, documentId: string) {
 
     // Get document to find storage path
     const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
@@ -304,12 +286,7 @@ export class DocumentService {
   /**
    * Bulk delete documents
    */
-  static async bulkDeleteDocuments(documentIds: string[]) {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      throw new Error('Unauthorized')
-    }
+  static async bulkDeleteDocuments(userId: string, documentIds: string[]) {
 
     // Get all documents first to find storage paths
     const documents = await Promise.all(

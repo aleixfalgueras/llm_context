@@ -1,23 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/documents/service'
-
-interface RouteParams {
-  params: Promise<{ id: string }>
-}
+import { 
+  withEnhancedApi, 
+  apiSuccess,
+  ApiContext 
+} from '@/lib/middleware/api-middleware'
 
 // GET /api/documents/[id]/content - Get document content as JSON
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { id } = await params
+export const GET = withEnhancedApi(
+  async ({ userId, params }: ApiContext) => {
+    const { id } = params!
+    const documentId = id as string
 
-    const content = await DocumentService.getDocumentContent(id)
-    return NextResponse.json({ content })
-  } catch (error) {
-    console.error('Failed to get document content:', error)
-    return NextResponse.json(
-      { error: 'Failed to get document content' },
-      { status: 500 }
-    )
+    const content = await DocumentService.getDocumentContent(userId, documentId)
+    return apiSuccess({ content })
+  },
+  { 
+    context: 'Get document content',
+    allowedMethods: ['GET']
   }
-}
+)
 

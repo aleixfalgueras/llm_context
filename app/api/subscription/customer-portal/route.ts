@@ -1,40 +1,42 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { createCustomerPortalSession } from '@/lib/stripe-utils'
+import { createCustomerPortalSession } from '@/lib/payments/utils'
 import { logger } from '@/lib/logger'
+import { 
+  withEnhancedApi, 
+  apiSuccess,
+  ApiContext 
+} from '@/lib/middleware/api-middleware'
+import { ApiSubscriptionErrorCode } from '@/types/enums'
 
-export async function POST(request: NextRequest) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      logger.warn('Unauthorized customer portal attempt')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export const POST = withEnhancedApi(
+  async ({ userId }: ApiContext) => {
+    try {
+      const portalSession = await createCustomerPortalSession(userId)
 
-    const portalSession = await createCustomerPortalSession(userId)
+      logger.info('Customer portal session created successfully', { 
+        userId, 
+        metadata: {
+          sessionId: portalSession.id 
+        }
+      })
 
-    logger.info('Customer portal session created successfully', { 
-      userId, 
-      metadata: {
-        sessionId: portalSession.id 
+      return apiSuccess({ url: portalSession.url })
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('No Stripe customer found')) {
+        logger.info('Customer portal access attempted during free trial period', { 
+          metadata: {
+            message: 'User has no Stripe customer - expected behavior for free trial users'
+          }
+        })
+        const noCustomerError = new Error('No active subscription found')
+        ;(noCustomerError as any).status = 404
+        ;(noCustomerError as any).code = ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
+        throw noCustomerError
       }
-    })
-
-    return NextResponse.json({ url: portalSession.url })
-  } catch (error) {
-    logger.error('Failed to create customer portal session', error as Error, { userId: (await auth()).userId ?? undefined })
-    
-    if (error instanceof Error && error.message.includes('No Stripe customer found')) {
-      return NextResponse.json(
-        { error: 'No active subscription found' },
-        { status: 404 }
-      )
+      throw error
     }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  },
+  { 
+    context: 'Create customer portal session',
+    allowedMethods: ['POST']
   }
-}
+)

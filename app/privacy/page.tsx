@@ -1,13 +1,11 @@
-import { Navbar } from '@/components/global/navbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { ArrowLeft, Shield, Eye, Lock, Database, Users, Mail, FileText } from 'lucide-react'
+import { ArrowLeft, Shield, Eye, Lock, Database, Users, Mail, FileText, Cookie } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Navbar />
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
@@ -213,6 +211,56 @@ export default function PrivacyPolicyPage() {
                   <p className="text-sm text-yellow-700 dark:text-yellow-300">
                     We retain your data for as long as your account is active. If you delete your account, we will remove your personal information within 30 days, except where required by law.
                   </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card id="cookies">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Cookie className="w-5 h-5" />
+                  Cookie Policy
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  This section explains how SpeedBrand uses cookies and similar technologies. 
+                  Currently, we only use essential cookies for authentication and security.
+                </p>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">What Are Cookies?</h4>
+                  <p className="text-muted-foreground">
+                    Cookies are small text files stored on your device when you visit our website. They help us provide you with a better experience by remembering your preferences and enabling certain functionality.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Necessary Cookies</h4>
+                  <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
+                    <p className="text-green-800 dark:text-green-200 font-medium mb-2">✓ Always Active</p>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      These cookies are essential for the website to function properly and cannot be disabled.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="border rounded-lg p-4">
+                      <h5 className="font-medium mb-2">Authentication Cookies</h5>
+                      <p className="text-sm text-muted-foreground mb-2">Keep you logged in and secure your session</p>
+                      <div className="text-xs text-muted-foreground">
+                        <p><strong>Duration:</strong> Session / 7 days</p>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4">
+                      <h5 className="font-medium mb-2">Security Cookies</h5>
+                      <p className="text-sm text-muted-foreground mb-2">Protect against security threats</p>
+                      <div className="text-xs text-muted-foreground">
+                        <p><strong>Duration:</strong> Session</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

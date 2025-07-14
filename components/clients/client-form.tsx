@@ -1,15 +1,15 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { CLIENT_FIELD_LABELS } from '@/types/client'
-import { Globe, HelpCircle, Shield } from 'lucide-react'
-import { useClientForm } from '@/hooks/use-client-form'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Textarea} from '@/components/ui/textarea'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Label} from '@/components/ui/label'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
+import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
+import {CLIENT_FIELD_LABELS} from '@/types/client'
+import {Globe, HelpCircle, Shield} from 'lucide-react'
+import {useClientForm} from '@/hooks/use-client-form'
 
 interface ClientFormProps {
   client?: any

@@ -23,7 +23,8 @@
       "Bash(npm install:*)",
       "Bash(npx tsx:*)",
       "Bash(cat:*)",
-      "WebFetch(domain:docs.stripe.com)"
+      "WebFetch(domain:docs.stripe.com)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

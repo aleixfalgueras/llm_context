@@ -1,11 +1,11 @@
 'use client'
 
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { User, Loader2 } from 'lucide-react'
-import { useEffect, useRef, memo, useMemo } from 'react'
-import { MarkdownRenderer } from '@/components/global/markdown-renderer'
-import { Message } from '@/types/message-types'
+import {ScrollArea} from '@/components/ui/scroll-area'
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
+import {Loader2, User} from 'lucide-react'
+import {memo, useEffect, useMemo, useRef} from 'react'
+import {MarkdownRenderer} from '@/components/global/markdown-renderer'
+import {Message} from '@/types/message-types'
 
 interface ChatMessagesProps {
   messages: Message[]

@@ -1,15 +1,8 @@
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
 import { AIServicesClient } from '@/components/ai-services/ai-services-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/lib/client-actions'
+import { getClients } from '@/lib/actions/client'
 
 export default async function AIServicesPage() {
-  const { userId } = await auth()
-
-  if (!userId) {
-    redirect('/sign-in')
-  }
 
   // Get user's clients
   const clients = await getClients({ includeDetails: true })

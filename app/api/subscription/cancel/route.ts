@@ -1,74 +1,73 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { stripe } from '@/lib/stripe'
+import { stripe } from '@/lib/payments/stripe'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { invalidateSubscriptionCache } from '@/lib/payments/subscription-cache'
 import Stripe from 'stripe'
+import { 
+  withEnhancedApi, 
+  apiSuccess,
+  ApiContext 
+} from '@/lib/middleware/api-middleware'
 
-export async function POST(request: NextRequest) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      logger.warn('Unauthorized subscription cancel attempt')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+export const POST = withEnhancedApi(
+  async ({ userId }: ApiContext) => {
     const subscription = await prisma.userSubscription.findUnique({
       where: { userId },
     })
 
     if (!subscription?.stripeSubscriptionId) {
       logger.warn('No active subscription found for cancellation', { userId })
-      return NextResponse.json(
-        { error: 'No active subscription found' },
-        { status: 404 }
-      )
+      const error = new Error('No active subscription found')
+      ;(error as any).status = 404
+      throw error
     }
 
-    // Cancel the subscription at the end of the current period
-    const canceledSubscription: Stripe.Subscription = await stripe.subscriptions.update(
-      subscription.stripeSubscriptionId,
-      {
-        cancel_at_period_end: true,
-      }
-    )
+    try {
+      // Cancel the subscription at the end of the current period
+      const canceledSubscription: Stripe.Subscription = await stripe.subscriptions.update(
+        subscription.stripeSubscriptionId,
+        {
+          cancel_at_period_end: true,
+        }
+      )
 
-    // Update the subscription in the database
-    await prisma.userSubscription.update({
-      where: { userId },
-      data: {
-        canceledAt: new Date(),
-        updatedAt: new Date(),
-      },
-    })
+      // Update the subscription in the database
+      await prisma.userSubscription.update({
+        where: { userId },
+        data: {
+          canceledAt: new Date(),
+          updatedAt: new Date(),
+        },
+      })
 
-    logger.info('Subscription canceled successfully', {
-      userId,
-      metadata: {
-        subscriptionId: subscription.stripeSubscriptionId,
+      // Invalidate subscription cache after successful cancellation
+      invalidateSubscriptionCache(userId)
+
+      logger.info('Subscription canceled successfully', {
+        userId,
+        metadata: {
+          subscriptionId: subscription.stripeSubscriptionId,
+          cancelAtPeriodEnd: canceledSubscription.cancel_at_period_end,
+        }
+      })
+
+      return apiSuccess({
+        success: true,
+        message: 'Subscription will be canceled at the end of the current billing period',
         cancelAtPeriodEnd: canceledSubscription.cancel_at_period_end,
+      })
+    } catch (error) {
+      // Handle Stripe-specific errors
+      if (error instanceof Error && error.message.includes('No such subscription')) {
+        const notFoundError = new Error('Subscription not found')
+        ;(notFoundError as any).status = 404
+        throw notFoundError
       }
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Subscription will be canceled at the end of the current billing period',
-      cancelAtPeriodEnd: canceledSubscription.cancel_at_period_end,
-    })
-  } catch (error) {
-    logger.error('Failed to cancel subscription', error as Error, { userId: (await auth()).userId ?? undefined })
-    
-    if (error instanceof Error && error.message.includes('No such subscription')) {
-      return NextResponse.json(
-        { error: 'Subscription not found' },
-        { status: 404 }
-      )
+      throw error
     }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  },
+  { 
+    context: 'Cancel subscription',
+    allowedMethods: ['POST']
   }
-}
+)

@@ -1,13 +1,13 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Eye, X } from 'lucide-react'
-import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Textarea} from '@/components/ui/textarea'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
+import {Label} from '@/components/ui/label'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Eye, Plus, X} from 'lucide-react'
+import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
 
 interface DocumentCreationFormProps {
   documentName: string

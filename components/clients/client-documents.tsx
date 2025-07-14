@@ -1,16 +1,16 @@
 'use client'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { DocumentList } from '@/components/documents/document-list'
-import { DocumentViewer } from '@/components/documents/document-viewer'
-import { DocumentCreationForm } from '@/components/documents/document-creation-form'
-import { DocumentPreviewDialog } from '@/components/documents/document-preview-dialog'
-import { useDocumentState } from '@/hooks/use-document-state'
-import { useDocumentOperations } from '@/hooks/use-document-operations'
-import { useDocumentUIState } from '@/hooks/use-document-ui-state'
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog'
+import {DocumentList} from '@/components/documents/document-list'
+import {DocumentViewer} from '@/components/documents/document-viewer'
+import {DocumentCreationForm} from '@/components/documents/document-creation-form'
+import {DocumentPreviewDialog} from '@/components/documents/document-preview-dialog'
+import {useDocumentState} from '@/hooks/use-document-state'
+import {useDocumentOperations} from '@/hooks/use-document-operations'
+import {useDocumentUIState} from '@/hooks/use-document-ui-state'
 
-import { useToast } from '@/hooks/use-toast'
-import type { ClientDocumentsProps, Document } from '@/types/client-document-types'
+import {useToast} from '@/hooks/use-toast'
+import type {ClientDocumentsProps, Document} from '@/types/client-document-types'
 
 export function ClientDocuments({ 
   clientId, 
@@ -39,27 +39,7 @@ export function ClientDocuments({
 
   // Document editing handlers
   const handleEditDocument = async (document: Document) => {
-    try {
-      const response = await fetch(`/api/documents/${document.id}/content`)
-
-      if (!response.ok) {
-        throw new Error('Failed to load document content')
-      }
-
-      const { content } = await response.json()
-      documentState.setDocumentContent(content)
-      documentState.setSelectedDocument(document)
-      documentState.setEditedContent(content)
-      documentState.setEditedDocumentName(document.documentName)
-      documentState.setIsEditing(true)
-      documentState.setIsCreating(false)
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load document content',
-        variant: 'destructive',
-      })
-    }
+    await documentState.loadDocumentContent(document, true)
   }
 
   const handleEditMode = () => {
@@ -167,6 +147,7 @@ export function ClientDocuments({
                 isEditing={documentState.isEditing}
                 editedContent={documentState.editedContent}
                 editedDocumentName={documentState.editedDocumentName}
+                loadingContent={documentState.loadingContent}
                 onEdit={handleEditMode}
                 onSave={handleSaveDocument}
                 onCancel={handleCancelEdit}

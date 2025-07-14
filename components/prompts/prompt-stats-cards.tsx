@@ -1,9 +1,9 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { FileText, TrendingUp } from 'lucide-react'
-import { PromptStats, Prompt } from '@/types/prompt-management-types'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Badge} from '@/components/ui/badge'
+import {FileText, TrendingUp} from 'lucide-react'
+import {Prompt, PromptStats} from '@/types/prompt-management-types'
 
 interface PromptStatsCardsProps {
   stats: PromptStats

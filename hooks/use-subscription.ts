@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getTierFromPlan } from '@/lib/models-config'
+import { getTierFromPlan } from '@/lib/ai/models-config'
 import { ModelTier, SubscriptionPlan, ModelTierType, SubscriptionPlanType } from '@/types/subscription-types'
 
 interface SubscriptionInfo {
@@ -16,6 +16,10 @@ interface SubscriptionInfo {
   storageLimitFormatted: string
   storageUsagePercentage: number
   isLoading: boolean
+  // Subscription status
+  status?: string
+  currentPeriodEnd?: string
+  isActive?: boolean
 }
 
 export function useSubscription() {
@@ -45,22 +49,20 @@ export function useSubscription() {
         if (response.ok) {
           const data = await response.json()
           
-          // API now returns { subscription: {...}, clients: {...}, tokens: {...}, storage: {...} }
-          const subscription = data.subscription || {}
-          const tokens = data.tokens || {}
-          const storage = data.storage || {}
-          
           setSubscription({
-            plan: subscription.plan || 'free',
-            tier: getTierFromPlan(subscription.plan || 'free'),
-            maxTokensPerMonth: subscription.maxTokensPerMonth || 0,
-            maxClients: subscription.maxClients || 0,
-            tokensUsed: tokens.used || 0,
-            storageUsed: storage.used || 0,
-            storageUsedFormatted: storage.usedFormatted || '0 Bytes',
-            storageLimit: storage.limit || 0,
-            storageLimitFormatted: storage.limitFormatted || '0 Bytes',
-            storageUsagePercentage: storage.usagePercentage || 0,
+            plan: data.plan || 'free',
+            tier: getTierFromPlan(data.plan || 'free'),
+            maxTokensPerMonth: data.tokensLimit || 0,
+            maxClients: data.clientsLimit || 0,
+            tokensUsed: data.tokensUsed || 0,
+            storageUsed: data.storageUsed || 0,
+            storageUsedFormatted: data.storageUsedFormatted || '0 Bytes',
+            storageLimit: data.storageLimit || 0,
+            storageLimitFormatted: data.storageLimitFormatted || '0 Bytes',
+            storageUsagePercentage: data.storageUsagePercentage || 0,
+            status: data.status,
+            currentPeriodEnd: data.currentPeriodEnd,
+            isActive: data.isActive,
             isLoading: false
           })
         } else {

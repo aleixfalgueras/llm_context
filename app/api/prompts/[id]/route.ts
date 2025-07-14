@@ -1,111 +1,80 @@
-import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-
-interface RouteParams {
-  params: Promise<{ id: string }>
-}
+import { PromptOperations } from '@/lib/database/prompt-operations'
+import { 
+  withEnhancedApi, 
+  apiSuccess, 
+  parseJsonBody,
+  ApiContext 
+} from '@/lib/middleware/api-middleware'
 
 // GET /api/prompts/[id] - Get specific prompt
-export async function GET(_request: Request, { params }: RouteParams) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-
-    const { id } = await params
+export const GET = withEnhancedApi(
+  async ({ userId, params }: ApiContext) => {
+    const { id } = params!
+    const promptId = id as string
 
     const prompt = await prisma.prompt.findFirst({
       where: {
-        id,
+        id: promptId,
         userId,
       },
     })
 
     if (!prompt) {
-      return new Response('Prompt not found', { status: 404 })
+      const error = new Error('Prompt not found')
+      ;(error as any).status = 404
+      throw error
     }
 
-    return Response.json(prompt)
-  } catch (error) {
-    console.error('Error fetching prompt:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    return apiSuccess(prompt)
+  },
+  { 
+    context: 'Get prompt',
+    allowedMethods: ['GET']
   }
-}
+)
 
 // PUT /api/prompts/[id] - Update prompt
-export async function PUT(request: Request, { params }: RouteParams) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-
-    const { id } = await params
-    const { name, description, content, category, isActive } = await request.json()
+export const PUT = withEnhancedApi(
+  async ({ userId, req, params }: ApiContext) => {
+    const { id } = params!
+    const promptId = id as string
+    const { name, description, content, category, isActive } = await parseJsonBody(req)
 
     // Validate required fields
     if (!name || !content) {
-      return new Response('Name and content are required', { status: 400 })
+      throw new Error('Name and content are required')
     }
 
-    const prompt = await prisma.prompt.updateMany({
-      where: {
-        id,
-        userId,
-      },
-      data: {
-        name,
-        description,
-        content,
-        category,
-        isActive,
-      },
+    const updatedPrompt = await PromptOperations.updatePrompt(promptId, userId, {
+      name,
+      description,
+      content,
+      category,
+      isActive,
     })
 
-    if (prompt.count === 0) {
-      return new Response('Prompt not found', { status: 404 })
-    }
-
-    // Fetch and return updated prompt
-    const updatedPrompt = await prisma.prompt.findFirst({
-      where: { id, userId },
-    })
-
-    return Response.json(updatedPrompt)
-  } catch (error) {
-    console.error('Error updating prompt:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    return apiSuccess(updatedPrompt)
+  },
+  { 
+    context: 'Update prompt',
+    allowedMethods: ['PUT'],
+    expectedContentType: 'application/json'
   }
-}
+)
 
 // DELETE /api/prompts/[id] - Delete prompt
-export async function DELETE(_request: Request, { params }: RouteParams) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
+export const DELETE = withEnhancedApi(
+  async ({ userId, params }: ApiContext) => {
+    const { id } = params!
+    const promptId = id as string
 
-    const { id } = await params
+    await PromptOperations.deletePrompt(promptId, userId)
 
-    const prompt = await prisma.prompt.deleteMany({
-      where: {
-        id,
-        userId,
-      },
-    })
-
-    if (prompt.count === 0) {
-      return new Response('Prompt not found', { status: 404 })
-    }
-
-    return new Response('Prompt deleted', { status: 200 })
-  } catch (error) {
-    console.error('Error deleting prompt:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    return apiSuccess({ message: 'Prompt deleted' })
+  },
+  { 
+    context: 'Delete prompt',
+    allowedMethods: ['DELETE']
   }
-} 
+) 

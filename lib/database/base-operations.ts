@@ -291,25 +291,6 @@ export class BaseOperations {
     }
   }
 
-  /**
-   * Check if user owns a record
-   */
-  static async verifyUserOwnership(
-    model: any,
-    recordId: string,
-    userId: string
-  ): Promise<boolean> {
-    try {
-      const record = await model.findFirst({
-        where: { id: recordId, userId },
-        select: { id: true }
-      })
-      return !!record
-    } catch (error) {
-      console.error('Error verifying ownership:', error)
-      return false
-    }
-  }
 
   /**
    * Bulk operations with ownership verification

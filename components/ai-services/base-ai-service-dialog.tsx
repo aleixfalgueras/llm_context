@@ -1,21 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Loader2, FileText, Edit, Eye, RefreshCw, Save, X } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { MarkdownRenderer } from '@/components/global/markdown-renderer'
-import { ClientCombobox } from '@/components/ui/client-combobox'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
-import { getDefaultModel } from '@/lib/models-config'
-import type { Client } from '@/types/client'
-import { ValidationResult } from '@/types/api-types'
+import {useState} from 'react'
+import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
+import {Textarea} from '@/components/ui/textarea'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Badge} from '@/components/ui/badge'
+import {Edit, Eye, FileText, Loader2, RefreshCw, Save, X} from 'lucide-react'
+import {useToast} from '@/hooks/use-toast'
+import {MarkdownRenderer} from '@/components/global/markdown-renderer'
+import {ClientCombobox} from '@/components/ui/client-combobox'
+import {handleClientApiError} from '@/lib/utils/toast'
+import {getDefaultModel} from '@/lib/ai/models-config'
+import type {Client} from '@/types/client'
+import {ValidationResult} from '@/types/api-types'
 
 /**
  * Base configuration for AI service dialogs
@@ -184,12 +184,7 @@ export function BaseAIServiceDialog<TFormData = any>({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new AIProviderError(
-          errorData.error || 'Failed to generate content',
-          errorData.provider || 'unknown',
-          errorData.type || 'generation_error',
-          response.status
-        )
+        throw new Error(errorData?.error || `Request failed: ${response.status}`)
       }
 
       const data = await response.json()
@@ -203,22 +198,7 @@ export function BaseAIServiceDialog<TFormData = any>({
 
     } catch (error) {
       console.error('Generation error:', error)
-      
-      if (error instanceof AIProviderError) {
-        const { title, description } = getAIErrorMessage(error)
-        toast({
-          title,
-          description,
-          variant: 'destructive',
-          duration: 8000
-        })
-      } else {
-        toast({
-          title: 'Generation Failed',
-          description: 'An unexpected error occurred. Please try again.',
-          variant: 'destructive'
-        })
-      }
+      handleClientApiError(error, 'Generation failed')
     } finally {
       setInternalIsGenerating(false)
     }

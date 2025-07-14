@@ -11,7 +11,7 @@ When you need to update your Terms of Service or Privacy Policy, follow these st
    - Make your changes clear and understandable
 
 2. **Update Version Numbers**
-   - **In `lib/consent-utils.ts`:**
+   - **In `lib/consent-general.ts`:**
      ```typescript
      export const CURRENT_TERMS_VERSION = '1.1' // Increment version
      export const CURRENT_PRIVACY_VERSION = '1.0' // Or this one if changing privacy
@@ -64,7 +64,7 @@ Before updating policies:
 
 ### 🚨 **Important Notes:**
 
-- **Version numbers must match** between `consent-utils.ts` and `consent-manager.tsx`
+- **Version numbers must match** between `consent-general.ts` and `consent-manager.tsx`
 - **Test thoroughly** after version updates
 - **Consider legal review** for significant changes
 - **Document changes** for your records

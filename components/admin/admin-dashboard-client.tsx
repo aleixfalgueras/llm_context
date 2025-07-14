@@ -1,31 +1,34 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  Users, 
-  FileText, 
-  MessageSquare, 
-  TrendingUp, 
-  DollarSign, 
+import {useMemo, useState} from 'react'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
+import {Badge} from '@/components/ui/badge'
+import {Button} from '@/components/ui/button'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
+import {
   AlertTriangle,
-  XCircle,
+  DollarSign,
+  FileText,
   Filter,
+  Loader2,
+  MessageSquare,
   RotateCcw,
-  Loader2
+  TrendingUp,
+  Users,
+  XCircle
 } from 'lucide-react'
-import { FeedbackType, Priority, FeedbackState, BadgeVariant } from '@/types/enums'
-import { AdminDashboardClientProps, FeedbackItem, AdminDashboardData } from '@/types/admin-types'
+import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/types/enums'
+import {AdminDashboardClientProps, FeedbackItem} from '@/types/admin-types'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AdminDashboardClient({ data }: AdminDashboardClientProps) {
+  const { toast } = useToast()
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [stateFilter, setStateFilter] = useState<string>('active') // Default to PENDING + IN_PROGRESS
   const [feedbackData, setFeedbackData] = useState<FeedbackItem[]>(data.allFeedback)
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
+  const [clearingCaches, setClearingCaches] = useState<boolean>(false)
 
   const clearFilters = () => {
     setTypeFilter('all')
@@ -34,6 +37,38 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
   }
 
   const hasActiveFilters = typeFilter !== 'all' || priorityFilter !== 'all' || stateFilter !== 'active'
+
+  const handleClearCaches = async () => {
+    setClearingCaches(true)
+    try {
+      const response = await fetch('/api/admin/clear-caches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to clear caches: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      toast({
+        title: 'Success',
+        description: result.message || 'All caches cleared successfully'
+      })
+    } catch (error) {
+      console.error('Error clearing caches:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to clear caches. Please try again.',
+        variant: 'destructive'
+      })
+    } finally {
+      setClearingCaches(false)
+    }
+  }
 
   const updateFeedbackStatus = async (feedbackId: string, newState: string) => {
     // Add to updating items
@@ -132,13 +167,32 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto py-8 px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            System overview and metrics for LLM Context platform
-          </p>
+    <div className="max-w-7xl mx-auto p-6">
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              System overview and metrics for LLM Context platform
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleClearCaches}
+            disabled={clearingCaches}
+            className="flex items-center gap-2"
+          >
+            {clearingCaches ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Clearing caches...
+              </>
+            ) : (
+              <>
+                <RotateCcw className="h-4 w-4" />
+                Clear caches
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Key Metrics Cards */}
@@ -382,7 +436,6 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   )
 }

@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai-errors'
-import { DEFAULT_MODEL } from '@/lib/models-config'
+import { AIProviderError, getAIErrorMessage } from '@/lib/ai/errors'
+import { DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { Message } from '@/types/message-types'
 
 // Helper function to check if messages are likely duplicates
@@ -45,7 +45,12 @@ function mergeMessages(serverMessages: Message[], currentMessages: Message[]): M
   return mergedMessages
 }
 
-export function useChat(chatId: string, initialMessages: Message[] = []) {
+interface NewChatParams {
+  clientId: string;
+  contextFields: string[];
+}
+
+export function useChat(chatId: string, initialMessages: Message[] = [], newChatParams?: NewChatParams) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [isLoading, setIsLoading] = useState(false)
   const [onTitleUpdate, setOnTitleUpdate] = useState<((title: string) => void) | null>(null)
@@ -149,8 +154,13 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
         },
         body: JSON.stringify({
           messages: [{ content }],
-          chatId,
+          chatId: chatId || undefined, // Send undefined for new chats
           model: selectedModel || DEFAULT_MODEL, // Default to configured default model if no model specified
+          // Include new chat parameters if this is a new chat
+          ...(newChatParams && {
+            clientId: newChatParams.clientId,
+            contextFields: newChatParams.contextFields
+          })
         }),
         signal: abortControllerRef.current?.signal,
         }),
@@ -220,6 +230,20 @@ export function useChat(chatId: string, initialMessages: Message[] = []) {
                 
                 clientLogger.messageReceived(streamedContent.length, { chatId });
                 
+                // Handle new chat creation - redirect to the new chat URL
+                if (data.chatId && data.chatId !== chatId) {
+                  clientLogger.info('New chat created, redirecting', { 
+                    chatId: data.chatId,
+                    metadata: { 
+                      originalChatId: chatId,
+                      newChatId: data.chatId 
+                    }
+                  });
+                  // Use window.location to redirect to the new chat
+                  window.location.href = `/assistant/chat/${data.chatId}`;
+                  return;
+                }
+
                 // Update title if this was the first message
                 if (data.newTitle && onTitleUpdate) {
                   onTitleUpdate(data.newTitle)

@@ -1,32 +1,32 @@
 import { prisma } from '@/lib/prisma'
-import { createMessage } from '@/lib/actions'
+import { createMessage } from '@/lib/actions/message'
 import { revalidatePath } from 'next/cache'
-import { generateChatTitleWithClient } from '@/lib/utils'
-import { buildClientContextSection, hasClientContext } from '@/lib/client-context-utils'
-import { withClientAccess } from '@/lib/client-middleware'
-import { createAICompletionStream } from '@/lib/ai-wrapper'
-import { AIProviderError } from '@/lib/ai-errors'
+import { generateChatTitleWithClient } from '@/lib/utils/general'
+import { buildClientContextSection, hasClientContext } from '@/lib/utils/client-context'
+import { createAICompletionStream } from '@/lib/ai/wrapper'
+import { AIProviderError } from '@/lib/ai/errors'
 import { logger } from '@/lib/logger'
-import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { getDefaultModel, getModelsByTier } from '@/lib/models-config'
-import { checkModelAccess } from '@/lib/subscription-utils'
+import { getDefaultModel, getModelsByTier } from '@/lib/ai/models-config'
+import { checkModelAccess } from '@/lib/payments/subscription-utils'
+import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
+import { handleApiError } from '@/lib/utils/error-handler'
+import { ApiSubscriptionErrorCode } from '@/types/enums' 
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Chat API');
   let chatId: string = '';
+  let userId: string = '';
   
   try {
-    const { messages, chatId: requestChatId, model } = await req.json()
-    chatId = requestChatId;
-    logger.apiRequest('POST', '/api/chat', { chatId, model });
+    // Authentication and token validation using composable middleware - FIRST
+    userId = await withAuth()
+    await withTokenValidation(userId)
 
-    // Authentication check only - no conversation limits, token limits will be enforced by AI wrapper
-    const { userId } = await auth()
-    if (!userId) {
-      logger.warn('Authentication failed', { chatId });
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Parse request body after authentication
+    const { messages, chatId: requestChatId, model, clientId, contextFields } = await req.json()
+    chatId = requestChatId;
+    logger.apiRequest('POST', '/api/chat', { chatId, clientId, model });
     
     // Use the model from the request, with fallback to centralized default
     const selectedModel = model || getDefaultModel()
@@ -49,44 +49,94 @@ export async function POST(req: Request) {
       
       return NextResponse.json({
         error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
-        code: 'MODEL_ACCESS_DENIED',
+        code: ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED,
         tier: modelAccess.tier,
         plan: modelAccess.plan,
         modelId: selectedModel,
-        upgradeUrl: '/pricing'
+        upgradeUrl: '/subscription'
       }, { status: 403 })
     }
     
-    logger.info('Chat request authenticated and model access validated', { 
+    logger.info('Chat request authenticated, model access and token usage validated', { 
       userId, 
       chatId, 
       model: selectedModel
     });
 
-    // CLIENT CONTEXT FLOW:
-    // 1. Client context is added as system message on EVERY request for consistency
-    // 2. This ensures the AI always has access to client information
-    // 3. System message is rebuilt from chat.contextFields for each request
+    // LAZY CHAT CREATION:
+    // If no chatId provided, create a new chat first
+    let chat: any = null;
+    
+    if (!chatId) {
+      // Create new chat - clientId and contextFields are required for new chats
+      if (!clientId) {
+        logger.warn('Chat creation attempted without client ID', { userId });
+        return NextResponse.json({ error: 'Client selection is required for new chat' }, { status: 400 })
+      }
 
-    // Get existing messages and chat info from the database
-    logger.dbQuery('findFirst', 'chat', { userId, chatId });
-    const chat = await prisma.chat.findFirst({
-      where: {
-        id: chatId,
-        userId,
-      },
-      include: {
-        messages: {
-          orderBy: {
-            createdAt: 'asc',
+      // Verify client exists and belongs to user
+      logger.dbQuery('findFirst', 'client', { userId, clientId });
+      const client = await prisma.client.findFirst({
+        where: { 
+          id: clientId,
+          userId 
+        },
+        select: { name: true }
+      })
+
+      if (!client) {
+        logger.warn('Client not found for chat creation', { userId, clientId });
+        return NextResponse.json({ error: 'Client not found' }, { status: 404 })
+      }
+
+      // Create new chat with client name in title
+      const chatTitle = generateChatTitleWithClient(client.name)
+      
+      logger.dbQuery('create', 'chat', { userId, clientId });
+      chat = await prisma.chat.create({
+        data: {
+          title: chatTitle,
+          userId,
+          clientId,
+          contextFields: contextFields || [],
+        },
+        include: {
+          messages: {
+            orderBy: {
+              createdAt: 'asc',
+            },
           },
         },
-      },
-    })
+      })
+      
+      chatId = chat.id
+      logger.info('New chat created', { 
+        userId, 
+        chatId, 
+        clientId,
+        metadata: { title: chatTitle, contextFieldCount: (contextFields || []).length }
+      });
+    } else {
+      // Get existing chat
+      logger.dbQuery('findFirst', 'chat', { userId, chatId });
+      chat = await prisma.chat.findFirst({
+        where: {
+          id: chatId,
+          userId,
+        },
+        include: {
+          messages: {
+            orderBy: {
+              createdAt: 'asc',
+            },
+          },
+        },
+      })
 
-    if (!chat) {
-      logger.warn('Chat not found', { userId, chatId });
-      return new Response('Chat not found', { status: 404 })
+      if (!chat) {
+        logger.warn('Chat not found', { userId, chatId });
+        return NextResponse.json({ error: 'Chat not found' }, { status: 404 })
+      }
     }
 
     logger.info('Chat data retrieved', { 
@@ -108,12 +158,7 @@ export async function POST(req: Request) {
     }))
 
     // Get client information for this chat (required)
-    const clientAccess = await withClientAccess(userId, (chat as any).clientId)
-    if (!clientAccess.success) {
-      return clientAccess.response!
-    }
-    
-    const client = clientAccess.client!
+    const client = await withClientAccess(userId, (chat as any).clientId)
 
     // Build and add system message with client context for ALL messages (not just first)
     logger.info('Adding client context system message', { 
@@ -262,7 +307,7 @@ Respond naturally and conversationally while keeping this context in mind.`
                   // Add a small delay - generation stats might not be immediately available
                   await new Promise(resolve => setTimeout(resolve, 1000));
                   
-                  const { OpenRouterClient } = await import('@/lib/openrouter/client');
+                  const { OpenRouterClient } = await import('@/lib/ai/openrouter/client');
                   const client = new OpenRouterClient();
                   const stats = await client.getGenerationStats(chunk.generationId);
                   
@@ -325,6 +370,7 @@ Respond naturally and conversationally while keeping this context in mind.`
               // Send completion signal
               const completionData = {
                 type: 'complete',
+                chatId: chatId, // Include chatId for new chats
                 newTitle: isFirstUserMessage && chat.title === 'New Chat' ? generateChatTitleWithClient(client.name) : undefined
               }
               
@@ -431,23 +477,15 @@ Respond naturally and conversationally while keeping this context in mind.`
     })
     
   } catch (error) {
-    logger.error('Error in chat API', error as Error, { chatId });
-    logger.apiResponse('POST', '/api/chat', 500, { chatId });
-    endTiming();
-    
-    // Handle AI provider errors specifically
-    if (error instanceof AIProviderError) {
-      return Response.json(
-        {
-          error: error.message,
-          provider: error.provider,
-          type: error.type,
-          retryAfter: error.retryAfter
-        },
-        { status: error.statusCode || 500 }
-      )
-    }
-    
-    return new Response('Internal Server Error', { status: 500 })
+    return handleApiError(error, {
+      context: 'chat API',
+      userId,
+      resourceId: chatId,
+      operation: 'chat',
+      cleanup: () => {
+        logger.apiResponse('POST', '/api/chat', 500, { chatId });
+        endTiming();
+      }
+    });
   }
 } 

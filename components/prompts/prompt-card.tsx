@@ -1,13 +1,13 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Edit2, Eye, EyeOff } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Prompt } from '@/types/prompt-management-types'
-import { PromptDialog } from '@/components/prompts/prompt-dialog'
-import { DeletePromptDialog } from '@/components/prompts/delete-prompt-dialog'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
+import {Badge} from '@/components/ui/badge'
+import {Edit2, Eye, EyeOff} from 'lucide-react'
+import {cn} from '@/lib/utils/general'
+import {Prompt} from '@/types/prompt-management-types'
+import {PromptDialog} from '@/components/prompts/prompt-dialog'
+import {DeletePromptDialog} from '@/components/prompts/delete-prompt-dialog'
 
 interface PromptCardProps {
   prompt: Prompt

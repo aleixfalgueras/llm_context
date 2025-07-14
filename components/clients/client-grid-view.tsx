@@ -1,9 +1,9 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileText, Edit, Trash2 } from 'lucide-react'
-import { Client, ClientActionHandlers, LanguageInfo } from '@/types/client-list-types'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Edit, FileText, Trash2} from 'lucide-react'
+import {Client, ClientActionHandlers, LanguageInfo} from '@/types/client-list-types'
 
 interface ClientGridViewProps {
   clients: Client[]
