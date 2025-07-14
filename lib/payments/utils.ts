@@ -2,7 +2,7 @@ import { stripe } from './stripe'
 import { prisma } from '../prisma'
 import { logger } from '../logger'
 import { SubscriptionPlan, SubscriptionStatus } from '@/types/subscription-types'
-import { invalidateSubscriptionCache } from './subscription-cache'
+import { invalidateAllUserCaches } from './subscription-cache'
 import { SUBSCRIPTION_PLANS } from './subscription-utils'
 import Stripe from 'stripe'
 import { UserSubscription } from '@prisma/client'
@@ -317,8 +317,8 @@ export async function updateSubscriptionInDatabase(
       }
     })
 
-    // Invalidate subscription cache after successful update
-    invalidateSubscriptionCache(subscription.userId)
+    // Invalidate all user caches after successful update
+    await invalidateAllUserCaches(subscription.userId)
 
     return updatedSubscription
   } catch (error) {

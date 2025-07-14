@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 import { PrismaClient } from '@prisma/client'
 import { SubscriptionStatus } from '@prisma/client'
-import { invalidateSubscriptionCache } from '@/lib/payments/subscription-cache'
+import { invalidateAllUserCaches } from '@/lib/payments/subscription-cache'
 
 const prisma = new PrismaClient()
 
@@ -106,9 +106,9 @@ async function main() {
     // Restore the subscription
     const updatedSubscription = await restoreSubscription(userId)
     
-    // Invalidate cache to ensure changes take effect immediately
-    await invalidateSubscriptionCache(userId)
-    console.log('🔄 Subscription cache invalidated')
+    // Invalidate all user caches to ensure changes take effect immediately
+    await invalidateAllUserCaches(userId)
+    console.log('🔄 All user caches invalidated')
     
     console.log('\n✅ Success! Subscription has been restored.')
     console.log('\n📋 Restored Subscription Status:')
