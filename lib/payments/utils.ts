@@ -5,6 +5,7 @@ import { SubscriptionPlan, SubscriptionStatus } from '@/types/subscription-types
 import { invalidateSubscriptionCache } from './subscription-cache'
 import { SUBSCRIPTION_PLANS } from './subscription-utils'
 import Stripe from 'stripe'
+import { UserSubscription } from '@prisma/client'
 
 export const STRIPE_PRICE_IDS = {
   [SubscriptionPlan.BASIC]: {
@@ -74,6 +75,71 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
   }
 }
 
+export async function updateSubscription(
+  existingSubscription: UserSubscription,
+  priceId: string,
+  planId: SubscriptionPlan
+) {
+  try {
+    // Validate that we have a valid Stripe subscription ID
+    if (!existingSubscription.stripeSubscriptionId) {
+      throw new Error('Cannot update subscription: no Stripe subscription ID found')
+    }
+
+    logger.info('Updating existing subscription via Stripe API', { 
+      userId: existingSubscription.userId, 
+      metadata: { 
+        existingSubscriptionId: existingSubscription.stripeSubscriptionId,
+        newPriceId: priceId,
+        newPlanId: planId 
+      } 
+    })
+
+    // Get the current subscription from Stripe
+    const stripeSubscription = await stripe.subscriptions.retrieve(
+      existingSubscription.stripeSubscriptionId
+    )
+
+    // Update the subscription with new price
+    const updatedSubscription = await stripe.subscriptions.update(
+      existingSubscription.stripeSubscriptionId,
+      {
+        items: [{
+          id: stripeSubscription.items.data[0].id,
+          price: priceId,
+        }],
+        proration_behavior: 'create_prorations',
+        metadata: {
+          userId: existingSubscription.userId,
+          planId,
+        }
+      }
+    )
+
+    logger.info('Successfully updated subscription via Stripe API', {
+      userId: existingSubscription.userId,
+      metadata: {
+        subscriptionId: updatedSubscription.id,
+        newStatus: updatedSubscription.status,
+        newPriceId: priceId,
+        planId
+      }
+    })
+
+    return {
+      success: true,
+      subscriptionId: updatedSubscription.id,
+      status: updatedSubscription.status
+    }
+  } catch (error) {
+    logger.error('Failed to update subscription', error as Error, { 
+      userId: existingSubscription.userId, 
+      metadata: { priceId, planId } 
+    })
+    throw error
+  }
+}
+
 export async function createCheckoutSession(
   userId: string,
   email: string,
@@ -83,6 +149,28 @@ export async function createCheckoutSession(
   try {
     const customer = await createOrRetrieveCustomer(userId, email)
 
+    // Check if customer has existing active subscription
+    const existingSubscription = await prisma.userSubscription.findUnique({
+      where: { userId },
+    })
+
+    // If customer has existing subscription, use direct update instead of checkout
+    if (existingSubscription?.stripeSubscriptionId) {
+      logger.info('Customer has existing subscription, using direct update instead of checkout', { 
+        userId, 
+        metadata: { 
+          existingSubscriptionId: existingSubscription.stripeSubscriptionId,
+          newPlanId: planId 
+        } 
+      })
+      
+      // Use the update function instead of creating new checkout session
+      return await updateSubscription(existingSubscription, priceId, planId)
+    }
+
+    // For new customers, create checkout session
+    logger.info('Creating checkout session for new customer', { userId, metadata: { planId } })
+    
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
       payment_method_types: ['card'],
@@ -105,8 +193,14 @@ export async function createCheckoutSession(
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/subscription?canceled=true`,
     })
 
-    logger.info('Created checkout session', { userId, metadata: { sessionId: session.id, planId } })
-    return session
+    logger.info('Created checkout session for new customer', { 
+      userId, 
+      metadata: { 
+        sessionId: session.id, 
+        planId
+      } 
+    })
+    return { success: true, url: session.url }
   } catch (error) {
     logger.error('Failed to create checkout session', error as Error, { userId, metadata: { planId } })
     throw error

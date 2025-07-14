@@ -32,14 +32,32 @@ export default function SubscriptionPage() {
       })
       
       if (response.ok) {
-        const { data: { url } } = await response.json()
-        window.location.href = url
+        const { data } = await response.json()
+        
+        // Check if it's a direct subscription update or checkout URL
+        if (data.url) {
+          // New customer - redirect to checkout
+          window.location.href = data.url
+        } else if (data.success) {
+          // Existing customer - subscription updated directly
+          toast({
+            title: 'Success',
+            description: 'Your subscription has been updated successfully!',
+            variant: ToastVariant.DEFAULT
+          })
+          // Refresh the page to show updated subscription
+          window.location.reload()
+        }
       } else {
-        throw new Error('Failed to create checkout session')
+        throw new Error('Failed to process subscription change')
       }
     } catch (error) {
       console.error('Error upgrading subscription:', error)
-      alert('Failed to start upgrade process. Please try again.')
+      toast({
+        title: 'Error',
+        description: 'Failed to update subscription. Please try again.',
+        variant: ToastVariant.DESTRUCTIVE
+      })
     } finally {
       setUpgradeLoading(null)
     }
