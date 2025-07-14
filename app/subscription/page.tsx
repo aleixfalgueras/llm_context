@@ -32,7 +32,7 @@ export default function SubscriptionPage() {
       })
       
       if (response.ok) {
-        const { url } = await response.json()
+        const { data: { url } } = await response.json()
         window.location.href = url
       } else {
         throw new Error('Failed to create checkout session')
@@ -54,7 +54,7 @@ export default function SubscriptionPage() {
       })
       
       if (response.ok) {
-        const { url } = await response.json()
+        const { data: { url } } = await response.json()
         window.location.href = url
       } else if (response.status === 404) {
         toast({

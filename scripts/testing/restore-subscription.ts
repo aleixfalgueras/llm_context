@@ -107,7 +107,7 @@ async function main() {
     const updatedSubscription = await restoreSubscription(userId)
     
     // Invalidate cache to ensure changes take effect immediately
-    invalidateSubscriptionCache(userId)
+    await invalidateSubscriptionCache(userId)
     console.log('🔄 Subscription cache invalidated')
     
     console.log('\n✅ Success! Subscription has been restored.')
