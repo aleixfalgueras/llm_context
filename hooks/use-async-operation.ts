@@ -1,13 +1,13 @@
 /**
  * Centralized loading state management hook to eliminate duplicate async operation patterns.
  * Provides consistent loading states, error handling, and operation management.
- * Reduces ~150+ lines of duplicate loading state code across components and hooks.
  */
 
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { handleClientApiError } from '@/lib/utils/toast'
 
 /**
  * Configuration for async operations
@@ -209,11 +209,31 @@ export function useAsyncOperation(): UseAsyncOperationReturn {
 
       // Show error toast if requested
       if (showErrorToast) {
-        toast({
-          title: `${context} Failed`,
-          description: errorMessage,
-          variant: 'destructive'
-        })
+        // Check if this is a Response object from fetch
+        if (error && typeof error === 'object' && 'status' in error) {
+          // Handle fetch response errors
+          if (error.status === 402 || error.status === 429 || error.status === 403) {
+            // Let the API error handler deal with subscription/usage errors
+            handleClientApiError(error, `${context} failed`)
+          } else {
+            // Handle other HTTP errors normally
+            toast({
+              title: `${context} Failed`,
+              description: errorMessage,
+              variant: 'destructive'
+            })
+          }
+        } else if (error && typeof error === 'object' && 'code' in error) {
+          // Handle server action errors with codes
+          handleClientApiError(error, `${context} failed`)
+        } else {
+          // Handle non-HTTP errors normally
+          toast({
+            title: `${context} Failed`,
+            description: errorMessage,
+            variant: 'destructive'
+          })
+        }
       }
 
       return {

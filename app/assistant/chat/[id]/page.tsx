@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
 import { ChatPageClient } from '@/components/assistant/chat-page-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/lib/client-actions'
+import { getClients } from '@/lib/actions/client'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
@@ -13,10 +13,6 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const { userId } = await auth()
   const { id } = await params
 
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
   // Get current user data from Clerk
   const user = await currentUser()
 
@@ -25,7 +21,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
     prisma.chat.findFirst({
       where: {
         id,
-        userId,
+        userId: userId!,
       },
       include: {
         messages: {
@@ -37,7 +33,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
     }) as any,
     prisma.chat.findMany({
       where: {
-        userId,
+        userId: userId!,
       },
       orderBy: {
         updatedAt: 'desc',

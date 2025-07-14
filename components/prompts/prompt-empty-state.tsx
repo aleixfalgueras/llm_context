@@ -1,8 +1,8 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { FileText } from 'lucide-react'
-import { PromptDialog } from '@/components/prompts/prompt-dialog'
+import {Button} from '@/components/ui/button'
+import {FileText} from 'lucide-react'
+import {PromptDialog} from '@/components/prompts/prompt-dialog'
 
 interface PromptEmptyStateProps {
   searchTerm: string

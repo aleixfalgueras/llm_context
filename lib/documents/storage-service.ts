@@ -13,12 +13,13 @@ export class DocumentStorageService {
   static async storeDocument(
     userId: string,
     clientId: string,
+    documentId: string,
     fileName: string,
     content: string,
     mimeType: string = 'text/plain'
   ): Promise<{ path: string; url?: string }> {
     try {
-      const filePath = `${userId}/${clientId}/${fileName}`
+      const filePath = `${userId}/${clientId}/${documentId}_${fileName}`
       const contentBuffer = Buffer.from(content, 'utf-8')
 
       const { data, error } = await supabaseServer.storage

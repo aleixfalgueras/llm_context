@@ -191,7 +191,7 @@ if (clientContextSection) {
 
 ### **Client Context System**
 ```typescript
-// lib/client-context-utils.ts
+// lib/client-context-general.ts
 export function buildClientContextSection(client: Client, selectedFields: string[] = []): string {
   // Respects user privacy selections
   // Returns formatted client context section

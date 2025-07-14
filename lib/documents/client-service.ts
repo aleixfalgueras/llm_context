@@ -34,7 +34,7 @@ export class DocumentClientService {
     }
 
     const result = await response.json()
-    return result.content
+    return result.data.content
   }
 
   /**

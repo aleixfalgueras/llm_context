@@ -161,6 +161,7 @@ model UserSubscription {
   updatedAt DateTime @updatedAt
   canceledAt DateTime?
   
+  @@index([currentPeriodEnd])
   @@map("user_subscriptions")
 }
 

@@ -1,14 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { UserButton, useUser } from '@clerk/nextjs'
-import { ThemeToggle } from '@/components/global/theme-toggle'
-import { cn } from '@/lib/utils'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Menu } from 'lucide-react'
-import { useMemo } from 'react'
+import {usePathname} from 'next/navigation'
+import {UserButton, useUser} from '@clerk/nextjs'
+import {ThemeToggle} from '@/components/global/theme-toggle'
+import {cn} from '@/lib/utils/general'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip'
+import {Menu} from 'lucide-react'
+import {useMemo} from 'react'
 
 export function Navbar() {
   const pathname = usePathname()
@@ -93,8 +93,8 @@ export function Navbar() {
                   
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
-                      <Link href="/pricing" className="cursor-pointer flex items-center">
-                        <span>Pricing</span>
+                      <Link href="/subscription" className="cursor-pointer flex items-center">
+                        <span>Subscription</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -105,11 +105,6 @@ export function Navbar() {
                     <DropdownMenuItem asChild>
                       <Link href="/terms" className="cursor-pointer flex items-center">
                         <span>Terms of Service</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/privacy/cookies" className="cursor-pointer flex items-center">
-                        <span>Cookie Policy</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

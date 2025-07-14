@@ -1,15 +1,15 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { PromptDialog } from '@/components/prompts/prompt-dialog'
-import { Plus, FileText, Lightbulb, AlertTriangle } from 'lucide-react'
-import { PromptStatsCards } from '@/components/prompts/prompt-stats-cards'
-import { PromptFiltersBar } from '@/components/prompts/prompt-filters-bar'
-import { PromptCard } from '@/components/prompts/prompt-card'
-import { SamplePromptCard } from '@/components/prompts/sample-prompt-card'
-import { PromptEmptyState } from '@/components/prompts/prompt-empty-state'
-import { usePromptManagement } from '@/hooks/use-prompt-management'
+import {Button} from '@/components/ui/button'
+import {Badge} from '@/components/ui/badge'
+import {PromptDialog} from '@/components/prompts/prompt-dialog'
+import {FileText, Lightbulb, Plus} from 'lucide-react'
+import {PromptStatsCards} from '@/components/prompts/prompt-stats-cards'
+import {PromptFiltersBar} from '@/components/prompts/prompt-filters-bar'
+import {PromptCard} from '@/components/prompts/prompt-card'
+import {SamplePromptCard} from '@/components/prompts/sample-prompt-card'
+import {PromptEmptyState} from '@/components/prompts/prompt-empty-state'
+import {usePromptManagement} from '@/hooks/use-prompt-management'
 
 export function PromptsManagement() {
   const {
@@ -42,7 +42,7 @@ export function PromptsManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>

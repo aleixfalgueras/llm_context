@@ -1,11 +1,16 @@
 'use client'
 
-import { useEffect, memo } from 'react'
-import { useChat } from '@/hooks/use-chat'
-import { ChatMessages } from '@/components/assistant/chat-messages'
-import { ChatInput } from '@/components/assistant/chat-input'
-import { ErrorBoundary } from '@/components/error-boundary'
-import { Message } from '@/types/message-types'
+import {memo, useEffect} from 'react'
+import {useChat} from '@/hooks/use-chat'
+import {ChatMessages} from '@/components/assistant/chat-messages'
+import {ChatInput} from '@/components/assistant/chat-input'
+import {ErrorBoundary} from '@/components/global/error-boundary'
+import {Message} from '@/types/message-types'
+
+interface NewChatParams {
+  clientId: string;
+  contextFields: string[];
+}
 
 interface ChatContainerProps {
   chatId: string
@@ -17,10 +22,11 @@ interface ChatContainerProps {
   chatTitle?: string
   onDocumentCreated?: (clientId: string, documentId: string) => void
   lastUsedModel?: string
+  newChatParams?: NewChatParams
 }
 
-function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel }: ChatContainerProps) {
-  const { messages, isLoading, isStreaming, sendMessage, stopGeneration, setOnTitleUpdate } = useChat(chatId, initialMessages)
+function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel, newChatParams }: ChatContainerProps) {
+  const { messages, isLoading, isStreaming, sendMessage, stopGeneration, setOnTitleUpdate } = useChat(chatId, initialMessages, newChatParams)
   
   // Set up title update callback
   useEffect(() => {

@@ -1,18 +1,28 @@
 // Language utilities removed - meeting reports are now generated in English only
-import { withAuthUsageAndClient } from '@/lib/client-middleware'
-import { createAICompletion } from '@/lib/ai-wrapper'
-import { AIProviderError } from '@/lib/ai-errors'
+import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
+import { createAICompletion } from '@/lib/ai/wrapper'
+import { AIProviderError } from '@/lib/ai/errors'
 import { logger, withTiming } from '@/lib/logger'
-import { DEFAULT_MODEL } from '@/lib/models-config'
+import { DEFAULT_MODEL } from '@/lib/ai/models-config'
+import { handleApiError } from '@/lib/utils/error-handler'
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Generate Meeting Report API');
   let clientId: string = '';
+  let userId: string = '';
   
   try {
+    // Use composable middleware for auth and token validation first
+    userId = await withAuth()
+    await withTokenValidation(userId)
+
+    // Parse request body after authentication
     const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL } = await req.json()
     clientId = requestClientId;
     logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
+
+    // Validate client access after parsing clientId
+    const client = await withClientAccess(userId, clientId)
 
     // Log additional instructions if provided
     if (additionalInfo && additionalInfo.trim()) {
@@ -31,27 +41,10 @@ export async function POST(req: Request) {
       return new Response('Missing required fields', { status: 400 })
     }
 
-
-
-    // Use unified middleware for auth, usage, and client access
-    const middleware = await withAuthUsageAndClient('document', clientId)
-    if (!middleware.success) {
-      logger.warn('Auth, usage, or client access failed', { clientId });
-      return middleware.response!
-    }
-    
-    const { userId, client } = middleware
-    
-    // TypeScript assertion - middleware guarantees these exist
-    const validUserId = userId!
-    const validClient = client!
-
-
-
     // Build the meeting report prompt (always in English)
     const meetingReportPrompt = `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
 
-CLIENT: ${validClient.name}
+CLIENT: ${client.name}
 
 MEETING INFORMATION:
 - Meeting Date: ${meetingDate}
@@ -80,7 +73,7 @@ INSTRUCTIONS:
 - Generate the response in English with clear, professional language`
 
     // Use unified AI wrapper with automatic usage tracking
-    logger.aiRequest(selectedModel, undefined, { userId: validUserId, clientId });
+    logger.aiRequest(selectedModel, undefined, { userId: userId, clientId });
     
     const completion = await withTiming(
       'AI Meeting Report Generation',
@@ -100,21 +93,21 @@ INSTRUCTIONS:
         temperature: 0.7,
       },
       {
-        userId: validUserId,
+        userId: userId,
         resourceId: clientId,
         additionalMetadata: {
           documentType: 'meeting-report'
         }
       }
       ),
-      { userId: validUserId, clientId, model: selectedModel }
+      { userId: userId, clientId, model: selectedModel }
     );
 
     const meetingReport = completion.content
     
     if (!meetingReport) {
       logger.error('Failed to generate meeting report - empty response', undefined, { 
-        userId: validUserId, 
+        userId: userId, 
         clientId 
       });
       return new Response('Failed to generate meeting report', { status: 500 })
@@ -123,29 +116,21 @@ INSTRUCTIONS:
 
 
     logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 200, { 
-      userId: validUserId, 
+      userId: userId, 
       clientId 
     });
     endTiming();
     return Response.json({ report: meetingReport })
   } catch (error) {
-    logger.error('Error generating meeting report', error as Error, { clientId });
-    logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 500, { clientId });
-    endTiming();
-    
-    // Handle AI provider errors specifically
-    if (error instanceof AIProviderError) {
-      return Response.json(
-        {
-          error: error.message,
-          provider: error.provider,
-          type: error.type,
-          retryAfter: error.retryAfter
-        },
-        { status: error.statusCode || 500 }
-      )
-    }
-    
-    return new Response('Internal Server Error', { status: 500 })
+    return handleApiError(error, {
+      context: 'generate meeting report',
+      userId,
+      resourceId: clientId,
+      operation: 'generate-meeting-report',
+      cleanup: () => {
+        logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 500, { clientId });
+        endTiming();
+      }
+    });
   }
 } 

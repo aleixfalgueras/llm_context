@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Shield, FileText, Mail, BarChart3, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
-import { CURRENT_TERMS_VERSION, CURRENT_PRIVACY_VERSION } from '@/lib/consent-utils'
+import { CURRENT_TERMS_VERSION, CURRENT_PRIVACY_VERSION } from '@/lib/utils/consent'
 
 interface ConsentData {
   dataProcessing: boolean
@@ -53,7 +53,7 @@ export function ConsentManager() {
 
     // Don't show consent dialog on public/informational pages and auth pages
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-    const isPublicPage = ['/', '/terms', '/privacy', '/privacy/cookies', '/privacy/settings'].includes(currentPath)
+    const isPublicPage = ['/', '/terms', '/privacy', '/privacy/settings'].includes(currentPath)
     const isAuthPage = currentPath.startsWith('/sign-in') || currentPath.startsWith('/sign-up')
     
     if (isPublicPage || isAuthPage) {

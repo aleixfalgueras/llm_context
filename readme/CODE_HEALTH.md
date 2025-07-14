@@ -53,30 +53,30 @@ Found 54 file(s) that exceed the recommended thresholds:
 | File | Lines | Threshold | Excess |
 |------|-------|-----------|--------|
 | `lib\database\base-operations.ts` | 362 | 100 | +262 |
-| `lib\subscription-utils.ts` | 360 | 100 | +260 |
-| `lib\consent-utils.ts` | 336 | 100 | +236 |
+| `lib\subscription-general.ts` | 360 | 100 | +260 |
+| `lib\consent-general.ts` | 336 | 100 | +236 |
 | `lib\api-middleware.ts` | 322 | 100 | +222 |
 | `lib\client-logger.ts` | 258 | 100 | +158 |
-| `lib\validation-helpers.ts` | 248 | 100 | +148 |
-| `lib\data-export-utils.ts` | 247 | 100 | +147 |
+| `lib\validation.ts` | 248 | 100 | +148 |
+| `lib\data-export-general.ts` | 247 | 100 | +147 |
 | `lib\logger.ts` | 247 | 100 | +147 |
 | `lib\actions.ts` | 243 | 100 | +143 |
 | `lib\documents\service.ts` | 237 | 100 | +137 |
 | `lib\models-config.ts` | 233 | 100 | +133 |
-| `lib\toast-helpers.ts` | 225 | 100 | +125 |
-| `lib\storage-utils.ts` | 224 | 100 | +124 |
+| `lib\toast.ts` | 225 | 100 | +125 |
+| `lib\storage-general.ts` | 224 | 100 | +124 |
 | `lib\sample-prompts.ts` | 215 | 100 | +115 |
 | `lib\usage-middleware.ts` | 182 | 100 | +82 |
 | `lib\documents\repository.ts` | 180 | 100 | +80 |
 | `lib\openrouter\service.ts` | 173 | 100 | +73 |
 | `lib\subscription-cache.ts` | 152 | 100 | +52 |
-| `lib\client-actions.ts` | 146 | 100 | +46 |
-| `lib\document-save-utils.ts` | 135 | 100 | +35 |
-| `lib\api-error-handler.ts` | 132 | 100 | +32 |
+| `lib\client.ts` | 146 | 100 | +46 |
+| `lib\document-save-general.ts` | 135 | 100 | +35 |
+| `lib\error-handler.ts` | 132 | 100 | +32 |
 | `lib\documents\client-service.ts` | 125 | 100 | +25 |
 | `lib\documents\storage-service.ts` | 124 | 100 | +24 |
-| `lib\ai-service-api.ts` | 122 | 100 | +22 |
-| `lib\ai-wrapper.ts` | 111 | 100 | +11 |
+| `lib\service-api.ts` | 122 | 100 | +22 |
+| `lib\wrapper.ts` | 111 | 100 | +11 |
 | `lib\openrouter\error-handler.ts` | 106 | 100 | +6 |
 | `lib\client-middleware.ts` | 105 | 100 | +5 |
 
@@ -209,7 +209,7 @@ Found 6602 code quality issue(s) across the codebase:
 | `app/api/chat/route.ts` | 13.3 | 377 | 18 | 13 | 69 |
 | `components/ai-services/ai-services-client.tsx` | 12.2 | 277 | 38 | 10 | 103 |
 | `components/assistant/chat-input.tsx` | 11.7 | 362 | 35 | 13 | 101 |
-| `lib/subscription-utils.ts` | 11.0 | 360 | 16 | 4 | 49 |
+| `lib/subscription-general.ts` | 11.0 | 360 | 16 | 4 | 49 |
 | `components/documents/document-list.tsx` | 10.9 | 265 | 35 | 9 | 94 |
 | `app/admin/page.tsx` | 10.9 | 310 | 52 | 7 | 125 |
 | `components/ai-services/custom-document-generator-dialog.tsx` | 10.7 | 322 | 41 | 13 | 112 |

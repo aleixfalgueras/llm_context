@@ -96,6 +96,11 @@ export enum ViewMode {
   LIST = 'list'
 }
 
+export enum ClientSortMode {
+  CREATED = 'created',
+  NAME = 'name'
+}
+
 // =============================================================================
 // LOGGING
 // =============================================================================
@@ -136,6 +141,17 @@ export const LANGUAGE_INFO: Record<Language, { label: string; flag: string }> = 
   [Language.POLISH]: { label: 'Polish (Polski)', flag: '🇵🇱' },
   [Language.RUSSIAN]: { label: 'Russian (Русский)', flag: '🇷🇺' },
   [Language.CATALAN]: { label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' }
+}
+
+// =============================================================================
+// API ERROR CODES
+// =============================================================================
+
+export enum ApiSubscriptionErrorCode {
+  SUBSCRIPTION_EXPIRED = 'SUBSCRIPTION_EXPIRED',
+  USAGE_LIMIT_EXCEEDED = 'USAGE_LIMIT_EXCEEDED',
+  MODEL_ACCESS_DENIED = 'MODEL_ACCESS_DENIED',
+  NO_SUBSCRIPTION_FOUND = 'NO_SUBSCRIPTION_FOUND'
 }
 
 // Helper function to get language options for forms

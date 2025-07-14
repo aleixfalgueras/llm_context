@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { FileText, Search, Star, TrendingUp, ChevronDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Prompt } from '@/types/component-types'
+import {useEffect, useState} from 'react'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Badge} from '@/components/ui/badge'
+import {ScrollArea} from '@/components/ui/scroll-area'
+import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
+import {ChevronDown, FileText, Search, Star, TrendingUp} from 'lucide-react'
+import {cn} from '@/lib/utils/general'
+import {Prompt} from '@/types/component-types'
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void

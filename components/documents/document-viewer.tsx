@@ -1,12 +1,12 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { FileText, Edit, Save, X, Eye } from 'lucide-react'
-import { MarkdownRenderer } from '@/components/global/markdown-renderer'
-import { getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-import { Document } from '@/types/component-types'
+import {Button} from '@/components/ui/button'
+import {Input} from '@/components/ui/input'
+import {Textarea} from '@/components/ui/textarea'
+import {Edit, Eye, FileText, Loader2, Save, X} from 'lucide-react'
+import {MarkdownRenderer} from '@/components/global/markdown-renderer'
+import {type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
+import {Document} from '@/types/component-types'
 
 interface DocumentViewerProps {
   document: Document | null
@@ -14,6 +14,7 @@ interface DocumentViewerProps {
   isEditing: boolean
   editedContent: string
   editedDocumentName: string
+  loadingContent?: boolean
   onEdit: () => void
   onSave: () => void
   onCancel: () => void
@@ -28,6 +29,7 @@ export function DocumentViewer({
   isEditing,
   editedContent,
   editedDocumentName,
+  loadingContent = false,
   onEdit,
   onSave,
   onCancel,
@@ -74,7 +76,7 @@ export function DocumentViewer({
                 variant="outline"
                 size="sm"
                 onClick={onPreview}
-                disabled={!editedContent.trim()}
+                disabled={!editedContent?.trim()}
               >
                 <Eye className="h-4 w-4 mr-1" />
                 Preview
@@ -90,7 +92,7 @@ export function DocumentViewer({
               <Button
                 size="sm"
                 onClick={onSave}
-                disabled={!editedDocumentName.trim() || !editedContent.trim()}
+                disabled={!editedDocumentName?.trim() || !editedContent?.trim()}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Save className="h-4 w-4 mr-1" />
@@ -126,9 +128,18 @@ export function DocumentViewer({
           </div>
         ) : (
           <div className="h-full overflow-y-auto">
-            <div className="p-6">
-              <MarkdownRenderer content={documentContent} />
-            </div>
+            {loadingContent ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+                  <p className="text-muted-foreground">Loading document content...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6">
+                <MarkdownRenderer content={documentContent || ''} />
+              </div>
+            )}
           </div>
         )}
       </div>

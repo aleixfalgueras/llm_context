@@ -1,40 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { DocumentService } from '@/lib/documents/service'
-
-interface RouteParams {
-  params: Promise<{ id: string }>
-}
+import { 
+  withEnhancedApi,
+  ApiContext 
+} from '@/lib/middleware/api-middleware'
 
 // GET /api/documents/[id]/download - Download document as file
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { id } = await params
+export const GET = withEnhancedApi(
+  async ({ userId, params }: ApiContext) => {
+    const { id } = params!
+    const documentId = id as string
 
     // Get the document from database to verify ownership and get name
     const document = await prisma.document.findFirst({
       where: { 
-        id,
+        id: documentId,
         userId 
       }
     })
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Document not found or unauthorized' }, 
-        { status: 404 }
-      )
+      const error = new Error('Document not found or unauthorized')
+      ;(error as any).status = 404
+      throw error
     }
 
     // Get document content
-    const documentContent = await DocumentService.getDocumentContent(id)
+    const documentContent = await DocumentService.getDocumentContent(userId, documentId)
 
     // Return markdown file as a blob for download
     return new NextResponse(documentContent, {
@@ -43,13 +36,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         'Content-Disposition': `attachment; filename="${document.documentName}.md"`,
       },
     })
-
-  } catch (error) {
-    console.error('Document download error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    )
+  },
+  { 
+    context: 'Download document',
+    allowedMethods: ['GET']
   }
-}
+)
 

@@ -4,7 +4,7 @@
 
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { AIServiceAPI } from '@/lib/ai-service-api'
+import { ServiceApi } from '@/lib/ai/service-api'
 import type { Client } from '@/types/client'
 
 interface UseAIServiceOperationsProps<TFormData> {
@@ -32,7 +32,7 @@ export function useAIServiceOperations<TFormData>({
     setIsGenerating(true)
     try {
       const payload = buildGeneratePayload(formData, client)
-      const result = await AIServiceAPI.generateContent(generateEndpoint, payload)
+      const result = await ServiceApi.generateContent(generateEndpoint, payload)
       
       if (result.success && result.content) {
         setGeneratedContent(result.content)
@@ -74,7 +74,7 @@ export function useAIServiceOperations<TFormData>({
       // Add document name to payload
       payload.name = documentName
       
-      const result = await AIServiceAPI.saveDocument(saveEndpoint, payload)
+      const result = await ServiceApi.saveDocument(saveEndpoint, payload)
       
       if (result.success && result.documentId) {
         onSaveSuccess?.(result.documentId)

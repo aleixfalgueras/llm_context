@@ -5,10 +5,10 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/api-middleware'
+} from '@/lib/middleware/api-middleware'
 
 export const POST = withEnhancedApi(
-  async ({ req }: ApiContext) => {
+  async ({ userId, req }: ApiContext) => {
     const body = await parseJsonBody(req)
     
     const { 
@@ -26,6 +26,7 @@ export const POST = withEnhancedApi(
     try {
       // Use the unified document service with tracking enabled
       const result = await DocumentService.createDocument(
+        userId,
         clientId,
         documentTitle,
         DOCUMENT_TYPES.CUSTOM_DOCUMENT,

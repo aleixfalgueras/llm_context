@@ -1,9 +1,9 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Eye } from 'lucide-react'
-import { MarkdownRenderer } from '@/components/global/markdown-renderer'
+import {Button} from '@/components/ui/button'
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog'
+import {Eye} from 'lucide-react'
+import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 
 interface DocumentPreviewDialogProps {
   open: boolean
@@ -49,7 +49,7 @@ export function DocumentPreviewDialog({
                 onConfirm()
               }}
               className="bg-blue-500 hover:bg-blue-600 text-white"
-              disabled={!title.trim() || !content.trim()}
+              disabled={!title?.trim() || !content?.trim()}
             >
               {confirmText}
             </Button>

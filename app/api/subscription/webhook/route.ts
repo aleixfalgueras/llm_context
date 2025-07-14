@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { stripe } from '@/lib/stripe'
-import { updateSubscriptionInDatabase } from '@/lib/stripe-utils'
+import { stripe } from '@/lib/payments/stripe'
+import { updateSubscriptionInDatabase } from '@/lib/payments/utils'
 import { logger } from '@/lib/logger'
 import Stripe from 'stripe'
 
@@ -57,12 +57,6 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
         await handleInvoicePaymentFailed(invoice)
-        break
-      }
-
-      case 'customer.subscription.trial_will_end': {
-        const subscription = event.data.object as Stripe.Subscription
-        await handleTrialWillEnd(subscription)
         break
       }
 
@@ -196,26 +190,3 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   }
 }
 
-async function handleTrialWillEnd(subscription: Stripe.Subscription) {
-  try {
-    logger.info('Trial will end soon', {
-      metadata: {
-        subscriptionId: subscription.id,
-        customerId: subscription.customer,
-        trialEnd: subscription.trial_end,
-      }
-    })
-    
-    // Here you could implement logic to notify the user about trial ending
-    // For example, send an email or create a notification
-    
-  } catch (error) {
-    logger.error('Failed to handle trial will end', error as Error, {
-      metadata: {
-        subscriptionId: subscription.id,
-        customerId: subscription.customer,
-      }
-    })
-    throw error
-  }
-}
