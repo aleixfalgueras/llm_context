@@ -8,7 +8,8 @@ const isPublicRoute = createRouteMatcher([
   '/terms',
   '/privacy',
   '/api/subscription/webhook',
-  '/feed.xml'
+  '/feed.xml',
+  '/ads.txt'
 ])
 
 // Note: /admin is NOT public - it requires authentication and email verification
