@@ -33,7 +33,7 @@ export async function POST() {
     // Clear all server-side caches
     logger.info('Admin clearing all server-side caches', { userId, metadata: { userEmail } })
     
-    clearAllCaches()
+    await clearAllCaches()
     
     logger.info('All server-side caches cleared successfully', { userId, metadata: { userEmail } })
     logger.apiResponse('POST', '/api/admin/clear-caches', 200)
