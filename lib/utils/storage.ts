@@ -150,7 +150,7 @@ export async function getStorageAnalytics(userId: string, subscription?: any) {
   try {
     // Check cache first
     const { getCachedStorageAnalytics, cacheStorageAnalytics } = await import('../payments/subscription-cache')
-    const cached = getCachedStorageAnalytics(userId)
+    const cached = await getCachedStorageAnalytics(userId)
     if (cached) {
       return cached
     }
@@ -173,7 +173,7 @@ export async function getStorageAnalytics(userId: string, subscription?: any) {
     }
 
     // Cache the result
-    cacheStorageAnalytics(userId, analytics)
+    await cacheStorageAnalytics(userId, analytics)
     
     return analytics
   } catch (error) {
