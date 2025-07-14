@@ -1,258 +1,257 @@
 /**
- * Simple caching layer for subscription data that changes infrequently
+ * Redis-based caching layer for subscription data that changes infrequently
+ * Uses Upstash Redis for reliable caching across serverless function instances
  * This reduces database load for frequently accessed user subscription information
  */
 
-interface CacheEntry<T> {
-  data: T
-  timestamp: number
-  expiresAt: number
+import { Redis } from '@upstash/redis'
+
+// Initialize Redis client with explicit Vercel environment variables
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+})
+
+// Environment-based prefix to separate dev/prod cache data
+const getEnvironmentPrefix = (): string => {
+  return process.env.NODE_ENV === 'production' ? 'prod:' : 'dev:'
 }
 
-interface SubscriptionCache {
-  [userId: string]: CacheEntry<any>
+// Redis cache key prefixes
+const CACHE_PREFIXES = {
+  SUBSCRIPTION: 'sub:',
+  USAGE: 'usage:',
+  STORAGE: 'storage:',
+  CLIENT_COUNT: 'client_count:'
+} as const
+
+// Helper functions for cache keys with environment separation
+const getCacheKey = (prefix: string, userId: string, suffix?: string) => {
+  const envPrefix = getEnvironmentPrefix()
+  return suffix ? `${envPrefix}${prefix}${userId}:${suffix}` : `${envPrefix}${prefix}${userId}`
 }
 
-interface UsageCache {
-  [userId: string]: CacheEntry<any>
-}
-
-interface StorageCache {
-  [userId: string]: CacheEntry<any>
-}
-
-interface ClientCountCache {
-  [userId: string]: CacheEntry<any>
-}
-
-// In-memory caches with TTL
-const subscriptionCache: SubscriptionCache = {}
-const usageCache: UsageCache = {}
-const storageCache: StorageCache = {}
-const clientCountCache: ClientCountCache = {}
-
-// Cache durations
-const SUBSCRIPTION_CACHE_TTL = 60 * 60 * 1000 // 1 hour (subscription data changes rarely)
-const USAGE_CACHE_TTL = 2 * 60 * 1000 // 2 minutes
-const STORAGE_CACHE_TTL = 5 * 60 * 1000 // 5 minutes (storage data changes rarely)
-const CLIENT_COUNT_CACHE_TTL = 1 * 60 * 1000 // 1 minute (client count changes occasionally)
+// Cache durations in seconds (Redis uses seconds for TTL)
+const SUBSCRIPTION_CACHE_TTL = 60 * 60 // 1 hour (subscription data changes rarely)
+const USAGE_CACHE_TTL = 2 * 60 // 2 minutes
+const STORAGE_CACHE_TTL = 5 * 60 // 5 minutes (storage data changes rarely)
+const CLIENT_COUNT_CACHE_TTL = 1 * 60 // 1 minute (client count changes occasionally)
 
 /**
  * Cache subscription data with TTL
  */
-export function cacheSubscription(userId: string, subscription: any): void {
-  const now = Date.now()
-  subscriptionCache[userId] = {
-    data: subscription,
-    timestamp: now,
-    expiresAt: now + SUBSCRIPTION_CACHE_TTL
-  }
-  
-  // Clean up old entries periodically
-  if (Object.keys(subscriptionCache).length > 500) {
-    cleanupCache(subscriptionCache)
+export async function cacheSubscription(userId: string, subscription: any): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.SUBSCRIPTION, userId)
+    await redis.setex(key, SUBSCRIPTION_CACHE_TTL, JSON.stringify(subscription))
+  } catch (error) {
+    console.error('Error caching subscription:', error)
+    // Fail silently - app should work without cache
   }
 }
 
 /**
  * Get cached subscription data if valid
  */
-export function getCachedSubscription(userId: string): any | null {
-  const entry = subscriptionCache[userId]
-  if (!entry) return null
-  
-  const now = Date.now()
-  if (now > entry.expiresAt) {
-    delete subscriptionCache[userId]
-    return null
+export async function getCachedSubscription(userId: string): Promise<any | null> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.SUBSCRIPTION, userId)
+    const cached = await redis.get(key)
+    if (cached && typeof cached === 'string') {
+      return JSON.parse(cached)
+    }
+    return cached // Redis returns null if key doesn't exist or expired
+  } catch (error) {
+    console.error('Error getting cached subscription:', error)
+    return null // Fall back to no cache
   }
-  
-  return entry.data
 }
 
 /**
  * Cache usage data with shorter TTL
  */
-export function cacheUsage(userId: string, usage: any): void {
-  const now = Date.now()
-  usageCache[userId] = {
-    data: usage,
-    timestamp: now,
-    expiresAt: now + USAGE_CACHE_TTL
-  }
-  
-  // Clean up old entries periodically
-  if (Object.keys(usageCache).length > 500) {
-    cleanupCache(usageCache)
+export async function cacheUsage(cacheKey: string, usage: any): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.USAGE, cacheKey)
+    await redis.setex(key, USAGE_CACHE_TTL, JSON.stringify(usage))
+  } catch (error) {
+    console.error('Error caching usage:', error)
+    // Fail silently - app should work without cache
   }
 }
 
 /**
  * Cache storage analytics data
  */
-export function cacheStorageAnalytics(userId: string, analytics: any): void {
-  const now = Date.now()
-  storageCache[userId] = {
-    data: analytics,
-    timestamp: now,
-    expiresAt: now + STORAGE_CACHE_TTL
-  }
-  
-  // Clean up old entries periodically
-  if (Object.keys(storageCache).length > 500) {
-    cleanupCache(storageCache)
+export async function cacheStorageAnalytics(userId: string, analytics: any): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
+    await redis.setex(key, STORAGE_CACHE_TTL, JSON.stringify(analytics))
+  } catch (error) {
+    console.error('Error caching storage analytics:', error)
+    // Fail silently - app should work without cache
   }
 }
 
 /**
  * Cache client count data
  */
-export function cacheClientCount(userId: string, count: number): void {
-  const now = Date.now()
-  clientCountCache[userId] = {
-    data: count,
-    timestamp: now,
-    expiresAt: now + CLIENT_COUNT_CACHE_TTL
-  }
-  
-  // Clean up old entries periodically
-  if (Object.keys(clientCountCache).length > 500) {
-    cleanupCache(clientCountCache)
+export async function cacheClientCount(userId: string, count: number): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
+    await redis.setex(key, CLIENT_COUNT_CACHE_TTL, count.toString())
+  } catch (error) {
+    console.error('Error caching client count:', error)
+    // Fail silently - app should work without cache
   }
 }
 
 /**
  * Get cached usage data if valid
  */
-export function getCachedUsage(userId: string): any | null {
-  const entry = usageCache[userId]
-  if (!entry) return null
-  
-  const now = Date.now()
-  if (now > entry.expiresAt) {
-    delete usageCache[userId]
-    return null
+export async function getCachedUsage(cacheKey: string): Promise<any | null> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.USAGE, cacheKey)
+    const cached = await redis.get(key)
+    if (cached && typeof cached === 'string') {
+      return JSON.parse(cached)
+    }
+    return cached // Redis returns null if key doesn't exist or expired
+  } catch (error) {
+    console.error('Error getting cached usage:', error)
+    return null // Fall back to no cache
   }
-  
-  return entry.data
 }
 
 /**
  * Get cached storage analytics data if valid
  */
-export function getCachedStorageAnalytics(userId: string): any | null {
-  const entry = storageCache[userId]
-  if (!entry) return null
-  
-  const now = Date.now()
-  if (now > entry.expiresAt) {
-    delete storageCache[userId]
-    return null
+export async function getCachedStorageAnalytics(userId: string): Promise<any | null> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
+    const cached = await redis.get(key)
+    if (cached && typeof cached === 'string') {
+      return JSON.parse(cached)
+    }
+    return cached // Redis returns null if key doesn't exist or expired
+  } catch (error) {
+    console.error('Error getting cached storage analytics:', error)
+    return null // Fall back to no cache
   }
-  
-  return entry.data
 }
 
 /**
  * Get cached client count if valid
  */
-export function getCachedClientCount(userId: string): number | null {
-  const entry = clientCountCache[userId]
-  if (!entry) return null
-  
-  const now = Date.now()
-  if (now > entry.expiresAt) {
-    delete clientCountCache[userId]
+export async function getCachedClientCount(userId: string): Promise<number | null> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
+    const cached = await redis.get(key)
+    if (cached !== null && cached !== undefined) {
+      return parseInt(cached.toString())
+    }
     return null
+  } catch (error) {
+    console.error('Error getting cached client count:', error)
+    return null // Fall back to no cache
   }
-  
-  return entry.data
 }
 
 /**
  * Invalidate subscription cache for a user (call when subscription changes)
  */
-export function invalidateSubscriptionCache(userId: string): void {
-  delete subscriptionCache[userId]
+export async function invalidateSubscriptionCache(userId: string): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.SUBSCRIPTION, userId)
+    await redis.del(key)
+  } catch (error) {
+    console.error('Error invalidating subscription cache:', error)
+    // Fail silently
+  }
 }
 
 /**
  * Invalidate usage cache for a user (call when usage changes)
  */
-export function invalidateUsageCache(userId: string): void {
-  delete usageCache[userId]
+export async function invalidateUsageCache(cacheKey: string): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.USAGE, cacheKey)
+    await redis.del(key)
+  } catch (error) {
+    console.error('Error invalidating usage cache:', error)
+    // Fail silently
+  }
 }
 
 /**
  * Invalidate storage analytics cache for a user (call when storage changes)
  */
-export function invalidateStorageCache(userId: string): void {
-  delete storageCache[userId]
+export async function invalidateStorageCache(userId: string): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
+    await redis.del(key)
+  } catch (error) {
+    console.error('Error invalidating storage cache:', error)
+    // Fail silently
+  }
 }
 
 /**
  * Invalidate client count cache for a user (call when client count changes)
  */
-export function invalidateClientCountCache(userId: string): void {
-  delete clientCountCache[userId]
+export async function invalidateClientCountCache(userId: string): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
+    await redis.del(key)
+  } catch (error) {
+    console.error('Error invalidating client count cache:', error)
+    // Fail silently
+  }
 }
 
 /**
- * Clean up expired cache entries
+ * Clean up expired cache entries (Redis handles TTL automatically)
+ * This function is kept for compatibility but does nothing since Redis handles expiration
  */
-function cleanupCache(cache: SubscriptionCache | UsageCache | StorageCache | ClientCountCache): void {
-  const now = Date.now()
-  const keysToDelete: string[] = []
-  
-  for (const [userId, entry] of Object.entries(cache)) {
-    if (now > entry.expiresAt) {
-      keysToDelete.push(userId)
-    }
-  }
-  
-  keysToDelete.forEach(userId => delete cache[userId])
+function cleanupCache(): void {
+  // Redis automatically handles TTL expiration, no manual cleanup needed
 }
 
 /**
  * Get cache statistics for monitoring
+ * Note: Redis doesn't provide easy access to key counts by pattern, so this returns basic info
  */
-export function getCacheStats() {
-  const now = Date.now()
-  
-  const subscriptionStats = {
-    total: Object.keys(subscriptionCache).length,
-    expired: Object.values(subscriptionCache).filter(entry => now > entry.expiresAt).length
-  }
-  
-  const usageStats = {
-    total: Object.keys(usageCache).length,
-    expired: Object.values(usageCache).filter(entry => now > entry.expiresAt).length
-  }
-  
-  const storageStats = {
-    total: Object.keys(storageCache).length,
-    expired: Object.values(storageCache).filter(entry => now > entry.expiresAt).length
-  }
-  
-  const clientCountStats = {
-    total: Object.keys(clientCountCache).length,
-    expired: Object.values(clientCountCache).filter(entry => now > entry.expiresAt).length
-  }
-  
-  return {
-    subscription: subscriptionStats,
-    usage: usageStats,
-    storage: storageStats,
-    clientCount: clientCountStats
+export async function getCacheStats() {
+  try {
+    // Redis doesn't easily support pattern counting without scanning all keys
+    // For now, return a simple status indicating Redis is available
+    const ping = await redis.ping()
+    return {
+      redis: {
+        status: ping === 'PONG' ? 'connected' : 'error',
+        note: 'Individual cache counts not available in Redis version'
+      }
+    }
+  } catch (error) {
+    return {
+      redis: {
+        status: 'error',
+        error: (error as Error).message
+      }
+    }
   }
 }
 
 /**
- * Clear all caches (useful for testing)
+ * Clear all caches (useful for testing and admin operations)
  */
-export function clearAllCaches(): void {
-  Object.keys(subscriptionCache).forEach(key => delete subscriptionCache[key])
-  Object.keys(usageCache).forEach(key => delete usageCache[key])
-  Object.keys(storageCache).forEach(key => delete storageCache[key])
-  Object.keys(clientCountCache).forEach(key => delete clientCountCache[key])
+export async function clearAllCaches(): Promise<void> {
+  try {
+    // Use Redis FLUSHALL to clear all keys
+    // Warning: This clears ALL data in the Redis database
+    await redis.flushall()
+  } catch (error) {
+    console.error('Error clearing all caches:', error)
+    throw error
+  }
 } 

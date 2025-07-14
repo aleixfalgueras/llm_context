@@ -296,10 +296,10 @@ export async function getUsageInfo(userId: string) {
 
     // Check client limits - count current clients with caching
     const { getCachedClientCount, cacheClientCount } = await import('../payments/subscription-cache')
-    let clientCount = getCachedClientCount(userId)
+    let clientCount = await getCachedClientCount(userId)
     if (clientCount === null) {
       clientCount = await prisma.client.count({ where: { userId } })
-      cacheClientCount(userId, clientCount)
+      await cacheClientCount(userId, clientCount)
     }
     
     const clientUsage = {

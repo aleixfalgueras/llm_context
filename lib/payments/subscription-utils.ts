@@ -75,7 +75,7 @@ export async function getUserSubscription(userId: string) {
   
   try {
     // Check cache first
-    const cached = getCachedSubscription(userId)
+    const cached = await getCachedSubscription(userId)
     if (cached) {
       logger.info('Returning cached subscription', { userId })
       endTiming();
@@ -117,7 +117,7 @@ export async function getUserSubscription(userId: string) {
     }
 
     // Cache the result
-    cacheSubscription(userId, subscription)
+    await cacheSubscription(userId, subscription)
 
     endTiming();
     return subscription
@@ -139,7 +139,7 @@ export async function getCurrentMonthUsage(userId: string) {
   try {
     // Check cache first (shorter TTL for usage data)
     const cacheKey = `${userId}_${year}_${month}`
-    const cached = getCachedUsage(cacheKey)
+    const cached = await getCachedUsage(cacheKey)
     if (cached) {
       logger.debug('Returning cached usage', { userId, metadata: { year: year.toString(), month: month.toString() } })
       endTiming();
@@ -189,7 +189,7 @@ export async function getCurrentMonthUsage(userId: string) {
     }
 
     // Cache the result
-    cacheUsage(cacheKey, usage)
+    await cacheUsage(cacheKey, usage)
 
     endTiming();
     return usage
@@ -368,7 +368,7 @@ export async function updateUsageTracking(
 
     // Invalidate usage cache after update
     const cacheKey = `${userId}_${year}_${month}`
-    invalidateUsageCache(cacheKey)
+    await invalidateUsageCache(cacheKey)
 
     endTiming();
   } catch (error) {
