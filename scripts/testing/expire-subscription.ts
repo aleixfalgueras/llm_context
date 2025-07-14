@@ -118,7 +118,7 @@ async function main() {
     }
 
     // Invalidate cache to ensure changes take effect immediately
-    invalidateSubscriptionCache(userId)
+    await invalidateSubscriptionCache(userId)
     console.log('🔄 Subscription cache invalidated')
 
     console.log('\n✅ Success! Subscription has been expired.')
