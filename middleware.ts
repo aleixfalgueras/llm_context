@@ -1,6 +1,22 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { logger } from '@/lib/logger'
 
+// Common bot/crawler routes to prevent authentication errors
+const BOT_CRAWLER_ROUTES = [
+  '/robots.txt',
+  '/sitemap.xml',
+  '/security.txt',
+  '/apple-touch-icon.png',
+  '/manifest.json',
+  '/browserconfig.xml',
+  '/humans.txt',
+  '/crossdomain.xml',
+  '/sitemap_index.xml',
+  '/favicon.png',
+  '/feed.xml',
+  '/ads.txt'
+]
+
 const isPublicRoute = createRouteMatcher([
   '/', 
   '/sign-in(.*)', 
@@ -8,8 +24,7 @@ const isPublicRoute = createRouteMatcher([
   '/terms',
   '/privacy',
   '/api/subscription/webhook',
-  '/feed.xml',
-  '/ads.txt'
+  ...BOT_CRAWLER_ROUTES
 ])
 
 // Note: /admin is NOT public - it requires authentication and email verification
