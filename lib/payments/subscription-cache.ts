@@ -210,35 +210,29 @@ export async function invalidateClientCountCache(userId: string): Promise<void> 
 }
 
 /**
- * Clean up expired cache entries (Redis handles TTL automatically)
- * This function is kept for compatibility but does nothing since Redis handles expiration
+ * Invalidate all user-specific caches (call after subscription changes)
+ * This ensures complete cache refresh after subscription upgrades/downgrades
  */
-function cleanupCache(): void {
-  // Redis automatically handles TTL expiration, no manual cleanup needed
-}
-
-/**
- * Get cache statistics for monitoring
- * Note: Redis doesn't provide easy access to key counts by pattern, so this returns basic info
- */
-export async function getCacheStats() {
+export async function invalidateAllUserCaches(userId: string): Promise<void> {
   try {
-    // Redis doesn't easily support pattern counting without scanning all keys
-    // For now, return a simple status indicating Redis is available
-    const ping = await redis.ping()
-    return {
-      redis: {
-        status: ping === 'PONG' ? 'connected' : 'error',
-        note: 'Individual cache counts not available in Redis version'
-      }
-    }
+    // Invalidate subscription cache
+    await invalidateSubscriptionCache(userId)
+    
+    // Invalidate current month usage cache
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+    const usageCacheKey = `${userId}_${year}_${month}`
+    await invalidateUsageCache(usageCacheKey)
+    
+    // Invalidate storage analytics cache
+    await invalidateStorageCache(userId)
+    
+    // Invalidate client count cache
+    await invalidateClientCountCache(userId)
   } catch (error) {
-    return {
-      redis: {
-        status: 'error',
-        error: (error as Error).message
-      }
-    }
+    console.error('Error invalidating all user caches:', error)
+    // Fail silently - cache invalidation should not break functionality
   }
 }
 

@@ -1,7 +1,7 @@
 import { stripe } from '@/lib/payments/stripe'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { invalidateSubscriptionCache } from '@/lib/payments/subscription-cache'
+import { invalidateAllUserCaches } from '@/lib/payments/subscription-cache'
 import Stripe from 'stripe'
 import { 
   withEnhancedApi, 
@@ -40,8 +40,8 @@ export const POST = withEnhancedApi(
         },
       })
 
-      // Invalidate subscription cache after successful cancellation
-      invalidateSubscriptionCache(userId)
+      // Invalidate all user caches after successful cancellation
+      await invalidateAllUserCaches(userId)
 
       logger.info('Subscription canceled successfully', {
         userId,
