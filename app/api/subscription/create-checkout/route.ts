@@ -8,8 +8,17 @@ import {
   parseJsonBody,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
+import Stripe from 'stripe'
 
-export const POST = withEnhancedApi(
+// Define the response interface for type safety
+interface CheckoutResponse {
+  url?: string | null
+  success?: boolean
+  subscriptionId?: string
+  status?: Stripe.Subscription.Status
+}
+
+export const POST = withEnhancedApi<CheckoutResponse>(
   async ({ userId, req }: ApiContext) => {
     const { planId, billingInterval = 'monthly' } = await parseJsonBody(req)
 
@@ -41,16 +50,37 @@ export const POST = withEnhancedApi(
 
     const session = await createCheckoutSession(userId, email, priceId, planId)
 
-    logger.info('Checkout session created successfully', { 
-      userId, 
-      metadata: {
-        planId, 
-        sessionId: session.id,
-        billingInterval
-      }
-    })
-
-    return apiSuccess({ url: session.url })
+    // Handle different return types from createCheckoutSession
+    if ('url' in session) {
+      // New customer - checkout session created
+      logger.info('Checkout session created successfully', { 
+        userId, 
+        metadata: {
+          planId, 
+          checkoutUrl: session.url,
+          billingInterval
+        }
+      })
+      return apiSuccess<CheckoutResponse>({ 
+        url: session.url
+      })
+    } else {
+      // Existing customer - subscription updated directly
+      logger.info('Subscription updated successfully', { 
+        userId, 
+        metadata: {
+          planId, 
+          subscriptionId: session.subscriptionId,
+          status: session.status,
+          billingInterval
+        }
+      })
+      return apiSuccess<CheckoutResponse>({ 
+        success: true, 
+        subscriptionId: session.subscriptionId, 
+        status: session.status 
+      })
+    }
   },
   { 
     context: 'Create checkout session',
