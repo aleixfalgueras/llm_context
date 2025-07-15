@@ -9,6 +9,7 @@ import { CheckIcon, StarIcon, CrownIcon, ZapIcon, SettingsIcon } from 'lucide-re
 import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 import { useSubscription } from '@/hooks/use-subscription'
+import { isUpgrade as checkIsUpgrade, isDowngrade as checkIsDowngrade } from '@/lib/payments/subscription-utils'
 import { Navbar } from '@/components/global/navbar'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/types/enums'
@@ -51,12 +52,21 @@ export default function SubscriptionPage() {
       if (response.ok) {
         const { data } = await response.json()
         
-        // All customers now go through checkout flow
-        if (data.url) {
-          // Redirect to checkout
-          window.location.href = data.url
+        // Handle downgrades vs upgrades with unified response
+        if (data.isDowngrade) {
+          // Downgrade was scheduled - show success message
+          toast({
+            title: 'Downgrade Scheduled',
+            description: data.message || 'Your plan will be downgraded at the end of your current billing period.',
+            variant: ToastVariant.DEFAULT
+          })
         } else {
-          throw new Error('No checkout URL received')
+          // Redirect to checkout for upgrades/new subscriptions
+          if (data.url) {
+            window.location.href = data.url
+          } else {
+            throw new Error('No checkout URL received')
+          }
         }
       } else {
         throw new Error('Failed to create checkout session')
@@ -158,8 +168,6 @@ export default function SubscriptionPage() {
       return <Badge className="bg-green-500">Current Plan</Badge>
     }
     
-    if (planId === SubscriptionPlan.PRO) return <Badge className="bg-blue-500">Most Popular</Badge>
-    if (planId === SubscriptionPlan.BUSINESS) return <Badge className="bg-purple-500">Enterprise</Badge>
     return null
   }
 
@@ -220,9 +228,7 @@ export default function SubscriptionPage() {
               className={`relative ${
                 isCurrentPlan(planId) 
                   ? 'border-green-500 shadow-lg scale-105 bg-green-50 dark:bg-green-900/20' 
-                  : planId === SubscriptionPlan.PRO 
-                    ? 'border-blue-500 shadow-lg scale-105' 
-                    : ''
+                  : ''
               }`}
             >
               <CardHeader className="text-center">
@@ -316,6 +322,7 @@ export default function SubscriptionPage() {
         billingInterval="monthly"
         isLoading={upgradeLoading !== null}
         hasActiveSubscription={!!subscription.stripeSubscriptionId}
+        isDowngrade={confirmationDialog.targetPlan ? checkIsDowngrade(subscription.plan as SubscriptionPlan, confirmationDialog.targetPlan) : false}
       />
     </div>
   )
