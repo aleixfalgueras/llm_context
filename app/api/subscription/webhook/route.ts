@@ -79,6 +79,47 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
     // Extract current period from subscription item
     const currentPeriodStart = subscriptionItem.current_period_start
     const currentPeriodEnd = subscriptionItem.current_period_end
+
+    // Check if this is an upgrade (new subscription replacing an old one)
+    const isUpgrade = subscription.metadata?.isUpgrade === 'true'
+    const previousSubscriptionId = subscription.metadata?.previousSubscriptionId
+
+    if (isUpgrade && previousSubscriptionId) {
+      logger.info('Processing subscription upgrade', {
+        metadata: {
+          newSubscriptionId: subscription.id,
+          previousSubscriptionId,
+          customerId: subscription.customer
+        }
+      })
+
+      // Cancel the previous subscription at the end of the current billing period
+      try {
+        await stripe.subscriptions.update(previousSubscriptionId, {
+          cancel_at_period_end: true,
+          metadata: {
+            ...subscription.metadata,
+            replacedBy: subscription.id,
+            cancelReason: 'upgraded'
+          }
+        })
+
+        logger.info('Successfully marked previous subscription for cancellation', {
+          metadata: {
+            previousSubscriptionId,
+            newSubscriptionId: subscription.id
+          }
+        })
+      } catch (error) {
+        logger.error('Failed to cancel previous subscription during upgrade', error as Error, {
+          metadata: {
+            previousSubscriptionId,
+            newSubscriptionId: subscription.id
+          }
+        })
+        // Continue with the new subscription update even if old cancellation fails
+      }
+    }
     
     await updateSubscriptionInDatabase(
       subscription.id,
@@ -110,7 +151,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
     const subscriptionItem = subscription.items.data[0]
-    
+
     // Extract current period from subscription item
     const currentPeriodStart = subscriptionItem.current_period_start
     const currentPeriodEnd = subscriptionItem.current_period_end
