@@ -41,8 +41,14 @@ export const POST = withEnhancedApi(
     })
 
     if (!existingSubscription?.stripeSubscriptionId) {
-      logger.warn('No active subscription found for upgrade preview', { userId })
-      throw new Error('No active subscription found')
+      logger.warn('No active subscription found for upgrade preview - user appears to be in free trial', { 
+        userId,
+        metadata: {
+          hasSubscriptionRecord: !!existingSubscription,
+          planId: planId
+        }
+      })
+      throw new Error('No active Stripe subscription found. This endpoint is for subscription upgrades only. Free trial users should proceed directly to checkout.')
     }
 
     // Get target price ID
