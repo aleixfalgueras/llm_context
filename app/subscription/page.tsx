@@ -315,7 +315,7 @@ export default function SubscriptionPage() {
         targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.BASIC}
         billingInterval="monthly"
         isLoading={upgradeLoading !== null}
-        hasActiveSubscription={!!(subscription.status && subscription.status !== 'incomplete')}
+        hasActiveSubscription={!!subscription.stripeSubscriptionId}
       />
     </div>
   )
