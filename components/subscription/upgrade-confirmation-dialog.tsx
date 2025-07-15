@@ -35,6 +35,7 @@ interface UpgradeConfirmationDialogProps {
   targetPlan: SubscriptionPlan
   billingInterval: 'monthly' | 'yearly'
   isLoading?: boolean
+  hasActiveSubscription?: boolean // Whether user has a paid Stripe subscription
 }
 
 export function UpgradeConfirmationDialog({
@@ -43,18 +44,19 @@ export function UpgradeConfirmationDialog({
   onConfirm,
   targetPlan,
   billingInterval,
-  isLoading = false
+  isLoading = false,
+  hasActiveSubscription = false
 }: UpgradeConfirmationDialogProps) {
   const [preview, setPreview] = useState<UpgradePreview | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const { toast } = useToast()
 
-  // Load pricing preview when dialog opens
+  // Load pricing preview when dialog opens (only for existing subscriptions)
   React.useEffect(() => {
-    if (isOpen && !preview) {
+    if (isOpen && hasActiveSubscription && !preview) {
       loadUpgradePreview()
     }
-  }, [isOpen, targetPlan, billingInterval])
+  }, [isOpen, targetPlan, billingInterval, hasActiveSubscription])
 
   const loadUpgradePreview = async () => {
     setPreviewLoading(true)
@@ -127,7 +129,7 @@ export function UpgradeConfirmationDialog({
               <span>Loading upgrade preview...</span>
             </div>
           </div>
-        ) : preview && currentPlanConfig ? (
+        ) : hasActiveSubscription && preview && currentPlanConfig ? (
           <div className="space-y-6">
             {/* Plan Comparison */}
             <div className="grid grid-cols-2 gap-4">
@@ -198,6 +200,49 @@ export function UpgradeConfirmationDialog({
               </div>
             </div>
           </div>
+        ) : !hasActiveSubscription ? (
+          <div className="space-y-6">
+            {/* First Subscription - Simple Confirmation */}
+            <div className="text-center">
+              <div className="p-6 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                <div className="font-semibold text-lg mb-2">{targetPlanConfig.name} Plan</div>
+                <div className="text-3xl font-bold mb-2">
+                  ${targetPlanConfig.price}
+                  <span className="text-lg font-normal text-muted-foreground">/month</span>
+                </div>
+                <Badge variant="secondary" className="mb-4">First Subscription</Badge>
+              </div>
+            </div>
+
+            {/* Feature List */}
+            <div className="space-y-3">
+              <div className="text-sm font-medium">What you'll get with {targetPlanConfig.name}:</div>
+              <div className="grid grid-cols-1 gap-2">
+                {targetPlanConfig.features_list.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm">
+                    <CheckIcon className="h-4 w-4 text-green-600" />
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-border" />
+
+            {/* Simple Billing Info */}
+            <div className="space-y-3">
+              <div className="text-sm font-medium">Billing Information</div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm">Monthly charge:</span>
+                  <span className="font-semibold">${targetPlanConfig.price}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  You'll be redirected to Stripe for secure payment processing.
+                </div>
+              </div>
+            </div>
+          </div>
         ) : null}
 
         <DialogFooter>
@@ -206,7 +251,7 @@ export function UpgradeConfirmationDialog({
           </Button>
           <Button 
             onClick={onConfirm} 
-            disabled={previewLoading || isLoading || !preview}
+            disabled={previewLoading || isLoading || (hasActiveSubscription && !preview)}
             className="flex items-center gap-2"
           >
             {isLoading ? (
@@ -217,7 +262,7 @@ export function UpgradeConfirmationDialog({
             ) : (
               <>
                 <ArrowRightIcon className="h-4 w-4" />
-                Confirm Upgrade
+                {hasActiveSubscription ? 'Confirm Upgrade' : 'Start Subscription'}
               </>
             )}
           </Button>
