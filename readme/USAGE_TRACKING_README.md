@@ -2,7 +2,7 @@
 
 This document explains how the usage tracking system works for the LLM Context application, focusing on **token consumption monitoring** using **Google Gemini 2.0 Flash** for all AI functionalities.
 
-**⚠️ UPDATED JANUARY 2025**: Upgraded to dual-model architecture with Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+**⚠️ UPDATED JANUARY 2025**: All subscription tiers now have access to Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter
 
 ## Overview
 
@@ -12,59 +12,61 @@ The usage tracking system operates across **three primary dimensions**:
 - **Storage usage tracking** (storage-based)
 
 **Key Features:**
-- ✅ **Dual model architecture** - Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter
+- ✅ **Premium AI models** - Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano available to all users
 - ✅ **Enhanced capabilities** with latest AI models from both Google and OpenAI
-- ✅ **Balanced token limits** based on cost-effective pricing
-- ✅ **Excellent profit margins** at all subscription levels (86-91%)
-- ✅ **User choice** between premium models with consistent pricing
+- ✅ **Generous token limits** based on cost-effective pricing
+- ✅ **Excellent profit margins** at all subscription levels (88-92%)
+- ✅ **No model restrictions** - all users get access to premium models
 
 ## Model Configuration
 
-### Dual Model Architecture
-**All AI functionalities powered by:**
-- **Google Gemini 2.0 Flash**: $0.10/M input tokens, $0.40/M output tokens, 1M context length
-- **OpenAI GPT-4.1 Nano**: $0.10/M input tokens, $0.40/M output tokens, 200K context length
+### Premium AI Models Available
+**All subscription tiers have access to:**
+- **Google Gemini 2.0 Flash**: Primary model with 1M context length
+- **OpenAI GPT-4.1 Nano**: Alternative model with 200K context length
+- **Consistent pricing**: Both models cost $0.10/M input tokens, $0.40/M output tokens
 - **Blended cost**: ~$0.175/M tokens (assuming 3:1 input/output ratio)
 - **OpenRouter Integration**: Unified API access to both premium models
 - **Performance**: Latest AI capabilities from both Google and OpenAI
 
-### Benefits of Dual Model Approach
+### Benefits of Premium Model Access
 - **Model choice**: Users can choose between Google and OpenAI providers
 - **Latest capabilities**: Access to both Google's and OpenAI's advanced models
 - **Cost consistency**: Both models have identical pricing for predictable costs
 - **Provider diversity**: Reduces dependency on a single AI provider
 - **Enhanced reliability**: Fallback options if one provider experiences issues
+- **No tier restrictions**: All users get access to the same premium models
 
 ## Subscription Plans and Token Limits
 
-### Basic Plan - €10/month ($11.72)
+### Basic Plan - €10/month
 - **Token Limit**: 5,000,000 tokens/month (~3,750 pages of content)
 - **Cost at limit**: ~$0.875 (92.5% profit margin)
-- **Storage**: 50 MB
-- **Clients**: 3 profiles
-- **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **Storage**: 50 MB document storage
+- **Clients**: 3 client profiles
+- **Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Individual users and small businesses
 
-### Pro Plan - €25/month ($29.30)
+### Pro Plan - €25/month
 - **Token Limit**: 15,000,000 tokens/month (~11,250 pages of content)
 - **Cost at limit**: ~$2.625 (91.0% profit margin)
-- **Storage**: 200 MB
-- **Clients**: Unlimited
-- **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **Storage**: 200 MB document storage
+- **Clients**: Unlimited client profiles
+- **Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Growing businesses and marketing professionals
 
-### Business Plan - €50/month ($58.60)
+### Business Plan - €50/month
 - **Token Limit**: 40,000,000 tokens/month (~30,000 pages of content)
-- **Cost at limit**: ~$7 (88.1% profit margin)
-- **Storage**: 2 GB
-- **Clients**: Unlimited
-- **Models**: Both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
+- **Cost at limit**: ~$7.00 (88.1% profit margin)
+- **Storage**: 2 GB document storage
+- **Clients**: Unlimited client profiles
+- **Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Agencies and large teams
 
 ## Token Usage Examples
 
 ### Content Generation Examples
-With Google Gemini 2.0 Flash token efficiency:
+With current AI models' token efficiency:
 
 **Basic Plan (5M tokens/month):**
 - ~3,750 full blog posts (1,330 tokens each)
@@ -98,68 +100,23 @@ With Google Gemini 2.0 Flash token efficiency:
 - Large-scale content operations
 - Team collaboration and sharing
 
-## Implementation Details
+## System Implementation
 
-### Database Schema
-```prisma
-model UserSubscription {
-  id                   String            @id @default(cuid())
-  userId               String            @unique
-  plan                 SubscriptionPlan  // BASIC, PRO, BUSINESS
-  maxTokensPerMonth    Int               // Plan-based limits
-  maxClients           Int               // Plan-based limits
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-}
+### Token Tracking
+- **Real-time monitoring**: Token usage tracked per API call
+- **Monthly limits**: Reset automatically at billing cycle
+- **Usage warnings**: Notifications at 80% and 95% of limits
+- **Hard limits**: Prevent overage charges
 
-model UserUsage {
-  id                   String   @id @default(cuid())
-  userId               String
-  year                 Int
-  month                Int
-  tokensUsed           Int      @default(0)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-}
-```
+### Storage Management
+- **Document storage**: Separate limits for each plan
+- **File management**: Efficient storage and retrieval
+- **Analytics tracking**: Storage usage monitoring
 
-### Token Limit Configuration
-```typescript
-export const SUBSCRIPTION_PLANS = {
-  [SubscriptionPlan.BASIC]: {
-    maxTokensPerMonth: 5000000,        // 5M tokens
-    maxClients: 3,
-    price: 11.72,  // €10 = $11.72
-  },
-  [SubscriptionPlan.PRO]: {
-    maxTokensPerMonth: 15000000,      // 15M tokens
-    maxClients: -1, // unlimited
-    price: 29.30,  // €25 = $29.30
-  },
-  [SubscriptionPlan.BUSINESS]: {
-    maxTokensPerMonth: 40000000,      // 40M tokens
-    maxClients: -1, // unlimited
-    price: 58.60,  // €50 = $58.60
-  },
-} as const;
-```
-
-### Model Configuration
-```typescript
-export const MODEL_IDS = {
-  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
-} as const;
-
-export const AVAILABLE_MODELS: AIModel[] = [
-  {
-    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    name: 'Gemini 2.0 Flash',
-    provider: 'google',
-    pricing: { input: 0.0001, output: 0.0004 },
-    contextLength: 1000000,
-  }
-];
-```
+### Client Management
+- **Profile limits**: Plan-based client profile restrictions
+- **Unlimited access**: Pro and Business plans have no client limits
+- **Context management**: Efficient client data handling
 
 ## Usage Monitoring
 
@@ -204,17 +161,17 @@ export const AVAILABLE_MODELS: AIModel[] = [
 ## Key Benefits
 
 ### For Users:
-- **Latest AI technology**: Access to Google's most advanced model
+- **Latest AI technology**: Access to Google's and OpenAI's most advanced models
 - **Consistent experience**: Same high-quality AI across all features
-- **No confusion**: Single model, no selection paralysis
+- **Model choice**: Option to use either Google or OpenAI models
 - **Generous limits**: Substantial token allowances for all use cases
 - **Enhanced performance**: Better reasoning and multimodal capabilities
 
 ### For Business:
-- **Excellent margins**: 86-91.25% gross profit margins across all plans
+- **Excellent margins**: 88-92% gross profit margins across all plans
 - **Simplified operations**: Easier to maintain and support
 - **Predictable costs**: Clear cost structure with excellent margins
-- **Better user experience**: No complexity around model choices
+- **Better user experience**: Premium models available to all users
 - **Competitive advantage**: Latest AI technology with generous limits
 
-This approach provides users with access to the latest Google AI technology while maintaining excellent profit margins and delivering a consistent, high-quality experience across all functionalities. 
+This approach provides users with access to the latest AI technology from both Google and OpenAI while maintaining excellent profit margins and delivering a consistent, high-quality experience across all functionalities. 
