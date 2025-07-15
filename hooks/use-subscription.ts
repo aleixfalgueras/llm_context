@@ -51,8 +51,8 @@ export function useSubscription() {
           const data = await response.json()
           
           setSubscription({
-            plan: data.plan || 'free',
-            tier: getTierFromPlan(data.plan || 'free'),
+            plan: data.plan,
+            tier: getTierFromPlan(data.plan),
             maxTokensPerMonth: data.tokensLimit || 0,
             maxClients: data.clientsLimit || 0,
             tokensUsed: data.tokensUsed || 0,

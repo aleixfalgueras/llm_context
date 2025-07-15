@@ -1,6 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { adminPrisma } from '@/lib/prisma'
 import { Navbar } from '@/components/global/navbar'
 import AdminDashboardClient from '@/components/admin/admin-dashboard-client'
 import { AdminDashboardData } from '@/types/admin-types'
@@ -8,43 +8,44 @@ import { AdminDashboardData } from '@/types/admin-types'
 const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 
 async function getAdminDashboardData(): Promise<AdminDashboardData> {
-  // Get comprehensive system statistics
-  const [
-    totalUsers,
-    totalClients,
-    totalDocuments,
-    totalChats,
-    totalMessages,
-    totalFeedback,
-    totalPrompts,
-    recentFeedback,
-    userSubscriptions,
-    monthlyUsage,
-    recentUsers
-  ] = await Promise.all([
+  try {
+    // Get comprehensive system statistics using admin client with direct connection
+    const [
+      totalUsers,
+      totalClients,
+      totalDocuments,
+      totalChats,
+      totalMessages,
+      totalFeedback,
+      totalPrompts,
+      recentFeedback,
+      userSubscriptions,
+      monthlyUsage,
+      recentUsers
+    ] = await Promise.all([
     // User counts
-    prisma.userSubscription.count(),
+    adminPrisma.userSubscription.count(),
     
     // Client counts
-    prisma.client.count(),
+    adminPrisma.client.count(),
     
     // Document counts
-    prisma.document.count(),
+    adminPrisma.document.count(),
     
     // Chat counts
-    prisma.chat.count(),
+    adminPrisma.chat.count(),
     
     // Message counts
-    prisma.message.count(),
+    adminPrisma.message.count(),
     
     // Feedback counts
-    prisma.feedback.count(),
+    adminPrisma.feedback.count(),
     
     // Prompt counts
-    prisma.prompt.count(),
+    adminPrisma.prompt.count(),
     
     // All feedback for admin filtering
-    prisma.feedback.findMany({
+    adminPrisma.feedback.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -60,13 +61,13 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
     }),
     
     // Subscription data
-    prisma.userSubscription.groupBy({
+    adminPrisma.userSubscription.groupBy({
       by: ['plan'],
       _count: true
     }),
     
     // Monthly usage data
-    prisma.userUsage.findMany({
+    adminPrisma.userUsage.findMany({
       where: {
         year: new Date().getFullYear(),
         month: new Date().getMonth() + 1
@@ -77,7 +78,7 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
     }),
     
     // Recent users (last 30 days)
-    prisma.userSubscription.count({
+    adminPrisma.userSubscription.count({
       where: {
         createdAt: {
           gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -94,18 +95,29 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
     { tokens: 0 }
   )
 
-  return {
-    totalUsers,
-    totalClients,
-    totalDocuments,
-    totalChats,
-    totalMessages,
-    totalPrompts,
-    totalFeedback,
-    recentUsers,
-    allFeedback: recentFeedback,
-    userSubscriptions,
-    monthlyStats
+    return {
+      totalUsers,
+      totalClients,
+      totalDocuments,
+      totalChats,
+      totalMessages,
+      totalPrompts,
+      totalFeedback,
+      recentUsers,
+      allFeedback: recentFeedback,
+      userSubscriptions,
+      monthlyStats
+    }
+  } catch (error: any) {
+    console.error('Admin dashboard database error:', error)
+    
+    // Check for connection timeout specifically
+    if (error.code === 'P1017' || error.message?.includes('connection pool') || error.message?.includes('Timed out')) {
+      throw new Error('Database connection timeout. Admin dashboard requires direct database access for complex queries. Please check your database configuration.')
+    }
+    
+    // Re-throw with more context
+    throw new Error(`Failed to load admin dashboard data: ${error.message || 'Unknown database error'}`)
   }
 }
 
