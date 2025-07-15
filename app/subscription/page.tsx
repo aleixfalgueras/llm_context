@@ -12,6 +12,7 @@ import { useSubscription } from '@/hooks/use-subscription'
 import { Navbar } from '@/components/global/navbar'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/types/enums'
+import { UpgradeConfirmationDialog } from '@/components/subscription/upgrade-confirmation-dialog'
 
 
 
@@ -20,10 +21,26 @@ export default function SubscriptionPage() {
   const subscription = useSubscription()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    isOpen: boolean
+    targetPlan: SubscriptionPlan | null
+  }>({ isOpen: false, targetPlan: null })
   const { toast } = useToast()
 
-  const handleUpgrade = async (planId: string) => {
+  const handleUpgrade = (planId: string) => {
+    // Show confirmation dialog instead of immediately upgrading
+    setConfirmationDialog({
+      isOpen: true,
+      targetPlan: planId as SubscriptionPlan
+    })
+  }
+
+  const handleConfirmUpgrade = async () => {
+    if (!confirmationDialog.targetPlan) return
+
+    const planId = confirmationDialog.targetPlan
     setUpgradeLoading(planId)
+    
     try {
       const response = await fetch('/api/subscription/create-checkout', {
         method: 'POST',
@@ -34,33 +51,31 @@ export default function SubscriptionPage() {
       if (response.ok) {
         const { data } = await response.json()
         
-        // Check if it's a direct subscription update or checkout URL
+        // All customers now go through checkout flow
         if (data.url) {
-          // New customer - redirect to checkout
+          // Redirect to checkout
           window.location.href = data.url
-        } else if (data.success) {
-          // Existing customer - subscription updated directly
-          toast({
-            title: 'Success',
-            description: 'Your subscription has been updated successfully!',
-            variant: ToastVariant.DEFAULT
-          })
-          // Refresh the page to show updated subscription
-          window.location.reload()
+        } else {
+          throw new Error('No checkout URL received')
         }
       } else {
-        throw new Error('Failed to process subscription change')
+        throw new Error('Failed to create checkout session')
       }
     } catch (error) {
-      console.error('Error upgrading subscription:', error)
+      console.error('Error creating checkout session:', error)
       toast({
         title: 'Error',
-        description: 'Failed to update subscription. Please try again.',
+        description: 'Failed to create checkout session. Please try again.',
         variant: ToastVariant.DESTRUCTIVE
       })
     } finally {
       setUpgradeLoading(null)
+      setConfirmationDialog({ isOpen: false, targetPlan: null })
     }
+  }
+
+  const handleCloseConfirmation = () => {
+    setConfirmationDialog({ isOpen: false, targetPlan: null })
   }
 
   const handleManageSubscription = async () => {
@@ -291,6 +306,16 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Confirmation Dialog */}
+      <UpgradeConfirmationDialog
+        isOpen={confirmationDialog.isOpen}
+        onClose={handleCloseConfirmation}
+        onConfirm={handleConfirmUpgrade}
+        targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.BASIC}
+        billingInterval="monthly"
+        isLoading={upgradeLoading !== null}
+      />
     </div>
   )
 } 
