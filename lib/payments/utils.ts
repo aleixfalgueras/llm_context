@@ -7,18 +7,9 @@ import {SUBSCRIPTION_PLANS} from './subscription-utils'
 import Stripe from 'stripe'
 
 export const STRIPE_PRICE_IDS = {
-  [SubscriptionPlan.BASIC]: {
-    monthly: process.env.STRIPE_BASIC_PRICE_ID || 'price_1RgN2fH1IwPXt7SI6fY3NRQF',
-    yearly: process.env.STRIPE_BASIC_PRICE_ID_YEARLY || 'price_basic_yearly_to_be_created',
-  },
-  [SubscriptionPlan.PRO]: {
-    monthly: process.env.STRIPE_PRO_PRICE_ID || 'price_1RiV0KH1IwPXt7SIphwW0d6Z',
-    yearly: process.env.STRIPE_PRO_PRICE_ID_YEARLY || 'price_pro_yearly_to_be_created',
-  },
-  [SubscriptionPlan.BUSINESS]: {
-    monthly: process.env.STRIPE_BUSINESS_PRICE_ID || 'price_1RiV0uH1IwPXt7SInp95Km4L',
-    yearly: process.env.STRIPE_BUSINESS_PRICE_ID_YEARLY || 'price_business_yearly_to_be_created',
-  },
+  [SubscriptionPlan.BASIC]: process.env.STRIPE_BASIC_PRICE_ID || 'price_1RgN2fH1IwPXt7SI6fY3NRQF',
+  [SubscriptionPlan.PRO]: process.env.STRIPE_PRO_PRICE_ID || 'price_1RiV0KH1IwPXt7SIphwW0d6Z',
+  [SubscriptionPlan.BUSINESS]: process.env.STRIPE_BUSINESS_PRICE_ID || 'price_1RiV0uH1IwPXt7SInp95Km4L',
 } as const
 
 export async function createOrRetrieveCustomer(userId: string, email: string) {
@@ -61,8 +52,8 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
         status: SubscriptionStatus.ACTIVE,
         currentPeriodStart: new Date(),
         currentPeriodEnd: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
-        maxClients: 3,
-        maxTokensPerMonth: 5000000,
+        maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
+        maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
       },
     })
 
@@ -177,8 +168,8 @@ export async function createCustomerPortalSession(userId: string) {
 }
 
 export function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
-  for (const [plan, prices] of Object.entries(STRIPE_PRICE_IDS)) {
-    if (prices.monthly === priceId || prices.yearly === priceId) {
+  for (const [plan, planPriceId] of Object.entries(STRIPE_PRICE_IDS)) {
+    if (planPriceId === priceId) {
       return plan as SubscriptionPlan
     }
   }

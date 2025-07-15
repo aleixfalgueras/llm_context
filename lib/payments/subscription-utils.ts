@@ -12,7 +12,8 @@ import {
   cacheSubscription, 
   getCachedUsage, 
   cacheUsage,
-  invalidateUsageCache
+  invalidateUsageCache,
+  invalidateAllUserCaches
 } from './subscription-cache'
 
 // Subscription Plans Configuration
@@ -541,6 +542,9 @@ export async function scheduleSubscriptionDowngrade(
       effectiveDate: effectiveDate.toISOString()
     }
   })
+
+  // Invalidate caches after scheduling downgrade
+  await invalidateAllUserCaches(userId)
 
   return {
     effectiveDate,

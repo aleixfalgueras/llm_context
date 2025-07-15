@@ -15,21 +15,16 @@ interface CheckoutResponse {
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
-    const { planId, billingInterval = 'monthly' } = await parseJsonBody(req)
+    const { planId } = await parseJsonBody(req)
 
     if (!planId || !Object.values(SubscriptionPlan).includes(planId)) {
       logger.warn('Invalid plan ID provided', { metadata: { planId } })
       throw new Error('Invalid plan ID')
     }
 
-    if (billingInterval !== 'monthly' && billingInterval !== 'yearly') {
-      logger.warn('Invalid billing interval provided', { metadata: { billingInterval } })
-      throw new Error('Invalid billing interval')
-    }
-
-    const priceId = STRIPE_PRICE_IDS[planId as SubscriptionPlan][billingInterval as 'monthly' | 'yearly']
+    const priceId = STRIPE_PRICE_IDS[planId as SubscriptionPlan]
     if (!priceId) {
-      logger.warn('No price ID found for plan', { metadata: { planId, billingInterval } })
+      logger.warn('No price ID found for plan', { metadata: { planId } })
       throw new Error('Price not found')
     }
 
@@ -50,17 +45,10 @@ export const POST = withEnhancedApi(
         }
       })
       
-      // Handle downgrade scheduling directly
-      const targetPriceId = STRIPE_PRICE_IDS[planId as SubscriptionPlan][billingInterval as 'monthly' | 'yearly']
-      if (!targetPriceId) {
-        logger.warn('No price ID found for plan in downgrade scheduling', { metadata: { planId, billingInterval } })
-        throw new Error('Price not found')
-      }
-
       // Schedule the downgrade using shared utility function
       const { effectiveDate, message } = await scheduleSubscriptionDowngrade(
         existingSubscription.stripeSubscriptionId,
-        targetPriceId,
+        priceId,
         userId,
         existingSubscription.plan as SubscriptionPlan,
         planId as SubscriptionPlan
@@ -92,8 +80,7 @@ export const POST = withEnhancedApi(
       userId, 
       metadata: {
         planId, 
-        checkoutUrl: session.url,
-        billingInterval
+        checkoutUrl: session.url
       }
     })
 

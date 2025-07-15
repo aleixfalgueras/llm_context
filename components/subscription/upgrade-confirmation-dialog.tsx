@@ -22,8 +22,6 @@ interface UpgradePreview {
   targetPlan: SubscriptionPlan
   currentPrice: number
   newPrice: number
-  prorationAmount: number
-  totalDue: number
   nextBillingDate: string
   currency: string
 }
@@ -33,7 +31,6 @@ interface UpgradeConfirmationDialogProps {
   onClose: () => void
   onConfirm: () => void
   targetPlan: SubscriptionPlan
-  billingInterval: 'monthly' | 'yearly'
   isLoading?: boolean
   hasActiveSubscription?: boolean // Whether user has a paid Stripe subscription
   isDowngrade?: boolean // Whether this is a downgrade (scheduled for end of period)
@@ -44,7 +41,6 @@ export function UpgradeConfirmationDialog({
   onClose,
   onConfirm,
   targetPlan,
-  billingInterval,
   isLoading = false,
   hasActiveSubscription = false,
   isDowngrade = false
@@ -58,7 +54,7 @@ export function UpgradeConfirmationDialog({
     if (isOpen && hasActiveSubscription && !preview) {
       loadUpgradePreview()
     }
-  }, [isOpen, targetPlan, billingInterval, hasActiveSubscription])
+  }, [isOpen, targetPlan, hasActiveSubscription])
 
   const loadUpgradePreview = async () => {
     setPreviewLoading(true)
@@ -66,7 +62,7 @@ export function UpgradeConfirmationDialog({
       const response = await fetch('/api/subscription/preview-upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: targetPlan, billingInterval })
+        body: JSON.stringify({ planId: targetPlan })
       })
 
       if (!response.ok) {
@@ -143,7 +139,7 @@ export function UpgradeConfirmationDialog({
                 <div className="p-4 border rounded-lg bg-muted/50">
                   <div className="font-semibold">{currentPlanConfig.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {formatPrice(preview.currentPrice, preview.currency)}/{billingInterval.slice(0, -2)}
+                    {formatPrice(preview.currentPrice, preview.currency)}/month
                   </div>
                 </div>
               </div>
@@ -156,7 +152,7 @@ export function UpgradeConfirmationDialog({
                     <Badge variant="secondary">Upgrade</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {formatPrice(preview.newPrice, preview.currency)}/{billingInterval.slice(0, -2)}
+                    {formatPrice(preview.newPrice, preview.currency)}/month
                   </div>
                 </div>
               </div>
@@ -177,7 +173,7 @@ export function UpgradeConfirmationDialog({
 
             <div className="border-t border-border" />
 
-            {/* Simplified Pricing */}
+            {/* Simplified Billing Summary */}
             <div className="space-y-3">
               <div className="text-sm font-medium">Billing Summary</div>
               <div className="p-4 bg-muted/50 rounded-lg">
@@ -214,7 +210,7 @@ export function UpgradeConfirmationDialog({
               <div className="p-6 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                 <div className="font-semibold text-lg mb-2">{targetPlanConfig.name} Plan</div>
                 <div className="text-3xl font-bold mb-2">
-                  ${targetPlanConfig.price}
+                  €{targetPlanConfig.price}
                   <span className="text-lg font-normal text-muted-foreground">/month</span>
                 </div>
                 <Badge variant="secondary" className="mb-4">First Subscription</Badge>
@@ -244,7 +240,7 @@ export function UpgradeConfirmationDialog({
                   <span className="text-sm">
                     {isDowngrade ? 'New monthly charge:' : 'Monthly charge:'}
                   </span>
-                  <span className="font-semibold">${targetPlanConfig.price}</span>
+                  <span className="font-semibold">€{targetPlanConfig.price}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {isDowngrade 

@@ -44,7 +44,7 @@ export default function SubscriptionPage() {
       const response = await fetch('/api/subscription/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, billingInterval: 'monthly' })
+        body: JSON.stringify({ planId })
       })
       
       if (response.ok) {
@@ -241,7 +241,7 @@ export default function SubscriptionPage() {
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <CardDescription className="text-sm">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">${plan.price}</span>
+                  <span className="text-4xl font-bold">€{plan.price}</span>
                   {plan.price > 0 && <span className="text-gray-500">/month</span>}
                 </div>
               </CardHeader>
@@ -285,8 +285,8 @@ export default function SubscriptionPage() {
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-2">Can I change plans anytime?</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, 
-                  and you'll be charged or credited proportionally.
+                  Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately at full price. 
+                  Downgrades take effect at the end of your current billing period.
                 </p>
               </CardContent>
             </Card>
@@ -321,7 +321,6 @@ export default function SubscriptionPage() {
         onClose={handleCloseConfirmation}
         onConfirm={handleConfirmUpgrade}
         targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.BASIC}
-        billingInterval="monthly"
         isLoading={upgradeLoading !== null}
         hasActiveSubscription={!!subscription.stripeSubscriptionId}
         isDowngrade={confirmationDialog.targetPlan ? checkIsDowngrade(subscription.plan as SubscriptionPlan, confirmationDialog.targetPlan) : false}
