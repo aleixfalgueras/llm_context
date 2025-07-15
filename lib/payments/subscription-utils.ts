@@ -491,4 +491,59 @@ export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: Subscript
   const currentIndex = PLAN_HIERARCHY.indexOf(currentPlan)
   const targetIndex = PLAN_HIERARCHY.indexOf(targetPlan)
   return targetIndex < currentIndex
+}
+
+/**
+ * Schedule a subscription downgrade to take effect at the end of the current billing period
+ */
+export async function scheduleSubscriptionDowngrade(
+  stripeSubscriptionId: string,
+  targetPriceId: string,
+  userId: string,
+  currentPlan: SubscriptionPlan,
+  targetPlan: SubscriptionPlan
+): Promise<{
+  effectiveDate: Date
+  message: string
+}> {
+  // Import stripe here to avoid circular dependency
+  const { stripe } = await import('./stripe')
+  
+  // Get current subscription from Stripe
+  const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+
+  // Schedule the downgrade at the end of the current billing period
+  const updatedSubscription = await stripe.subscriptions.update(
+    stripeSubscriptionId,
+    {
+      items: [
+        {
+          id: stripeSubscription.items.data[0].id,
+          price: targetPriceId,
+        },
+      ],
+      proration_behavior: 'none', // No immediate billing
+      billing_cycle_anchor: 'unchanged', // Wait for next billing cycle
+    }
+  )
+
+  // Get the effective date (next billing cycle)
+  const subscriptionItem = updatedSubscription.items.data[0]
+  const currentPeriodEnd = subscriptionItem.current_period_end
+  const effectiveDate = new Date(currentPeriodEnd * 1000)
+
+  logger.info('Downgrade scheduled successfully', {
+    userId,
+    metadata: {
+      currentPlan,
+      targetPlan,
+      subscriptionId: stripeSubscriptionId,
+      effectiveDate: effectiveDate.toISOString()
+    }
+  })
+
+  return {
+    effectiveDate,
+    message: `Downgrade scheduled successfully. Your plan will change to ${targetPlan} on ${effectiveDate.toLocaleDateString()}.`
+  }
 } 

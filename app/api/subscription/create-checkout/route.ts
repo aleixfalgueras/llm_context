@@ -1,17 +1,10 @@
-import { clerkClient } from '@clerk/nextjs/server'
-import { createCheckoutSession, STRIPE_PRICE_IDS } from '@/lib/payments/utils'
-import { SubscriptionPlan } from '@/types/subscription-types'
-import { isDowngrade } from '@/lib/payments/subscription-utils'
-import { logger } from '@/lib/logger'
-import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/payments/stripe'
-import { 
-  withEnhancedApi, 
-  apiSuccess, 
-  parseJsonBody,
-  ApiContext 
-} from '@/lib/middleware/api-middleware'
-import Stripe from 'stripe'
+import {clerkClient} from '@clerk/nextjs/server'
+import {createCheckoutSession, STRIPE_PRICE_IDS} from '@/lib/payments/utils'
+import {SubscriptionPlan} from '@/types/subscription-types'
+import {isDowngrade, scheduleSubscriptionDowngrade} from '@/lib/payments/subscription-utils'
+import {logger} from '@/lib/logger'
+import {prisma} from '@/lib/prisma'
+import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
 
 interface CheckoutResponse {
   isDowngrade: boolean
@@ -45,11 +38,11 @@ export const POST = withEnhancedApi(
       where: { userId },
     })
 
-    // If user has active subscription and this is a downgrade, redirect to schedule-downgrade endpoint
+    // If user has active subscription and this is a downgrade, handle downgrade scheduling directly
     if (existingSubscription?.stripeSubscriptionId && 
         isDowngrade(existingSubscription.plan as SubscriptionPlan, planId as SubscriptionPlan)) {
       
-      logger.info('Detected downgrade request, redirecting to schedule-downgrade API', {
+      logger.info('Detected downgrade request, handling downgrade scheduling inline', {
         userId,
         metadata: {
           currentPlan: existingSubscription.plan,
@@ -64,44 +57,18 @@ export const POST = withEnhancedApi(
         throw new Error('Price not found')
       }
 
-      // Get current subscription from Stripe
-      const stripeSubscription = await stripe.subscriptions.retrieve(
-        existingSubscription.stripeSubscriptionId
-      )
-
-      // Schedule the downgrade at the end of the current billing period
-      const updatedSubscription = await stripe.subscriptions.update(
+      // Schedule the downgrade using shared utility function
+      const { effectiveDate, message } = await scheduleSubscriptionDowngrade(
         existingSubscription.stripeSubscriptionId,
-        {
-          items: [
-            {
-              id: stripeSubscription.items.data[0].id,
-              price: targetPriceId,
-            },
-          ],
-          proration_behavior: 'none', // No immediate billing
-          billing_cycle_anchor: 'unchanged', // Wait for next billing cycle
-        }
-      )
-
-      // Get the effective date (next billing cycle)
-      const subscriptionItem = updatedSubscription.items.data[0]
-      const currentPeriodEnd = subscriptionItem.current_period_end
-      const effectiveDate = new Date(currentPeriodEnd * 1000)
-
-      logger.info('Downgrade scheduled successfully', {
+        targetPriceId,
         userId,
-        metadata: {
-          currentPlan: existingSubscription.plan,
-          targetPlan: planId,
-          subscriptionId: existingSubscription.stripeSubscriptionId,
-          effectiveDate: effectiveDate.toISOString()
-        }
-      })
+        existingSubscription.plan as SubscriptionPlan,
+        planId as SubscriptionPlan
+      )
 
       const response: CheckoutResponse = {
         isDowngrade: true,
-        message: `Downgrade scheduled successfully. Your plan will change to ${planId} on ${effectiveDate.toLocaleDateString()}.`,
+        message,
         effectiveDate: effectiveDate.toISOString()
       }
       
