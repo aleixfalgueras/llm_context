@@ -36,6 +36,7 @@ interface UpgradeConfirmationDialogProps {
   billingInterval: 'monthly' | 'yearly'
   isLoading?: boolean
   hasActiveSubscription?: boolean // Whether user has a paid Stripe subscription
+  isDowngrade?: boolean // Whether this is a downgrade (scheduled for end of period)
 }
 
 export function UpgradeConfirmationDialog({
@@ -45,7 +46,8 @@ export function UpgradeConfirmationDialog({
   targetPlan,
   billingInterval,
   isLoading = false,
-  hasActiveSubscription = false
+  hasActiveSubscription = false,
+  isDowngrade = false
 }: UpgradeConfirmationDialogProps) {
   const [preview, setPreview] = useState<UpgradePreview | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -115,10 +117,13 @@ export function UpgradeConfirmationDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCardIcon className="h-5 w-5" />
-            Confirm Subscription Upgrade
+            {isDowngrade ? 'Schedule Subscription Downgrade' : 'Confirm Subscription Upgrade'}
           </DialogTitle>
           <DialogDescription>
-            Review the details of your subscription upgrade before proceeding.
+            {isDowngrade 
+              ? 'Review the details of your subscription downgrade. Changes will take effect at the end of your current billing period.'
+              : 'Review the details of your subscription upgrade before proceeding.'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -177,17 +182,27 @@ export function UpgradeConfirmationDialog({
               <div className="text-sm font-medium">Billing Summary</div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm">Upgrade to {targetPlanConfig.name}:</span>
+                  <span className="text-sm">
+                    {isDowngrade ? `Downgrade to ${targetPlanConfig.name}:` : `Upgrade to ${targetPlanConfig.name}:`}
+                  </span>
                   <span className="font-semibold text-lg">
                     {formatPrice(preview.newPrice, preview.currency)}
                   </span>
                 </div>
                 <div className="text-xs text-muted-foreground mb-2">
-                  You'll be charged the full monthly price for the new plan.
+                  {isDowngrade 
+                    ? 'You\'ll be charged the new plan price starting from your next billing cycle. You\'ll keep your current plan benefits until then.'
+                    : 'You\'ll be charged the full monthly price for the new plan.'
+                  }
                 </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <CalendarIcon className="h-3 w-3" />
-                  <span>Next billing: {formatDate(preview.nextBillingDate)}</span>
+                  <span>
+                    {isDowngrade 
+                      ? `Changes take effect: ${formatDate(preview.nextBillingDate)}`
+                      : `Next billing: ${formatDate(preview.nextBillingDate)}`
+                    }
+                  </span>
                 </div>
               </div>
             </div>
@@ -226,11 +241,16 @@ export function UpgradeConfirmationDialog({
               <div className="text-sm font-medium">Billing Information</div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm">Monthly charge:</span>
+                  <span className="text-sm">
+                    {isDowngrade ? 'New monthly charge:' : 'Monthly charge:'}
+                  </span>
                   <span className="font-semibold">${targetPlanConfig.price}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  You'll be redirected to Stripe for secure payment processing.
+                  {isDowngrade 
+                    ? 'Your plan will change at the end of your current billing period. No immediate payment required.'
+                    : 'You\'ll be redirected to Stripe for secure payment processing.'
+                  }
                 </div>
               </div>
             </div>
@@ -254,7 +274,7 @@ export function UpgradeConfirmationDialog({
             ) : (
               <>
                 <ArrowRightIcon className="h-4 w-4" />
-                {hasActiveSubscription ? 'Confirm Upgrade' : 'Start Subscription'}
+                {isDowngrade ? 'Schedule Downgrade' : (hasActiveSubscription ? 'Confirm Upgrade' : 'Start Subscription')}
               </>
             )}
           </Button>

@@ -4,6 +4,9 @@ import { getTierFromPlan, isModelAvailableForTier } from '../ai/models-config'
 import { SubscriptionPlan, SubscriptionStatus, ModelTier } from '@/types/subscription-types'
 import { ApiSubscriptionErrorCode } from '@/types/enums'
 
+// Plan hierarchy for upgrade/downgrade detection
+const PLAN_HIERARCHY = [SubscriptionPlan.BASIC, SubscriptionPlan.PRO, SubscriptionPlan.BUSINESS]
+
 import { 
   getCachedSubscription, 
   cacheSubscription, 
@@ -470,4 +473,22 @@ export async function getUserUsageAnalytics(userId: string) {
     console.error('Error getting usage analytics:', error)
     throw error
   }
+}
+
+/**
+ * Determine if a plan change is an upgrade or downgrade
+ */
+export function isUpgrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {
+  const currentIndex = PLAN_HIERARCHY.indexOf(currentPlan)
+  const targetIndex = PLAN_HIERARCHY.indexOf(targetPlan)
+  return targetIndex > currentIndex
+}
+
+/**
+ * Determine if a plan change is a downgrade
+ */
+export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {
+  const currentIndex = PLAN_HIERARCHY.indexOf(currentPlan)
+  const targetIndex = PLAN_HIERARCHY.indexOf(targetPlan)
+  return targetIndex < currentIndex
 } 
