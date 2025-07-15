@@ -3,11 +3,12 @@ import { auth } from '@clerk/nextjs/server'
 import { handleApiError, ApiErrors } from '../utils/error-handler'
 
 // =============================================================================
-// ENHANCED API MIDDLEWARE FOR DRY ELIMINATION
+// ENHANCED API MIDDLEWARE
 // =============================================================================
 
 /**
- * Request context passed to API handlers
+ * Request context passed to API handlers:
+ * Defines the information that gets passed to your API handler.
  */
 export interface ApiContext {
   userId: string
@@ -16,7 +17,17 @@ export interface ApiContext {
 }
 
 /**
- * Configuration for enhanced API middleware
+ * Enhanced API handler function type:
+ * Defines what your actual API function should look like
+ */
+export type EnhancedApiHandler<T = any> = (
+  context: ApiContext
+) => Promise<NextResponse<T | { error: string }>> | NextResponse<T | { error: string }>
+
+
+/**
+ * Configuration for enhanced API middleware:
+ * Defines how your API endpoint should behave
  */
 export interface EnhancedApiConfig {
   /** Whether authentication is required (default: true) */
@@ -30,34 +41,8 @@ export interface EnhancedApiConfig {
 }
 
 /**
- * Enhanced API handler function type
- */
-export type EnhancedApiHandler<T = any> = (
-  context: ApiContext
-) => Promise<NextResponse<T | { error: string }>> | NextResponse<T | { error: string }>
-
-/**
  * Enhanced API middleware that consolidates auth, usage checking, error handling,
  * and common response patterns. Eliminates duplicate code across API routes.
- * 
- * @example
- * ```typescript
- * export const GET = withEnhancedApi(async ({ userId, req }) => {
- *   const data = await fetchUserData(userId)
- *   return apiSuccess(data)
- * }, { context: 'Fetch User Data' })
- * 
- * export const POST = withEnhancedApi(async ({ userId, req }) => {
- *   const body = await parseJsonBody(req)
- *   const result = await createResource(userId, body)
- *   return apiSuccess(result, 201)
- * }, { 
- *   context: 'Create Resource',
- *   usageAction: 'client',
- *   allowedMethods: ['POST'],
- *   expectedContentType: 'application/json'
- * })
- * ```
  */
 export function withEnhancedApi<T = any>(
   handler: EnhancedApiHandler<T>,
@@ -183,7 +168,7 @@ export function extractClientInfo(req: NextRequest): {
 }
 
 // =============================================================================
-// COMPOSABLE MIDDLEWARE FUNCTIONS (New Simplified Approach)
+// COMPOSABLE MIDDLEWARE FUNCTIONS
 // =============================================================================
 
 /**
