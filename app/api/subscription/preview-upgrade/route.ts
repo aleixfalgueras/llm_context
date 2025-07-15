@@ -64,30 +64,15 @@ export const POST = withEnhancedApi(
         existingSubscription.stripeSubscriptionId
       )
 
-      // Get current and target prices
+      // Get current and target prices (simplified - no proration)
       const currentPrice = await stripe.prices.retrieve(stripeSubscription.items.data[0].price.id)
       const targetPrice = await stripe.prices.retrieve(targetPriceId)
 
-      // Preview the upgrade using invoice preview
-      const upcomingInvoice = await stripe.invoices.createPreview({
-        customer: stripeSubscription.customer as string,
-        subscription: existingSubscription.stripeSubscriptionId,
-        subscription_details: {
-          items: [
-            {
-              id: stripeSubscription.items.data[0].id,
-              price: targetPriceId,
-            },
-          ],
-          proration_behavior: 'create_prorations',
-        },
-      })
-
-      // Calculate amounts
+      // Simple pricing - just charge the new plan price
       const currentPriceAmount = currentPrice.unit_amount || 0
       const newPriceAmount = targetPrice.unit_amount || 0
-      const totalDue = upcomingInvoice.amount_due || 0
-      const prorationAmount = totalDue - (newPriceAmount - currentPriceAmount)
+      const totalDue = newPriceAmount // Simple: just charge the new plan price
+      const prorationAmount = 0 // No proration - keep it simple
 
       // Get currentPeriodEnd from subscription items
       const subscriptionItem = stripeSubscription.items.data[0]
@@ -98,10 +83,10 @@ export const POST = withEnhancedApi(
         targetPlan: planId as SubscriptionPlan,
         currentPrice: currentPriceAmount / 100, // Convert from cents
         newPrice: newPriceAmount / 100, // Convert from cents
-        prorationAmount: prorationAmount / 100, // Convert from cents
-        totalDue: totalDue / 100, // Convert from cents
+        prorationAmount: prorationAmount / 100, // Convert from cents (always 0)
+        totalDue: totalDue / 100, // Convert from cents (same as newPrice)
         nextBillingDate: new Date(currentPeriodEnd * 1000).toISOString(),
-        currency: upcomingInvoice.currency || 'usd'
+        currency: targetPrice.currency || 'eur'
       }
 
       logger.info('Upgrade preview calculated successfully', {

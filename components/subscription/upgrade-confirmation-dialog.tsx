@@ -172,26 +172,18 @@ export function UpgradeConfirmationDialog({
 
             <div className="border-t border-border" />
 
-            {/* Pricing Breakdown */}
+            {/* Simplified Pricing */}
             <div className="space-y-3">
               <div className="text-sm font-medium">Billing Summary</div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Current plan credit:</span>
-                  <span className="text-green-600">
-                    -{formatPrice(Math.abs(preview.prorationAmount), preview.currency)}
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm">Upgrade to {targetPlanConfig.name}:</span>
+                  <span className="font-semibold text-lg">
+                    {formatPrice(preview.newPrice, preview.currency)}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>New plan charge:</span>
-                  <span>{formatPrice(preview.newPrice, preview.currency)}</span>
-                </div>
-                <div className="border-t border-border" />
-                <div className="flex justify-between font-semibold">
-                  <span>Total due today:</span>
-                  <span className="text-lg">
-                    {formatPrice(preview.totalDue, preview.currency)}
-                  </span>
+                <div className="text-xs text-muted-foreground mb-2">
+                  You'll be charged the full monthly price for the new plan.
                 </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <CalendarIcon className="h-3 w-3" />
