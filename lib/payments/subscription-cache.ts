@@ -5,6 +5,7 @@
  */
 
 import { Redis } from '@upstash/redis'
+import { logger } from '../logger'
 
 // Initialize Redis client with explicit Vercel environment variables
 const redis = new Redis({
@@ -45,7 +46,7 @@ export async function cacheSubscription(userId: string, subscription: any): Prom
     const key = getCacheKey(CACHE_PREFIXES.SUBSCRIPTION, userId)
     await redis.setex(key, SUBSCRIPTION_CACHE_TTL, JSON.stringify(subscription))
   } catch (error) {
-    console.error('Error caching subscription:', error)
+    logger.error('Error caching subscription', error as Error)
     // Fail silently - app should work without cache
   }
 }
@@ -62,7 +63,7 @@ export async function getCachedSubscription(userId: string): Promise<any | null>
     }
     return cached // Redis returns null if key doesn't exist or expired
   } catch (error) {
-    console.error('Error getting cached subscription:', error)
+    logger.error('Error getting cached subscription', error as Error)
     return null // Fall back to no cache
   }
 }
@@ -75,7 +76,7 @@ export async function cacheUsage(cacheKey: string, usage: any): Promise<void> {
     const key = getCacheKey(CACHE_PREFIXES.USAGE, cacheKey)
     await redis.setex(key, USAGE_CACHE_TTL, JSON.stringify(usage))
   } catch (error) {
-    console.error('Error caching usage:', error)
+    logger.error('Error caching usage', error as Error)
     // Fail silently - app should work without cache
   }
 }
@@ -88,7 +89,7 @@ export async function cacheStorageAnalytics(userId: string, analytics: any): Pro
     const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
     await redis.setex(key, STORAGE_CACHE_TTL, JSON.stringify(analytics))
   } catch (error) {
-    console.error('Error caching storage analytics:', error)
+    logger.error('Error caching storage analytics', error as Error)
     // Fail silently - app should work without cache
   }
 }
@@ -101,7 +102,7 @@ export async function cacheClientCount(userId: string, count: number): Promise<v
     const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
     await redis.setex(key, CLIENT_COUNT_CACHE_TTL, count.toString())
   } catch (error) {
-    console.error('Error caching client count:', error)
+    logger.error('Error caching client count', error as Error)
     // Fail silently - app should work without cache
   }
 }
@@ -118,7 +119,7 @@ export async function getCachedUsage(cacheKey: string): Promise<any | null> {
     }
     return cached // Redis returns null if key doesn't exist or expired
   } catch (error) {
-    console.error('Error getting cached usage:', error)
+    logger.error('Error getting cached usage', error as Error)
     return null // Fall back to no cache
   }
 }
@@ -135,7 +136,7 @@ export async function getCachedStorageAnalytics(userId: string): Promise<any | n
     }
     return cached // Redis returns null if key doesn't exist or expired
   } catch (error) {
-    console.error('Error getting cached storage analytics:', error)
+    logger.error('Error getting cached storage analytics', error as Error)
     return null // Fall back to no cache
   }
 }
@@ -152,7 +153,7 @@ export async function getCachedClientCount(userId: string): Promise<number | nul
     }
     return null
   } catch (error) {
-    console.error('Error getting cached client count:', error)
+    logger.error('Error getting cached client count', error as Error)
     return null // Fall back to no cache
   }
 }
@@ -165,7 +166,7 @@ export async function invalidateSubscriptionCache(userId: string): Promise<void>
     const key = getCacheKey(CACHE_PREFIXES.SUBSCRIPTION, userId)
     await redis.del(key)
   } catch (error) {
-    console.error('Error invalidating subscription cache:', error)
+    logger.error('Error invalidating subscription cache', error as Error)
     // Fail silently
   }
 }
@@ -178,7 +179,7 @@ export async function invalidateUsageCache(cacheKey: string): Promise<void> {
     const key = getCacheKey(CACHE_PREFIXES.USAGE, cacheKey)
     await redis.del(key)
   } catch (error) {
-    console.error('Error invalidating usage cache:', error)
+    logger.error('Error invalidating usage cache', error as Error)
     // Fail silently
   }
 }
@@ -191,7 +192,7 @@ export async function invalidateStorageCache(userId: string): Promise<void> {
     const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
     await redis.del(key)
   } catch (error) {
-    console.error('Error invalidating storage cache:', error)
+    logger.error('Error invalidating storage cache', error as Error)
     // Fail silently
   }
 }
@@ -204,7 +205,7 @@ export async function invalidateClientCountCache(userId: string): Promise<void> 
     const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
     await redis.del(key)
   } catch (error) {
-    console.error('Error invalidating client count cache:', error)
+    logger.error('Error invalidating client count cache', error as Error)
     // Fail silently
   }
 }
@@ -231,7 +232,7 @@ export async function invalidateAllUserCaches(userId: string): Promise<void> {
     // Invalidate client count cache
     await invalidateClientCountCache(userId)
   } catch (error) {
-    console.error('Error invalidating all user caches:', error)
+    logger.error('Error invalidating all user caches', error as Error)
     // Fail silently - cache invalidation should not break functionality
   }
 }
@@ -245,7 +246,7 @@ export async function clearAllCaches(): Promise<void> {
     // Warning: This clears ALL data in the Redis database
     await redis.flushall()
   } catch (error) {
-    console.error('Error clearing all caches:', error)
+    logger.error('Error clearing all caches', error as Error)
     throw error
   }
 } 

@@ -23,6 +23,7 @@ export const POST = withEnhancedApi(
     } catch (error) {
       if (error instanceof Error && error.message.includes('No Stripe customer found')) {
         logger.info('Customer portal access attempted during free trial period', { 
+          userId,
           metadata: {
             message: 'User has no Stripe customer - expected behavior for free trial users'
           }
