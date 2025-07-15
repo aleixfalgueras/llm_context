@@ -1,20 +1,18 @@
 'use client'
 
-import { useState } from 'react'
-import { useUser } from '@clerk/nextjs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { CheckIcon, StarIcon, CrownIcon, ZapIcon, SettingsIcon } from 'lucide-react'
-import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
-import { SubscriptionPlan } from '@/types/subscription-types'
-import { useSubscription } from '@/hooks/use-subscription'
-import { isUpgrade as checkIsUpgrade, isDowngrade as checkIsDowngrade } from '@/lib/payments/subscription-utils'
-import { Navbar } from '@/components/global/navbar'
-import { useToast } from '@/hooks/use-toast'
-import { ToastVariant } from '@/types/enums'
-import { UpgradeConfirmationDialog } from '@/components/subscription/upgrade-confirmation-dialog'
-
+import {useState} from 'react'
+import {useUser} from '@clerk/nextjs'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
+import {Button} from '@/components/ui/button'
+import {Badge} from '@/components/ui/badge'
+import {CheckIcon, CrownIcon, SettingsIcon, StarIcon, ZapIcon} from 'lucide-react'
+import {isDowngrade as checkIsDowngrade, SUBSCRIPTION_PLANS} from '@/lib/payments/subscription-utils'
+import {SubscriptionPlan} from '@/types/subscription-types'
+import {useSubscription} from '@/hooks/use-subscription'
+import {Navbar} from '@/components/global/navbar'
+import {useToast} from '@/hooks/use-toast'
+import {ToastVariant} from '@/types/enums'
+import {UpgradeConfirmationDialog} from '@/components/subscription/upgrade-confirmation-dialog'
 
 
 export default function SubscriptionPage() {
@@ -136,19 +134,23 @@ export default function SubscriptionPage() {
       return 'Current Plan'
     }
     
-    if (planId === SubscriptionPlan.BASIC) {
-      return subscription.plan === SubscriptionPlan.PRO || subscription.plan === SubscriptionPlan.BUSINESS 
-        ? 'Downgrade to Basic' 
-        : 'First 2 Weeks Free 🚀'
-    }
-    
-    // For upgrades
     const planNames = {
       [SubscriptionPlan.BASIC]: 'Basic',
       [SubscriptionPlan.PRO]: 'Pro',
       [SubscriptionPlan.BUSINESS]: 'Business'
     }
     
+    // Check if this is a downgrade
+    if (checkIsDowngrade(subscription.plan as SubscriptionPlan, planId as SubscriptionPlan)) {
+      return `Downgrade to ${planNames[planId as keyof typeof planNames]}`
+    }
+    
+    // Special case for Basic plan - show free trial message for new users
+    if (planId === SubscriptionPlan.BASIC) {
+      return 'First 2 Weeks Free 🚀'
+    }
+    
+    // For upgrades
     return `Upgrade to ${planNames[planId as keyof typeof planNames]}`
   }
 
