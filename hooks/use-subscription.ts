@@ -48,7 +48,10 @@ export function useSubscription() {
         })
 
         if (response.ok) {
-          const data = await response.json()
+          const responseData = await response.json()
+          
+          // Extract the actual data from the API response
+          const data = responseData.data || responseData
           
           setSubscription({
             plan: data.plan,

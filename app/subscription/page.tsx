@@ -26,6 +26,23 @@ export default function SubscriptionPage() {
   }>({ isOpen: false, targetPlan: null })
   const { toast } = useToast()
 
+  // Helper function to detect if user is in free mode
+  const isFreeMode = () => {
+    return subscription.plan === SubscriptionPlan.BASIC && !subscription.stripeSubscriptionId
+  }
+
+  // Helper function to calculate remaining trial days
+  const getRemainingTrialDays = () => {
+    if (!isFreeMode() || !subscription.currentPeriodEnd) return 0
+    
+    const now = new Date()
+    const endDate = new Date(subscription.currentPeriodEnd)
+    const diffTime = endDate.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    return Math.max(0, diffDays)
+  }
+
   const handleUpgrade = (planId: string) => {
     // Show confirmation dialog instead of immediately upgrading
     setConfirmationDialog({
@@ -127,27 +144,35 @@ export default function SubscriptionPage() {
     }
   }
 
-  const getButtonText = (planId: string) => {
-    const isCurrentPlan = planId === subscription.plan
-    
-    if (isCurrentPlan) {
-      return 'Current Plan'
+  const getPlanNameColor = (planId: string) => {
+    switch (planId) {
+      case SubscriptionPlan.BASIC: return 'text-green-600 dark:text-green-400'
+      case SubscriptionPlan.PRO: return 'text-blue-600 dark:text-blue-400'
+      case SubscriptionPlan.BUSINESS: return 'text-purple-600 dark:text-purple-400'
+      default: return 'text-green-600 dark:text-green-400'
     }
-    
+  }
+
+  const getButtonText = (planId: string) => {
     const planNames = {
       [SubscriptionPlan.BASIC]: 'Basic',
       [SubscriptionPlan.PRO]: 'Pro',
       [SubscriptionPlan.BUSINESS]: 'Business'
     }
     
+    // Free mode users see "Subscribe to..." for all plans
+    if (isFreeMode()) {
+      return `Subscribe to ${planNames[planId as keyof typeof planNames]}`
+    }
+    
+    // Check if this is the current plan (for paid users)
+    if (isCurrentPlan(planId)) {
+      return 'Current Plan'
+    }
+    
     // Check if this is a downgrade
     if (checkIsDowngrade(subscription.plan as SubscriptionPlan, planId as SubscriptionPlan)) {
       return `Downgrade to ${planNames[planId as keyof typeof planNames]}`
-    }
-    
-    // Special case for Basic plan - show free trial message for new users
-    if (planId === SubscriptionPlan.BASIC) {
-      return 'First 2 Weeks Free 🚀'
     }
     
     // For upgrades
@@ -161,12 +186,21 @@ export default function SubscriptionPage() {
     return targetIndex > currentIndex
   }
 
-  const isCurrentPlan = (planId: string) => planId === subscription.plan
+  const isCurrentPlan = (planId: string) => {
+    // Free mode users don't have a "current plan" - they're in trial
+    if (isFreeMode()) {
+      return false
+    }
+    return planId === subscription.plan
+  }
 
   const getPlanBadge = (planId: string) => {
-    const isCurrentPlan = planId === subscription.plan
+    // Free mode users don't get a "Current Plan" badge
+    if (isFreeMode()) {
+      return null
+    }
     
-    if (isCurrentPlan) {
+    if (isCurrentPlan(planId)) {
       return <Badge className="bg-green-500">Current Plan</Badge>
     }
     
@@ -204,9 +238,23 @@ export default function SubscriptionPage() {
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Start with our Basic plan (first 2 weeks free). Upgrade when you need more. 🚀
           </p>
+
+          {/* Free Trial Banner */}
+          {isFreeMode() && subscription.currentPeriodEnd && (
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
+                <span className="font-semibold text-lg">
+                  Free Trial Active - {getRemainingTrialDays()} days remaining
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Trial expires on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+              </p>
+            </div>
+          )}
           
-          {/* Current Subscription Status */}
-          {subscription.currentPeriodEnd && (
+          {/* Current Subscription Status - Only show for paid subscriptions */}
+          {!isFreeMode() && subscription.currentPeriodEnd && (
             <div className="mt-8 text-center">
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
                 subscription.isActive 
@@ -214,8 +262,8 @@ export default function SubscriptionPage() {
                   : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
               }`}>
                 <span className="font-medium">
-                  {subscription.isActive ? 'Active' : 'Expired'} - 
-                  {subscription.isActive ? ' Expires' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} - 
+                  {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                 </span>
               </div>
             </div>
@@ -238,7 +286,7 @@ export default function SubscriptionPage() {
                 <div className="flex justify-center mb-4">
                   {getPlanIcon(planId)}
                 </div>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
                 <CardDescription className="text-sm">{plan.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">€{plan.price}</span>
@@ -259,8 +307,11 @@ export default function SubscriptionPage() {
                 <Button 
                   onClick={() => handleUpgrade(plan.id)}
                   disabled={upgradeLoading === plan.id || isCurrentPlan(planId)}
-                  className="w-full"
-                  variant={isCurrentPlan(planId) ? 'secondary' : (plan.id === SubscriptionPlan.PRO ? 'default' : 'outline')}
+                  className={`w-full ${
+                    isCurrentPlan(planId) 
+                      ? 'bg-gray-500 hover:bg-gray-600 text-white' 
+                      : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
+                  }`}
                 >
                   {upgradeLoading === plan.id ? (
                     <div className="flex items-center gap-2">
