@@ -1,6 +1,6 @@
 'use client'
 
-import {useState, useEffect} from 'react'
+import {useState, useEffect, Suspense} from 'react'
 import {useSearchParams, useRouter} from 'next/navigation'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
@@ -14,38 +14,15 @@ import {useToast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/types/enums'
 import {UpgradeConfirmationDialog} from '@/components/subscription/upgrade-confirmation-dialog'
 
-
-export default function SubscriptionPage() {
-  const subscription = useSubscription()
+// Component to handle URL parameters (needs to be wrapped in Suspense)
+function SubscriptionUrlHandler({ subscription, toast }: { 
+  subscription: ReturnType<typeof useSubscription>
+  toast: ReturnType<typeof useToast>['toast']
+}) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
-  const [portalLoading, setPortalLoading] = useState(false)
   const [refreshingAfterSuccess, setRefreshingAfterSuccess] = useState(false)
-  const [confirmationDialog, setConfirmationDialog] = useState<{
-    isOpen: boolean
-    targetPlan: SubscriptionPlan | null
-  }>({ isOpen: false, targetPlan: null })
-  const { toast } = useToast()
 
-  // Helper function to detect if user is in free mode
-  const isFreeMode = () => {
-    return subscription.plan === SubscriptionPlan.BASIC && !subscription.stripeSubscriptionId
-  }
-
-  // Helper function to calculate remaining trial days
-  const getRemainingTrialDays = () => {
-    if (!isFreeMode() || !subscription.currentPeriodEnd) return 0
-    
-    const now = new Date()
-    const endDate = new Date(subscription.currentPeriodEnd)
-    const diffTime = endDate.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    return Math.max(0, diffDays)
-  }
-
-  // Handle successful payment redirect
   useEffect(() => {
     const isSuccess = searchParams.get('success') === 'true'
     const isCanceled = searchParams.get('canceled') === 'true'
@@ -100,6 +77,37 @@ export default function SubscriptionPage() {
       }
     }
   }, [searchParams, refreshingAfterSuccess, subscription, router, toast])
+
+  return null // This component only handles side effects
+}
+
+export default function SubscriptionPage() {
+  const subscription = useSubscription()
+  const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    isOpen: boolean
+    targetPlan: SubscriptionPlan | null
+  }>({ isOpen: false, targetPlan: null })
+  const { toast } = useToast()
+
+  // Helper function to detect if user is in free mode
+  const isFreeMode = () => {
+    return subscription.plan === SubscriptionPlan.BASIC && !subscription.stripeSubscriptionId
+  }
+
+  // Helper function to calculate remaining trial days
+  const getRemainingTrialDays = () => {
+    if (!isFreeMode() || !subscription.currentPeriodEnd) return 0
+    
+    const now = new Date()
+    const endDate = new Date(subscription.currentPeriodEnd)
+    const diffTime = endDate.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    return Math.max(0, diffDays)
+  }
+
 
   const handleUpgrade = (planId: string) => {
     // Show confirmation dialog instead of immediately upgrading
@@ -259,6 +267,9 @@ export default function SubscriptionPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <Suspense fallback={null}>
+        <SubscriptionUrlHandler subscription={subscription} toast={toast} />
+      </Suspense>
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
