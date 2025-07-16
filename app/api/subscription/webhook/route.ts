@@ -145,7 +145,8 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
       currentPeriodStart,
       currentPeriodEnd,
       priceId,
-      subscription.canceled_at
+      subscription.canceled_at,
+      subscription.cancel_at_period_end
     )
 
     logger.info('Subscription event processed successfully', {
@@ -153,6 +154,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
         subscriptionId: subscription.id,
         customerId: subscription.customer,
         status: subscription.status,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
       }
     })
   } catch (error) {
@@ -181,13 +183,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       currentPeriodStart,
       currentPeriodEnd,
       undefined, // no priceId for deletion
-      subscription.canceled_at
+      subscription.canceled_at,
+      false // Set to false since subscription is now fully canceled
     )
 
     logger.info('Subscription deletion processed successfully', {
       metadata: {
         subscriptionId: subscription.id,
         customerId: subscription.customer,
+        cancelAtPeriodEnd: false, // Always false for deleted subscriptions
       }
     })
   } catch (error) {
