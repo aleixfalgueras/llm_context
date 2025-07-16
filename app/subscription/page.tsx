@@ -1,6 +1,7 @@
 'use client'
 
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
+import {useSearchParams, useRouter} from 'next/navigation'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
@@ -16,8 +17,11 @@ import {UpgradeConfirmationDialog} from '@/components/subscription/upgrade-confi
 
 export default function SubscriptionPage() {
   const subscription = useSubscription()
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [refreshingAfterSuccess, setRefreshingAfterSuccess] = useState(false)
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean
     targetPlan: SubscriptionPlan | null
@@ -40,6 +44,58 @@ export default function SubscriptionPage() {
     
     return Math.max(0, diffDays)
   }
+
+  // Handle successful payment redirect
+  useEffect(() => {
+    const isSuccess = searchParams.get('success') === 'true'
+    const isCanceled = searchParams.get('canceled') === 'true'
+    
+    if (isSuccess && !refreshingAfterSuccess) {
+      setRefreshingAfterSuccess(true)
+      
+      // Immediate refresh
+      subscription.refetch().then(() => {
+        toast({
+          title: 'Subscription Updated!',
+          description: 'Your subscription has been successfully updated.',
+          variant: ToastVariant.SUCCESS
+        })
+      })
+      
+      // Polling for webhook updates (every 2 seconds for 10 seconds)
+      let pollCount = 0
+      const maxPolls = 5
+      const pollInterval = setInterval(async () => {
+        pollCount++
+        await subscription.refetch()
+        
+        if (pollCount >= maxPolls) {
+          clearInterval(pollInterval)
+          setRefreshingAfterSuccess(false)
+        }
+      }, 2000)
+      
+      // Clean up URL parameters
+      const url = new URL(window.location.href)
+      url.searchParams.delete('success')
+      router.replace(url.pathname, { scroll: false })
+      
+      return () => clearInterval(pollInterval)
+    }
+    
+    if (isCanceled) {
+      toast({
+        title: 'Payment Canceled',
+        description: 'Your subscription update was canceled.',
+        variant: ToastVariant.DEFAULT
+      })
+      
+      // Clean up URL parameters
+      const url = new URL(window.location.href)
+      url.searchParams.delete('canceled')
+      router.replace(url.pathname, { scroll: false })
+    }
+  }, [searchParams, refreshingAfterSuccess, subscription, router, toast])
 
   const handleUpgrade = (planId: string) => {
     // Show confirmation dialog instead of immediately upgrading
