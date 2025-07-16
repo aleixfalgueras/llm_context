@@ -168,92 +168,103 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
   }
 }
 
+// Handle upgrade process atomically
+async function handleUpgradeProcess(
+  newSubscription: Stripe.Subscription,
+  previousSubscriptionId: string
+): Promise<void> {
+  const subscriptionItem = newSubscription.items.data[0]
+  const priceId = subscriptionItem?.price?.id
+  const currentPeriodStart = subscriptionItem.current_period_start
+  const currentPeriodEnd = subscriptionItem.current_period_end
+
+  try {
+    logger.info('Starting upgrade process', {
+      metadata: {
+        newSubscriptionId: newSubscription.id,
+        previousSubscriptionId,
+        customerId: newSubscription.customer
+      }
+    })
+
+    // Step 1: Cancel old subscription first
+    await cancelSubscriptionImmediately(previousSubscriptionId, 'upgraded')
+
+    logger.info('Old subscription cancelled, updating database', {
+      metadata: {
+        newSubscriptionId: newSubscription.id,
+        previousSubscriptionId,
+        customerId: newSubscription.customer
+      }
+    })
+
+    // Step 2: Update database only after successful cancellation
+    await updateSubscriptionInDatabase(
+      newSubscription.id,
+      newSubscription.customer as string,
+      newSubscription.status,
+      currentPeriodStart,
+      currentPeriodEnd,
+      priceId,
+      newSubscription.canceled_at,
+      newSubscription.cancel_at_period_end
+    )
+
+    logger.info('Upgrade completed successfully', {
+      metadata: {
+        newSubscriptionId: newSubscription.id,
+        previousSubscriptionId,
+        customerId: newSubscription.customer
+      }
+    })
+  } catch (error) {
+    logger.error('Upgrade failed - will retry on next webhook', error as Error, {
+      metadata: {
+        newSubscriptionId: newSubscription.id,
+        previousSubscriptionId,
+        customerId: newSubscription.customer
+      }
+    })
+    throw error // Re-throw to ensure webhook is not marked as processed
+  }
+}
+
 async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
   try {
-    const subscriptionItem = subscription.items.data[0]
-    const priceId = subscriptionItem?.price?.id
-    
-    // Extract current period from subscription item
-    const currentPeriodStart = subscriptionItem.current_period_start
-    const currentPeriodEnd = subscriptionItem.current_period_end
-
     // Check if this is an upgrade (new subscription replacing an old one)
     const isUpgrade = subscription.metadata?.isUpgrade === 'true'
     const previousSubscriptionId = subscription.metadata?.previousSubscriptionId
 
     if (isUpgrade && previousSubscriptionId) {
-      logger.info('Processing subscription upgrade', {
+      // Handle upgrade process atomically
+      await handleUpgradeProcess(subscription, previousSubscriptionId)
+    } else {
+      // Handle regular subscription event
+      const subscriptionItem = subscription.items.data[0]
+      const priceId = subscriptionItem?.price?.id
+      const currentPeriodStart = subscriptionItem.current_period_start
+      const currentPeriodEnd = subscriptionItem.current_period_end
+
+      await updateSubscriptionInDatabase(
+        subscription.id,
+        subscription.customer as string,
+        subscription.status,
+        currentPeriodStart,
+        currentPeriodEnd,
+        priceId,
+        subscription.canceled_at,
+        subscription.cancel_at_period_end
+      )
+
+      logger.info('Subscription event processed successfully', {
         metadata: {
-          newSubscriptionId: subscription.id,
-          previousSubscriptionId,
-          customerId: subscription.customer
+          subscriptionId: subscription.id,
+          customerId: subscription.customer,
+          status: subscription.status,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
         }
       })
-
-      // Immediately cancel the previous subscription to avoid double billing
-      try {
-        await cancelSubscriptionImmediately(previousSubscriptionId, 'upgraded')
-
-        logger.info('Successfully canceled previous subscription during upgrade', {
-          metadata: {
-            previousSubscriptionId,
-            newSubscriptionId: subscription.id,
-            customerId: subscription.customer
-          }
-        })
-      } catch (error) {
-        // Enhanced error handling for upgrade cancellation failures
-        if (error instanceof Error) {
-          if (error.message.includes('No such subscription')) {
-            logger.warn('Previous subscription not found in Stripe (may already be canceled)', {
-              metadata: {
-                previousSubscriptionId,
-                newSubscriptionId: subscription.id,
-                customerId: subscription.customer
-              }
-            })
-          } else {
-            logger.error('Failed to cancel previous subscription during upgrade', error, {
-              metadata: {
-                previousSubscriptionId,
-                newSubscriptionId: subscription.id,
-                customerId: subscription.customer,
-                errorMessage: error.message
-              }
-            })
-          }
-        } else {
-          logger.error('Unknown error canceling previous subscription during upgrade', new Error('Unknown error'), {
-            metadata: {
-              previousSubscriptionId,
-              newSubscriptionId: subscription.id,
-              customerId: subscription.customer
-            }
-          })
-        }
-        // Continue with the new subscription update even if old cancellation fails
-      }
     }
-    
-    await updateSubscriptionInDatabase(
-      subscription.id,
-      subscription.customer as string,
-      subscription.status,
-      currentPeriodStart,
-      currentPeriodEnd,
-      priceId,
-      subscription.canceled_at,
-      subscription.cancel_at_period_end
-    )
-
-    logger.info('Subscription event processed successfully', {
-      metadata: {
-        subscriptionId: subscription.id,
-        customerId: subscription.customer,
-        status: subscription.status,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      }
-    })
   } catch (error) {
     logger.error('Failed to handle subscription event', error as Error, {
       metadata: {
