@@ -324,6 +324,7 @@ export async function getUsageInfo(userId: string) {
       currentPeriodEnd: subscription.currentPeriodEnd,
       isActive: isSubscriptionActive(subscription),
       stripeSubscriptionId: subscription.stripeSubscriptionId,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
       
       // Client limits (flat structure for frontend compatibility)
       clientsUsed: clientUsage.used,

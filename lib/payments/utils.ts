@@ -54,6 +54,7 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
         currentPeriodEnd: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
         maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
         maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
+        cancelAtPeriodEnd: false,
       },
     })
 
@@ -226,7 +227,8 @@ export async function updateSubscriptionInDatabase(
   currentPeriodStart: number,
   currentPeriodEnd: number,
   priceId?: string,
-  canceledAt?: number | null
+  canceledAt?: number | null,
+  cancelAtPeriodEnd?: boolean
 ) {
   try {
     const subscription = await prisma.userSubscription.findFirst({
@@ -252,6 +254,11 @@ export async function updateSubscriptionInDatabase(
       currentPeriodEnd: new Date(currentPeriodEnd * 1000),
       stripePriceId: priceId || subscription.stripePriceId,
       updatedAt: new Date(),
+    }
+
+    // Handle cancelAtPeriodEnd field
+    if (cancelAtPeriodEnd !== undefined) {
+      updateData.cancelAtPeriodEnd = cancelAtPeriodEnd
     }
 
     // Handle canceledAt timestamp
@@ -305,7 +312,10 @@ export async function updateSubscriptionInDatabase(
         canceledAtChanged: subscription.canceledAt !== updatedSubscription.canceledAt,
         previousCanceledAt: subscription.canceledAt,
         newCanceledAt: updatedSubscription.canceledAt,
-        stripeCanceledAt: canceledAt ? new Date(canceledAt * 1000) : null
+        stripeCanceledAt: canceledAt ? new Date(canceledAt * 1000) : null,
+        cancelAtPeriodEndChanged: subscription.cancelAtPeriodEnd !== updatedSubscription.cancelAtPeriodEnd,
+        previousCancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+        newCancelAtPeriodEnd: updatedSubscription.cancelAtPeriodEnd
       }
     })
 

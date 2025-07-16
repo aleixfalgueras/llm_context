@@ -123,6 +123,7 @@ export async function getUserSubscription(userId: string) {
             currentPeriodEnd: periodEnd,
             maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
             maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
+            cancelAtPeriodEnd: false,
           }
         }),
         { userId },
@@ -447,7 +448,7 @@ export function isSubscriptionActive(subscription: any) {
   if (!subscription) return false
   
   const now = new Date()
-  const isStatusActive = subscription.status === SubscriptionStatus.ACTIVE || subscription.status === SubscriptionStatus.CANCELED
+  const isStatusActive = subscription.status === SubscriptionStatus.ACTIVE
   const isNotExpired = subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd) > now
   
   return isStatusActive && isNotExpired

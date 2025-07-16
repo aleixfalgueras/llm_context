@@ -21,6 +21,7 @@ interface SubscriptionInfo {
   currentPeriodEnd?: string
   isActive?: boolean
   stripeSubscriptionId?: string
+  cancelAtPeriodEnd?: boolean
 }
 
 export function useSubscription() {
@@ -69,6 +70,7 @@ export function useSubscription() {
           currentPeriodEnd: data.currentPeriodEnd,
           isActive: data.isActive,
           stripeSubscriptionId: data.stripeSubscriptionId,
+          cancelAtPeriodEnd: data.cancelAtPeriodEnd,
           isLoading: false
         })
         return true

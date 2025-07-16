@@ -108,6 +108,23 @@ export default function SubscriptionPage() {
     return Math.max(0, diffDays)
   }
 
+  // Helper function to detect if subscription is active but marked for cancellation
+  const isActiveCancelled = () => {
+    return !isFreeMode() && subscription.isActive && subscription.cancelAtPeriodEnd
+  }
+
+  // Helper function to calculate remaining days until cancellation
+  const getRemainingActiveDays = () => {
+    if (!isActiveCancelled() || !subscription.currentPeriodEnd) return 0
+    
+    const now = new Date()
+    const endDate = new Date(subscription.currentPeriodEnd)
+    const diffTime = endDate.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    return Math.max(0, diffDays)
+  }
+
 
   const handleUpgrade = (planId: string) => {
     // Show confirmation dialog instead of immediately upgrading
@@ -309,8 +326,22 @@ export default function SubscriptionPage() {
             </div>
           )}
           
-          {/* Current Subscription Status - Only show for paid subscriptions */}
-          {!isFreeMode() && subscription.currentPeriodEnd && (
+          {/* Active Subscription Marked for Cancellation */}
+          {isActiveCancelled() && subscription.currentPeriodEnd && (
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-700">
+                <span className="font-semibold text-lg">
+                  Active Subscription (Cancelling) - {getRemainingActiveDays()} days remaining
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Your subscription will be cancelled on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+          
+          {/* Current Subscription Status - Only show for paid subscriptions that are not marked for cancellation */}
+          {!isFreeMode() && !isActiveCancelled() && subscription.currentPeriodEnd && (
             <div className="mt-8 text-center">
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
                 subscription.isActive 
