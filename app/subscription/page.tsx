@@ -197,8 +197,6 @@ export default function SubscriptionPage() {
     return null
   }
 
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
@@ -225,16 +223,13 @@ export default function SubscriptionPage() {
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Start with our Basic plan (first 2 weeks free). Upgrade when you need more. 🚀
-          </p>
 
           {/* Free Trial Banner */}
           {isFreeMode() && subscription.currentPeriodEnd && (
             <div className="mt-8 text-center">
               <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
                 <span className="font-semibold text-lg">
-                  Free Trial Active - {getRemainingTrialDays()} days remaining
+                  Free Trial Active (Basic Plan) - {getRemainingTrialDays()} days remaining
                 </span>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
