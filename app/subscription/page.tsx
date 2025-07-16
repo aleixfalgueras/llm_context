@@ -1,6 +1,6 @@
 'use client'
 
-import {useState, useEffect, Suspense} from 'react'
+import {useState, useEffect, Suspense, useRef} from 'react'
 import {useSearchParams, useRouter} from 'next/navigation'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
@@ -89,7 +89,9 @@ export default function SubscriptionPage() {
     isOpen: boolean
     targetPlan: SubscriptionPlan | null
   }>({ isOpen: false, targetPlan: null })
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const { toast } = useToast()
+  const wasPreviouslyBlurred = useRef(false)
 
   // Helper function to detect if user is in free mode
   const isFreeMode = () => {
@@ -147,6 +149,74 @@ export default function SubscriptionPage() {
     if (!planName) return 'Unknown'
     return planName.charAt(0).toUpperCase() + planName.slice(1)
   }
+
+  // Tab focus detection for Customer Portal return
+  useEffect(() => {
+    let debounceTimer: NodeJS.Timeout
+
+    const handleFocus = () => {
+      // Only refresh if the tab was previously blurred (not on initial page load)
+      if (wasPreviouslyBlurred.current) {
+        // Clear any existing timer
+        clearTimeout(debounceTimer)
+        
+        // Debounce the refresh to prevent excessive API calls
+        debounceTimer = setTimeout(async () => {
+          setIsRefreshing(true)
+          
+          try {
+            // Store current state before refresh
+            const previousState = {
+              plan: subscription.plan,
+              status: subscription.status,
+              cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+              pendingPlanChange: subscription.pendingPlanChange
+            }
+            
+            await subscription.refetch()
+            
+            // Check if anything important changed
+            const hasChanges = 
+              previousState.plan !== subscription.plan ||
+              previousState.status !== subscription.status ||
+              previousState.cancelAtPeriodEnd !== subscription.cancelAtPeriodEnd ||
+              previousState.pendingPlanChange !== subscription.pendingPlanChange
+            
+            // Only show toast if there were actual changes
+            if (hasChanges) {
+              toast({
+                title: 'Subscription Updated',
+                description: 'Your subscription changes have been synchronized.',
+                variant: ToastVariant.SUCCESS
+              })
+            }
+          } catch (error) {
+            console.error('Failed to refresh subscription:', error)
+            toast({
+              title: 'Sync Error',
+              description: 'Failed to refresh subscription data. Please try again.',
+              variant: ToastVariant.DESTRUCTIVE
+            })
+          } finally {
+            setIsRefreshing(false)
+          }
+        }, 500) // 500ms debounce delay
+      }
+    }
+
+    const handleBlur = () => {
+      wasPreviouslyBlurred.current = true
+    }
+
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('blur', handleBlur)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('blur', handleBlur)
+      clearTimeout(debounceTimer)
+    }
+  }, [subscription, toast])
 
 
   const handleUpgrade = (planId: string) => {
@@ -314,6 +384,14 @@ export default function SubscriptionPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-16 relative">
+          {/* Refresh Indicator - Top Left */}
+          {isRefreshing && (
+            <div className="absolute top-0 left-0 flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-lg text-blue-800 dark:text-blue-200 text-sm">
+              <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              Updating...
+            </div>
+          )}
+          
           {/* Manage Subscription Link - Top Right */}
           <div className="absolute top-0 right-0">
             <a 
