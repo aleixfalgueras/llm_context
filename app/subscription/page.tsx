@@ -75,10 +75,12 @@ export default function SubscriptionPage() {
         }
       }, 2000)
       
-      // Clean up URL parameters
-      const url = new URL(window.location.href)
-      url.searchParams.delete('success')
-      router.replace(url.pathname, { scroll: false })
+      // Clean up URL parameters (only in browser environment)
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('success')
+        router.replace(url.pathname, { scroll: false })
+      }
       
       return () => clearInterval(pollInterval)
     }
@@ -90,10 +92,12 @@ export default function SubscriptionPage() {
         variant: ToastVariant.DEFAULT
       })
       
-      // Clean up URL parameters
-      const url = new URL(window.location.href)
-      url.searchParams.delete('canceled')
-      router.replace(url.pathname, { scroll: false })
+      // Clean up URL parameters (only in browser environment)
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('canceled')
+        router.replace(url.pathname, { scroll: false })
+      }
     }
   }, [searchParams, refreshingAfterSuccess, subscription, router, toast])
 
