@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/payments/stripe'
-import { updateSubscriptionInDatabase } from '@/lib/payments/utils'
+import { updateSubscriptionInDatabase, cancelSubscriptionImmediately } from '@/lib/payments/utils'
 import { logger } from '@/lib/logger'
 import Stripe from 'stripe'
 
@@ -93,30 +93,47 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
         }
       })
 
-      // Cancel the previous subscription at the end of the current billing period
+      // Immediately cancel the previous subscription to avoid double billing
       try {
-        await stripe.subscriptions.update(previousSubscriptionId, {
-          cancel_at_period_end: true,
-          metadata: {
-            ...subscription.metadata,
-            replacedBy: subscription.id,
-            cancelReason: 'upgraded'
-          }
-        })
+        await cancelSubscriptionImmediately(previousSubscriptionId, 'upgraded')
 
-        logger.info('Successfully marked previous subscription for cancellation', {
+        logger.info('Successfully canceled previous subscription during upgrade', {
           metadata: {
             previousSubscriptionId,
-            newSubscriptionId: subscription.id
+            newSubscriptionId: subscription.id,
+            customerId: subscription.customer
           }
         })
       } catch (error) {
-        logger.error('Failed to cancel previous subscription during upgrade', error as Error, {
-          metadata: {
-            previousSubscriptionId,
-            newSubscriptionId: subscription.id
+        // Enhanced error handling for upgrade cancellation failures
+        if (error instanceof Error) {
+          if (error.message.includes('No such subscription')) {
+            logger.warn('Previous subscription not found in Stripe (may already be canceled)', {
+              metadata: {
+                previousSubscriptionId,
+                newSubscriptionId: subscription.id,
+                customerId: subscription.customer
+              }
+            })
+          } else {
+            logger.error('Failed to cancel previous subscription during upgrade', error, {
+              metadata: {
+                previousSubscriptionId,
+                newSubscriptionId: subscription.id,
+                customerId: subscription.customer,
+                errorMessage: error.message
+              }
+            })
           }
-        })
+        } else {
+          logger.error('Unknown error canceling previous subscription during upgrade', new Error('Unknown error'), {
+            metadata: {
+              previousSubscriptionId,
+              newSubscriptionId: subscription.id,
+              customerId: subscription.customer
+            }
+          })
+        }
         // Continue with the new subscription update even if old cancellation fails
       }
     }
@@ -127,7 +144,8 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
       subscription.status,
       currentPeriodStart,
       currentPeriodEnd,
-      priceId
+      priceId,
+      subscription.canceled_at
     )
 
     logger.info('Subscription event processed successfully', {
@@ -161,7 +179,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       subscription.customer as string,
       'canceled',
       currentPeriodStart,
-      currentPeriodEnd
+      currentPeriodEnd,
+      undefined, // no priceId for deletion
+      subscription.canceled_at
     )
 
     logger.info('Subscription deletion processed successfully', {
