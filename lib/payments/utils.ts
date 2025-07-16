@@ -139,6 +139,33 @@ export async function createCheckoutSession(
   }
 }
 
+export async function cancelSubscriptionImmediately(subscriptionId: string, reason: string = 'user_request') {
+  try {
+    const canceledSubscription = await stripe.subscriptions.cancel(subscriptionId, {
+      prorate: false, // Don't prorate since this is typically for upgrades
+      invoice_now: false, // Don't create invoice for partial period
+    })
+
+    logger.info('Successfully canceled subscription immediately', {
+      metadata: {
+        subscriptionId,
+        reason,
+        canceledAt: canceledSubscription.canceled_at
+      }
+    })
+
+    return canceledSubscription
+  } catch (error) {
+    logger.error('Failed to cancel subscription immediately', error as Error, {
+      metadata: {
+        subscriptionId,
+        reason
+      }
+    })
+    throw error
+  }
+}
+
 export async function createCustomerPortalSession(userId: string) {
   try {
     const subscription = await prisma.userSubscription.findUnique({
@@ -198,7 +225,8 @@ export async function updateSubscriptionInDatabase(
   status: string,
   currentPeriodStart: number,
   currentPeriodEnd: number,
-  priceId?: string
+  priceId?: string,
+  canceledAt?: number | null
 ) {
   try {
     const subscription = await prisma.userSubscription.findFirst({
@@ -224,6 +252,14 @@ export async function updateSubscriptionInDatabase(
       currentPeriodEnd: new Date(currentPeriodEnd * 1000),
       stripePriceId: priceId || subscription.stripePriceId,
       updatedAt: new Date(),
+    }
+
+    // Handle canceledAt timestamp
+    if (subscriptionStatus === SubscriptionStatus.CANCELED && canceledAt) {
+      updateData.canceledAt = new Date(canceledAt * 1000)
+    } else if (subscriptionStatus !== SubscriptionStatus.CANCELED) {
+      // Clear canceledAt if subscription is not canceled (e.g., reactivated)
+      updateData.canceledAt = null
     }
 
     // Update plan limits if plan changed
