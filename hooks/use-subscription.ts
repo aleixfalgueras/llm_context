@@ -40,11 +40,15 @@ export function useSubscription() {
     isLoading: true
   })
 
-  const fetchSubscription = async () => {
+  const fetchSubscription = async (forceRefresh = false) => {
     try {
       setSubscription(prev => ({ ...prev, isLoading: true }))
       
-      const response = await fetch('/api/subscription/usage-info', {
+      const url = forceRefresh 
+        ? `/api/subscription/usage-info?t=${Date.now()}`
+        : '/api/subscription/usage-info'
+      
+      const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -88,9 +92,9 @@ export function useSubscription() {
     }
   }
 
-  const refetch = async (retries: number = 3, delay: number = 1000) => {
+  const refetch = async (retries: number = 3, delay: number = 1000, forceRefresh = false) => {
     for (let i = 0; i < retries; i++) {
-      const success = await fetchSubscription()
+      const success = await fetchSubscription(forceRefresh)
       if (success) return true
       
       if (i < retries - 1) {
