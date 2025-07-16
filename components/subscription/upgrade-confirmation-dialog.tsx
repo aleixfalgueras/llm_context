@@ -139,7 +139,7 @@ export function UpgradeConfirmationDialog({
                 <div className="p-4 border rounded-lg bg-muted/50">
                   <div className="font-semibold">{currentPlanConfig.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {formatPrice(preview.currentPrice, preview.currency)}/month
+                    {preview.currentPrice}€/month
                   </div>
                 </div>
               </div>
@@ -152,7 +152,7 @@ export function UpgradeConfirmationDialog({
                     <Badge variant="secondary">Upgrade</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {formatPrice(preview.newPrice, preview.currency)}/month
+                    {preview.newPrice}€/month
                   </div>
                 </div>
               </div>
@@ -182,7 +182,7 @@ export function UpgradeConfirmationDialog({
                     {isDowngrade ? `Downgrade to ${targetPlanConfig.name}:` : `Upgrade to ${targetPlanConfig.name}:`}
                   </span>
                   <span className="font-semibold text-lg">
-                    {formatPrice(preview.newPrice, preview.currency)}
+                    {preview.newPrice}€
                   </span>
                 </div>
                 <div className="text-xs text-muted-foreground mb-2">
