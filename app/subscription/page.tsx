@@ -1,12 +1,11 @@
 'use client'
 
 import {useState} from 'react'
-import {useUser} from '@clerk/nextjs'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
 import {CheckIcon, CrownIcon, SettingsIcon, StarIcon, ZapIcon} from 'lucide-react'
-import {isDowngrade as checkIsDowngrade, SUBSCRIPTION_PLANS} from '@/lib/payments/subscription-utils'
+import {isDowngrade as checkIsDowngrade, SUBSCRIPTION_PLANS, getPlanNameColor} from '@/lib/payments/subscription-utils'
 import {SubscriptionPlan} from '@/types/subscription-types'
 import {useSubscription} from '@/hooks/use-subscription'
 import {Navbar} from '@/components/global/navbar'
@@ -16,7 +15,6 @@ import {UpgradeConfirmationDialog} from '@/components/subscription/upgrade-confi
 
 
 export default function SubscriptionPage() {
-  const { user: _user } = useUser()
   const subscription = useSubscription()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
@@ -144,14 +142,6 @@ export default function SubscriptionPage() {
     }
   }
 
-  const getPlanNameColor = (planId: string) => {
-    switch (planId) {
-      case SubscriptionPlan.BASIC: return 'text-green-600 dark:text-green-400'
-      case SubscriptionPlan.PRO: return 'text-blue-600 dark:text-blue-400'
-      case SubscriptionPlan.BUSINESS: return 'text-purple-600 dark:text-purple-400'
-      default: return 'text-green-600 dark:text-green-400'
-    }
-  }
 
   const getButtonText = (planId: string) => {
     const planNames = {
@@ -289,7 +279,7 @@ export default function SubscriptionPage() {
                 <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
                 <CardDescription className="text-sm">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">€{plan.price}</span>
+                  <span className="text-4xl font-bold">{plan.price}€</span>
                   {plan.price > 0 && <span className="text-gray-500">/month</span>}
                 </div>
               </CardHeader>

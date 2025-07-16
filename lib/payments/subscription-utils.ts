@@ -27,7 +27,7 @@ export const SUBSCRIPTION_PLANS = {
     maxTokensPerMonth: 5000000,        // 5M tokens - generous allowance with Gemini 2.0 Flash
     // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
     // Max cost: 5M * $0.000175 = $0.875, leaving $10.845 profit (92.5% margin) [€10 = $11.72]
-    description: 'Perfect for getting started with AI marketing assistance',
+    description: 'Perfect for getting started',
     features_list: [
       '👥 3 client profiles',
       '💾 50 MB document storage',
@@ -72,6 +72,16 @@ export const SUBSCRIPTION_PLANS = {
 } as const
 
 export type PlanId = SubscriptionPlan
+
+// Plan name color utilities
+export function getPlanNameColor(planId: string) {
+  switch (planId) {
+    case SubscriptionPlan.BASIC: return 'text-green-600 dark:text-green-400'
+    case SubscriptionPlan.PRO: return 'text-blue-600 dark:text-blue-400'
+    case SubscriptionPlan.BUSINESS: return 'text-purple-600 dark:text-purple-400'
+    default: return 'text-green-600 dark:text-green-400'
+  }
+}
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string) {

@@ -18,7 +18,7 @@ import {
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
-import {SUBSCRIPTION_PLANS} from '@/lib/payments/subscription-utils'
+import {SUBSCRIPTION_PLANS, getPlanNameColor} from '@/lib/payments/subscription-utils'
 import {SubscriptionPlan} from '@/types/subscription-types'
 import Link from 'next/link'
 
@@ -256,10 +256,10 @@ export function LandingPage() {
                     <div className="flex justify-center mb-4">
                       {getPlanIcon(planId)}
                     </div>
-                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                    <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
                     <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{plan.description}</CardDescription>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold">€{plan.price}</span>
+                      <span className="text-4xl font-bold">{plan.price}€</span>
                       {plan.price > 0 && <span className="text-gray-500">/month</span>}
                     </div>
                   </CardHeader>
