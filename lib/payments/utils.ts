@@ -295,6 +295,17 @@ export async function updateSubscriptionInDatabase(
           previousCanceledAt: subscription.canceledAt
         }
       })
+    } else if (canceledAt === null && subscription.canceledAt) {
+      // Explicitly clear canceledAt when null is passed (e.g., during upgrades)
+      updateData.canceledAt = null
+      logger.info('Explicitly clearing canceledAt field', {
+        metadata: {
+          subscriptionId,
+          customerId,
+          previousCanceledAt: subscription.canceledAt,
+          reason: 'explicit_null_passed'
+        }
+      })
     }
     // If subscription is canceled and we have existing canceledAt, preserve it
 
@@ -304,15 +315,20 @@ export async function updateSubscriptionInDatabase(
       updateData.maxTokensPerMonth = planLimits.maxTokensPerMonth
     }
 
-    const updatedSubscription = await prisma.userSubscription.update({
-      where: { id: subscription.id },
-      data: updateData,
+    const updatedSubscription = await prisma.$transaction(async (tx) => {
+      return await tx.userSubscription.update({
+        where: { id: subscription.id },
+        data: updateData,
+      })
     })
 
     logger.info('Updated subscription in database', {
       userId: subscription.userId,
       metadata: {
         subscriptionId,
+        previousSubscriptionId: subscription.stripeSubscriptionId,
+        newSubscriptionId: updatedSubscription.stripeSubscriptionId,
+        subscriptionIdChanged: subscription.stripeSubscriptionId !== updatedSubscription.stripeSubscriptionId,
         plan: updatedSubscription.plan,
         status: updatedSubscription.status,
         maxClients: updatedSubscription.maxClients,

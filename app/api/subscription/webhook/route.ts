@@ -183,7 +183,11 @@ async function handleUpgradeProcess(
       metadata: {
         newSubscriptionId: newSubscription.id,
         previousSubscriptionId,
-        customerId: newSubscription.customer
+        customerId: newSubscription.customer,
+        newSubscriptionStatus: newSubscription.status,
+        newSubscriptionPriceId: priceId,
+        newSubscriptionCanceledAt: newSubscription.canceled_at,
+        newSubscriptionCancelAtPeriodEnd: newSubscription.cancel_at_period_end
       }
     })
 
@@ -206,7 +210,7 @@ async function handleUpgradeProcess(
       currentPeriodStart,
       currentPeriodEnd,
       priceId,
-      newSubscription.canceled_at,
+      null, // Explicitly clear canceledAt for upgrade to active subscription
       newSubscription.cancel_at_period_end,
       null // Clear any pending plan change since this is an immediate upgrade
     )
@@ -215,7 +219,11 @@ async function handleUpgradeProcess(
       metadata: {
         newSubscriptionId: newSubscription.id,
         previousSubscriptionId,
-        customerId: newSubscription.customer
+        customerId: newSubscription.customer,
+        finalStatus: newSubscription.status,
+        priceId: priceId,
+        canceledAtCleared: true,
+        cancelAtPeriodEnd: newSubscription.cancel_at_period_end
       }
     })
   } catch (error) {
