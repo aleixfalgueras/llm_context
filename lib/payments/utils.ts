@@ -256,11 +256,31 @@ export async function updateSubscriptionInDatabase(
 
     // Handle canceledAt timestamp
     if (subscriptionStatus === SubscriptionStatus.CANCELED && canceledAt) {
+      // Stripe provided a canceledAt timestamp (immediate cancellation)
       updateData.canceledAt = new Date(canceledAt * 1000)
-    } else if (subscriptionStatus !== SubscriptionStatus.CANCELED) {
-      // Clear canceledAt if subscription is not canceled (e.g., reactivated)
+    } else if (subscriptionStatus === SubscriptionStatus.CANCELED && !canceledAt && !subscription.canceledAt) {
+      // Subscription is canceled but no timestamp from Stripe and no existing timestamp
+      // This shouldn't happen in normal flow, but we'll set current time as fallback
+      updateData.canceledAt = new Date()
+      logger.warn('Subscription canceled without canceledAt timestamp', {
+        metadata: {
+          subscriptionId,
+          customerId,
+          status: subscriptionStatus
+        }
+      })
+    } else if (subscriptionStatus !== SubscriptionStatus.CANCELED && subscription.canceledAt) {
+      // Clear canceledAt if subscription transitions from canceled to active (reactivated)
       updateData.canceledAt = null
+      logger.info('Clearing canceledAt for reactivated subscription', {
+        metadata: {
+          subscriptionId,
+          customerId,
+          previousCanceledAt: subscription.canceledAt
+        }
+      })
     }
+    // If subscription is canceled and we have existing canceledAt, preserve it
 
     // Update plan limits if plan changed
     if (planLimits) {
@@ -281,7 +301,11 @@ export async function updateSubscriptionInDatabase(
         status: updatedSubscription.status,
         maxClients: updatedSubscription.maxClients,
         maxTokensPerMonth: updatedSubscription.maxTokensPerMonth,
-        planLimitsUpdated: !!planLimits
+        planLimitsUpdated: !!planLimits,
+        canceledAtChanged: subscription.canceledAt !== updatedSubscription.canceledAt,
+        previousCanceledAt: subscription.canceledAt,
+        newCanceledAt: updatedSubscription.canceledAt,
+        stripeCanceledAt: canceledAt ? new Date(canceledAt * 1000) : null
       }
     })
 

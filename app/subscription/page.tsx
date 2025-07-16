@@ -179,7 +179,7 @@ export default function SubscriptionPage() {
       
       if (response.ok) {
         const { data: { url } } = await response.json()
-        window.location.href = url
+        window.open(url, '_blank')
       } else if (response.status === 404) {
         toast({
           title: 'Free Trial Period',
