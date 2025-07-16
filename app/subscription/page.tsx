@@ -30,8 +30,8 @@ function SubscriptionUrlHandler({ subscription, toast }: {
     if (isSuccess && !refreshingAfterSuccess) {
       setRefreshingAfterSuccess(true)
       
-      // Immediate refresh
-      subscription.refetch().then(() => {
+      // Immediate refresh with cache bypass
+      subscription.refetch(3, 1000, true).then(() => {
         toast({
           title: 'Subscription Updated!',
           description: 'Your subscription has been successfully updated.',
@@ -39,12 +39,12 @@ function SubscriptionUrlHandler({ subscription, toast }: {
         })
       })
       
-      // Polling for webhook updates (every 2 seconds for 10 seconds)
+      // Polling for webhook updates (every 2 seconds for 10 seconds) with cache bypass
       let pollCount = 0
       const maxPolls = 5
       const pollInterval = setInterval(async () => {
         pollCount++
-        await subscription.refetch()
+        await subscription.refetch(3, 1000, true)
         
         if (pollCount >= maxPolls) {
           clearInterval(pollInterval)
@@ -384,29 +384,27 @@ export default function SubscriptionPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-16 relative">
-          {/* Refresh Indicator - Top Left */}
-          {isRefreshing && (
-            <div className="absolute top-0 left-0 flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-lg text-blue-800 dark:text-blue-200 text-sm">
-              <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              Updating...
-            </div>
-          )}
-          
-          {/* Manage Subscription Link - Top Right */}
+          {/* Manage Subscription Section - Top Right */}
           <div className="absolute top-0 right-0">
-            <a 
-              href="#"
-              onClick={(e) => {
-                e.preventDefault()
-                handleManageSubscription()
-              }}
-              className={`inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 hover:underline transition-colors ${
-                portalLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              }`}
-            >
-              <SettingsIcon className="h-4 w-4" />
-              {portalLoading ? 'Loading...' : 'Manage Subscription'}
-            </a>
+            <div className="flex flex-col items-end gap-2">
+              <Button
+                onClick={handleManageSubscription}
+                disabled={portalLoading}
+                variant="outline"
+                className="inline-flex items-center gap-2"
+              >
+                <SettingsIcon className="h-4 w-4" />
+                {portalLoading ? 'Loading...' : 'Manage Subscription'}
+              </Button>
+              
+              {/* Updating Status Message */}
+              {isRefreshing && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Updating...</span>
+                </div>
+              )}
+            </div>
           </div>
           
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -432,7 +430,7 @@ export default function SubscriptionPage() {
             <div className="mt-8 text-center">
               <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-700">
                 <span className="font-semibold text-lg">
-                  Active Subscription (Cancelling) - {getRemainingActiveDays()} days remaining
+                  Active Subscription (Cancelled) - {getRemainingActiveDays()} days remaining
                 </span>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">

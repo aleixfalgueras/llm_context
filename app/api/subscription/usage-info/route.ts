@@ -9,8 +9,11 @@ import {
 export const dynamic = 'force-dynamic'
 
 export const GET = withEnhancedApi(
-  async ({ userId }: ApiContext) => {
-    const usageInfo = await getUsageInfo(userId)
+  async ({ userId, req }: ApiContext) => {
+    const url = new URL(req.url)
+    const forceRefresh = url.searchParams.has('t')
+    
+    const usageInfo = await getUsageInfo(userId, forceRefresh)
     
     if (!usageInfo) {
       const error = new Error('Failed to fetch usage information')

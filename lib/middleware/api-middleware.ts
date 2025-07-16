@@ -264,7 +264,7 @@ export async function trackUsage(
 /**
  * Get comprehensive usage information for client-side display
  */
-export async function getUsageInfo(userId: string) {
+export async function getUsageInfo(userId: string, bypassCache = false) {
   try {
     const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('../payments/subscription-utils')
     const { prisma } = await import('../prisma')
@@ -272,7 +272,7 @@ export async function getUsageInfo(userId: string) {
     
     // Get subscription and usage data once, then check all limits
     const [subscription, usage] = await Promise.all([
-      getUserSubscription(userId),
+      getUserSubscription(userId, bypassCache),
       getCurrentMonthUsage(userId)
     ]);
     

@@ -84,16 +84,20 @@ export function getPlanNameColor(planId: string) {
 }
 
 // Get or create user subscription
-export async function getUserSubscription(userId: string) {
+export async function getUserSubscription(userId: string, bypassCache = false) {
   const endTiming = logger.startTiming('Get User Subscription', { userId });
   
   try {
-    // Check cache first
-    const cached = await getCachedSubscription(userId)
-    if (cached) {
-      logger.info('Returning cached subscription', { userId })
-      endTiming();
-      return cached
+    // Check cache first (unless bypassing cache)
+    if (!bypassCache) {
+      const cached = await getCachedSubscription(userId)
+      if (cached) {
+        logger.info('Returning cached subscription', { userId })
+        endTiming();
+        return cached
+      }
+    } else {
+      logger.info('Bypassing cache for subscription fetch', { userId })
     }
 
     logger.dbQuery('findUnique', 'userSubscription', { userId });
