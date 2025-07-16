@@ -15,9 +15,10 @@ import {ToastVariant} from '@/types/enums'
 import {UpgradeConfirmationDialog} from '@/components/subscription/upgrade-confirmation-dialog'
 
 // Component to handle URL parameters (needs to be wrapped in Suspense)
-function SubscriptionUrlHandler({ subscription, toast }: { 
+function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }: { 
   subscription: ReturnType<typeof useSubscription>
   toast: ReturnType<typeof useToast>['toast']
+  setIsRefreshing: (refreshing: boolean) => void
 }) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -28,29 +29,40 @@ function SubscriptionUrlHandler({ subscription, toast }: {
     const isCanceled = searchParams.get('canceled') === 'true'
     
     if (isSuccess && !refreshingAfterSuccess) {
+      console.log('💰 Payment success detected - starting subscription refresh')
       setRefreshingAfterSuccess(true)
+      setIsRefreshing(true)
       
-      // Immediate refresh with cache bypass
-      subscription.refetch(3, 1000, true).then(() => {
-        toast({
-          title: 'Subscription Updated!',
-          description: 'Your subscription has been successfully updated.',
-          variant: ToastVariant.SUCCESS
+      let pollInterval: NodeJS.Timeout | null = null
+      
+      // Add a small delay before first refresh to allow webhooks to process
+      setTimeout(() => {
+        console.log('🔄 Starting subscription refresh with cache bypass')
+        // Immediate refresh with cache bypass
+        subscription.refetch(3, 1000, true).then(() => {
+          toast({
+            title: 'Subscription Updated!',
+            description: 'Your subscription has been successfully updated.',
+            variant: ToastVariant.SUCCESS
+          })
         })
-      })
-      
-      // Polling for webhook updates (every 2 seconds for 10 seconds) with cache bypass
-      let pollCount = 0
-      const maxPolls = 5
-      const pollInterval = setInterval(async () => {
-        pollCount++
-        await subscription.refetch(3, 1000, true)
         
-        if (pollCount >= maxPolls) {
-          clearInterval(pollInterval)
-          setRefreshingAfterSuccess(false)
-        }
-      }, 2000)
+        // Polling for webhook updates (every 2 seconds for 10 seconds) with cache bypass
+        let pollCount = 0
+        const maxPolls = 5
+        pollInterval = setInterval(async () => {
+          pollCount++
+          await subscription.refetch(3, 1000, true)
+          
+          if (pollCount >= maxPolls) {
+            if (pollInterval) {
+              clearInterval(pollInterval)
+            }
+            setRefreshingAfterSuccess(false)
+            setIsRefreshing(false)
+          }
+        }, 2000)
+      }, 1000) // 1 second delay
       
       // Clean up URL parameters (only in browser environment)
       if (typeof window !== 'undefined') {
@@ -59,7 +71,11 @@ function SubscriptionUrlHandler({ subscription, toast }: {
         router.replace(url.pathname, { scroll: false })
       }
       
-      return () => clearInterval(pollInterval)
+      return () => {
+        if (pollInterval) {
+          clearInterval(pollInterval)
+        }
+      }
     }
     
     if (isCanceled) {
@@ -378,7 +394,7 @@ export default function SubscriptionPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Suspense fallback={null}>
-        <SubscriptionUrlHandler subscription={subscription} toast={toast} />
+        <SubscriptionUrlHandler subscription={subscription} toast={toast} setIsRefreshing={setIsRefreshing} />
       </Suspense>
       <Navbar />
       <div className="container mx-auto px-4 py-8">

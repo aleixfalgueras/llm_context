@@ -48,6 +48,10 @@ export function useSubscription() {
         ? `/api/subscription/usage-info?t=${Date.now()}`
         : '/api/subscription/usage-info'
       
+      if (forceRefresh) {
+        console.log('🔄 Forcing subscription refresh with cache bypass:', url)
+      }
+      
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',

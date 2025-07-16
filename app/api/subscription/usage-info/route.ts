@@ -13,6 +13,10 @@ export const GET = withEnhancedApi(
     const url = new URL(req.url)
     const forceRefresh = url.searchParams.has('t')
     
+    if (forceRefresh) {
+      console.log('🔄 API: Cache bypass requested for userId:', userId)
+    }
+    
     const usageInfo = await getUsageInfo(userId, forceRefresh)
     
     if (!usageInfo) {
