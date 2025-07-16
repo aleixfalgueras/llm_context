@@ -38,50 +38,67 @@ export function useSubscription() {
     isLoading: true
   })
 
-  useEffect(() => {
-    async function fetchSubscription() {
-      try {
-        const response = await fetch('/api/subscription/usage-info', {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+  const fetchSubscription = async () => {
+    try {
+      setSubscription(prev => ({ ...prev, isLoading: true }))
+      
+      const response = await fetch('/api/subscription/usage-info', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
 
-        if (response.ok) {
-          const responseData = await response.json()
-          
-          // Extract the actual data from the API response
-          const data = responseData.data || responseData
-          
-          setSubscription({
-            plan: data.plan,
-            tier: getTierFromPlan(data.plan),
-            maxTokensPerMonth: data.tokensLimit || 0,
-            maxClients: data.clientsLimit || 0,
-            tokensUsed: data.tokensUsed || 0,
-            storageUsed: data.storageUsed || 0,
-            storageUsedFormatted: data.storageUsedFormatted || '0 Bytes',
-            storageLimit: data.storageLimit || 0,
-            storageLimitFormatted: data.storageLimitFormatted || '0 Bytes',
-            storageUsagePercentage: data.storageUsagePercentage || 0,
-            status: data.status,
-            currentPeriodEnd: data.currentPeriodEnd,
-            isActive: data.isActive,
-            stripeSubscriptionId: data.stripeSubscriptionId,
-            isLoading: false
-          })
-        } else {
-          console.error('Failed to fetch subscription info')
-          setSubscription(prev => ({ ...prev, isLoading: false }))
-        }
-      } catch (error) {
-        console.error('Error fetching subscription:', error)
+      if (response.ok) {
+        const responseData = await response.json()
+        
+        // Extract the actual data from the API response
+        const data = responseData.data || responseData
+        
+        setSubscription({
+          plan: data.plan,
+          tier: getTierFromPlan(data.plan),
+          maxTokensPerMonth: data.tokensLimit || 0,
+          maxClients: data.clientsLimit || 0,
+          tokensUsed: data.tokensUsed || 0,
+          storageUsed: data.storageUsed || 0,
+          storageUsedFormatted: data.storageUsedFormatted || '0 Bytes',
+          storageLimit: data.storageLimit || 0,
+          storageLimitFormatted: data.storageLimitFormatted || '0 Bytes',
+          storageUsagePercentage: data.storageUsagePercentage || 0,
+          status: data.status,
+          currentPeriodEnd: data.currentPeriodEnd,
+          isActive: data.isActive,
+          stripeSubscriptionId: data.stripeSubscriptionId,
+          isLoading: false
+        })
+        return true
+      } else {
+        console.error('Failed to fetch subscription info')
         setSubscription(prev => ({ ...prev, isLoading: false }))
+        return false
+      }
+    } catch (error) {
+      console.error('Error fetching subscription:', error)
+      setSubscription(prev => ({ ...prev, isLoading: false }))
+      return false
+    }
+  }
+
+  const refetch = async (retries: number = 3, delay: number = 1000) => {
+    for (let i = 0; i < retries; i++) {
+      const success = await fetchSubscription()
+      if (success) return true
+      
+      if (i < retries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delay))
       }
     }
+    return false
+  }
 
+  useEffect(() => {
     fetchSubscription()
   }, [])
 
-  return subscription
+  return { ...subscription, refetch }
 } 
