@@ -6,6 +6,67 @@ import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
 
+// Helper function to check if a subscription is part of an upgrade flow
+async function isUpgradeSubscription(subscriptionId: string, customerId: string): Promise<boolean> {
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    return subscription.metadata?.isUpgrade === 'true'
+  } catch (error) {
+    logger.warn('Failed to check upgrade status for subscription', {
+      metadata: {
+        subscriptionId,
+        customerId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }
+    })
+    return false
+  }
+}
+
+// Helper function to validate upgrade state
+async function validateUpgradeState(
+  newSubscriptionId: string, 
+  previousSubscriptionId: string, 
+  customerId: string
+): Promise<{ isValid: boolean; reason?: string }> {
+  try {
+    // Check if previous subscription exists in database
+    const previousSub = await prisma.userSubscription.findFirst({
+      where: { 
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: previousSubscriptionId
+      }
+    })
+
+    if (!previousSub) {
+      return { isValid: false, reason: 'Previous subscription not found in database' }
+    }
+
+    // Check if new subscription already exists (race condition protection)
+    const newSub = await prisma.userSubscription.findFirst({
+      where: { 
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: newSubscriptionId
+      }
+    })
+
+    if (newSub) {
+      return { isValid: false, reason: 'New subscription already exists in database' }
+    }
+
+    return { isValid: true }
+  } catch (error) {
+    logger.error('Failed to validate upgrade state', error as Error, {
+      metadata: {
+        newSubscriptionId,
+        previousSubscriptionId,
+        customerId
+      }
+    })
+    return { isValid: false, reason: 'Database validation failed' }
+  }
+}
+
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
 // Idempotency check function
@@ -168,7 +229,7 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
   }
 }
 
-// Handle upgrade process atomically
+// Handle upgrade process atomically - Single source of truth for upgrades
 async function handleUpgradeProcess(
   newSubscription: Stripe.Subscription,
   previousSubscriptionId: string
@@ -179,7 +240,7 @@ async function handleUpgradeProcess(
   const currentPeriodEnd = subscriptionItem.current_period_end
 
   try {
-    logger.info('Starting upgrade process', {
+    logger.info('Starting upgrade process - Single source of truth', {
       metadata: {
         newSubscriptionId: newSubscription.id,
         previousSubscriptionId,
@@ -191,7 +252,34 @@ async function handleUpgradeProcess(
       }
     })
 
-    // Step 1: Cancel old subscription first
+    // Step 1: Validate upgrade state to prevent race conditions
+    const validation = await validateUpgradeState(
+      newSubscription.id,
+      previousSubscriptionId,
+      newSubscription.customer as string
+    )
+
+    if (!validation.isValid) {
+      logger.warn('Upgrade validation failed - skipping upgrade process', {
+        metadata: {
+          newSubscriptionId: newSubscription.id,
+          previousSubscriptionId,
+          customerId: newSubscription.customer,
+          reason: validation.reason
+        }
+      })
+      
+      // If the new subscription already exists, this is likely a duplicate event
+      if (validation.reason === 'New subscription already exists in database') {
+        logger.info('Duplicate upgrade event detected - upgrade already processed')
+        return
+      }
+      
+      // For other validation failures, continue with upgrade anyway but log the issue
+      logger.warn('Continuing with upgrade despite validation failure')
+    }
+
+    // Step 2: Cancel old subscription first
     await cancelSubscriptionImmediately(previousSubscriptionId, 'upgraded')
 
     logger.info('Old subscription cancelled, updating database', {
@@ -202,7 +290,8 @@ async function handleUpgradeProcess(
       }
     })
 
-    // Step 2: Update database only after successful cancellation
+    // Step 3: Update database only after successful cancellation
+    // This is the single source of truth - no other webhook event should modify during upgrade
     await updateSubscriptionInDatabase(
       newSubscription.id,
       newSubscription.customer as string,
@@ -215,7 +304,7 @@ async function handleUpgradeProcess(
       null // Clear any pending plan change since this is an immediate upgrade
     )
 
-    logger.info('Upgrade completed successfully', {
+    logger.info('Upgrade completed successfully - Database updated', {
       metadata: {
         newSubscriptionId: newSubscription.id,
         previousSubscriptionId,
@@ -313,6 +402,46 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
+    // Check if this subscription was deleted as part of an upgrade
+    // In that case, skip processing as it's handled by the upgrade flow
+    const dbSubscription = await prisma.userSubscription.findFirst({
+      where: { 
+        stripeCustomerId: subscription.customer as string,
+        stripeSubscriptionId: subscription.id 
+      }
+    })
+    
+    // If the subscription is not found in our database, it might have been replaced during upgrade
+    if (!dbSubscription) {
+      logger.info('Subscription not found in database - likely replaced during upgrade', {
+        metadata: {
+          subscriptionId: subscription.id,
+          customerId: subscription.customer,
+        }
+      })
+      return
+    }
+
+    // Check if there's a newer subscription for this customer (indicating upgrade)
+    const currentSubscription = await prisma.userSubscription.findFirst({
+      where: { 
+        stripeCustomerId: subscription.customer as string,
+        stripeSubscriptionId: { not: subscription.id }
+      },
+      orderBy: { updatedAt: 'desc' }
+    })
+
+    if (currentSubscription && currentSubscription.updatedAt > dbSubscription.updatedAt) {
+      logger.info('Skipping subscription deletion - newer subscription exists (upgrade scenario)', {
+        metadata: {
+          deletedSubscriptionId: subscription.id,
+          currentSubscriptionId: currentSubscription.stripeSubscriptionId,
+          customerId: subscription.customer,
+        }
+      })
+      return
+    }
+
     const subscriptionItem = subscription.items.data[0]
 
     // Extract current period from subscription item
@@ -353,6 +482,22 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     if (invoice.parent?.subscription_details?.subscription) {
       const subscription = await stripe.subscriptions.retrieve(invoice.parent.subscription_details.subscription as string)
+      
+      // Skip processing if this is part of an upgrade flow
+      // The upgrade will be handled by customer.subscription.created event
+      if (subscription.metadata?.isUpgrade === 'true') {
+        logger.info('Skipping invoice payment processing for upgrade - will be handled by subscription.created', {
+          metadata: {
+            invoiceId: invoice.id,
+            subscriptionId: subscription.id,
+            customerId: invoice.customer,
+            isUpgrade: true,
+            previousSubscriptionId: subscription.metadata?.previousSubscriptionId
+          }
+        })
+        return
+      }
+      
       await handleSubscriptionEvent(subscription)
     }
 
