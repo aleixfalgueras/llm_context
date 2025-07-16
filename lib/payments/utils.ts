@@ -216,6 +216,8 @@ export function mapStripeStatusToSubscriptionStatus(stripeStatus: string): Subsc
     case 'incomplete':
     case 'incomplete_expired':
       return SubscriptionStatus.INCOMPLETE
+    case 'unpaid':
+      return SubscriptionStatus.UNPAID
     default:
       return SubscriptionStatus.INCOMPLETE
   }
