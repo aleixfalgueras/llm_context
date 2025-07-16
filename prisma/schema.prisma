@@ -239,6 +239,18 @@ model ConsentAuditLog {
   @@map("consent_audit_logs")
 }
 
+model WebhookEvent {
+  id            String   @id @default(cuid())
+  stripeEventId String   @unique // Stripe event ID
+  eventType     String   // Event type (e.g., 'customer.subscription.updated')
+  processed     Boolean  @default(false)
+  processedAt   DateTime?
+  createdAt     DateTime @default(now())
+  
+  @@index([stripeEventId])
+  @@map("webhook_events")
+}
+
 model DataExportRequest {
   id          String   @id @default(cuid())
   userId      String   // The user's ID from Clerk
