@@ -124,6 +124,7 @@ export async function getUserSubscription(userId: string) {
             maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
             maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
             cancelAtPeriodEnd: false,
+            pendingPlanChange: null,
           }
         }),
         { userId },
@@ -544,13 +545,20 @@ export async function scheduleSubscriptionDowngrade(
   const currentPeriodEnd = subscriptionItem.current_period_end
   const effectiveDate = new Date(currentPeriodEnd * 1000)
 
+  // Immediately update database with pending plan change
+  await prisma.userSubscription.update({
+    where: { userId },
+    data: { pendingPlanChange: targetPlan }
+  })
+
   logger.info('Downgrade scheduled successfully', {
     userId,
     metadata: {
       currentPlan,
       targetPlan,
       subscriptionId: stripeSubscriptionId,
-      effectiveDate: effectiveDate.toISOString()
+      effectiveDate: effectiveDate.toISOString(),
+      pendingPlanChange: targetPlan
     }
   })
 
