@@ -125,6 +125,29 @@ export default function SubscriptionPage() {
     return Math.max(0, diffDays)
   }
 
+  // Helper function to detect if subscription has pending downgrade
+  const isPendingDowngrade = () => {
+    return !isFreeMode() && subscription.isActive && subscription.pendingPlanChange && !subscription.cancelAtPeriodEnd
+  }
+
+  // Helper function to calculate remaining days until downgrade
+  const getRemainingDowngradeDays = () => {
+    if (!isPendingDowngrade() || !subscription.currentPeriodEnd) return 0
+    
+    const now = new Date()
+    const endDate = new Date(subscription.currentPeriodEnd)
+    const diffTime = endDate.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    return Math.max(0, diffDays)
+  }
+
+  // Helper function to safely capitalize plan name
+  const capitalizePlanName = (planName: string | undefined) => {
+    if (!planName) return 'Unknown'
+    return planName.charAt(0).toUpperCase() + planName.slice(1)
+  }
+
 
   const handleUpgrade = (planId: string) => {
     // Show confirmation dialog instead of immediately upgrading
@@ -340,8 +363,22 @@ export default function SubscriptionPage() {
             </div>
           )}
           
-          {/* Current Subscription Status - Only show for paid subscriptions that are not marked for cancellation */}
-          {!isFreeMode() && !isActiveCancelled() && subscription.currentPeriodEnd && (
+          {/* Active Subscription Marked for Downgrade */}
+          {isPendingDowngrade() && subscription.currentPeriodEnd && (
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 border border-orange-200 dark:border-orange-700">
+                <span className="font-semibold text-lg">
+                  Active Subscription (Downgrading) - {getRemainingDowngradeDays()} days until downgrade to {capitalizePlanName(subscription.pendingPlanChange)}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Your subscription will be downgraded on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+          
+          {/* Current Subscription Status - Only show for paid subscriptions that are not marked for cancellation or downgrade */}
+          {!isFreeMode() && !isActiveCancelled() && !isPendingDowngrade() && subscription.currentPeriodEnd && (
             <div className="mt-8 text-center">
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
                 subscription.isActive 

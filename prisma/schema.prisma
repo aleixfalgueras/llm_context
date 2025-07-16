@@ -159,6 +159,9 @@ model UserSubscription {
   // Cancellation tracking
   cancelAtPeriodEnd Boolean @default(false)
   
+  // Plan change tracking
+  pendingPlanChange String? // Target plan for scheduled downgrade (basic, pro, business)
+  
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

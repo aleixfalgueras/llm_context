@@ -207,7 +207,8 @@ async function handleUpgradeProcess(
       currentPeriodEnd,
       priceId,
       newSubscription.canceled_at,
-      newSubscription.cancel_at_period_end
+      newSubscription.cancel_at_period_end,
+      null // Clear any pending plan change since this is an immediate upgrade
     )
 
     logger.info('Upgrade completed successfully', {
@@ -245,6 +246,31 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
       const currentPeriodStart = subscriptionItem.current_period_start
       const currentPeriodEnd = subscriptionItem.current_period_end
 
+      // Check if this is a pending plan change taking effect
+      const dbSubscription = await prisma.userSubscription.findFirst({
+        where: { stripeCustomerId: subscription.customer as string }
+      })
+
+      let pendingPlanChangeValue = dbSubscription?.pendingPlanChange || null
+      
+      if (dbSubscription?.pendingPlanChange && priceId) {
+        const { getPlanFromPriceId } = await import('@/lib/payments/utils')
+        const newPlan = getPlanFromPriceId(priceId)
+        
+        // If the new plan matches the pending plan change, clear the pending change
+        if (newPlan === dbSubscription.pendingPlanChange) {
+          pendingPlanChangeValue = null
+          logger.info('Pending plan change applied, clearing pendingPlanChange', {
+            metadata: {
+              subscriptionId: subscription.id,
+              customerId: subscription.customer,
+              previousPendingPlan: dbSubscription.pendingPlanChange,
+              newPlan
+            }
+          })
+        }
+      }
+
       await updateSubscriptionInDatabase(
         subscription.id,
         subscription.customer as string,
@@ -253,7 +279,8 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
         currentPeriodEnd,
         priceId,
         subscription.canceled_at,
-        subscription.cancel_at_period_end
+        subscription.cancel_at_period_end,
+        pendingPlanChangeValue
       )
 
       logger.info('Subscription event processed successfully', {
@@ -292,7 +319,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       currentPeriodEnd,
       undefined, // no priceId for deletion
       subscription.canceled_at,
-      false // Set to false since subscription is now fully canceled
+      false, // Set to false since subscription is now fully canceled
+      null // Clear pending plan change since subscription is deleted
     )
 
     logger.info('Subscription deletion processed successfully', {
