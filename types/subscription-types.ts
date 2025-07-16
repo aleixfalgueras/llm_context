@@ -19,7 +19,8 @@ export enum SubscriptionStatus {
   ACTIVE = 'active',
   CANCELED = 'canceled',
   PAST_DUE = 'past_due',
-  INCOMPLETE = 'incomplete'
+  INCOMPLETE = 'incomplete',
+  UNPAID = 'unpaid'
 }
 
 // Type aliases for convenience (can be used where string types are still needed)

@@ -132,6 +132,7 @@ enum SubscriptionStatus {
   canceled
   past_due
   incomplete
+  unpaid
 }
 
 // NEW: User Subscription Management
