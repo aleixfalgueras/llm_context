@@ -28,7 +28,7 @@ export const POST = withEnhancedApi(
       throw new Error('Price not found')
     }
 
-    // Check if user has existing subscription and if this is a downgrade
+    // Check if user has existing subscription
     const existingSubscription = await prisma.userSubscription.findUnique({
       where: { userId },
     })
