@@ -54,6 +54,22 @@ async function validateUpgradeState(
       return { isValid: false, reason: 'New subscription already exists in database' }
     }
 
+    // Additional defensive check: verify previous subscription is still active
+    // If it's already cancelled, this upgrade may have been processed already
+    if (previousSub.status === 'canceled') {
+      return { isValid: false, reason: 'Previous subscription already cancelled - upgrade likely already processed' }
+    }
+
+    // Check if current database subscription is already the new one
+    const currentSub = await prisma.userSubscription.findFirst({
+      where: { stripeCustomerId: customerId },
+      orderBy: { updatedAt: 'desc' }
+    })
+
+    if (currentSub && currentSub.stripeSubscriptionId === newSubscriptionId) {
+      return { isValid: false, reason: 'Upgrade already completed - current subscription matches new subscription' }
+    }
+
     return { isValid: true }
   } catch (error) {
     logger.error('Failed to validate upgrade state', error as Error, {
@@ -202,7 +218,7 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
     case 'customer.subscription.created':
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription
-      await handleSubscriptionEvent(subscription)
+      await handleSubscriptionEvent(subscription, event.type)
       break
     }
 
@@ -304,6 +320,34 @@ async function handleUpgradeProcess(
       null // Clear any pending plan change since this is an immediate upgrade
     )
 
+    // Step 4: Clear upgrade metadata to prevent future confusion
+    try {
+      await stripe.subscriptions.update(newSubscription.id, {
+        metadata: {
+          // Remove upgrade-specific metadata
+          isUpgrade: '',
+          previousSubscriptionId: '',
+          // Preserve other metadata if any (you can extend this as needed)
+        }
+      })
+      
+      logger.info('Upgrade metadata cleared successfully', {
+        metadata: {
+          subscriptionId: newSubscription.id,
+          customerId: newSubscription.customer
+        }
+      })
+    } catch (metadataError) {
+      // Non-critical error - log but don't fail the upgrade
+      logger.warn('Failed to clear upgrade metadata (non-critical)', {
+        metadata: {
+          subscriptionId: newSubscription.id,
+          customerId: newSubscription.customer,
+          error: metadataError instanceof Error ? metadataError.message : 'Unknown error'
+        }
+      })
+    }
+
     logger.info('Upgrade completed successfully - Database updated', {
       metadata: {
         newSubscriptionId: newSubscription.id,
@@ -312,7 +356,8 @@ async function handleUpgradeProcess(
         finalStatus: newSubscription.status,
         priceId: priceId,
         canceledAtCleared: true,
-        cancelAtPeriodEnd: newSubscription.cancel_at_period_end
+        cancelAtPeriodEnd: newSubscription.cancel_at_period_end,
+        metadataCleared: true
       }
     })
   } catch (error) {
@@ -327,16 +372,36 @@ async function handleUpgradeProcess(
   }
 }
 
-async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
+async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventType: string) {
   try {
-    // Check if this is an upgrade (new subscription replacing an old one)
-    const isUpgrade = subscription.metadata?.isUpgrade === 'true'
+    // Only allow upgrades for 'created' events - 'updated' events should be regular updates
+    const isUpgrade = eventType === 'customer.subscription.created' && 
+                     subscription.metadata?.isUpgrade === 'true'
     const previousSubscriptionId = subscription.metadata?.previousSubscriptionId
 
     if (isUpgrade && previousSubscriptionId) {
+      logger.info('Processing subscription upgrade', {
+        metadata: {
+          subscriptionId: subscription.id,
+          eventType,
+          previousSubscriptionId,
+          customerId: subscription.customer
+        }
+      })
       // Handle upgrade process atomically
       await handleUpgradeProcess(subscription, previousSubscriptionId)
     } else {
+      // Log the reason for not treating as upgrade
+      if (subscription.metadata?.isUpgrade === 'true' && eventType === 'customer.subscription.updated') {
+        logger.info('Subscription has upgrade metadata but processing as regular update due to event type', {
+          metadata: {
+            subscriptionId: subscription.id,
+            eventType,
+            customerId: subscription.customer,
+            reason: 'updated_event_not_upgrade'
+          }
+        })
+      }
       // Handle regular subscription event
       const subscriptionItem = subscription.items.data[0]
       const priceId = subscriptionItem?.price?.id
@@ -384,8 +449,11 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
         metadata: {
           subscriptionId: subscription.id,
           customerId: subscription.customer,
+          eventType,
           status: subscription.status,
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          priceId: priceId,
+          processedAs: 'regular_subscription_update'
         }
       })
     }
@@ -498,7 +566,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
         return
       }
       
-      await handleSubscriptionEvent(subscription)
+      await handleSubscriptionEvent(subscription, 'invoice.payment_succeeded')
     }
 
     logger.info('Invoice payment succeeded', {
@@ -523,7 +591,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   try {
     if (invoice.parent?.subscription_details?.subscription) {
       const subscription = await stripe.subscriptions.retrieve(invoice.parent.subscription_details.subscription as string)
-      await handleSubscriptionEvent(subscription)
+      await handleSubscriptionEvent(subscription, 'invoice.payment_failed')
     }
 
     logger.warn('Invoice payment failed', {
