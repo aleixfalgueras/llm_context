@@ -210,7 +210,7 @@ export function UpgradeConfirmationDialog({
               <div className="p-6 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                 <div className="font-semibold text-lg mb-2">{targetPlanConfig.name} Plan</div>
                 <div className="text-3xl font-bold mb-2">
-                  €{targetPlanConfig.price}
+                  {targetPlanConfig.price}€
                   <span className="text-lg font-normal text-muted-foreground">/month</span>
                 </div>
                 <Badge variant="secondary" className="mb-4">First Subscription</Badge>
@@ -240,7 +240,7 @@ export function UpgradeConfirmationDialog({
                   <span className="text-sm">
                     {isDowngrade ? 'New monthly charge:' : 'Monthly charge:'}
                   </span>
-                  <span className="font-semibold">€{targetPlanConfig.price}</span>
+                  <span className="font-semibold">{targetPlanConfig.price}€</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {isDowngrade 
