@@ -261,11 +261,20 @@ export default function SubscriptionPage() {
         
         // Handle downgrades vs upgrades with unified response
         if (data.isDowngrade) {
-          // Downgrade was scheduled - show success message
+          // Downgrade was scheduled - show success message and refresh subscription
           toast({
             title: 'Downgrade Scheduled',
             description: data.message || 'Your plan will be downgraded at the end of your current billing period.',
             variant: ToastVariant.DEFAULT
+          })
+          
+          // Refresh subscription to show updated state
+          setIsRefreshing(true)
+          subscription.refetch(3, 1000, true).then(() => {
+            setIsRefreshing(false)
+          }).catch((error) => {
+            console.error('Failed to refresh subscription after downgrade:', error)
+            setIsRefreshing(false)
           })
         } else {
           // Redirect to checkout for upgrades/new subscriptions
