@@ -162,6 +162,7 @@ model UserSubscription {
   
   // Plan change tracking
   pendingPlanChange String? // Target plan for scheduled downgrade (basic, pro, business)
+  stripeScheduleId  String? // Stripe schedule ID for tracking active scheduled downgrades
   
   // Timestamps
   createdAt DateTime @default(now())

@@ -307,7 +307,6 @@ export async function updateSubscriptionInDatabase(
         }
       })
     }
-    // If subscription is canceled and we have existing canceledAt, preserve it
 
     // Update plan limits if plan changed
     if (planLimits) {
@@ -316,10 +315,10 @@ export async function updateSubscriptionInDatabase(
     }
 
     const updatedSubscription = await prisma.$transaction(async (tx) => {
-      return await tx.userSubscription.update({
-        where: { id: subscription.id },
+      return tx.userSubscription.update({
+        where: {id: subscription.id},
         data: updateData,
-      })
+      });
     })
 
     logger.info('Updated subscription in database', {
