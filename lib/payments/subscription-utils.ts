@@ -690,16 +690,19 @@ export async function scheduleSubscriptionDowngrade(
         downgradedAt: new Date().toISOString(),
       },
       phases: [
+        // Keep the current phase as-is (this represents the existing subscription)
         {
-          items: [
-            {
-              price: targetPriceId,
-              quantity: 1,
-            },
-          ],
-          start_date: currentPeriodEnd,
+          items: schedule.phases[0].items, // Use existing items from current phase
+          start_date: schedule.phases[0].start_date, // Keep original start date
+          end_date: currentPeriodEnd, // End current phase at billing period end
         },
-      ],
+        // Add new phase for the downgraded plan
+        {
+          items: [{ price: targetPriceId, quantity: 1 }],
+          start_date: currentPeriodEnd, // Start new phase when current period ends
+
+        }
+      ]
     })
     
     logger.info('Updated subscription schedule with downgrade phase', {
