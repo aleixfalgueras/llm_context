@@ -685,17 +685,6 @@ export async function scheduleSubscriptionDowngrade(
     updatedSchedule = await stripe.subscriptionSchedules.update(schedule.id, {
       phases: [
         {
-          // Current phase - maintain current subscription until period end
-          items: [
-            {
-              price: stripeSubscription.items.data[0].price.id,
-              quantity: 1,
-            },
-          ],
-          start_date: 'now',
-          end_date: currentPeriodEnd,
-        },
-        {
           // Downgrade phase - starts at period end
           items: [
             {
