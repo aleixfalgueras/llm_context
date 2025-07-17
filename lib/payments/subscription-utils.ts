@@ -511,6 +511,86 @@ export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: Subscript
 }
 
 /**
+ * Cancel an existing Stripe subscription schedule
+ */
+export async function cancelExistingSchedule(scheduleId: string): Promise<void> {
+  const { stripe } = await import('./stripe')
+  
+  try {
+    const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId)
+    
+    // Only cancel if schedule is still active
+    if (schedule.status === 'active') {
+      await stripe.subscriptionSchedules.cancel(scheduleId)
+      
+      logger.info('Successfully canceled existing subscription schedule', {
+        metadata: {
+          scheduleId,
+          previousStatus: schedule.status,
+          userId: schedule.metadata?.userId
+        }
+      })
+    } else {
+      logger.info('Schedule already inactive, skipping cancellation', {
+        metadata: {
+          scheduleId,
+          status: schedule.status,
+          userId: schedule.metadata?.userId
+        }
+      })
+    }
+  } catch (error) {
+    logger.error('Failed to cancel existing subscription schedule', error as Error, {
+      metadata: { scheduleId }
+    })
+    throw error
+  }
+}
+
+/**
+ * Get active subscription schedule for a user
+ */
+export async function getActiveSchedule(userId: string): Promise<string | null> {
+  try {
+    const subscription = await prisma.userSubscription.findUnique({
+      where: { userId },
+      select: { stripeScheduleId: true }
+    })
+    
+    if (!subscription?.stripeScheduleId) {
+      return null
+    }
+    
+    // Verify schedule is still active in Stripe
+    const { stripe } = await import('./stripe')
+    const schedule = await stripe.subscriptionSchedules.retrieve(subscription.stripeScheduleId)
+    
+    if (schedule.status === 'active') {
+      return subscription.stripeScheduleId
+    } else {
+      // Schedule is no longer active, clean up database
+      await prisma.userSubscription.update({
+        where: { userId },
+        data: { stripeScheduleId: null }
+      })
+      
+      logger.info('Cleaned up inactive schedule ID from database', {
+        userId,
+        metadata: {
+          scheduleId: subscription.stripeScheduleId,
+          status: schedule.status
+        }
+      })
+      
+      return null
+    }
+  } catch (error) {
+    logger.error('Failed to get active schedule', error as Error, { userId })
+    return null
+  }
+}
+
+/**
  * Schedule a subscription downgrade to take effect at the end of the current billing period
  */
 export async function scheduleSubscriptionDowngrade(
@@ -526,33 +606,90 @@ export async function scheduleSubscriptionDowngrade(
   // Import stripe here to avoid circular dependency
   const { stripe } = await import('./stripe')
   
+  logger.info('Starting downgrade scheduling process', {
+    userId,
+    metadata: {
+      currentPlan,
+      targetPlan,
+      subscriptionId: stripeSubscriptionId
+    }
+  })
+
+  // Check for existing active schedule and cancel it if found
+  const existingScheduleId = await getActiveSchedule(userId)
+  if (existingScheduleId) {
+    logger.info('Found existing active schedule, canceling before creating new one', {
+      userId,
+      metadata: {
+        existingScheduleId,
+        currentPlan,
+        targetPlan
+      }
+    })
+    
+    try {
+      await cancelExistingSchedule(existingScheduleId)
+    } catch (error) {
+      logger.error('Failed to cancel existing schedule, continuing with new schedule creation', error as Error, {
+        userId,
+        metadata: {
+          existingScheduleId,
+          currentPlan,
+          targetPlan
+        }
+      })
+      // Continue with new schedule creation even if cancellation fails
+    }
+  }
+  
   // Get current subscription from Stripe
   const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
-
-  // Schedule the downgrade at the end of the current billing period
-  const updatedSubscription = await stripe.subscriptions.update(
-    stripeSubscriptionId,
-    {
-      items: [
-        {
-          id: stripeSubscription.items.data[0].id,
-          price: targetPriceId,
-        },
-      ],
-      proration_behavior: 'none', // No immediate billing
-      billing_cycle_anchor: 'unchanged', // Wait for next billing cycle
-    }
-  )
-
-  // Get the effective date (next billing cycle)
-  const subscriptionItem = updatedSubscription.items.data[0]
+  
+  // Get the effective date (current period end from subscription item)
+  const subscriptionItem = stripeSubscription.items.data[0]
   const currentPeriodEnd = subscriptionItem.current_period_end
   const effectiveDate = new Date(currentPeriodEnd * 1000)
 
-  // Immediately update database with pending plan change
+  // Create a subscription schedule for the downgrade
+  const schedule = await stripe.subscriptionSchedules.create({
+    from_subscription: stripeSubscriptionId,
+    phases: [
+      {
+        // Current phase - maintain current subscription until period end
+        items: [
+          {
+            price: stripeSubscription.items.data[0].price.id,
+            quantity: 1,
+          },
+        ],
+        end_date: currentPeriodEnd,
+      },
+      {
+        // Downgrade phase - starts at period end
+        items: [
+          {
+            price: targetPriceId,
+            quantity: 1,
+          },
+        ],
+        // iterations: omitted to continue indefinitely
+      },
+    ],
+    metadata: {
+      userId,
+      currentPlan,
+      targetPlan,
+      downgradedAt: new Date().toISOString(),
+    },
+  })
+
+  // Update database with pending plan change and schedule ID
   await prisma.userSubscription.update({
     where: { userId },
-    data: { pendingPlanChange: targetPlan }
+    data: { 
+      pendingPlanChange: targetPlan,
+      stripeScheduleId: schedule.id
+    }
   })
 
   logger.info('Downgrade scheduled successfully', {
@@ -561,8 +698,10 @@ export async function scheduleSubscriptionDowngrade(
       currentPlan,
       targetPlan,
       subscriptionId: stripeSubscriptionId,
+      scheduleId: schedule.id,
       effectiveDate: effectiveDate.toISOString(),
-      pendingPlanChange: targetPlan
+      pendingPlanChange: targetPlan,
+      canceledExistingSchedule: !!existingScheduleId
     }
   })
 
