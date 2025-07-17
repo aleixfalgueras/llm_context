@@ -692,6 +692,7 @@ export async function scheduleSubscriptionDowngrade(
               quantity: 1,
             },
           ],
+          start_date: 'now',
           end_date: currentPeriodEnd,
         },
         {
@@ -702,6 +703,7 @@ export async function scheduleSubscriptionDowngrade(
               quantity: 1,
             },
           ],
+          start_date: currentPeriodEnd,
           // iterations: omitted to continue indefinitely
         },
       ],
