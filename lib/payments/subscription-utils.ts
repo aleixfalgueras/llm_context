@@ -651,17 +651,11 @@ export async function scheduleSubscriptionDowngrade(
   const effectiveDate = new Date(currentPeriodEnd * 1000)
 
   // Step 1: Create a subscription schedule from existing subscription
-  // Note: Cannot use phases with from_subscription in API version 2025-06-30.basil
+  // Note: Cannot use phases OR metadata with from_subscription in API version 2025-06-30.basil
   let schedule: any
   try {
     schedule = await stripe.subscriptionSchedules.create({
       from_subscription: stripeSubscriptionId,
-      metadata: {
-        userId,
-        currentPlan,
-        targetPlan,
-        downgradedAt: new Date().toISOString(),
-      },
     })
     
     logger.info('Created subscription schedule (step 1)', {
@@ -685,7 +679,7 @@ export async function scheduleSubscriptionDowngrade(
     throw error
   }
 
-  // Step 2: Update the schedule with the desired phases
+  // Step 2: Update the schedule with the desired phases and metadata
   let updatedSchedule: any
   try {
     updatedSchedule = await stripe.subscriptionSchedules.update(schedule.id, {
@@ -711,20 +705,27 @@ export async function scheduleSubscriptionDowngrade(
           // iterations: omitted to continue indefinitely
         },
       ],
+      metadata: {
+        userId,
+        currentPlan,
+        targetPlan,
+        downgradedAt: new Date().toISOString(),
+      },
     })
     
-    logger.info('Updated subscription schedule with phases (step 2)', {
+    logger.info('Updated subscription schedule with phases and metadata (step 2)', {
       userId,
       metadata: {
         scheduleId: updatedSchedule.id,
         subscriptionId: stripeSubscriptionId,
         currentPlan,
         targetPlan,
-        effectiveDate: effectiveDate.toISOString()
+        effectiveDate: effectiveDate.toISOString(),
+        metadataAdded: true
       }
     })
   } catch (error) {
-    logger.error('Failed to update subscription schedule with phases (step 2)', error as Error, {
+    logger.error('Failed to update subscription schedule with phases and metadata (step 2)', error as Error, {
       userId,
       metadata: {
         scheduleId: schedule.id,
@@ -737,15 +738,15 @@ export async function scheduleSubscriptionDowngrade(
     // Cleanup: Cancel the created schedule if phase update fails
     try {
       await stripe.subscriptionSchedules.cancel(schedule.id)
-      logger.info('Cleaned up failed schedule after phase update error', {
+      logger.info('Cleaned up failed schedule after phase and metadata update error', {
         userId,
         metadata: {
           scheduleId: schedule.id,
-          reason: 'phase_update_failed'
+          reason: 'phase_and_metadata_update_failed'
         }
       })
     } catch (cleanupError) {
-      logger.error('Failed to cleanup schedule after phase update error', cleanupError as Error, {
+      logger.error('Failed to cleanup schedule after phase and metadata update error', cleanupError as Error, {
         userId,
         metadata: {
           scheduleId: schedule.id
