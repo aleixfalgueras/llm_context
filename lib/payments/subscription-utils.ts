@@ -720,8 +720,7 @@ export async function scheduleSubscriptionDowngrade(
       scheduleId: schedule.id,
       effectiveDate: effectiveDate.toISOString(),
       pendingPlanChange: targetPlan,
-      canceledExistingSchedule: !!existingScheduleId,
-      singleStepProcess: true
+      canceledExistingSchedule: !!existingScheduleId
     }
   })
 
