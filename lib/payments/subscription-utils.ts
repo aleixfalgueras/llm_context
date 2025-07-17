@@ -655,12 +655,6 @@ export async function scheduleSubscriptionDowngrade(
   try {
     schedule = await stripe.subscriptionSchedules.create({
       from_subscription: stripeSubscriptionId,
-      metadata: {
-        userId,
-        currentPlan,
-        targetPlan,
-        downgradedAt: new Date().toISOString(),
-      },
     })
     
     logger.info('Created subscription schedule from existing subscription', {
@@ -687,9 +681,14 @@ export async function scheduleSubscriptionDowngrade(
   }
 
   // Update subscription schedule with downgrade phase (Step 2)
-  let updatedSchedule: any
   try {
-    updatedSchedule = await stripe.subscriptionSchedules.update(schedule.id, {
+    await stripe.subscriptionSchedules.update(schedule.id, {
+      metadata: {
+        userId,
+        currentPlan,
+        targetPlan,
+        downgradedAt: new Date().toISOString(),
+      },
       phases: [
         {
           items: [
