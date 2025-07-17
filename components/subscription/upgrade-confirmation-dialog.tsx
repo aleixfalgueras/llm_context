@@ -149,7 +149,7 @@ export function UpgradeConfirmationDialog({
                 <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                   <div className="font-semibold flex items-center gap-2">
                     {targetPlanConfig.name}
-                    <Badge variant="secondary">Upgrade</Badge>
+                    <Badge variant="secondary">{isDowngrade ? 'Downgrade' : 'Upgrade'}</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {preview.newPrice}€/month
