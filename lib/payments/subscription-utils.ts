@@ -650,50 +650,24 @@ export async function scheduleSubscriptionDowngrade(
   const currentPeriodEnd = subscriptionItem.current_period_end
   const effectiveDate = new Date(currentPeriodEnd * 1000)
 
-  // Step 1: Create a subscription schedule from existing subscription
-  // Note: Cannot use phases OR metadata with from_subscription in API version 2025-06-30.basil
+  // Create subscription schedule with only downgrade phase
   let schedule: any
   try {
     schedule = await stripe.subscriptionSchedules.create({
-      from_subscription: stripeSubscriptionId,
-    })
-    
-    logger.info('Created subscription schedule (step 1)', {
-      userId,
-      metadata: {
-        scheduleId: schedule.id,
-        subscriptionId: stripeSubscriptionId,
-        currentPlan,
-        targetPlan
-      }
-    })
-  } catch (error) {
-    logger.error('Failed to create subscription schedule (step 1)', error as Error, {
-      userId,
-      metadata: {
-        subscriptionId: stripeSubscriptionId,
-        currentPlan,
-        targetPlan
-      }
-    })
-    throw error
-  }
-
-  // Step 2: Update the schedule with the desired phases and metadata
-  let updatedSchedule: any
-  try {
-    updatedSchedule = await stripe.subscriptionSchedules.update(schedule.id, {
+      customer: typeof stripeSubscription.customer === 'string' 
+        ? stripeSubscription.customer 
+        : stripeSubscription.customer.id,
+      start_date: currentPeriodEnd, // Schedule starts when current subscription ends
       phases: [
         {
-          // Downgrade phase - starts at period end
+          // Only the downgrade phase
           items: [
             {
               price: targetPriceId,
               quantity: 1,
             },
           ],
-          start_date: currentPeriodEnd,
-          // iterations: omitted to continue indefinitely
+          // No end_date = continues indefinitely
         },
       ],
       metadata: {
@@ -704,47 +678,27 @@ export async function scheduleSubscriptionDowngrade(
       },
     })
     
-    logger.info('Updated subscription schedule with phases and metadata (step 2)', {
-      userId,
-      metadata: {
-        scheduleId: updatedSchedule.id,
-        subscriptionId: stripeSubscriptionId,
-        currentPlan,
-        targetPlan,
-        effectiveDate: effectiveDate.toISOString(),
-        metadataAdded: true
-      }
-    })
-  } catch (error) {
-    logger.error('Failed to update subscription schedule with phases and metadata (step 2)', error as Error, {
+    logger.info('Created subscription schedule with downgrade phase', {
       userId,
       metadata: {
         scheduleId: schedule.id,
         subscriptionId: stripeSubscriptionId,
         currentPlan,
-        targetPlan
+        targetPlan,
+        effectiveDate: effectiveDate.toISOString(),
+        startDate: currentPeriodEnd
       }
     })
-    
-    // Cleanup: Cancel the created schedule if phase update fails
-    try {
-      await stripe.subscriptionSchedules.cancel(schedule.id)
-      logger.info('Cleaned up failed schedule after phase and metadata update error', {
-        userId,
-        metadata: {
-          scheduleId: schedule.id,
-          reason: 'phase_and_metadata_update_failed'
-        }
-      })
-    } catch (cleanupError) {
-      logger.error('Failed to cleanup schedule after phase and metadata update error', cleanupError as Error, {
-        userId,
-        metadata: {
-          scheduleId: schedule.id
-        }
-      })
-    }
-    
+  } catch (error) {
+    logger.error('Failed to create subscription schedule with downgrade phase', error as Error, {
+      userId,
+      metadata: {
+        subscriptionId: stripeSubscriptionId,
+        currentPlan,
+        targetPlan,
+        effectiveDate: effectiveDate.toISOString()
+      }
+    })
     throw error
   }
 
@@ -753,7 +707,7 @@ export async function scheduleSubscriptionDowngrade(
     where: { userId },
     data: { 
       pendingPlanChange: targetPlan,
-      stripeScheduleId: updatedSchedule.id
+      stripeScheduleId: schedule.id
     }
   })
 
@@ -763,11 +717,11 @@ export async function scheduleSubscriptionDowngrade(
       currentPlan,
       targetPlan,
       subscriptionId: stripeSubscriptionId,
-      scheduleId: updatedSchedule.id,
+      scheduleId: schedule.id,
       effectiveDate: effectiveDate.toISOString(),
       pendingPlanChange: targetPlan,
       canceledExistingSchedule: !!existingScheduleId,
-      twoStepProcess: true
+      singleStepProcess: true
     }
   })
 
