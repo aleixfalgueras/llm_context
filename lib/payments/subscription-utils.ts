@@ -650,26 +650,11 @@ export async function scheduleSubscriptionDowngrade(
   const currentPeriodEnd = subscriptionItem.current_period_end
   const effectiveDate = new Date(currentPeriodEnd * 1000)
 
-  // Create subscription schedule with only downgrade phase
+  // Create subscription schedule from existing subscription (Step 1)
   let schedule: any
   try {
     schedule = await stripe.subscriptionSchedules.create({
-      customer: typeof stripeSubscription.customer === 'string' 
-        ? stripeSubscription.customer 
-        : stripeSubscription.customer.id,
-      start_date: currentPeriodEnd, // Schedule starts when current subscription ends
-      phases: [
-        {
-          // Only the downgrade phase
-          items: [
-            {
-              price: targetPriceId,
-              quantity: 1,
-            },
-          ],
-          // No end_date = continues indefinitely
-        },
-      ],
+      from_subscription: stripeSubscriptionId,
       metadata: {
         userId,
         currentPlan,
@@ -678,7 +663,47 @@ export async function scheduleSubscriptionDowngrade(
       },
     })
     
-    logger.info('Created subscription schedule with downgrade phase', {
+    logger.info('Created subscription schedule from existing subscription', {
+      userId,
+      metadata: {
+        scheduleId: schedule.id,
+        subscriptionId: stripeSubscriptionId,
+        currentPlan,
+        targetPlan,
+        effectiveDate: effectiveDate.toISOString()
+      }
+    })
+  } catch (error) {
+    logger.error('Failed to create subscription schedule from existing subscription', error as Error, {
+      userId,
+      metadata: {
+        subscriptionId: stripeSubscriptionId,
+        currentPlan,
+        targetPlan,
+        effectiveDate: effectiveDate.toISOString()
+      }
+    })
+    throw error
+  }
+
+  // Update subscription schedule with downgrade phase (Step 2)
+  let updatedSchedule: any
+  try {
+    updatedSchedule = await stripe.subscriptionSchedules.update(schedule.id, {
+      phases: [
+        {
+          items: [
+            {
+              price: targetPriceId,
+              quantity: 1,
+            },
+          ],
+          start_date: currentPeriodEnd,
+        },
+      ],
+    })
+    
+    logger.info('Updated subscription schedule with downgrade phase', {
       userId,
       metadata: {
         scheduleId: schedule.id,
@@ -690,9 +715,10 @@ export async function scheduleSubscriptionDowngrade(
       }
     })
   } catch (error) {
-    logger.error('Failed to create subscription schedule with downgrade phase', error as Error, {
+    logger.error('Failed to update subscription schedule with downgrade phase', error as Error, {
       userId,
       metadata: {
+        scheduleId: schedule.id,
         subscriptionId: stripeSubscriptionId,
         currentPlan,
         targetPlan,
