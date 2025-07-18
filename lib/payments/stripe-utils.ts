@@ -1,6 +1,6 @@
 import {stripe} from './stripe'
 import {logger} from '../logger'
-import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
+import {SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
 import {SubscriptionOperations} from '@/lib/database'
 import Stripe from 'stripe'
 
@@ -201,8 +201,6 @@ export async function releaseSubscriptionSchedule(
   schedule: string | Stripe.SubscriptionSchedule,
   stripeSubscriptionId: string | null
 ): Promise<void> {
-  const { stripe } = await import('./stripe')
-
   try {
     const scheduleId = typeof schedule === 'string' ? schedule : schedule.id;
     await stripe.subscriptionSchedules.release(scheduleId);
