@@ -14,20 +14,12 @@ import {
 } from './subscription-cache'
 import {SubscriptionOperations} from "@/lib/database";
 
-// Plan hierarchy for upgrade/downgrade detection
-const PLAN_HIERARCHY = [SubscriptionPlan.BASIC, SubscriptionPlan.PRO, SubscriptionPlan.BUSINESS]
+import {PLAN_HIERARCHY, getPlanNameColor, isUpgrade as clientIsUpgrade, isDowngrade as clientIsDowngrade} from './subscription-client-utils'
 
 export type PlanId = SubscriptionPlan
 
-// Plan name color utilities
-export function getPlanNameColor(planId: string) {
-  switch (planId) {
-    case SubscriptionPlan.BASIC: return 'text-green-600 dark:text-green-400'
-    case SubscriptionPlan.PRO: return 'text-blue-600 dark:text-blue-400'
-    case SubscriptionPlan.BUSINESS: return 'text-purple-600 dark:text-purple-400'
-    default: return 'text-green-600 dark:text-green-400'
-  }
-}
+// Re-export client utilities for backwards compatibility
+export { getPlanNameColor } from './subscription-client-utils'
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string, bypassCache = false) {
@@ -414,22 +406,7 @@ export async function getUserUsageAnalytics(userId: string) {
   }
 }
 
-/**
- * Determine if a plan change is an upgrade or downgrade
- */
-export function isUpgrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {
-  const currentIndex = PLAN_HIERARCHY.indexOf(currentPlan)
-  const targetIndex = PLAN_HIERARCHY.indexOf(targetPlan)
-  return targetIndex > currentIndex
-}
-
-/**
- * Determine if a plan change is a downgrade
- */
-export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {
-  const currentIndex = PLAN_HIERARCHY.indexOf(currentPlan)
-  const targetIndex = PLAN_HIERARCHY.indexOf(targetPlan)
-  return targetIndex < currentIndex
-}
+// Re-export client utilities for backwards compatibility
+export { isUpgrade, isDowngrade } from './subscription-client-utils'
 
  
