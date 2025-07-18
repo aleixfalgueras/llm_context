@@ -14,15 +14,6 @@ export function getPlanNameColor(planId: string) {
 }
 
 /**
- * Determine if a plan change is an upgrade
- */
-export function isUpgrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {
-  const currentIndex = PLAN_HIERARCHY.indexOf(currentPlan)
-  const targetIndex = PLAN_HIERARCHY.indexOf(targetPlan)
-  return targetIndex > currentIndex
-}
-
-/**
  * Determine if a plan change is a downgrade
  */
 export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {

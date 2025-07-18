@@ -1,7 +1,14 @@
 import {prisma} from "@/lib/prisma";
 import {logger} from "@/lib/logger";
+import Stripe from "stripe";
+import {
+  handleInvoicePaymentFailed,
+  handleInvoicePaymentSucceeded,
+  handleSubscriptionDeleted,
+  handleSubscriptionEvent
+} from "@/lib/stripe/webhook-handle";
 
-export async function checkAndMarkEventProcessed(
+export async function checkEventIdempotency(
   eventId: string,
   eventType: string
 ): Promise<{ shouldSkip: boolean; isRetry: boolean }> {
@@ -43,6 +50,39 @@ export async function checkAndMarkEventProcessed(
       metadata: {eventId, eventType}
     })
     throw error
+  }
+}
+
+// Process webhook event based on type
+export async function processWebhookEvent(event: Stripe.Event): Promise<void> {
+  switch (event.type) {
+    case 'customer.subscription.created':
+    case 'customer.subscription.updated': {
+      const subscription = event.data.object as Stripe.Subscription
+      await handleSubscriptionEvent(subscription, event.type)
+      break
+    }
+
+    case 'customer.subscription.deleted': {
+      const subscription = event.data.object as Stripe.Subscription
+      await handleSubscriptionDeleted(subscription)
+      break
+    }
+
+    case 'invoice.payment_succeeded': {
+      const invoice = event.data.object as Stripe.Invoice
+      await handleInvoicePaymentSucceeded(invoice)
+      break
+    }
+
+    case 'invoice.payment_failed': {
+      const invoice = event.data.object as Stripe.Invoice
+      await handleInvoicePaymentFailed(invoice)
+      break
+    }
+
+    default:
+      logger.info('Unhandled webhook event type', {metadata: {type: event.type}})
   }
 }
 
