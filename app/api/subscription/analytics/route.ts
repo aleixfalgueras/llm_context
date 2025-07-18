@@ -1,4 +1,4 @@
-import { getUserUsageAnalytics } from '@/lib/payments/subscription-utils'
+import { getUserUsageAnalytics } from '@/lib/subscription/subscription-utils'
 import { 
   withEnhancedApi, 
   apiSuccess,

@@ -188,7 +188,7 @@ export async function withAuth(): Promise<string> {
  * Token usage validation middleware - checks monthly token limits
  */
 export async function withTokenValidation(userId: string): Promise<void> {
-  const { checkTokenUsageLimit } = await import('../payments/subscription-utils')
+  const { checkTokenUsageLimit } = await import('../subscription/subscription-utils')
   
   const tokenUsage = await checkTokenUsageLimit(userId)
   
@@ -253,7 +253,7 @@ export async function trackUsage(
   }
 ): Promise<void> {
   try {
-    const { updateUsageTracking } = await import('../payments/subscription-utils')
+    const { updateUsageTracking } = await import('../subscription/subscription-utils')
     await updateUsageTracking(userId, metadata)
   } catch (error) {
     console.error('Error tracking usage:', error)
@@ -266,7 +266,7 @@ export async function trackUsage(
  */
 export async function getUsageInfo(userId: string, bypassCache = false) {
   try {
-    const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('../payments/subscription-utils')
+    const { getUserSubscription, getCurrentMonthUsage, isSubscriptionActive } = await import('../subscription/subscription-utils')
     const { prisma } = await import('../prisma')
     const { getStorageAnalytics } = await import('../utils/storage')
     
@@ -280,7 +280,7 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
     const storageAnalytics = await getStorageAnalytics(userId, subscription);
 
     // Check client limits - count current clients with caching
-    const { getCachedClientCount, cacheClientCount } = await import('../payments/subscription-cache')
+    const { getCachedClientCount, cacheClientCount } = await import('../subscription/subscription-cache')
     let clientCount = await getCachedClientCount(userId)
     if (clientCount === null) {
       clientCount = await prisma.client.count({ where: { userId } })

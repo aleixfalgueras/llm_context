@@ -36,7 +36,7 @@ const getCacheKey = (prefix: string, userId: string, suffix?: string) => {
 const SUBSCRIPTION_CACHE_TTL = 60 * 60 // 1 hour (subscription data changes rarely)
 const USAGE_CACHE_TTL = 2 * 60 // 2 minutes
 const STORAGE_CACHE_TTL = 5 * 60 // 5 minutes (storage data changes rarely)
-const CLIENT_COUNT_CACHE_TTL = 1 * 60 // 1 minute (client count changes occasionally)
+const CLIENT_COUNT_CACHE_TTL = 60 // 1 minute (client count changes occasionally)
 
 /**
  * Cache subscription data with TTL

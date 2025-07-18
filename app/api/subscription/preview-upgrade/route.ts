@@ -4,8 +4,8 @@ import {
   parseJsonBody,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import { stripe } from '@/lib/payments/stripe'
-import { STRIPE_PRICE_IDS } from '@/lib/payments/stripe-utils'
+import { stripe } from '@/lib/stripe/stripe'
+import { STRIPE_PRICE_IDS } from '@/lib/stripe/stripe-utils'
 import { SubscriptionPlan } from '@/types/subscription-types'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
