@@ -18,8 +18,8 @@ import {
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
-import {SUBSCRIPTION_PLANS, getPlanNameColor} from '@/lib/payments/subscription-utils'
-import {SubscriptionPlan} from '@/types/subscription-types'
+import {getPlanNameColor} from '@/lib/payments/subscription-utils'
+import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
 import Link from 'next/link'
 
 export function LandingPage() {
@@ -240,7 +240,7 @@ export function LandingPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {Object.entries(SUBSCRIPTION_PLANS).map(([planId, plan]) => {
+            {Object.entries(SUBSCRIPTION_PLAN_DETAIL).map(([planId, plan]) => {
               const getPlanIcon = (planId: string) => {
                 switch (planId) {
                   case SubscriptionPlan.BASIC: return <ZapIcon className="h-8 w-8" />

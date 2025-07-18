@@ -12,8 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckIcon, ArrowRightIcon, CreditCardIcon, CalendarIcon } from 'lucide-react'
-import { SubscriptionPlan } from '@/types/subscription-types'
-import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
+import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/types/enums'
 
@@ -89,8 +88,8 @@ export function UpgradeConfirmationDialog({
     onClose()
   }
 
-  const currentPlanConfig = preview ? SUBSCRIPTION_PLANS[preview.currentPlan] : null
-  const targetPlanConfig = SUBSCRIPTION_PLANS[targetPlan]
+  const currentPlanConfig = preview ? SUBSCRIPTION_PLAN_DETAIL[preview.currentPlan] : null
+  const targetPlanConfig = SUBSCRIPTION_PLAN_DETAIL[targetPlan]
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

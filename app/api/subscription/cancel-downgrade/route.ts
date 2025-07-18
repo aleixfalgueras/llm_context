@@ -3,7 +3,7 @@ import {
   apiSuccess, 
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import { cancelExistingSchedule } from '@/lib/payments/subscription-utils'
+import { releaseSubscriptionSchedule } from '@/lib/payments/stripe-utils'
 import { invalidateAllUserCaches } from '@/lib/payments/subscription-cache'
 
 import { logger } from '@/lib/logger'
@@ -17,7 +17,8 @@ export const POST = withEnhancedApi(
       select: {
         stripeScheduleId: true,
         pendingPlanChange: true,
-        plan: true
+        plan: true,
+        stripeSubscriptionId: true
       }
     })
 
@@ -39,19 +40,10 @@ export const POST = withEnhancedApi(
     }
 
     try {
-      // Cancel the Stripe subscription schedule
-      await cancelExistingSchedule(subscription.stripeScheduleId)
+      // Release the Stripe subscription schedule
+      await releaseSubscriptionSchedule(subscription.stripeScheduleId, subscription.stripeSubscriptionId)
 
-      // Clear the pending plan change and schedule ID in database
-      await prisma.userSubscription.update({
-        where: { userId },
-        data: {
-          pendingPlanChange: null,
-          stripeScheduleId: null
-        }
-      })
-
-      logger.info('Successfully canceled subscription downgrade', {
+      logger.info('Successfully cancelled subscription downgrade', {
         userId,
         metadata: {
           scheduleId: subscription.stripeScheduleId,

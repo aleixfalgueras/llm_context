@@ -6,8 +6,8 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
 import {CheckIcon, CrownIcon, SettingsIcon, StarIcon, ZapIcon} from 'lucide-react'
-import {isDowngrade as checkIsDowngrade, SUBSCRIPTION_PLANS, getPlanNameColor} from '@/lib/payments/subscription-utils'
-import {SubscriptionPlan} from '@/types/subscription-types'
+import {isDowngrade as checkIsDowngrade, getPlanNameColor} from '@/lib/payments/subscription-utils'
+import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
 import {useSubscription} from '@/hooks/use-subscription'
 import {Navbar} from '@/components/global/navbar'
 import {useToast} from '@/hooks/use-toast'
@@ -563,7 +563,7 @@ export default function SubscriptionPage() {
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {Object.entries(SUBSCRIPTION_PLANS).map(([planId, plan]) => (
+          {Object.entries(SUBSCRIPTION_PLAN_DETAIL).map(([planId, plan]) => (
             <Card 
               key={planId} 
               className={`relative ${

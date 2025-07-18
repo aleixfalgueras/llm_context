@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/payments/stripe'
-import { updateSubscriptionInDatabase, cancelSubscriptionImmediately } from '@/lib/payments/utils'
+import { cancelSubscriptionImmediately } from '@/lib/payments/stripe-utils'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
+import {SubscriptionOperations} from "@/lib/database";
 
 // Helper function to check if a subscription is part of an upgrade flow
 async function isUpgradeSubscription(subscriptionId: string, customerId: string): Promise<boolean> {
@@ -309,7 +310,7 @@ async function handleUpgradeProcess(
 
     // Step 3: Update database only after successful cancellation
     // This is the single source of truth - no other webhook event should modify during upgrade
-    await updateSubscriptionInDatabase(
+    await SubscriptionOperations.updateSubscriptionInDatabase(
       newSubscription.id,
       newSubscription.customer as string,
       newSubscription.status,
@@ -419,7 +420,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
       let clearScheduleId = false
       
       if (dbSubscription?.pendingPlanChange && priceId) {
-        const { getPlanFromPriceId } = await import('@/lib/payments/utils')
+        const { getPlanFromPriceId } = await import('@/lib/payments/stripe-utils')
         const newPlan = getPlanFromPriceId(priceId)
         
         // If the new plan matches the pending plan change, clear the pending change
@@ -438,7 +439,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
         }
       }
 
-      await updateSubscriptionInDatabase(
+      await SubscriptionOperations.updateSubscriptionInDatabase(
         subscription.id,
         subscription.customer as string,
         subscription.status,
@@ -524,7 +525,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     const currentPeriodStart = subscriptionItem.current_period_start
     const currentPeriodEnd = subscriptionItem.current_period_end
     
-    await updateSubscriptionInDatabase(
+    await SubscriptionOperations.updateSubscriptionInDatabase(
       subscription.id,
       subscription.customer as string,
       'canceled',

@@ -1,75 +1,22 @@
-import { prisma } from '../prisma'
-import { logger, withTiming } from '../logger'
-import { getTierFromPlan, isModelAvailableForTier } from '../ai/models-config'
-import { SubscriptionPlan, SubscriptionStatus, ModelTier } from '@/types/subscription-types'
-import { ApiSubscriptionErrorCode } from '@/types/enums'
+import {prisma} from '../prisma'
+import {logger, withTiming} from '../logger'
+import {getTierFromPlan, isModelAvailableForTier} from '../ai/models-config'
+import {ModelTier, SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
+import {ApiSubscriptionErrorCode} from '@/types/enums'
+
+import {
+  cacheSubscription,
+  cacheUsage,
+  getCachedSubscription,
+  getCachedUsage,
+  invalidateAllUserCaches,
+  invalidateUsageCache
+} from './subscription-cache'
+import {releaseSubscriptionSchedule} from "@/lib/payments/stripe-utils";
+import {SubscriptionOperations} from "@/lib/database";
 
 // Plan hierarchy for upgrade/downgrade detection
 const PLAN_HIERARCHY = [SubscriptionPlan.BASIC, SubscriptionPlan.PRO, SubscriptionPlan.BUSINESS]
-
-import { 
-  getCachedSubscription, 
-  cacheSubscription, 
-  getCachedUsage, 
-  cacheUsage,
-  invalidateUsageCache,
-  invalidateAllUserCaches
-} from './subscription-cache'
-
-// Subscription Plans Configuration
-export const SUBSCRIPTION_PLANS = {
-  [SubscriptionPlan.BASIC]: {
-    id: SubscriptionPlan.BASIC,
-    name: 'Basic',
-    price: 10,
-    currency: 'EUR',
-    maxClients: 3,
-    maxTokensPerMonth: 5000000,        // 5M tokens - generous allowance with Gemini 2.0 Flash
-    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
-    // Max cost: 5M * $0.000175 = $0.875, leaving $10.845 profit (92.5% margin) [€10 = $11.72]
-    description: 'Perfect for getting started',
-    features_list: [
-      '👥 3 client profiles',
-      '💾 50 MB document storage',
-      '🔤 5M tokens (~3,750 pages of content)',
-      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
-    ]
-  },
-  [SubscriptionPlan.PRO]: {
-    id: SubscriptionPlan.PRO,
-    name: 'Pro',
-    price: 25,
-    currency: 'EUR',
-    maxClients: -1, // unlimited
-    maxTokensPerMonth: 15000000,       // 15M tokens - excellent value with Gemini 2.0 Flash
-    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
-    // Max cost: 15M * $0.000175 = $2.625, leaving $26.675 profit (91.0% margin) [€25 = $29.30]
-    description: 'For marketing professionals scaling their business',
-    features_list: [
-      '👥 Unlimited client profiles',
-      '💾 200 MB document storage',
-      '🔤 15M tokens (~11,250 pages of content)',
-      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
-    ]
-  },
-  [SubscriptionPlan.BUSINESS]: {
-    id: SubscriptionPlan.BUSINESS,
-    name: 'Business',
-    price: 50,
-    currency: 'EUR',
-    maxClients: -1, // unlimited
-    maxTokensPerMonth: 40000000,       // 40M tokens - enterprise-level allowance
-    // Pricing calculation: Gemini 2.0 Flash = ~$0.000175/1K tokens (blended)
-    // Max cost: 40M * $0.000175 = $7, leaving $51.60 profit (88.1% margin) [€50 = $58.60]
-    description: 'For agencies and teams with advanced needs',
-    features_list: [
-      '👥 Unlimited client profiles',
-      '💾 2 GB document storage',
-      '🔤 40M tokens (~30,000 pages of content)',
-      '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
-    ]
-  }
-} as const
 
 export type PlanId = SubscriptionPlan
 
@@ -102,38 +49,14 @@ export async function getUserSubscription(userId: string, bypassCache = false) {
 
     logger.dbQuery('findUnique', 'userSubscription', { userId });
     
-    let subscription = await prisma.userSubscription.findUnique({
-      where: { userId }
-    })
+    let subscription = await SubscriptionOperations.findByUserId(userId)
 
     // Create default basic subscription if none exists using upsert to prevent race conditions
     if (!subscription) {
       logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.BASIC } });
       
-      const now = new Date()
-      const periodEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-      
       logger.dbQuery('upsert', 'userSubscription', { userId });
-      subscription = await withTiming(
-        'Create user subscription',
-        () => prisma.userSubscription.upsert({
-          where: { userId },
-          update: {}, // Don't update if exists
-          create: {
-            userId,
-            plan: SubscriptionPlan.BASIC,
-            status: SubscriptionStatus.ACTIVE,
-            currentPeriodStart: now,
-            currentPeriodEnd: periodEnd,
-            maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
-            maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
-            cancelAtPeriodEnd: false,
-            pendingPlanChange: null,
-          }
-        }),
-        { userId },
-        500 // Database operations should be fast - warn if >500ms
-      );
+      subscription = await SubscriptionOperations.createDefaultBasicSubscription(userId)
     }
 
     // Cache the result
@@ -467,7 +390,7 @@ export async function getUserUsageAnalytics(userId: string) {
       getCurrentMonthUsage(userId)
     ])
 
-    const plan = SUBSCRIPTION_PLANS[subscription.plan as PlanId]
+    const plan = SUBSCRIPTION_PLAN_DETAIL[subscription.plan as PlanId]
 
     return {
       subscription: {
@@ -511,148 +434,6 @@ export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: Subscript
 }
 
 /**
- * Cancel an existing Stripe subscription schedule
- */
-export async function cancelExistingSchedule(scheduleId: string): Promise<void> {
-  const { stripe } = await import('./stripe')
-  
-  try {
-    const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId)
-    
-    // Only cancel if schedule is still active
-    if (schedule.status === 'active') {
-      await stripe.subscriptionSchedules.cancel(scheduleId)
-      
-      logger.info('Successfully canceled existing subscription schedule', {
-        metadata: {
-          scheduleId,
-          previousStatus: schedule.status,
-          userId: schedule.metadata?.userId
-        }
-      })
-    } else {
-      logger.info('Schedule already inactive, skipping cancellation', {
-        metadata: {
-          scheduleId,
-          status: schedule.status,
-          userId: schedule.metadata?.userId
-        }
-      })
-    }
-  } catch (error) {
-    logger.error('Failed to cancel existing subscription schedule', error as Error, {
-      metadata: { scheduleId }
-    })
-    throw error
-  }
-}
-
-/**
- * Helper function to clean up schedule and database fields
- */
-async function cleanupScheduleAndDatabase(scheduleId: string, userId: string): Promise<void> {
-  const { stripe } = await import('./stripe')
-  
-  try {
-    // First, get the current schedule status
-    const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId)
-    
-    logger.info('Retrieved schedule for cleanup', {
-      userId,
-      metadata: {
-        scheduleId,
-        status: schedule.status
-      }
-    })
-    
-    // Handle schedule based on its current status
-    if (schedule.status === 'active') {
-      // For active schedules, cancel them first
-      logger.info('Canceling active schedule before release', {
-        userId,
-        metadata: { scheduleId }
-      })
-      await stripe.subscriptionSchedules.cancel(scheduleId)
-    }
-    
-    // For all schedules (active, completed, canceled), release them from the subscription
-    logger.info('Releasing schedule from subscription', {
-      userId,
-      metadata: { scheduleId, status: schedule.status }
-    })
-    await stripe.subscriptionSchedules.release(scheduleId)
-    
-    // Clear the schedule ID and pending plan change from database
-    await prisma.userSubscription.update({
-      where: { userId },
-      data: { 
-        stripeScheduleId: null,
-        pendingPlanChange: null
-      }
-    })
-    
-    logger.info('Successfully cleaned up schedule and database', {
-      userId,
-      metadata: {
-        clearedScheduleId: scheduleId,
-        originalStatus: schedule.status
-      }
-    })
-  } catch (error) {
-    logger.error('Failed to cleanup schedule and database', error as Error, {
-      userId,
-      metadata: {
-        scheduleId
-      }
-    })
-    throw error
-  }
-}
-
-/**
- * Get active subscription schedule for a user
- */
-export async function getActiveSchedule(userId: string): Promise<string | null> {
-  try {
-    const subscription = await prisma.userSubscription.findUnique({
-      where: { userId },
-      select: { stripeScheduleId: true }
-    })
-    
-    if (!subscription?.stripeScheduleId) {
-      return null
-    }
-    
-    // Verify schedule is still active in Stripe
-    const { stripe } = await import('./stripe')
-    const schedule = await stripe.subscriptionSchedules.retrieve(subscription.stripeScheduleId)
-    
-    if (schedule.status === 'active') {
-      return subscription.stripeScheduleId
-    } else {
-      // Schedule is no longer active, clean up database
-      await prisma.userSubscription.update({
-        where: { userId },
-        data: { stripeScheduleId: null }
-      })
-      
-      logger.info('Cleaned up inactive schedule ID from database', {
-        userId,
-        metadata: {
-          scheduleId: subscription.stripeScheduleId,
-          status: schedule.status
-        }
-      })
-      
-      return null
-    }
-  } catch (error) {
-    logger.error('Failed to get active schedule', error as Error, { userId })
-    return null
-  }
-}
-
-/**
  * Schedule a subscription downgrade to take effect at the end of the current billing period
  */
 export async function scheduleSubscriptionDowngrade(
@@ -690,10 +471,7 @@ export async function scheduleSubscriptionDowngrade(
       }
     })
 
-    const scheduleId = typeof stripeSubscription.schedule === 'string' ?
-      stripeSubscription.schedule : stripeSubscription.schedule.id;
-
-    await stripe.subscriptionSchedules.release(scheduleId);
+    await releaseSubscriptionSchedule(stripeSubscription.schedule, stripeSubscriptionId)
   }
   
   // Get the effective date (current period end from subscription item)
