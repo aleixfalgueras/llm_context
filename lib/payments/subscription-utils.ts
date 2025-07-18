@@ -551,9 +551,36 @@ export async function cancelExistingSchedule(scheduleId: string): Promise<void> 
  * Helper function to clean up schedule and database fields
  */
 async function cleanupScheduleAndDatabase(scheduleId: string, userId: string): Promise<void> {
+  const { stripe } = await import('./stripe')
+  
   try {
-    // Cancel the existing schedule
-    await cancelExistingSchedule(scheduleId)
+    // First, get the current schedule status
+    const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId)
+    
+    logger.info('Retrieved schedule for cleanup', {
+      userId,
+      metadata: {
+        scheduleId,
+        status: schedule.status
+      }
+    })
+    
+    // Handle schedule based on its current status
+    if (schedule.status === 'active') {
+      // For active schedules, cancel them first
+      logger.info('Canceling active schedule before release', {
+        userId,
+        metadata: { scheduleId }
+      })
+      await stripe.subscriptionSchedules.cancel(scheduleId)
+    }
+    
+    // For all schedules (active, completed, canceled), release them from the subscription
+    logger.info('Releasing schedule from subscription', {
+      userId,
+      metadata: { scheduleId, status: schedule.status }
+    })
+    await stripe.subscriptionSchedules.release(scheduleId)
     
     // Clear the schedule ID and pending plan change from database
     await prisma.userSubscription.update({
@@ -567,7 +594,8 @@ async function cleanupScheduleAndDatabase(scheduleId: string, userId: string): P
     logger.info('Successfully cleaned up schedule and database', {
       userId,
       metadata: {
-        clearedScheduleId: scheduleId
+        clearedScheduleId: scheduleId,
+        originalStatus: schedule.status
       }
     })
   } catch (error) {
@@ -793,7 +821,6 @@ export async function scheduleSubscriptionDowngrade(
         {
           items: [{ price: targetPriceId, quantity: 1 }],
           start_date: currentPeriodEnd, // Start new phase when current period ends
-
         }
       ]
     })
