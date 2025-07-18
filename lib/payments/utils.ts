@@ -232,7 +232,8 @@ export async function updateSubscriptionInDatabase(
   priceId?: string,
   canceledAt?: number | null,
   cancelAtPeriodEnd?: boolean,
-  pendingPlanChange?: string | null
+  pendingPlanChange?: string | null,
+  stripeScheduleId?: string | null
 ) {
   try {
     const subscription = await prisma.userSubscription.findFirst({
@@ -268,6 +269,11 @@ export async function updateSubscriptionInDatabase(
     // Handle pendingPlanChange field
     if (pendingPlanChange !== undefined) {
       updateData.pendingPlanChange = pendingPlanChange
+    }
+
+    // Handle stripeScheduleId field
+    if (stripeScheduleId !== undefined) {
+      updateData.stripeScheduleId = stripeScheduleId
     }
 
     // Handle canceledAt timestamp

@@ -240,11 +240,6 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
       break
     }
 
-    case 'subscription_schedule.completed': {
-      const scheduleObject = event.data.object as Stripe.SubscriptionSchedule
-      await handleSubscriptionScheduleEvent(scheduleObject, event.type)
-      break
-    }
 
     default:
       logger.info('Unhandled webhook event type', { metadata: { type: event.type } })
@@ -323,7 +318,8 @@ async function handleUpgradeProcess(
       priceId,
       null, // Explicitly clear canceledAt for upgrade to active subscription
       newSubscription.cancel_at_period_end,
-      null // Clear any pending plan change since this is an immediate upgrade
+      null, // Clear any pending plan change since this is an immediate upgrade
+      null // Clear schedule ID since upgrade replaces any pending scheduled changes
     )
 
     // Step 4: Clear upgrade metadata to prevent future confusion
@@ -420,6 +416,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
       })
 
       let pendingPlanChangeValue = dbSubscription?.pendingPlanChange || null
+      let clearScheduleId = false
       
       if (dbSubscription?.pendingPlanChange && priceId) {
         const { getPlanFromPriceId } = await import('@/lib/payments/utils')
@@ -428,12 +425,14 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
         // If the new plan matches the pending plan change, clear the pending change
         if (newPlan === dbSubscription.pendingPlanChange) {
           pendingPlanChangeValue = null
+          clearScheduleId = true // Also clear schedule ID when plan change completes
           logger.info('Pending plan change applied, clearing pendingPlanChange', {
             metadata: {
               subscriptionId: subscription.id,
               customerId: subscription.customer,
               previousPendingPlan: dbSubscription.pendingPlanChange,
-              newPlan
+              newPlan,
+              scheduleCompleted: !!dbSubscription.stripeScheduleId
             }
           })
         }
@@ -448,8 +447,10 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
         priceId,
         subscription.canceled_at,
         subscription.cancel_at_period_end,
-        pendingPlanChangeValue
+        pendingPlanChangeValue,
+        clearScheduleId ? null : undefined
       )
+
 
       logger.info('Subscription event processed successfully', {
         metadata: {
@@ -459,7 +460,8 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
           status: subscription.status,
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
           priceId: priceId,
-          processedAs: 'regular_subscription_update'
+          processedAs: 'regular_subscription_update',
+          scheduleCompleted: clearScheduleId
         }
       })
     }
@@ -531,7 +533,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       undefined, // no priceId for deletion
       subscription.canceled_at,
       false, // Set to false since subscription is now fully canceled
-      null // Clear pending plan change since subscription is deleted
+      null, // Clear pending plan change since subscription is deleted
+      null // Clear schedule ID since subscription is deleted
     )
 
     logger.info('Subscription deletion processed successfully', {
@@ -618,108 +621,4 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   }
 }
 
-// Handle subscription schedule events (for downgrades)
-async function handleSubscriptionScheduleEvent(
-  schedule: Stripe.SubscriptionSchedule,
-  eventType: string
-): Promise<void> {
-  try {
-    logger.info('Processing subscription schedule event', {
-      metadata: {
-        scheduleId: schedule.id,
-        eventType,
-        status: schedule.status,
-        customerId: schedule.customer,
-        subscriptionId: schedule.subscription,
-        phases: schedule.phases?.length || 0
-      }
-    })
-
-    // Process completed schedule (when downgrade actually takes effect)
-    if (schedule.subscription) {
-      const subscriptionId = schedule.subscription as string
-      const customerId = schedule.customer as string
-      
-      // Get the updated subscription to see the new plan
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-      
-      // Get subscription item for proper period access
-      const subscriptionItem = subscription.items.data[0]
-      const currentPeriodStart = subscriptionItem.current_period_start
-      const currentPeriodEnd = subscriptionItem.current_period_end
-      
-      // Check if this was a downgrade by looking at schedule metadata
-      const isDowngrade = schedule.metadata && schedule.metadata.targetPlan && schedule.metadata.currentPlan
-      
-      if (isDowngrade && schedule.metadata) {
-        logger.info('Processing completed downgrade from subscription schedule', {
-          metadata: {
-            scheduleId: schedule.id,
-            subscriptionId,
-            customerId,
-            currentPlan: schedule.metadata.currentPlan,
-            targetPlan: schedule.metadata.targetPlan,
-            userId: schedule.metadata.userId
-          }
-        })
-
-        // Update subscription in database and clear pendingPlanChange
-        await updateSubscriptionInDatabase(
-          subscriptionId,
-          customerId,
-          subscription.status,
-          currentPeriodStart,
-          currentPeriodEnd,
-          subscriptionItem?.price?.id,
-          subscription.canceled_at || null,
-          subscription.cancel_at_period_end,
-          null // Clear pendingPlanChange since downgrade is now complete
-        )
-
-        // Clear the stripeScheduleId since the schedule has completed
-        const userSubscription = await prisma.userSubscription.findFirst({
-          where: { stripeCustomerId: customerId }
-        })
-        
-        if (userSubscription) {
-          await prisma.userSubscription.update({
-            where: { id: userSubscription.id },
-            data: { stripeScheduleId: null }
-          })
-        }
-
-        logger.info('Downgrade completed successfully via subscription schedule', {
-          metadata: {
-            scheduleId: schedule.id,
-            subscriptionId,
-            customerId,
-            currentPlan: schedule.metadata.currentPlan,
-            targetPlan: schedule.metadata.targetPlan,
-            userId: schedule.metadata.userId,
-            pendingPlanChangeCleared: true,
-            stripeScheduleIdCleared: true
-          }
-        })
-      }
-    }
-
-    logger.info('Subscription schedule event processed successfully', {
-      metadata: {
-        scheduleId: schedule.id,
-        eventType,
-        status: schedule.status,
-        customerId: schedule.customer
-      }
-    })
-  } catch (error) {
-    logger.error('Failed to handle subscription schedule event', error as Error, {
-      metadata: {
-        scheduleId: schedule.id,
-        eventType,
-        customerId: schedule.customer,
-      }
-    })
-    throw error
-  }
-}
 
