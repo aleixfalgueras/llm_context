@@ -1,12 +1,12 @@
 import {NextRequest, NextResponse} from 'next/server'
 import {headers} from 'next/headers'
-import {stripe} from '@/lib/payments/stripe'
-import {cancelSubscriptionImmediately} from '@/lib/payments/stripe-utils'
+import {stripe} from '@/lib/stripe/stripe'
 import {logger} from '@/lib/logger'
 import {prisma} from '@/lib/prisma'
 import Stripe from 'stripe'
 import {SubscriptionOperations} from "@/lib/database";
-import {checkAndMarkEventProcessed, markEventProcessed} from "@/lib/payments/webhook-event";
+import {checkAndMarkEventProcessed, markEventProcessed} from "@/lib/stripe/webhook-event";
+import {cancelSubscriptionImmediately, synchronizeSubscriptionWithStripe} from "@/lib/stripe/stripe-subscription";
 
 // Helper function to check if a subscription is part of an upgrade flow
 async function isUpgradeSubscription(subscriptionId: string, customerId: string): Promise<boolean> {
@@ -243,7 +243,7 @@ async function handleUpgradeProcess(
 
     // Step 3: Update database only after successful cancellation
     // This is the single source of truth - no other webhook event should modify during upgrade
-    await SubscriptionOperations.updateSubscriptionInDatabase(
+    await synchronizeSubscriptionWithStripe(
       newSubscription.id,
       newSubscription.customer as string,
       newSubscription.status,
@@ -353,7 +353,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
       let clearScheduleId = false
       
       if (dbSubscription?.pendingPlanChange && priceId) {
-        const { getPlanFromPriceId } = await import('@/lib/payments/stripe-utils')
+        const { getPlanFromPriceId } = await import('@/lib/stripe/stripe-utils')
         const newPlan = getPlanFromPriceId(priceId)
         
         // If the new plan matches the pending plan change, clear the pending change
@@ -372,7 +372,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
         }
       }
 
-      await SubscriptionOperations.updateSubscriptionInDatabase(
+      await synchronizeSubscriptionWithStripe(
         subscription.id,
         subscription.customer as string,
         subscription.status,
@@ -458,7 +458,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     const currentPeriodStart = subscriptionItem.current_period_start
     const currentPeriodEnd = subscriptionItem.current_period_end
     
-    await SubscriptionOperations.updateSubscriptionInDatabase(
+    await synchronizeSubscriptionWithStripe(
       subscription.id,
       subscription.customer as string,
       'canceled',

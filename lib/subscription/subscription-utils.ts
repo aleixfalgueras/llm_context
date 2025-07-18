@@ -9,12 +9,9 @@ import {
   cacheUsage,
   getCachedSubscription,
   getCachedUsage,
-  invalidateAllUserCaches,
   invalidateUsageCache
 } from './subscription-cache'
 import {SubscriptionOperations} from "@/lib/database";
-
-import {PLAN_HIERARCHY, getPlanNameColor, isUpgrade as clientIsUpgrade, isDowngrade as clientIsDowngrade} from './subscription-client-utils'
 
 export type PlanId = SubscriptionPlan
 

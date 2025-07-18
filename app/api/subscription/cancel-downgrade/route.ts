@@ -3,11 +3,11 @@ import {
   apiSuccess, 
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import { releaseSubscriptionSchedule } from '@/lib/payments/stripe-utils'
-import { invalidateAllUserCaches } from '@/lib/payments/subscription-cache'
+import { invalidateAllUserCaches } from '@/lib/subscription/subscription-cache'
 
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
+import {releaseSubscriptionSchedule} from "@/lib/stripe/stripe-subscription";
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {
@@ -42,7 +42,6 @@ export const POST = withEnhancedApi(
     try {
       // Release the Stripe subscription schedule
       await releaseSubscriptionSchedule(subscription.stripeScheduleId, subscription.stripeSubscriptionId)
-
       logger.info('Successfully cancelled subscription downgrade', {
         userId,
         metadata: {
@@ -51,6 +50,8 @@ export const POST = withEnhancedApi(
           currentPlan: subscription.plan
         }
       })
+
+      // TODO: Clean schedule fields in database
 
       // Invalidate all user caches after canceling downgrade
       await invalidateAllUserCaches(userId)

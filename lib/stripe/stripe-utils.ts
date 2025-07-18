@@ -1,6 +1,6 @@
 import {stripe} from './stripe'
 import {logger} from '../logger'
-import {SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
+import {SubscriptionPlan} from '@/types/subscription-types'
 import {SubscriptionOperations} from '@/lib/database'
 import Stripe from 'stripe'
 
@@ -38,7 +38,7 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
       },
     })
 
-    await SubscriptionOperations.upsertWithStripeCustomer(userId, customer.id)
+    await SubscriptionOperations.updateSubscription(userId, { stripeCustomerId: customer.id })
 
     logger.info('Created new Stripe customer', { userId, metadata: { customerId: customer.id } })
     return customer
@@ -119,33 +119,6 @@ export async function createCheckoutSession(
   }
 }
 
-export async function cancelSubscriptionImmediately(subscriptionId: string, reason: string = 'user_request') {
-  try {
-    const canceledSubscription = await stripe.subscriptions.cancel(subscriptionId, {
-      prorate: false,
-      invoice_now: false,
-    })
-
-    logger.info('Successfully canceled subscription immediately', {
-      metadata: {
-        subscriptionId,
-        reason,
-        canceledAt: canceledSubscription.canceled_at
-      }
-    })
-
-    return canceledSubscription
-  } catch (error) {
-    logger.error('Failed to cancel subscription immediately', error as Error, {
-      metadata: {
-        subscriptionId,
-        reason
-      }
-    })
-    throw error
-  }
-}
-
 export async function createCustomerPortalSession(userId: string) {
   try {
     const subscription = await SubscriptionOperations.findByUserId(userId)
@@ -174,41 +147,4 @@ export function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
     }
   }
   return null
-}
-
-export function mapStripeStatusToSubscriptionStatus(stripeStatus: string): SubscriptionStatus {
-  switch (stripeStatus) {
-    case 'active':
-      return SubscriptionStatus.ACTIVE
-    case 'canceled':
-      return SubscriptionStatus.CANCELED
-    case 'past_due':
-      return SubscriptionStatus.PAST_DUE
-    case 'incomplete':
-    case 'incomplete_expired':
-      return SubscriptionStatus.INCOMPLETE
-    case 'unpaid':
-      return SubscriptionStatus.UNPAID
-    default:
-      return SubscriptionStatus.INCOMPLETE
-  }
-}
-
-/**
- * Release (cancel) an Stripe subscription schedule
- */
-export async function releaseSubscriptionSchedule(
-  schedule: string | Stripe.SubscriptionSchedule,
-  stripeSubscriptionId: string | null
-): Promise<void> {
-  try {
-    const scheduleId = typeof schedule === 'string' ? schedule : schedule.id;
-    await stripe.subscriptionSchedules.release(scheduleId);
-
-  } catch (error) {
-    logger.error('Failed to release subscription schedule', error as Error, {
-      metadata: { stripeSubscriptionId }
-    })
-    throw error
-  }
 }
