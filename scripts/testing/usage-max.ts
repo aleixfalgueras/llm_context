@@ -10,8 +10,7 @@
  *   tsx scripts/usage-max.ts user_123   # Set token usage to max for their current plan
  */
 import { PrismaClient } from '@prisma/client'
-import { SUBSCRIPTION_PLANS } from '@/lib/payments/subscription-utils'
-import { SubscriptionPlan } from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
 
 const prisma = new PrismaClient()
 
@@ -59,8 +58,8 @@ async function getUserSubscription(userId: string) {
         status: 'active',
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
-        maxClients: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxClients,
-        maxTokensPerMonth: SUBSCRIPTION_PLANS[SubscriptionPlan.BASIC].maxTokensPerMonth,
+        maxClients: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.BASIC].maxClients,
+        maxTokensPerMonth: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.BASIC].maxTokensPerMonth,
       }
     })
     
@@ -72,7 +71,7 @@ async function getUserSubscription(userId: string) {
 }
 
 async function updateUserUsageToMax(userId: string, subscription: any) {
-  const plan = SUBSCRIPTION_PLANS[subscription.plan as SubscriptionPlan]
+  const plan = SUBSCRIPTION_PLAN_DETAIL[subscription.plan as SubscriptionPlan]
   const now = new Date()
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1 // JavaScript months are 0-based

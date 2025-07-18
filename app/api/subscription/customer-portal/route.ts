@@ -1,4 +1,4 @@
-import { createCustomerPortalSession } from '@/lib/payments/utils'
+import { createCustomerPortalSession } from '@/lib/payments/stripe-utils'
 import { logger } from '@/lib/logger'
 import { 
   withEnhancedApi, 
