@@ -438,13 +438,6 @@ export default function SubscriptionPage() {
     return `Upgrade to ${planNames[planId as keyof typeof planNames]}`
   }
 
-  const isUpgrade = (planId: string) => {
-    const planOrder = [SubscriptionPlan.BASIC, SubscriptionPlan.PRO, SubscriptionPlan.BUSINESS]
-    const currentIndex = planOrder.indexOf(subscription.plan as SubscriptionPlan)
-    const targetIndex = planOrder.indexOf(planId as SubscriptionPlan)
-    return targetIndex > currentIndex
-  }
-
   const isCurrentPlan = (planId: string) => {
     // Free mode users don't have a "current plan" - they're in trial
     if (isFreeMode()) {

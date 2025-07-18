@@ -402,8 +402,3 @@ export async function getUserUsageAnalytics(userId: string) {
     throw error
   }
 }
-
-// Re-export client utilities for backwards compatibility
-export { isUpgrade, isDowngrade } from './subscription-client-utils'
-
- 
