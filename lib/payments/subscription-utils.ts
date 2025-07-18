@@ -676,36 +676,25 @@ export async function scheduleSubscriptionDowngrade(
       subscriptionId: stripeSubscriptionId
     }
   })
+  // Get current subscription from Stripe
+  const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
 
-  
-  // Check for existing schedule and clean up if necessary
-  const existingScheduleId = await getActiveSchedule(userId)
-  if (existingScheduleId) {
-    logger.info('Found existing schedule, cleaning up before creating new one', {
+  // Check if stripeSubscription is owned by a schedule, release it if true
+  if (stripeSubscription.schedule) {
+    logger.info('Found existing schedule, releasing it before creating new one', {
       userId,
       metadata: {
-        existingScheduleId,
         subscriptionId: stripeSubscriptionId,
         currentPlan,
         targetPlan
       }
     })
-    
-    try {
-      await cleanupScheduleAndDatabase(existingScheduleId, userId)
-    } catch (cleanupError) {
-      logger.error('Failed to clean up existing schedule, proceeding anyway', cleanupError as Error, {
-        userId,
-        metadata: {
-          existingScheduleId,
-          subscriptionId: stripeSubscriptionId
-        }
-      })
-    }
-  }
 
-  // Get current subscription from Stripe
-  const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+    const scheduleId = typeof stripeSubscription.schedule === 'string' ?
+      stripeSubscription.schedule : stripeSubscription.schedule.id;
+
+    await stripe.subscriptionSchedules.release(scheduleId);
+  }
   
   // Get the effective date (current period end from subscription item)
   const subscriptionItem = stripeSubscription.items.data[0]
@@ -730,75 +719,16 @@ export async function scheduleSubscriptionDowngrade(
       }
     })
   } catch (error) {
-    const errorMessage = (error as Error).message
-    
-    // Check if this is the specific "already attached to a schedule" error
-    if (errorMessage.includes('already attached to a schedule')) {
-      logger.warn('Detected subscription already attached to schedule, attempting automatic cleanup and retry', {
-        userId,
-        metadata: {
-          subscriptionId: stripeSubscriptionId,
-          errorMessage,
-          currentPlan,
-          targetPlan
-        }
-      })
-      
-      try {
-        // Try to find and clean up any remaining schedule association
-        const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
-        
-        if (subscription.schedule) {
-          logger.info('Found schedule association on subscription, cleaning up', {
-            userId,
-            metadata: {
-              subscriptionId: stripeSubscriptionId,
-              scheduleId: subscription.schedule
-            }
-          })
-          
-          // Try to cancel the associated schedule and clean up database
-          await cleanupScheduleAndDatabase(subscription.schedule as string, userId)
-          
-          // Retry creating the schedule
-          schedule = await stripe.subscriptionSchedules.create({
-            from_subscription: stripeSubscriptionId,
-          })
-          
-          logger.info('Successfully created schedule after cleanup and retry', {
-            userId,
-            metadata: {
-              scheduleId: schedule.id,
-              subscriptionId: stripeSubscriptionId,
-              currentPlan,
-              targetPlan
-            }
-          })
-        } else {
-          throw new Error('No schedule found on subscription but still getting schedule error')
-        }
-      } catch (retryError) {
-        logger.error('Failed to automatically resolve schedule conflict', retryError as Error, {
-          userId,
-          metadata: {
-            subscriptionId: stripeSubscriptionId,
-            originalError: errorMessage
-          }
-        })
-        throw new Error(`Cannot create downgrade schedule: subscription already has an attached schedule. Please contact support or try canceling any existing downgrades first.`)
+    logger.error('Failed to create subscription schedule from existing subscription', error as Error, {
+      userId,
+      metadata: {
+        subscriptionId: stripeSubscriptionId,
+        currentPlan,
+        targetPlan,
+        effectiveDate: effectiveDate.toISOString()
       }
-    } else {
-      logger.error('Failed to create subscription schedule from existing subscription', error as Error, {
-        userId,
-        metadata: {
-          subscriptionId: stripeSubscriptionId,
-          currentPlan,
-          targetPlan,
-          effectiveDate: effectiveDate.toISOString()
-        }
-      })
-      throw error
-    }
+    })
+    throw error
   }
 
   // Update subscription schedule with downgrade phase (Step 2)
