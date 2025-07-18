@@ -18,7 +18,7 @@ import {
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
-import {getPlanNameColor} from '@/lib/payments/subscription-utils'
+import {getPlanNameColor} from '@/lib/payments/subscription-client-utils'
 import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
 import Link from 'next/link'
 
