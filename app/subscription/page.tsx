@@ -100,6 +100,7 @@ function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }: {
 export default function SubscriptionPage() {
   const subscription = useSubscription()
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
+  const [cancelDowngradeLoading, setCancelDowngradeLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean
@@ -145,7 +146,12 @@ export default function SubscriptionPage() {
 
   // Helper function to detect if subscription has pending downgrade
   const isPendingDowngrade = () => {
-    return !isFreeMode() && subscription.isActive && subscription.pendingPlanChange && !subscription.cancelAtPeriodEnd
+    return Boolean(!isFreeMode() && subscription.isActive && subscription.pendingPlanChange && !subscription.cancelAtPeriodEnd)
+  }
+
+  // Helper function to safely check if a plan matches the pending change
+  const isPendingPlanChange = (planId: string): boolean => {
+    return Boolean(subscription.pendingPlanChange && subscription.pendingPlanChange !== "" && subscription.pendingPlanChange === planId)
   }
 
   // Helper function to calculate remaining days until downgrade
@@ -243,6 +249,15 @@ export default function SubscriptionPage() {
     })
   }
 
+  const handlePlanAction = (planId: string) => {
+    // Check if this plan is the target of a pending downgrade
+    if (isPendingDowngrade() && isPendingPlanChange(planId)) {
+      handleCancelDowngrade()
+    } else {
+      handleUpgrade(planId)
+    }
+  }
+
   const handleConfirmUpgrade = async () => {
     if (!confirmationDialog.targetPlan) return
 
@@ -336,6 +351,47 @@ export default function SubscriptionPage() {
     }
   }
 
+  const handleCancelDowngrade = async () => {
+    setCancelDowngradeLoading(true)
+    try {
+      const response = await fetch('/api/subscription/cancel-downgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      
+      if (response.ok) {
+        const { data } = await response.json()
+        
+        toast({
+          title: 'Downgrade Canceled',
+          description: data.message || 'Your scheduled downgrade has been canceled successfully.',
+          variant: ToastVariant.SUCCESS
+        })
+        
+        // Refresh subscription to show updated state
+        setIsRefreshing(true)
+        subscription.refetch(3, 1000, true).then(() => {
+          setIsRefreshing(false)
+        }).catch((error) => {
+          console.error('Failed to refresh subscription after canceling downgrade:', error)
+          setIsRefreshing(false)
+        })
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to cancel downgrade')
+      }
+    } catch (error) {
+      console.error('Error canceling downgrade:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to cancel downgrade. Please try again.',
+        variant: ToastVariant.DESTRUCTIVE
+      })
+    } finally {
+      setCancelDowngradeLoading(false)
+    }
+  }
+
   const getPlanIcon = (planId: string) => {
     switch (planId) {
       case SubscriptionPlan.BASIC: return <ZapIcon className="h-6 w-6" />
@@ -358,9 +414,19 @@ export default function SubscriptionPage() {
       return `Subscribe to ${planNames[planId as keyof typeof planNames]}`
     }
     
+    // Check if this plan is the target of a pending downgrade
+    if (isPendingDowngrade() && isPendingPlanChange(planId)) {
+      return 'Cancel Downgrade'
+    }
+    
     // Check if this is the current plan (for paid users)
     if (isCurrentPlan(planId)) {
       return 'Current Plan'
+    }
+    
+    // If there's a pending downgrade and this is not the target plan, show blocked state
+    if (isPendingDowngrade()) {
+      return `${planNames[planId as keyof typeof planNames]} (Blocked)`
     }
     
     // Check if this is a downgrade
@@ -530,18 +596,27 @@ export default function SubscriptionPage() {
                 </ul>
                 
                 <Button 
-                  onClick={() => handleUpgrade(plan.id)}
-                  disabled={upgradeLoading === plan.id || isCurrentPlan(planId)}
+                  onClick={() => handlePlanAction(plan.id)}
+                  disabled={upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan(planId) || (isPendingDowngrade() && !isPendingPlanChange(planId))}
                   className={`w-full ${
                     isCurrentPlan(planId) 
                       ? 'bg-gray-500 hover:bg-gray-600 text-white' 
-                      : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
+                      : isPendingDowngrade() && isPendingPlanChange(planId)
+                        ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+                        : isPendingDowngrade() && !isPendingPlanChange(planId)
+                          ? 'bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
                   }`}
                 >
                   {upgradeLoading === plan.id ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Processing...
+                    </div>
+                  ) : cancelDowngradeLoading && isPendingDowngrade() && isPendingPlanChange(planId) ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Canceling...
                     </div>
                   ) : (
                     getButtonText(planId)
