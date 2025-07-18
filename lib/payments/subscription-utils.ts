@@ -615,32 +615,6 @@ export async function scheduleSubscriptionDowngrade(
     }
   })
 
-  // Check for existing active schedule and cancel it if found
-  const existingScheduleId = await getActiveSchedule(userId)
-  if (existingScheduleId) {
-    logger.info('Found existing active schedule, canceling before creating new one', {
-      userId,
-      metadata: {
-        existingScheduleId,
-        currentPlan,
-        targetPlan
-      }
-    })
-    
-    try {
-      await cancelExistingSchedule(existingScheduleId)
-    } catch (error) {
-      logger.error('Failed to cancel existing schedule, continuing with new schedule creation', error as Error, {
-        userId,
-        metadata: {
-          existingScheduleId,
-          currentPlan,
-          targetPlan
-        }
-      })
-      // Continue with new schedule creation even if cancellation fails
-    }
-  }
   
   // Get current subscription from Stripe
   const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
@@ -747,8 +721,7 @@ export async function scheduleSubscriptionDowngrade(
       subscriptionId: stripeSubscriptionId,
       scheduleId: schedule.id,
       effectiveDate: effectiveDate.toISOString(),
-      pendingPlanChange: targetPlan,
-      canceledExistingSchedule: !!existingScheduleId
+      pendingPlanChange: targetPlan
     }
   })
 
