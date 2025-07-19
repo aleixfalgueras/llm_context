@@ -61,11 +61,6 @@ export function getButtonText(
     return 'Current Plan'
   }
   
-  // If there's a pending downgrade and this is not the target plan, show blocked state
-  if (isPendingDowngrade) {
-    return `${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]} (Blocked)`
-  }
-  
   // Check if this is a downgrade
   if (isDowngrade(currentPlan, planId as SubscriptionPlan)) {
     return `Downgrade to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
