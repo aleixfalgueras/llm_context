@@ -8,6 +8,16 @@ import {
   handleSubscriptionEvent
 } from "@/lib/stripe/webhook-handle";
 
+/**
+ * Checks webhook event idempotency to prevent duplicate processing.
+ * Creates a database record for new events and determines if an event should be skipped
+ * based on its processing status. Ensures webhook events are processed exactly once.
+ * 
+ * @param eventId - The unique Stripe event ID
+ * @param eventType - The type of webhook event (e.g., 'customer.subscription.created')
+ * @returns Promise<{shouldSkip: boolean, isRetry: boolean}> - Processing decision and retry status
+ * @throws Error if database operations fail
+ */
 export async function checkEventIdempotency(
   eventId: string,
   eventType: string
@@ -53,7 +63,14 @@ export async function checkEventIdempotency(
   }
 }
 
-// Process webhook event based on type
+/**
+ * Main webhook event dispatcher that routes Stripe events to their appropriate handlers.
+ * Supports subscription lifecycle events (created, updated, deleted) and invoice payment events.
+ * Acts as the central processing hub for all incoming Stripe webhook events.
+ * 
+ * @param event - The complete Stripe event object from the webhook
+ * @throws Error if event processing fails in any of the delegated handlers
+ */
 export async function processWebhookEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case 'customer.subscription.created':
@@ -86,7 +103,14 @@ export async function processWebhookEvent(event: Stripe.Event): Promise<void> {
   }
 }
 
-// Mark event as processed
+/**
+ * Marks a webhook event as successfully processed in the database.
+ * Updates the event record with processed status and timestamp to prevent reprocessing.
+ * Should be called after successful completion of webhook event handling.
+ * 
+ * @param eventId - The unique Stripe event ID to mark as processed
+ * @throws Error if database update fails
+ */
 export async function markEventProcessed(eventId: string): Promise<void> {
   try {
     await prisma.webhookEvent.update({
