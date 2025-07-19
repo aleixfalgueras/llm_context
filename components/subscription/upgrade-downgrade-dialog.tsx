@@ -58,7 +58,7 @@ export function UpgradeDowngradeDialog({
   const loadUpgradePreview = async () => {
     setPreviewLoading(true)
     try {
-      const response = await fetch('/api/subscription/preview-upgrade', {
+      const response = await fetch('/api/subscription/preview-upgrade-downgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId: targetPlan })
