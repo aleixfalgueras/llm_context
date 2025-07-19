@@ -10,9 +10,13 @@ export function useSubscriptionRefresh() {
   const wasPreviouslyBlurred = useRef(false)
 
   // Helper function to refresh subscription with error handling
-  const refreshSubscriptionWithFallback = async () => {
+  const refreshSubscriptionWithFallback = async (withDelay: boolean = false) => {
     setIsRefreshing(true)
     try {
+      // Wait for database changes to propagate if requested
+      if (withDelay) {
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
       await subscription.refetch(3, 1000, true)
     } catch (error) {
       console.error('Failed to refresh subscription:', error)
