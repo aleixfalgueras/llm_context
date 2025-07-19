@@ -1,14 +1,9 @@
-import { 
-  withEnhancedApi, 
-  apiSuccess, 
-  parseJsonBody,
-  ApiContext 
-} from '@/lib/middleware/api-middleware'
-import { stripe } from '@/lib/stripe/stripe'
-import { STRIPE_PRICE_IDS } from '@/lib/stripe/stripe-utils'
-import { SubscriptionPlan } from '@/types/subscription-types'
-import { logger } from '@/lib/logger'
-import { prisma } from '@/lib/prisma'
+import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
+import {stripe} from '@/lib/stripe/stripe'
+import {STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
+import {SubscriptionPlan} from '@/types/subscription-types'
+import {logger} from '@/lib/logger'
+import {SubscriptionOperations} from "@/lib/database";
 
 interface UpgradePreviewResponse {
   currentPlan: SubscriptionPlan
@@ -29,9 +24,7 @@ export const POST = withEnhancedApi(
     }
 
     // Get current subscription
-    const existingSubscription = await prisma.userSubscription.findUnique({
-      where: { userId },
-    })
+    const existingSubscription = await SubscriptionOperations.findByUserId(userId)
 
     if (!existingSubscription?.stripeSubscriptionId) {
       logger.warn('No active subscription found for upgrade preview - user appears to be in free trial', { 
