@@ -20,23 +20,18 @@ export { getPlanNameColor } from './subscription-plan-utils'
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string, bypassCache = false) {
-  const endTiming = logger.startTiming('Get User Subscription', { userId });
-  
   try {
     // Check cache first (unless bypassing cache)
     if (!bypassCache) {
       const cached = await getCachedSubscription(userId)
       if (cached) {
         logger.info('Returning cached subscription', { userId })
-        endTiming();
         return cached
       }
     } else {
       logger.info('Bypassing cache for subscription fetch', { userId })
     }
 
-    logger.dbQuery('findUnique', 'userSubscription', { userId });
-    
     let subscription = await SubscriptionOperations.findByUserId(userId)
 
     // Create default basic subscription if none exists using upsert to prevent race conditions
@@ -50,19 +45,15 @@ export async function getUserSubscription(userId: string, bypassCache = false) {
     // Cache the result
     await cacheSubscription(userId, subscription)
 
-    endTiming();
     return subscription
   } catch (error) {
     logger.error('Error getting user subscription', error as Error, { userId });
-    endTiming();
     throw error
   }
 }
 
 // Get current month usage
 export async function getCurrentMonthUsage(userId: string) {
-  const endTiming = logger.startTiming('Get Current Month Usage', { userId });
-  
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
@@ -73,11 +64,9 @@ export async function getCurrentMonthUsage(userId: string) {
     const cached = await getCachedUsage(cacheKey)
     if (cached) {
       logger.debug('Returning cached usage', { userId, metadata: { year: year.toString(), month: month.toString() } })
-      endTiming();
       return cached
     }
 
-    logger.dbQuery('findUnique', 'userUsage', { userId });
     let usage = await prisma.userUsage.findUnique({
       where: {
         userId_year_month: {
@@ -122,14 +111,12 @@ export async function getCurrentMonthUsage(userId: string) {
     // Cache the result
     await cacheUsage(cacheKey, usage)
 
-    endTiming();
     return usage
   } catch (error) {
     logger.error('Error getting current month usage', error as Error, { 
       userId,
       metadata: { year: year.toString(), month: month.toString() }
     });
-    endTiming();
     throw error
   }
 }
