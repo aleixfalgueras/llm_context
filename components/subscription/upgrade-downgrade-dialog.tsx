@@ -35,7 +35,7 @@ interface UpgradeConfirmationDialogProps {
   isDowngrade?: boolean // Whether this is a downgrade (scheduled for end of period)
 }
 
-export function UpgradeConfirmationDialog({
+export function UpgradeDowngradeDialog({
   isOpen,
   onClose,
   onConfirm,
