@@ -10,6 +10,16 @@ export const STRIPE_PRICE_IDS = {
   [SubscriptionPlan.BUSINESS]: process.env.STRIPE_BUSINESS_PRICE_ID || 'price_1RiV0uH1IwPXt7SInp95Km4L',
 } as const
 
+/**
+ * Creates a new Stripe customer or retrieves an existing one for the given user.
+ * If the user already has a subscription with a valid Stripe customer ID, it will attempt
+ * to retrieve that customer. If the customer doesn't exist or is deleted, a new customer is created.
+ * 
+ * @param userId - The unique identifier for the user
+ * @param email - The email address for the customer
+ * @returns Promise<Stripe.Customer> - The Stripe customer object
+ * @throws Error if customer creation/retrieval fails
+ */
 export async function createOrRetrieveCustomer(userId: string, email: string) {
   try {
     const existingSubscription = await SubscriptionOperations.findByUserId(userId)
@@ -48,6 +58,18 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
   }
 }
 
+/**
+ * Creates a Stripe checkout session for subscription purchase or upgrade.
+ * Handles both new subscriptions and upgrades from existing subscriptions.
+ * For upgrades, the old subscription will be cancelled after the new one is created using metada.
+ * 
+ * @param userId - The unique identifier for the user
+ * @param email - The email address for the customer
+ * @param priceId - The Stripe price ID for the subscription plan
+ * @param planId - The subscription plan type being purchased
+ * @returns Promise<{success: boolean, url: string | null}> - Success status and checkout URL
+ * @throws Error if checkout session creation fails
+ */
 export async function createCheckoutSession(
   userId: string,
   email: string,
@@ -119,6 +141,14 @@ export async function createCheckoutSession(
   }
 }
 
+/**
+ * Creates a Stripe customer portal session for subscription management.
+ * Allows customers to view invoices, update payment methods, and manage their subscription.
+ * 
+ * @param userId - The unique identifier for the user
+ * @returns Promise<Stripe.BillingPortal.Session> - The billing portal session object
+ * @throws Error if the user doesn't have a Stripe customer ID or portal creation fails
+ */
 export async function createCustomerPortalSession(userId: string) {
   try {
     const subscription = await SubscriptionOperations.findByUserId(userId)
@@ -140,6 +170,13 @@ export async function createCustomerPortalSession(userId: string) {
   }
 }
 
+/**
+ * Maps a Stripe price ID to the corresponding subscription plan.
+ * Used to identify which plan a customer is subscribing to based on the price ID.
+ * 
+ * @param priceId - The Stripe price ID to look up
+ * @returns SubscriptionPlan | null - The corresponding plan or null if not found
+ */
 export function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
   for (const [plan, planPriceId] of Object.entries(STRIPE_PRICE_IDS)) {
     if (planPriceId === priceId) {
