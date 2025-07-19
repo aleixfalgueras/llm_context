@@ -30,7 +30,7 @@ export default function SubscriptionPage() {
     isCurrentPlan
   } = useSubscriptionStatus()
 
-  const { isRefreshing, setIsRefreshing, refreshSubscriptionWithFallback } = useSubscriptionRefresh()
+  const { isRefreshing, setIsRefreshing, refreshSubscriptionWithFallback } = useSubscriptionRefresh({ refetch: subscription.refetch })
 
   const {
     upgradeLoading,
