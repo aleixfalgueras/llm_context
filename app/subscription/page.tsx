@@ -60,7 +60,7 @@ export default function SubscriptionPage() {
     if (subscription.isActive) {
       // If marked for cancellation, show reactivate option
       if (subscription.cancelAtPeriodEnd) {
-        return 'Re-activate Subscription'
+        return 'Reactivate Subscription'
       }
       // If active and not marked for cancellation, show cancel option
       return 'Cancel Subscription'
