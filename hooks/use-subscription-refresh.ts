@@ -37,34 +37,15 @@ export function useSubscriptionRefresh() {
         
         // Debounce the refresh to prevent excessive API calls
         debounceTimer = setTimeout(async () => {
-          setIsRefreshing(true)
-          
           try {
-            // Store current state before refresh
-            const previousState = {
-              plan: subscription.plan,
-              status: subscription.status,
-              cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-              pendingPlanChange: subscription.pendingPlanChange
-            }
-            
             await refreshSubscriptionWithFallback(true)
             
-            // Check if anything important changed
-            const hasChanges = 
-              previousState.plan !== subscription.plan ||
-              previousState.status !== subscription.status ||
-              previousState.cancelAtPeriodEnd !== subscription.cancelAtPeriodEnd ||
-              previousState.pendingPlanChange !== subscription.pendingPlanChange
-            
-            // Only show toast if there were actual changes
-            if (hasChanges) {
-              toast({
-                title: 'Subscription Updated',
-                description: 'Your subscription changes have been synchronized.',
-                variant: ToastVariant.SUCCESS
-              })
-            }
+            // Always show success toast when returning to tab (user likely made changes elsewhere)
+            toast({
+              title: 'Subscription Updated',
+              description: 'Your subscription data has been refreshed.',
+              variant: ToastVariant.SUCCESS
+            })
           } catch (error) {
             console.error('Failed to refresh subscription:', error)
             toast({
@@ -72,8 +53,6 @@ export function useSubscriptionRefresh() {
               description: 'Failed to refresh subscription data. Please try again.',
               variant: ToastVariant.DESTRUCTIVE
             })
-          } finally {
-            setIsRefreshing(false)
           }
         }, 500) // 500ms debounce delay
       }
