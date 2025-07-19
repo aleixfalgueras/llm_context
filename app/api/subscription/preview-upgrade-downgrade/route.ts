@@ -27,20 +27,23 @@ export const POST = withEnhancedApi(
     const existingSubscription = await SubscriptionOperations.findByUserId(userId)
 
     if (!existingSubscription?.stripeSubscriptionId) {
-      logger.warn('No active subscription found for upgrade preview - user appears to be in free trial', { 
+      logger.warn('No active subscription found for upgrade/downgrade preview - ' +
+        'user appears to be in free trial', {
         userId,
         metadata: {
           hasSubscriptionRecord: !!existingSubscription,
           planId: planId
         }
       })
-      throw new Error('No active Stripe subscription found. This endpoint is for subscription upgrades only. Free trial users should proceed directly to checkout.')
+      throw new Error('No active Stripe subscription found. ' +
+        'This endpoint is for subscription upgrades/downgrade only. ' +
+        'Free trial users should proceed directly to checkout.')
     }
 
     // Get target price ID
     const targetPriceId = STRIPE_PRICE_IDS[planId as SubscriptionPlan]
     if (!targetPriceId) {
-      logger.warn('No price ID found for plan in upgrade preview', { metadata: { planId } })
+      logger.warn('No price ID found for plan in upgrade/downgrade preview', { metadata: { planId } })
       throw new Error('Price not found')
     }
 
@@ -71,7 +74,7 @@ export const POST = withEnhancedApi(
         currency: targetPrice.currency || 'eur'
       }
 
-      logger.info('Upgrade preview calculated successfully', {
+      logger.info('Upgrade preview/downgrade calculated successfully', {
         userId,
         metadata: {
           currentPlan: existingSubscription.plan,
@@ -82,7 +85,7 @@ export const POST = withEnhancedApi(
 
       return apiSuccess(previewData)
     } catch (error) {
-      logger.error('Failed to calculate upgrade preview', error as Error, {
+      logger.error('Failed to calculate upgrade/downgrade preview', error as Error, {
         userId,
         metadata: { planId }
       })
@@ -90,7 +93,7 @@ export const POST = withEnhancedApi(
     }
   },
   { 
-    context: 'Preview subscription upgrade',
+    context: 'Preview subscription upgrade/downgrade',
     allowedMethods: ['POST'],
     expectedContentType: 'application/json'
   }
