@@ -1,10 +1,12 @@
 import {useState, useEffect, useRef} from 'react'
-import {useSubscription} from '@/hooks/use-subscription'
 import {useToast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/types/enums'
 
-export function useSubscriptionRefresh() {
-  const subscription = useSubscription()
+interface UseSubscriptionRefreshProps {
+  refetch: (retries?: number, delay?: number, forceRefresh?: boolean) => Promise<boolean>
+}
+
+export function useSubscriptionRefresh({ refetch }: UseSubscriptionRefreshProps) {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const { toast } = useToast()
   const wasPreviouslyBlurred = useRef(false)
@@ -17,7 +19,7 @@ export function useSubscriptionRefresh() {
       if (withDelay) {
         await new Promise(resolve => setTimeout(resolve, 500))
       }
-      await subscription.refetch(3, 1000, true)
+      await refetch(3, 1000, true)
     } catch (error) {
       console.error('Failed to refresh subscription:', error)
     } finally {
@@ -70,7 +72,7 @@ export function useSubscriptionRefresh() {
       window.removeEventListener('blur', handleBlur)
       clearTimeout(debounceTimer)
     }
-  }, [subscription, toast])
+  }, [refetch, toast])
 
   return {
     isRefreshing,
