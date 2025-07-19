@@ -5,7 +5,16 @@ import {cancelSubscriptionImmediately, synchronizeSubscriptionWithStripe} from "
 import {stripe} from "@/lib/stripe/stripe";
 import {prisma} from "@/lib/prisma";
 
-// Helper function to validate upgrade state
+/**
+ * Validates the state before processing a subscription upgrade to prevent race conditions.
+ * Checks if the upgrade is valid by ensuring the previous subscription exists,
+ * the new subscription doesn't already exist, and the previous subscription isn't already cancelled.
+ * 
+ * @param newSubscriptionId - The ID of the new subscription being created
+ * @param previousSubscriptionId - The ID of the subscription being upgraded from
+ * @param customerId - The Stripe customer ID
+ * @returns Promise<{isValid: boolean, reason?: string}> - Validation result with optional reason for failure
+ */
 async function validateUpgradeState(
   newSubscriptionId: string,
   previousSubscriptionId: string,
@@ -65,6 +74,18 @@ async function validateUpgradeState(
   }
 }
 
+/**
+ * Handles the atomic upgrade process from one subscription to another.
+ * This is the single source of truth for subscription upgrades and ensures:
+ * 1. Validates upgrade state to prevent race conditions
+ * 2. Cancels the old subscription immediately
+ * 3. Updates the database with the new subscription
+ * 4. Clears upgrade metadata from Stripe
+ * 
+ * @param newSubscription - The new Stripe subscription object
+ * @param previousSubscriptionId - The ID of the subscription being replaced
+ * @throws Error if the upgrade process fails at any step
+ */
 async function handleUpgradeProcess(
   newSubscription: Stripe.Subscription,
   previousSubscriptionId: string
@@ -192,6 +213,16 @@ async function handleUpgradeProcess(
   }
 }
 
+/**
+ * Main handler for Stripe subscription events (created, updated).
+ * Distinguishes between upgrade scenarios and regular subscription updates.
+ * For upgrades, delegates to handleUpgradeProcess. For regular updates,
+ * synchronizes the subscription data with the database and handles pending plan changes.
+ * 
+ * @param subscription - The Stripe subscription object from the webhook
+ * @param eventType - The type of webhook event (e.g., 'customer.subscription.created')
+ * @throws Error if subscription processing fails
+ */
 export async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventType: string) {
   try {
     // Only allow upgrades for 'created' events - 'updated' events should be regular updates
@@ -294,6 +325,14 @@ export async function handleSubscriptionEvent(subscription: Stripe.Subscription,
   }
 }
 
+/**
+ * Handles subscription deletion events from Stripe webhooks.
+ * Includes logic to skip processing if the subscription was deleted as part of an upgrade
+ * (to prevent conflicts with the upgrade process). Only processes genuine cancellations.
+ * 
+ * @param subscription - The deleted Stripe subscription object
+ * @throws Error if subscription deletion processing fails
+ */
 export async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
     // Check if this subscription was deleted as part of an upgrade
@@ -373,6 +412,14 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
   }
 }
 
+/**
+ * Handles successful invoice payment events from Stripe.
+ * Skips processing for upgrade scenarios (handled by subscription.created events)
+ * and delegates to handleSubscriptionEvent for regular payment processing.
+ * 
+ * @param invoice - The Stripe invoice object with successful payment
+ * @throws Error if invoice payment processing fails
+ */
 export async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     if (invoice.parent?.subscription_details?.subscription) {
@@ -414,6 +461,14 @@ export async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 }
 
+/**
+ * Handles failed invoice payment events from Stripe.
+ * Retrieves the associated subscription and delegates to handleSubscriptionEvent
+ * to update the subscription status and handle any necessary cleanup.
+ * 
+ * @param invoice - The Stripe invoice object with failed payment
+ * @throws Error if invoice payment failure processing fails
+ */
 export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   try {
     if (invoice.parent?.subscription_details?.subscription) {
