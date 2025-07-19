@@ -165,7 +165,6 @@ export async function createCustomerPortalSession(userId: string) {
     logger.info('Created customer portal session', { userId, metadata: { sessionId: portalSession.id } })
     return portalSession
   } catch (error) {
-    logger.error('Failed to create customer portal session', error as Error, { userId })
     throw error
   }
 }
