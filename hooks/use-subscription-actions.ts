@@ -4,7 +4,7 @@ import {SubscriptionPlan} from '@/types/subscription-types'
 import {ToastVariant} from '@/types/enums'
 
 interface UseSubscriptionActionsProps {
-  refreshSubscriptionWithFallback: () => Promise<void>
+  refreshSubscriptionWithFallback: (withDelay?: boolean) => Promise<void>
 }
 
 export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseSubscriptionActionsProps) {
@@ -60,7 +60,7 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
           })
           
           // Refresh subscription to show updated state
-          await refreshSubscriptionWithFallback()
+          await refreshSubscriptionWithFallback(true)
         } else {
           // Redirect to checkout for upgrades/new subscriptions
           if (data.url) {
@@ -139,7 +139,7 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
         })
         
         // Refresh subscription to show updated state
-        await refreshSubscriptionWithFallback()
+        await refreshSubscriptionWithFallback(true)
       } else {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.message || 'Failed to cancel downgrade')
