@@ -26,7 +26,7 @@ export function getPlanIconType(planId: string) {
 // Get button styles based on plan state
 export function getButtonStyles(isCurrentPlan: boolean, isPendingDowngrade: boolean, isPendingPlanChange: boolean) {
   if (isCurrentPlan) {
-    return 'bg-gray-500 hover:bg-gray-600 text-white'
+    return 'bg-gray-500 hover:bg-gray-600 text-gray-900'
   }
   if (isPendingDowngrade && isPendingPlanChange) {
     return 'bg-red-600 hover:bg-red-700 text-white border-red-600'
