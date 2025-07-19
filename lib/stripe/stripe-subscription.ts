@@ -7,6 +7,16 @@ import {invalidateAllUserCaches} from '../subscription/subscription-cache'
 import {SubscriptionOperations} from "@/lib/database";
 import Stripe from "stripe";
 
+/**
+ * Cancels a Stripe subscription immediately without proration or additional invoicing.
+ * Used for scenarios like subscription upgrades where the old subscription needs to be
+ * terminated immediately to avoid conflicts.
+ * 
+ * @param subscriptionId - The Stripe subscription ID to cancel
+ * @param reason - The reason for cancellation (default: 'user_request')
+ * @returns Promise<Stripe.Subscription> - The cancelled Stripe subscription object
+ * @throws Error if the cancellation fails
+ */
 export async function cancelSubscriptionImmediately(subscriptionId: string, reason: string = 'user_request') {
   try {
     const canceledSubscription = await stripe.subscriptions.cancel(subscriptionId, {
@@ -34,6 +44,13 @@ export async function cancelSubscriptionImmediately(subscriptionId: string, reas
   }
 }
 
+/**
+ * Maps Stripe subscription status strings to internal SubscriptionStatus enum values.
+ * Handles all possible Stripe subscription statuses and provides fallback mapping.
+ * 
+ * @param stripeStatus - The status string from Stripe (e.g., 'active', 'canceled', 'past_due')
+ * @returns SubscriptionStatus - The corresponding internal status enum value
+ */
 export function mapStripeStatusToSubscriptionStatus(stripeStatus: string): SubscriptionStatus {
   switch (stripeStatus) {
     case 'active':
@@ -53,7 +70,13 @@ export function mapStripeStatusToSubscriptionStatus(stripeStatus: string): Subsc
 }
 
 /**
- * Release (cancel) an Stripe subscription schedule
+ * Releases (cancels) a Stripe subscription schedule, allowing the subscription to continue
+ * without being controlled by the schedule. This is typically used when changing or cancelling
+ * pending subscription modifications.
+ * 
+ * @param schedule - Either a schedule ID string or a Stripe.SubscriptionSchedule object
+ * @param stripeSubscriptionId - The subscription ID for logging purposes (can be null)
+ * @throws Error if the schedule release fails
  */
 export async function releaseSubscriptionSchedule(
   schedule: string | Stripe.SubscriptionSchedule,
@@ -72,7 +95,22 @@ export async function releaseSubscriptionSchedule(
 }
 
 /**
- * Synchronize databsae subscription with Stripe state
+ * Synchronizes the database subscription record with the current Stripe subscription state.
+ * This is the core function for keeping local subscription data in sync with Stripe,
+ * handling plan changes, status updates, billing periods, and cancellation states.
+ * 
+ * @param subscriptionId - The Stripe subscription ID
+ * @param customerId - The Stripe customer ID
+ * @param status - The Stripe subscription status
+ * @param currentPeriodStart - Unix timestamp of current billing period start
+ * @param currentPeriodEnd - Unix timestamp of current billing period end
+ * @param priceId - Optional Stripe price ID (for plan identification)
+ * @param canceledAt - Optional Unix timestamp when subscription was cancelled
+ * @param cancelAtPeriodEnd - Optional boolean indicating if cancellation is scheduled for period end
+ * @param pendingPlanChange - Optional plan change scheduled for future
+ * @param stripeScheduleId - Optional Stripe schedule ID for pending changes
+ * @returns Promise<UserSubscription> - The updated subscription record
+ * @throws Error if database synchronization fails
  */
 export async function synchronizeSubscriptionWithStripe(
   subscriptionId: string,
@@ -216,7 +254,18 @@ export async function synchronizeSubscriptionWithStripe(
 }
 
 /**
- * Schedule a subscription downgrade to take effect at the end of the current billing period
+ * Schedules a subscription downgrade to take effect at the end of the current billing period.
+ * This function creates a Stripe subscription schedule that maintains the current plan until
+ * the billing period ends, then switches to the target plan. Handles existing schedules by
+ * releasing them first to avoid conflicts.
+ * 
+ * @param stripeSubscriptionId - The current Stripe subscription ID
+ * @param targetPriceId - The Stripe price ID for the target plan
+ * @param userId - The user ID for database updates and logging
+ * @param currentPlan - The current subscription plan
+ * @param targetPlan - The target subscription plan for downgrade
+ * @returns Promise<{effectiveDate: Date, message: string}> - Effective date and user message
+ * @throws Error if schedule creation or database update fails
  */
 export async function scheduleSubscriptionDowngrade(
   stripeSubscriptionId: string,
