@@ -1,7 +1,7 @@
 import {clerkClient} from '@clerk/nextjs/server'
 import {createCheckoutSession, STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
 import {SubscriptionPlan} from '@/types/subscription-types'
-import {isDowngrade} from '@/lib/subscription/subscription-client-utils'
+import {isDowngrade} from '@/lib/subscription/subscription-plan-utils'
 import {scheduleSubscriptionDowngrade} from '@/lib/stripe/stripe-subscription'
 import {logger} from '@/lib/logger'
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'

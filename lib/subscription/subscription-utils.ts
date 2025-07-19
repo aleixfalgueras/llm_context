@@ -16,7 +16,7 @@ import {SubscriptionOperations} from "@/lib/database";
 export type PlanId = SubscriptionPlan
 
 // Re-export client utilities for backwards compatibility
-export { getPlanNameColor } from './subscription-client-utils'
+export { getPlanNameColor } from './subscription-plan-utils'
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string, bypassCache = false) {
