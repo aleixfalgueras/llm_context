@@ -6,7 +6,7 @@ import {SettingsIcon} from 'lucide-react'
 import {isDowngrade as checkIsDowngrade} from '@/lib/subscription/subscription-plan-utils'
 import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
 import {Navbar} from '@/components/global/navbar'
-import {UpgradeConfirmationDialog} from '@/components/subscription/upgrade-confirmation-dialog'
+import {UpgradeDowngradeDialog} from '@/components/subscription/upgrade-downgrade-dialog'
 import {SubscriptionUrlHandler} from '@/components/subscription/subscription-url-handler'
 import {SubscriptionStatusBanners} from '@/components/subscription/subscription-status-banners'
 import {PlanCard} from '@/components/subscription/plan-card'
@@ -143,7 +143,7 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Upgrade Confirmation Dialog */}
-      <UpgradeConfirmationDialog
+      <UpgradeDowngradeDialog
         isOpen={confirmationDialog.isOpen}
         onClose={handleCloseConfirmation}
         onConfirm={handleConfirmUpgrade}
