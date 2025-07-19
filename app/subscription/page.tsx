@@ -14,6 +14,15 @@ import {useToast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/types/enums'
 import {UpgradeConfirmationDialog} from '@/components/subscription/upgrade-confirmation-dialog'
 
+// Helper function to clean up URL parameters
+function cleanupUrlParams(paramNames: string[], router: ReturnType<typeof useRouter>) {
+  if (typeof window !== 'undefined') {
+    const url = new URL(window.location.href)
+    paramNames.forEach(param => url.searchParams.delete(param))
+    router.replace(url.pathname, { scroll: false })
+  }
+}
+
 // Component to handle URL parameters (needs to be wrapped in Suspense)
 function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }: { 
   subscription: ReturnType<typeof useSubscription>
@@ -64,12 +73,8 @@ function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }: {
         }, 2000)
       }, 1000) // 1 second delay
       
-      // Clean up URL parameters (only in browser environment)
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
-        url.searchParams.delete('success')
-        router.replace(url.pathname, { scroll: false })
-      }
+      // Clean up URL parameters
+      cleanupUrlParams(['success'], router)
       
       return () => {
         if (pollInterval) {
@@ -85,12 +90,8 @@ function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }: {
         variant: ToastVariant.DEFAULT
       })
       
-      // Clean up URL parameters (only in browser environment)
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
-        url.searchParams.delete('canceled')
-        router.replace(url.pathname, { scroll: false })
-      }
+      // Clean up URL parameters
+      cleanupUrlParams(['canceled'], router)
     }
   }, [searchParams, refreshingAfterSuccess, subscription, router, toast])
 
@@ -110,6 +111,18 @@ export default function SubscriptionPage() {
   const { toast } = useToast()
   const wasPreviouslyBlurred = useRef(false)
 
+  // Helper function to calculate remaining days from end date
+  const calculateRemainingDays = (endDate: string | Date | null | undefined): number => {
+    if (!endDate) return 0
+    
+    const now = new Date()
+    const end = new Date(endDate)
+    const diffTime = end.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    return Math.max(0, diffDays)
+  }
+
   // Helper function to detect if user is in free mode
   const isFreeMode = () => {
     return subscription.plan === SubscriptionPlan.BASIC && !subscription.stripeSubscriptionId
@@ -117,14 +130,8 @@ export default function SubscriptionPage() {
 
   // Helper function to calculate remaining trial days
   const getRemainingTrialDays = () => {
-    if (!isFreeMode() || !subscription.currentPeriodEnd) return 0
-    
-    const now = new Date()
-    const endDate = new Date(subscription.currentPeriodEnd)
-    const diffTime = endDate.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    return Math.max(0, diffDays)
+    if (!isFreeMode()) return 0
+    return calculateRemainingDays(subscription.currentPeriodEnd)
   }
 
   // Helper function to detect if subscription is active but marked for cancellation
@@ -134,14 +141,8 @@ export default function SubscriptionPage() {
 
   // Helper function to calculate remaining days until cancellation
   const getRemainingActiveDays = () => {
-    if (!isActiveCancelled() || !subscription.currentPeriodEnd) return 0
-    
-    const now = new Date()
-    const endDate = new Date(subscription.currentPeriodEnd)
-    const diffTime = endDate.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    return Math.max(0, diffDays)
+    if (!isActiveCancelled()) return 0
+    return calculateRemainingDays(subscription.currentPeriodEnd)
   }
 
   // Helper function to detect if subscription has pending downgrade
@@ -156,14 +157,20 @@ export default function SubscriptionPage() {
 
   // Helper function to calculate remaining days until downgrade
   const getRemainingDowngradeDays = () => {
-    if (!isPendingDowngrade() || !subscription.currentPeriodEnd) return 0
-    
-    const now = new Date()
-    const endDate = new Date(subscription.currentPeriodEnd)
-    const diffTime = endDate.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    return Math.max(0, diffDays)
+    if (!isPendingDowngrade()) return 0
+    return calculateRemainingDays(subscription.currentPeriodEnd)
+  }
+
+  // Helper function to refresh subscription with error handling
+  const refreshSubscriptionWithFallback = async () => {
+    setIsRefreshing(true)
+    try {
+      await subscription.refetch(3, 1000, true)
+    } catch (error) {
+      console.error('Failed to refresh subscription:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
   }
 
   // Helper function to safely capitalize plan name
@@ -284,13 +291,7 @@ export default function SubscriptionPage() {
           })
           
           // Refresh subscription to show updated state
-          setIsRefreshing(true)
-          subscription.refetch(3, 1000, true).then(() => {
-            setIsRefreshing(false)
-          }).catch((error) => {
-            console.error('Failed to refresh subscription after downgrade:', error)
-            setIsRefreshing(false)
-          })
+          await refreshSubscriptionWithFallback()
         } else {
           // Redirect to checkout for upgrades/new subscriptions
           if (data.url) {
@@ -369,13 +370,7 @@ export default function SubscriptionPage() {
         })
         
         // Refresh subscription to show updated state
-        setIsRefreshing(true)
-        subscription.refetch(3, 1000, true).then(() => {
-          setIsRefreshing(false)
-        }).catch((error) => {
-          console.error('Failed to refresh subscription after canceling downgrade:', error)
-          setIsRefreshing(false)
-        })
+        await refreshSubscriptionWithFallback()
       } else {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.message || 'Failed to cancel downgrade')
@@ -402,16 +397,40 @@ export default function SubscriptionPage() {
   }
 
 
-  const getButtonText = (planId: string) => {
-    const planNames = {
-      [SubscriptionPlan.BASIC]: 'Basic',
-      [SubscriptionPlan.PRO]: 'Pro',
-      [SubscriptionPlan.BUSINESS]: 'Business'
+  // Plan names constant
+  const PLAN_NAMES = {
+    [SubscriptionPlan.BASIC]: 'Basic',
+    [SubscriptionPlan.PRO]: 'Pro',
+    [SubscriptionPlan.BUSINESS]: 'Business'
+  }
+
+  // Loading spinner component
+  const LoadingSpinner = ({ text = 'Loading...' }: { text?: string }) => (
+    <div className="flex items-center gap-2">
+      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      {text}
+    </div>
+  )
+
+  // Helper function to get button styles based on plan state
+  const getButtonStyles = (planId: string, isCurrentPlan: boolean, isPendingDowngrade: boolean, isPendingPlanChange: boolean) => {
+    if (isCurrentPlan) {
+      return 'bg-gray-500 hover:bg-gray-600 text-white'
     }
+    if (isPendingDowngrade && isPendingPlanChange) {
+      return 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+    }
+    if (isPendingDowngrade && !isPendingPlanChange) {
+      return 'bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed'
+    }
+    return 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
+  }
+
+  const getButtonText = (planId: string) => {
     
     // Free mode users see "Subscribe to..." for all plans
     if (isFreeMode()) {
-      return `Subscribe to ${planNames[planId as keyof typeof planNames]}`
+      return `Subscribe to ${PLAN_NAMES[planId as keyof typeof PLAN_NAMES]}`
     }
     
     // Check if this plan is the target of a pending downgrade
@@ -426,16 +445,16 @@ export default function SubscriptionPage() {
     
     // If there's a pending downgrade and this is not the target plan, show blocked state
     if (isPendingDowngrade()) {
-      return `${planNames[planId as keyof typeof planNames]} (Blocked)`
+      return `${PLAN_NAMES[planId as keyof typeof PLAN_NAMES]} (Blocked)`
     }
     
     // Check if this is a downgrade
     if (checkIsDowngrade(subscription.plan as SubscriptionPlan, planId as SubscriptionPlan)) {
-      return `Downgrade to ${planNames[planId as keyof typeof planNames]}`
+      return `Downgrade to ${PLAN_NAMES[planId as keyof typeof PLAN_NAMES]}`
     }
     
     // For upgrades
-    return `Upgrade to ${planNames[planId as keyof typeof planNames]}`
+    return `Upgrade to ${PLAN_NAMES[planId as keyof typeof PLAN_NAMES]}`
   }
 
   const isCurrentPlan = (planId: string) => {
@@ -591,26 +610,17 @@ export default function SubscriptionPage() {
                 <Button 
                   onClick={() => handlePlanAction(plan.id)}
                   disabled={upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan(planId) || (isPendingDowngrade() && !isPendingPlanChange(planId))}
-                  className={`w-full ${
-                    isCurrentPlan(planId) 
-                      ? 'bg-gray-500 hover:bg-gray-600 text-white' 
-                      : isPendingDowngrade() && isPendingPlanChange(planId)
-                        ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
-                        : isPendingDowngrade() && !isPendingPlanChange(planId)
-                          ? 'bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
-                  }`}
+                  className={`w-full ${getButtonStyles(
+                    planId,
+                    isCurrentPlan(planId),
+                    isPendingDowngrade(),
+                    isPendingPlanChange(planId)
+                  )}`}
                 >
                   {upgradeLoading === plan.id ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Processing...
-                    </div>
+                    <LoadingSpinner text="Processing..." />
                   ) : cancelDowngradeLoading && isPendingDowngrade() && isPendingPlanChange(planId) ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Canceling...
-                    </div>
+                    <LoadingSpinner text="Canceling..." />
                   ) : (
                     getButtonText(planId)
                   )}
