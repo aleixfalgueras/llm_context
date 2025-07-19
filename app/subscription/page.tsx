@@ -49,6 +49,27 @@ export default function SubscriptionPage() {
     handlePlanAction(planId, isPendingDowngrade(), isPendingPlanChange(planId))
   }
 
+  // Helper function to get dynamic button text based on subscription status
+  const getManageButtonText = () => {
+    // For free mode users, always show "Manage Subscription"
+    if (isFreeMode()) {
+      return 'Manage Subscription'
+    }
+
+    // For active subscriptions
+    if (subscription.isActive) {
+      // If marked for cancellation, show reactivate option
+      if (subscription.cancelAtPeriodEnd) {
+        return 'Reactivate Subscription'
+      }
+      // If active and not marked for cancellation, show cancel option
+      return 'Cancel Subscription'
+    }
+
+    // For all other cases (expired, inactive, etc.)
+    return 'Manage Subscription'
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Suspense fallback={null}>
@@ -72,7 +93,7 @@ export default function SubscriptionPage() {
                 className="inline-flex items-center gap-2"
               >
                 <SettingsIcon className="h-4 w-4" />
-                {portalLoading ? 'Loading...' : 'Manage Subscription'}
+                {portalLoading ? 'Loading...' : getManageButtonText()}
               </Button>
               
               {/* Updating Status Message */}
