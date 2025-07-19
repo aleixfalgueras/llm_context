@@ -89,4 +89,19 @@ export class SubscriptionOperations extends BaseOperations {
     }
   }
 
+  /**
+   * Clear schedule fields (stripeScheduleId and pendingPlanChange)
+   */
+  static async clearScheduleFields(userId: string) {
+    try {
+      return await this.updateSubscription(userId, {
+        stripeScheduleId: null,
+        pendingPlanChange: null
+      })
+    } catch (error) {
+      logger.error('Failed to clear schedule fields', error as Error, { userId })
+      throw error
+    }
+  }
+
 }

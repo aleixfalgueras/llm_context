@@ -7,7 +7,8 @@ import { invalidateAllUserCaches } from '@/lib/subscription/subscription-cache'
 
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
-import {releaseSubscriptionSchedule} from "@/lib/stripe/stripe-subscription";
+import {releaseSubscriptionSchedule} from "@/lib/stripe/stripe-subscription"
+import { SubscriptionOperations } from '@/lib/database/subscription-operations'
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {
@@ -51,7 +52,8 @@ export const POST = withEnhancedApi(
         }
       })
 
-      // TODO: Clean schedule fields in database
+      // Clear schedule fields in database
+      await SubscriptionOperations.clearScheduleFields(userId)
 
       // Invalidate all user caches after canceling downgrade
       await invalidateAllUserCaches(userId)
