@@ -60,7 +60,7 @@ export default function SubscriptionPage() {
     if (subscription.isActive) {
       // If marked for cancellation, show reactivate option
       if (subscription.cancelAtPeriodEnd) {
-        return 'Reactivate Subscription'
+        return 'Re-activate Subscription'
       }
       // If active and not marked for cancellation, show cancel option
       return 'Cancel Subscription'
@@ -154,6 +154,7 @@ export default function SubscriptionPage() {
               isPendingPlanChange={isPendingPlanChange(planId)}
               upgradeLoading={upgradeLoading}
               cancelDowngradeLoading={cancelDowngradeLoading}
+              isActiveCancelled={isActiveCancelled()}
               onPlanAction={handlePlanActionWrapper}
             />
           ))}
