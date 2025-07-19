@@ -48,7 +48,7 @@ export function useSubscriptionRefresh() {
               pendingPlanChange: subscription.pendingPlanChange
             }
             
-            await subscription.refetch()
+            await refreshSubscriptionWithFallback(true)
             
             // Check if anything important changed
             const hasChanges = 
