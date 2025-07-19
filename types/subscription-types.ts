@@ -9,25 +9,18 @@ export enum SubscriptionPlan {
   BUSINESS = 'business'
 }
 
-export enum ModelTier {
-  BASIC = 'basic',
-  PRO = 'pro',
-  BUSINESS = 'business'
-}
-
-export enum SubscriptionStatus {
-  ACTIVE = 'active',
-  CANCELED = 'canceled',
-  PAST_DUE = 'past_due',
-  INCOMPLETE = 'incomplete',
-  UNPAID = 'unpaid'
+// Subscription Plan names constant
+export const SUBSCRIPTION_PLAN_NAMES = {
+  [SubscriptionPlan.BASIC]: 'Basic',
+  [SubscriptionPlan.PRO]: 'Pro',
+  [SubscriptionPlan.BUSINESS]: 'Business'
 }
 
 // Subscription Plans Configuration
 export const SUBSCRIPTION_PLAN_DETAIL = {
   [SubscriptionPlan.BASIC]: {
     id: SubscriptionPlan.BASIC,
-    name: 'Basic',
+    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.BASIC],
     price: 10,
     currency: 'EUR',
     maxClients: 3,
@@ -44,7 +37,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   },
   [SubscriptionPlan.PRO]: {
     id: SubscriptionPlan.PRO,
-    name: 'Pro',
+    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.PRO],
     price: 25,
     currency: 'EUR',
     maxClients: -1, // unlimited
@@ -61,7 +54,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   },
   [SubscriptionPlan.BUSINESS]: {
     id: SubscriptionPlan.BUSINESS,
-    name: 'Business',
+    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.BUSINESS],
     price: 50,
     currency: 'EUR',
     maxClients: -1, // unlimited
@@ -78,21 +71,21 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   }
 } as const
 
+export enum SubscriptionStatus {
+  ACTIVE = 'active',
+  CANCELED = 'canceled',
+  PAST_DUE = 'past_due',
+  INCOMPLETE = 'incomplete',
+  UNPAID = 'unpaid'
+}
+
+export enum ModelTier {
+  BASIC = 'basic',
+  PRO = 'pro',
+  BUSINESS = 'business'
+}
+
 // Type aliases for convenience (can be used where string types are still needed)
 export type SubscriptionPlanType = `${SubscriptionPlan}`
 export type ModelTierType = `${ModelTier}`
 export type SubscriptionStatusType = `${SubscriptionStatus}`
-
-// Utility functions for type checking and conversion
-export function isValidSubscriptionPlan(plan: string): plan is SubscriptionPlanType {
-  return Object.values(SubscriptionPlan).includes(plan as SubscriptionPlan)
-}
-
-export function isValidModelTier(tier: string): tier is ModelTierType {
-  return Object.values(ModelTier).includes(tier as ModelTier)
-}
-
-export function isValidSubscriptionStatus(status: string): status is SubscriptionStatusType {
-  return Object.values(SubscriptionStatus).includes(status as SubscriptionStatus)
-}
-
