@@ -139,26 +139,10 @@ export default function SubscriptionPage() {
                   : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
               }`}>
                 <span className="font-medium">
-                  {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} - 
-                  {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  {subscription.isActive || isPastDueOrUnpaid() ? 'Active Subscription' : 'Expired Subscription'} -
+                  {subscription.isActive || isPastDueOrUnpaid() ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                 </span>
               </div>
-              
-              {/* Pay Now Button for Past Due/Unpaid Subscriptions */}
-              {isPastDueOrUnpaid() && (
-                <div className="mt-4">
-                  <Button
-                    onClick={handleRetryPayment}
-                    disabled={retryPaymentLoading}
-                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2"
-                  >
-                    {retryPaymentLoading ? 'Processing...' : 'Pay Now to Restore Subscription'}
-                  </Button>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    Your subscription payment failed. Click to retry payment and restore your subscription.
-                  </p>
-                </div>
-              )}
             </div>
           )}
         </div>
