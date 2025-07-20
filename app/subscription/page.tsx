@@ -195,7 +195,7 @@ export default function SubscriptionPage() {
         onConfirm={handleConfirmUpgrade}
         targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.BASIC}
         isLoading={upgradeLoading !== null}
-        hasActiveSubscription={!!subscription.stripeSubscriptionId}
+        hasActiveSubscription={!!subscription.stripeSubscriptionId && subscription.isActive && !isExpired()}
         isDowngrade={confirmationDialog.targetPlan ? checkIsDowngrade(subscription.plan as SubscriptionPlan, confirmationDialog.targetPlan) : false}
       />
     </div>
