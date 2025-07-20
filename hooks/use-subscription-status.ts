@@ -66,6 +66,10 @@ export function useSubscriptionStatus() {
     if (isFreeMode()) {
       return false
     }
+    // Expired subscriptions don't have a "current plan" - they need to resubscribe
+    if (isExpired()) {
+      return false
+    }
     return planId === subscription.plan
   }
 

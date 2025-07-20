@@ -300,7 +300,6 @@ export async function handleSubscriptionEvent(subscription: Stripe.Subscription,
         clearScheduleId ? null : undefined
       )
 
-
       logger.info('Subscription event processed successfully', {
         metadata: {
           subscriptionId: subscription.id,
