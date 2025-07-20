@@ -2,7 +2,7 @@
 
 import {useState, useEffect} from 'react'
 import {useSearchParams, useRouter} from 'next/navigation'
-import {useSubscription} from '@/hooks/use-subscription'
+import {useSubscription} from '@/hooks/subscription/use-subscription'
 import {useToast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/types/enums'
 

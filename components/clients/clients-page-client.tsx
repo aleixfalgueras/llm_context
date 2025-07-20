@@ -9,7 +9,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert'
 import {AlertTriangle} from 'lucide-react'
 import {Button} from '@/components/ui/button'
-import {useClientManagement} from '@/hooks/use-client-management'
+import {useClientManagement} from '@/hooks/client/use-client-management'
 
 interface ClientsPageClientProps {
   clients: any[]

@@ -9,7 +9,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
 import {CLIENT_FIELD_LABELS} from '@/types/client'
 import {Globe, HelpCircle, Shield} from 'lucide-react'
-import {useClientForm} from '@/hooks/use-client-form'
+import {useClientForm} from '@/hooks/client/use-client-form'
 
 interface ClientFormProps {
   client?: any

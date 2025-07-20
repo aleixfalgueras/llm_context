@@ -11,9 +11,9 @@ import {SubscriptionUrlHandler} from '@/components/subscription/subscription-url
 import {SubscriptionStatusBanners} from '@/components/subscription/subscription-status-banners'
 import {PlanCard} from '@/components/subscription/plan-card'
 import {SubscriptionFAQ} from '@/components/subscription/subscription-faq'
-import {useSubscriptionStatus} from '@/hooks/use-subscription-status'
-import {useSubscriptionActions} from '@/hooks/use-subscription-actions'
-import {useSubscriptionRefresh} from '@/hooks/use-subscription-refresh'
+import {useSubscriptionStatus} from '@/hooks/subscription/use-subscription-status'
+import {useSubscriptionActions} from '@/hooks/subscription/use-subscription-actions'
+import {useSubscriptionRefresh} from '@/hooks/subscription/use-subscription-refresh'
 import {useToast} from '@/hooks/use-toast'
 
 export default function SubscriptionPage() {
