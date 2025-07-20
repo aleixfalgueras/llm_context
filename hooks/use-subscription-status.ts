@@ -1,5 +1,5 @@
 import {useSubscription} from '@/hooks/use-subscription'
-import {SubscriptionPlan} from '@/types/subscription-types'
+import {SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
 
 export function useSubscriptionStatus() {
   const subscription = useSubscription()
@@ -79,13 +79,13 @@ export function useSubscriptionStatus() {
     if (isFreeMode()) {
       return false
     }
-    return subscription.status === 'past_due' || subscription.status === 'unpaid'
+    return subscription.status === SubscriptionStatus.PAST_DUE || subscription.status === SubscriptionStatus.UNPAID
   }
 
   // Helper function to detect if subscription is expired
   const isExpired = () => {
     // User had a subscription but it's no longer active
-    return !!subscription.stripeSubscriptionId && !subscription.isActive
+    return !!subscription.stripeSubscriptionId && SubscriptionStatus.CANCELED
   }
 
   return {
