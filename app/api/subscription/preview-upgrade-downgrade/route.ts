@@ -74,7 +74,7 @@ export const POST = withEnhancedApi(
         currency: targetPrice.currency || 'eur'
       }
 
-      logger.info('Upgrade preview/downgrade calculated successfully', {
+      logger.info('Upgrade/downgrade preview calculated successfully', {
         userId,
         metadata: {
           currentPlan: existingSubscription.plan,
