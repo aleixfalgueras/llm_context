@@ -141,7 +141,8 @@ export default function SubscriptionPage() {
               }`}>
                 <span className="font-medium">
                   {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} -
-                  {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  {subscription.isActive ? ' Renews' : ' Expired'} on
+                  {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB')}
                 </span>
               </div>
             </div>
