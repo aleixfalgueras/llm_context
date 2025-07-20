@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useUsageLimits } from './use-usage-limits'
+import { useUsageLimits } from '../use-usage-limits'
 import type { Client } from '@/types/client'
 
 interface UseClientManagementReturn {

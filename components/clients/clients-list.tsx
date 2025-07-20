@@ -11,7 +11,7 @@ import {ClientPagination} from '@/components/clients/client-pagination'
 import {ClientEmptyState} from '@/components/clients/client-empty-state'
 import {Client, ClientActionHandlers, UsageInfo} from '@/types/client-list-types'
 import {ButtonVariant, ClientSortMode, ViewMode} from '@/types/enums'
-import {useClientList} from '@/hooks/use-client-list'
+import {useClientList} from '@/hooks/client/use-client-list'
 
 interface ClientsListProps {
   clients: Client[]

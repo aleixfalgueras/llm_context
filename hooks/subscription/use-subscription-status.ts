@@ -1,4 +1,4 @@
-import {useSubscription} from '@/hooks/use-subscription'
+import {useSubscription} from '@/hooks/subscription/use-subscription'
 import {SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
 
 export function useSubscriptionStatus() {

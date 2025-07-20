@@ -11,7 +11,7 @@ import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import {clientLogger} from '@/lib/client-logger'
 import {DEFAULT_MODEL} from '@/lib/ai/models-config'
-import {useSubscription} from '@/hooks/use-subscription'
+import {useSubscription} from '@/hooks/subscription/use-subscription'
 import {Message} from '@/types/message-types'
 import {Prompt} from '@/types/component-types'
 
