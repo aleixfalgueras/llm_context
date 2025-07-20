@@ -3,6 +3,7 @@ import {logger} from '../logger'
 import {SubscriptionPlan} from '@/types/subscription-types'
 import {SubscriptionOperations} from '@/lib/database'
 import Stripe from 'stripe'
+import {isSubscriptionActive} from "@/lib/subscription/subscription-utils";
 
 export const STRIPE_PRICE_IDS = {
   [SubscriptionPlan.BASIC]: process.env.STRIPE_BASIC_PRICE_ID || 'price_1RgN2fH1IwPXt7SI6fY3NRQF',
@@ -82,7 +83,7 @@ export async function createCheckoutSession(
     // Check if customer has existing active subscription
     const existingSubscription = await SubscriptionOperations.findByUserId(userId)
 
-    const isUpgrade = existingSubscription?.stripeSubscriptionId
+    const isUpgrade = existingSubscription?.stripeSubscriptionId && isSubscriptionActive(existingSubscription)
     
     logger.info(isUpgrade ? 'Creating checkout session for subscription upgrade' : 'Creating checkout session for new customer', { 
       userId, 
