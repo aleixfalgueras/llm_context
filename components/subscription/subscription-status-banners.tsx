@@ -40,7 +40,7 @@ export function SubscriptionStatusBanners({
             </span>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Trial expires on {new Date(currentPeriodEnd).toLocaleDateString()}
+            Trial expires on {new Date(currentPeriodEnd).toLocaleDateString('en-GB')}
           </p>
         </div>
       )}
@@ -54,7 +54,7 @@ export function SubscriptionStatusBanners({
             </span>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Your subscription will be cancelled on {new Date(currentPeriodEnd).toLocaleDateString()}
+            Your subscription will be cancelled on {new Date(currentPeriodEnd).toLocaleDateString('en-GB')}
           </p>
         </div>
       )}
@@ -68,7 +68,7 @@ export function SubscriptionStatusBanners({
             </span>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Your subscription will be downgraded on {new Date(currentPeriodEnd).toLocaleDateString()}
+            Your subscription will be downgraded on {new Date(currentPeriodEnd).toLocaleDateString('en-GB')}
           </p>
         </div>
       )}

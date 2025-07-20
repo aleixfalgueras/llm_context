@@ -92,11 +92,7 @@ export function UpgradeDowngradeDialog({
   const targetPlanConfig = SUBSCRIPTION_PLAN_DETAIL[targetPlan]
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    return new Date(dateString).toLocaleDateString('en-GB')
   }
 
   const formatPrice = (amount: number, currency: string = 'eur') => {
