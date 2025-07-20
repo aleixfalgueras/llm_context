@@ -27,7 +27,8 @@ export default function SubscriptionPage() {
     isPendingPlanChange,
     getRemainingDowngradeDays,
     capitalizePlanName,
-    isCurrentPlan
+    isCurrentPlan,
+    isPastDueOrUnpaid
   } = useSubscriptionStatus()
 
   const { isRefreshing, setIsRefreshing, refreshSubscriptionWithFallback } = useSubscriptionRefresh({ refetch: subscription.refetch })
@@ -36,11 +37,13 @@ export default function SubscriptionPage() {
     upgradeLoading,
     cancelDowngradeLoading,
     portalLoading,
+    retryPaymentLoading,
     confirmationDialog,
     handlePlanAction,
     handleConfirmUpgrade,
     handleCloseConfirmation,
-    handleManageSubscription
+    handleManageSubscription,
+    handleRetryPayment
   } = useSubscriptionActions({ refreshSubscriptionWithFallback })
 
   const { toast } = useToast()
@@ -115,12 +118,15 @@ export default function SubscriptionPage() {
             isFreeMode={isFreeMode()}
             isActiveCancelled={isActiveCancelled()}
             isPendingDowngrade={isPendingDowngrade()}
+            isPastDueOrUnpaid={isPastDueOrUnpaid()}
             currentPeriodEnd={subscription.currentPeriodEnd || null}
             getRemainingTrialDays={getRemainingTrialDays}
             getRemainingActiveDays={getRemainingActiveDays}
             getRemainingDowngradeDays={getRemainingDowngradeDays}
             capitalizePlanName={capitalizePlanName}
             pendingPlanChange={subscription.pendingPlanChange}
+            onRetryPayment={handleRetryPayment}
+            retryPaymentLoading={retryPaymentLoading}
           />
           
           {/* Current Subscription Status - Only show for paid subscriptions that are not marked for cancellation or downgrade */}
@@ -136,6 +142,22 @@ export default function SubscriptionPage() {
                   {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                 </span>
               </div>
+              
+              {/* Pay Now Button for Past Due/Unpaid Subscriptions */}
+              {isPastDueOrUnpaid() && (
+                <div className="mt-4">
+                  <Button
+                    onClick={handleRetryPayment}
+                    disabled={retryPaymentLoading}
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2"
+                  >
+                    {retryPaymentLoading ? 'Processing...' : 'Pay Now to Restore Subscription'}
+                  </Button>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    Your subscription payment failed. Click to retry payment and restore your subscription.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

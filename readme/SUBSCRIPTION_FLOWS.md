@@ -131,6 +131,55 @@
 - Calculate pricing information
 - Return preview data with current/new prices and next billing date
 
+## 8. Payment Failure Flow
+
+**Stripe attempts monthly subscription charge but payment fails**
+
+- Stripe webhook: invoice.payment_failed (webhook/route.ts)
+- Check idempotency (checkEventIdempotency in webhook-event.ts)
+- Process webhook event (processWebhookEvent in webhook-event.ts)
+- Handle invoice payment failed (handleInvoicePaymentFailed in webhook-handle.ts)
+- Retrieve associated subscription from Stripe
+- Handle subscription event with 'invoice.payment_failed' type (handleSubscriptionEvent in webhook-handle.ts)
+- Synchronize subscription status (synchronizeSubscriptionWithStripe in stripe-subscription.ts)
+- Map Stripe status to internal status (mapStripeStatusToSubscriptionStatus in stripe-subscription.ts)
+  - First failure: Status may remain `active` during retry period
+  - After retries: Status changes to `past_due` 
+  - Final failure: Status changes to `unpaid` or `canceled`
+- Update database with new status and timestamps
+- Invalidate user caches
+- Mark event as processed (markEventProcessed in webhook-event.ts)
+- **Stripe automatically handles retry attempts and customer notifications**
+
+### Status Progression
+- `active` - `past_due` - `unpaid` - `canceled` (based on Stripe's dunning management)
+
+## 9. Payment Retry Flow
+
+**User with past_due/unpaid subscription manually retries payment**
+
+- User sees warning banner "Payment Required - Subscription Suspended"
+- User clicks "Pay Now" button (available in banner or status section)
+- API call to retry payment (retry-payment/route.ts)
+- Validate subscription is in past_due/unpaid status (SubscriptionOperations.findByUserId)
+- Get unpaid invoices from Stripe (stripe.invoices.list with status: 'open')
+- Find latest unpaid invoice for the subscription
+- Attempt payment (stripe.invoices.pay with invoiceId)
+- Handle payment result:
+  - Success: Return success message and amount paid
+  - Failure: Return specific error (insufficient funds, card declined, etc.)
+- Frontend handles response:
+  - Success: Show success toast and refresh subscription data (handleRetryPayment in use-subscription-actions.ts)
+  - Failure: Show error toast with next steps
+- **If payment succeeds, Stripe triggers invoice.payment_succeeded webhook**
+- Webhook processing (existing pipeline):
+  - Check idempotency (checkEventIdempotency in webhook-event.ts)
+  - Process webhook event (processWebhookEvent in webhook-event.ts)
+  - Handle invoice payment succeeded (handleInvoicePaymentSucceeded in webhook-handle.ts)
+  - Update subscription status from past_due/unpaid to active
+  - Mark event as processed (markEventProcessed in webhook-event.ts)
+- Subscription page refreshes to show active status
+
 ## Key Components
 
 ### API Routes
@@ -138,12 +187,14 @@
 - `cancel-downgrade/route.ts` - Handles canceling pending downgrades
 - `customer-portal/route.ts` - Provides access to Stripe customer portal
 - `preview-upgrade-downgrade/route.ts` - Provides pricing previews
+- `retry-payment/route.ts` - Handles manual payment retry for past_due/unpaid subscriptions
 - `webhook/route.ts` - Processes Stripe webhook events
 
 ### Core Functions
 - `createCheckoutSession` (stripe-utils.ts) - Creates Stripe checkout sessions
 - `scheduleSubscriptionDowngrade` (stripe-subscription.ts) - Schedules downgrades
 - `handleUpgradeProcess` (webhook-handle.ts) - Processes subscription upgrades
+- `handleRetryPayment` (use-subscription-actions.ts) - Handles manual payment retry
 - `synchronizeSubscriptionWithStripe` (stripe-subscription.ts) - Syncs subscription data
 - `checkEventIdempotency` (webhook-event.ts) - Prevents duplicate webhook processing
 

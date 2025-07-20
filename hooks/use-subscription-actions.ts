@@ -11,6 +11,7 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
   const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null)
   const [cancelDowngradeLoading, setCancelDowngradeLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [retryPaymentLoading, setRetryPaymentLoading] = useState(false)
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean
     targetPlan: SubscriptionPlan | null
@@ -156,16 +157,53 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
     }
   }
 
+  const handleRetryPayment = async () => {
+    setRetryPaymentLoading(true)
+    try {
+      const response = await fetch('/api/subscription/retry-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      
+      if (response.ok) {
+        const { data } = await response.json()
+        
+        toast({
+          title: 'Payment Successful',
+          description: data.message || 'Your subscription has been restored successfully.',
+          variant: ToastVariant.SUCCESS
+        })
+        
+        // Refresh subscription to show updated active state
+        await refreshSubscriptionWithFallback(true)
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to process payment')
+      }
+    } catch (error) {
+      console.error('Error retrying payment:', error)
+      toast({
+        title: 'Payment Failed',
+        description: error instanceof Error ? error.message : 'Failed to process payment. Please try again or update your payment method.',
+        variant: ToastVariant.DESTRUCTIVE
+      })
+    } finally {
+      setRetryPaymentLoading(false)
+    }
+  }
+
   return {
     upgradeLoading,
     cancelDowngradeLoading,
     portalLoading,
+    retryPaymentLoading,
     confirmationDialog,
     handleUpgrade,
     handlePlanAction,
     handleConfirmUpgrade,
     handleCloseConfirmation,
     handleManageSubscription,
-    handleCancelDowngrade
+    handleCancelDowngrade,
+    handleRetryPayment
   }
 }
