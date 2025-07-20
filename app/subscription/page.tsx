@@ -131,16 +131,17 @@ export default function SubscriptionPage() {
           />
           
           {/* Current Subscription Status - Only show for paid subscriptions that are not marked for cancellation or downgrade */}
-          {!isFreeMode() && !isActiveCancelled() && !isPendingDowngrade() && subscription.currentPeriodEnd && (
+          {!isPastDueOrUnpaid() && !isFreeMode() && !isActiveCancelled() &&
+            !isPendingDowngrade() && subscription.currentPeriodEnd && (
             <div className="mt-8 text-center">
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
-                subscription.isActive 
+                subscription.isActive
                   ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
                   : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
               }`}>
                 <span className="font-medium">
-                  {subscription.isActive || isPastDueOrUnpaid() ? 'Active Subscription' : 'Expired Subscription'} -
-                  {subscription.isActive || isPastDueOrUnpaid() ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} -
+                  {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                 </span>
               </div>
             </div>
