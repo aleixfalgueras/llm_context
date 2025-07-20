@@ -1,25 +1,33 @@
+import {Button} from '@/components/ui/button'
+
 interface SubscriptionStatusBannersProps {
   isFreeMode: boolean
   isActiveCancelled: boolean
   isPendingDowngrade: boolean
+  isPastDueOrUnpaid: boolean
   currentPeriodEnd?: string | null
   getRemainingTrialDays: () => number
   getRemainingActiveDays: () => number
   getRemainingDowngradeDays: () => number
   capitalizePlanName: (planName: string | undefined) => string
   pendingPlanChange?: string
+  onRetryPayment?: () => void
+  retryPaymentLoading?: boolean
 }
 
 export function SubscriptionStatusBanners({
   isFreeMode,
   isActiveCancelled,
   isPendingDowngrade,
+  isPastDueOrUnpaid,
   currentPeriodEnd,
   getRemainingTrialDays,
   getRemainingActiveDays,
   getRemainingDowngradeDays,
   capitalizePlanName,
-  pendingPlanChange
+  pendingPlanChange,
+  onRetryPayment,
+  retryPaymentLoading
 }: SubscriptionStatusBannersProps) {
   return (
     <>
@@ -62,6 +70,29 @@ export function SubscriptionStatusBanners({
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
             Your subscription will be downgraded on {new Date(currentPeriodEnd).toLocaleDateString()}
           </p>
+        </div>
+      )}
+      
+      {/* Past Due/Unpaid Subscription Banner */}
+      {isPastDueOrUnpaid && (
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border border-red-200 dark:border-red-700">
+            <span className="font-semibold text-lg">
+              ⚠️ Payment Required - Subscription Suspended
+            </span>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-4">
+            Your subscription payment failed. Please update your payment method or retry payment to restore access.
+          </p>
+          {onRetryPayment && (
+            <Button
+              onClick={onRetryPayment}
+              disabled={retryPaymentLoading}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2"
+            >
+              {retryPaymentLoading ? 'Processing Payment...' : 'Pay Now to Restore Access'}
+            </Button>
+          )}
         </div>
       )}
     </>

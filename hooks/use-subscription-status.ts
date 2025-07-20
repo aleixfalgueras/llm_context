@@ -69,6 +69,15 @@ export function useSubscriptionStatus() {
     return planId === subscription.plan
   }
 
+  // Helper function to detect if subscription is past due or unpaid
+  const isPastDueOrUnpaid = () => {
+    // Only for users with actual Stripe subscriptions (not free mode)
+    if (isFreeMode()) {
+      return false
+    }
+    return subscription.status === 'past_due' || subscription.status === 'unpaid'
+  }
+
   return {
     subscription,
     calculateRemainingDays,
@@ -80,6 +89,7 @@ export function useSubscriptionStatus() {
     isPendingPlanChange,
     getRemainingDowngradeDays,
     capitalizePlanName,
-    isCurrentPlan
+    isCurrentPlan,
+    isPastDueOrUnpaid
   }
 }
