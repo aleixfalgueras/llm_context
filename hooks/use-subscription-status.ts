@@ -85,7 +85,7 @@ export function useSubscriptionStatus() {
   // Helper function to detect if subscription is expired
   const isExpired = () => {
     // User had a subscription but it's no longer active
-    return !!subscription.stripeSubscriptionId && SubscriptionStatus.CANCELED
+    return !!subscription.stripeSubscriptionId && subscription.status === SubscriptionStatus.CANCELED
   }
 
   return {
