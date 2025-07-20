@@ -78,6 +78,12 @@ export function useSubscriptionStatus() {
     return subscription.status === 'past_due' || subscription.status === 'unpaid'
   }
 
+  // Helper function to detect if subscription is expired
+  const isExpired = () => {
+    // User had a subscription but it's no longer active
+    return !!subscription.stripeSubscriptionId && !subscription.isActive
+  }
+
   return {
     subscription,
     calculateRemainingDays,
@@ -90,6 +96,7 @@ export function useSubscriptionStatus() {
     getRemainingDowngradeDays,
     capitalizePlanName,
     isCurrentPlan,
-    isPastDueOrUnpaid
+    isPastDueOrUnpaid,
+    isExpired
   }
 }

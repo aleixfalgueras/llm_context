@@ -23,6 +23,7 @@ interface PlanCardProps {
   upgradeLoading: string | null
   cancelDowngradeLoading: boolean
   isActiveCancelled: boolean
+  isExpired: boolean
   onPlanAction: (planId: string) => void
 }
 
@@ -37,6 +38,7 @@ export function PlanCard({
   upgradeLoading,
   cancelDowngradeLoading,
   isActiveCancelled,
+  isExpired,
   onPlanAction
 }: PlanCardProps) {
   const getPlanIcon = (planId: string) => {
@@ -84,7 +86,7 @@ export function PlanCard({
         
         <Button 
           onClick={() => onPlanAction(plan.id)}
-          disabled={upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan || (isPendingDowngrade && !isPendingPlanChange) || isActiveCancelled}
+          disabled={upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan || (isPendingDowngrade && !isPendingPlanChange) || (isActiveCancelled && !isExpired)}
           className={`w-full ${getButtonStyles(
             isCurrentPlan,
             isPendingDowngrade,
@@ -96,7 +98,7 @@ export function PlanCard({
           ) : cancelDowngradeLoading && isPendingDowngrade && isPendingPlanChange ? (
             <LoadingSpinner text="Canceling..." />
           ) : (
-            getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan)
+            getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired)
           )}
         </Button>
       </CardContent>

@@ -28,7 +28,8 @@ export default function SubscriptionPage() {
     getRemainingDowngradeDays,
     capitalizePlanName,
     isCurrentPlan,
-    isPastDueOrUnpaid
+    isPastDueOrUnpaid,
+    isExpired
   } = useSubscriptionStatus()
 
   const { isRefreshing, setIsRefreshing, refreshSubscriptionWithFallback } = useSubscriptionRefresh({ refetch: subscription.refetch })
@@ -177,6 +178,7 @@ export default function SubscriptionPage() {
               upgradeLoading={upgradeLoading}
               cancelDowngradeLoading={cancelDowngradeLoading}
               isActiveCancelled={isActiveCancelled()}
+              isExpired={isExpired()}
               onPlanAction={handlePlanActionWrapper}
             />
           ))}

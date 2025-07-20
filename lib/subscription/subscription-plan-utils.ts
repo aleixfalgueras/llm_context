@@ -44,10 +44,11 @@ export function getButtonText(
   isFreeMode: boolean,
   isPendingDowngrade: boolean, 
   isPendingPlanChange: boolean,
-  isCurrentPlan: boolean
+  isCurrentPlan: boolean,
+  isExpired?: boolean
 ) {
-  // Free mode users see "Subscribe to..." for all plans
-  if (isFreeMode) {
+  // Free mode users and expired subscription users see "Subscribe to..." for all plans
+  if (isFreeMode || isExpired) {
     return `Subscribe to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
   }
   
