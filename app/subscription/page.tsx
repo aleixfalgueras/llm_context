@@ -164,6 +164,7 @@ export default function SubscriptionPage() {
               cancelDowngradeLoading={cancelDowngradeLoading}
               isActiveCancelled={isActiveCancelled()}
               isExpired={isExpired()}
+              isPastDueOrUnpaid={isPastDueOrUnpaid()}
               onPlanAction={handlePlanActionWrapper}
             />
           ))}
