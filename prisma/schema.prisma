@@ -150,7 +150,7 @@ model UserSubscription {
   stripePriceId        String?  // Stripe price ID for current plan
   
   // Plan Limits
-  maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: 4M
+  tokenLimit              Int @default(100000) // Basic: 5M, Pro: 15M, Business: 40M
   
   // Billing Cycle
   currentPeriodStart DateTime @default(now())
@@ -177,20 +177,21 @@ model UserUsage {
   id       String @id @default(cuid())
   userId   String // The user's ID from Clerk
   
-  // Usage Period (monthly tracking)
-  year     Int
-  month    Int
+  // Usage Period (billing period tracking)
+  billingPeriodStart DateTime
+  billingPeriodEnd   DateTime
   
   // Token Tracking (primary limit with OpenRouter)
-  tokensUsed        Int   @default(0)   // Total tokens consumed this month
+  tokensUsed        Int   @default(0)   // Total tokens consumed this billing period
   
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  // Unique constraint for user per month
-  @@unique([userId, year, month])
+  // Unique constraint for user per billing period
+  @@unique([userId, billingPeriodStart, billingPeriodEnd])
   @@index([userId])
+  @@index([billingPeriodStart, billingPeriodEnd])
   @@map("user_usage")
 }
 

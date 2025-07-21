@@ -136,7 +136,7 @@ export async function withClientAccess(userId: string, clientId: string): Promis
  * **Integration with Subscription System:**
  * - Leverages centralized token usage tracking
  * - Respects subscription tiers and plan limits
- * - Handles unlimited plans appropriately
+ * - Enforces numeric token limits for all plans
  * - Provides real-time usage validation
  * 
  * **Error Handling Standardization:**
@@ -163,7 +163,7 @@ export async function withTokenValidation(userId: string): Promise<void> {
  * 
  * @param validationResult - The token validation result from getTokenUsageLimit()
  * @param validationResult.allowed - Whether the validation passed
- * @param validationResult.limit - Token limit (number or 'unlimited')
+ * @param validationResult.limit - Token limit (number)
  * @param validationResult.used - Current token usage
  * @param validationResult.remaining - Remaining tokens (if applicable)
  * @param validationResult.reason - Error code for validation failure
@@ -222,7 +222,7 @@ export function throwValidationError(validationResult: TokenValidationResult): n
  * 
  * @param validationResult - The token validation result from getTokenUsageLimit()
  * @param validationResult.allowed - Whether validation passed (should be false when called)
- * @param validationResult.limit - Token limit (number or 'unlimited')
+ * @param validationResult.limit - Token limit (number)
  * @param validationResult.used - Current monthly token usage
  * @param validationResult.remaining - Remaining tokens in current period
  * @param validationResult.reason - Specific error code for validation failure
@@ -246,7 +246,7 @@ export function throwValidationError(validationResult: TokenValidationResult): n
  * **Metadata Structure:**
  * - **limitType:** Always 'tokens' for token-based validation
  * - **used:** Current monthly token consumption (number)
- * - **limit:** Monthly limit from subscription (number or 'unlimited')
+ * - **limit:** Monthly limit from subscription (number)
  * - **remaining:** Tokens remaining this period (number or undefined)
  * - **upgradeUrl:** Direct path to subscription management page
  * 

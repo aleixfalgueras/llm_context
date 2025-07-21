@@ -177,12 +177,15 @@ export async function invalidateAllUserCaches(userId: string): Promise<void> {
     // Invalidate subscription cache
     await invalidateSubscriptionCache(userId)
     
-    // Invalidate current month usage cache
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth() + 1
-    const usageCacheKey = `${userId}_${year}_${month}`
-    await invalidateUsageCache(usageCacheKey)
+    // Invalidate current billing period usage cache
+    // Note: We need to get the subscription to know the billing period dates
+    const { getUserSubscription } = await import('@/lib/subscription/subscription-utils')
+    const subscription = await getUserSubscription(userId)
+    
+    if (subscription.currentPeriodStart && subscription.currentPeriodEnd) {
+      const usageCacheKey = `${userId}_${subscription.currentPeriodStart.toISOString()}_${subscription.currentPeriodEnd.toISOString()}`
+      await invalidateUsageCache(usageCacheKey)
+    }
     
     // Invalidate storage analytics cache
     await invalidateStorageCache(userId)

@@ -40,7 +40,7 @@ The usage tracking system operates across **three primary dimensions**:
 ## Subscription Plans and Token Limits
 
 ### Basic Plan - €10/month
-- **Token Limit**: 5,000,000 tokens/month (~3,750 pages of content)
+- **Token Limit**: 5,000,000 tokens per billing period (~3,750 pages of content)
 - **Cost at limit**: ~$0.875 (92.5% profit margin)
 - **Storage**: 50 MB document storage
 - **Clients**: Client profiles
@@ -48,7 +48,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Perfect for**: Individual users and small businesses
 
 ### Pro Plan - €25/month
-- **Token Limit**: 15,000,000 tokens/month (~11,250 pages of content)
+- **Token Limit**: 15,000,000 tokens per billing period (~11,250 pages of content)
 - **Cost at limit**: ~$2.625 (91.0% profit margin)
 - **Storage**: 200 MB document storage
 - **Clients**: Client profiles
@@ -56,7 +56,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Perfect for**: Growing businesses and marketing professionals
 
 ### Business Plan - €50/month
-- **Token Limit**: 40,000,000 tokens/month (~30,000 pages of content)
+- **Token Limit**: 40,000,000 tokens per billing period (~30,000 pages of content)
 - **Cost at limit**: ~$7.00 (88.1% profit margin)
 - **Storage**: 2 GB document storage
 - **Clients**: Client profiles
@@ -68,17 +68,17 @@ The usage tracking system operates across **three primary dimensions**:
 ### Content Generation Examples
 With current AI models' token efficiency:
 
-**Basic Plan (5M tokens/month):**
+**Basic Plan (5M tokens per billing period):**
 - ~3,750 full blog posts (1,330 tokens each)
 - ~1,250 detailed marketing strategies (4,000 tokens each)
 - ~500 comprehensive client reports (10,000 tokens each)
 
-**Pro Plan (15M tokens/month):**
+**Pro Plan (15M tokens per billing period):**
 - ~11,250 full blog posts
 - ~3,750 detailed marketing strategies  
 - ~1,500 comprehensive client reports
 
-**Business Plan (40M tokens/month):**
+**Business Plan (40M tokens per billing period):**
 - ~30,000 full blog posts
 - ~10,000 detailed marketing strategies
 - ~4,000 comprehensive client reports
@@ -102,11 +102,40 @@ With current AI models' token efficiency:
 
 ## System Implementation
 
+### Billing Period-Based Usage Tracking
+
+**⚠️ IMPORTANT**: Usage tracking is now aligned with your actual Stripe subscription billing cycles, not calendar months. This means:
+
+- **Usage resets** exactly when your subscription renews (e.g., if you subscribed on the 15th, usage resets on the 15th of each month)
+- **More accurate billing alignment** - you see usage reset when you're actually charged
+- **No calendar month confusion** - your usage period matches your billing period
+
 ### Token Tracking
 - **Real-time monitoring**: Token usage tracked per API call
-- **Monthly limits**: Reset automatically at billing cycle
+- **Billing period limits**: Reset automatically at subscription billing cycle boundaries  
 - **Usage warnings**: Notifications at 80% and 95% of limits
 - **Hard limits**: Prevent overage charges
+
+### Technical Architecture
+
+**Database Schema** (UserUsage model):
+```prisma
+model UserUsage {
+  userId             String   
+  billingPeriodStart DateTime  // Start of current billing period
+  billingPeriodEnd   DateTime  // End of current billing period  
+  tokensUsed         Int      
+  createdAt          DateTime
+  updatedAt          DateTime
+  
+  @@unique([userId, billingPeriodStart, billingPeriodEnd])
+}
+```
+
+**Key Functions**:
+- `getCurrentBillingPeriodUsage()`: Gets usage for active billing period
+- `trackUsage()`: Updates usage within current billing period
+- `getUserLimitsAndUsage()`: Combined subscription and usage data
 
 ### Storage Management
 - **Document storage**: Separate limits for each plan
@@ -120,7 +149,7 @@ With current AI models' token efficiency:
 - **Token consumption** tracked per API call
 - **Usage warnings** at 80% and 95% of limits
 - **Hard limits** prevent overage
-- **Monthly reset** for billing cycles
+- **Billing period reset** aligned with subscription cycles
 
 ### Analytics Dashboard
 - **Current usage** vs. plan limits
