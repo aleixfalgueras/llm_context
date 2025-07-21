@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useUsageLimits } from '../use-usage-limits'
 import type { Client } from '@/types/client'
 
 interface UseClientManagementReturn {
@@ -11,18 +10,14 @@ interface UseClientManagementReturn {
   // Dialog states
   isDialogOpen: boolean
   isDocumentsOpen: boolean
-  showLimitDialog: boolean
   editingClient: Client | null
-  limitMessage: string
   
   // Actions
-  handleAddClient: () => Promise<void>
+  handleAddClient: () => void
   handleEditClient: (client: Client) => void
   handleViewDocuments: (client: Client) => void
   setIsDialogOpen: (open: boolean) => void
   setIsDocumentsOpen: (open: boolean) => void
-  setShowLimitDialog: (show: boolean) => void
-  checkUsageLimits: () => Promise<boolean>
   refreshClients: () => void
 }
 
@@ -31,25 +26,11 @@ export function useClientManagement(): UseClientManagementReturn {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
-  const [showLimitDialog, setShowLimitDialog] = useState(false)
-  const [limitMessage, setLimitMessage] = useState('')
-  
-  const { checkClientLimit } = useUsageLimits()
 
-  const handleAddClient = useCallback(async () => {
-    // Check usage limits only when user tries to add a client
-    const limitCheck = await checkClientLimit()
-    if (!limitCheck.canAdd) {
-      // Show limit dialog instead of toast
-      setLimitMessage(limitCheck.message)
-      setShowLimitDialog(true)
-      return
-    }
-    
-    // User can add clients, proceed with normal flow
+  const handleAddClient = useCallback(() => {
     setEditingClient(null)
     setIsDialogOpen(true)
-  }, [checkClientLimit])
+  }, [])
 
   const handleEditClient = useCallback((client: Client) => {
     setEditingClient(client)
@@ -61,10 +42,6 @@ export function useClientManagement(): UseClientManagementReturn {
     setIsDocumentsOpen(true)
   }, [])
 
-  const checkUsageLimits = useCallback(async (): Promise<boolean> => {
-    const limitCheck = await checkClientLimit()
-    return limitCheck.canAdd
-  }, [checkClientLimit])
 
   const refreshClients = useCallback(() => {
     // This would typically trigger a refetch of clients
@@ -79,9 +56,7 @@ export function useClientManagement(): UseClientManagementReturn {
     // Dialog states
     isDialogOpen,
     isDocumentsOpen,
-    showLimitDialog,
     editingClient,
-    limitMessage,
     
     // Actions
     handleAddClient,
@@ -89,8 +64,6 @@ export function useClientManagement(): UseClientManagementReturn {
     handleViewDocuments,
     setIsDialogOpen,
     setIsDocumentsOpen,
-    setShowLimitDialog,
-    checkUsageLimits,
     refreshClients,
   }
 }

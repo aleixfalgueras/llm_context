@@ -61,7 +61,6 @@ export class SubscriptionOperations extends BaseOperations {
           status: SubscriptionStatus.ACTIVE,
           currentPeriodStart: now,
           currentPeriodEnd: periodEnd,
-          maxClients: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.BASIC].maxClients,
           maxTokensPerMonth: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.BASIC].maxTokensPerMonth,
           cancelAtPeriodEnd: false,
           pendingPlanChange: null,

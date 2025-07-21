@@ -43,7 +43,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Token Limit**: 5,000,000 tokens/month (~3,750 pages of content)
 - **Cost at limit**: ~$0.875 (92.5% profit margin)
 - **Storage**: 50 MB document storage
-- **Clients**: 3 client profiles
+- **Clients**: Client profiles
 - **Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Individual users and small businesses
 
@@ -51,7 +51,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Token Limit**: 15,000,000 tokens/month (~11,250 pages of content)
 - **Cost at limit**: ~$2.625 (91.0% profit margin)
 - **Storage**: 200 MB document storage
-- **Clients**: Unlimited client profiles
+- **Clients**: Client profiles
 - **Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Growing businesses and marketing professionals
 
@@ -59,7 +59,7 @@ The usage tracking system operates across **three primary dimensions**:
 - **Token Limit**: 40,000,000 tokens/month (~30,000 pages of content)
 - **Cost at limit**: ~$7.00 (88.1% profit margin)
 - **Storage**: 2 GB document storage
-- **Clients**: Unlimited client profiles
+- **Clients**: Client profiles
 - **Models**: Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano
 - **Perfect for**: Agencies and large teams
 
@@ -113,10 +113,6 @@ With current AI models' token efficiency:
 - **File management**: Efficient storage and retrieval
 - **Analytics tracking**: Storage usage monitoring
 
-### Client Management
-- **Profile limits**: Plan-based client profile restrictions
-- **Unlimited access**: Pro and Business plans have no client limits
-- **Context management**: Efficient client data handling
 
 ## Usage Monitoring
 

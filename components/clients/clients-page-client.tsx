@@ -6,9 +6,6 @@ import {ClientsList} from '@/components/clients/clients-list'
 import {ClientForm} from '@/components/clients/client-form'
 import {ClientDocuments} from '@/components/clients/client-documents'
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog'
-import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert'
-import {AlertTriangle} from 'lucide-react'
-import {Button} from '@/components/ui/button'
 import {useClientManagement} from '@/hooks/client/use-client-management'
 
 interface ClientsPageClientProps {
@@ -28,9 +25,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
     // Dialog states
     isDialogOpen,
     isDocumentsOpen,
-    showLimitDialog,
     editingClient,
-    limitMessage,
     
     // Actions
     handleAddClient,
@@ -38,7 +33,6 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
     handleViewDocuments,
     setIsDialogOpen,
     setIsDocumentsOpen,
-    setShowLimitDialog,
     refreshClients,
   } = useClientManagement()
 
@@ -51,10 +45,6 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
     setIsDialogOpen(false)
   }
 
-  const handleUpgrade = () => {
-    setShowLimitDialog(false)
-    router.push('/subscription')
-  }
 
   return (
     <>
@@ -82,32 +72,6 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
         </DialogContent>
       </Dialog>
 
-      {/* Client Limit Alert Dialog */}
-      <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
-              Client Limit Reached
-            </DialogTitle>
-          </DialogHeader>
-          <Alert variant="destructive" className="mt-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Upgrade Required</AlertTitle>
-            <AlertDescription>
-              {limitMessage}
-            </AlertDescription>
-          </Alert>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
-              Close
-            </Button>
-            <Button onClick={handleUpgrade}>
-              Upgrade Plan
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {selectedClient && (
         <ClientDocuments

@@ -176,66 +176,6 @@ export async function checkTokenUsageLimit(userId: string) {
   }
 }
 
-// Check usage limits for different actions
-export async function checkUsageLimit(userId: string, action: 'client') {
-  const endTiming = logger.startTiming('Check Usage Limit', { userId });
-  
-  try {
-    const subscription = await getUserSubscription(userId)
-
-    // Check if subscription is active first
-    if (!isSubscriptionActive(subscription)) {
-      logger.warn('Subscription is not active for usage limit check', { 
-        userId,
-        metadata: { 
-          action,
-          plan: subscription.plan,
-          status: subscription.status,
-          currentPeriodEnd: subscription.currentPeriodEnd
-        }
-      });
-      endTiming();
-      return { 
-        allowed: false, 
-        limit: 0, 
-        used: 0, 
-        limitType: action,
-        reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED 
-      }
-    }
-
-    switch (action) {
-      case 'client':
-        const clientCount = await prisma.client.count({ where: { userId } })
-        const maxClients = subscription.maxClients
-        if (maxClients === -1) return { allowed: true, limit: 'unlimited', used: clientCount, limitType: 'clients' }
-        return {
-          allowed: clientCount < maxClients,
-          limit: maxClients,
-          used: clientCount,
-          remaining: maxClients - clientCount,
-          limitType: 'clients'
-        }
-
-      default:
-        logger.warn('Unknown action type for usage limit check', { 
-          userId,
-          metadata: { action }
-        });
-        endTiming();
-        return { allowed: false, limit: 0, used: 0 }
-    }
-  } catch (error) {
-    logger.error('Error checking usage limit', error as Error, { 
-      userId,
-      metadata: { action }
-    });
-    endTiming();
-    return { allowed: false, limit: 0, used: 0 }
-  } finally {
-    endTiming();
-  }
-}
 
 // Track usage by updating monthly usage only (no individual events)
 export async function updateUsageTracking(
@@ -375,7 +315,6 @@ export async function getUserUsageAnalytics(userId: string) {
         isActive: isSubscriptionActive(subscription),
       },
       limits: {
-        clients: subscription.maxClients,
         tokens: subscription.maxTokensPerMonth,
         // Removed cost limit - OpenRouter handles billing automatically
       },

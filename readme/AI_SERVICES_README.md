@@ -330,17 +330,17 @@ AI Services API Structure:
 ```
 Basic Plan - $10/month:
 - 5M tokens per month (91.25% profit margin)
-- 3 client profiles
+- Client profiles
 - 50 MB storage
 
 Pro Plan - $25/month:  
 - 15M tokens per month (89.5% profit margin)
-- Unlimited client profiles
+- Client profiles
 - 200 MB storage
 
 Business Plan - $50/month:
 - 40M tokens per month (86% profit margin)
-- Unlimited client profiles
+- Client profiles
 - 2 GB storage
 ```
 

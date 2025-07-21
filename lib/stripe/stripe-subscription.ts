@@ -207,7 +207,6 @@ export async function synchronizeSubscriptionWithStripe(
 
     // Update plan limits if plan changed
     if (planLimits) {
-      updateData.maxClients = planLimits.maxClients
       updateData.maxTokensPerMonth = planLimits.maxTokensPerMonth
     }
 
@@ -222,7 +221,6 @@ export async function synchronizeSubscriptionWithStripe(
         subscriptionIdChanged: subscription.stripeSubscriptionId !== updatedSubscription.stripeSubscriptionId,
         plan: updatedSubscription.plan,
         status: updatedSubscription.status,
-        maxClients: updatedSubscription.maxClients,
         maxTokensPerMonth: updatedSubscription.maxTokensPerMonth,
         planLimitsUpdated: !!planLimits,
         canceledAtChanged: subscription.canceledAt !== updatedSubscription.canceledAt,

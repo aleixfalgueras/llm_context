@@ -279,20 +279,6 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
     // Pass subscription to getStorageAnalytics to avoid duplicate query
     const storageAnalytics = await getStorageAnalytics(userId, subscription);
 
-    // Check client limits - count current clients with caching
-    const { getCachedClientCount, cacheClientCount } = await import('../subscription/subscription-cache')
-    let clientCount = await getCachedClientCount(userId)
-    if (clientCount === null) {
-      clientCount = await prisma.client.count({ where: { userId } })
-      await cacheClientCount(userId, clientCount)
-    }
-    
-    const clientUsage = {
-      allowed: subscription.maxClients === -1 || clientCount < subscription.maxClients,
-      limit: subscription.maxClients === -1 ? 'unlimited' as const : subscription.maxClients,
-      used: clientCount,
-      remaining: subscription.maxClients === -1 ? undefined : Math.max(0, subscription.maxClients - clientCount)
-    };
 
     // Check token limits - primary limit for OpenRouter usage
     const tokenUsage = {
@@ -327,9 +313,6 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
       pendingPlanChange: subscription.pendingPlanChange,
       
-      // Client limits (flat structure for frontend compatibility)
-      clientsUsed: clientUsage.used,
-      clientsLimit: clientUsage.limit === 'unlimited' ? -1 : clientUsage.limit,
       
       // Token limits (flat structure for frontend compatibility)
       tokensUsed: tokenUsage.used,
