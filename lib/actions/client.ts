@@ -17,6 +17,14 @@ export async function createClient(data: ClientFormData) {
     throw new Error('User not authenticated')
   }
 
+  // Check subscription expiration before creating client
+  const subscription = await getUserSubscription(userId)
+  if (!isSubscriptionActive(subscription)) {
+    const error = new Error('Your subscription has expired. Please upgrade to continue creating clients.')
+    ;(error as any).code = ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
+    ;(error as any).upgradeUrl = '/subscription'
+    throw error
+  }
 
   // Prepare client data with defaults and trim context fields
   const clientData = processClientData({
