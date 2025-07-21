@@ -17,7 +17,7 @@ export function ClientTableView({
   isDeleting, 
   getLanguageInfo 
 }: ClientTableViewProps) {
-  const { onEditClient, onViewDocuments, onDeleteClient } = actionHandlers
+  const { onEditClient, onViewClient, onViewDocuments, onDeleteClient } = actionHandlers
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -49,7 +49,11 @@ export function ClientTableView({
             {clients.map((client) => {
               const languageInfo = getLanguageInfo(client.documentsLanguage || 'english')
               return (
-                <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <tr 
+                  key={client.id} 
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  onClick={() => onViewClient(client)}
+                >
                   <td className="px-4 py-4">
                     <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {client.name}
@@ -81,7 +85,10 @@ export function ClientTableView({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onViewDocuments(client)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onViewDocuments(client)
+                        }}
                         title="View Documents"
                       >
                         <FileText className="h-4 w-4 text-yellow-600 hover:text-yellow-700" />
@@ -89,7 +96,10 @@ export function ClientTableView({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onEditClient(client)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onEditClient(client)
+                        }}
                         title="Edit Client"
                       >
                         <Edit className="h-4 w-4 text-blue-600 hover:text-blue-700" />
@@ -97,7 +107,10 @@ export function ClientTableView({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onDeleteClient(client.id, client.name)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDeleteClient(client.id, client.name)
+                        }}
                         disabled={isDeleting === client.id}
                         title="Delete Client"
                       >

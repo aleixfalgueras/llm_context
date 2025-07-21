@@ -9,14 +9,18 @@ interface UseClientManagementReturn {
   
   // Dialog states
   isDialogOpen: boolean
+  isViewDialogOpen: boolean
   isDocumentsOpen: boolean
   editingClient: Client | null
+  viewingClient: Client | null
   
   // Actions
   handleAddClient: () => void
   handleEditClient: (client: Client) => void
+  handleViewClient: (client: Client) => void
   handleViewDocuments: (client: Client) => void
   setIsDialogOpen: (open: boolean) => void
+  setIsViewDialogOpen: (open: boolean) => void
   setIsDocumentsOpen: (open: boolean) => void
   refreshClients: () => void
 }
@@ -24,7 +28,9 @@ interface UseClientManagementReturn {
 export function useClientManagement(): UseClientManagementReturn {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
+  const [viewingClient, setViewingClient] = useState<Client | null>(null)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
 
   const handleAddClient = useCallback(() => {
@@ -35,6 +41,11 @@ export function useClientManagement(): UseClientManagementReturn {
   const handleEditClient = useCallback((client: Client) => {
     setEditingClient(client)
     setIsDialogOpen(true)
+  }, [])
+
+  const handleViewClient = useCallback((client: Client) => {
+    setViewingClient(client)
+    setIsViewDialogOpen(true)
   }, [])
 
   const handleViewDocuments = useCallback((client: Client) => {
@@ -55,14 +66,18 @@ export function useClientManagement(): UseClientManagementReturn {
     
     // Dialog states
     isDialogOpen,
+    isViewDialogOpen,
     isDocumentsOpen,
     editingClient,
+    viewingClient,
     
     // Actions
     handleAddClient,
     handleEditClient,
+    handleViewClient,
     handleViewDocuments,
     setIsDialogOpen,
+    setIsViewDialogOpen,
     setIsDocumentsOpen,
     refreshClients,
   }

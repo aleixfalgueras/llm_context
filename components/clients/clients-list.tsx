@@ -17,12 +17,13 @@ interface ClientsListProps {
   clients: Client[]
   usageInfo?: UsageInfo | null // Optional since we no longer pre-load it
   onEditClient: (client: Client) => void
+  onViewClient: (client: Client) => void
   onAddClient: () => void
   onRefresh: () => void
   onViewDocuments: (client: Client) => void
 }
 
-export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
+export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const {
@@ -68,6 +69,7 @@ export function ClientsList({ clients, onEditClient, onAddClient, onRefresh, onV
   // Prepare data for child components
   const actionHandlers: ClientActionHandlers = {
     onEditClient,
+    onViewClient,
     onViewDocuments,
     onDeleteClient: handleDelete
   }
