@@ -87,3 +87,55 @@ export type SubscriptionPlanType = `${SubscriptionPlan}`
 export type ModelTierType = `${ModelTier}`
 export type SubscriptionStatusType = `${SubscriptionStatus}`
 export type PlanId = SubscriptionPlan
+
+// =============================================================================
+// TOKEN VALIDATION AND USAGE TYPES
+// =============================================================================
+
+/**
+ * Unified usage and limits data structure
+ * Combines subscription and usage information for efficient access
+ */
+export interface UsageLimitsData {
+  subscription: {
+    plan: SubscriptionPlan
+    status: SubscriptionStatus
+    currentPeriodEnd: Date
+    isActive: boolean
+    maxTokensPerMonth: number
+  }
+  usage: {
+    tokensUsed: number
+    year: number
+    month: number
+  }
+}
+
+/**
+ * Token validation result structure
+ * Standardized result from token usage validation
+ */
+export interface TokenValidationResult {
+  allowed: boolean
+  limitType: 'tokens'
+  used: number
+  limit: number
+  remaining?: number
+  reason?: string
+}
+
+/**
+ * Validation error details for middleware error handling
+ */
+export interface ValidationErrorDetails {
+  code: string
+  status: number
+  message: string
+  metadata: {
+    limitType: string
+    used: number
+    limit: number
+    remaining?: number
+    upgradeUrl: string
+  }
+}
