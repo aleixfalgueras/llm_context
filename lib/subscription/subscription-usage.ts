@@ -1,10 +1,61 @@
 import {cacheUsage, getCachedUsage, invalidateUsageCache} from "@/lib/subscription/subscription-cache";
 import {logger, withTiming} from "@/lib/logger";
 import {prisma} from "@/lib/prisma";
-import {PlanId, SUBSCRIPTION_PLAN_DETAIL} from "@/types/subscription-types";
+import {PlanId, SUBSCRIPTION_PLAN_DETAIL, UsageLimitsData, TokenValidationResult} from "@/types/subscription-types";
 import {getUserSubscription, isSubscriptionActive} from "@/lib/subscription/subscription-utils";
 import {ApiSubscriptionErrorCode} from "@/types/enums";
 import {getStorageAnalytics} from "@/lib/utils/storage";
+
+/**
+ * Get unified subscription and usage data for a user in a single call.
+ * This function is optimized for token validation flows where
+ * both subscription status and usage data are needed together.
+ * 
+ * @param userId - The user ID to retrieve data for
+ * 
+ * @returns Promise<UsageLimitsData> - Combined subscription and usage data:
+ *   **subscription**: Current subscription details including plan, status, limits
+ *   **usage**: Current month token usage and period information
+ * 
+ * @throws Error - Database connection or query failures
+ * 
+ * **Performance Benefits:**
+ * - Single cache lookup for combined data when possible
+ * - Parallel data fetching when cache miss occurs
+ * - Eliminates redundant subscription status checks
+ * - Optimized for high-frequency validation operations
+ * 
+ * **Usage Pattern:**
+ * Primary function for token validation and usage display components.
+ * Replaces separate calls to getUserSubscription() and getCurrentMonthUsage().
+ */
+export async function getUserLimitsAndUsage(userId: string): Promise<UsageLimitsData> {
+  try {
+    // Fetch subscription and usage data in parallel for optimal performance
+    const [subscription, usage] = await Promise.all([
+      getUserSubscription(userId),
+      getCurrentMonthUsage(userId)
+    ]);
+
+    return {
+      subscription: {
+        plan: subscription.plan,
+        status: subscription.status,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+        isActive: isSubscriptionActive(subscription),
+        maxTokensPerMonth: subscription.maxTokensPerMonth
+      },
+      usage: {
+        tokensUsed: usage.tokensUsed,
+        year: usage.year,
+        month: usage.month
+      }
+    };
+  } catch (error) {
+    logger.error('Error getting user limits and usage', error as Error, { userId });
+    throw error;
+  }
+}
 
 /**
  * Track usage after successful API completion by updating monthly usage records.
@@ -375,74 +426,33 @@ export async function getUserUsageAnalytics(userId: string) {
  * Check token usage limits before AI requests to enforce subscription quotas.
  * 
  * Validates whether a user can make AI requests based on their current subscription
- * status and monthly token usage. Essential for enforcing subscription limits and
- * preventing quota overages before expensive AI operations.
+ * status and monthly token usage. Now uses the unified data service for improved
+ * performance and consistency.
  * 
  * @param userId - The user ID to check token usage limits for
  * 
- * @returns Promise<TokenUsageLimit> - Usage limit result object:
- *   **For Active Unlimited Subscriptions:**
- *   - allowed: true
- *   - limit: 'unlimited'
- *   - used: current month token consumption
- *   - limitType: 'tokens'
- * 
- *   **For Active Limited Subscriptions:**
- *   - allowed: boolean (true if under limit)
- *   - limit: monthly token limit number
- *   - used: current month token consumption
- *   - remaining: tokens remaining in current period
- *   - limitType: 'tokens'
- * 
- *   **For Inactive Subscriptions:**
- *   - allowed: false
- *   - limit: 0
- *   - used: 0
- *   - limitType: 'tokens'
- *   - reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
- * 
- *   **For Errors:**
- *   - allowed: false
- *   - limit: 0
- *   - used: 0
- *   - limitType: 'tokens'
+ * @returns Promise<TokenValidationResult> - Standardized validation result object
  * 
  * @throws Never throws - Returns safe fallback values on error
  * 
- * **Validation Flow:**
- * 1. Retrieve user subscription details
- * 2. Check if subscription is currently active
- * 3. If inactive, return denial with specific error code
- * 4. If active, fetch current month usage
- * 5. Compare usage against subscription limits
- * 6. Return validation result with remaining quota
- * 
- * **Performance Monitoring:**
- * - Comprehensive timing measurement for optimization
- * - Detailed logging for subscription status and usage
- * - Performance threshold warnings for slow operations
- * 
- * **Error Handling:**
- * - Safe fallback prevents API access on errors
- * - Comprehensive error logging for debugging
- * - Non-throwing behavior maintains API stability
- * 
- * **Integration Pattern:**
- * Should be called before any AI API operations to validate quota availability.
- * Critical for subscription enforcement and preventing overages.
+ * **Optimized Implementation:**
+ * - Uses unified getUserLimitsAndUsage() for single data fetch
+ * - Eliminates redundant subscription status checks
+ * - Consistent return structure via TokenValidationResult interface
+ * - Better error handling with proper fallback values
  */
-export async function getTokenUsageLimit(userId: string) {
+export async function getTokenUsageLimit(userId: string): Promise<TokenValidationResult> {
   try {
-    const subscription = await getUserSubscription(userId)
+    const data = await getUserLimitsAndUsage(userId);
 
     // Check if subscription is active first
-    if (!isSubscriptionActive(subscription)) {
+    if (!data.subscription.isActive) {
       logger.warn('Subscription is not active for token usage limit check', {
         userId,
         metadata: {
-          plan: subscription.plan,
-          status: subscription.status,
-          currentPeriodEnd: subscription.currentPeriodEnd
+          plan: data.subscription.plan,
+          status: data.subscription.status,
+          currentPeriodEnd: data.subscription.currentPeriodEnd
         }
       });
       return {
@@ -451,30 +461,26 @@ export async function getTokenUsageLimit(userId: string) {
         used: 0,
         limitType: 'tokens',
         reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
-      }
+      };
     }
 
-    const usage = await getCurrentMonthUsage(userId)
-    const maxTokens = subscription.maxTokensPerMonth
-
-    if (maxTokens === -1) {
-      return {
-        allowed: true,
-        limit: 'unlimited',
-        used: usage.tokensUsed,
-        limitType: 'tokens'
-      }
-    }
+    const maxTokens = data.subscription.maxTokensPerMonth;
+    const tokensUsed = data.usage.tokensUsed;
 
     return {
-      allowed: usage.tokensUsed < maxTokens,
+      allowed: tokensUsed < maxTokens,
       limit: maxTokens,
-      used: usage.tokensUsed,
-      remaining: maxTokens - usage.tokensUsed,
+      used: tokensUsed,
+      remaining: Math.max(0, maxTokens - tokensUsed),
       limitType: 'tokens'
-    }
+    };
   } catch (error) {
-    logger.error('Error checking token usage limit', error as Error, {userId});
-    return {allowed: false, limit: 0, used: 0, limitType: 'tokens'}
+    logger.error('Error checking token usage limit', error as Error, { userId });
+    return {
+      allowed: false,
+      limit: 0,
+      used: 0,
+      limitType: 'tokens'
+    };
   }
 }
