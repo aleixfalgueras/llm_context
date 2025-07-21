@@ -1,10 +1,10 @@
 // Language utilities removed - meeting reports are now generated in English only
-import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
 import { createAICompletion } from '@/lib/ai/wrapper'
 import { AIProviderError } from '@/lib/ai/errors'
 import { logger, withTiming } from '@/lib/logger'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { handleApiError } from '@/lib/utils/error-handler'
+import {withAuth, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Generate Meeting Report API');

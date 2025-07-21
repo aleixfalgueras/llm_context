@@ -1,12 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import { buildClientContextSection } from '@/lib/utils/client-context'
 import { replaceClientVariables } from '@/lib/ai/variable-replacement'
-import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
 import { createAICompletion } from '@/lib/ai/wrapper'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
 import { logger } from '@/lib/logger'
 import { handleApiError } from '@/lib/utils/error-handler'
+import {withAuth, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
 
 export async function POST(request: Request) {
   let userId: string = '';

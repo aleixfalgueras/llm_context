@@ -8,11 +8,64 @@ import { AIProviderError } from '@/lib/ai/errors'
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { getDefaultModel, getModelsByTier } from '@/lib/ai/models-config'
-import { checkModelAccess } from '@/lib/subscription/subscription-utils'
-import { withAuth, withTokenValidation, withClientAccess } from '@/lib/middleware/api-middleware'
 import { handleApiError } from '@/lib/utils/error-handler'
-import { ApiSubscriptionErrorCode } from '@/types/enums' 
+import { ApiSubscriptionErrorCode } from '@/types/enums'
+import {
+  checkModelAccess,
+  withAuth,
+  withClientAccess,
+  withTokenValidation
+} from "@/lib/middleware/validation-middleware";
+import {OpenRouterClient} from "@/lib/ai/openrouter";
 
+/**
+ * Chat API endpoint that handles AI chat interactions with streaming responses.
+ * 
+ * This endpoint manages the complete chat flow including authentication, model access validation,
+ * chat creation/retrieval, client context integration, and AI response streaming. It supports
+ * both new chat creation and continuation of existing chats with full client context awareness.
+ * 
+ * @param req - HTTP request containing chat data
+ * @param req.body.messages - Array of chat messages with content and role
+ * @param req.body.chatId - Optional existing chat ID (creates new chat if not provided)
+ * @param req.body.model - AI model to use (defaults to system default if not specified)
+ * @param req.body.clientId - Required client ID for new chats, determines context
+ * @param req.body.contextFields - Array of client context fields to include in system prompt
+ * 
+ * @returns StreamingResponse - Server-sent events stream with the following data types:
+ *   - `content`: Streaming AI response content chunks
+ *   - `complete`: Final completion signal with chatId and optional newTitle
+ *   - `error`: Error information with type, message, and retry details
+ * 
+ * @throws 400 - Missing required fields (clientId for new chats)
+ * @throws 403 - Model access denied based on subscription tier
+ * @throws 404 - Chat or client not found
+ * @throws 500 - Internal server errors (AI provider issues, database errors)
+ * 
+ * **Authentication Flow:**
+ * 1. User authentication validation
+ * 2. Token usage validation and limits checking
+ * 3. Model access verification based on subscription tier
+ * 
+ * **Chat Processing Flow:**
+ * 1. Parse and validate request parameters
+ * 2. Create new chat or retrieve existing chat with messages
+ * 3. Build client context system prompt from selected fields
+ * 4. Process user message and save to database
+ * 5. Stream AI response with real-time content delivery
+ * 6. Save complete AI response and update token usage
+ * 
+ * **Client Context Integration:**
+ * - Builds personalized system prompts using client information
+ * - Supports selective context fields for privacy and relevance
+ * - Maintains client context across all messages in a chat
+ * 
+ * **Error Handling:**
+ * - Graceful handling of client disconnections during streaming
+ * - Partial message saving on interruptions
+ * - Provider-specific error handling with retry information
+ * - Comprehensive logging for debugging and monitoring
+ */
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Chat API');
   let chatId: string = '';
@@ -306,8 +359,7 @@ Respond naturally and conversationally while keeping this context in mind.`
                 try {                  
                   // Add a small delay - generation stats might not be immediately available
                   await new Promise(resolve => setTimeout(resolve, 1000));
-                  
-                  const { OpenRouterClient } = await import('@/lib/ai/openrouter/client');
+
                   const client = new OpenRouterClient();
                   const stats = await client.getGenerationStats(chunk.generationId);
                   

@@ -1,9 +1,9 @@
-import { getUsageInfo } from '@/lib/middleware/api-middleware'
-import { 
+import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
+import {getUsageInfo} from "@/lib/subscription/subscription-usage";
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'

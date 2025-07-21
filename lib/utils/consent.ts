@@ -1,5 +1,6 @@
-import { prisma } from '../prisma'
-import { ConsentAction, ConsentType } from '@/types/enums'
+import {prisma} from '../prisma'
+import {ConsentAction, ConsentType} from '@/types/enums'
+import {NextRequest} from "next/server";
 
 // Current policy versions - update these when you change Terms/Privacy Policy
 export const CURRENT_TERMS_VERSION = '1.0'
@@ -333,4 +334,22 @@ export async function hasCurrentConsent(userId: string): Promise<boolean> {
     console.error('Error checking current consent:', error)
     return false
   }
-} 
+}
+
+/**
+ * Extract client IP and user agent for audit trails
+ * Eliminates duplicate code across routes that need this information
+ */
+export function extractClientInfo(req: NextRequest): {
+  ipAddress: string;
+  userAgent: string
+} {
+  const ipAddress = req.headers.get('x-forwarded-for') ||
+    req.headers.get('x-real-ip') ||
+    req.ip ||
+    'unknown'
+
+  const userAgent = req.headers.get('user-agent') || 'unknown'
+
+  return {ipAddress, userAgent}
+}

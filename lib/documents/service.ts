@@ -8,6 +8,8 @@ import { validateDocumentStorage, calculateDocumentSize } from '../utils/storage
 import { logger } from '../logger'
 import { prisma } from '../prisma'
 import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
+import { trackUsage } from '../subscription/subscription-usage'
+import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
 
 export class DocumentService {
   /**
@@ -142,11 +144,10 @@ export class DocumentService {
     }
 
     // Track usage if enabled (default: true)
-    const trackUsage = options?.trackUsage !== false
-    if (trackUsage) {
+    const shouldTrackUsage = options?.trackUsage !== false
+    if (shouldTrackUsage) {
       try {
-        const { trackUsage: trackUsageEvent } = await import('../middleware/api-middleware')
-        await trackUsageEvent(userId, {
+        await trackUsage(userId, {
           documentType,
           clientId,
           documentName: finalDocumentName
@@ -158,8 +159,7 @@ export class DocumentService {
 
     // Invalidate storage cache since storage usage has changed
     try {
-      const { invalidateStorageCache } = await import('../subscription/subscription-cache')
-      invalidateStorageCache(userId)
+      await invalidateStorageCache(userId)
     } catch (error) {
       logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))
     }
@@ -230,8 +230,7 @@ export class DocumentService {
 
       // Invalidate storage cache since storage usage may have changed
       try {
-        const { invalidateStorageCache } = await import('../subscription/subscription-cache')
-        invalidateStorageCache(userId)
+        await invalidateStorageCache(userId)
       } catch (error) {
         logger.error('Error invalidating storage cache', error instanceof Error ? error : new Error(String(error)))
       }
