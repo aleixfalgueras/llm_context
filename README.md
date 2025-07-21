@@ -32,9 +32,9 @@ A production-ready AI-powered marketing assistant platform built with Next.js 14
 
 ## 💰 Pricing
 
-- **Basic ($10/month)**: 5M tokens, 3 clients, 50MB storage
-- **Pro ($25/month)**: 15M tokens, unlimited clients, 200MB storage  
-- **Business ($50/month)**: 40M tokens, unlimited clients, 2GB storage
+- **Basic ($10/month)**: 5M tokens, client profiles, 50MB storage
+- **Pro ($25/month)**: 15M tokens, client profiles, 200MB storage  
+- **Business ($50/month)**: 40M tokens, client profiles, 2GB storage
 
 All plans include access to both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano models.
 

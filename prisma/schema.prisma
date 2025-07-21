@@ -150,7 +150,6 @@ model UserSubscription {
   stripePriceId        String?  // Stripe price ID for current plan
   
   // Plan Limits
-  maxClients              Int @default(3)     // Basic: 3, Pro: unlimited (-1), Business: unlimited (-1)
   maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: 4M
   
   // Billing Cycle

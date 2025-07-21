@@ -22,8 +22,7 @@ const getEnvironmentPrefix = (): string => {
 const CACHE_PREFIXES = {
   SUBSCRIPTION: 'sub:',
   USAGE: 'usage:',
-  STORAGE: 'storage:',
-  CLIENT_COUNT: 'client_count:'
+  STORAGE: 'storage:'
 } as const
 
 // Helper functions for cache keys with environment separation
@@ -36,7 +35,6 @@ const getCacheKey = (prefix: string, userId: string, suffix?: string) => {
 const SUBSCRIPTION_CACHE_TTL = 60 * 60 // 1 hour (subscription data changes rarely)
 const USAGE_CACHE_TTL = 2 * 60 // 2 minutes
 const STORAGE_CACHE_TTL = 5 * 60 // 5 minutes (storage data changes rarely)
-const CLIENT_COUNT_CACHE_TTL = 60 // 1 minute (client count changes occasionally)
 
 /**
  * Cache subscription data with TTL
@@ -94,18 +92,6 @@ export async function cacheStorageAnalytics(userId: string, analytics: any): Pro
   }
 }
 
-/**
- * Cache client count data
- */
-export async function cacheClientCount(userId: string, count: number): Promise<void> {
-  try {
-    const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
-    await redis.setex(key, CLIENT_COUNT_CACHE_TTL, count.toString())
-  } catch (error) {
-    logger.error('Error caching client count', error as Error)
-    // Fail silently - app should work without cache
-  }
-}
 
 /**
  * Get cached usage data if valid
@@ -141,22 +127,6 @@ export async function getCachedStorageAnalytics(userId: string): Promise<any | n
   }
 }
 
-/**
- * Get cached client count if valid
- */
-export async function getCachedClientCount(userId: string): Promise<number | null> {
-  try {
-    const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
-    const cached = await redis.get(key)
-    if (cached !== null && cached !== undefined) {
-      return parseInt(cached.toString())
-    }
-    return null
-  } catch (error) {
-    logger.error('Error getting cached client count', error as Error)
-    return null // Fall back to no cache
-  }
-}
 
 /**
  * Invalidate subscription cache for a user (call when subscription changes)
@@ -197,18 +167,6 @@ export async function invalidateStorageCache(userId: string): Promise<void> {
   }
 }
 
-/**
- * Invalidate client count cache for a user (call when client count changes)
- */
-export async function invalidateClientCountCache(userId: string): Promise<void> {
-  try {
-    const key = getCacheKey(CACHE_PREFIXES.CLIENT_COUNT, userId)
-    await redis.del(key)
-  } catch (error) {
-    logger.error('Error invalidating client count cache', error as Error)
-    // Fail silently
-  }
-}
 
 /**
  * Invalidate all user-specific caches (call after subscription changes)
@@ -228,9 +186,6 @@ export async function invalidateAllUserCaches(userId: string): Promise<void> {
     
     // Invalidate storage analytics cache
     await invalidateStorageCache(userId)
-    
-    // Invalidate client count cache
-    await invalidateClientCountCache(userId)
   } catch (error) {
     logger.error('Error invalidating all user caches', error as Error)
     // Fail silently - cache invalidation should not break functionality

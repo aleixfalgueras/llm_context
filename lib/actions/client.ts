@@ -2,7 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { checkUsageLimit, getUserSubscription, isSubscriptionActive } from '../subscription/subscription-utils'
+import { getUserSubscription, isSubscriptionActive } from '../subscription/subscription-utils'
 import { logger } from '../logger'
 import { ClientOperations } from '../database'
 import { ClientFormData } from '@/types/client'
@@ -17,17 +17,6 @@ export async function createClient(data: ClientFormData) {
     throw new Error('User not authenticated')
   }
 
-  // Check usage limits before creating client
-  const usageCheck = await checkUsageLimit(userId, 'client')
-  if (!usageCheck.allowed) {
-    if (usageCheck.reason === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
-      const error = new Error('Your subscription has expired. Please upgrade to continue creating clients.')
-      ;(error as any).code = ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
-      ;(error as any).upgradeUrl = '/subscription'
-      throw error
-    }
-    throw new Error(`You've reached your client limit of ${usageCheck.limit}. Upgrade to Pro for unlimited clients.`)
-  }
 
   // Prepare client data with defaults and trim context fields
   const clientData = processClientData({
@@ -42,13 +31,6 @@ export async function createClient(data: ClientFormData) {
     throw new Error(result.error || 'Failed to create client')
   }
 
-  // Invalidate client count cache since client count has changed
-  try {
-    const { invalidateClientCountCache } = await import('../subscription/subscription-cache')
-    invalidateClientCountCache(userId)
-  } catch (error) {
-    console.error('Error invalidating client count cache:', error)
-  }
 
   revalidatePath('/clients')
   return { success: true, client: result.data }
@@ -100,13 +82,6 @@ export async function deleteClient(id: string) {
     throw new Error(result.error || 'Failed to delete client')
   }
 
-  // Invalidate client count cache since client count has changed
-  try {
-    const { invalidateClientCountCache } = await import('../subscription/subscription-cache')
-    invalidateClientCountCache(userId)
-  } catch (error) {
-    console.error('Error invalidating client count cache:', error)
-  }
 
   revalidatePath('/clients')
   return { success: true }

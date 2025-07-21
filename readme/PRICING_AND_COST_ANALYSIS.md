@@ -53,7 +53,7 @@ Per 1K tokens = $0.000175
 
 **Value Proposition:**
 - 3x more tokens than Basic plan for 2.5x the price
-- Unlimited client profiles
+- Client profiles
 - Suitable for professional content creation at scale
 
 ### Business Plan - €50/month

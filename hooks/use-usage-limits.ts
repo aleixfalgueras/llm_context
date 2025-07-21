@@ -4,18 +4,12 @@ import { useState, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
 
 interface UsageInfo {
-  clientsUsed: number
-  clientsLimit: number
   storageUsed: number
   storageLimit: number
   plan: string
   tier: string
 }
 
-interface LimitCheckResult {
-  canAdd: boolean
-  message: string
-}
 
 interface UseUsageLimitsReturn {
   // State
@@ -23,7 +17,6 @@ interface UseUsageLimitsReturn {
   loading: boolean
   
   // Actions
-  checkClientLimit: () => Promise<LimitCheckResult>
   checkStorageLimit: () => Promise<boolean>
   refreshUsageInfo: () => Promise<void>
   getUsageInfo: () => Promise<UsageInfo | null>
@@ -58,21 +51,6 @@ export function useUsageLimits(): UseUsageLimitsReturn {
     }
   }, [getUsageInfo])
 
-  const checkClientLimit = useCallback(async (): Promise<LimitCheckResult> => {
-    try {
-      const usage = await getUsageInfo()
-      if (!usage) return { canAdd: true, message: '' } // Allow if we can't check
-
-      if (usage.clientsUsed >= usage.clientsLimit) {
-        const message = `You've reached your client limit (${usage.clientsLimit}). Please upgrade your plan or delete some existing clients to create new ones.`
-        return { canAdd: false, message }
-      }
-      return { canAdd: true, message: '' }
-    } catch (error) {
-      console.error('Error checking client limit:', error)
-      return { canAdd: true, message: '' } // Allow if check fails
-    }
-  }, [getUsageInfo])
 
 
   const checkStorageLimit = useCallback(async (): Promise<boolean> => {
@@ -102,7 +80,6 @@ export function useUsageLimits(): UseUsageLimitsReturn {
     loading,
     
     // Actions
-    checkClientLimit,
     checkStorageLimit,
     refreshUsageInfo,
     getUsageInfo,

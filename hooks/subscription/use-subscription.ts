@@ -8,7 +8,6 @@ interface SubscriptionInfo {
   plan: SubscriptionPlanType
   tier: ModelTierType
   maxTokensPerMonth: number
-  maxClients: number
   tokensUsed: number
   storageUsed: number
   storageUsedFormatted: string
@@ -30,7 +29,6 @@ export function useSubscription() {
     plan: SubscriptionPlan.BASIC,
     tier: ModelTier.BASIC,
     maxTokensPerMonth: 100000,
-    maxClients: 3,
     tokensUsed: 0,
     storageUsed: 0,
     storageUsedFormatted: '0 Bytes',
@@ -68,7 +66,6 @@ export function useSubscription() {
           plan: data.plan,
           tier: getTierFromPlan(data.plan),
           maxTokensPerMonth: data.tokensLimit || 0,
-          maxClients: data.clientsLimit || 0,
           tokensUsed: data.tokensUsed || 0,
           storageUsed: data.storageUsed || 0,
           storageUsedFormatted: data.storageUsedFormatted || '0 Bytes',
