@@ -21,6 +21,7 @@ export interface LanguageInfo {
 
 export interface ClientActionHandlers {
   onEditClient: (client: Client) => void
+  onViewClient: (client: Client) => void
   onViewDocuments: (client: Client) => void
   onDeleteClient: (clientId: string, clientName: string) => void
 }

@@ -24,14 +24,18 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
     
     // Dialog states
     isDialogOpen,
+    isViewDialogOpen,
     isDocumentsOpen,
     editingClient,
+    viewingClient,
     
     // Actions
     handleAddClient,
     handleEditClient,
+    handleViewClient,
     handleViewDocuments,
     setIsDialogOpen,
+    setIsViewDialogOpen,
     setIsDocumentsOpen,
     refreshClients,
   } = useClientManagement()
@@ -45,6 +49,10 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
     setIsDialogOpen(false)
   }
 
+  const handleViewCancel = () => {
+    setIsViewDialogOpen(false)
+  }
+
 
   return (
     <>
@@ -52,6 +60,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
         clients={clients}
         onAddClient={handleAddClient}
         onEditClient={handleEditClient}
+        onViewClient={handleViewClient}
         onRefresh={refreshClients}
         onViewDocuments={handleViewDocuments}
       />
@@ -68,6 +77,20 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
             onSuccess={handleSuccess}
             onCancel={handleCancel}
             hideTitle={true}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>View Client</DialogTitle>
+          </DialogHeader>
+          <ClientForm
+            client={viewingClient}
+            onCancel={handleViewCancel}
+            hideTitle={true}
+            viewMode={true}
           />
         </DialogContent>
       </Dialog>
