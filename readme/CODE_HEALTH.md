@@ -1,6 +1,14 @@
 # Code Health Report
 
-Generated on: 2025-07-03
+**⚠️ NOTE**: This is an automated report generated on: 2025-07-03
+
+**🔄 REGENERATE AFTER MAJOR CHANGES**: This report should be regenerated after significant refactors or architectural changes. Run the following command to generate a fresh report:
+
+```bash
+npx tsx scripts/report_code_health.ts
+```
+
+**Recent Major Changes**: The application recently underwent a billing period refactor (January 2025) that changed usage tracking from calendar months to subscription billing periods. This may have affected some metrics in this report.
 
 ## File Length Analysis
 

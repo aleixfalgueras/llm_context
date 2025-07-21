@@ -27,7 +27,7 @@ AI Services provide automated marketing content generation using client profiles
 - **Dual Model System**: Google Gemini 2.0 Flash ($0.10/M input, $0.40/M output) and OpenAI GPT-4.1 Nano (same pricing) for optimal cost efficiency
 - **OpenRouter Integration**: Unified API access through OpenRouter with business-sustainable pricing across both models
 - **Cost-Optimized Selection**: Models chosen for 86-91% profit margins while maintaining high quality
-- **Token Usage Tracking**: Real-time monitoring across both models without confusing cost estimates
+- **Token Usage Tracking**: Real-time monitoring across both models aligned with subscription billing periods
 - **Business Sustainability**: Pricing ensures long-term platform viability with excellent margins
 - **Model Choice**: Users can select preferred model per service, with preferences saved across sessions
 - **Error Handling**: Comprehensive error management with fallback capabilities across both providers
@@ -242,12 +242,12 @@ AI Services API Structure:
 - **Privacy Compliance**: Monitor client context selection patterns
 
 ### **Cost Management & Analytics**
-- **Token Usage Tracking**: Monitor consumption patterns for Gemini 2.0 Flash and GPT-4.1 Nano
+- **Token Usage Tracking**: Monitor consumption patterns for Gemini 2.0 Flash and GPT-4.1 Nano aligned with billing periods
 - **Cost-Optimized Pricing**: Subscription pricing covers AI costs with 89-91% profit margins
 - **Per-User Analytics**: Track usage per user for billing and limit enforcement
-- **Real-time Monitoring**: Live token consumption tracking without confusing cost estimates
+- **Billing Period Alignment**: Token consumption tracking matches Stripe billing cycles for accurate usage reporting
 - **Business Sustainability**: Pricing model ensures long-term platform viability
-- **Usage Limits**: Fair token limits based on subscription tier with automatic enforcement
+- **Usage Limits**: Fair token limits based on subscription tier with automatic enforcement per billing period
 
 ## 🚀 Future Enhancements
 
@@ -345,9 +345,9 @@ Business Plan - $50/month:
 ```
 
 ### **Token Management**
-- **Fair Usage Limits**: Token limits calculated based on most expensive models
-- **Real-time Tracking**: Monitor consumption without confusing cost estimates
-- **Automatic Enforcement**: Usage limits enforced at API level
+- **Fair Usage Limits**: Token limits calculated based on most expensive models, enforced per billing period
+- **Real-time Tracking**: Monitor consumption aligned with subscription billing cycles
+- **Automatic Enforcement**: Usage limits enforced at API level with billing period reset timing
 
 ---
 

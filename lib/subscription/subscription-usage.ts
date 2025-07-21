@@ -7,6 +7,134 @@ import {ApiSubscriptionErrorCode} from "@/types/enums";
 import {getStorageAnalytics} from "@/lib/utils/storage";
 
 /**
+ * Get the current billing period dates from a user's subscription.
+ * 
+ * @param userId - The user ID to get billing period for
+ * @returns Promise<{periodStart: Date, periodEnd: Date}> - Current billing period dates
+ * @throws Error - If subscription not found or invalid
+ */
+async function getCurrentBillingPeriod(userId: string): Promise<{periodStart: Date, periodEnd: Date}> {
+  const subscription = await getUserSubscription(userId);
+  
+  if (!subscription.currentPeriodStart || !subscription.currentPeriodEnd) {
+    throw new Error('Subscription missing billing period dates');
+  }
+  
+  return {
+    periodStart: subscription.currentPeriodStart,
+    periodEnd: subscription.currentPeriodEnd
+  };
+}
+
+/**
+ * Get current billing period usage data with intelligent caching and auto-creation.
+ *
+ * Retrieves the user's usage statistics for the current subscription billing period,
+ * implementing a multi-layer approach with caching, database queries, and automatic
+ * record creation to ensure consistent data availability.
+ *
+ * @param userId - The user ID to retrieve usage data for
+ *
+ * @returns Promise<UserUsage> - Complete usage record with the following structure:
+ *   - userId: User identifier
+ *   - billingPeriodStart: Start of current billing period
+ *   - billingPeriodEnd: End of current billing period
+ *   - tokensUsed: Number of tokens consumed this billing period
+ *   - createdAt: Record creation timestamp
+ *   - updatedAt: Last update timestamp
+ *
+ * @throws Error - Database connection or query failures
+ *
+ * **Caching Strategy:**
+ * - First checks Redis cache with key format: `{userId}_{periodStart}_{periodEnd}`
+ * - Cache TTL optimized for usage data freshness requirements
+ * - Cache populated after successful database queries
+ *
+ * **Auto-Creation Logic:**
+ * - Uses upsert operation to prevent race conditions during record creation
+ * - Creates new usage record with zero tokens if none exists for current billing period
+ * - Logs creation events for monitoring and debugging
+ *
+ * **Performance Monitoring:**
+ * - Database operations timed with performance threshold
+ * - Comprehensive error logging with contextual metadata
+ * - Debug logging for cache hits to monitor cache effectiveness
+ *
+ * **Usage Pattern:**
+ * Called frequently by usage validation and display components.
+ * Essential for subscription limit enforcement aligned with billing periods.
+ */
+export async function getCurrentBillingPeriodUsage(userId: string) {
+  try {
+    // Get current billing period from subscription
+    const { periodStart, periodEnd } = await getCurrentBillingPeriod(userId);
+
+    // Check cache first (shorter TTL for usage data)
+    const cacheKey = `${userId}_${periodStart.toISOString()}_${periodEnd.toISOString()}`
+    const cached = await getCachedUsage(cacheKey)
+    if (cached) {
+      logger.debug('Returning cached usage', {
+        userId,
+        metadata: {
+          billingPeriodStart: periodStart.toISOString(),
+          billingPeriodEnd: periodEnd.toISOString()
+        }
+      })
+      return cached
+    }
+
+    let usage = await prisma.userUsage.findUnique({
+      where: {
+        userId_billingPeriodStart_billingPeriodEnd: {
+          userId,
+          billingPeriodStart: periodStart,
+          billingPeriodEnd: periodEnd
+        }
+      }
+    })
+
+    // Create usage record if none exists for current billing period using upsert to prevent race conditions
+    if (!usage) {
+      logger.info('Creating new user usage record for billing period', {
+        userId,
+        metadata: {
+          billingPeriodStart: periodStart.toISOString(),
+          billingPeriodEnd: periodEnd.toISOString()
+        }
+      });
+
+      logger.dbQuery('upsert', 'userUsage', {userId});
+      usage = await prisma.userUsage.upsert({
+        where: {
+          userId_billingPeriodStart_billingPeriodEnd: {
+            userId,
+            billingPeriodStart: periodStart,
+            billingPeriodEnd: periodEnd
+          }
+        },
+        update: {}, // Don't update if exists
+        create: {
+          userId,
+          billingPeriodStart: periodStart,
+          billingPeriodEnd: periodEnd,
+          tokensUsed: 0,
+        }
+      })
+    }
+
+    // Cache the result
+    await cacheUsage(cacheKey, usage)
+
+    return usage
+  } catch (error) {
+    logger.error('Error getting current billing period usage', error as Error, {
+      userId
+    });
+    throw error
+  }
+}
+
+/**
  * Get unified subscription and usage data for a user in a single call.
  * This function is optimized for token validation flows where
  * both subscription status and usage data are needed together.
@@ -27,14 +155,14 @@ import {getStorageAnalytics} from "@/lib/utils/storage";
  * 
  * **Usage Pattern:**
  * Primary function for token validation and usage display components.
- * Replaces separate calls to getUserSubscription() and getCurrentMonthUsage().
+ * Replaces separate calls to getUserSubscription() and getCurrentBillingPeriodUsage().
  */
 export async function getUserLimitsAndUsage(userId: string): Promise<UsageLimitsData> {
   try {
     // Fetch subscription and usage data in parallel for optimal performance
     const [subscription, usage] = await Promise.all([
       getUserSubscription(userId),
-      getCurrentMonthUsage(userId)
+      getCurrentBillingPeriodUsage(userId)
     ]);
 
     return {
@@ -43,198 +171,17 @@ export async function getUserLimitsAndUsage(userId: string): Promise<UsageLimits
         status: subscription.status,
         currentPeriodEnd: subscription.currentPeriodEnd,
         isActive: isSubscriptionActive(subscription),
-        maxTokensPerMonth: subscription.maxTokensPerMonth
+        tokenLimit: subscription.tokenLimit
       },
       usage: {
         tokensUsed: usage.tokensUsed,
-        year: usage.year,
-        month: usage.month
+        billingPeriodStart: usage.billingPeriodStart,
+        billingPeriodEnd: usage.billingPeriodEnd
       }
     };
   } catch (error) {
     logger.error('Error getting user limits and usage', error as Error, { userId });
     throw error;
-  }
-}
-
-/**
- * Track usage after successful API completion by updating monthly usage records.
- * 
- * This function increments the user's monthly token usage and invalidates the cache
- * to ensure fresh data on subsequent requests. It uses upsert to handle cases where
- * the monthly usage record doesn't exist yet.
- * 
- * @param userId - The user ID to track usage for
- * @param metadata - Optional metadata object containing usage details
- * @param metadata.tokensUsed - Number of tokens consumed in this operation
- * @param metadata.model - AI model used (for logging purposes)
- * @param metadata.[key] - Additional metadata fields for logging
- * 
- * @returns Promise<void> - Does not return a value
- * 
- * @throws Never throws - All errors are caught and logged to prevent breaking main functionality
- * 
- * **Behavior:**
- * - Creates new monthly usage record if none exists for current month
- * - Increments existing token usage atomically using Prisma increment
- * - Invalidates usage cache after successful update
- * - Logs all operations for monitoring and debugging
- * - Gracefully handles errors without throwing to avoid breaking API calls
- * 
- * **Usage Pattern:**
- * Should be called after successful AI API completions to maintain accurate usage tracking.
- * Non-blocking operation that won't affect user experience if it fails.
- */
-export async function trackUsage(
-  userId: string,
-  metadata?: {
-    tokensUsed?: number
-    model?: string
-    [key: string]: any
-  }
-): Promise<void> {
-  try {
-    // Update monthly usage directly
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth() + 1
-
-    const updateData: any = {}
-    
-    if (metadata?.tokensUsed) {
-      updateData.tokensUsed = { increment: metadata.tokensUsed }
-    }
-
-    const result = await prisma.userUsage.upsert({
-      where: {
-        userId_year_month: {
-          userId,
-          year,
-          month
-        }
-      },
-      create: {
-        userId,
-        year,
-        month,
-        tokensUsed: metadata?.tokensUsed || 0,
-      },
-      update: updateData
-    })
-
-    logger.info('Updated tokensUsed', { 
-      userId, 
-      tokensUsed: result.tokensUsed 
-    });
-
-    // Invalidate usage cache after update
-    const cacheKey = `${userId}_${year}_${month}`
-    await invalidateUsageCache(cacheKey)
-
-  } catch (error) {
-    logger.error('Error tracking usage', error as Error, { userId });
-    // Don't throw error as this shouldn't break the main functionality
-  }
-}
-
-/**
- * Get current month usage data with intelligent caching and auto-creation.
- * 
- * Retrieves the user's usage statistics for the current calendar month, implementing
- * a multi-layer approach with caching, database queries, and automatic record creation
- * to ensure consistent data availability.
- * 
- * @param userId - The user ID to retrieve usage data for
- * 
- * @returns Promise<UserUsage> - Complete usage record with the following structure:
- *   - userId: User identifier
- *   - year: Current year (e.g., 2024)
- *   - month: Current month (1-12)
- *   - tokensUsed: Number of tokens consumed this month
- *   - createdAt: Record creation timestamp
- *   - updatedAt: Last update timestamp
- * 
- * @throws Error - Database connection or query failures
- * 
- * **Caching Strategy:**
- * - First checks Redis cache with key format: `{userId}_{year}_{month}`
- * - Cache TTL optimized for usage data freshness requirements
- * - Cache populated after successful database queries
- * 
- * **Auto-Creation Logic:**
- * - Uses upsert operation to prevent race conditions during record creation
- * - Creates new usage record with zero tokens if none exists for current month
- * - Logs creation events for monitoring and debugging
- * 
- * **Performance Monitoring:**
- * - Database operations timed with 500ms performance threshold
- * - Comprehensive error logging with contextual metadata
- * - Debug logging for cache hits to monitor cache effectiveness
- * 
- * **Usage Pattern:**
- * Called frequently by usage validation and display components.
- * Essential for subscription limit enforcement and user dashboard display.
- */
-export async function getCurrentMonthUsage(userId: string) {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
-
-  try {
-    // Check cache first (shorter TTL for usage data)
-    const cacheKey = `${userId}_${year}_${month}`
-    const cached = await getCachedUsage(cacheKey)
-    if (cached) {
-      logger.debug('Returning cached usage', {userId, metadata: {year: year.toString(), month: month.toString()}})
-      return cached
-    }
-
-    let usage = await prisma.userUsage.findUnique({
-      where: {
-        userId_year_month: {
-          userId,
-          year,
-          month
-        }
-      }
-    })
-
-    // Create usage record if none exists for current month using upsert to prevent race conditions
-    if (!usage) {
-      logger.info('Creating new user usage record', {
-        userId,
-        metadata: {year, month}
-      });
-
-      logger.dbQuery('upsert', 'userUsage', {userId});
-      usage = await prisma.userUsage.upsert({
-          where: {
-            userId_year_month: {
-              userId,
-              year,
-              month
-            }
-          },
-          update: {}, // Don't update if exists
-          create: {
-            userId,
-            year,
-            month,
-            tokensUsed: 0,
-          }
-        })
-    }
-
-    // Cache the result
-    await cacheUsage(cacheKey, usage)
-
-    return usage
-  } catch (error) {
-    logger.error('Error getting current month usage', error as Error, {
-      userId,
-      metadata: {year: year.toString(), month: month.toString()}
-    });
-    throw error
   }
 }
 
@@ -261,7 +208,7 @@ export async function getCurrentMonthUsage(userId: string) {
  * 
  *   **Token Usage (Flat Structure):**
  *   - tokensUsed: Number of tokens consumed this month
- *   - tokensLimit: Monthly token limit (-1 for unlimited)
+ *   - tokenLimit: Monthly token limit
  * 
  *   **Storage Usage (Flat Structure in MB):**
  *   - storageUsed: Storage consumed in megabytes
@@ -279,7 +226,7 @@ export async function getCurrentMonthUsage(userId: string) {
  * - Flat structure eliminates need for nested object access
  * - Consistent units (MB for storage) for easy display
  * - Boolean flags for quick conditional rendering
- * - Handles unlimited limits with -1 convention
+ * - All plans have specific numeric token limits
  * 
  * **Error Handling:**
  * - Returns null on any error (check for null in consuming code)
@@ -291,7 +238,7 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
     // Get subscription and usage data once, then check all limits
     const [subscription, usage] = await Promise.all([
       getUserSubscription(userId, bypassCache),
-      getCurrentMonthUsage(userId)
+      getCurrentBillingPeriodUsage(userId)
     ]);
 
     // Pass subscription to getStorageAnalytics to avoid duplicate query
@@ -300,10 +247,10 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
 
     // Check token limits - primary limit for OpenRouter usage
     const tokenUsage = {
-      allowed: subscription.maxTokensPerMonth === -1 || usage.tokensUsed < subscription.maxTokensPerMonth,
-      limit: subscription.maxTokensPerMonth === -1 ? 'unlimited' as const : subscription.maxTokensPerMonth,
+      allowed: usage.tokensUsed < subscription.tokenLimit,
+      limit: subscription.tokenLimit,
       used: usage.tokensUsed,
-      remaining: subscription.maxTokensPerMonth === -1 ? undefined : Math.max(0, subscription.maxTokensPerMonth - usage.tokensUsed)
+      remaining: Math.max(0, subscription.tokenLimit - usage.tokensUsed)
     };
 
     // Storage usage information
@@ -331,10 +278,9 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
       pendingPlanChange: subscription.pendingPlanChange,
 
-
       // Token limits (flat structure for frontend compatibility)
       tokensUsed: tokenUsage.used,
-      tokensLimit: tokenUsage.limit === 'unlimited' ? -1 : tokenUsage.limit,
+      tokenLimit: tokenUsage.limit,
 
       // Storage limits (flat structure for frontend compatibility)
       storageUsed: Math.round(storageUsage.used / (1024 * 1024)), // Convert to MB
@@ -363,7 +309,7 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
  *   - isActive: Boolean indicating active subscription status
  * 
  *   **limits: UsageLimits**
- *   - tokens: Monthly token limit (-1 for unlimited plans)
+ *   - tokens: Monthly token limit
  * 
  *   **usage: CurrentUsage**
  *   - tokensUsed: Number of tokens consumed in current month
@@ -396,7 +342,7 @@ export async function getUserUsageAnalytics(userId: string) {
   try {
     const [subscription, currentUsage] = await Promise.all([
       getUserSubscription(userId),
-      getCurrentMonthUsage(userId)
+      getCurrentBillingPeriodUsage(userId)
     ])
 
     const plan = SUBSCRIPTION_PLAN_DETAIL[subscription.plan as PlanId]
@@ -409,7 +355,7 @@ export async function getUserUsageAnalytics(userId: string) {
         isActive: isSubscriptionActive(subscription),
       },
       limits: {
-        tokens: subscription.maxTokensPerMonth,
+        tokens: subscription.tokenLimit,
       },
       usage: {
         tokensUsed: currentUsage.tokensUsed,
@@ -464,14 +410,14 @@ export async function getTokenUsageLimit(userId: string): Promise<TokenValidatio
       };
     }
 
-    const maxTokens = data.subscription.maxTokensPerMonth;
+    const tokenLimit = data.subscription.tokenLimit;
     const tokensUsed = data.usage.tokensUsed;
 
     return {
-      allowed: tokensUsed < maxTokens,
-      limit: maxTokens,
+      allowed: tokensUsed < tokenLimit,
+      limit: tokenLimit,
       used: tokensUsed,
-      remaining: Math.max(0, maxTokens - tokensUsed),
+      remaining: Math.max(0, tokenLimit - tokensUsed),
       limitType: 'tokens'
     };
   } catch (error) {
@@ -482,5 +428,87 @@ export async function getTokenUsageLimit(userId: string): Promise<TokenValidatio
       used: 0,
       limitType: 'tokens'
     };
+  }
+}
+
+/**
+ * Track usage after successful API completion by updating billing period usage records.
+ *
+ * This function increments the user's token usage for the current billing period and
+ * invalidates the cache to ensure fresh data on subsequent requests. It uses upsert to
+ * handle cases where the billing period usage record doesn't exist yet.
+ *
+ * @param userId - The user ID to track usage for
+ * @param metadata - Optional metadata object containing usage details
+ * @param metadata.tokensUsed - Number of tokens consumed in this operation
+ * @param metadata.model - AI model used (for logging purposes)
+ * @param metadata.[key] - Additional metadata fields for logging
+ *
+ * @returns Promise<void> - Does not return a value
+ *
+ * @throws Never throws - All errors are caught and logged to prevent breaking main functionality
+ *
+ * **Behavior:**
+ * - Creates new billing period usage record if none exists for current period
+ * - Increments existing token usage atomically using Prisma increment
+ * - Invalidates usage cache after successful update
+ * - Logs all operations for monitoring and debugging
+ * - Gracefully handles errors without throwing to avoid breaking API calls
+ *
+ * **Usage Pattern:**
+ * Should be called after successful AI API completions to maintain accurate usage tracking.
+ * Non-blocking operation that won't affect user experience if it fails.
+ */
+export async function trackUsage(
+  userId: string,
+  metadata?: {
+    tokensUsed?: number
+    model?: string
+    [key: string]: any
+  }
+): Promise<void> {
+  try {
+    // Get current billing period
+    const { periodStart, periodEnd } = await getCurrentBillingPeriod(userId);
+
+    const updateData: any = {}
+
+    if (metadata?.tokensUsed) {
+      updateData.tokensUsed = { increment: metadata.tokensUsed }
+    }
+
+    const result = await prisma.userUsage.upsert({
+      where: {
+        userId_billingPeriodStart_billingPeriodEnd: {
+          userId,
+          billingPeriodStart: periodStart,
+          billingPeriodEnd: periodEnd
+        }
+      },
+      create: {
+        userId,
+        billingPeriodStart: periodStart,
+        billingPeriodEnd: periodEnd,
+        tokensUsed: metadata?.tokensUsed || 0,
+      },
+      update: updateData
+    })
+
+    logger.info('Updated tokensUsed for billing period', {
+      userId,
+      tokensUsed: result.tokensUsed,
+      metadata: {
+        billingPeriodStart: periodStart.toISOString(),
+        billingPeriodEnd: periodEnd.toISOString()
+      }
+    });
+
+    // Invalidate usage cache after update
+    const cacheKey = `${userId}_${periodStart.toISOString()}_${periodEnd.toISOString()}`
+    await invalidateUsageCache(cacheKey)
+
+  } catch (error) {
+    logger.error('Error tracking usage', error as Error, { userId });
+    // Don't throw error as this shouldn't break the main functionality
   }
 }

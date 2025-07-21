@@ -7,7 +7,7 @@ import { ModelTier, SubscriptionPlan, ModelTierType, SubscriptionPlanType } from
 interface SubscriptionInfo {
   plan: SubscriptionPlanType
   tier: ModelTierType
-  maxTokensPerMonth: number
+  tokenLimit: number
   tokensUsed: number
   storageUsed: number
   storageUsedFormatted: string
@@ -28,7 +28,7 @@ export function useSubscription() {
   const [subscription, setSubscription] = useState<SubscriptionInfo>({
     plan: SubscriptionPlan.BASIC,
     tier: ModelTier.BASIC,
-    maxTokensPerMonth: 100000,
+    tokenLimit: 100000,
     tokensUsed: 0,
     storageUsed: 0,
     storageUsedFormatted: '0 Bytes',
@@ -65,7 +65,7 @@ export function useSubscription() {
         setSubscription({
           plan: data.plan,
           tier: getTierFromPlan(data.plan),
-          maxTokensPerMonth: data.tokensLimit || 0,
+          tokenLimit: data.tokenLimit || 0,
           tokensUsed: data.tokensUsed || 0,
           storageUsed: data.storageUsed || 0,
           storageUsedFormatted: data.storageUsedFormatted || '0 Bytes',

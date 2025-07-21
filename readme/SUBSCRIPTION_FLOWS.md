@@ -1,5 +1,31 @@
 # Subscription Flows Documentation
 
+## Overview: Billing Period Usage Integration
+
+**⚠️ IMPORTANT**: The application uses **billing period-based usage tracking** that aligns with Stripe subscription billing cycles. This means:
+
+- **Usage tracking periods** match your exact Stripe billing periods (e.g., 15th to 15th if subscribed on the 15th)
+- **Usage resets** occur exactly when Stripe charges the customer, not on calendar month boundaries
+- **Subscription changes** automatically handle usage period transitions
+- **Accurate usage reporting** aligned with actual billing cycles
+
+## Usage Tracking During Subscription Changes
+
+### Usage Behavior During Upgrades
+- **Immediate effect**: New token limits apply instantly upon successful upgrade
+- **Usage preservation**: Current billing period usage carries over to new plan
+- **Billing period continuity**: Usage period remains aligned with original subscription start date
+
+### Usage Behavior During Downgrades  
+- **Scheduled effect**: New limits apply at next billing period (when downgrade takes effect)
+- **Usage monitoring**: Current period tracked under existing limits until transition
+- **Clean transition**: Usage resets with new billing period when downgrade activates
+
+### Usage Behavior During Renewals
+- **Automatic reset**: Usage resets to 0 when billing period renews
+- **Exact timing**: Reset occurs at Stripe subscription renewal timestamp
+- **Consistent periods**: Each billing period duration matches subscription settings
+
 ## 1. New Subscription Creation Flow
 
 **User initiates subscription creation from UI**
@@ -198,7 +224,36 @@
 - `synchronizeSubscriptionWithStripe` (stripe-subscription.ts) - Syncs subscription data
 - `checkEventIdempotency` (webhook-event.ts) - Prevents duplicate webhook processing
 
+### Usage Tracking Functions
+- `getCurrentBillingPeriod()` - Extracts billing period dates from subscription
+- `getCurrentBillingPeriodUsage()` - Gets usage for active billing period
+- `invalidateAllUserCaches()` - Clears usage and subscription caches during changes
+- `trackUsage()` - Records token usage within current billing period
+
+### Cache Management During Subscription Changes
+
+**Cache Invalidation Strategy**:
+All subscription changes trigger comprehensive cache clearing to ensure users see accurate usage data:
+
+```typescript
+// During any subscription change
+await invalidateAllUserCaches(userId)
+
+// This invalidates:
+// - Subscription cache (plan, limits, status)  
+// - Current billing period usage cache
+// - Storage analytics cache
+```
+
+**Cache Key Format**:
+Usage cache keys now include billing period dates:
+```
+{userId}_{billingPeriodStart}_{billingPeriodEnd}
+```
+
 ### Database Operations
 - `SubscriptionOperations.findByUserId` - Get user subscription
-- `SubscriptionOperations.updateSubscription` - Update subscription data
+- `SubscriptionOperations.updateSubscription` - Update subscription data  
 - `SubscriptionOperations.clearScheduleFields` - Clear pending schedule data
+- `UserUsage.findUnique` - Get usage for specific billing period
+- `UserUsage.upsert` - Create/update usage records for billing periods

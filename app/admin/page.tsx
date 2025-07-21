@@ -66,11 +66,11 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
       _count: true
     }),
     
-    // Monthly usage data
+    // Current billing period usage data
     adminPrisma.userUsage.findMany({
       where: {
-        year: new Date().getFullYear(),
-        month: new Date().getMonth() + 1
+        billingPeriodStart: { lte: new Date() },
+        billingPeriodEnd: { gte: new Date() }
       },
       select: {
         tokensUsed: true
@@ -87,7 +87,7 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
     })
   ])
 
-  // Calculate monthly totals
+  // Calculate current billing period totals
   const monthlyStats = monthlyUsage.reduce(
     (acc, usage) => ({
       tokens: acc.tokens + usage.tokensUsed
