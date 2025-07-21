@@ -4,6 +4,7 @@ import {logger} from "@/lib/logger";
 import {cancelSubscriptionImmediately, synchronizeSubscriptionWithStripe} from "@/lib/stripe/stripe-subscription";
 import {stripe} from "@/lib/stripe/stripe";
 import {prisma} from "@/lib/prisma";
+import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils";
 
 /**
  * Validates the state before processing a subscription upgrade to prevent race conditions.
@@ -268,7 +269,6 @@ export async function handleSubscriptionEvent(subscription: Stripe.Subscription,
       let clearScheduleId = false
 
       if (dbSubscription?.pendingPlanChange && priceId) {
-        const {getPlanFromPriceId} = await import('@/lib/stripe/stripe-utils')
         const newPlan = getPlanFromPriceId(priceId)
 
         // If the new plan matches the pending plan change, clear the pending change

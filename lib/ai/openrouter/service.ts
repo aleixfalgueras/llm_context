@@ -5,7 +5,6 @@
 import { OpenRouterClient, OpenRouterCompletionOptions, StreamChunk } from './client'
 import { handleOpenRouterError } from '../../utils/error-handler'
 import { processOpenRouterStream } from './stream-handler'
-import { trackUsage } from '../../middleware/api-middleware'
 import { logger } from '../../logger'
 import { 
   getDefaultModel, 
@@ -14,6 +13,7 @@ import {
   getDefaultPresencePenalty, 
   getDefaultFrequencyPenalty 
 } from '../models-config'
+import {trackUsage} from "@/lib/subscription/subscription-usage";
 
 export interface UsageTrackingOptions {
   userId: string

@@ -86,3 +86,4 @@ export enum ModelTier {
 export type SubscriptionPlanType = `${SubscriptionPlan}`
 export type ModelTierType = `${ModelTier}`
 export type SubscriptionStatusType = `${SubscriptionStatus}`
+export type PlanId = SubscriptionPlan
