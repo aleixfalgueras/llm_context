@@ -28,8 +28,6 @@ export const GET = withEnhancedApi(
       // Cap at 100 items per page
       pagination.limit = Math.min(pagination.limit, 100)
 
-      logger.dbQuery('findMany', 'prompt', { userId })
-      
       const result = await withTiming(
         'Fetch prompts from DB',
         async () => {
@@ -114,8 +112,6 @@ export const POST = withEnhancedApi(
         category: body.category || 'general'
       }
 
-      logger.dbQuery('create', 'prompt', { userId })
-      
       const result = await withTiming(
         'Create prompt in DB',
         () => PromptOperations.createPrompt(userId, promptData),
