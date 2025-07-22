@@ -1,5 +1,5 @@
 import {useSubscription} from '@/hooks/subscription/use-subscription'
-import {SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
+import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 
 export function useSubscriptionStatus() {
   const subscription = useSubscription()
@@ -18,7 +18,7 @@ export function useSubscriptionStatus() {
 
   // Helper function to detect if user is in free mode
   const isFreeMode = () => {
-    return subscription.plan === SubscriptionPlan.BASIC && !subscription.stripeSubscriptionId
+    return subscription.plan === SubscriptionPlan.basic && !subscription.stripeSubscriptionId
   }
 
   // Helper function to calculate remaining trial days
@@ -79,13 +79,13 @@ export function useSubscriptionStatus() {
     if (isFreeMode()) {
       return false
     }
-    return subscription.status === SubscriptionStatus.PAST_DUE || subscription.status === SubscriptionStatus.UNPAID
+    return subscription.status === SubscriptionStatus.past_due || subscription.status === SubscriptionStatus.unpaid
   }
 
   // Helper function to detect if subscription is expired
   const isExpired = () => {
     // User had a subscription but it's no longer active
-    return !!subscription.stripeSubscriptionId && subscription.status === SubscriptionStatus.CANCELED
+    return !!subscription.stripeSubscriptionId && subscription.status === SubscriptionStatus.canceled
   }
 
   return {

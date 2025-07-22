@@ -9,8 +9,8 @@
  * Examples:
  *   tsx scripts/usage-max.ts user_123   # Set token usage to max for their current plan
  */
-import { PrismaClient } from '@prisma/client'
-import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
+import { PrismaClient, SubscriptionPlan } from '@prisma/client'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
 
 const prisma = new PrismaClient()
 
@@ -54,11 +54,11 @@ async function getUserSubscription(userId: string) {
     const newSubscription = await prisma.userSubscription.create({
       data: {
         userId,
-        plan: SubscriptionPlan.BASIC,
+        plan: SubscriptionPlan.basic,
         status: 'active',
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
-        tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.BASIC].tokenLimit,
+        tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.basic].tokenLimit,
       }
     })
     
@@ -91,7 +91,7 @@ async function updateUserUsageToMax(userId: string, subscription: any) {
   // Determine target token usage based on plan
   let targetTokens: number
   
-  if (subscription.plan === SubscriptionPlan.BUSINESS) {
+  if (subscription.plan === SubscriptionPlan.business) {
     // For business plan, use high but finite value
     targetTokens = 4000000  // Business plan limit
   } else {

@@ -5,6 +5,7 @@
 4. Then, begin working on the todo items, marking them as complete as you go.
 5. Please every step of the way just give me a high level explanation of what changes you made
 6. **Everything is about simplicity.**
+7. **ALWAYS use Prisma-generated types** - Never manually create interfaces that duplicate Prisma models.
 
 ## Project Structure (Next.js)
 - **Pages**: `app/` folder

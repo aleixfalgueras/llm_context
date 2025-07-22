@@ -1,8 +1,8 @@
 import {logger} from '../logger'
-import {SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
 
 import {cacheSubscription, getCachedSubscription} from './subscription-cache'
 import {SubscriptionOperations} from "@/lib/database";
+import {SubscriptionPlan, SubscriptionStatus} from "@prisma/client";
 
 // Get or create user subscription
 export async function getUserSubscription(userId: string, bypassCache = false) {
@@ -22,7 +22,7 @@ export async function getUserSubscription(userId: string, bypassCache = false) {
 
     // Create default basic subscription if none exists using upsert to prevent race conditions
     if (!subscription) {
-      logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.BASIC } });
+      logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.basic } });
       
       logger.dbQuery('upsert', 'userSubscription', { userId });
       subscription = await SubscriptionOperations.createDefaultBasicSubscription(userId)
@@ -43,7 +43,7 @@ export function isSubscriptionActive(subscription: any) {
   if (!subscription) return false
   
   const now = new Date()
-  const isStatusActive = subscription.status === SubscriptionStatus.ACTIVE
+  const isStatusActive = subscription.status === SubscriptionStatus.active
   const isNotExpired = subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd) > now
   
   return isStatusActive && isNotExpired

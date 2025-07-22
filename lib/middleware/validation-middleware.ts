@@ -1,11 +1,13 @@
 import {auth} from "@clerk/nextjs/server";
 import {logger} from "@/lib/logger";
-import {ModelTier, SubscriptionPlan, TokenValidationResult, ValidationErrorDetails} from "@/types/subscription-types";
+import {ModelTier} from "@/types/subscription-types";
 import {ApiSubscriptionErrorCode} from "@/types/enums";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/ai/models-config";
 import {getUserSubscription, isSubscriptionActive} from "@/lib/subscription/subscription-utils";
 import {getTokenUsageLimit} from "@/lib/subscription/subscription-usage";
 import {prisma} from "@/lib/prisma";
+import { SubscriptionPlan } from "@prisma/client";
+import {TokenValidationResult, ValidationErrorDetails} from "@/types/validation-types";
 
 /**
  * Simple authentication middleware that validates user authentication via Clerk.
@@ -399,6 +401,6 @@ export async function checkModelAccess(userId: string, modelId: string) {
       metadata: {modelId}
     });
     endTiming();
-    return {allowed: false, tier: ModelTier.BASIC, plan: SubscriptionPlan.BASIC, modelId}
+    return {allowed: false, tier: ModelTier.BASIC, plan: SubscriptionPlan.basic, modelId}
   }
 }

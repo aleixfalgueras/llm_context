@@ -1,10 +1,12 @@
 import {cacheUsage, getCachedUsage, invalidateUsageCache} from "@/lib/subscription/subscription-cache";
-import {logger, withTiming} from "@/lib/logger";
+import {logger} from "@/lib/logger";
 import {prisma} from "@/lib/prisma";
-import {PlanId, SUBSCRIPTION_PLAN_DETAIL, UsageLimitsData, TokenValidationResult} from "@/types/subscription-types";
+import {PlanId, SUBSCRIPTION_PLAN_DETAIL} from "@/types/subscription-types";
 import {getUserSubscription, isSubscriptionActive} from "@/lib/subscription/subscription-utils";
 import {ApiSubscriptionErrorCode} from "@/types/enums";
 import {getStorageAnalytics} from "@/lib/utils/storage";
+import {TokenValidationResult} from "@/types/validation-types";
+import {UsageLimitsData} from "@/types/usage-types";
 
 /**
  * Get the current billing period dates from a user's subscription.
@@ -265,10 +267,11 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
       usagePercentage: storageAnalytics.usagePercentage
     };
 
+    // TODO: Remove tier?
     return {
       // Plan info
       plan: subscription.plan,
-      tier: subscription.tier || 'basic',
+      tier: subscription.plan,
 
       // Subscription status
       status: subscription.status,
