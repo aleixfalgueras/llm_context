@@ -1,12 +1,13 @@
 import {prisma} from '../prisma'
 import {logger} from '../logger'
-import {auth} from '@clerk/nextjs/server'
 import {getUserSubscription} from '../subscription/subscription-utils'
 
 // Storage limits per plan (in bytes)
 import {SubscriptionPlanType} from '@/types/subscription-types'
-import {cacheStorageAnalytics, getCachedStorageAnalytics} from "@/lib/subscription/subscription-cache";
+import {cacheStorageAnalytics, getCachedStorageSubscriptionUsage} from "@/lib/subscription/subscription-cache";
 import {SubscriptionPlan} from "@prisma/client";
+import {StorageUsage, StorageSubscriptionUsage} from "@/types/subscription-usage-types";
+import {StorageUsageValidationResult} from "@/types/middleware-validation-types";
 
 export const STORAGE_LIMITS = {
   [SubscriptionPlan.basic]: 50 * 1024 * 1024,    // 50 MB for basic plan
@@ -14,63 +15,49 @@ export const STORAGE_LIMITS = {
   [SubscriptionPlan.business]: 2 * 1024 * 1024 * 1024, // 2 GB for business plan
 } as const
 
-export interface StorageCheckResult {
-  allowed: boolean
-  limit: number
-  used: number
-  remaining?: number
-  limitType: 'storage'
-  message?: string
-}
-
-export interface StorageUsage {
-  totalBytes: number
-  documentCount: number
-  usageByClient: Record<string, number>
-}
-
-/**
- * Check if user has enough storage space for a new document
- */
-export async function checkStorageLimit(userId: string, documentSizeBytes: number): Promise<StorageCheckResult> {
-  try {
-    const subscription = await getUserSubscription(userId)
-    const storageUsage = await getCurrentStorageUsage(userId)
-    
-    // Get storage limit based on plan
-    const storageLimit = getStorageLimitForPlan(subscription.plan)
-    
-    // Check if adding this document would exceed the limit
-    const wouldExceedLimit = (storageUsage.totalBytes + documentSizeBytes) > storageLimit
-    
-    if (wouldExceedLimit) {
-      return {
-        allowed: false,
-        limit: storageLimit,
-        used: storageUsage.totalBytes,
-        remaining: Math.max(0, storageLimit - storageUsage.totalBytes),
-        limitType: 'storage',
-        message: `Storage limit exceeded. Document size: ${formatBytes(documentSizeBytes)}, Available: ${formatBytes(Math.max(0, storageLimit - storageUsage.totalBytes))}`
-      }
-    }
-
-    return {
-      allowed: true,
-      limit: storageLimit,
-      used: storageUsage.totalBytes,
-      remaining: storageLimit - storageUsage.totalBytes,
-      limitType: 'storage'
-    }
-  } catch (error) {
-    logger.error('Error checking storage limit', error as Error, { userId })
-    throw error
+export function getStorageLimitForPlan(plan: SubscriptionPlanType): number {
+  switch (plan) {
+    case SubscriptionPlan.basic:
+      return STORAGE_LIMITS[SubscriptionPlan.basic]
+    case SubscriptionPlan.pro:
+      return STORAGE_LIMITS[SubscriptionPlan.pro]
+    case SubscriptionPlan.business:
+      return STORAGE_LIMITS[SubscriptionPlan.business]
+    default:
+      return STORAGE_LIMITS[SubscriptionPlan.basic] // Default to basic plan limits
   }
 }
 
+export function calculateDocumentSize(content: string): number {
+  // Calculate size in bytes (UTF-8 encoding)
+  return new Blob([content]).size
+}
+
 /**
- * Get current storage usage for a user
+ * Format bytes into a human-readable string with appropriate units.
  */
-export async function getCurrentStorageUsage(userId: string): Promise<StorageUsage> {
+export function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 Bytes'
+
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+/**
+ * Get current storage usage statistics for a user.
+ * 
+ * Queries the database to calculate total storage usage across all user documents.
+ * Aggregates file sizes from the document records and provides breakdown by client.
+ * Uses database-stored file sizes for accurate tracking.
+ * 
+ * @param userId - The user ID to calculate storage usage for
+ * @returns Promise<StorageUsage> containing total bytes, document count, and usage by client
+ * @throws Error if database query fails
+ */
+export async function getStorageUsage(userId: string): Promise<StorageUsage> {
   try {
     // Get all documents for the user with file sizes from database
     const documents = await prisma.document.findMany({
@@ -109,49 +96,26 @@ export async function getCurrentStorageUsage(userId: string): Promise<StorageUsa
 }
 
 /**
- * Get storage limit for a subscription plan
+ * Get comprehensive storage usage for a user with subscription context.
+ * 
+ * Combines storage usage data with subscription plan limits to provide formatted
+ * analytics including usage percentages, remaining space, and formatted values.
+ * Implements intelligent caching and parallel data fetching for performance.
+ * 
+ * @param userId - The user ID to get storage analytics for
+ * @param subscription - Optional subscription data, fetched if not provided
+ * @returns Promise<StorageSubscriptionUsage> with usage data, limits, and formatted values
+ * @throws Error if data fetching or calculation fails
+ * 
+ * **Performance Features:**
+ * - Redis caching with automatic cache population
+ * - Parallel fetching of subscription and usage data
+ * - Optimized for frequent usage validation calls
  */
-export function getStorageLimitForPlan(plan: SubscriptionPlanType): number {
-  switch (plan) {
-    case SubscriptionPlan.basic:
-      return STORAGE_LIMITS[SubscriptionPlan.basic]
-    case SubscriptionPlan.pro:
-      return STORAGE_LIMITS[SubscriptionPlan.pro]
-    case SubscriptionPlan.business:
-      return STORAGE_LIMITS[SubscriptionPlan.business]
-    default:
-      return STORAGE_LIMITS[SubscriptionPlan.basic] // Default to basic plan limits
-  }
-}
-
-/**
- * Calculate the size of a document in bytes
- */
-export function calculateDocumentSize(content: string): number {
-  // Calculate size in bytes (UTF-8 encoding)
-  return new Blob([content]).size
-}
-
-/**
- * Format bytes into a human-readable string
- */
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 Bytes'
-  
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-/**
- * Get storage analytics for a user
- */
-export async function getStorageAnalytics(userId: string, subscription?: any) {
+export async function getStorageSubscriptionUsage(userId: string, subscription?: any): Promise<StorageSubscriptionUsage> {
   try {
     // Check cache first
-    const cached = await getCachedStorageAnalytics(userId)
+    const cached = await getCachedStorageSubscriptionUsage(userId)
     if (cached) {
       return cached
     }
@@ -159,12 +123,12 @@ export async function getStorageAnalytics(userId: string, subscription?: any) {
     // If subscription is provided, use it; otherwise fetch it
     const [userSubscription, storageUsage] = await Promise.all([
       subscription ? Promise.resolve(subscription) : getUserSubscription(userId),
-      getCurrentStorageUsage(userId)
+      getStorageUsage(userId)
     ])
 
     const storageLimit = getStorageLimitForPlan(userSubscription.plan)
-    
-    const analytics = {
+
+    const storageSubscriptionUsage = {
       usage: storageUsage,
       limit: storageLimit,
       limitFormatted: formatBytes(storageLimit),
@@ -174,9 +138,9 @@ export async function getStorageAnalytics(userId: string, subscription?: any) {
     }
 
     // Cache the result
-    await cacheStorageAnalytics(userId, analytics)
-    
-    return analytics
+    await cacheStorageAnalytics(userId, storageSubscriptionUsage)
+
+    return storageSubscriptionUsage
   } catch (error) {
     logger.error('Error getting storage analytics', error as Error, { userId })
     throw error
@@ -184,36 +148,72 @@ export async function getStorageAnalytics(userId: string, subscription?: any) {
 }
 
 /**
- * Validate if a document can be saved (helper function for API routes)
+ * Validate storage limits before document creation or upload.
+ * 
+ * Checks if adding a new document of specified size would exceed the user's
+ * storage quota based on their subscription plan. Uses the optimized storage
+ * analytics function for consistent data and caching benefits.
+ * 
+ * @param userId - The user ID to validate storage limits for
+ * @param documentSizeBytes - Size of document to validate, defaults to 0 for current usage check
+ * @returns Promise<StorageUsageValidationResult> with validation result and limit details
+ * @throws Error if data fetching fails
+ * 
+ * **Architecture:**
+ * - Uses getStorageSubscriptionUsage() for consistent data source
+ * - Leverages existing caching and performance optimizations
+ * - Returns standardized validation result interface
  */
-export async function validateDocumentStorage(content: string, userId?: string): Promise<void> {
-  const { userId: authUserId } = userId ? { userId } : await auth()
-  
-  if (!authUserId) {
-    throw new Error('Unauthorized')
-  }
+export async function getStorageUsageValidationResult(userId: string, documentSizeBytes: number = 0): Promise<StorageUsageValidationResult> {
+  try {
+    const storageSubscriptionUsage = await getStorageSubscriptionUsage(userId)
 
+    // Check if adding this document would exceed the limit
+    const wouldExceedLimit = (storageSubscriptionUsage.usage.totalBytes + documentSizeBytes) > storageSubscriptionUsage.limit
+
+    if (wouldExceedLimit) {
+      return {
+        allowed: false,
+        limit: storageSubscriptionUsage.limit,
+        used: storageSubscriptionUsage.usage.totalBytes,
+        remaining: Math.max(0, storageSubscriptionUsage.limit - storageSubscriptionUsage.usage.totalBytes),
+        limitType: 'storage',
+        message: `Storage limit exceeded. Document size: ${formatBytes(documentSizeBytes)}, Available: ${formatBytes(Math.max(0, storageSubscriptionUsage.limit - storageSubscriptionUsage.usage.totalBytes))}`
+      }
+    }
+
+    return {
+      allowed: true,
+      limit: storageSubscriptionUsage.limit,
+      used: storageSubscriptionUsage.usage.totalBytes,
+      remaining: storageSubscriptionUsage.limit - storageSubscriptionUsage.usage.totalBytes,
+      limitType: 'storage'
+    }
+  } catch (error) {
+    logger.error('Error checking storage limit', error as Error, { userId })
+    throw error
+  }
+}
+
+/**
+ * Validate if a document can be saved without exceeding storage limits.
+ *
+ * Helper function that checks if saving a document would exceed the user's
+ * storage quota. Calculates document size and performs storage validation.
+ * Throws an error if validation fails.
+ *
+ * Called from DocumentService update and create methods.
+ *
+ * @param content - The document content to validate
+ * @param userId - The user ID to validate storage limits for
+ * @throws Error if storage limit would be exceeded
+ * @returns Promise that resolves if validation passes
+ */
+export async function validateDocumentStorage(content: string, userId: string): Promise<void> {
   const documentSize = calculateDocumentSize(content)
-  const storageCheck = await checkStorageLimit(authUserId, documentSize)
+  const storageCheck = await getStorageUsageValidationResult(userId, documentSize)
 
   if (!storageCheck.allowed) {
     throw new Error(storageCheck.message || 'Storage limit exceeded')
   }
 }
-
-/**
- * Check if user is approaching storage limit (80% threshold)
- */
-export async function isApproachingStorageLimit(userId: string, subscription?: any): Promise<boolean> {
-  try {
-    const userSubscription = subscription || await getUserSubscription(userId)
-    const storageUsage = await getCurrentStorageUsage(userId)
-    const storageLimit = getStorageLimitForPlan(userSubscription.plan)
-
-    const usagePercentage = (storageUsage.totalBytes / storageLimit) * 100
-    return usagePercentage >= 80
-  } catch (error) {
-    logger.error('Error checking storage limit threshold', error as Error, { userId })
-    return false
-  }
-} 

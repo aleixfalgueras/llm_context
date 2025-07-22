@@ -4,10 +4,10 @@ import {ModelTier} from "@/types/subscription-types";
 import {ApiSubscriptionErrorCode} from "@/types/enums";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/ai/models-config";
 import {getUserSubscription, isSubscriptionActive} from "@/lib/subscription/subscription-utils";
-import {getTokenUsageLimit} from "@/lib/subscription/subscription-usage";
+import {getTokenUsageValidationResult} from "@/lib/subscription/subscription-usage";
 import {prisma} from "@/lib/prisma";
 import { SubscriptionPlan } from "@prisma/client";
-import {TokenValidationResult, ValidationErrorDetails} from "@/types/validation-types";
+import {TokenUsageValidationResult, ValidationErrorDetails} from "@/types/middleware-validation-types";
 
 /**
  * Simple authentication middleware that validates user authentication via Clerk.
@@ -149,10 +149,10 @@ export async function withClientAccess(userId: string, clientId: string): Promis
  *
  */
 export async function withTokenValidation(userId: string): Promise<void> {
-  const validationResult = await getTokenUsageLimit(userId);
+  const validationResult = await getTokenUsageValidationResult(userId);
 
   if (!validationResult.allowed) {
-    throwValidationError(validationResult);
+    throwTokenValidationError(validationResult);
   }
 }
 
@@ -203,8 +203,8 @@ export async function withTokenValidation(userId: string): Promise<void> {
  * This function is typed to return `never` because it always throws an error.
  * The TypeScript compiler understands this and won't expect code after the call.
  */
-export function throwValidationError(validationResult: TokenValidationResult): never {
-  const errorDetails = createValidationErrorDetails(validationResult);
+export function throwTokenValidationError(validationResult: TokenUsageValidationResult): never {
+  const errorDetails = createTokenValidationErrorDetails(validationResult);
   const error = new Error(errorDetails.message);
 
   // Add metadata to error for proper response handling
@@ -267,7 +267,7 @@ export function throwValidationError(validationResult: TokenValidationResult): n
  * - Status codes enable appropriate client-side error handling logic
  * - Upgrade URLs provide direct paths for subscription management
  */
-export function createValidationErrorDetails(validationResult: TokenValidationResult): ValidationErrorDetails {
+export function createTokenValidationErrorDetails(validationResult: TokenUsageValidationResult): ValidationErrorDetails {
   const isExpired = validationResult.reason === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED;
 
   return {
@@ -285,7 +285,6 @@ export function createValidationErrorDetails(validationResult: TokenValidationRe
     }
   };
 }
-
 
 /**
  * Check if user can access a specific AI model based on their subscription tier.

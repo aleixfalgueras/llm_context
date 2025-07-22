@@ -2,7 +2,7 @@
  * Centralized subscription and tier type definitions
  * Use these enums instead of string literals throughout the codebase
  */
-import {SubscriptionPlan, SubscriptionStatus} from "@prisma/client";
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from "@prisma/client";
 
 // Subscription Plan names constant
 export const SUBSCRIPTION_PLAN_NAMES = {
@@ -65,6 +65,8 @@ export enum ModelTier {
   PRO = 'pro',
   BUSINESS = 'business'
 }
+
+export type SubscriptionWithValidation = UserSubscription & { isActive: boolean }
 
 // Type aliases for convenience (can be used where string types are still needed)
 // TODO: Check and probably remove that

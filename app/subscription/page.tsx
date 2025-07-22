@@ -79,7 +79,7 @@ export default function SubscriptionPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Suspense fallback={null}>
         <SubscriptionUrlHandler 
-          subscription={subscription} 
+          subscription={subscription}
           toast={toast} 
           setIsRefreshing={setIsRefreshing} 
         />
@@ -121,12 +121,12 @@ export default function SubscriptionPage() {
             isActiveCancelled={isActiveCancelled()}
             isPendingDowngrade={isPendingDowngrade()}
             isPastDueOrUnpaid={isPastDueOrUnpaid()}
-            currentPeriodEnd={subscription.currentPeriodEnd || null}
+            currentPeriodEnd={new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB') || null}
             getRemainingTrialDays={getRemainingTrialDays}
             getRemainingActiveDays={getRemainingActiveDays}
             getRemainingDowngradeDays={getRemainingDowngradeDays}
             capitalizePlanName={capitalizePlanName}
-            pendingPlanChange={subscription.pendingPlanChange}
+            pendingPlanChange={subscription.pendingPlanChange ?? ""}
             onRetryPayment={handleRetryPayment}
             retryPaymentLoading={retryPaymentLoading}
           />

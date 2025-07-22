@@ -1,12 +1,11 @@
 import {cacheUsage, getCachedUsage, invalidateUsageCache} from "@/lib/subscription/subscription-cache";
 import {logger} from "@/lib/logger";
 import {prisma} from "@/lib/prisma";
-import {PlanId, SUBSCRIPTION_PLAN_DETAIL} from "@/types/subscription-types";
-import {getUserSubscription, isSubscriptionActive} from "@/lib/subscription/subscription-utils";
+import {getUserSubscription, getUserSubscriptionWithValidation} from "@/lib/subscription/subscription-utils";
 import {ApiSubscriptionErrorCode} from "@/types/enums";
-import {getStorageAnalytics} from "@/lib/utils/storage";
-import {TokenValidationResult} from "@/types/validation-types";
-import {UsageLimitsData} from "@/types/usage-types";
+import {getStorageSubscriptionUsage} from "@/lib/utils/storage";
+import {TokenUsageValidationResult} from "@/types/middleware-validation-types";
+import {SubscriptionUsage, UsageInfo} from "@/types/subscription-usage-types";
 import {UserUsage} from "@prisma/client";
 
 /**
@@ -135,49 +134,40 @@ export async function getCurrentBillingPeriodUsage(userId: string): Promise<User
  * Get unified subscription and usage data for a user in a single call.
  * This function is optimized for token validation flows where
  * both subscription status and usage data are needed together.
- * 
+ *
  * @param userId - The user ID to retrieve data for
- * 
- * @returns Promise<UsageLimitsData> - Combined subscription and usage data:
+ *
+ * @param bypassCache
+ * @returns Promise<SubscriptionUsage> - Combined subscription and usage data:
  *   **subscription**: Current subscription details including plan, status, limits
  *   **usage**: Current month token usage and period information
- * 
+ *
  * @throws Error - Database connection or query failures
- * 
+ *
  * **Performance Benefits:**
  * - Single cache lookup for combined data when possible
  * - Parallel data fetching when cache miss occurs
  * - Eliminates redundant subscription status checks
  * - Optimized for high-frequency validation operations
- * 
+ *
  * **Usage Pattern:**
  * Primary function for token validation and usage display components.
  * Replaces separate calls to getUserSubscription() and getCurrentBillingPeriodUsage().
  */
-export async function getUserLimitsAndUsage(userId: string): Promise<UsageLimitsData> {
+export async function getUserSubscriptionUsage(userId: string, bypassCache = false): Promise<SubscriptionUsage> {
   try {
     // Fetch subscription and usage data in parallel for optimal performance
     const [subscription, usage] = await Promise.all([
-      getUserSubscription(userId),
+      getUserSubscriptionWithValidation(userId, bypassCache),
       getCurrentBillingPeriodUsage(userId)
     ]);
 
     return {
-      subscription: {
-        plan: subscription.plan,
-        status: subscription.status,
-        currentPeriodEnd: subscription.currentPeriodEnd,
-        isActive: isSubscriptionActive(subscription),
-        tokenLimit: subscription.tokenLimit
-      },
-      usage: {
-        tokensUsed: usage.tokensUsed,
-        billingPeriodStart: usage.billingPeriodStart,
-        billingPeriodEnd: usage.billingPeriodEnd
-      }
+      subscription,
+      usage
     };
   } catch (error) {
-    logger.error('Error getting user limits and usage', error as Error, { userId });
+    logger.error('Error getting user subscription usage data', error as Error, { userId });
     throw error;
   }
 }
@@ -185,183 +175,43 @@ export async function getUserLimitsAndUsage(userId: string): Promise<UsageLimits
 /**
  * Get comprehensive usage information optimized for client-side display and validation.
  * 
- * Aggregates subscription details, token usage, storage analytics, and plan information
- * into a flattened structure optimized for frontend consumption. Combines multiple data
- * sources to provide a complete view of user account status and usage limits.
+ * Aggregates subscription details, token usage, and storage analytics into a structured
+ * UsageInfo object. Combines multiple data sources to provide a complete view of user
+ * account status and usage limits with properly formatted values.
  * 
  * @param userId - The user ID to retrieve comprehensive usage info for
  * @param bypassCache - Optional flag to force fresh data retrieval (default: false)
  * 
- * @returns Promise<UsageInfo | null> - Comprehensive usage object with flat structure:
- *   **Plan & Subscription:**
- *   - plan: Current subscription plan ID
- *   - tier: User tier (basic, pro, etc.)
- *   - status: Subscription status (active, canceled, etc.)
- *   - currentPeriodEnd: When current billing period ends
- *   - isActive: Boolean indicating if subscription is currently active
- *   - stripeSubscriptionId: Stripe subscription identifier
- *   - cancelAtPeriodEnd: Whether subscription cancels at period end
- *   - pendingPlanChange: Any pending plan changes
- * 
- *   **Token Usage (Flat Structure):**
- *   - tokensUsed: Number of tokens consumed this month
- *   - tokenLimit: Monthly token limit
- * 
- *   **Storage Usage (Flat Structure in MB):**
- *   - storageUsed: Storage consumed in megabytes
- *   - storageLimit: Storage limit in megabytes
+ * @returns Promise<UsageInfo | null> - Comprehensive usage object with structured format:
+ *   **subscriptionUsage**: Contains subscription details and token usage
+ *   **storageSubscriptionUsage**: Contains storage usage with formatted values
  * 
  * @returns null if error occurs (logged but not thrown)
  * 
  * **Data Integration:**
  * - Fetches subscription and usage data in parallel for performance
- * - Integrates storage analytics with subscription context
- * - Calculates remaining quotas and usage percentages
- * - Provides formatted values for direct UI display
- * 
- * **Frontend Optimization:**
- * - Flat structure eliminates need for nested object access
- * - Consistent units (MB for storage) for easy display
- * - Boolean flags for quick conditional rendering
- * - All plans have specific numeric token limits
+ * - Uses formatted storage values from StorageSubscriptionUsage
+ * - Provides properly structured data for type-safe consumption
  * 
  * **Error Handling:**
  * - Returns null on any error (check for null in consuming code)
  * - Comprehensive error logging for debugging
  * - Non-throwing behavior prevents UI breaks
  */
-export async function getUsageInfo(userId: string, bypassCache = false) {
+export async function getUserUsageInfo(userId: string, bypassCache = false): Promise<UsageInfo | null> {
   try {
-    // Get subscription and usage data once, then check all limits
-    const [subscription, usage] = await Promise.all([
-      getUserSubscription(userId, bypassCache),
-      getCurrentBillingPeriodUsage(userId)
+    const [subscriptionUsage, storageSubscriptionUsage] = await Promise.all([
+      getUserSubscriptionUsage(userId, bypassCache),
+      getStorageSubscriptionUsage(userId)
     ]);
 
-    // Pass subscription to getStorageAnalytics to avoid duplicate query
-    const storageAnalytics = await getStorageAnalytics(userId, subscription);
-
-    // Check token limits - primary limit for OpenRouter usage
-    const tokenUsage = {
-      allowed: usage.tokensUsed < subscription.tokenLimit,
-      limit: subscription.tokenLimit,
-      used: usage.tokensUsed,
-      remaining: Math.max(0, subscription.tokenLimit - usage.tokensUsed)
-    };
-
-    // Storage usage information
-    const storageUsage = {
-      allowed: storageAnalytics.usage.totalBytes < storageAnalytics.limit,
-      limit: storageAnalytics.limit,
-      used: storageAnalytics.usage.totalBytes,
-      usedFormatted: storageAnalytics.usedFormatted,
-      limitFormatted: storageAnalytics.limitFormatted,
-      remaining: Math.max(0, storageAnalytics.limit - storageAnalytics.usage.totalBytes),
-      remainingFormatted: storageAnalytics.remainingFormatted,
-      usagePercentage: storageAnalytics.usagePercentage
-    };
-
-    // TODO: Remove tier?
     return {
-      // Plan info
-      plan: subscription.plan,
-      tier: subscription.plan,
-
-      // Subscription status
-      status: subscription.status,
-      currentPeriodEnd: subscription.currentPeriodEnd,
-      isActive: isSubscriptionActive(subscription),
-      stripeSubscriptionId: subscription.stripeSubscriptionId,
-      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-      pendingPlanChange: subscription.pendingPlanChange,
-
-      // Token limits (flat structure for frontend compatibility)
-      tokensUsed: tokenUsage.used,
-      tokenLimit: tokenUsage.limit,
-
-      // Storage limits (flat structure for frontend compatibility)
-      storageUsed: Math.round(storageUsage.used / (1024 * 1024)), // Convert to MB
-      storageLimit: Math.round(storageUsage.limit / (1024 * 1024)), // Convert to MB
-    }
+      subscriptionUsage,
+      storageSubscriptionUsage
+    };
   } catch (error) {
     console.error('Error getting usage info:', error)
     return null
-  }
-}
-
-/**
- * Get usage analytics data optimized for admin dashboards and detailed reporting.
- * 
- * Provides structured analytics data combining subscription status, usage limits,
- * current usage statistics, and detailed plan information. Designed for administrative
- * interfaces and detailed usage reporting rather than general user consumption.
- * 
- * @param userId - The user ID to retrieve detailed analytics for
- * 
- * @returns Promise<UserAnalytics> - Structured analytics object with nested organization:
- *   **subscription: SubscriptionStatus**
- *   - plan: Current subscription plan identifier
- *   - status: Subscription status (active, canceled, past_due, etc.)
- *   - currentPeriodEnd: End date of current billing period
- *   - isActive: Boolean indicating active subscription status
- * 
- *   **limits: UsageLimits**
- *   - tokens: Monthly token limit
- * 
- *   **usage: CurrentUsage**
- *   - tokensUsed: Number of tokens consumed in current month
- * 
- *   **planDetails: PlanConfiguration**
- *   - Complete plan configuration from SUBSCRIPTION_PLAN_DETAIL
- *   - Includes pricing, features, limits, and plan metadata
- * 
- * @throws Error - Database connection failures or subscription lookup errors
- * 
- * **Data Structure:**
- * - Organized in logical groups for easy dashboard consumption
- * - Preserves detailed plan configuration for feature checks
- * - Includes subscription status for billing state validation
- * - Structured for JSON serialization and API responses
- * 
- * **Use Cases:**
- * - Admin dashboards displaying user account details
- * - Detailed usage reports and analytics
- * - Subscription management interfaces
- * - Billing and usage audit trails
- * 
- * **vs. getUsageInfo():**
- * - More detailed and structured (not flattened)
- * - Includes complete plan configuration details
- * - Optimized for admin/reporting rather than user UI
- * - Throws errors instead of returning null
- */
-export async function getUserUsageAnalytics(userId: string) {
-  try {
-    const [subscription, currentUsage] = await Promise.all([
-      getUserSubscription(userId),
-      getCurrentBillingPeriodUsage(userId)
-    ])
-
-    const plan = SUBSCRIPTION_PLAN_DETAIL[subscription.plan as PlanId]
-
-    return {
-      subscription: {
-        plan: subscription.plan,
-        status: subscription.status,
-        currentPeriodEnd: subscription.currentPeriodEnd,
-        isActive: isSubscriptionActive(subscription),
-      },
-      limits: {
-        tokens: subscription.tokenLimit,
-      },
-      usage: {
-        tokensUsed: currentUsage.tokensUsed,
-      },
-      planDetails: plan
-    }
-  } catch (error) {
-    console.error('Error getting usage analytics:', error)
-    throw error
   }
 }
 
@@ -374,7 +224,7 @@ export async function getUserUsageAnalytics(userId: string) {
  * 
  * @param userId - The user ID to check token usage limits for
  * 
- * @returns Promise<TokenValidationResult> - Standardized validation result object
+ * @returns Promise<TokenUsageValidationResult> - Standardized validation result object
  * 
  * @throws Never throws - Returns safe fallback values on error
  * 
@@ -384,18 +234,18 @@ export async function getUserUsageAnalytics(userId: string) {
  * - Consistent return structure via TokenValidationResult interface
  * - Better error handling with proper fallback values
  */
-export async function getTokenUsageLimit(userId: string): Promise<TokenValidationResult> {
+export async function getTokenUsageValidationResult(userId: string): Promise<TokenUsageValidationResult> {
   try {
-    const data = await getUserLimitsAndUsage(userId);
+    const subscriptionUsage = await getUserSubscriptionUsage(userId);
 
     // Check if subscription is active first
-    if (!data.subscription.isActive) {
+    if (!subscriptionUsage.subscription.isActive) {
       logger.warn('Subscription is not active for token usage limit check', {
         userId,
         metadata: {
-          plan: data.subscription.plan,
-          status: data.subscription.status,
-          currentPeriodEnd: data.subscription.currentPeriodEnd
+          plan: subscriptionUsage.subscription.plan,
+          status: subscriptionUsage.subscription.status,
+          currentPeriodEnd: subscriptionUsage.subscription.currentPeriodEnd
         }
       });
       return {
@@ -407,8 +257,8 @@ export async function getTokenUsageLimit(userId: string): Promise<TokenValidatio
       };
     }
 
-    const tokenLimit = data.subscription.tokenLimit;
-    const tokensUsed = data.usage.tokensUsed;
+    const tokenLimit = subscriptionUsage.subscription.tokenLimit;
+    const tokensUsed = subscriptionUsage.usage.tokensUsed;
 
     return {
       allowed: tokensUsed < tokenLimit,

@@ -29,7 +29,7 @@ export function useSubscriptionStatus() {
 
   // Helper function to detect if subscription is active but marked for cancellation
   const isActiveCancelled = () => {
-    return !isFreeMode() && !!subscription.isActive && !!subscription.cancelAtPeriodEnd
+    return !isFreeMode() && subscription.isActive && subscription.cancelAtPeriodEnd
   }
 
   // Helper function to calculate remaining days until cancellation

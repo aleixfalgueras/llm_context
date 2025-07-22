@@ -2,9 +2,9 @@
 
 import {useState, useEffect} from 'react'
 import {useSearchParams, useRouter} from 'next/navigation'
-import {useSubscription} from '@/hooks/subscription/use-subscription'
 import {useToast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/types/enums'
+import {useSubscription} from "@/hooks/subscription/use-subscription";
 
 // Helper function to clean up URL parameters
 function cleanupUrlParams(paramNames: string[], router: ReturnType<typeof useRouter>) {
