@@ -6,13 +6,13 @@ import {prisma} from '../prisma'
 import {logger} from '../logger'
 import {BaseOperations} from './base-operations'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
-import {SubscriptionPlan, SubscriptionStatus} from "@prisma/client";
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription, UserUsage} from "@prisma/client";
 
 export class SubscriptionOperations extends BaseOperations {
   /**
    * Find user subscription by userId
    */
-  static async findByUserId(userId: string) {
+  static async findByUserId(userId: string): Promise<UserSubscription | null> {
     try {
       return await prisma.userSubscription.findUnique({
         where: { userId },
@@ -28,9 +28,9 @@ export class SubscriptionOperations extends BaseOperations {
    */
   static async upsertSubscription(
     userId: string,
-    updateData: Partial<any> = {},
-    createData: Partial<any> = {}
-  ) {
+    updateData: Partial<UserSubscription> = {},
+    createData: Partial<Omit<UserSubscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>> = {}
+  ): Promise<UserSubscription> {
     try {
       return await prisma.userSubscription.upsert({
         where: { userId },
@@ -49,7 +49,7 @@ export class SubscriptionOperations extends BaseOperations {
   /**
    * Create default basic subscription for new users
    */
-  static async createDefaultBasicSubscription(userId: string) {
+  static async createDefaultBasicSubscription(userId: string): Promise<UserSubscription> {
     try {
       const now = new Date()
       const periodEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days
@@ -76,7 +76,7 @@ export class SubscriptionOperations extends BaseOperations {
   /**
    * Update existing subscription with new data
    */
-  static async updateSubscription(userId: string, updateData: Partial<any>) {
+  static async updateSubscription(userId: string, updateData: Partial<Omit<UserSubscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>): Promise<UserSubscription> {
     try {
       return await this.upsertSubscription(
         userId,
@@ -92,7 +92,7 @@ export class SubscriptionOperations extends BaseOperations {
   /**
    * Clear schedule fields (stripeScheduleId and pendingPlanChange)
    */
-  static async clearScheduleFields(userId: string) {
+  static async clearScheduleFields(userId: string): Promise<UserSubscription> {
     try {
       return await this.updateSubscription(userId, {
         stripeScheduleId: null,

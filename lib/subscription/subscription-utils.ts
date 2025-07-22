@@ -2,10 +2,10 @@ import {logger} from '../logger'
 
 import {cacheSubscription, getCachedSubscription} from './subscription-cache'
 import {SubscriptionOperations} from "@/lib/database";
-import {SubscriptionPlan, SubscriptionStatus} from "@prisma/client";
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from "@prisma/client";
 
 // Get or create user subscription
-export async function getUserSubscription(userId: string, bypassCache = false) {
+export async function getUserSubscription(userId: string, bypassCache = false): Promise<UserSubscription> {
   try {
     // Check cache first (unless bypassing cache)
     if (!bypassCache) {
@@ -39,12 +39,12 @@ export async function getUserSubscription(userId: string, bypassCache = false) {
 }
 
 // Check if subscription is active and not expired
-export function isSubscriptionActive(subscription: any) {
+export function isSubscriptionActive(subscription: any): boolean {
   if (!subscription) return false
   
   const now = new Date()
   const isStatusActive = subscription.status === SubscriptionStatus.active
   const isNotExpired = subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd) > now
   
-  return isStatusActive && isNotExpired
+  return Boolean(isStatusActive && isNotExpired)
 }
