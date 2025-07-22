@@ -7,6 +7,7 @@
 import { Redis } from '@upstash/redis'
 import { logger } from '../logger'
 import { UserSubscription, UserUsage } from '@prisma/client'
+import {getStorageSubscriptionUsage} from "@/lib/utils/storage";
 
 // Initialize Redis client with explicit Vercel environment variables
 const redis = new Redis({
@@ -112,9 +113,9 @@ export async function getCachedUsage(cacheKey: string): Promise<UserUsage | null
 }
 
 /**
- * Get cached storage analytics data if valid
+ * Get cached storage subscription usage data if valid
  */
-export async function getCachedStorageAnalytics(userId: string): Promise<any | null> {
+export async function getCachedStorageSubscriptionUsage(userId: string): Promise<any | null> {
   try {
     const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
     const cached = await redis.get(key)
