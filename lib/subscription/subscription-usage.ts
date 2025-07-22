@@ -7,6 +7,7 @@ import {ApiSubscriptionErrorCode} from "@/types/enums";
 import {getStorageAnalytics} from "@/lib/utils/storage";
 import {TokenValidationResult} from "@/types/validation-types";
 import {UsageLimitsData} from "@/types/usage-types";
+import {UserUsage} from "@prisma/client";
 
 /**
  * Get the current billing period dates from a user's subscription.
@@ -38,12 +39,6 @@ async function getCurrentBillingPeriod(userId: string): Promise<{periodStart: Da
  * @param userId - The user ID to retrieve usage data for
  *
  * @returns Promise<UserUsage> - Complete usage record with the following structure:
- *   - userId: User identifier
- *   - billingPeriodStart: Start of current billing period
- *   - billingPeriodEnd: End of current billing period
- *   - tokensUsed: Number of tokens consumed this billing period
- *   - createdAt: Record creation timestamp
- *   - updatedAt: Last update timestamp
  *
  * @throws Error - Database connection or query failures
  *
@@ -66,7 +61,7 @@ async function getCurrentBillingPeriod(userId: string): Promise<{periodStart: Da
  * Called frequently by usage validation and display components.
  * Essential for subscription limit enforcement aligned with billing periods.
  */
-export async function getCurrentBillingPeriodUsage(userId: string) {
+export async function getCurrentBillingPeriodUsage(userId: string): Promise<UserUsage> {
   try {
     // Get current billing period from subscription
     const { periodStart, periodEnd } = await getCurrentBillingPeriod(userId);
@@ -245,7 +240,6 @@ export async function getUsageInfo(userId: string, bypassCache = false) {
 
     // Pass subscription to getStorageAnalytics to avoid duplicate query
     const storageAnalytics = await getStorageAnalytics(userId, subscription);
-
 
     // Check token limits - primary limit for OpenRouter usage
     const tokenUsage = {
