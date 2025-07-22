@@ -1,14 +1,14 @@
 import {stripe} from './stripe'
 import {logger} from '../logger'
-import {SubscriptionPlan} from '@/types/subscription-types'
 import {SubscriptionOperations} from '@/lib/database'
 import Stripe from 'stripe'
 import {isSubscriptionActive} from "@/lib/subscription/subscription-utils";
+import { SubscriptionPlan } from '@prisma/client';
 
 export const STRIPE_PRICE_IDS = {
-  [SubscriptionPlan.BASIC]: process.env.STRIPE_BASIC_PRICE_ID || 'price_1RgN2fH1IwPXt7SI6fY3NRQF',
-  [SubscriptionPlan.PRO]: process.env.STRIPE_PRO_PRICE_ID || 'price_1RiV0KH1IwPXt7SIphwW0d6Z',
-  [SubscriptionPlan.BUSINESS]: process.env.STRIPE_BUSINESS_PRICE_ID || 'price_1RiV0uH1IwPXt7SInp95Km4L',
+  [SubscriptionPlan.basic]: process.env.STRIPE_BASIC_PRICE_ID || 'price_1RgN2fH1IwPXt7SI6fY3NRQF',
+  [SubscriptionPlan.pro]: process.env.STRIPE_PRO_PRICE_ID || 'price_1RiV0KH1IwPXt7SIphwW0d6Z',
+  [SubscriptionPlan.business]: process.env.STRIPE_BUSINESS_PRICE_ID || 'price_1RiV0uH1IwPXt7SInp95Km4L',
 } as const
 
 /**

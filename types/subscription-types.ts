@@ -2,25 +2,20 @@
  * Centralized subscription and tier type definitions
  * Use these enums instead of string literals throughout the codebase
  */
-
-export enum SubscriptionPlan {
-  BASIC = 'basic',
-  PRO = 'pro',
-  BUSINESS = 'business'
-}
+import {SubscriptionPlan, SubscriptionStatus} from "@prisma/client";
 
 // Subscription Plan names constant
 export const SUBSCRIPTION_PLAN_NAMES = {
-  [SubscriptionPlan.BASIC]: 'Basic',
-  [SubscriptionPlan.PRO]: 'Pro',
-  [SubscriptionPlan.BUSINESS]: 'Business'
+  [SubscriptionPlan.basic]: 'Basic',
+  [SubscriptionPlan.pro]: 'Pro',
+  [SubscriptionPlan.business]: 'Business'
 }
 
 // Subscription Plans Configuration
 export const SUBSCRIPTION_PLAN_DETAIL = {
-  [SubscriptionPlan.BASIC]: {
-    id: SubscriptionPlan.BASIC,
-    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.BASIC],
+  [SubscriptionPlan.basic]: {
+    id: SubscriptionPlan.basic,
+    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.basic],
     price: 10,
     currency: 'EUR',
     tokenLimit: 5000000,        // 5M tokens - generous allowance with Gemini 2.0 Flash
@@ -33,9 +28,9 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
       '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   },
-  [SubscriptionPlan.PRO]: {
-    id: SubscriptionPlan.PRO,
-    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.PRO],
+  [SubscriptionPlan.pro]: {
+    id: SubscriptionPlan.pro,
+    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.pro],
     price: 25,
     currency: 'EUR',
     tokenLimit: 15000000,       // 15M tokens - excellent value with Gemini 2.0 Flash
@@ -48,9 +43,9 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
       '🤖 Powered by Google Gemini 2.0 and Chat GPT 4.1'
     ]
   },
-  [SubscriptionPlan.BUSINESS]: {
-    id: SubscriptionPlan.BUSINESS,
-    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.BUSINESS],
+  [SubscriptionPlan.business]: {
+    id: SubscriptionPlan.business,
+    name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.business],
     price: 50,
     currency: 'EUR',
     tokenLimit: 40000000,       // 40M tokens - enterprise-level allowance
@@ -65,14 +60,6 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   }
 } as const
 
-export enum SubscriptionStatus {
-  ACTIVE = 'active',
-  CANCELED = 'canceled',
-  PAST_DUE = 'past_due',
-  INCOMPLETE = 'incomplete',
-  UNPAID = 'unpaid'
-}
-
 export enum ModelTier {
   BASIC = 'basic',
   PRO = 'pro',
@@ -80,59 +67,8 @@ export enum ModelTier {
 }
 
 // Type aliases for convenience (can be used where string types are still needed)
+// TODO: Check and probably remove that
 export type SubscriptionPlanType = `${SubscriptionPlan}`
 export type ModelTierType = `${ModelTier}`
 export type SubscriptionStatusType = `${SubscriptionStatus}`
 export type PlanId = SubscriptionPlan
-
-// =============================================================================
-// TOKEN VALIDATION AND USAGE TYPES
-// =============================================================================
-
-/**
- * Unified usage and limits data structure
- * Combines subscription and usage information for efficient access
- */
-export interface UsageLimitsData {
-  subscription: {
-    plan: SubscriptionPlan
-    status: SubscriptionStatus
-    currentPeriodEnd: Date
-    isActive: boolean
-    tokenLimit: number
-  }
-  usage: {
-    tokensUsed: number
-    billingPeriodStart: Date
-    billingPeriodEnd: Date
-  }
-}
-
-/**
- * Token validation result structure
- * Standardized result from token usage validation
- */
-export interface TokenValidationResult {
-  allowed: boolean
-  limitType: 'tokens'
-  used: number
-  limit: number
-  remaining?: number
-  reason?: string
-}
-
-/**
- * Validation error details for middleware error handling
- */
-export interface ValidationErrorDetails {
-  code: string
-  status: number
-  message: string
-  metadata: {
-    limitType: string
-    used: number
-    limit: number
-    remaining?: number
-    upgradeUrl: string
-  }
-}

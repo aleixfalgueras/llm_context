@@ -4,13 +4,14 @@ import {auth} from '@clerk/nextjs/server'
 import {getUserSubscription} from '../subscription/subscription-utils'
 
 // Storage limits per plan (in bytes)
-import {SubscriptionPlan, SubscriptionPlanType} from '@/types/subscription-types'
+import {SubscriptionPlanType} from '@/types/subscription-types'
 import {cacheStorageAnalytics, getCachedStorageAnalytics} from "@/lib/subscription/subscription-cache";
+import {SubscriptionPlan} from "@prisma/client";
 
 export const STORAGE_LIMITS = {
-  [SubscriptionPlan.BASIC]: 50 * 1024 * 1024,    // 50 MB for basic plan
-  [SubscriptionPlan.PRO]: 200 * 1024 * 1024,     // 200 MB for pro plan
-  [SubscriptionPlan.BUSINESS]: 2 * 1024 * 1024 * 1024, // 2 GB for business plan
+  [SubscriptionPlan.basic]: 50 * 1024 * 1024,    // 50 MB for basic plan
+  [SubscriptionPlan.pro]: 200 * 1024 * 1024,     // 200 MB for pro plan
+  [SubscriptionPlan.business]: 2 * 1024 * 1024 * 1024, // 2 GB for business plan
 } as const
 
 export interface StorageCheckResult {
@@ -112,14 +113,14 @@ export async function getCurrentStorageUsage(userId: string): Promise<StorageUsa
  */
 export function getStorageLimitForPlan(plan: SubscriptionPlanType): number {
   switch (plan) {
-    case SubscriptionPlan.BASIC:
-      return STORAGE_LIMITS[SubscriptionPlan.BASIC]
-    case SubscriptionPlan.PRO:
-      return STORAGE_LIMITS[SubscriptionPlan.PRO]
-    case SubscriptionPlan.BUSINESS:
-      return STORAGE_LIMITS[SubscriptionPlan.BUSINESS]
+    case SubscriptionPlan.basic:
+      return STORAGE_LIMITS[SubscriptionPlan.basic]
+    case SubscriptionPlan.pro:
+      return STORAGE_LIMITS[SubscriptionPlan.pro]
+    case SubscriptionPlan.business:
+      return STORAGE_LIMITS[SubscriptionPlan.business]
     default:
-      return STORAGE_LIMITS[SubscriptionPlan.BASIC] // Default to basic plan limits
+      return STORAGE_LIMITS[SubscriptionPlan.basic] // Default to basic plan limits
   }
 }
 

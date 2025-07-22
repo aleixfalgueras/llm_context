@@ -1,9 +1,9 @@
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
 import {stripe} from '@/lib/stripe/stripe'
 import {STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
-import {SubscriptionPlan} from '@/types/subscription-types'
 import {logger} from '@/lib/logger'
 import {SubscriptionOperations} from "@/lib/database";
+import {SubscriptionPlan} from "@prisma/client";
 
 interface UpgradePreviewResponse {
   currentPlan: SubscriptionPlan

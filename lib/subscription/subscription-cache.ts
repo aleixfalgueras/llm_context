@@ -6,6 +6,7 @@
 
 import { Redis } from '@upstash/redis'
 import { logger } from '../logger'
+import { UserSubscription, UserUsage } from '@prisma/client'
 
 // Initialize Redis client with explicit Vercel environment variables
 const redis = new Redis({
@@ -39,7 +40,7 @@ const STORAGE_CACHE_TTL = 5 * 60 // 5 minutes (storage data changes rarely)
 /**
  * Cache subscription data with TTL
  */
-export async function cacheSubscription(userId: string, subscription: any): Promise<void> {
+export async function cacheSubscription(userId: string, subscription: UserSubscription): Promise<void> {
   try {
     const key = getCacheKey(CACHE_PREFIXES.SUBSCRIPTION, userId)
     await redis.setex(key, SUBSCRIPTION_CACHE_TTL, JSON.stringify(subscription))
@@ -52,14 +53,14 @@ export async function cacheSubscription(userId: string, subscription: any): Prom
 /**
  * Get cached subscription data if valid
  */
-export async function getCachedSubscription(userId: string): Promise<any | null> {
+export async function getCachedSubscription(userId: string): Promise<UserSubscription | null> {
   try {
     const key = getCacheKey(CACHE_PREFIXES.SUBSCRIPTION, userId)
     const cached = await redis.get(key)
     if (cached && typeof cached === 'string') {
-      return JSON.parse(cached)
+      return JSON.parse(cached) as UserSubscription
     }
-    return cached // Redis returns null if key doesn't exist or expired
+    return null // Redis returns null if key doesn't exist or expired
   } catch (error) {
     logger.error('Error getting cached subscription', error as Error)
     return null // Fall back to no cache
@@ -69,7 +70,7 @@ export async function getCachedSubscription(userId: string): Promise<any | null>
 /**
  * Cache usage data with shorter TTL
  */
-export async function cacheUsage(cacheKey: string, usage: any): Promise<void> {
+export async function cacheUsage(cacheKey: string, usage: UserUsage): Promise<void> {
   try {
     const key = getCacheKey(CACHE_PREFIXES.USAGE, cacheKey)
     await redis.setex(key, USAGE_CACHE_TTL, JSON.stringify(usage))
@@ -96,14 +97,14 @@ export async function cacheStorageAnalytics(userId: string, analytics: any): Pro
 /**
  * Get cached usage data if valid
  */
-export async function getCachedUsage(cacheKey: string): Promise<any | null> {
+export async function getCachedUsage(cacheKey: string): Promise<UserUsage | null> {
   try {
     const key = getCacheKey(CACHE_PREFIXES.USAGE, cacheKey)
     const cached = await redis.get(key)
     if (cached && typeof cached === 'string') {
-      return JSON.parse(cached)
+      return JSON.parse(cached) as UserUsage
     }
-    return cached // Redis returns null if key doesn't exist or expired
+    return null // Redis returns null if key doesn't exist or expired
   } catch (error) {
     logger.error('Error getting cached usage', error as Error)
     return null // Fall back to no cache
@@ -118,6 +119,8 @@ export async function getCachedStorageAnalytics(userId: string): Promise<any | n
     const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
     const cached = await redis.get(key)
     if (cached && typeof cached === 'string') {
+      // Storage analytics may not have date fields, so use JSON.parse for now
+      // This can be enhanced later if storage analytics include date fields
       return JSON.parse(cached)
     }
     return cached // Redis returns null if key doesn't exist or expired
@@ -179,7 +182,7 @@ export async function invalidateAllUserCaches(userId: string): Promise<void> {
     
     // Invalidate current billing period usage cache
     // Note: We need to get the subscription to know the billing period dates
-    const { getUserSubscription } = await import('@/lib/subscription/subscription-utils')
+    const { getUserSubscription } = await import('./subscription-utils')
     const subscription = await getUserSubscription(userId)
     
     if (subscription.currentPeriodStart && subscription.currentPeriodEnd) {

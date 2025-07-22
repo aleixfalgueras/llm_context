@@ -1,4 +1,5 @@
-import { ModelTier, ModelTierType, SubscriptionPlan, SubscriptionPlanType } from '@/types/subscription-types'
+import { ModelTier, ModelTierType, SubscriptionPlanType } from '@/types/subscription-types'
+import {SubscriptionPlan} from "@prisma/client";
 
 export interface AIModel {
   id: string
@@ -124,11 +125,11 @@ export function isModelAvailableForTier(modelId: string, tier: ModelTierType): b
  */
 export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
   switch (plan) {
-    case SubscriptionPlan.BASIC:
+    case SubscriptionPlan.basic:
       return ModelTier.BASIC
-    case SubscriptionPlan.PRO:
+    case SubscriptionPlan.pro:
       return ModelTier.PRO
-    case SubscriptionPlan.BUSINESS:
+    case SubscriptionPlan.business:
       return ModelTier.BUSINESS
     default:
       return ModelTier.BASIC

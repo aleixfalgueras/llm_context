@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { getTierFromPlan } from '@/lib/ai/models-config'
-import { ModelTier, SubscriptionPlan, ModelTierType, SubscriptionPlanType } from '@/types/subscription-types'
+import { ModelTier, ModelTierType, SubscriptionPlanType } from '@/types/subscription-types'
+import {SubscriptionPlan} from "@prisma/client";
 
 interface SubscriptionInfo {
   plan: SubscriptionPlanType
@@ -26,7 +27,7 @@ interface SubscriptionInfo {
 
 export function useSubscription() {
   const [subscription, setSubscription] = useState<SubscriptionInfo>({
-    plan: SubscriptionPlan.BASIC,
+    plan: SubscriptionPlan.basic,
     tier: ModelTier.BASIC,
     tokenLimit: 100000,
     tokensUsed: 0,

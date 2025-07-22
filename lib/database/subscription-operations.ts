@@ -5,7 +5,8 @@
 import {prisma} from '../prisma'
 import {logger} from '../logger'
 import {BaseOperations} from './base-operations'
-import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SubscriptionPlan, SubscriptionStatus} from "@prisma/client";
 
 export class SubscriptionOperations extends BaseOperations {
   /**
@@ -57,11 +58,11 @@ export class SubscriptionOperations extends BaseOperations {
         userId,
         {}, // Don't update if exists
         {
-          plan: SubscriptionPlan.BASIC,
-          status: SubscriptionStatus.ACTIVE,
+          plan: SubscriptionPlan.basic,
+          status: SubscriptionStatus.active,
           currentPeriodStart: now,
           currentPeriodEnd: periodEnd,
-          tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.BASIC].tokenLimit,
+          tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.basic].tokenLimit,
           cancelAtPeriodEnd: false,
           pendingPlanChange: null,
         }
