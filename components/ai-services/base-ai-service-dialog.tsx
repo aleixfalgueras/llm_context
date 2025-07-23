@@ -8,7 +8,8 @@ import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Badge} from '@/components/ui/badge'
-import {Edit, Eye, FileText, Loader2, RefreshCw, Save, X} from 'lucide-react'
+import {LoadingSpinner} from '@/components/ui/loading-spinner'
+import {Edit, Eye, FileText, RefreshCw, Save, X} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {ClientCombobox} from '@/components/ui/client-combobox'
@@ -426,10 +427,7 @@ export function BaseAIServiceDialog<TFormData = any>({
               className={`bg-gradient-to-r ${themeColors.primary} hover:shadow-lg transition-all`}
             >
               {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
+                <LoadingSpinner size="sm" text="Generating..." className="text-white" />
               ) : (
                 <>
                   <config.icon className="h-4 w-4 mr-2" />
@@ -445,7 +443,7 @@ export function BaseAIServiceDialog<TFormData = any>({
                 disabled={isGenerating}
               >
                 {isGenerating ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  <LoadingSpinner size="sm" text="" />
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-1" />
                 )}
@@ -457,10 +455,7 @@ export function BaseAIServiceDialog<TFormData = any>({
                 className={`bg-gradient-to-r ${themeColors.primary} hover:shadow-lg transition-all`}
               >
                 {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
+                  <LoadingSpinner size="sm" text="Saving..." className="text-white" />
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />

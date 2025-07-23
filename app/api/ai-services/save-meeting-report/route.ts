@@ -16,8 +16,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       clientId,
       documentName,
       DOCUMENT_TYPES.MEETING,
-      reportContent,
-      { trackUsage: true }
+      reportContent
     )
 
     return apiSuccess({
