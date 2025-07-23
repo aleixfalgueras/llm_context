@@ -4,7 +4,7 @@ import {getUserSubscription} from '../subscription/subscription-utils'
 
 // Storage limits per plan (in bytes)
 import {SubscriptionPlanType} from '@/types/subscription-types'
-import {cacheStorageAnalytics, getCachedStorageSubscriptionUsage} from "@/lib/subscription/subscription-cache";
+import {cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} from "@/lib/subscription/subscription-cache";
 import {SubscriptionPlan} from "@prisma/client";
 import {StorageUsage, StorageSubscriptionUsage} from "@/types/subscription-usage-types";
 import {StorageUsageValidationResult} from "@/types/middleware-validation-types";
@@ -138,7 +138,7 @@ export async function getStorageSubscriptionUsage(userId: string, subscription?:
     }
 
     // Cache the result
-    await cacheStorageAnalytics(userId, storageSubscriptionUsage)
+    await cacheStorageSubscriptionUsage(userId, storageSubscriptionUsage)
 
     return storageSubscriptionUsage
   } catch (error) {
