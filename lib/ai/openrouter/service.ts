@@ -3,7 +3,6 @@
  */
 
 import { OpenRouterClient, OpenRouterCompletionOptions, StreamChunk } from './client'
-import { handleOpenRouterError } from '../../utils/error-handler'
 import { processOpenRouterStream } from './stream-handler'
 import { logger } from '../../logger'
 import { 
@@ -54,7 +53,7 @@ export class OpenRouterService {
         await this.handleUsageTracking(finalChunk, finalOptions, usageOptions)
       }
     } catch (error) {
-      handleOpenRouterError(error)
+      throw error
     }
   }
 
@@ -90,7 +89,7 @@ export class OpenRouterService {
       
       return { content, usage }
     } catch (error) {
-      handleOpenRouterError(error)
+      throw error
     }
   }
 

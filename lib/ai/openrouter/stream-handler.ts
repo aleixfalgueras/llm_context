@@ -3,7 +3,6 @@
  */
 
 import { logger } from '../../logger'
-import { handleOpenRouterError } from '../../utils/error-handler'
 import type { StreamChunk } from './client'
 
 /**
@@ -73,7 +72,7 @@ export async function* processOpenRouterStream(
     }
   } catch (error) {
     logger.error('OpenRouter streaming error', error instanceof Error ? error : new Error(String(error)))
-    handleOpenRouterError(error)
+    throw error
   }
 }
 
