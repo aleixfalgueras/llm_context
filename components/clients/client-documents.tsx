@@ -131,6 +131,7 @@ export function ClientDocuments({
                   documentContent={documentState.newDocumentContent}
                   documentType={documentState.newDocumentType}
                   isCreating={documentState.isCreating}
+                  isCreatingDocument={operations.isCreatingDocument}
                   hideDocumentType={true}
                   onNameChange={documentState.setNewDocumentName}
                   onContentChange={documentState.setNewDocumentContent}

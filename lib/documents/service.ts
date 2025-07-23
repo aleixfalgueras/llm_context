@@ -2,13 +2,12 @@
  * Document service - orchestrates repository and storage operations
  */
 
-import { DocumentRepository, DocumentData, DocumentQueryOptions } from './repository'
-import { DocumentStorageService } from './storage-service'
-import { validateDocumentStorage, calculateDocumentSize } from '../utils/storage'
-import { logger } from '../logger'
-import { prisma } from '../prisma'
-import { DOCUMENT_TYPES, getDocumentTypeLabel, type DocumentType } from '@/types/document-types'
-import { trackUsage } from '../subscription/subscription-usage'
+import {DocumentData, DocumentQueryOptions, DocumentRepository} from './repository'
+import {DocumentStorageService} from './storage-service'
+import {calculateDocumentSize, validateDocumentStorage} from '../utils/storage'
+import {logger} from '../logger'
+import {prisma} from '../prisma'
+import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
 import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
 
 export class DocumentService {
@@ -54,11 +53,7 @@ export class DocumentService {
     clientId: string,
     documentName: string | undefined,
     documentType: DocumentType,
-    content: string,
-    options?: {
-      metadata?: Record<string, any>
-      trackUsage?: boolean
-    }
+    content: string
   ) {
 
     // Validate storage constraints (throws error if validation fails)
@@ -141,20 +136,6 @@ export class DocumentService {
         logger.error('Failed to cleanup database record after storage error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
       }
       throw storageError
-    }
-
-    // Track usage if enabled (default: true)
-    const shouldTrackUsage = options?.trackUsage !== false
-    if (shouldTrackUsage) {
-      try {
-        await trackUsage(userId, {
-          documentType,
-          clientId,
-          documentName: finalDocumentName
-        })
-      } catch (error) {
-        logger.error('Error tracking usage', error instanceof Error ? error : new Error(String(error)))
-      }
     }
 
     // Invalidate storage cache since storage usage has changed

@@ -1,8 +1,9 @@
 'use client'
 
-import {Download, Loader2, Send, Square} from 'lucide-react'
+import {Download, Send, Square} from 'lucide-react'
 import {Button} from '@/components/ui/button'
 import {Textarea} from '@/components/ui/textarea'
+import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
 import {replaceClientVariables} from '@/lib/ai/variable-replacement'
@@ -293,7 +294,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
               className="justify-between"
             >
               {isExporting ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <LoadingSpinner size="sm" text="" className="mr-2" />
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
@@ -330,7 +331,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
             disabled={isLoading}
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <LoadingSpinner size="sm" text="" />
             ) : (
               <Send className="w-4 h-4" />
             )}

@@ -211,9 +211,9 @@ export async function getStorageUsageValidationResult(userId: string, documentSi
  */
 export async function validateDocumentStorage(content: string, userId: string): Promise<void> {
   const documentSize = calculateDocumentSize(content)
-  const storageCheck = await getStorageUsageValidationResult(userId, documentSize)
+  const storageUsageValidationResult = await getStorageUsageValidationResult(userId, documentSize)
 
-  if (!storageCheck.allowed) {
-    throw new Error(storageCheck.message || 'Storage limit exceeded')
+  if (!storageUsageValidationResult.allowed) {
+    throw new Error(storageUsageValidationResult.message || 'Storage limit exceeded')
   }
 }

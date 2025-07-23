@@ -45,7 +45,6 @@ export class DocumentClientService {
     documentName: string,
     documentType: string,
     content: string,
-    metadata?: Record<string, any>
   ) {
     const response = await fetch('/api/documents', {
       method: 'POST',
@@ -54,8 +53,7 @@ export class DocumentClientService {
         clientId,
         documentName,
         documentType,
-        content,
-        metadata
+        content
       })
     })
 

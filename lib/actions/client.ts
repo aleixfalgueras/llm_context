@@ -39,7 +39,6 @@ export async function createClient(data: ClientFormData) {
     throw new Error(result.error || 'Failed to create client')
   }
 
-
   revalidatePath('/clients')
   return { success: true, client: result.data }
 }
