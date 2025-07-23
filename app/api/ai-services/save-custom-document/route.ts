@@ -30,8 +30,7 @@ export const POST = withEnhancedApi(
         clientId,
         documentTitle,
         DOCUMENT_TYPES.CUSTOM_DOCUMENT,
-        content,
-        { trackUsage: true }
+        content
       )
 
       return apiSuccess({

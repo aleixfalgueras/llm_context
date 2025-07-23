@@ -6,6 +6,7 @@ import {Textarea} from '@/components/ui/textarea'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {Label} from '@/components/ui/label'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Eye, Plus, X} from 'lucide-react'
 import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
 
@@ -14,6 +15,7 @@ interface DocumentCreationFormProps {
   documentContent: string
   documentType: string
   isCreating: boolean
+  isCreatingDocument?: boolean
   hideDocumentType?: boolean
   onNameChange: (name: string) => void
   onContentChange: (content: string) => void
@@ -28,6 +30,7 @@ export function DocumentCreationForm({
   documentContent,
   documentType,
   isCreating,
+  isCreatingDocument = false,
   hideDocumentType,
   onNameChange,
   onContentChange,
@@ -112,10 +115,16 @@ export function DocumentCreationForm({
           <Button
             onClick={onCreate}
             className="bg-blue-500 hover:bg-blue-600 text-white"
-            disabled={!documentName.trim() || !documentContent.trim() || (!hideDocumentType && !documentType)}
+            disabled={!documentName.trim() || !documentContent.trim() || (!hideDocumentType && !documentType) || isCreatingDocument}
           >
-            <Plus className="h-4 w-4 mr-1" />
-            Create Document
+            {isCreatingDocument ? (
+              <LoadingSpinner size="sm" text="Creating..." className="text-white" />
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-1" />
+                Create Document
+              </>
+            )}
           </Button>
         </div>
       </CardContent>

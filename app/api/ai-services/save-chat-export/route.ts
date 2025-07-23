@@ -16,8 +16,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       clientId,
       chatTitle,
       DOCUMENT_TYPES.CHAT,
-      content,
-      { trackUsage: true }
+      content
     )
 
     return apiSuccess({

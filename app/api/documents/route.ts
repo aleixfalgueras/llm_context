@@ -32,7 +32,7 @@ export const GET = withEnhancedApi(
 // POST /api/documents - Create new document
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
-    const { clientId, documentName, documentType, content, metadata } = await parseJsonBody(req)
+    const { clientId, documentName, documentType, content } = await parseJsonBody(req)
 
     if (!clientId || !documentName || !documentType || !content) {
       throw new Error('Missing required fields')
@@ -44,8 +44,7 @@ export const POST = withEnhancedApi(
         clientId,
         documentName,
         documentType,
-        content,
-        { metadata, trackUsage: true }
+        content
       )
 
       return apiSuccess(result, 201)
