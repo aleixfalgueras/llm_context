@@ -19,8 +19,9 @@ import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
 import {getPlanNameColor} from '@/lib/subscription/subscription-plan-utils'
-import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
 import Link from 'next/link'
+import {SubscriptionPlan} from "@prisma/client";
 
 export function LandingPage() {
   return (
@@ -243,9 +244,9 @@ export function LandingPage() {
             {Object.entries(SUBSCRIPTION_PLAN_DETAIL).map(([planId, plan]) => {
               const getPlanIcon = (planId: string) => {
                 switch (planId) {
-                  case SubscriptionPlan.BASIC: return <ZapIcon className="h-8 w-8" />
-                  case SubscriptionPlan.PRO: return <StarIcon className="h-8 w-8" />
-                  case SubscriptionPlan.BUSINESS: return <CrownIcon className="h-8 w-8" />
+                  case SubscriptionPlan.basic: return <ZapIcon className="h-8 w-8" />
+                  case SubscriptionPlan.pro: return <StarIcon className="h-8 w-8" />
+                  case SubscriptionPlan.business: return <CrownIcon className="h-8 w-8" />
                   default: return <ZapIcon className="h-8 w-8" />
                 }
               }

@@ -202,17 +202,17 @@ export async function processStreamResponse(response: Response) {
 ```typescript
 export const SUBSCRIPTION_LIMITS = {
   [SubscriptionPlan.BASIC]: {
-    maxTokensPerMonth: 5000000,    // 5M tokens
+    tokenLimit: 5000000,    // 5M tokens
     cost: 0.875,                   // $0.875 at limit
     profitMargin: 0.9125           // 91.25%
   },
   [SubscriptionPlan.PRO]: {
-    maxTokensPerMonth: 15000000,   // 15M tokens
+    tokenLimit: 15000000,   // 15M tokens
     cost: 2.625,                   // $2.625 at limit
     profitMargin: 0.895            // 89.5%
   },
   [SubscriptionPlan.BUSINESS]: {
-    maxTokensPerMonth: 40000000,   // 40M tokens
+    tokenLimit: 40000000,   // 40M tokens
     cost: 7.00,                    // $7.00 at limit
     profitMargin: 0.86             // 86%
   }

@@ -9,8 +9,8 @@
  * Examples:
  *   tsx scripts/usage-max.ts user_123   # Set token usage to max for their current plan
  */
-import { PrismaClient } from '@prisma/client'
-import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
+import { PrismaClient, SubscriptionPlan } from '@prisma/client'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
 
 const prisma = new PrismaClient()
 
@@ -54,11 +54,11 @@ async function getUserSubscription(userId: string) {
     const newSubscription = await prisma.userSubscription.create({
       data: {
         userId,
-        plan: SubscriptionPlan.BASIC,
+        plan: SubscriptionPlan.basic,
         status: 'active',
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
-        maxTokensPerMonth: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.BASIC].maxTokensPerMonth,
+        tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.basic].tokenLimit,
       }
     })
     
@@ -71,20 +71,19 @@ async function getUserSubscription(userId: string) {
 
 async function updateUserUsageToMax(userId: string, subscription: any) {
   const plan = SUBSCRIPTION_PLAN_DETAIL[subscription.plan as SubscriptionPlan]
-  const now = new Date()
-  const currentYear = now.getFullYear()
-  const currentMonth = now.getMonth() + 1 // JavaScript months are 0-based
+  const billingPeriodStart = subscription.currentPeriodStart
+  const billingPeriodEnd = subscription.currentPeriodEnd
   
   console.log(`🎯 Setting token usage to maximum for plan: ${subscription.plan}`)
-  console.log(`📅 Target period: ${currentYear}-${currentMonth.toString().padStart(2, '0')}`)
+  console.log(`📅 Billing period: ${billingPeriodStart.toISOString()} to ${billingPeriodEnd.toISOString()}`)
   
   // Check if current usage record exists for reference
   await prisma.userUsage.findUnique({
     where: {
-      userId_year_month: {
+      userId_billingPeriodStart_billingPeriodEnd: {
         userId,
-        year: currentYear,
-        month: currentMonth
+        billingPeriodStart,
+        billingPeriodEnd
       }
     }
   })
@@ -92,35 +91,35 @@ async function updateUserUsageToMax(userId: string, subscription: any) {
   // Determine target token usage based on plan
   let targetTokens: number
   
-  if (subscription.plan === SubscriptionPlan.BUSINESS) {
+  if (subscription.plan === SubscriptionPlan.business) {
     // For business plan, use high but finite value
     targetTokens = 4000000  // Business plan limit
   } else {
     // For basic and pro plans, use plan limits
-    targetTokens = plan.maxTokensPerMonth
+    targetTokens = plan.tokenLimit
   }
   
   // Set token usage to maximum
   console.log(`📊 Setting TOKENS to maximum:`)
   console.log(`   Tokens: ${targetTokens.toLocaleString()} (at limit)`)
   
-  // Upsert the usage record for the current month
+  // Upsert the usage record for the current billing period
   const updatedUsage = await prisma.userUsage.upsert({
     where: {
-      userId_year_month: {
+      userId_billingPeriodStart_billingPeriodEnd: {
         userId,
-        year: currentYear,
-        month: currentMonth
+        billingPeriodStart,
+        billingPeriodEnd
       }
     },
     update: {
       tokensUsed: targetTokens,
-      updatedAt: now
+      updatedAt: new Date()
     },
     create: {
       userId,
-      year: currentYear,
-      month: currentMonth,
+      billingPeriodStart,
+      billingPeriodEnd,
       tokensUsed: targetTokens,
     }
   })
@@ -151,7 +150,7 @@ async function main() {
     console.log('\n📋 Final Usage Summary:')
     console.log(`   User ID: ${userId}`)
     console.log(`   Plan: ${subscription.plan}`)
-    console.log(`   Period: ${updatedUsage.year}-${updatedUsage.month.toString().padStart(2, '0')}`)
+    console.log(`   Billing Period: ${updatedUsage.billingPeriodStart.toISOString()} to ${updatedUsage.billingPeriodEnd.toISOString()}`)
     console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
     
     console.log('\n🧪 Testing Tips:')

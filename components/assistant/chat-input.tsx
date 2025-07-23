@@ -10,10 +10,10 @@ import {useToast} from '@/hooks/use-toast'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import {clientLogger} from '@/lib/client-logger'
-import {DEFAULT_MODEL} from '@/lib/ai/models-config'
-import {useSubscription} from '@/hooks/subscription/use-subscription'
+import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/ai/models-config'
 import {Message} from '@/types/message-types'
 import {Prompt} from '@/types/component-types'
+import {useSubscription} from "@/hooks/subscription/use-subscription";
 
 // Separate component for just the textarea input to isolate re-renders
 interface TextareaInputProps {
@@ -279,7 +279,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
           <ModelSelector 
             selectedModel={selectedModel}
             onModelSelect={setSelectedModel}
-            userTier={subscription.tier}
+            userTier={getTierFromPlan(subscription.plan)}
           />
         </div>
         <div className="flex gap-2">

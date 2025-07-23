@@ -1,14 +1,15 @@
-import {SUBSCRIPTION_PLAN_NAMES, SubscriptionPlan} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_NAMES} from '@/types/subscription-types'
+import { SubscriptionPlan } from '@prisma/client'
 
 // Plan hierarchy for upgrade/downgrade detection
-export const SUBSCRIPTION_PLAN_HIERARCHY = [SubscriptionPlan.BASIC, SubscriptionPlan.PRO, SubscriptionPlan.BUSINESS]
+export const SUBSCRIPTION_PLAN_HIERARCHY = [SubscriptionPlan.basic, SubscriptionPlan.pro, SubscriptionPlan.business]
 
 // Plan name color utilities
 export function getPlanNameColor(planId: string) {
   switch (planId) {
-    case SubscriptionPlan.BASIC: return 'text-green-600 dark:text-green-400'
-    case SubscriptionPlan.PRO: return 'text-blue-600 dark:text-blue-400'
-    case SubscriptionPlan.BUSINESS: return 'text-purple-600 dark:text-purple-400'
+    case SubscriptionPlan.basic: return 'text-green-600 dark:text-green-400'
+    case SubscriptionPlan.pro: return 'text-blue-600 dark:text-blue-400'
+    case SubscriptionPlan.business: return 'text-purple-600 dark:text-purple-400'
     default: return 'text-green-600 dark:text-green-400'
   }
 }
@@ -16,9 +17,9 @@ export function getPlanNameColor(planId: string) {
 // Get plan icon component name based on plan ID
 export function getPlanIconType(planId: string) {
   switch (planId) {
-    case SubscriptionPlan.BASIC: return 'ZapIcon'
-    case SubscriptionPlan.PRO: return 'StarIcon'
-    case SubscriptionPlan.BUSINESS: return 'CrownIcon'
+    case SubscriptionPlan.basic: return 'ZapIcon'
+    case SubscriptionPlan.pro: return 'StarIcon'
+    case SubscriptionPlan.business: return 'CrownIcon'
     default: return 'ZapIcon'
   }
 }
