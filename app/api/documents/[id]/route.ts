@@ -6,24 +6,6 @@ import {
   ApiContext 
 } from '@/lib/middleware/api-middleware'
 
-// GET /api/documents/[id] - Get document metadata
-export const GET = withEnhancedApi(
-  async ({ userId, params }: ApiContext) => {
-    const { id } = params!
-    const documentId = id as string
-
-    // This would need to be implemented in DocumentService
-    // For now, we'll return a not implemented response
-    const error = new Error('Get document metadata not implemented yet')
-    ;(error as any).status = 501
-    throw error
-  },
-  { 
-    context: 'Get document metadata',
-    allowedMethods: ['GET']
-  }
-)
-
 // PUT /api/documents/[id] - Update document
 export const PUT = withEnhancedApi(
   async ({ userId, req, params }: ApiContext) => {
