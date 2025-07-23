@@ -1,97 +1,79 @@
-import { prisma } from '@/lib/prisma'
-import { createMessage } from '@/lib/actions/message'
-import { revalidatePath } from 'next/cache'
-import { generateChatTitleWithClient } from '@/lib/utils/general'
-import { buildClientContextSection, hasClientContext } from '@/lib/utils/client-context'
-import { createAICompletionStream } from '@/lib/ai/wrapper'
-import { AIProviderError } from '@/lib/ai/errors'
-import { logger } from '@/lib/logger'
-import { NextResponse } from 'next/server'
-import { getDefaultModel, getModelsByTier } from '@/lib/ai/models-config'
-import { handleApiError } from '@/lib/utils/error-handler'
-import { ApiSubscriptionErrorCode } from '@/types/enums'
-import {
-  checkModelAccess,
-  withAuth,
-  withClientAccess,
-  withTokenValidation
-} from "@/lib/middleware/validation-middleware";
+import {prisma} from '@/lib/prisma'
+import {createMessage} from '@/lib/actions/message'
+import {revalidatePath} from 'next/cache'
+import {generateChatTitleWithClient} from '@/lib/utils/general'
+import {buildClientContextSection, hasClientContext} from '@/lib/utils/client-context'
+import {createAICompletionStream} from '@/lib/ai/wrapper'
+import {AIProviderError} from '@/lib/ai/errors'
+import {logger} from '@/lib/logger'
+import {NextResponse} from 'next/server'
+import {getDefaultModel, getModelsByTier} from '@/lib/ai/models-config'
+import {ApiSubscriptionErrorCode} from '@/types/enums'
+import {checkModelAccess, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
 import {OpenRouterClient} from "@/lib/ai/openrouter";
+import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
 
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.
- * 
- * This endpoint manages the complete chat flow including authentication, model access validation,
- * chat creation/retrieval, client context integration, and AI response streaming. It supports
+ *
+ * It manages the complete chat flow including model access validation, chat
+ * creation/retrieval, client context integration, and AI response streaming. It supports
  * both new chat creation and continuation of existing chats with full client context awareness.
- * 
- * @param req - HTTP request containing chat data
- * @param req.body.messages - Array of chat messages with content and role
- * @param req.body.chatId - Optional existing chat ID (creates new chat if not provided)
- * @param req.body.model - AI model to use (defaults to system default if not specified)
- * @param req.body.clientId - Required client ID for new chats, determines context
- * @param req.body.contextFields - Array of client context fields to include in system prompt
- * 
+ *
+ * @param context - ApiContext object containing userId and request
+ * @param context.userId - Authenticated user ID (provided by withEnhancedApi middleware)
+ * @param context.req - NextRequest object containing chat data
+ * @param context.req.body.messages - Array of chat messages with content and role
+ * @param context.req.body.chatId - Optional existing chat ID (creates new chat if not provided)
+ * @param context.req.body.model - AI model to use (defaults to system default if not specified)
+ * @param context.req.body.clientId - Required client ID for new chats, determines context
+ * @param context.req.body.contextFields - Array of client context fields to include in system prompt
+ *
  * @returns StreamingResponse - Server-sent events stream with the following data types:
  *   - `content`: Streaming AI response content chunks
  *   - `complete`: Final completion signal with chatId and optional newTitle
  *   - `error`: Error information with type, message, and retry details
- * 
+ *
  * @throws 400 - Missing required fields (clientId for new chats)
  * @throws 403 - Model access denied based on subscription tier
  * @throws 404 - Chat or client not found
- * @throws 500 - Internal server errors (AI provider issues, database errors)
- * 
- * **Authentication Flow:**
- * 1. User authentication validation
+ * @throws Standard HTTP errors handled automatically by withEnhancedApi middleware
+ *
+ * Authentication & Validation Flow:
+ * 1. Authentication handled automatically by withEnhancedApi middleware
  * 2. Token usage validation and limits checking
  * 3. Model access verification based on subscription tier
- * 
- * **Chat Processing Flow:**
+ *
+ * Chat Processing Flow:
  * 1. Parse and validate request parameters
  * 2. Create new chat or retrieve existing chat with messages
  * 3. Build client context system prompt from selected fields
  * 4. Process user message and save to database
  * 5. Stream AI response with real-time content delivery
  * 6. Save complete AI response and update token usage
- * 
- * **Client Context Integration:**
- * - Builds personalized system prompts using client information
- * - Supports selective context fields for privacy and relevance
- * - Maintains client context across all messages in a chat
- * 
- * **Error Handling:**
- * - Graceful handling of client disconnections during streaming
- * - Partial message saving on interruptions
- * - Provider-specific error handling with retry information
- * - Comprehensive logging for debugging and monitoring
  */
-export async function POST(req: Request) {
-  const endTiming = logger.startTiming('Chat API');
-  let chatId: string = '';
-  let userId: string = '';
-  
-  try {
-    // Authentication and token validation using composable middleware - FIRST
-    userId = await withAuth()
+export const POST = withEnhancedApi(
+  async ({userId, req}: ApiContext) => {
+    let chatId: string = '';
+
+    // Token validation using composable middleware
     await withTokenValidation(userId)
 
-    // Parse request body after authentication
-    const { messages, chatId: requestChatId, model, clientId, contextFields } = await req.json()
+    // Parse request body
+    const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
     chatId = requestChatId;
-    logger.apiRequest('POST', '/api/chat', { chatId, clientId, model });
-    
+
     // Use the model from the request, with fallback to centralized default
     const selectedModel = model || getDefaultModel()
-    
+
     // Validate model access based on user's subscription tier
     const modelAccess = await checkModelAccess(userId, selectedModel)
     if (!modelAccess.allowed) {
       const availableModels = getModelsByTier(modelAccess.tier)
       const modelNames = availableModels.map(m => m.name).join(', ')
-      
-      logger.warn('Model access denied', { 
-        userId, 
+
+      logger.warn('Model access denied', {
+        userId,
         chatId,
         metadata: {
           requestedModel: selectedModel,
@@ -99,7 +81,7 @@ export async function POST(req: Request) {
           userPlan: modelAccess.plan
         }
       });
-      
+
       return NextResponse.json({
         error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
         code: ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED,
@@ -107,45 +89,43 @@ export async function POST(req: Request) {
         plan: modelAccess.plan,
         modelId: selectedModel,
         upgradeUrl: '/subscription'
-      }, { status: 403 })
+      }, {status: 403})
     }
-    
-    logger.info('Chat request authenticated, model access and token usage validated', { 
-      userId, 
-      chatId, 
+
+    logger.info('Chat request authenticated, model access and token usage validated', {
+      userId,
+      chatId,
       model: selectedModel
     });
 
     // LAZY CHAT CREATION:
     // If no chatId provided, create a new chat first
     let chat: any = null;
-    
+
     if (!chatId) {
       // Create new chat - clientId and contextFields are required for new chats
       if (!clientId) {
-        logger.warn('Chat creation attempted without client ID', { userId });
-        return NextResponse.json({ error: 'Client selection is required for new chat' }, { status: 400 })
+        logger.warn('Chat creation attempted without client ID', {userId});
+        return NextResponse.json({error: 'Client selection is required for new chat'}, {status: 400})
       }
 
       // Verify client exists and belongs to user
-      logger.dbQuery('findFirst', 'client', { userId, clientId });
       const client = await prisma.client.findFirst({
-        where: { 
+        where: {
           id: clientId,
-          userId 
+          userId
         },
-        select: { name: true }
+        select: {name: true}
       })
 
       if (!client) {
-        logger.warn('Client not found for chat creation', { userId, clientId });
-        return NextResponse.json({ error: 'Client not found' }, { status: 404 })
+        logger.warn('Client not found for chat creation', {userId, clientId});
+        return NextResponse.json({error: 'Client not found'}, {status: 404})
       }
 
       // Create new chat with client name in title
       const chatTitle = generateChatTitleWithClient(client.name)
-      
-      logger.dbQuery('create', 'chat', { userId, clientId });
+
       chat = await prisma.chat.create({
         data: {
           title: chatTitle,
@@ -161,17 +141,17 @@ export async function POST(req: Request) {
           },
         },
       })
-      
+
       chatId = chat.id
-      logger.info('New chat created', { 
-        userId, 
-        chatId, 
+      logger.info('New chat created', {
+        userId,
+        chatId,
         clientId,
-        metadata: { title: chatTitle, contextFieldCount: (contextFields || []).length }
+        metadata: {title: chatTitle, contextFieldCount: (contextFields || []).length}
       });
     } else {
       // Get existing chat
-      logger.dbQuery('findFirst', 'chat', { userId, chatId });
+      logger.dbQuery('findFirst', 'chat', {userId, chatId});
       chat = await prisma.chat.findFirst({
         where: {
           id: chatId,
@@ -187,16 +167,16 @@ export async function POST(req: Request) {
       })
 
       if (!chat) {
-        logger.warn('Chat not found', { userId, chatId });
-        return NextResponse.json({ error: 'Chat not found' }, { status: 404 })
+        logger.warn('Chat not found', {userId, chatId});
+        return NextResponse.json({error: 'Chat not found'}, {status: 404})
       }
     }
 
-    logger.info('Chat data retrieved', { 
-      userId, 
+    logger.info('Chat data retrieved', {
+      userId,
       chatId,
       clientId: chat.clientId,
-      metadata: { messageCount: chat.messages.length }
+      metadata: {messageCount: chat.messages.length}
     });
 
     const existingMessages = chat.messages
@@ -205,7 +185,10 @@ export async function POST(req: Request) {
     const isFirstUserMessage = existingMessages.length === 0
 
     // Format messages for AI provider
-    const aiMessages: Array<{role: 'system' | 'user' | 'assistant', content: string}> = existingMessages.map((msg: any) => ({
+    const aiMessages: Array<{
+      role: 'system' | 'user' | 'assistant',
+      content: string
+    }> = existingMessages.map((msg: any) => ({
       role: msg.role.toLowerCase() as 'user' | 'assistant',
       content: msg.content,
     }))
@@ -214,22 +197,22 @@ export async function POST(req: Request) {
     const client = await withClientAccess(userId, (chat as any).clientId)
 
     // Build and add system message with client context for ALL messages (not just first)
-    logger.info('Adding client context system message', { 
-      userId, 
-      chatId, 
+    logger.info('Adding client context system message', {
+      userId,
+      chatId,
       clientId: client.id,
-      metadata: { 
+      metadata: {
         clientName: client.name,
         selectedContextFields: (chat as any).contextFields || [],
         isFirstMessage: isFirstUserMessage
       }
     });
-    
+
     // Build chat system prompt with user-selected client context
     const selectedContextFields = (chat as any).contextFields || []
     const clientContextSection = buildClientContextSection(client, selectedContextFields)
     const hasContext = hasClientContext(selectedContextFields)
-    
+
     const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their business.${hasContext ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
 
 INSTRUCTIONS:
@@ -243,11 +226,11 @@ INSTRUCTIONS:
 Respond naturally and conversationally while keeping this context in mind.`
 
     // Log the complete system prompt
-    logger.info('System prompt created for chat', { 
-      userId, 
-      chatId, 
+    logger.info('System prompt created for chat', {
+      userId,
+      chatId,
       clientId: client.id,
-      metadata: { 
+      metadata: {
         systemPrompt,
         promptLength: systemPrompt.length,
         hasClientContext: hasContext,
@@ -271,20 +254,20 @@ Respond naturally and conversationally while keeping this context in mind.`
     })
 
     // Save the user message to the database (tokens will be updated after AI response)
-    logger.dbQuery('create', 'message', { userId, chatId });
+    logger.dbQuery('create', 'message', {userId, chatId});
     const userMessage = await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
-    logger.info('User message saved', { 
-      userId, 
-      chatId, 
+    logger.info('User message saved', {
+      userId,
+      chatId,
       model: selectedModel,
-      metadata: { messageLength: lastMessage.content.length }
+      metadata: {messageLength: lastMessage.content.length}
     });
 
     // If this is the first user message, update the chat title only if it's still the default
     if (isFirstUserMessage && chat.title === 'New Chat') {
       const newTitle = generateChatTitleWithClient(client.name)
-      
-      logger.dbQuery('update', 'chat', { userId, chatId });
+
+      logger.dbQuery('update', 'chat', {userId, chatId});
       await prisma.chat.update({
         where: {
           id: chatId,
@@ -294,13 +277,13 @@ Respond naturally and conversationally while keeping this context in mind.`
           title: newTitle,
         },
       })
-      
-      logger.info('Chat title updated', { 
-        userId, 
+
+      logger.info('Chat title updated', {
+        userId,
         chatId,
-        metadata: { newTitle }
+        metadata: {newTitle}
       });
-      
+
       // Revalidate the chat page and home page to show the updated title
       revalidatePath(`/assistant/chat/${chatId}`)
       revalidatePath('/')
@@ -312,7 +295,7 @@ Respond naturally and conversationally while keeping this context in mind.`
         const encoder = new TextEncoder()
         let fullContent = ''
         let completionStream: any = null
-        
+
         // Helper function to safely enqueue data
         const safeEnqueue = (data: Uint8Array) => {
           try {
@@ -323,11 +306,11 @@ Respond naturally and conversationally while keeping this context in mind.`
             return false
           }
         }
-        
+
         try {
           // Use unified AI wrapper with automatic usage tracking (streaming version)
-          logger.aiRequest(selectedModel, undefined, { userId, chatId });
-          
+          logger.aiRequest(selectedModel, undefined, {userId, chatId});
+
           completionStream = createAICompletionStream(
             {
               model: selectedModel,
@@ -342,27 +325,27 @@ Respond naturally and conversationally while keeping this context in mind.`
           for await (const chunk of completionStream) {
             if (chunk.isComplete) {
               // Final chunk - save the complete message to database
-              logger.info('AI response received', { 
-                userId, 
-                chatId, 
+              logger.info('AI response received', {
+                userId,
+                chatId,
                 model: selectedModel,
-                metadata: { 
+                metadata: {
                   responseLength: fullContent.length,
-                  tokensUsed: chunk.usage?.totalTokens 
+                  tokensUsed: chunk.usage?.totalTokens
                 }
               });
-              
+
               let finalUsage = chunk.usage;
-              
+
               // Fallback: Query generation stats if usage data is missing
               if (!finalUsage && chunk.generationId) {
-                try {                  
+                try {
                   // Add a small delay - generation stats might not be immediately available
                   await new Promise(resolve => setTimeout(resolve, 1000));
 
                   const client = new OpenRouterClient();
                   const stats = await client.getGenerationStats(chunk.generationId);
-                  
+
                   if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
                     finalUsage = {
                       promptTokens: stats.data.tokens_prompt || 0,
@@ -374,49 +357,49 @@ Respond naturally and conversationally while keeping this context in mind.`
                   }
                 } catch (error) {
                   console.log('DEBUG: Failed to get generation stats:', error);
-                  
+
                   // If generation stats fail, provide a rough estimate based on content length
                   // This is a very rough estimate: ~4 characters per token for English text
                   const estimatedCompletionTokens = Math.ceil(fullContent.length / 4);
                   const estimatedPromptTokens = Math.ceil(JSON.stringify(aiMessages).length / 4);
-                  
+
                   finalUsage = {
                     promptTokens: estimatedPromptTokens,
                     completionTokens: estimatedCompletionTokens,
                     totalTokens: estimatedPromptTokens + estimatedCompletionTokens
                   };
-                  
+
                   console.log('DEBUG: Using estimated token counts:', finalUsage);
                 }
               }
 
               // Update user message with input tokens and save assistant's response
-              logger.dbQuery('update', 'message', { userId, chatId });
+              logger.dbQuery('update', 'message', {userId, chatId});
               await prisma.message.update({
-                where: { id: userMessage.id },
+                where: {id: userMessage.id},
                 data: {
                   inputTokens: finalUsage?.promptTokens || 0,
                   tokensUsed: finalUsage?.promptTokens || 0
                 }
               })
-              logger.info('User message updated with token info', { 
-                userId, 
-                chatId, 
-                metadata: { inputTokens: finalUsage?.promptTokens }
+              logger.info('User message updated with token info', {
+                userId,
+                chatId,
+                metadata: {inputTokens: finalUsage?.promptTokens}
               });
 
               // Save the assistant's response to the database
-              logger.dbQuery('create', 'message', { userId, chatId });
+              logger.dbQuery('create', 'message', {userId, chatId});
               await createMessage(
-                chatId, 
-                fullContent, 
-                'ASSISTANT', 
-                selectedModel, 
+                chatId,
+                fullContent,
+                'ASSISTANT',
+                selectedModel,
                 finalUsage?.completionTokens,
                 0, // inputTokens for assistant message
                 finalUsage?.completionTokens
               )
-              logger.info('Assistant message saved', { userId, chatId });
+              logger.info('Assistant message saved', {userId, chatId});
 
 
               // Send completion signal
@@ -425,13 +408,13 @@ Respond naturally and conversationally while keeping this context in mind.`
                 chatId: chatId, // Include chatId for new chats
                 newTitle: isFirstUserMessage && chat.title === 'New Chat' ? generateChatTitleWithClient(client.name) : undefined
               }
-              
+
               if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))) {
                 // Client disconnected during completion, but message is already saved
-                logger.info('Client disconnected during completion signal', { userId, chatId });
+                logger.info('Client disconnected during completion signal', {userId, chatId});
                 return
               }
-              
+
               controller.close()
             } else if (chunk.content) {
               // Stream content chunk
@@ -440,29 +423,29 @@ Respond naturally and conversationally while keeping this context in mind.`
                 type: 'content',
                 content: chunk.content
               }
-              
+
               if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))) {
                 // Client disconnected during streaming - save partial message
-                logger.info('Client disconnected during streaming, saving partial message', { 
-                  userId, 
+                logger.info('Client disconnected during streaming, saving partial message', {
+                  userId,
                   chatId,
-                  metadata: { partialLength: fullContent.length }
+                  metadata: {partialLength: fullContent.length}
                 });
-                
+
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
-                  logger.dbQuery('create', 'message', { userId, chatId });
+                  logger.dbQuery('create', 'message', {userId, chatId});
                   await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
-                  logger.info('Partial assistant message saved', { userId, chatId });
+                  logger.info('Partial assistant message saved', {userId, chatId});
                 }
-                
+
                 return
               }
             }
           }
         } catch (error) {
-          logger.error('Error in streaming chat', error as Error, { chatId });
-          
+          logger.error('Error in streaming chat', error as Error, {chatId});
+
           // Abort the completion stream if still active
           try {
             if (completionStream) {
@@ -472,9 +455,12 @@ Respond naturally and conversationally while keeping this context in mind.`
               }
             }
           } catch (streamAbortError) {
-            logger.warn('Failed to abort completion stream', { chatId, metadata: { error: (streamAbortError as Error).message } });
+            logger.warn('Failed to abort completion stream', {
+              chatId,
+              metadata: {error: (streamAbortError as Error).message}
+            });
           }
-          
+
           // Handle AI provider errors specifically
           if (error instanceof AIProviderError) {
             const errorData = {
@@ -486,7 +472,7 @@ Respond naturally and conversationally while keeping this context in mind.`
             }
             if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
               // Client disconnected, just log and exit
-              logger.info('Client disconnected during error response', { userId, chatId });
+              logger.info('Client disconnected during error response', {userId, chatId});
               return
             }
           } else {
@@ -496,11 +482,11 @@ Respond naturally and conversationally while keeping this context in mind.`
             }
             if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
               // Client disconnected, just log and exit
-              logger.info('Client disconnected during error response', { userId, chatId });
+              logger.info('Client disconnected during error response', {userId, chatId});
               return
             }
           }
-          
+
           try {
             controller.close()
           } catch {
@@ -510,16 +496,7 @@ Respond naturally and conversationally while keeping this context in mind.`
       }
     })
 
-    logger.apiResponse('POST', '/api/chat', 200, { 
-      userId, 
-      chatId,
-      metadata: { 
-        streaming: true
-      }
-    });
-    
-    endTiming();
-    
+
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
@@ -527,17 +504,9 @@ Respond naturally and conversationally while keeping this context in mind.`
         'Connection': 'keep-alive',
       },
     })
-    
-  } catch (error) {
-    return handleApiError(error, {
-      context: 'chat API',
-      userId,
-      resourceId: chatId,
-      operation: 'chat',
-      cleanup: () => {
-        logger.apiResponse('POST', '/api/chat', 500, { chatId });
-        endTiming();
-      }
-    });
-  }
-} 
+  },
+  {
+    context: 'Chat API',
+    allowedMethods: ['POST'],
+    expectedContentType: 'application/json'
+  })

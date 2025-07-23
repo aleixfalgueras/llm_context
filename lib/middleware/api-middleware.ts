@@ -19,7 +19,7 @@ export interface ApiContext {
  */
 export type EnhancedApiHandler<T = any> = (
   context: ApiContext
-) => Promise<NextResponse<T | { error: string }>> | NextResponse<T | { error: string }>
+) => Promise<NextResponse<T | { error: string }> | Response> | NextResponse<T | { error: string }> | Response
 
 
 /**
@@ -55,7 +55,7 @@ export function withEnhancedApi<T = any>(
   return async (
     req: NextRequest,
     { params }: { params?: Promise<Record<string, string | string[]>> } = {}
-  ): Promise<NextResponse> => {
+  ): Promise<NextResponse | Response> => {
     try {
       // Method validation
       if (allowedMethods && !allowedMethods.includes(req.method)) {
@@ -95,7 +95,7 @@ export function withEnhancedApi<T = any>(
 
       const response = await handler(apiContext)
       
-      // Log successful API response
+      // Log successful API response (works for both NextResponse and Response)
       logger.apiResponse(req.method, req.nextUrl.pathname, response.status, { userId })
       
       return response
