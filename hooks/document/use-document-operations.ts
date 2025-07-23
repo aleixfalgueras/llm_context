@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/types/enums'
@@ -25,6 +26,7 @@ export function useDocumentOperations({
   setDocuments,
 }: UseDocumentOperationsProps) {
   const { toast } = useToast()
+  const [isCreatingDocument, setIsCreatingDocument] = useState(false)
 
   const handleCreateDocument = async (
     documentName: string,
@@ -40,6 +42,7 @@ export function useDocumentOperations({
       return false
     }
 
+    setIsCreatingDocument(true)
     try {
       await DocumentClientService.createDocument(
         clientId,
@@ -72,6 +75,8 @@ export function useDocumentOperations({
         })
       }
       return false
+    } finally {
+      setIsCreatingDocument(false)
     }
   }
 
@@ -243,5 +248,6 @@ export function useDocumentOperations({
     handleDeleteDocument,
     handleDeleteAllDocuments,
     handleDownloadDocument,
+    isCreatingDocument,
   }
 } 
