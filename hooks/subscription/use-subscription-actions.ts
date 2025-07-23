@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import {useToast} from '@/hooks/use-toast'
-import {SubscriptionPlan} from '@/types/subscription-types'
 import {ToastVariant} from '@/types/enums'
+import {SubscriptionPlan} from "@prisma/client";
 
 interface UseSubscriptionActionsProps {
   refreshSubscriptionWithFallback: (withDelay?: boolean) => Promise<void>

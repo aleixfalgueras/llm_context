@@ -1,11 +1,12 @@
 import {stripe} from '@/lib/stripe/stripe'
 import {logger} from '../logger'
-import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan, SubscriptionStatus} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
 import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils"
 import {prisma} from '../prisma'
 import {invalidateAllUserCaches} from '../subscription/subscription-cache'
 import {SubscriptionOperations} from "@/lib/database";
 import Stripe from "stripe";
+import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 
 /**
  * Cancels a Stripe subscription immediately without proration or additional invoicing.
@@ -54,18 +55,18 @@ export async function cancelSubscriptionImmediately(subscriptionId: string, reas
 export function mapStripeStatusToSubscriptionStatus(stripeStatus: string): SubscriptionStatus {
   switch (stripeStatus) {
     case 'active':
-      return SubscriptionStatus.ACTIVE
+      return SubscriptionStatus.active
     case 'canceled':
-      return SubscriptionStatus.CANCELED
+      return SubscriptionStatus.canceled
     case 'past_due':
-      return SubscriptionStatus.PAST_DUE
+      return SubscriptionStatus.past_due
     case 'incomplete':
     case 'incomplete_expired':
-      return SubscriptionStatus.INCOMPLETE
+      return SubscriptionStatus.incomplete
     case 'unpaid':
-      return SubscriptionStatus.UNPAID
+      return SubscriptionStatus.unpaid
     default:
-      return SubscriptionStatus.INCOMPLETE
+      return SubscriptionStatus.incomplete
   }
 }
 
@@ -164,10 +165,10 @@ export async function synchronizeSubscriptionWithStripe(
     }
 
     // Handle canceledAt timestamp
-    if (stripeSubscriptionStatus === SubscriptionStatus.CANCELED && canceledAt) {
+    if (stripeSubscriptionStatus === SubscriptionStatus.canceled && canceledAt) {
       updateData.canceledAt = new Date(canceledAt * 1000)
     }
-    else if (stripeSubscriptionStatus === SubscriptionStatus.CANCELED &&
+    else if (stripeSubscriptionStatus === SubscriptionStatus.canceled &&
       !canceledAt && !subscription.canceledAt) {
       // Subscription is canceled but no timestamp from Stripe and no existing timestamp
       // This shouldn't happen in normal flow, but we'll set current time as fallback
@@ -179,7 +180,7 @@ export async function synchronizeSubscriptionWithStripe(
           status: stripeSubscriptionStatus
         }
       })
-    } else if (stripeSubscriptionStatus !== SubscriptionStatus.CANCELED && subscription.canceledAt) {
+    } else if (stripeSubscriptionStatus !== SubscriptionStatus.canceled && subscription.canceledAt) {
       // Clear canceledAt if subscription transitions from canceled to active (reactivated)
       updateData.canceledAt = null
       logger.info('Clearing canceledAt for reactivated subscription', {
@@ -207,7 +208,7 @@ export async function synchronizeSubscriptionWithStripe(
 
     // Update plan limits if plan changed
     if (planLimits) {
-      updateData.maxTokensPerMonth = planLimits.maxTokensPerMonth
+      updateData.tokenLimit = planLimits.tokenLimit
     }
 
     const updatedSubscription = await SubscriptionOperations.updateSubscription(subscription.userId, updateData)
@@ -221,7 +222,7 @@ export async function synchronizeSubscriptionWithStripe(
         subscriptionIdChanged: subscription.stripeSubscriptionId !== updatedSubscription.stripeSubscriptionId,
         plan: updatedSubscription.plan,
         status: updatedSubscription.status,
-        maxTokensPerMonth: updatedSubscription.maxTokensPerMonth,
+        tokenLimit: updatedSubscription.tokenLimit,
         planLimitsUpdated: !!planLimits,
         canceledAtChanged: subscription.canceledAt !== updatedSubscription.canceledAt,
         previousCanceledAt: subscription.canceledAt,

@@ -30,19 +30,29 @@ function parseArguments(): ScriptArgs {
 
 async function resetUserUsage(userId: string) {
   const now = new Date()
-  const currentYear = now.getFullYear()
-  const currentMonth = now.getMonth() + 1 // JavaScript months are 0-based
+  
+  // Get user's current subscription to determine billing period
+  const subscription = await prisma.userSubscription.findUnique({
+    where: { userId }
+  })
+  
+  if (!subscription) {
+    throw new Error(`No subscription found for user ${userId}`)
+  }
+  
+  const billingPeriodStart = subscription.currentPeriodStart
+  const billingPeriodEnd = subscription.currentPeriodEnd
   
   console.log(`🔄 Resetting usage for user: ${userId}`)
-  console.log(`📅 Target period: ${currentYear}-${currentMonth.toString().padStart(2, '0')}`)
+  console.log(`📅 Billing period: ${billingPeriodStart.toISOString()} to ${billingPeriodEnd.toISOString()}`)
   
-  // Reset the usage record for the current month
+  // Reset the usage record for the current billing period
   const updatedUsage = await prisma.userUsage.upsert({
     where: {
-      userId_year_month: {
+      userId_billingPeriodStart_billingPeriodEnd: {
         userId,
-        year: currentYear,
-        month: currentMonth
+        billingPeriodStart,
+        billingPeriodEnd
       }
     },
     update: {
@@ -51,8 +61,8 @@ async function resetUserUsage(userId: string) {
     },
     create: {
       userId,
-      year: currentYear,
-      month: currentMonth,
+      billingPeriodStart,
+      billingPeriodEnd,
       tokensUsed: 0,
     }
   })
@@ -75,7 +85,7 @@ async function main() {
     console.log('\n✅ Success! Usage has been reset to zero.')
     console.log('\n📋 Final Usage Summary:')
     console.log(`   User ID: ${userId}`)
-    console.log(`   Period: ${updatedUsage.year}-${updatedUsage.month.toString().padStart(2, '0')}`)
+    console.log(`   Billing Period: ${updatedUsage.billingPeriodStart.toISOString()} to ${updatedUsage.billingPeriodEnd.toISOString()}`)
     console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
 
   } catch (error) {

@@ -4,7 +4,7 @@ import {Badge} from '@/components/ui/badge'
 import {CheckIcon, ZapIcon, StarIcon, CrownIcon} from 'lucide-react'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {getPlanNameColor, getPlanIconType, getButtonStyles, getButtonText, shouldShowPlanBadge} from '@/lib/subscription/subscription-plan-utils'
-import {SubscriptionPlan} from '@/types/subscription-types'
+import {SubscriptionPlan} from "@prisma/client";
 
 interface PlanCardProps {
   planId: string

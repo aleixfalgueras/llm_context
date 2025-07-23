@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,112 +9,206 @@ datasource db {
 }
 
 model Chat {
-  id           String    @id @default(cuid())
-  title        String
-  userId       String
-  clientId     String    // Required client association for this chat
-  contextFields String[] @default([]) // Array of context field names that were selected for this chat
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  messages     Message[]
-
-  // Relations
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id            String    @id @default(cuid())
+  title         String
+  userId        String
+  clientId      String
+  contextFields String[]  @default([])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages      Message[]
 
   @@map("chats")
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String
-  role      Role
-  model     String?  // AI model used for this message (e.g., 'gpt-4o', 'gpt-4o-mini', 'claude-3-5-haiku')
-  tokensUsed Int     @default(0) // Number of tokens consumed for this message (total)
-  inputTokens Int    @default(0) // Number of input tokens for this message
-  outputTokens Int   @default(0) // Number of output tokens for this message
-  chatId    String
-  createdAt DateTime @default(now())
-
-  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  content      String
+  role         Role
+  model        String?
+  tokensUsed   Int      @default(0)
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  chatId       String
+  createdAt    DateTime @default(now())
+  chat         Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   @@map("messages")
 }
 
 model Client {
-  id          String   @id @default(cuid())
-  userId      String   // The marketing service provider's user ID
-  name        String
-  email       String?
-  phone       String?
-  country     String?  // Client's country/location
-
-  generalContext String?  // General context about the client
-  specificContext1 String? // Specific context 1 about the client
-  specificContext2 String? // Specific context 2 about the client  
-  specificContext3 String? // Specific context 3 about the client
-  documentsLanguage String @default("english") // Preferred language for generated documents
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  chats       Chat[]
-  documents   Document[]
+  id                String     @id @default(cuid())
+  userId            String
+  name              String
+  email             String?
+  phone             String?
+  country           String?
+  generalContext    String?
+  specificContext1  String?
+  specificContext2  String?
+  specificContext3  String?
+  documentsLanguage String     @default("english")
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  chats             Chat[]
+  documents         Document[]
 
   @@index([userId])
   @@map("clients")
 }
 
 model Document {
-  id          String   @id @default(cuid())
-  userId      String   // The marketing professional's user ID
-  clientId    String   // The client this document belongs to
-  documentName String  // The name of the document
-  documentPath String  // Path in Supabase storage: user_id/client_id/document_name.md
-  documentType String  // Type of document (e.g., "meeting-report", "custom-document", "proposal")
-  fileSize    Int      @default(0) // File size in bytes for storage calculations
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  userId       String
+  clientId     String
+  documentName String
+  documentPath String
+  documentType String
+  fileSize     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("documents")
 }
 
 model Feedback {
-  id          String   @id @default(cuid())
-  userId      String   // The user's ID from Clerk
-  userEmail   String?  // User's email for contact purposes
-  userName    String?  // User's name
-  type        String   // Type of feedback: "feature", "bug", "complaint"
-  title       String   // Title of the feedback
-  description String   // Detailed description of the feedback
-  priority    String   // Priority level: "low", "medium", "high"
-  state       String   @default("PENDING") // State of feedback: "COMPLETED", "IN_PROGRESS", "PENDING", "FALSE_ALARM"
-  useCase     String?  // Use case or scenario (for feature requests)
-  stepsToReproduce String? // Steps to reproduce (for bug reports)
-  createdAt   DateTime @default(now())
-  
+  id               String   @id @default(cuid())
+  userId           String
+  userEmail        String?
+  userName         String?
+  type             String
+  title            String
+  description      String
+  priority         String
+  state            String   @default("PENDING")
+  useCase          String?
+  stepsToReproduce String?
+  createdAt        DateTime @default(now())
+
   @@map("feedbacks")
 }
 
 model Prompt {
   id          String   @id @default(cuid())
-  userId      String   // The user's ID from Clerk
-  name        String   // User-friendly name for the prompt
-  description String?  // Optional description of what the prompt does
-  content     String   // The actual prompt content/template
-  category    String   @default("general") // Category for organization (general, marketing, content, etc.)
-  isActive    Boolean  @default(true) // Allow users to disable prompts without deleting
-  usageCount  Int      @default(0) // Track how often prompt is used
+  userId      String
+  name        String
+  description String?
+  content     String
+  category    String   @default("general")
+  isActive    Boolean  @default(true)
+  usageCount  Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@map("prompts")
 }
 
-// Enums for better type safety
+model UserSubscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  plan                 SubscriptionPlan   @default(basic)
+  status               SubscriptionStatus @default(active)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  currentPeriodStart   DateTime           @default(now())
+  currentPeriodEnd     DateTime           @default(now())
+  cancelAtPeriodEnd    Boolean            @default(false)
+  pendingPlanChange    String?
+  stripeScheduleId     String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  canceledAt           DateTime?
+  tokenLimit           Int                @default(100000)
+
+  @@index([currentPeriodEnd])
+  @@map("user_subscriptions")
+}
+
+model UserUsage {
+  id                 String   @id @default(cuid())
+  userId             String
+  billingPeriodStart DateTime
+  billingPeriodEnd   DateTime
+  tokensUsed         Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([userId, billingPeriodStart, billingPeriodEnd])
+  @@index([userId])
+  @@index([billingPeriodStart, billingPeriodEnd])
+  @@map("user_usage")
+}
+
+model UserConsent {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  dataProcessing    Boolean   @default(false)
+  analytics         Boolean   @default(false)
+  marketing         Boolean   @default(false)
+  agreedToTerms     Boolean   @default(false)
+  agreedToPrivacy   Boolean   @default(false)
+  termsVersion      String?
+  privacyVersion    String?
+  cookiesNecessary  Boolean   @default(true)
+  cookiesAnalytics  Boolean   @default(false)
+  cookiesMarketing  Boolean   @default(false)
+  cookiesFunctional Boolean   @default(false)
+  ipAddress         String?
+  userAgent         String?
+  consentMethod     String?
+  consentGivenAt    DateTime  @default(now())
+  lastUpdatedAt     DateTime  @updatedAt
+  withdrawnAt       DateTime?
+
+  @@map("user_consents")
+}
+
+model ConsentAuditLog {
+  id            String   @id @default(cuid())
+  userId        String
+  action        String
+  consentType   String
+  previousValue Boolean?
+  newValue      Boolean
+  reason        String?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@map("consent_audit_logs")
+}
+
+model WebhookEvent {
+  id            String    @id @default(cuid())
+  stripeEventId String    @unique
+  eventType     String
+  processed     Boolean   @default(false)
+  processedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([stripeEventId])
+  @@map("webhook_events")
+}
+
+model DataExportRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  requestType String
+  status      String
+  requestData Json?
+  filePath    String?
+  expiresAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("data_export_requests")
+}
+
 enum SubscriptionPlan {
   basic
   pro
@@ -133,141 +221,6 @@ enum SubscriptionStatus {
   past_due
   incomplete
   unpaid
-}
-
-// NEW: User Subscription Management
-model UserSubscription {
-  id              String   @id @default(cuid())
-  userId          String   @unique // The user's ID from Clerk
-  
-  // Subscription Details
-  plan            SubscriptionPlan   @default(basic)
-  status          SubscriptionStatus @default(active)
-  
-  // Billing Information
-  stripeCustomerId     String?  // Stripe customer ID
-  stripeSubscriptionId String?  // Stripe subscription ID
-  stripePriceId        String?  // Stripe price ID for current plan
-  
-  // Plan Limits
-  maxTokensPerMonth       Int @default(100000) // Basic: 100K, Pro: 2M, Business: 4M
-  
-  // Billing Cycle
-  currentPeriodStart DateTime @default(now())
-  currentPeriodEnd   DateTime @default(now())
-  
-  // Cancellation tracking
-  cancelAtPeriodEnd Boolean @default(false)
-  
-  // Plan change tracking
-  pendingPlanChange String? // Target plan for scheduled downgrade (basic, pro, business)
-  stripeScheduleId  String? // Stripe schedule ID for tracking active scheduled downgrades
-  
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  canceledAt DateTime?
-  
-  @@index([currentPeriodEnd])
-  @@map("user_subscriptions")
-}
-
-// NEW: Usage Tracking
-model UserUsage {
-  id       String @id @default(cuid())
-  userId   String // The user's ID from Clerk
-  
-  // Usage Period (monthly tracking)
-  year     Int
-  month    Int
-  
-  // Token Tracking (primary limit with OpenRouter)
-  tokensUsed        Int   @default(0)   // Total tokens consumed this month
-  
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Unique constraint for user per month
-  @@unique([userId, year, month])
-  @@index([userId])
-  @@map("user_usage")
-}
-
-model UserConsent {
-  id              String   @id @default(cuid())
-  userId          String   @unique // The user's ID from Clerk
-  
-  // GDPR Consent Fields
-  dataProcessing  Boolean  @default(false) // Required for service
-  analytics       Boolean  @default(false) // Optional - for analytics
-  marketing       Boolean  @default(false) // Optional - for marketing communications
-  
-  // Legal Agreement Fields
-  agreedToTerms   Boolean  @default(false) // Terms of Service agreement
-  agreedToPrivacy Boolean  @default(false) // Privacy Policy agreement
-  termsVersion    String?  // Version of terms they agreed to
-  privacyVersion  String?  // Version of privacy policy they agreed to
-  
-  // Cookie Consent Fields
-  cookiesNecessary  Boolean @default(true)  // Always true
-  cookiesAnalytics  Boolean @default(false) // Optional
-  cookiesMarketing  Boolean @default(false) // Optional
-  cookiesFunctional Boolean @default(false) // Optional
-  
-  // Metadata
-  ipAddress       String?  // IP when consent was given (for audit)
-  userAgent       String?  // User agent when consent was given
-  consentMethod   String?  // How consent was obtained (banner, form, etc.)
-  
-  // Timestamps
-  consentGivenAt  DateTime @default(now())
-  lastUpdatedAt   DateTime @updatedAt
-  withdrawnAt     DateTime? // If consent was withdrawn
-  
-  @@map("user_consents")
-}
-
-model ConsentAuditLog {
-  id            String   @id @default(cuid())
-  userId        String   // The user's ID from Clerk
-  action        String   // 'granted', 'updated', 'withdrawn'
-  consentType   String   // 'data_processing', 'analytics', 'marketing', 'cookies'
-  previousValue Boolean? // Previous consent state
-  newValue      Boolean  // New consent state
-  reason        String?  // Reason for change (user_request, policy_update, etc.)
-  ipAddress     String?  // IP address when change occurred
-  userAgent     String?  // User agent when change occurred
-  createdAt     DateTime @default(now())
-  
-  @@map("consent_audit_logs")
-}
-
-model WebhookEvent {
-  id            String   @id @default(cuid())
-  stripeEventId String   @unique // Stripe event ID
-  eventType     String   // Event type (e.g., 'customer.subscription.updated')
-  processed     Boolean  @default(false)
-  processedAt   DateTime?
-  createdAt     DateTime @default(now())
-  
-  @@index([stripeEventId])
-  @@map("webhook_events")
-}
-
-model DataExportRequest {
-  id          String   @id @default(cuid())
-  userId      String   // The user's ID from Clerk
-  requestType String   // 'full_export', 'specific_data', 'deletion_confirmation', 'account_deletion'
-  status      String   // 'pending', 'processing', 'completed', 'failed', 'cancelled'
-  requestData Json?    // Additional request parameters
-  filePath    String?  // Path to generated export file
-  expiresAt   DateTime? // When the export link expires
-  completedAt DateTime? // When the export was completed
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@map("data_export_requests")
 }
 
 enum Role {

@@ -11,6 +11,20 @@
 
 **⚠️ UPDATED JANUARY 2025**: All subscription tiers now have access to Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano through OpenRouter
 
+## Important: Billing Period vs Calendar Month
+
+**⚠️ BILLING PERIOD ALIGNMENT**: Token limits are enforced per **billing period**, not calendar month. This means:
+
+- **Usage resets** when your subscription renews (e.g., if you subscribed on the 15th, usage resets on the 15th)
+- **More accurate tracking** - your usage period aligns exactly with when you're billed
+- **Fair usage calculation** - you get the full token allowance for your actual billing cycle
+- **No calendar confusion** - usage tracking matches your subscription renewal dates
+
+**Example**: If you subscribe to Pro Plan on January 15th:
+- Your first billing period: January 15 - February 15 (15M tokens)
+- Your second billing period: February 15 - March 15 (15M tokens reset)
+- And so on...
+
 ## Model Configuration
 
 ### Premium AI Models Available
@@ -32,7 +46,7 @@ Per 1K tokens = $0.000175
 ## Subscription Plans Analysis
 
 ### Basic Plan - €10/month
-- **Token Limit**: 5,000,000 tokens/month
+- **Token Limit**: 5,000,000 tokens per billing period
 - **Cost at limit**: 5M × $0.000175 = $0.875
 - **Profit margin**: €10 - $0.875 = ~€9.12 (92.5% margin)
 - **Content equivalent**: ~3,750 pages of content
@@ -45,7 +59,7 @@ Per 1K tokens = $0.000175
 - 5M tokens supports extensive monthly content generation
 
 ### Pro Plan - €25/month
-- **Token Limit**: 15,000,000 tokens/month
+- **Token Limit**: 15,000,000 tokens per billing period
 - **Cost at limit**: 15M × $0.000175 = $2.625
 - **Profit margin**: €25 - $2.625 = ~€22.37 (91.0% margin)
 - **Content equivalent**: ~11,250 pages of content
@@ -57,7 +71,7 @@ Per 1K tokens = $0.000175
 - Suitable for professional content creation at scale
 
 ### Business Plan - €50/month
-- **Token Limit**: 40,000,000 tokens/month
+- **Token Limit**: 40,000,000 tokens per billing period
 - **Cost at limit**: 40M × $0.000175 = $7.00
 - **Profit margin**: €50 - $7.00 = ~€42.99 (88.1% margin)
 - **Content equivalent**: ~30,000 pages of content
@@ -76,26 +90,26 @@ Per 1K tokens = $0.000175
 
 **Basic Plan (5M tokens):**
 ```
-Blog posts (1,330 tokens each):     ~3,750 posts/month
-Marketing strategies (4,000 tokens): ~1,250 strategies/month
-Client reports (10,000 tokens):      ~500 reports/month
-Social media content (200 tokens):   ~25,000 posts/month
+Blog posts (1,330 tokens each):     ~3,750 posts per billing period
+Marketing strategies (4,000 tokens): ~1,250 strategies per billing period
+Client reports (10,000 tokens):      ~500 reports per billing period
+Social media content (200 tokens):   ~25,000 posts per billing period
 ```
 
 **Pro Plan (15M tokens):**
 ```
-Blog posts:           ~11,250 posts/month
-Marketing strategies: ~3,750 strategies/month
-Client reports:       ~1,500 reports/month
-Social media content: ~75,000 posts/month
+Blog posts:           ~11,250 posts per billing period
+Marketing strategies: ~3,750 strategies per billing period
+Client reports:       ~1,500 reports per billing period
+Social media content: ~75,000 posts per billing period
 ```
 
 **Business Plan (40M tokens):**
 ```
-Blog posts:           ~30,000 posts/month
-Marketing strategies: ~10,000 strategies/month
-Client reports:       ~4,000 reports/month
-Social media content: ~200,000 posts/month
+Blog posts:           ~30,000 posts per billing period
+Marketing strategies: ~10,000 strategies per billing period
+Client reports:       ~4,000 reports per billing period
+Social media content: ~200,000 posts per billing period
 ```
 
 ### Premium Model Benefits

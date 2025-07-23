@@ -4,7 +4,7 @@ import {Suspense} from 'react'
 import {Button} from '@/components/ui/button'
 import {SettingsIcon} from 'lucide-react'
 import {isDowngrade as checkIsDowngrade} from '@/lib/subscription/subscription-plan-utils'
-import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionPlan} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
 import {Navbar} from '@/components/global/navbar'
 import {UpgradeDowngradeDialog} from '@/components/subscription/upgrade-downgrade-dialog'
 import {SubscriptionUrlHandler} from '@/components/subscription/subscription-url-handler'
@@ -15,6 +15,7 @@ import {useSubscriptionStatus} from '@/hooks/subscription/use-subscription-statu
 import {useSubscriptionActions} from '@/hooks/subscription/use-subscription-actions'
 import {useSubscriptionRefresh} from '@/hooks/subscription/use-subscription-refresh'
 import {useToast} from '@/hooks/use-toast'
+import {SubscriptionPlan} from "@prisma/client";
 
 export default function SubscriptionPage() {
   const {
@@ -78,7 +79,7 @@ export default function SubscriptionPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Suspense fallback={null}>
         <SubscriptionUrlHandler 
-          subscription={subscription} 
+          subscription={subscription}
           toast={toast} 
           setIsRefreshing={setIsRefreshing} 
         />
@@ -120,12 +121,12 @@ export default function SubscriptionPage() {
             isActiveCancelled={isActiveCancelled()}
             isPendingDowngrade={isPendingDowngrade()}
             isPastDueOrUnpaid={isPastDueOrUnpaid()}
-            currentPeriodEnd={subscription.currentPeriodEnd || null}
+            currentPeriodEnd={new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB') || null}
             getRemainingTrialDays={getRemainingTrialDays}
             getRemainingActiveDays={getRemainingActiveDays}
             getRemainingDowngradeDays={getRemainingDowngradeDays}
             capitalizePlanName={capitalizePlanName}
-            pendingPlanChange={subscription.pendingPlanChange}
+            pendingPlanChange={subscription.pendingPlanChange ?? ""}
             onRetryPayment={handleRetryPayment}
             retryPaymentLoading={retryPaymentLoading}
           />
@@ -179,7 +180,7 @@ export default function SubscriptionPage() {
         isOpen={confirmationDialog.isOpen}
         onClose={handleCloseConfirmation}
         onConfirm={handleConfirmUpgrade}
-        targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.BASIC}
+        targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.basic}
         isLoading={upgradeLoading !== null}
         hasActiveSubscription={!!subscription.stripeSubscriptionId && subscription.isActive && !isExpired()}
         isDowngrade={confirmationDialog.targetPlan ? checkIsDowngrade(subscription.plan as SubscriptionPlan, confirmationDialog.targetPlan) : false}
