@@ -7,7 +7,7 @@
 import { Redis } from '@upstash/redis'
 import { logger } from '../logger'
 import { UserSubscription, UserUsage } from '@prisma/client'
-import {getStorageSubscriptionUsage} from "@/lib/utils/storage";
+import {StorageSubscriptionUsage} from "@/types/subscription-usage-types";
 
 // Initialize Redis client with explicit Vercel environment variables
 const redis = new Redis({
@@ -82,20 +82,6 @@ export async function cacheUsage(cacheKey: string, usage: UserUsage): Promise<vo
 }
 
 /**
- * Cache storage analytics data
- */
-export async function cacheStorageAnalytics(userId: string, analytics: any): Promise<void> {
-  try {
-    const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
-    await redis.setex(key, STORAGE_CACHE_TTL, JSON.stringify(analytics))
-  } catch (error) {
-    logger.error('Error caching storage analytics', error as Error)
-    // Fail silently - app should work without cache
-  }
-}
-
-
-/**
  * Get cached usage data if valid
  */
 export async function getCachedUsage(cacheKey: string): Promise<UserUsage | null> {
@@ -113,18 +99,29 @@ export async function getCachedUsage(cacheKey: string): Promise<UserUsage | null
 }
 
 /**
+ * Cache storage subscription usage data
+ */
+export async function cacheStorageSubscriptionUsage(userId: string, storageSubscriptionUsage: StorageSubscriptionUsage): Promise<void> {
+  try {
+    const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
+    await redis.setex(key, STORAGE_CACHE_TTL, JSON.stringify(storageSubscriptionUsage))
+  } catch (error) {
+    logger.error('Error caching storage storageSubscriptionUsage', error as Error)
+    // Fail silently - app should work without cache
+  }
+}
+
+/**
  * Get cached storage subscription usage data if valid
  */
-export async function getCachedStorageSubscriptionUsage(userId: string): Promise<any | null> {
+export async function getCachedStorageSubscriptionUsage(userId: string): Promise<StorageSubscriptionUsage | null> {
   try {
     const key = getCacheKey(CACHE_PREFIXES.STORAGE, userId)
     const cached = await redis.get(key)
     if (cached && typeof cached === 'string') {
-      // Storage analytics may not have date fields, so use JSON.parse for now
-      // This can be enhanced later if storage analytics include date fields
-      return JSON.parse(cached)
+      return JSON.parse(cached) as StorageSubscriptionUsage
     }
-    return cached // Redis returns null if key doesn't exist or expired
+    return null // Redis returns null if key doesn't exist or expired
   } catch (error) {
     logger.error('Error getting cached storage analytics', error as Error)
     return null // Fall back to no cache
