@@ -66,4 +66,38 @@ export class MessageService {
   static async getChatMessages(chatId: string, userId: string) {
     return MessageOperations.getChatMessages(chatId, userId)
   }
+
+  /**
+   * Update message token information with ownership verification
+   */
+  static async updateMessageTokens(messageId: string, userId: string, tokenData: {
+    inputTokens?: number,
+    tokensUsed?: number,
+    outputTokens?: number
+  }) {
+    const endTiming = logger.startTiming('Update Message Tokens Service');
+    
+    try {
+      logger.userAction('Update message tokens', { 
+        userId,
+        metadata: { tokenData, messageId }
+      });
+
+      const result = await withTiming(
+        'Update message tokens in DB',
+        () => MessageOperations.updateMessageTokens(messageId, userId, tokenData),
+        { userId, metadata: { messageId }}
+      );
+
+      endTiming();
+      return result;
+    } catch (error) {
+      logger.error('Error updating message tokens', error as Error, { userId, metadata: { messageId } });
+      endTiming();
+      return {
+        success: false as const,
+        error: 'Failed to update message tokens'
+      }
+    }
+  }
 }

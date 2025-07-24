@@ -1,4 +1,4 @@
-import { DocumentService } from '@/lib/documents/service'
+import { DocumentService } from '@/lib/services/document-service'
 import { 
   withEnhancedApi, 
   apiSuccess, 
@@ -16,11 +16,7 @@ export const GET = withEnhancedApi(
       throw new Error('Client ID is required')
     }
 
-    const options = {
-      limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined
-    }
-
-    const documents = await DocumentService.getClientDocuments(userId, clientId, options)
+    const documents = await DocumentService.getClientDocuments(userId, clientId)
     return apiSuccess(documents)
   },
   { 

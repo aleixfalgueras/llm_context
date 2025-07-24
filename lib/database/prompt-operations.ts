@@ -3,7 +3,8 @@
  */
 
 import { prisma } from '../prisma'
-import { BaseOperations, PaginationConfig, DbOperationConfig } from './base-operations'
+import { BaseOperations } from './base-operations'
+import {DbOperationConfig, PaginationConfig} from "@/types/database-types";
 
 export class PromptOperations extends BaseOperations {
   static async findUserPrompts(

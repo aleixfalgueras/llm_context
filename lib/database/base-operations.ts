@@ -3,49 +3,32 @@
  * with built-in ownership verification, error handling, and consistent patterns.
  */
 
-import { Prisma } from '@prisma/client'
-import { logger } from '../logger'
+import {Prisma} from '@prisma/client'
+import {logger} from '../logger'
+import {DbOperationConfig, DbOperationResult, PaginationConfig, UserOwnedModel} from "@/types/database-types";
 
 /**
- * Base interface for models with user ownership
+ * Type guard to check if a database operation was successful
  */
-export interface UserOwnedModel {
-  id: string
-  userId: string
+export function isSuccess<T>(result: DbOperationResult<T>): result is { success: true; data: T } {
+  return result.success
 }
 
 /**
- * Configuration for database operations
+ * Type guard to check if a database operation failed
  */
-export interface DbOperationConfig {
-  /** Context string for error logging */
-  context?: string
-  /** Whether to verify user ownership (default: true) */
-  verifyOwnership?: boolean
-  /** Include relationships in queries */
-  include?: Record<string, any>
-  /** Select specific fields */
-  select?: Record<string, any>
-  /** Custom ordering for queries */
-  orderBy?: Record<string, any> | Array<Record<string, any>>
+export function isError<T>(result: DbOperationResult<T>): result is { success: false; error: string } {
+  return !result.success
 }
 
 /**
- * Result type for database operations
+ * Helper to extract data from successful result or throw error
  */
-export interface DbOperationResult<T> {
-  success: boolean
-  data?: T
-  error?: string
-}
-
-/**
- * Pagination configuration
- */
-export interface PaginationConfig {
-  page: number
-  limit: number
-  skip?: number
+export function unwrapResult<T>(result: DbOperationResult<T>): T {
+  if (isSuccess(result)) {
+    return result.data
+  }
+  throw new Error(result.error)
 }
 
 /**
@@ -340,4 +323,5 @@ export class BaseOperations {
       return 0
     }
   }
+
 }

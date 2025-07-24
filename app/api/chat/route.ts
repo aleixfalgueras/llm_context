@@ -1,14 +1,11 @@
-import {prisma} from '@/lib/prisma'
 import {MessageService} from '@/lib/services/message-service'
+import {ChatService} from '@/lib/services/chat-service'
 import {revalidatePath} from 'next/cache'
-import {generateChatTitleWithClient} from '@/lib/utils/general'
-import {buildClientContextSection, hasClientContext} from '@/lib/utils/client-context'
 import {createAICompletionStream} from '@/lib/ai/wrapper'
 import {logger} from '@/lib/logger'
 import {NextResponse} from 'next/server'
-import {getDefaultModel, getModelsByTier} from '@/lib/ai/models-config'
-import {ApiSubscriptionErrorCode} from '@/types/enums'
-import {checkModelAccess, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
+import {getDefaultModel} from '@/lib/ai/models-config'
+import {withTokenValidation} from "@/lib/middleware/validation-middleware";
 import {OpenRouterClient} from "@/lib/ai/openrouter";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
 
@@ -61,31 +58,13 @@ export const POST = withEnhancedApi(
     const selectedModel = model || getDefaultModel()
 
     // Validate model access based on user's subscription tier
-    const modelAccess = await checkModelAccess(userId, selectedModel)
-    if (!modelAccess.allowed) {
-      const availableModels = getModelsByTier(modelAccess.tier)
-      const modelNames = availableModels.map(m => m.name).join(', ')
-
-      logger.warn('Model access denied', {
-        userId,
-        chatId,
-        metadata: {
-          requestedModel: selectedModel,
-          userTier: modelAccess.tier,
-          userPlan: modelAccess.plan
-        }
-      });
-
+    const modelAccessResult = await ChatService.validateModelAccess(userId, selectedModel, chatId)
+    if (!modelAccessResult.success) {
       throw {
-        error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
-        code: ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED,
-        status: 403,
-        metadata: {
-          tier: modelAccess.tier,
-          plan: modelAccess.plan,
-          modelId: selectedModel,
-          upgradeUrl: '/subscription'
-        }
+        error: modelAccessResult.error,
+        code: modelAccessResult.code,
+        status: modelAccessResult.status,
+        metadata: modelAccessResult.metadata
       }
     }
 
@@ -98,74 +77,28 @@ export const POST = withEnhancedApi(
     // LAZY CHAT CREATION:
     // If no chatId provided, create a new chat first
     let chat: any = null;
+    let client: any = null;
 
     if (!chatId) {
       // Create new chat - clientId and contextFields are required for new chats
-      if (!clientId) {
-        logger.warn('Chat creation attempted without client ID', {userId});
-        throw new Error('Client selection is required for new chat')
+      const newChatResult = await ChatService.processNewChat(userId, clientId, contextFields || [])
+      
+      if (!newChatResult.success) {
+        throw new Error(newChatResult.error)
       }
 
-      // Verify client exists and belongs to user
-      const client = await prisma.client.findFirst({
-        where: {
-          id: clientId,
-          userId
-        },
-        select: {name: true}
-      })
-
-      if (!client) {
-        logger.warn('Client not found for chat creation', {userId, clientId});
-        throw new Error('Client not found')
-      }
-
-      // Create new chat with client name in title
-      const chatTitle = generateChatTitleWithClient(client.name)
-
-      chat = await prisma.chat.create({
-        data: {
-          title: chatTitle,
-          userId,
-          clientId,
-          contextFields: contextFields || [],
-        },
-        include: {
-          messages: {
-            orderBy: {
-              createdAt: 'asc',
-            },
-          },
-        },
-      })
-
+      chat = newChatResult.data.chat
+      client = newChatResult.data.client
       chatId = chat.id
-      logger.info('New chat created', {
-        userId,
-        chatId,
-        clientId,
-        metadata: {title: chatTitle, contextFieldCount: (contextFields || []).length}
-      });
     } else {
       // Get existing chat
-      chat = await prisma.chat.findFirst({
-        where: {
-          id: chatId,
-          userId,
-        },
-        include: {
-          messages: {
-            orderBy: {
-              createdAt: 'asc',
-            },
-          },
-        },
-      })
-
-      if (!chat) {
-        logger.warn('Chat not found', {userId, chatId});
-        throw new Error('Chat not found')
+      const existingChatResult = await ChatService.processExistingChat(chatId, userId)
+      
+      if (!existingChatResult.success) {
+        throw new Error(existingChatResult.error)
       }
+
+      chat = existingChatResult.data
     }
 
     logger.info('Chat data retrieved', {
@@ -175,79 +108,20 @@ export const POST = withEnhancedApi(
       metadata: {messageCount: chat.messages.length}
     });
 
-    const existingMessages = chat.messages
-
-    // Check if this is the first user message
-    const isFirstUserMessage = existingMessages.length === 0
-
-    // Format messages for AI provider
-    const aiMessages: Array<{
-      role: 'system' | 'user' | 'assistant',
-      content: string
-    }> = existingMessages.map((msg: any) => ({
-      role: msg.role.toLowerCase() as 'user' | 'assistant',
-      content: msg.content,
-    }))
-
-    // Get client information for this chat (required)
-    const client = await withClientAccess(userId, (chat as any).clientId)
-
-    // Build and add system message with client context for ALL messages (not just first)
-    logger.info('Adding client context system message', {
-      userId,
-      chatId,
-      clientId: client.id,
-      metadata: {
-        clientName: client.name,
-        selectedContextFields: (chat as any).contextFields || [],
-        isFirstMessage: isFirstUserMessage
-      }
-    });
-
-    // Build chat system prompt with user-selected client context
-    const selectedContextFields = (chat as any).contextFields || []
-    const clientContextSection = buildClientContextSection(client, selectedContextFields)
-    const hasContext = hasClientContext(selectedContextFields)
-
-    const systemPrompt = `You are a professional AI assistant helping a marketing service provider with their business.${hasContext ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
-
-INSTRUCTIONS:
-- ${hasContext ? 'Use this client information to personalize your responses when relevant' : 'Provide helpful general business advice'}
-- ${hasContext ? 'Reference their specific circumstances when it adds value to your response' : 'Keep responses broadly applicable but actionable'}
-- Be professional, knowledgeable, and supportive
-- Help with any aspect of marketing business operations: strategy, client management, content creation, campaigns, analysis, operations, industry insights, problem-solving, etc.
-- Provide practical, actionable advice tailored to marketing professionals
-- Maintain confidentiality and professionalism at all times
-
-Respond naturally and conversationally while keeping this context in mind.`
-
-    // Log the complete system prompt
-    logger.info('System prompt created for chat', {
-      userId,
-      chatId,
-      clientId: client.id,
-      metadata: {
-        systemPrompt,
-        promptLength: systemPrompt.length,
-        hasClientContext: hasContext,
-        contextFields: selectedContextFields,
-        clientName: client.name,
-        isFirstMessage: isFirstUserMessage
-      }
-    });
-
-    // Always add system message for consistent client context
-    aiMessages.unshift({
-      role: 'system',
-      content: systemPrompt,
-    })
-
-    // Add the new user message
+    // Prepare chat data for AI processing
     const lastMessage = messages[messages.length - 1]
-    aiMessages.push({
-      role: 'user' as const,
-      content: lastMessage.content,
-    })
+    const prepareResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content)
+    
+    if (!prepareResult.success) {
+      throw new Error('Failed to prepare chat for AI processing')
+    }
+
+    const { aiMessages, client: chatClient, isFirstUserMessage, selectedContextFields } = prepareResult.data
+    
+    // Use the client from the preparation if we don't have one yet (for existing chats)
+    if (!client) {
+      client = chatClient
+    }
 
     // Save the user message to the database (tokens will be updated after AI response)
     const userMessageResult = await MessageService.createMessage(chatId, userId, lastMessage.content, 'USER', selectedModel)
@@ -265,25 +139,15 @@ Respond naturally and conversationally while keeping this context in mind.`
     });
 
     // If this is the first user message, update the chat title only if it's still the default
-    if (isFirstUserMessage && chat.title === 'New Chat') {
-      const newTitle = generateChatTitleWithClient(client.name)
+    const titleUpdateResult = await ChatService.updateChatTitleForFirstMessage(
+      chatId, 
+      userId, 
+      client.name, 
+      isFirstUserMessage, 
+      chat.title
+    )
 
-      await prisma.chat.update({
-        where: {
-          id: chatId,
-          userId,
-        },
-        data: {
-          title: newTitle,
-        },
-      })
-
-      logger.info('Chat title updated', {
-        userId,
-        chatId,
-        metadata: {newTitle}
-      });
-
+    if (titleUpdateResult.success && titleUpdateResult.data.updated) {
       // Revalidate the chat page and home page to show the updated title
       revalidatePath(`/assistant/chat/${chatId}`)
       revalidatePath('/')
@@ -373,19 +237,22 @@ Respond naturally and conversationally while keeping this context in mind.`
                 }
               }
 
-              // Update user message with input tokens and save assistant's response
-              await prisma.message.update({
-                where: {id: userMessage.id},
-                data: {
+              // Update user message with input tokens
+              const tokenUpdateResult = await MessageService.updateMessageTokens(
+                userMessage.id,
+                userId,
+                {
                   inputTokens: finalUsage?.promptTokens || 0,
                   tokensUsed: finalUsage?.promptTokens || 0
                 }
-              })
-              logger.info('User message updated with token info', {
-                userId,
-                chatId,
-                metadata: {inputTokens: finalUsage?.promptTokens}
-              });
+              )
+              
+              if (!tokenUpdateResult.success) {
+                logger.error(
+                  'Failed to update user message tokens',
+                  new Error(tokenUpdateResult.error),
+                  { userId, chatId, metadata: {messageId: userMessage.id }})
+              }
 
               // Save the assistant's response to the database
               const assistantMessageResult = await MessageService.createMessage(
@@ -409,7 +276,7 @@ Respond naturally and conversationally while keeping this context in mind.`
               const completionData = {
                 type: 'complete',
                 chatId: chatId, // Include chatId for new chats
-                newTitle: isFirstUserMessage && chat.title === 'New Chat' ? generateChatTitleWithClient(client.name) : undefined
+                newTitle: titleUpdateResult.success && titleUpdateResult.data.updated ? titleUpdateResult.data.newTitle : undefined
               }
 
               if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))) {
