@@ -25,12 +25,11 @@ Create a new API route file in `/app/api/ai-services/your-service-name/route.ts`
 ```typescript
 import { NextRequest } from 'next'
 import { getAuth } from '@clerk/nextjs/server'
-import { aiServiceMiddleware } from '@/lib/ai-service-api'
 import { validateUsageLimits } from '@/lib/usage-middleware'
 import { generateAIResponse } from '@/lib/openrouter/service'
 import { buildClientContextSection } from '@/lib/client-context-utils'
 import { getClientById } from '@/lib/database/client-operations'
-import { ApiError, handleApiError } from '@/lib/api-error-handler'
+import { handleApiError } from '@/lib/utils/error-handler'
 import { logger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
@@ -40,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Get user authentication
     const { userId } = getAuth(request)
     if (!userId) {
-      throw new ApiError('Authentication required', 401)
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
     }
 
     // Parse and validate request body
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!clientId) {
-      throw new ApiError('Client ID is required', 400)
+      return Response.json({ error: 'Client ID is required' }, { status: 400 })
     }
 
     // Validate usage limits
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Get client data
     const validClient = await getClientById(clientId, userId)
     if (!validClient) {
-      throw new ApiError('Client not found', 404)
+      return Response.json({ error: 'Client not found' }, { status: 404 })
     }
 
     // Build client context section (respects privacy selections)
@@ -143,21 +142,21 @@ Create a save endpoint at `/app/api/ai-services/save-your-service/route.ts`:
 import { NextRequest } from 'next'
 import { getAuth } from '@clerk/nextjs/server'
 import { saveDocument } from '@/lib/documents/service'
-import { ApiError, handleApiError } from '@/lib/api-error-handler'
+import { handleApiError } from '@/lib/utils/error-handler'
 import { logger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   try {
     const { userId } = getAuth(request)
     if (!userId) {
-      throw new ApiError('Authentication required', 401)
+      return Response.json({ error: 'Authentication required' }, { status: 401 })
     }
 
     const body = await request.json()
     const { content, title, clientId } = body
 
     if (!content || !title || !clientId) {
-      throw new ApiError('Content, title, and client ID are required', 400)
+      return Response.json({ error: 'Content, title, and client ID are required' }, { status: 400 })
     }
 
     // Save document with your service type
@@ -202,7 +201,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { ModelSelector } from '@/components/ui/model-selector'
 import { ClientContextSidebar } from '@/components/clients/client-context-sidebar'
-import { useAIServiceOperations } from '@/hooks/use-ai-service-operations'
+import { BaseAIServiceDialog } from '@/components/ai-services/base-ai-service-dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
 
@@ -222,162 +221,34 @@ export function YourServiceDialog({
   const [title, setTitle] = useState('')
   const [customInput, setCustomInput] = useState('')
   const [additionalData, setAdditionalData] = useState('')
-  const [selectedModel, setSelectedModel] = useState('google/gemini-2.0-flash-001')
-  const [selectedContextFields, setSelectedContextFields] = useState<string[]>([])
   
   const { toast } = useToast()
-  const {
-    generateContent,
-    saveDocument,
-    isGenerating,
-    isSaving,
-    generatedContent
-  } = useAIServiceOperations()
-
-  const handleGenerate = async () => {
-    if (!customInput.trim()) {
-      toast({
-        title: "Input Required",
-        description: "Please provide the required input for your service.",
-        variant: "destructive"
-      })
-      return
-    }
-
-    try {
-      await generateContent('/api/ai-services/your-service-name', {
-        clientId,
-        selectedContextFields,
-        model: selectedModel,
-        customInput: customInput.trim(),
-        additionalData: additionalData.trim() || undefined
-      })
-    } catch (error) {
-      console.error('Generation failed:', error)
-    }
-  }
-
-  const handleSave = async () => {
-    if (!generatedContent || !title.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please provide a title for the document.",
-        variant: "destructive"
-      })
-      return
-    }
-
-    try {
-      await saveDocument('/api/ai-services/save-your-service', {
-        content: generatedContent,
-        title: title.trim(),
-        clientId
-      })
-
-      toast({
-        title: "Document Saved",
-        description: "Your service document has been saved successfully."
-      })
-
-      onOpenChange(false)
-    } catch (error) {
-      console.error('Save failed:', error)
-    }
-  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>Your Service - {clientName}</DialogTitle>
-        </DialogHeader>
-
-        <div className="flex gap-6 h-full overflow-hidden">
-          {/* Main Form */}
-          <div className="flex-1 space-y-4 overflow-y-auto">
-            <div>
-              <Label htmlFor="title">Document Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter document title..."
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="customInput">Your Service Input</Label>
-              <Textarea
-                id="customInput"
-                value={customInput}
-                onChange={(e) => setCustomInput(e.target.value)}
-                placeholder="Enter your service specific input..."
-                rows={4}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="additionalData">Additional Information (Optional)</Label>
-              <Textarea
-                id="additionalData"
-                value={additionalData}
-                onChange={(e) => setAdditionalData(e.target.value)}
-                placeholder="Any additional context or requirements..."
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <Label>AI Model</Label>
-              <ModelSelector
-                value={selectedModel}
-                onValueChange={setSelectedModel}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleGenerate} 
-                disabled={isGenerating || !customInput.trim()}
-                className="flex-1"
-              >
-                {isGenerating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Generate Your Service
-              </Button>
-
-              {generatedContent && (
-                <Button 
-                  onClick={handleSave} 
-                  disabled={isSaving || !title.trim()}
-                  variant="outline"
-                >
-                  {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Save Document
-                </Button>
-              )}
-            </div>
-
-            {/* Generated Content Display */}
-            {generatedContent && (
-              <div className="mt-6 p-4 border rounded-lg">
-                <h3 className="font-semibold mb-2">Generated Content:</h3>
-                <div className="prose max-w-none">
-                  {/* Render your generated content */}
-                  <pre className="whitespace-pre-wrap">{generatedContent}</pre>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Client Context Sidebar */}
-          <ClientContextSidebar
-            clientId={clientId}
-            selectedFields={selectedContextFields}
-            onSelectionChange={setSelectedContextFields}
-          />
-        </div>
-      </DialogContent>
-    </Dialog>
+    <BaseAIServiceDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      clientId={clientId}
+      clientName={clientName}
+      title="Your Service"
+      generateEndpoint="/api/ai-services/your-service-name"
+      saveEndpoint="/api/ai-services/save-your-service"
+      documentType="your-service-type"
+      description="Generate your custom service content"
+      placeholder={{
+        title: "Enter document title...",
+        content: "Enter your service specific input..."
+      }}
+      additionalFields={[
+        {
+          key: 'additionalData',
+          label: 'Additional Information (Optional)',
+          type: 'textarea',
+          placeholder: 'Any additional context or requirements...',
+          rows: 3
+        }
+      ]}
+    />
   )
 }
 ```

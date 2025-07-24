@@ -8,10 +8,7 @@ import type { StreamChunk } from './client'
 /**
  * Process OpenRouter streaming completion
  */
-export async function* processOpenRouterStream(
-  stream: AsyncIterable<any>,
-  serviceSource: string = 'openrouter'
-): AsyncGenerator<StreamChunk, void, unknown> {
+export async function* processOpenRouterStream(stream: AsyncIterable<any>): AsyncGenerator<StreamChunk, void, unknown> {
   let totalContent = ''
   let finalUsage: StreamChunk['usage'] | undefined
   let generationId: string | undefined

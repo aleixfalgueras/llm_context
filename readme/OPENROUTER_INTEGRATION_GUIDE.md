@@ -23,7 +23,6 @@ The OpenRouter integration is built with a clean modular architecture:
 lib/openrouter/
 ├── client.ts          # Low-level OpenRouter API client
 ├── service.ts         # High-level AI service with usage tracking
-├── error-handler.ts   # AI-specific error handling
 ├── stream-handler.ts  # Real-time streaming response processing
 └── index.ts          # Unified exports
 ```
@@ -151,7 +150,7 @@ export async function generateAIResponse(options: AIGenerationOptions) {
     
     return response
   } catch (error) {
-    await handleAIError(error, options)
+    logger.error('OpenRouter API error', { error, userId: options.userId })
     throw error
   }
 }
@@ -221,26 +220,27 @@ export const SUBSCRIPTION_LIMITS = {
 
 ## 🛡️ Error Handling
 
-### **AI-Specific Errors** (`lib/openrouter/error-handler.ts`)
-Comprehensive error management with fallback capabilities:
+The OpenRouter integration uses the application's unified error handling approach:
+
 ```typescript
-export async function handleAIError(error: any, context: ErrorContext) {
-  if (error.status === 429) {
-    // Rate limiting - implement retry with backoff
-    await retryWithBackoff(context)
-  } else if (error.status === 401) {
-    // Authentication error
-    throw new AIError('Invalid API key or insufficient credits')
-  } else if (error.status === 400) {
-    // Bad request - invalid model or parameters
-    throw new AIError('Invalid request parameters')
-  } else {
-    // General error handling
-    logger.error('OpenRouter API error', error, context)
-    throw new AIError('AI service temporarily unavailable')
-  }
+// In API routes - use the centralized error handler
+import { handleApiError } from '@/lib/utils/error-handler'
+
+try {
+  const response = await generateAIResponse(options)
+  return Response.json({ content: response.content })
+} catch (error) {
+  return handleApiError(error, 'AI service generation failed')
 }
 ```
+
+### **Common Error Scenarios**
+- **401 Unauthorized**: Invalid or expired OpenRouter API key
+- **429 Rate Limited**: API rate limits exceeded
+- **400 Bad Request**: Invalid model parameters or request format
+- **500 Server Error**: OpenRouter service temporarily unavailable
+
+All errors are automatically logged and returned in a consistent format via `handleApiError()`.
 
 ## 🧪 Testing
 

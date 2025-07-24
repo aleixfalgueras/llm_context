@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai/errors'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { Message } from '@/types/message-types'
 
@@ -171,19 +170,6 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
-        
-        // Handle AI provider errors from API
-        if (errorData?.error && errorData?.provider) {
-          const aiError = new AIProviderError(
-            errorData.error,
-            errorData.provider,
-            errorData.type || 'unknown',
-            response.status,
-            errorData.retryAfter
-          )
-          throw aiError
-        }
-        
         throw new Error(errorData?.error || `Failed to send message: ${response.status}`)
       }
 
@@ -254,18 +240,7 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
                 }
               } else if (data.type === 'error') {
                 // Handle streaming error
-                if (data.provider) {
-                  const aiError = new AIProviderError(
-                    data.error,
-                    data.provider,
-                    data.errorType || 'unknown',
-                    500,
-                    data.retryAfter
-                  )
-                  throw aiError
-                } else {
-                  throw new Error(data.error || 'Streaming error occurred')
-                }
+                throw new Error(data.error || 'Streaming error occurred')
               }
             } catch (parseError) {
               // Skip malformed JSON lines
@@ -283,24 +258,13 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
       
       clientLogger.error('Error sending message', error as Error, { chatId });
       
-      // Handle AI provider errors with specific messages
-      if (error instanceof AIProviderError) {
-        const { title, description } = getAIErrorMessage(error)
-        toast({
-          title,
-          description,
-          variant: 'destructive',
-          duration: error.type === 'rate_limit' ? 10000 : 8000, // Longer duration for rate limits
-        })
-      } else {
-        // Generic error handling
-        const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.'
-        toast({
-          title: 'Message Failed',
-          description: errorMessage,
-          variant: 'destructive',
-        })
-      }
+      // Generic error handling
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.'
+      toast({
+        title: 'Message Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      })
       
       // Remove both user and assistant messages on error
       setMessages(prev => prev.filter(msg => 

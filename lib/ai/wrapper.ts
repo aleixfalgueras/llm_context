@@ -4,7 +4,6 @@ import {
   type UsageTrackingOptions,
   type StreamChunk
 } from './openrouter'
-import { AIProviderError } from './errors'
 import { logger } from '../logger'
 
 // Re-export interfaces for backward compatibility
@@ -33,18 +32,9 @@ export async function createAICompletion(
       usage: result.usage || null
     }
   } catch (error) {
-    // Re-throw AIProviderError as-is
-    if (error instanceof AIProviderError) {
-      throw error
-    }
-    
     // Handle unexpected errors
-    logger.aiError('openrouter', error as Error, { operation: 'createAICompletion' })
-    throw new AIProviderError(
-      'Unexpected AI service error',
-      'openrouter',
-      'unknown'
-    )
+    logger.error('AI service error', error as Error, { operation: 'createAICompletion' })
+    throw error
   }
 }
 
@@ -58,18 +48,9 @@ export async function* createAICompletionStream(
   try {
     yield* openRouterService.createStreamingCompletion(completionOptions, trackingOptions)
   } catch (error) {
-    // Re-throw AIProviderError as-is
-    if (error instanceof AIProviderError) {
-      throw error
-    }
-    
     // Handle unexpected errors
-    logger.aiError('openrouter', error as Error, { operation: 'createAICompletionStream' })
-    throw new AIProviderError(
-      'Unexpected AI service error',
-      'openrouter',
-      'unknown'
-    )
+    logger.error('AI service error', error as Error, { operation: 'createAICompletionStream' })
+    throw error
   }
 }
 
