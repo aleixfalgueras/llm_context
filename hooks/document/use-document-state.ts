@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { DOCUMENT_TYPES } from '@/types/document-types'
 import { Document } from '@/types/component-types'
-import { DocumentClientService } from '@/lib/documents'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()
@@ -30,7 +29,14 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const result = await DocumentClientService.getClientDocuments(clientId)
+      const params = new URLSearchParams({ clientId })
+      const response = await fetch(`/api/documents?${params}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch client documents')
+      }
+
+      const result = await response.json()
       
       // Handle DbOperationResult structure
       const docs = result.data?.records || result.records || result.data || result || []
@@ -53,7 +59,14 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setLoadingContent(true)
     
     try {
-      const content = await DocumentClientService.getDocumentContent(document.id)
+      const response = await fetch(`/api/documents/${document.id}/content`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch document content')
+      }
+
+      const result = await response.json()
+      const content = result.data.content
       
       // Update all related state atomically
       setDocumentContent(content)

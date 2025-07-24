@@ -7,7 +7,7 @@ import {
 } from '@/lib/middleware/api-middleware'
 import { PromptOperations } from '@/lib/database'
 import { validatePromptForm } from '@/lib/utils/validation'
-import { logger, withTiming } from '@/lib/logger'
+import { logger } from '@/lib/logger'
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'
@@ -15,9 +15,6 @@ export const dynamic = 'force-dynamic'
 // GET /api/prompts - List user's prompts
 export const GET = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
-    const endTiming = logger.startTiming('Get Prompts API')
-    logger.apiRequest('GET', '/api/prompts')
-
     try {
       const { searchParams } = req.nextUrl
       const category = searchParams.get('category') || undefined
@@ -28,34 +25,28 @@ export const GET = withEnhancedApi(
       // Cap at 100 items per page
       pagination.limit = Math.min(pagination.limit, 100)
 
-      const result = await withTiming(
-        'Fetch prompts from DB',
-        async () => {
-          // Get prompts with custom select to optionally include content
-          const filters = { category, isActive }
-          const config = {
-            context: 'Find user prompts',
-            select: {
-              id: true,
-              name: true,
-              description: true,
-              category: true,
-              isActive: true,
-              usageCount: true,
-              createdAt: true,
-              updatedAt: true,
-              ...(includeContent && { content: true })
-            },
-            orderBy: [
-              { usageCount: 'desc' }, // Most used first
-              { updatedAt: 'desc' }, // Then by recent updates
-            ]
-          }
-
-          return await PromptOperations.findUserPrompts(userId, filters, pagination, config)
+      // Get prompts with custom select to optionally include content
+      const filters = { category, isActive }
+      const config = {
+        context: 'Find user prompts',
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          category: true,
+          isActive: true,
+          usageCount: true,
+          createdAt: true,
+          updatedAt: true,
+          ...(includeContent && { content: true })
         },
-        { userId }
-      )
+        orderBy: [
+          { usageCount: 'desc' }, // Most used first
+          { updatedAt: 'desc' }, // Then by recent updates
+        ]
+      }
+
+      const result = await PromptOperations.findUserPrompts(userId, filters, pagination, config)
 
       if (!result.success) {
         throw new Error(result.error)
@@ -71,13 +62,9 @@ export const GET = withEnhancedApi(
         }
       }
 
-      logger.apiResponse('GET', '/api/prompts', 200, { userId })
-      endTiming()
       return apiSuccess(response)
     } catch (error) {
       logger.error('Error fetching prompts', error as Error, { userId })
-      logger.apiResponse('GET', '/api/prompts', 500)
-      endTiming()
       throw error
     }
   },
@@ -90,9 +77,6 @@ export const GET = withEnhancedApi(
 // POST /api/prompts - Create new prompt
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
-    const endTiming = logger.startTiming('Create Prompt API')
-    logger.apiRequest('POST', '/api/prompts')
-
     try {
       const body = await parseJsonBody(req)
       
@@ -112,23 +96,15 @@ export const POST = withEnhancedApi(
         category: body.category || 'general'
       }
 
-      const result = await withTiming(
-        'Create prompt in DB',
-        () => PromptOperations.createPrompt(userId, promptData),
-        { userId }
-      )
+      const result = await PromptOperations.createPrompt(userId, promptData)
 
       if (!result.success) {
         throw new Error(result.error)
       }
 
-      logger.apiResponse('POST', '/api/prompts', 201, { userId })
-      endTiming()
       return apiSuccess(result.data, 201)
     } catch (error) {
       logger.error('Error creating prompt', error as Error, { userId })
-      logger.apiResponse('POST', '/api/prompts', 500)
-      endTiming()
       throw error
     }
   },

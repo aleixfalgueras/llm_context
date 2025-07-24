@@ -1,7 +1,7 @@
 'use server'
 
 import {auth} from '@clerk/nextjs/server'
-import {prisma} from '../prisma'
+import {ChatService} from '../services/chat-service'
 import {revalidatePath} from 'next/cache'
 import {redirect} from 'next/navigation'
 
@@ -12,12 +12,11 @@ export async function deleteChat(chatId: string) {
     throw new Error('Unauthorized')
   }
 
-  await prisma.chat.delete({
-    where: {
-      id: chatId,
-      userId, // Ensure user can only delete their own chats
-    },
-  })
+  const result = await ChatService.deleteChat(chatId, userId)
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to delete chat')
+  }
 
   revalidatePath('/')
   redirect('/assistant')
@@ -30,11 +29,11 @@ export async function deleteAllChats(currentPath?: string) {
     throw new Error('Unauthorized')
   }
 
-  await prisma.chat.deleteMany({
-    where: {
-      userId, // Only delete the user's own chats
-    },
-  })
+  const result = await ChatService.deleteAllUserChats(userId)
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to delete all chats')
+  }
 
   revalidatePath('/')
   
@@ -51,15 +50,11 @@ export async function updateChatTitle(chatId: string, title: string) {
     throw new Error('Unauthorized')
   }
 
-  await prisma.chat.update({
-    where: {
-      id: chatId,
-      userId,
-    },
-    data: {
-      title,
-    },
-  })
+  const result = await ChatService.updateChatTitle(chatId, userId, title)
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to update chat title')
+  }
 
   revalidatePath('/')
 }
