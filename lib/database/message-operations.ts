@@ -3,7 +3,8 @@
  */
 
 import { prisma } from '../prisma'
-import { BaseOperations, DbOperationConfig } from './base-operations'
+import { BaseOperations } from './base-operations'
+import {DbOperationConfig} from "@/types/database-types";
 
 export class MessageOperations extends BaseOperations {
   /**
@@ -81,6 +82,50 @@ export class MessageOperations extends BaseOperations {
       return {
         success: false,
         error: 'Failed to get chat messages'
+      }
+    }
+  }
+
+  /**
+   * Update message token information with ownership verification
+   */
+  static async updateMessageTokens(messageId: string, userId: string, tokenData: {
+    inputTokens?: number,
+    tokensUsed?: number,
+    outputTokens?: number
+  }) {
+    try {
+      // First verify the message belongs to a user-owned chat
+      const message = await prisma.message.findFirst({
+        where: { id: messageId },
+        include: { chat: true }
+      })
+
+      if (!message || message.chat.userId !== userId) {
+        return {
+          success: false as const,
+          error: 'Message not found or access denied'
+        }
+      }
+
+      const updatedMessage = await prisma.message.update({
+        where: { id: messageId },
+        data: {
+          inputTokens: tokenData.inputTokens ?? message.inputTokens,
+          tokensUsed: tokenData.tokensUsed ?? message.tokensUsed,
+          outputTokens: tokenData.outputTokens ?? message.outputTokens
+        }
+      })
+
+      return {
+        success: true as const,
+        data: updatedMessage
+      }
+    } catch (error) {
+      console.error('Error updating message tokens:', error)
+      return {
+        success: false as const,
+        error: 'Failed to update message tokens'
       }
     }
   }
