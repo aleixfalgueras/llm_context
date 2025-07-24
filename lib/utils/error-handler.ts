@@ -4,7 +4,6 @@
  */
 
 import {NextResponse} from 'next/server'
-import {AIProviderError} from '../ai/errors'
 import {logger} from '../logger'
 import {ApiSubscriptionErrorCode} from '@/types/enums'
 import {getErrorMetadata, normalizeErrorData} from './error-code'
@@ -56,7 +55,7 @@ export function handleApiError(
 
   if (logError) {
     // Normalize error data for consistent handling
-    const errorData = error instanceof AIProviderError ? null : normalizeErrorData(error)
+    const errorData = normalizeErrorData(error)
     const errorMetadata = errorData ? getErrorMetadata(errorData) : null
     
     // Handle expected user limit errors as INFO instead of ERROR
@@ -81,8 +80,6 @@ export function handleApiError(
           }
         });
       }
-    } else if (error instanceof AIProviderError) {
-      logger.aiError(error.provider || 'unknown', error, logContext)
     } else {
       logger.error(`Error in ${context}`, error as Error, logContext)
     }
@@ -100,18 +97,6 @@ export function handleApiError(
     )
   }
 
-  // Handle AI provider errors with specific formatting
-  if (error instanceof AIProviderError) {
-    return NextResponse.json(
-      {
-        error: error.message,
-        provider: error.provider,
-        type: error.type,
-        retryAfter: error.retryAfter
-      },
-      { status: error.statusCode || 500 }
-    )
-  }
 
   // Handle known Error instances
   if (error instanceof Error) {

@@ -41,7 +41,7 @@ export class OpenRouterService {
       
       let finalChunk: StreamChunk | null = null
       
-      for await (const chunk of processOpenRouterStream(stream, 'openrouter')) {
+      for await (const chunk of processOpenRouterStream(stream)) {
         if (chunk.isComplete) {
           finalChunk = chunk
         }

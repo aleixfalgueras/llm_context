@@ -4,7 +4,6 @@ import {revalidatePath} from 'next/cache'
 import {generateChatTitleWithClient} from '@/lib/utils/general'
 import {buildClientContextSection, hasClientContext} from '@/lib/utils/client-context'
 import {createAICompletionStream} from '@/lib/ai/wrapper'
-import {AIProviderError} from '@/lib/ai/errors'
 import {logger} from '@/lib/logger'
 import {NextResponse} from 'next/server'
 import {getDefaultModel, getModelsByTier} from '@/lib/ai/models-config'
@@ -151,7 +150,6 @@ export const POST = withEnhancedApi(
       });
     } else {
       // Get existing chat
-      logger.dbQuery('findFirst', 'chat', {userId, chatId});
       chat = await prisma.chat.findFirst({
         where: {
           id: chatId,
@@ -254,7 +252,6 @@ Respond naturally and conversationally while keeping this context in mind.`
     })
 
     // Save the user message to the database (tokens will be updated after AI response)
-    logger.dbQuery('create', 'message', {userId, chatId});
     const userMessage = await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
     logger.info('User message saved', {
       userId,
@@ -267,7 +264,6 @@ Respond naturally and conversationally while keeping this context in mind.`
     if (isFirstUserMessage && chat.title === 'New Chat') {
       const newTitle = generateChatTitleWithClient(client.name)
 
-      logger.dbQuery('update', 'chat', {userId, chatId});
       await prisma.chat.update({
         where: {
           id: chatId,
@@ -374,7 +370,6 @@ Respond naturally and conversationally while keeping this context in mind.`
               }
 
               // Update user message with input tokens and save assistant's response
-              logger.dbQuery('update', 'message', {userId, chatId});
               await prisma.message.update({
                 where: {id: userMessage.id},
                 data: {
@@ -389,7 +384,6 @@ Respond naturally and conversationally while keeping this context in mind.`
               });
 
               // Save the assistant's response to the database
-              logger.dbQuery('create', 'message', {userId, chatId});
               await createMessage(
                 chatId,
                 fullContent,
@@ -434,7 +428,6 @@ Respond naturally and conversationally while keeping this context in mind.`
 
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
-                  logger.dbQuery('create', 'message', {userId, chatId});
                   await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
                   logger.info('Partial assistant message saved', {userId, chatId});
                 }
@@ -461,30 +454,12 @@ Respond naturally and conversationally while keeping this context in mind.`
             });
           }
 
-          // Handle AI provider errors specifically
-          if (error instanceof AIProviderError) {
-            const errorData = {
-              type: 'error',
-              error: error.message,
-              provider: error.provider,
-              errorType: error.type,
-              retryAfter: error.retryAfter
-            }
-            if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
-              // Client disconnected, just log and exit
-              logger.info('Client disconnected during error response', {userId, chatId});
-              return
-            }
-          } else {
-            const errorData = {
-              type: 'error',
-              error: 'Internal Server Error'
-            }
-            if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
-              // Client disconnected, just log and exit
-              logger.info('Client disconnected during error response', {userId, chatId});
-              return
-            }
+          const errorData = (error as Error | undefined)?.message ?? 'Internal Server Error'
+
+          if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
+            // Client disconnected, just log and exit
+            logger.info('Client disconnected during error response', {userId, chatId});
+            return
           }
 
           try {
@@ -495,7 +470,6 @@ Respond naturally and conversationally while keeping this context in mind.`
         }
       }
     })
-
 
     return new Response(stream, {
       headers: {
