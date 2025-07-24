@@ -97,7 +97,6 @@ export function handleApiError(
     )
   }
 
-
   // Handle known Error instances
   if (error instanceof Error) {
     return NextResponse.json(
@@ -117,6 +116,7 @@ export function handleApiError(
 // COMMON API ERROR RESPONSES
 // =============================================================================
 
+// TODO: Add subscription and usage errors
 export const ApiErrors = {
   unauthorized: () => NextResponse.json(
     { error: 'Authentication required' },

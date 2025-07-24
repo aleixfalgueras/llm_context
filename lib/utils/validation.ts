@@ -213,25 +213,6 @@ export function processClientData<T extends Record<string, any>>(data: T): T {
  */
 export const apiValidation = {
   /**
-   * Validate required fields for AI service document generation
-   */
-  aiServiceDocument: (data: {
-    clientId?: string | null
-    content?: string | null
-    documentTitle?: string | null
-  }) => {
-    const missing: string[] = []
-    
-    if (!data.clientId) missing.push('clientId')
-    if (!data.content) missing.push('content')
-    if (!data.documentTitle) missing.push('documentTitle')
-    
-    if (missing.length > 0) {
-      throw new Error(`Missing required fields: ${missing.join(', ')}`)
-    }
-  },
-
-  /**
    * Validate required fields for meeting report generation
    */
   meetingReport: (data: {

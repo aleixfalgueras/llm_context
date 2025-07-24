@@ -1,5 +1,5 @@
 import {prisma} from '@/lib/prisma'
-import {createMessage} from '@/lib/actions/message'
+import {MessageService} from '@/lib/services/message-service'
 import {revalidatePath} from 'next/cache'
 import {generateChatTitleWithClient} from '@/lib/utils/general'
 import {buildClientContextSection, hasClientContext} from '@/lib/utils/client-context'
@@ -32,12 +32,7 @@ import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-m
  *   - `content`: Streaming AI response content chunks
  *   - `complete`: Final completion signal with chatId and optional newTitle
  *   - `error`: Error information with type, message, and retry details
- *
- * @throws 400 - Missing required fields (clientId for new chats)
- * @throws 403 - Model access denied based on subscription tier
- * @throws 404 - Chat or client not found
- * @throws Standard HTTP errors handled automatically by withEnhancedApi middleware
- *
+
  * Authentication & Validation Flow:
  * 1. Authentication handled automatically by withEnhancedApi middleware
  * 2. Token usage validation and limits checking
@@ -81,14 +76,17 @@ export const POST = withEnhancedApi(
         }
       });
 
-      return NextResponse.json({
+      throw {
         error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
         code: ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED,
-        tier: modelAccess.tier,
-        plan: modelAccess.plan,
-        modelId: selectedModel,
-        upgradeUrl: '/subscription'
-      }, {status: 403})
+        status: 403,
+        metadata: {
+          tier: modelAccess.tier,
+          plan: modelAccess.plan,
+          modelId: selectedModel,
+          upgradeUrl: '/subscription'
+        }
+      }
     }
 
     logger.info('Chat request authenticated, model access and token usage validated', {
@@ -105,7 +103,7 @@ export const POST = withEnhancedApi(
       // Create new chat - clientId and contextFields are required for new chats
       if (!clientId) {
         logger.warn('Chat creation attempted without client ID', {userId});
-        return NextResponse.json({error: 'Client selection is required for new chat'}, {status: 400})
+        throw new Error('Client selection is required for new chat')
       }
 
       // Verify client exists and belongs to user
@@ -119,7 +117,7 @@ export const POST = withEnhancedApi(
 
       if (!client) {
         logger.warn('Client not found for chat creation', {userId, clientId});
-        return NextResponse.json({error: 'Client not found'}, {status: 404})
+        throw new Error('Client not found')
       }
 
       // Create new chat with client name in title
@@ -166,7 +164,7 @@ export const POST = withEnhancedApi(
 
       if (!chat) {
         logger.warn('Chat not found', {userId, chatId});
-        return NextResponse.json({error: 'Chat not found'}, {status: 404})
+        throw new Error('Chat not found')
       }
     }
 
@@ -252,7 +250,13 @@ Respond naturally and conversationally while keeping this context in mind.`
     })
 
     // Save the user message to the database (tokens will be updated after AI response)
-    const userMessage = await createMessage(chatId, lastMessage.content, 'USER', selectedModel)
+    const userMessageResult = await MessageService.createMessage(chatId, userId, lastMessage.content, 'USER', selectedModel)
+    
+    if (!userMessageResult.success) {
+      return NextResponse.json({ error: userMessageResult.error || 'Failed to save user message' }, { status: 500 })
+    }
+    
+    const userMessage = (userMessageResult as { success: true; data: any }).data
     logger.info('User message saved', {
       userId,
       chatId,
@@ -384,8 +388,9 @@ Respond naturally and conversationally while keeping this context in mind.`
               });
 
               // Save the assistant's response to the database
-              await createMessage(
+              const assistantMessageResult = await MessageService.createMessage(
                 chatId,
+                userId,
                 fullContent,
                 'ASSISTANT',
                 selectedModel,
@@ -393,6 +398,10 @@ Respond naturally and conversationally while keeping this context in mind.`
                 0, // inputTokens for assistant message
                 finalUsage?.completionTokens
               )
+              
+              if (!assistantMessageResult.success) {
+                logger.error('Failed to save assistant message', new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
+              }
               logger.info('Assistant message saved', {userId, chatId});
 
 
@@ -428,8 +437,12 @@ Respond naturally and conversationally while keeping this context in mind.`
 
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
-                  await createMessage(chatId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
-                  logger.info('Partial assistant message saved', {userId, chatId});
+                  const partialMessageResult = await MessageService.createMessage(chatId, userId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
+                  if (partialMessageResult.success) {
+                    logger.info('Partial assistant message saved', {userId, chatId});
+                  } else {
+                    logger.error('Failed to save partial assistant message', new Error(partialMessageResult.error || 'Unknown error'), { userId, chatId })
+                  }
                 }
 
                 return
