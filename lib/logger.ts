@@ -243,10 +243,6 @@ class Logger {
     const tokensStr = tokensUsed ? ` (${colors.cyan}${tokensUsed} tokens${colors.reset})` : '';
     this.info(`🤖 AI Request: ${colors.magenta}${model}${colors.reset}${tokensStr}`, { ...context, tokensUsed });
   }
-
-  aiError(model: string, error: Error, context?: LogContext): void {
-    this.error(`🤖💥 AI Error: ${colors.magenta}${model}${colors.reset}`, error, context);
-  }
 }
 
 export const logger = new Logger();

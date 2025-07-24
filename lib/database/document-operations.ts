@@ -3,7 +3,9 @@
  */
 
 import { prisma } from '../prisma'
-import { BaseOperations, PaginationConfig, DbOperationConfig } from './base-operations'
+import { BaseOperations } from './base-operations'
+import { Document } from '@prisma/client'
+import {DbOperationConfig, PaginationConfig} from "@/types/database-types";
 
 export class DocumentOperations extends BaseOperations {
   static async findUserDocuments(
@@ -37,7 +39,7 @@ export class DocumentOperations extends BaseOperations {
     )
   }
 
-  static async createDocument(userId: string, data: any) {
+  static async createDocument(userId: string, data: Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) {
     return this.createUserOwnedRecord(
       prisma.document,
       userId,
@@ -46,7 +48,7 @@ export class DocumentOperations extends BaseOperations {
     )
   }
 
-  static async updateDocument(documentId: string, userId: string, data: any) {
+  static async updateDocument(documentId: string, userId: string, data: Partial<Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'userId'>>) {
     return this.updateUserOwnedRecord(
       prisma.document,
       documentId,

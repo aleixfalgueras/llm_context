@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { DocumentClientService } from '@/lib/documents'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/types/enums'
 import { Document } from '@/types/component-types'
@@ -44,12 +43,22 @@ export function useDocumentOperations({
 
     setIsCreatingDocument(true)
     try {
-      await DocumentClientService.createDocument(
-        clientId,
-        documentName,
-        documentType,
-        documentContent
-      )
+      const response = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId,
+          documentName,
+          documentType,
+          content: documentContent
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create document')
+      }
+
+      await response.json()
       toast({
         title: 'Success',
         description: 'Document created successfully',
@@ -105,10 +114,21 @@ export function useDocumentOperations({
     }
 
     try {
-      await DocumentClientService.updateDocument(selectedDocument.id, {
-        documentName: editedDocumentName,
-        content: editedContent
+      const response = await fetch(`/api/documents/${selectedDocument.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentName: editedDocumentName,
+          content: editedContent
+        })
       })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to update document')
+      }
+
+      await response.json()
       
       setDocumentContent(editedContent)
       setSelectedDocument({ ...selectedDocument, documentName: editedDocumentName })
@@ -145,7 +165,16 @@ export function useDocumentOperations({
     }
 
     try {
-      await DocumentClientService.deleteDocument(document.id)
+      const response = await fetch(`/api/documents/${document.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document')
+      }
+
+      await response.json()
       toast({
         title: 'Success',
         description: 'Document deleted successfully',
@@ -177,7 +206,17 @@ export function useDocumentOperations({
 
     if (showDeleteAllConfirm) {
       try {
-        await DocumentClientService.deleteAllDocuments(clientId)
+        const response = await fetch('/api/documents/delete-all', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientId })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to delete all documents')
+        }
+
+        await response.json()
         toast({
           title: 'Success',
           description: 'All documents deleted successfully',

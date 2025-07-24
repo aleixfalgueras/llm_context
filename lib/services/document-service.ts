@@ -2,20 +2,37 @@
  * Document service - orchestrates repository and storage operations
  */
 
-import {DocumentData, DocumentQueryOptions, DocumentRepository} from './repository'
 import {DocumentStorageService} from './storage-service'
 import {calculateDocumentSize, validateDocumentStorage} from '../utils/storage'
 import {logger} from '../logger'
 import {prisma} from '../prisma'
 import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
+import {isSuccess, BaseOperations} from '../database/base-operations'
+import {DocumentOperations} from '../database'
 import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
+import { Document } from '@prisma/client'
+
 
 export class DocumentService {
   /**
    * Get client documents
    */
-  static async getClientDocuments(userId: string, clientId: string, options?: DocumentQueryOptions) {
-    const result = await DocumentRepository.getClientDocuments(userId, clientId, options)
+  static async getClientDocuments(userId: string, clientId: string) {
+    const config = {
+      context: 'Get client documents',
+      select: {
+        id: true,
+        documentName: true,
+        documentType: true,
+        createdAt: true,
+        updatedAt: true
+      },
+      orderBy: { 
+        createdAt: 'desc'
+      }
+    }
+
+    const result = await DocumentOperations.findUserDocuments(userId, clientId, undefined, config)
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to fetch documents')
@@ -29,7 +46,12 @@ export class DocumentService {
    */
   static async getDocumentContent(userId: string, documentId: string): Promise<string> {
     // Get document metadata
-    const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
+    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
+      prisma.document,
+      documentId,
+      userId,
+      { context: 'Get document by ID' }
+    )
     
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
@@ -81,7 +103,7 @@ export class DocumentService {
     const fileSize = calculateDocumentSize(content)
 
     // Create database record first to get the generated ID
-    const documentData: DocumentData = {
+    const documentData: Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'userId'> = {
       documentName: finalDocumentName,
       documentType,
       documentPath: '', // Will be updated after storage
@@ -89,7 +111,7 @@ export class DocumentService {
       fileSize: fileSize
     }
 
-    const result = await DocumentRepository.createDocument(userId, documentData)
+    const result = await DocumentOperations.createDocument(userId, documentData)
 
     if (!result.success) {
       throw new Error(result.error || 'Failed to create document')
@@ -115,7 +137,7 @@ export class DocumentService {
       storagePath = storageResult.path
 
       // Update document record with storage path
-      const updateResult = await DocumentRepository.updateDocument(userId, documentId, {
+      const updateResult = await DocumentOperations.updateDocument(documentId, userId, {
         documentPath: storageResult.path
       })
 
@@ -131,7 +153,7 @@ export class DocumentService {
     } catch (storageError) {
       // Cleanup database record if storage failed
       try {
-        await DocumentRepository.deleteDocument(userId, documentId)
+        await DocumentOperations.deleteDocument(documentId, userId)
       } catch (cleanupError) {
         logger.error('Failed to cleanup database record after storage error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
       }
@@ -162,11 +184,16 @@ export class DocumentService {
   static async updateDocument(
     userId: string,
     documentId: string,
-    updates: Partial<Pick<DocumentData, 'documentName' | 'documentType'>> & { content?: string }
+    updates: Partial<Pick<Document, 'documentName' | 'documentType'>> & { content?: string }
   ) {
 
     // Get current document to check permissions and get storage path
-    const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
+    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
+      prisma.document,
+      documentId,
+      userId,
+      { context: 'Get document by ID' }
+    )
     
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
@@ -203,7 +230,7 @@ export class DocumentService {
       delete metadataUpdates.content
 
       // Update metadata in database
-      const result = await DocumentRepository.updateDocument(userId, documentId, metadataUpdates)
+      const result = await DocumentOperations.updateDocument(documentId, userId, metadataUpdates)
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to update document')
@@ -219,7 +246,7 @@ export class DocumentService {
       return result.data
     } else {
       // Only metadata updates
-      const result = await DocumentRepository.updateDocument(userId, documentId, updates)
+      const result = await DocumentOperations.updateDocument(documentId, userId, updates)
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to update document')
@@ -235,7 +262,12 @@ export class DocumentService {
   static async deleteDocument(userId: string, documentId: string) {
 
     // Get document to find storage path
-    const documentResult = await DocumentRepository.getDocumentById(userId, documentId)
+    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
+      prisma.document,
+      documentId,
+      userId,
+      { context: 'Get document by ID' }
+    )
     
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
@@ -244,7 +276,7 @@ export class DocumentService {
     const document = documentResult.data as any
 
     // Delete from database first
-    const deleteResult = await DocumentRepository.deleteDocument(userId, documentId)
+    const deleteResult = await DocumentOperations.deleteDocument(documentId, userId)
     
     if (!deleteResult.success) {
       throw new Error(deleteResult.error || 'Failed to delete document')
@@ -270,12 +302,17 @@ export class DocumentService {
 
     // Get all documents first to find storage paths
     const documents = await Promise.all(
-      documentIds.map(id => DocumentRepository.getDocumentById(userId, id))
+      documentIds.map(id => BaseOperations.findUserOwnedRecord<Document>(
+        prisma.document,
+        id,
+        userId,
+        { context: 'Get document by ID' }
+      ))
     )
 
     const validDocuments = documents
-      .filter(result => result.success && result.data)
-      .map(result => result.data! as any)
+      .filter(isSuccess)
+      .map(result => result.data)
 
     if (validDocuments.length === 0) {
       throw new Error('No valid documents found')
@@ -292,9 +329,11 @@ export class DocumentService {
     }
 
     // Delete from database
-    const deleteResult = await DocumentRepository.bulkDeleteDocuments(
+    const deleteResult = await BaseOperations.bulkDeleteUserOwnedRecords(
+      prisma.document,
+      validDocuments.map(doc => doc.id),
       userId,
-      validDocuments.map(doc => doc.id)
+      { context: 'Bulk delete documents' }
     )
 
     if (!deleteResult.success) {
@@ -319,9 +358,11 @@ export class DocumentService {
    */
   private static async bulkDeleteDocumentsIndividually(userId: string, validDocuments: any[]) {
     // Delete from database
-    const deleteResult = await DocumentRepository.bulkDeleteDocuments(
+    const deleteResult = await BaseOperations.bulkDeleteUserOwnedRecords(
+      prisma.document,
+      validDocuments.map(doc => doc.id),
       userId,
-      validDocuments.map(doc => doc.id)
+      { context: 'Bulk delete documents' }
     )
 
     if (!deleteResult.success) {

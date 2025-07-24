@@ -1,4 +1,4 @@
-import { DocumentService } from '@/lib/documents/service'
+import { DocumentService } from '@/lib/services/document-service'
 import { 
   withEnhancedApi, 
   apiSuccess,

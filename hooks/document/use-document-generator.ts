@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
-import { AIProviderError, getAIErrorMessage } from '@/lib/ai/errors'
 import { getDefaultModel } from '@/lib/ai/models-config'
 import { clientLogger } from '@/lib/client-logger'
 import { Prompt } from '@/types/component-types'
@@ -139,19 +138,6 @@ export function useDocumentGenerator({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
-        
-        // Handle AI provider errors from API
-        if (errorData?.error && errorData?.provider) {
-          const aiError = new AIProviderError(
-            errorData.error,
-            errorData.provider,
-            errorData.type || 'unknown',
-            response.status,
-            errorData.retryAfter
-          )
-          throw aiError
-        }
-        
         throw new Error(errorData?.error || `HTTP error! status: ${response.status}`)
       }
 
@@ -161,24 +147,13 @@ export function useDocumentGenerator({
     } catch (error) {
       console.error('Error generating document:', error)
       
-      // Handle AI provider errors with specific messages
-      if (error instanceof AIProviderError) {
-        const { title, description } = getAIErrorMessage(error)
-        toast({
-          title,
-          description,
-          variant: 'destructive',
-          duration: error.type === 'rate_limit' ? 10000 : 8000, // Longer duration for rate limits
-        })
-      } else {
-        // Generic error handling
-        const errorMessage = error instanceof Error ? error.message : 'Failed to generate document. Please try again.'
-        toast({
-          title: 'Generation Failed',
-          description: errorMessage,
-          variant: 'destructive',
-        })
-      }
+      // Generic error handling
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate document. Please try again.'
+      toast({
+        title: 'Generation Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      })
       throw error
     }
   }

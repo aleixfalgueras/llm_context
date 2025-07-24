@@ -3,16 +3,12 @@
  */
 
 import { logger } from '../../logger'
-import { handleOpenRouterError } from '../../utils/error-handler'
 import type { StreamChunk } from './client'
 
 /**
  * Process OpenRouter streaming completion
  */
-export async function* processOpenRouterStream(
-  stream: AsyncIterable<any>,
-  serviceSource: string = 'openrouter'
-): AsyncGenerator<StreamChunk, void, unknown> {
+export async function* processOpenRouterStream(stream: AsyncIterable<any>): AsyncGenerator<StreamChunk, void, unknown> {
   let totalContent = ''
   let finalUsage: StreamChunk['usage'] | undefined
   let generationId: string | undefined
@@ -73,7 +69,7 @@ export async function* processOpenRouterStream(
     }
   } catch (error) {
     logger.error('OpenRouter streaming error', error instanceof Error ? error : new Error(String(error)))
-    handleOpenRouterError(error)
+    throw error
   }
 }
 

@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server'
 import {auth} from '@clerk/nextjs/server'
 import {ApiErrors, handleApiError} from '../utils/error-handler'
+import {logger} from '../logger'
 
 /**
  * Request context passed to API handlers:
@@ -18,7 +19,7 @@ export interface ApiContext {
  */
 export type EnhancedApiHandler<T = any> = (
   context: ApiContext
-) => Promise<NextResponse<T | { error: string }>> | NextResponse<T | { error: string }>
+) => Promise<NextResponse<T | { error: string }> | Response> | NextResponse<T | { error: string }> | Response
 
 
 /**
@@ -54,7 +55,7 @@ export function withEnhancedApi<T = any>(
   return async (
     req: NextRequest,
     { params }: { params?: Promise<Record<string, string | string[]>> } = {}
-  ): Promise<NextResponse> => {
+  ): Promise<NextResponse | Response> => {
     try {
       // Method validation
       if (allowedMethods && !allowedMethods.includes(req.method)) {
@@ -80,6 +81,9 @@ export function withEnhancedApi<T = any>(
         userId = authUserId
       }
 
+      // Log the API request
+      logger.apiRequest(req.method, req.nextUrl.pathname)
+
       // Create context and call handler
       const resolvedParams = params ? await params : undefined
       
@@ -89,8 +93,16 @@ export function withEnhancedApi<T = any>(
         params: resolvedParams
       }
 
-      return await handler(apiContext)
+      const response = await handler(apiContext)
+      
+      // Log successful API response (works for both NextResponse and Response)
+      logger.apiResponse(req.method, req.nextUrl.pathname, response.status, { userId })
+      
+      return response
     } catch (error) {
+      // Log error API response
+      logger.apiResponse(req.method, req.nextUrl.pathname, 500)
+      
       return handleApiError(error, { context })
     }
   }
