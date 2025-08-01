@@ -7,14 +7,47 @@
 6. **Everything is about simplicity.**
 7. **ALWAYS use Prisma-generated types** - Never manually create interfaces that duplicate Prisma models.
 
-## Project Structure (Next.js)
-- **Pages**: `app/` folder
-- **Components**: `components/` folder
-- **Hooks**: `hooks/` folder
-- **API Routes**: `app/api/` folder
-- **Utilities**: `lib/` folder
-- **Types**: `types/` folder
-- **UI Components**: `components/ui/` (shadcn-ui components)
+## Architecture & Project Structure
+
+### 3-Layer Architecture Pattern
+Follow strict separation of concerns with these three layers:
+
+#### 1. Presentation Layer (UI & API Concerns)
+- **Server Actions** (`app/actions/`): Handle UI form submissions and interactions
+- **API Routes** (`app/api/`): Handle HTTP requests and responses
+- **Pages** (`app/[route]/`): Next.js pages and layouts
+- **Components** (`components/`): React UI components
+- **UI Library** (`components/ui/`): shadcn-ui components
+
+#### 2. Business Logic Layer
+- **Services** (`/services/`): Contains ALL business logic
+  - No knowledge of HTTP or UI concerns
+  - Orchestrates repository calls
+  - Handles data transformation and business rules
+  - Returns domain objects/DTOs
+
+#### 3. Data Access Layer
+- **Database Operations** (`/database/`): ALL database queries live here
+  - Uses Prisma client exclusively
+  - No business logic, only data access
+  - Returns Prisma-generated types
+
+### Supporting Structure
+- **Types** (`lib/types/`): DTOs and custom types
+  - Organized by domain (e.g., `lib/types/instagram/`)
+  - Service-specific DTOs
+  - Shared types and interfaces
+  - NO Prisma model duplicates
+- **Utilities** (`lib/utils/`): Helper functions and shared logic
+- **Constants** (`lib/constants/`): App-wide constants
+- **Hooks** (`hooks/`): Custom React hooks
+- **Database** (`prisma/`): Schema and migrations
+
+### Architecture Rules
+- **Dependency flow**: UI/API → Services → Repositories (never reverse)
+- **No layer jumping**: Actions/APIs must go through services
+- **Single responsibility**: Each layer handles only its concerns
+- **Type safety**: Use Prisma types throughout, no manual duplicates
 
 ## UI Component Guidelines
 - **Always prefer using `shadcn-ui` components when implementing UI.**
