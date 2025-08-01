@@ -2,7 +2,6 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
-      "Bash(npm run dev:*)",
       "Bash(node:*)",
       "Bash(mv:*)",
       "Bash(find:*)",
