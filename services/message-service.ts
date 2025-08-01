@@ -4,7 +4,7 @@
  */
 
 import { MessageOperations } from '../database'
-import { logger, withTiming } from '../logger'
+import { logger, withTiming } from '../lib/logger'
 
 export class MessageService {
   /**

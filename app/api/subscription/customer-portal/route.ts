@@ -5,7 +5,7 @@ import {
   apiSuccess,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import { ApiSubscriptionErrorCode } from '@/types/enums'
+import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {

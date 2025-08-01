@@ -5,7 +5,7 @@ import {useChat} from '@/hooks/use-chat'
 import {ChatMessages} from '@/components/assistant/chat-messages'
 import {ChatInput} from '@/components/assistant/chat-input'
 import {ErrorBoundary} from '@/components/global/error-boundary'
-import {Message} from '@/types/message-types'
+import {Message} from '@/lib/types/message-types'
 
 interface NewChatParams {
   clientId: string;

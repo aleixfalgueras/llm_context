@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {useToast} from '@/hooks/use-toast'
-import {ToastVariant} from '@/types/enums'
+import {ToastVariant} from '@/lib/types/enums'
 import {SubscriptionPlan} from "@prisma/client";
 
 interface UseSubscriptionActionsProps {

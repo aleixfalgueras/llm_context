@@ -5,7 +5,7 @@ import {
   apiSuccess,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import { SubscriptionOperations } from '@/lib/database'
+import { SubscriptionOperations } from '@/database'
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {

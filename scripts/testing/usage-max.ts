@@ -10,7 +10,7 @@
  *   tsx scripts/usage-max.ts user_123   # Set token usage to max for their current plan
  */
 import { PrismaClient, SubscriptionPlan } from '@prisma/client'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 
 const prisma = new PrismaClient()
 

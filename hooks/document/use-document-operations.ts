@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { ToastVariant } from '@/types/enums'
-import { Document } from '@/types/component-types'
+import { ToastVariant } from '@/lib/types/enums'
+import { Document } from '@/lib/types/component-types'
 
 interface UseDocumentOperationsProps {
   clientId: string

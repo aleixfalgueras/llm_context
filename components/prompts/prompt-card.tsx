@@ -5,7 +5,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Badge} from '@/components/ui/badge'
 import {Edit2, Eye, EyeOff} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
-import {Prompt} from '@/types/prompt-management-types'
+import {Prompt} from '@/lib/types/prompt-management-types'
 import {PromptDialog} from '@/components/prompts/prompt-dialog'
 import {DeletePromptDialog} from '@/components/prompts/delete-prompt-dialog'
 

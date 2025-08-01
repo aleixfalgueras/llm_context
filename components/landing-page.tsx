@@ -19,7 +19,7 @@ import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
 import {getPlanNameColor} from '@/lib/subscription/subscription-plan-utils'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import Link from 'next/link'
 import {SubscriptionPlan} from "@prisma/client";
 

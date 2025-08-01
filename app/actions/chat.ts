@@ -1,7 +1,7 @@
 'use server'
 
 import {auth} from '@clerk/nextjs/server'
-import {ChatService} from '../services/chat-service'
+import {ChatService} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
 import {redirect} from 'next/navigation'
 

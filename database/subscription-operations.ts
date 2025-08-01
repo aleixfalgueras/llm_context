@@ -2,10 +2,10 @@
  * Subscription-specific database operations
  */
 
-import {prisma} from '../prisma'
-import {logger} from '../logger'
+import {prisma} from '../lib/prisma'
+import {logger} from '../lib/logger'
 import {BaseOperations} from './base-operations'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription, UserUsage} from "@prisma/client";
 
 export class SubscriptionOperations extends BaseOperations {

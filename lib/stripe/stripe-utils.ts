@@ -1,6 +1,6 @@
 import {stripe} from './stripe'
 import {logger} from '../logger'
-import {SubscriptionOperations} from '@/lib/database'
+import {SubscriptionOperations} from '@/database'
 import Stripe from 'stripe'
 import {isSubscriptionActive} from "@/lib/subscription/subscription-utils";
 import { SubscriptionPlan } from '@prisma/client';

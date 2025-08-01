@@ -1,9 +1,9 @@
 import {logger} from '../logger'
 
 import {cacheSubscription, getCachedSubscription} from './subscription-cache'
-import {SubscriptionOperations} from "@/lib/database";
+import {SubscriptionOperations} from "@/database";
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from "@prisma/client";
-import {SubscriptionWithValidation} from "@/types/subscription-types";
+import {SubscriptionWithValidation} from "@/lib/types/subscription-types";
 
 /**
  * Get or create user subscription with intelligent caching and auto-creation.

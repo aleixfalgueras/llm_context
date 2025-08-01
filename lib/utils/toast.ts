@@ -4,7 +4,7 @@
  */
 
 import { toast } from '@/hooks/use-toast'
-import { ApiSubscriptionErrorCode, ToastVariant } from '@/types/enums'
+import { ApiSubscriptionErrorCode, ToastVariant } from '@/lib/types/enums'
 import { 
   normalizeErrorData, 
   getErrorMetadata, 

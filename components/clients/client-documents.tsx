@@ -10,7 +10,7 @@ import {useDocumentOperations} from '@/hooks/document/use-document-operations'
 import {useDocumentUIState} from '@/hooks/document/use-document-ui-state'
 
 import {useToast} from '@/hooks/use-toast'
-import type {ClientDocumentsProps, Document} from '@/types/client-document-types'
+import type {ClientDocumentsProps, Document} from '@/lib/types/client-document-types'
 
 export function ClientDocuments({ 
   clientId, 

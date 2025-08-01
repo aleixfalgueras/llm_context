@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { DOCUMENT_TYPES } from '@/types/document-types'
-import { Document } from '@/types/component-types'
+import { DOCUMENT_TYPES } from '@/lib/types/document-types'
+import { Document } from '@/lib/types/component-types'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()

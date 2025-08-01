@@ -8,7 +8,7 @@ import {Label} from '@/components/ui/label'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Eye, Plus, X} from 'lucide-react'
-import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
+import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
 
 interface DocumentCreationFormProps {
   documentName: string

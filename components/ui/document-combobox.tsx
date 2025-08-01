@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { DocumentBasic } from "@/types/component-types"
+import { DocumentBasic } from "@/lib/types/component-types"
 
 interface DocumentComboboxProps {
   documents: DocumentBasic[]

@@ -3,11 +3,11 @@
  */
 
 import {DocumentStorageService} from './storage-service'
-import {calculateDocumentSize, validateDocumentStorage} from '../utils/storage'
-import {logger} from '../logger'
-import {prisma} from '../prisma'
-import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
-import {isSuccess, BaseOperations} from '../database/base-operations'
+import {calculateDocumentSize, validateDocumentStorage} from '../lib/utils/storage'
+import {logger} from '../lib/logger'
+import {prisma} from '../lib/prisma'
+import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {isSuccess, BaseOperations} from '@/database/base-operations'
 import {DocumentOperations} from '../database'
 import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
 import { Document } from '@prisma/client'

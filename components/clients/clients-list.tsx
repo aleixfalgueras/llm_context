@@ -9,8 +9,8 @@ import {ClientGridView} from '@/components/clients/client-grid-view'
 import {ClientTableView} from '@/components/clients/client-table-view'
 import {ClientPagination} from '@/components/clients/client-pagination'
 import {ClientEmptyState} from '@/components/clients/client-empty-state'
-import {Client, ClientActionHandlers, UsageInfo} from '@/types/client-list-types'
-import {ButtonVariant, ClientSortMode, ViewMode} from '@/types/enums'
+import {Client, ClientActionHandlers, UsageInfo} from '@/lib/types/client-list-types'
+import {ButtonVariant, ClientSortMode, ViewMode} from '@/lib/types/enums'
 import {useClientList} from '@/hooks/client/use-client-list'
 
 interface ClientsListProps {

@@ -2,7 +2,7 @@
 
 import {Button} from '@/components/ui/button'
 import {Edit, FileText, Trash2} from 'lucide-react'
-import {Client, ClientActionHandlers, LanguageInfo} from '@/types/client-list-types'
+import {Client, ClientActionHandlers, LanguageInfo} from '@/lib/types/client-list-types'
 
 interface ClientTableViewProps {
   clients: Client[]

@@ -1,10 +1,10 @@
 import {stripe} from '@/lib/stripe/stripe'
 import {logger} from '../logger'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils"
 import {prisma} from '../prisma'
 import {invalidateAllUserCaches} from '../subscription/subscription-cache'
-import {SubscriptionOperations} from "@/lib/database";
+import {SubscriptionOperations} from "@/database";
 import Stripe from "stripe";
 import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 

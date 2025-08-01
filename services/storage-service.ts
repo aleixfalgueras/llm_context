@@ -2,9 +2,9 @@
  * Document storage service - handles Supabase file operations only
  */
 
-import { supabaseServer } from '../supabase'
-import { STORAGE_CONFIG } from '../config'
-import { logger } from '../logger'
+import { supabaseServer } from '../lib/supabase'
+import { STORAGE_CONFIG } from '../lib/config'
+import { logger } from '../lib/logger'
 
 export class DocumentStorageService {
   /**

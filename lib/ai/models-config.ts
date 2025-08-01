@@ -1,4 +1,4 @@
-import { ModelTier, ModelTierType, SubscriptionPlanType } from '@/types/subscription-types'
+import { ModelTier, ModelTierType, SubscriptionPlanType } from '@/lib/types/subscription-types'
 import {SubscriptionPlan} from "@prisma/client";
 
 export interface AIModel {

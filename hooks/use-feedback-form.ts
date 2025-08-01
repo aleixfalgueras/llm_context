@@ -10,7 +10,7 @@ import {
   PRIORITY_LABELS,
   FEEDBACK_TYPE_VALUES,
   PRIORITY_VALUES
-} from '@/types/enums'
+} from '@/lib/types/enums'
 
 interface FeedbackFormData {
   type: string

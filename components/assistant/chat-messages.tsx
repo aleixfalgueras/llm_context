@@ -5,7 +5,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Loader2, User} from 'lucide-react'
 import {memo, useEffect, useMemo, useRef} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
-import {Message} from '@/types/message-types'
+import {Message} from '@/lib/types/message-types'
 
 interface ChatMessagesProps {
   messages: Message[]

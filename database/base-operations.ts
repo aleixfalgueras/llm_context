@@ -4,8 +4,8 @@
  */
 
 import {Prisma} from '@prisma/client'
-import {logger} from '../logger'
-import {DbOperationConfig, DbOperationResult, PaginationConfig, UserOwnedModel} from "@/types/database-types";
+import {logger} from '../lib/logger'
+import {DbOperationConfig, DbOperationResult, PaginationConfig, UserOwnedModel} from "@/lib/types/database-types";
 
 /**
  * Type guard to check if a database operation was successful

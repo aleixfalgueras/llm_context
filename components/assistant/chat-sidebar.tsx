@@ -5,12 +5,12 @@ import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
-import {deleteAllChats, deleteChat, updateChatTitle} from '@/lib/actions/chat'
+import {deleteAllChats, deleteChat, updateChatTitle} from '@/app/actions/chat'
 import Link from 'next/link'
 import {useState} from 'react'
 import {usePathname} from 'next/navigation'
 import {Input} from '@/components/ui/input'
-import {Chat} from '@/types/component-types'
+import {Chat} from '@/lib/types/component-types'
 
 interface ChatSidebarProps {
   chats: Chat[]

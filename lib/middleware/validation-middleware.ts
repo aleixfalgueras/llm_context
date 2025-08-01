@@ -1,13 +1,13 @@
 import {auth} from "@clerk/nextjs/server";
 import {logger} from "@/lib/logger";
-import {ModelTier} from "@/types/subscription-types";
-import {ApiSubscriptionErrorCode} from "@/types/enums";
+import {ModelTier} from "@/lib/types/subscription-types";
+import {ApiSubscriptionErrorCode} from "@/lib/types/enums";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/ai/models-config";
 import {getUserSubscription, isSubscriptionActive} from "@/lib/subscription/subscription-utils";
 import {getTokenUsageValidationResult} from "@/lib/subscription/subscription-usage";
 import {prisma} from "@/lib/prisma";
 import { SubscriptionPlan } from "@prisma/client";
-import {TokenUsageValidationResult, ValidationErrorDetails} from "@/types/middleware-validation-types";
+import {TokenUsageValidationResult, ValidationErrorDetails} from "@/lib/types/middleware-validation-types";
 
 /**
  * Simple authentication middleware that validates user authentication via Clerk.

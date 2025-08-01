@@ -3,7 +3,7 @@
  * across forms and API routes. Provides consistent validation logic and error messages.
  */
 
-import { ValidationResult } from '@/types/api-types'
+import { ValidationResult } from '@/lib/types/api-types'
 
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

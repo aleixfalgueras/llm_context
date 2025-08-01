@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { PromptOperations } from '@/lib/database/prompt-operations'
+import { PromptOperations } from '@/database/prompt-operations'
 import { 
   withEnhancedApi, 
   apiSuccess, 

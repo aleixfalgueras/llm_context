@@ -7,7 +7,7 @@
 import { Redis } from '@upstash/redis'
 import { logger } from '../logger'
 import { UserSubscription, UserUsage } from '@prisma/client'
-import {StorageSubscriptionUsage} from "@/types/subscription-usage-types";
+import {StorageSubscriptionUsage} from "@/lib/types/subscription-usage-types";
 
 // Initialize Redis client with explicit Vercel environment variables
 const redis = new Redis({

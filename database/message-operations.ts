@@ -2,9 +2,9 @@
  * Message-specific database operations
  */
 
-import { prisma } from '../prisma'
+import { prisma } from '../lib/prisma'
 import { BaseOperations } from './base-operations'
-import {DbOperationConfig} from "@/types/database-types";
+import {DbOperationConfig} from "@/lib/types/database-types";
 
 export class MessageOperations extends BaseOperations {
   /**

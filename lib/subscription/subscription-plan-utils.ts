@@ -1,4 +1,4 @@
-import {SUBSCRIPTION_PLAN_NAMES} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_NAMES} from '@/lib/types/subscription-types'
 import { SubscriptionPlan } from '@prisma/client'
 
 // Plan hierarchy for upgrade/downgrade detection
