@@ -13,10 +13,11 @@ import {Edit, Eye, FileText, RefreshCw, Save, X} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {ClientCombobox} from '@/components/ui/client-combobox'
-import {handleClientApiError} from '@/lib/utils/toast'
+import {handleClientApiError} from '@/lib/api/api-toast'
 import {getDefaultModel} from '@/lib/ai/models-config'
-import type {Client} from '@/lib/types/client-types'
+import type {Client} from '@prisma/client'
 import {ValidationResult} from '@/lib/types/api-types'
+import {logger} from "@/lib/logger";
 
 /**
  * Base configuration for AI service dialogs
@@ -198,8 +199,9 @@ export function BaseAIServiceDialog<TFormData = any>({
       }
 
     } catch (error) {
-      console.error('Generation error:', error)
-      handleClientApiError(error, 'Generation failed')
+      const errorMessage = logger.handleError(error)
+      handleClientApiError(errorMessage, 'Generation failed')
+
     } finally {
       setInternalIsGenerating(false)
     }

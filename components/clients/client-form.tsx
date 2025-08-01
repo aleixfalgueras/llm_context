@@ -10,6 +10,7 @@ import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
 import {CLIENT_FIELD_LABELS} from '@/lib/types/client-types'
 import {Globe, HelpCircle, Shield} from 'lucide-react'
 import {useClientForm} from '@/hooks/client/use-client-form'
+import React from "react";
 
 interface ClientFormProps {
   client?: any

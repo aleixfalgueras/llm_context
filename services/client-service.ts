@@ -1,15 +1,46 @@
-/**
- * Client business logic service
- * Contains all client-related business rules, validation, and orchestration
- */
-
 import {SubscriptionUsageService} from '@/services/subscription-usage-service'
 import {logger} from '@/lib/logger'
 import {ClientOperations} from '@/database'
-import {ClientFormData} from '@/lib/types/client-types'
-import {processClientData} from '@/lib/utils/validation'
+import {Client, Prisma} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
-import {Client} from '@prisma/client'
+import {sanitizeToNull} from "@/lib/utils/validation";
+import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
+
+/**
+ * Process client data by trimming context fields and converting empty strings to null
+ */
+export function prepareClientData(
+  data: Omit<Prisma.ClientCreateInput, 'userId'>
+): Omit<Prisma.ClientCreateInput, 'userId'> {
+  const processed = {...data}
+
+  // Trim context fields and convert empty strings to null for nullable fields
+  if (processed.generalContext !== undefined) {
+    processed.generalContext = sanitizeToNull(processed.generalContext)
+  }
+  if (processed.specificContext1 !== undefined) {
+    processed.specificContext1 = sanitizeToNull(processed.specificContext1)
+  }
+  if (processed.specificContext2 !== undefined) {
+    processed.specificContext2 = sanitizeToNull(processed.specificContext2)
+  }
+  if (processed.specificContext3 !== undefined) {
+    processed.specificContext3 = sanitizeToNull(processed.specificContext3)
+  }
+
+  // Also handle other nullable string fields
+  if (processed.email !== undefined) {
+    processed.email = sanitizeToNull(processed.email)
+  }
+  if (processed.phone !== undefined) {
+    processed.phone = sanitizeToNull(processed.phone)
+  }
+  if (processed.country !== undefined) {
+    processed.country = sanitizeToNull(processed.country)
+  }
+
+  return processed
+}
 
 export class ClientService {
   /**
@@ -17,20 +48,20 @@ export class ClientService {
    */
   static async createClient(
     userId: string, 
-    data: ClientFormData
+    data: Omit<Prisma.ClientCreateInput, 'userId'>
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before creating client
-      const subscription = await SubscriptionUsageService.getUserSubscription(userId)
-      if (!SubscriptionUsageService.isSubscriptionActive(subscription)) {
+      const subscriptionWithValidation = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId)
+      if (!subscriptionWithValidation.isActive) {
         return {
           success: false,
-          error: 'Your subscription has expired. Please upgrade to continue creating clients.'
+          error: SubscriptionErrorCode.SUBSCRIPTION_EXPIRED
         }
       }
 
       // Prepare client data with defaults and trim context fields
-      const clientData = processClientData({
+      const clientData = prepareClientData({
         ...data,
         documentsLanguage: data.documentsLanguage || 'english',
       })
@@ -57,20 +88,20 @@ export class ClientService {
   static async updateClient(
     clientId: string,
     userId: string,
-    data: ClientFormData
+    data: Omit<Prisma.ClientCreateInput, 'userId'>
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before updating client
-      const subscription = await SubscriptionUsageService.getUserSubscription(userId)
-      if (!SubscriptionUsageService.isSubscriptionActive(subscription)) {
+      const subscriptionWithValidation = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId)
+      if (!subscriptionWithValidation.isActive) {
         return {
           success: false,
-          error: 'Your subscription has expired. Please upgrade to continue editing clients.'
+          error: SubscriptionErrorCode.SUBSCRIPTION_EXPIRED
         }
       }
 
       // Prepare client data with defaults and trim context fields
-      const clientData = processClientData({
+      const clientData = prepareClientData({
         ...data,
         documentsLanguage: data.documentsLanguage || 'english',
       })

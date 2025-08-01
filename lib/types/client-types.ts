@@ -1,62 +1,3 @@
-/**
- * Centralized client types and constants
- * This file contains all client-related interfaces, types, and field definitions
- * to avoid duplication across the codebase.
- */
-
-// =============================================================================
-// CORE CLIENT INTERFACE
-// =============================================================================
-
-export interface Client {
-  id: string
-  name: string
-  email?: string
-  phone?: string
-  country?: string
-  generalContext?: string
-  specificContext1?: string
-  specificContext2?: string
-  specificContext3?: string
-  documentsLanguage?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-// =============================================================================
-// PARTIAL CLIENT INTERFACES FOR SPECIFIC USE CASES
-// =============================================================================
-
-export interface ClientBasic {
-  id: string
-  name: string
-  email?: string
-}
-
-export interface ClientWithContext {
-  name?: string | null
-  country?: string | null
-  generalContext?: string | null
-  specificContext1?: string | null
-  specificContext2?: string | null
-  specificContext3?: string | null
-}
-
-export interface ClientFormData {
-  name: string
-  email?: string
-  phone?: string
-  country?: string
-  generalContext?: string
-  specificContext1?: string
-  specificContext2?: string
-  specificContext3?: string
-  documentsLanguage?: string
-}
-
-// =============================================================================
-// FIELD DEFINITIONS AND LABELS
-// =============================================================================
 
 export const CLIENT_FIELD_LABELS = {
   id: 'ID',
@@ -89,7 +30,7 @@ export const CLIENT_FIELD_PLACEHOLDERS = {
 } as const
 
 // =============================================================================
-// CONTEXT FIELD MAPPINGS
+// CONTEXT FIELD MAPPINGS TODO: Delete that?
 // =============================================================================
 
 export const CLIENT_CONTEXT_FIELDS = {
@@ -107,52 +48,3 @@ export const CLIENT_CONTEXT_FIELD_LABELS = {
   specific_context_2: CLIENT_FIELD_LABELS.specificContext2,
   specific_context_3: CLIENT_FIELD_LABELS.specificContext3
 } as const
-
-// =============================================================================
-// DATABASE FIELD SELECTIONS
-// =============================================================================
-
-export const CLIENT_SELECT_BASIC = {
-  id: true,
-  name: true,
-  email: true
-} as const
-
-export const CLIENT_SELECT_DETAILED = {
-  id: true,
-  name: true,
-  email: true,
-  phone: true,
-  country: true,
-  generalContext: true,
-  specificContext1: true,
-  specificContext2: true,
-  specificContext3: true,
-  documentsLanguage: true,
-  createdAt: true,
-  updatedAt: true
-} as const
-
-// =============================================================================
-// TYPE UTILITIES
-// =============================================================================
-
-export type ClientFieldKey = keyof Client
-export type ClientContextFieldKey = keyof typeof CLIENT_CONTEXT_FIELDS
-export type ClientFieldLabel = typeof CLIENT_FIELD_LABELS[ClientFieldKey]
-
-// =============================================================================
-// VALIDATION HELPERS
-// =============================================================================
-
-export function isValidClientField(field: string): field is ClientFieldKey {
-  return field in CLIENT_FIELD_LABELS
-}
-
-export function getClientFieldLabel(field: ClientFieldKey): string {
-  return CLIENT_FIELD_LABELS[field]
-}
-
-export function getClientFieldPlaceholder(field: ClientFieldKey): string {
-  return CLIENT_FIELD_PLACEHOLDERS[field]
-} 

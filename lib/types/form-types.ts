@@ -103,31 +103,6 @@ export interface UseAsyncOperationReturn {
 // SPECIFIC FORM TYPES
 // =============================================================================
 
-/**
- * Client form data interface
- */
-export interface ClientFormData {
-  name: string
-  email?: string
-  phone?: string
-  country: string
-  language: string
-  generalContext?: string
-  specificContext1?: string
-  specificContext2?: string
-  specificContext3?: string
-}
-
-/**
- * Client form return type
- */
-export interface UseClientFormReturn extends UseFormReturn<ClientFormData> {
-  availableLanguages: Array<{ code: string; name: string; nativeName: string }>
-  isEditing: boolean
-  clientId: string | null
-  handleSave: () => Promise<void>
-  handleCancel: () => void
-}
 
 /**
  * Document form data interface

@@ -1,4 +1,14 @@
-import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
+
+
+export enum SubscriptionErrorCode {
+  SUBSCRIPTION_EXPIRED = 'SUBSCRIPTION_EXPIRED',
+  USAGE_LIMIT_EXCEEDED = 'USAGE_LIMIT_EXCEEDED',
+  MODEL_ACCESS_DENIED = 'MODEL_ACCESS_DENIED',
+  NO_SUBSCRIPTION_FOUND = 'NO_SUBSCRIPTION_FOUND'
+}
+
+
+// #######################################################################################
 
 /**
  * Shared error handling utilities to eliminate duplication between 
@@ -32,6 +42,8 @@ export interface ErrorMetadata {
   plan?: string
 }
 
+
+
 /**
  * Extracts metadata from error data based on error code
  */
@@ -39,7 +51,7 @@ export function getErrorMetadata(errorData: ErrorData): ErrorMetadata {
   const code = errorData.code
   
   switch (code) {
-    case ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED:
+    case SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED:
       return {
         isUserLimitError: true,
         isSubscriptionError: true,
@@ -51,7 +63,7 @@ export function getErrorMetadata(errorData: ErrorData): ErrorMetadata {
         }
       }
     
-    case ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED:
+    case SubscriptionErrorCode.SUBSCRIPTION_EXPIRED:
       return {
         isUserLimitError: false,
         isSubscriptionError: true,
@@ -60,14 +72,14 @@ export function getErrorMetadata(errorData: ErrorData): ErrorMetadata {
         plan: errorData.metadata?.plan
       }
     
-    case ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED:
+    case SubscriptionErrorCode.MODEL_ACCESS_DENIED:
       return {
         isUserLimitError: false,
         isSubscriptionError: true,
         shouldLogAsInfo: false
       }
     
-    case ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND:
+    case SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND:
       return {
         isUserLimitError: false,
         isSubscriptionError: true,
@@ -83,54 +95,15 @@ export function getErrorMetadata(errorData: ErrorData): ErrorMetadata {
   }
 }
 
-/**
- * Gets user-friendly error message based on error code and data
- */
-export function getErrorMessage(errorData: ErrorData): string {
-  const code = errorData.code
-  const message = errorData.error || errorData.message
-  
-  switch (code) {
-    case ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED:
-      return message || 'Usage limit exceeded. Please upgrade your plan to continue.'
-    
-    case ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED:
-      return 'Your subscription has expired. Please upgrade to continue using write features. Read-only access is still available.'
-    
-    case ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED:
-      return message || 'Model access denied. Please upgrade your plan to continue.'
-    
-    case ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND:
-      return message || 'No active subscription found. Please upgrade to access billing portal.'
-    
-    default:
-      return message || 'An error occurred'
-  }
-}
 
-/**
- * Checks if an error code represents a user limit error
- */
-export function isUserLimitError(code?: string): boolean {
-  return code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED
-}
-
-/**
- * Checks if an error code represents a subscription-related error
- */
-export function isSubscriptionError(code?: string): boolean {
-  return code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED ||
-         code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED ||
-         code === ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED
-}
 
 /**
  * Determines if an error should be logged as INFO instead of ERROR
  */
 export function shouldLogAsInfo(code?: string): boolean {
-  return code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED ||
-         code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED ||
-         code === ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
+  return code === SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED ||
+         code === SubscriptionErrorCode.SUBSCRIPTION_EXPIRED ||
+         code === SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
 }
 
 /**

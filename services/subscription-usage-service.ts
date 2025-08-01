@@ -14,8 +14,7 @@ import {
   invalidateAllUserCaches 
 } from '@/lib/subscription/subscription-cache'
 import { getStorageSubscriptionUsage } from '@/lib/utils/storage'
-import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
-import { 
+import {
   UserSubscription, 
   UserUsage, 
   SubscriptionPlan, 
@@ -27,6 +26,7 @@ import {
   UsageInfo 
 } from '@/lib/types/subscription-usage-types'
 import { TokenUsageValidationResult } from '@/lib/types/middleware-validation-types'
+import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 export class SubscriptionUsageService {
 
@@ -364,7 +364,7 @@ export class SubscriptionUsageService {
           limit: 0,
           used: 0,
           limitType: 'tokens',
-          reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
+          reason: SubscriptionErrorCode.SUBSCRIPTION_EXPIRED
         };
       }
 

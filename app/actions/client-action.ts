@@ -2,54 +2,37 @@
 
 import { revalidatePath } from 'next/cache'
 import { ClientService } from '@/services/client-service'
-import { ClientFormData } from '@/lib/types/client-types'
-import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
 import { withAuth } from '@/lib/middleware/validation-middleware'
+import { Prisma, Client } from '@prisma/client'
 
-export type ClientData = ClientFormData
-
-export async function createClient(data: ClientFormData) {
+export async function createClient(data: Omit<Prisma.ClientCreateInput, 'userId'>): Promise<Client> {
   const userId = await withAuth()
   const result = await ClientService.createClient(userId, data)
   
   if (!result.success) {
-    // Handle subscription-specific errors for UI
-    if (result.error?.includes('subscription has expired')) {
-      const error = new Error(result.error)
-      ;(error as any).code = ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
-      ;(error as any).upgradeUrl = '/subscription'
-      throw error
-    }
     throw new Error(result.error || 'Failed to create client')
   }
 
   revalidatePath('/clients')
-  return { success: true, client: result.data }
+  return result.data
+
 }
 
-export async function updateClient(clientId: string, data: ClientFormData) {
+export async function updateClient(clientId: string, data: Omit<Prisma.ClientCreateInput, 'userId'>): Promise<Client> {
   const userId = await withAuth()
 
   const result = await ClientService.updateClient(clientId, userId, data)
-  
+
   if (!result.success) {
-    // Handle subscription-specific errors for UI
-    if (result.error?.includes('subscription has expired')) {
-      const error = new Error(result.error)
-      ;(error as any).code = ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
-      ;(error as any).upgradeUrl = '/subscription'
-      throw error
-    }
     throw new Error(result.error || 'Failed to update client')
   }
 
   revalidatePath('/clients')
-  return { success: true, client: result.data }
+  return result.data
 }
 
-export async function deleteClient(id: string) {
+export async function deleteClient(id: string): Promise<void> {
   const userId = await withAuth()
-
   const result = await ClientService.deleteClient(id, userId)
   
   if (!result.success) {
@@ -57,12 +40,10 @@ export async function deleteClient(id: string) {
   }
 
   revalidatePath('/clients')
-  return { success: true }
 }
 
-export async function getClients(options?: { includeDetails?: boolean; limit?: number }) {
+export async function getClients(options?: { includeDetails?: boolean; limit?: number }): Promise<Client[]> {
   const userId = await withAuth()
-
   const result = await ClientService.getClients(userId, options)
   
   if (!result.success) {

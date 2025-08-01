@@ -6,11 +6,11 @@
 import { ChatOperations } from '../database'
 import { isSuccess, unwrapResult } from '@/database/base-operations'
 import { generateChatTitleWithClient } from '../lib/utils/general'
-import { buildClientContextSection, hasClientContext } from '../lib/utils/client-context'
+import { buildClientContextSection, hasClientContext } from './client-context-service'
 import { getDefaultModel, getModelsByTier } from '../lib/ai/models-config'
 import { checkModelAccess, withClientAccess } from '../lib/middleware/validation-middleware'
-import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
 import { logger } from '../lib/logger'
+import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 export class ChatService {
   /**
@@ -57,7 +57,7 @@ export class ChatService {
       return {
         success: false as const,
         error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
-        code: ApiSubscriptionErrorCode.MODEL_ACCESS_DENIED,
+        code: SubscriptionErrorCode.MODEL_ACCESS_DENIED,
         status: 403,
         metadata: {
           tier: modelAccess.tier,
