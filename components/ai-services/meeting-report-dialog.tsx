@@ -9,7 +9,7 @@ import {useToast} from '@/hooks/use-toast'
 import {DatePicker} from '@/components/ui/date-picker'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
-import type {Client} from '@/lib/types/client'
+import type {Client} from '@/lib/types/client-types'
 import {getDefaultModel} from '@/lib/ai/models-config'
 
 interface MeetingReportDialogProps {

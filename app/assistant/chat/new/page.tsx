@@ -2,7 +2,7 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ChatPageClient } from '@/components/assistant/chat-page-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/app/actions/client'
+import { getClients } from '@/app/actions/client-action'
 import { prisma } from '@/lib/prisma'
 
 interface NewChatPageProps {

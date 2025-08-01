@@ -9,9 +9,9 @@ export interface UsageInfo {
 }
 
 // Import Client interface from centralized types
-import type { Client } from './client'
-export type { Client } from './client'
-export { CLIENT_FIELD_LABELS, CLIENT_FIELD_PLACEHOLDERS } from './client'
+import type { Client } from './client-types'
+export type { Client } from './client-types'
+export { CLIENT_FIELD_LABELS, CLIENT_FIELD_PLACEHOLDERS } from './client-types'
 
 export interface LanguageInfo {
   value: string

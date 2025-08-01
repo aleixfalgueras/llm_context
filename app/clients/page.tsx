@@ -1,4 +1,4 @@
-import { getClients } from '@/app/actions/client'
+import { getClients } from '@/app/actions/client-action'
 import { ClientsPageClient } from '@/components/clients/clients-page-client'
 import { Navbar } from '@/components/global/navbar'
 

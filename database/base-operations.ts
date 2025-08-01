@@ -4,7 +4,7 @@
  */
 
 import {Prisma} from '@prisma/client'
-import {logger} from '../lib/logger'
+import {logger} from '@/lib/logger'
 import {DbOperationConfig, DbOperationResult, PaginationConfig, UserOwnedModel} from "@/lib/types/database-types";
 
 /**

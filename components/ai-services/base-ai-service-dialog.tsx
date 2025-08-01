@@ -15,7 +15,7 @@ import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {ClientCombobox} from '@/components/ui/client-combobox'
 import {handleClientApiError} from '@/lib/utils/toast'
 import {getDefaultModel} from '@/lib/ai/models-config'
-import type {Client} from '@/lib/types/client'
+import type {Client} from '@/lib/types/client-types'
 import {ValidationResult} from '@/lib/types/api-types'
 
 /**

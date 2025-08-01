@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { AssistantLandingClient } from '@/components/assistant/assistant-landing-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/app/actions/client'
+import { getClients } from '@/app/actions/client-action'
 
 export default async function AssistantPage() {
   const { userId } = await auth()
