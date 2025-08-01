@@ -3,8 +3,7 @@ import {logger} from "@/lib/logger";
 import {ModelTier} from "@/lib/types/subscription-types";
 import {ApiSubscriptionErrorCode} from "@/lib/types/enums";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/ai/models-config";
-import {getUserSubscription, isSubscriptionActive} from "@/lib/subscription/subscription-utils";
-import {getTokenUsageValidationResult} from "@/lib/subscription/subscription-usage";
+import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 import {prisma} from "@/lib/prisma";
 import { SubscriptionPlan } from "@prisma/client";
 import {TokenUsageValidationResult, ValidationErrorDetails} from "@/lib/types/middleware-validation-types";
@@ -149,7 +148,7 @@ export async function withClientAccess(userId: string, clientId: string): Promis
  *
  */
 export async function withTokenValidation(userId: string): Promise<void> {
-  const validationResult = await getTokenUsageValidationResult(userId);
+  const validationResult = await SubscriptionUsageService.getTokenUsageValidationResult(userId);
 
   if (!validationResult.allowed) {
     throwTokenValidationError(validationResult);
@@ -333,7 +332,7 @@ export function createTokenValidationErrorDetails(validationResult: TokenUsageVa
  * 6. Return access result with tier and plan information
  * 
  * **Subscription Status Validation:**
- * - Uses isSubscriptionActive() for comprehensive status checking
+ * - Uses SubscriptionUsageService.isSubscriptionActive() for comprehensive status checking
  * - Considers expiration dates, cancellation status, and payment status
  * - Logs detailed information for inactive subscriptions
  * 
@@ -361,10 +360,10 @@ export async function checkModelAccess(userId: string, modelId: string) {
   const endTiming = logger.startTiming('Check Model Access', {userId});
 
   try {
-    const subscription = await getUserSubscription(userId)
+    const subscription = await SubscriptionUsageService.getUserSubscription(userId)
 
     // Check if subscription is active first
-    if (!isSubscriptionActive(subscription)) {
+    if (!SubscriptionUsageService.isSubscriptionActive(subscription)) {
       logger.warn('Subscription is not active for model access check', {
         userId,
         metadata: {

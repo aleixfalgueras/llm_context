@@ -3,7 +3,7 @@ import {
   apiSuccess,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import {getUserUsageInfo} from "@/lib/subscription/subscription-usage";
+import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'
@@ -17,7 +17,7 @@ export const GET = withEnhancedApi(
       console.log('🔄 API: Cache bypass requested for userId:', userId)
     }
     
-    const usageInfo = await getUserUsageInfo(userId, forceRefresh)
+    const usageInfo = await SubscriptionUsageService.getUserUsageInfo(userId, forceRefresh)
     
     if (!usageInfo) {
       const error = new Error('Failed to fetch usage information')

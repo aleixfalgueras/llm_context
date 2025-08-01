@@ -1,14 +1,15 @@
 /**
- * Subscription-specific database operations
+ * Subscription and Usage database operations
  */
 
-import {prisma} from '../lib/prisma'
-import {logger} from '../lib/logger'
+import {prisma} from '@/lib/prisma'
+import {logger} from '@/lib/logger'
 import {BaseOperations} from './base-operations'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription, UserUsage} from "@prisma/client";
 
-export class SubscriptionOperations extends BaseOperations {
+// TODO: Use base-operations methods
+export class SubscriptionUsageOperations extends BaseOperations {
   /**
    * Find user subscription by userId
    */
@@ -100,6 +101,116 @@ export class SubscriptionOperations extends BaseOperations {
       })
     } catch (error) {
       logger.error('Failed to clear schedule fields', error as Error, { userId })
+      throw error
+    }
+  }
+
+  /**
+   * Find usage by billing period
+   */
+  static async findUsageByPeriod(
+    userId: string,
+    billingPeriodStart: Date,
+    billingPeriodEnd: Date
+  ): Promise<UserUsage | null> {
+    try {
+      return await prisma.userUsage.findUnique({
+        where: {
+          userId_billingPeriodStart_billingPeriodEnd: {
+            userId,
+            billingPeriodStart,
+            billingPeriodEnd
+          }
+        }
+      })
+    } catch (error) {
+      logger.error('Failed to find usage by period', error as Error, { 
+        userId,
+        metadata: {
+          billingPeriodStart: billingPeriodStart.toISOString(),
+          billingPeriodEnd: billingPeriodEnd.toISOString()
+        }
+      })
+      throw error
+    }
+  }
+
+  /**
+   * Upsert user usage record
+   */
+  static async upsertUsage(
+    userId: string,
+    billingPeriodStart: Date,
+    billingPeriodEnd: Date,
+    updateData: Partial<Pick<UserUsage, 'tokensUsed'>> = {}
+  ): Promise<UserUsage> {
+    try {
+      return await prisma.userUsage.upsert({
+        where: {
+          userId_billingPeriodStart_billingPeriodEnd: {
+            userId,
+            billingPeriodStart,
+            billingPeriodEnd
+          }
+        },
+        update: updateData,
+        create: {
+          userId,
+          billingPeriodStart,
+          billingPeriodEnd,
+          tokensUsed: 0,
+          ...updateData
+        }
+      })
+    } catch (error) {
+      logger.error('Failed to upsert usage', error as Error, { 
+        userId,
+        metadata: {
+          billingPeriodStart: billingPeriodStart.toISOString(),
+          billingPeriodEnd: billingPeriodEnd.toISOString()
+        }
+      })
+      throw error
+    }
+  }
+
+  /**
+   * Increment usage tokens atomically
+   */
+  static async incrementUsage(
+    userId: string,
+    billingPeriodStart: Date,
+    billingPeriodEnd: Date,
+    tokensToAdd: number
+  ): Promise<UserUsage> {
+    try {
+      return await prisma.userUsage.upsert({
+        where: {
+          userId_billingPeriodStart_billingPeriodEnd: {
+            userId,
+            billingPeriodStart,
+            billingPeriodEnd
+          }
+        },
+        create: {
+          userId,
+          billingPeriodStart,
+          billingPeriodEnd,
+          tokensUsed: tokensToAdd
+        },
+        update: {
+          tokensUsed: { increment: tokensToAdd }
+        }
+      })
+    } catch (error) {
+      logger.error('Failed to increment usage', error as Error, { 
+        userId,
+        metadata: {
+          tokensToAdd,
+          billingPeriodStart: billingPeriodStart.toISOString(),
+          billingPeriodEnd: billingPeriodEnd.toISOString()
+        }
+      })
       throw error
     }
   }

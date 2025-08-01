@@ -5,12 +5,12 @@ import {
   apiSuccess,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import { SubscriptionOperations } from '@/database'
+import { SubscriptionUsageOperations } from '@/database'
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {
     // Get current subscription
-    const subscription = await SubscriptionOperations.findByUserId(userId)
+    const subscription = await SubscriptionUsageOperations.findByUserId(userId)
 
     if (!subscription?.stripeSubscriptionId || !subscription?.stripeCustomerId) {
       logger.warn('No active Stripe subscription found for payment retry', { 

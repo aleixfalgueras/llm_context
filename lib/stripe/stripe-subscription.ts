@@ -4,7 +4,7 @@ import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils"
 import {prisma} from '../prisma'
 import {invalidateAllUserCaches} from '../subscription/subscription-cache'
-import {SubscriptionOperations} from "@/database";
+import {SubscriptionUsageOperations} from "@/database";
 import Stripe from "stripe";
 import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 
@@ -211,7 +211,7 @@ export async function synchronizeSubscriptionWithStripe(
       updateData.tokenLimit = planLimits.tokenLimit
     }
 
-    const updatedSubscription = await SubscriptionOperations.updateSubscription(subscription.userId, updateData)
+    const updatedSubscription = await SubscriptionUsageOperations.updateSubscription(subscription.userId, updateData)
 
     logger.info('Updated subscription in database', {
       userId: subscription.userId,

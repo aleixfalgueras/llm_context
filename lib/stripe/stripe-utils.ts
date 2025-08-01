@@ -1,8 +1,8 @@
 import {stripe} from './stripe'
 import {logger} from '../logger'
-import {SubscriptionOperations} from '@/database'
+import {SubscriptionUsageOperations} from '@/database'
 import Stripe from 'stripe'
-import {isSubscriptionActive} from "@/lib/subscription/subscription-utils";
+import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 import { SubscriptionPlan } from '@prisma/client';
 
 export const STRIPE_PRICE_IDS = {
@@ -23,7 +23,7 @@ export const STRIPE_PRICE_IDS = {
  */
 export async function createOrRetrieveCustomer(userId: string, email: string) {
   try {
-    const existingSubscription = await SubscriptionOperations.findByUserId(userId)
+    const existingSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
     if (existingSubscription?.stripeCustomerId) {
       try {
@@ -49,7 +49,7 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
       },
     })
 
-    await SubscriptionOperations.updateSubscription(userId, { stripeCustomerId: customer.id })
+    await SubscriptionUsageOperations.updateSubscription(userId, { stripeCustomerId: customer.id })
 
     logger.info('Created new Stripe customer', { userId, metadata: { customerId: customer.id } })
     return customer
@@ -81,9 +81,9 @@ export async function createCheckoutSession(
     const customer = await createOrRetrieveCustomer(userId, email)
 
     // Check if customer has existing active subscription
-    const existingSubscription = await SubscriptionOperations.findByUserId(userId)
+    const existingSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
-    const isUpgrade = existingSubscription?.stripeSubscriptionId && isSubscriptionActive(existingSubscription)
+    const isUpgrade = existingSubscription?.stripeSubscriptionId && SubscriptionUsageService.isSubscriptionActive(existingSubscription)
     
     logger.info(isUpgrade ? 'Creating checkout session for subscription upgrade' : 'Creating checkout session for new customer', { 
       userId, 
@@ -152,7 +152,7 @@ export async function createCheckoutSession(
  */
 export async function createCustomerPortalSession(userId: string) {
   try {
-    const subscription = await SubscriptionOperations.findByUserId(userId)
+    const subscription = await SubscriptionUsageOperations.findByUserId(userId)
 
     if (!subscription?.stripeCustomerId) {
       throw new Error('No Stripe customer found for user')

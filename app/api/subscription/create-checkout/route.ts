@@ -4,7 +4,7 @@ import {isDowngrade} from '@/lib/subscription/subscription-plan-utils'
 import {scheduleSubscriptionDowngrade} from '@/lib/stripe/stripe-subscription'
 import {logger} from '@/lib/logger'
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
-import {SubscriptionOperations} from "@/database";
+import {SubscriptionUsageOperations} from "@/database";
 import {SubscriptionPlan} from "@prisma/client";
 
 interface CheckoutResponse {
@@ -30,7 +30,7 @@ export const POST = withEnhancedApi(
     }
 
     // Check if user has existing subscription
-    const existingSubscription = await SubscriptionOperations.findByUserId(userId)
+    const existingSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
     // If user has active subscription and this is a downgrade, handle downgrade scheduling directly
     if (existingSubscription?.stripeSubscriptionId && 

@@ -12,7 +12,7 @@ import {
   getDefaultPresencePenalty, 
   getDefaultFrequencyPenalty 
 } from '../models-config'
-import {trackUsage} from "@/lib/subscription/subscription-usage";
+import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 
 export interface UsageTrackingOptions {
   userId: string
@@ -181,7 +181,7 @@ export class OpenRouterService {
     }
   ): Promise<void> {
     try {
-      await trackUsage(
+      await SubscriptionUsageService.trackUsage(
         usageOptions.userId,
         {
           tokensUsed: usageData.totalTokens,
