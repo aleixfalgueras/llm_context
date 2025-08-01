@@ -3,7 +3,7 @@
  * Contains all client-related business rules, validation, and orchestration
  */
 
-import {getUserSubscription, isSubscriptionActive} from '@/lib/subscription/subscription-utils'
+import {SubscriptionUsageService} from '@/services/subscription-usage-service'
 import {logger} from '@/lib/logger'
 import {ClientOperations} from '@/database'
 import {ClientFormData} from '@/lib/types/client-types'
@@ -21,8 +21,8 @@ export class ClientService {
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before creating client
-      const subscription = await getUserSubscription(userId)
-      if (!isSubscriptionActive(subscription)) {
+      const subscription = await SubscriptionUsageService.getUserSubscription(userId)
+      if (!SubscriptionUsageService.isSubscriptionActive(subscription)) {
         return {
           success: false,
           error: 'Your subscription has expired. Please upgrade to continue creating clients.'
@@ -61,8 +61,8 @@ export class ClientService {
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before updating client
-      const subscription = await getUserSubscription(userId)
-      if (!isSubscriptionActive(subscription)) {
+      const subscription = await SubscriptionUsageService.getUserSubscription(userId)
+      if (!SubscriptionUsageService.isSubscriptionActive(subscription)) {
         return {
           success: false,
           error: 'Your subscription has expired. Please upgrade to continue editing clients.'

@@ -2,7 +2,7 @@ import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/midd
 import {stripe} from '@/lib/stripe/stripe'
 import {STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
 import {logger} from '@/lib/logger'
-import {SubscriptionOperations} from "@/database";
+import {SubscriptionUsageOperations} from "@/database";
 import {SubscriptionPlan} from "@prisma/client";
 
 interface UpgradePreviewResponse {
@@ -24,7 +24,7 @@ export const POST = withEnhancedApi(
     }
 
     // Get current subscription
-    const existingSubscription = await SubscriptionOperations.findByUserId(userId)
+    const existingSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
     if (!existingSubscription?.stripeSubscriptionId) {
       logger.warn('No active subscription found for upgrade/downgrade preview - ' +
