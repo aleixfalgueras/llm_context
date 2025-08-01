@@ -2,17 +2,19 @@
  * Client-specific database operations
  */
 
-import { prisma } from '../lib/prisma'
-import { BaseOperations } from './base-operations'
-import {DbOperationConfig, PaginationConfig} from "@/lib/types/database-types";
+import {prisma} from '@/lib/prisma'
+import {BaseOperations} from './base-operations'
+import {DbOperationConfig, DbOperationResult, PaginationConfig} from "@/lib/types/database-types";
+import {Client} from '@prisma/client';
 
 export class ClientOperations extends BaseOperations {
+
   static async findUserClients(
     userId: string,
     pagination?: PaginationConfig,
     searchTerm?: string,
     config: DbOperationConfig = {}
-  ) {
+  ): Promise<DbOperationResult<{ records: Client[]; total?: number }>> {
     const filters = searchTerm 
       ? {
           OR: [
@@ -22,7 +24,7 @@ export class ClientOperations extends BaseOperations {
         }
       : {}
 
-    return this.findUserOwnedRecords(
+    return this.findUserOwnedRecords<Client>(
       prisma.client,
       userId,
       filters,
@@ -31,8 +33,8 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
-  static async createClient(userId: string, data: any) {
-    return this.createUserOwnedRecord(
+  static async createClient(userId: string, data: any): Promise<DbOperationResult<Client>> {
+    return this.createUserOwnedRecord<Client>(
       prisma.client,
       userId,
       data,
@@ -40,8 +42,8 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
-  static async updateClient(clientId: string, userId: string, data: any) {
-    return this.updateUserOwnedRecord(
+  static async updateClient(clientId: string, userId: string, data: any): Promise<DbOperationResult<Client>> {
+    return this.updateUserOwnedRecord<Client>(
       prisma.client,
       clientId,
       userId,
@@ -50,7 +52,7 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
-  static async deleteClient(clientId: string, userId: string) {
+  static async deleteClient(clientId: string, userId: string): Promise<DbOperationResult<{ id: string }>> {
     return this.deleteUserOwnedRecord(
       prisma.client,
       clientId,

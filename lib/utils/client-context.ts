@@ -1,4 +1,4 @@
-import { ClientWithContext } from '@/lib/types/client'
+import { ClientWithContext } from '@/lib/types/client-types'
 
 type Client = ClientWithContext
 

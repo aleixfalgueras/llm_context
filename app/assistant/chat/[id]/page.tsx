@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
 import { ChatPageClient } from '@/components/assistant/chat-page-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/app/actions/client'
+import { getClients } from '@/app/actions/client-action'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>

@@ -3,8 +3,8 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useLocalStorage } from '../use-local-storage'
 import { useToast } from '@/hooks/use-toast'
-import { deleteClient as deleteClientAction } from '@/app/actions/client'
-import type { Client } from '@/lib/types/client'
+import { deleteClient as deleteClientAction } from '@/app/actions/client-action'
+import type { Client } from '@/lib/types/client-types'
 import type { PaginationInfo, LanguageInfo } from '@/lib/types/client-list-types'
 import { ClientSortMode } from '@/lib/types/enums'
 
