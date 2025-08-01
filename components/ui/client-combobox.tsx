@@ -18,10 +18,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import type { ClientBasic as Client } from "@/lib/types/client-types"
+import type { Client } from "@prisma/client"
+
+type ClientBasic = Pick<Client, 'id' | 'name' | 'email'>
 
 interface ClientComboboxProps {
-  clients: Client[]
+  clients: ClientBasic[]
   value?: string
   onValueChange?: (value: string) => void
   placeholder?: string

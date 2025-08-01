@@ -1,6 +1,4 @@
-import { ClientWithContext } from '@/lib/types/client-types'
-
-type Client = ClientWithContext
+import type { Client } from '@prisma/client'
 
 /**
  * Replaces client variables in content with actual client data

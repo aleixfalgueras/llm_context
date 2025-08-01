@@ -1,6 +1,9 @@
-import { ClientWithContext } from '@/lib/types/client-types'
+/**
+ * Client context service
+ * Handles AI context formatting and client data for prompts
+ */
 
-type Client = ClientWithContext
+import type { Client } from '@prisma/client'
 
 /**
  * Builds just the client context section for AI prompts

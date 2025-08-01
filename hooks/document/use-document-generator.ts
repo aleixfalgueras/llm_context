@@ -6,7 +6,7 @@ import { ClientContextSelection, defaultClientContextSelections } from '@/lib/ty
 import { getDefaultModel } from '@/lib/ai/models-config'
 import { clientLogger } from '@/lib/client-logger'
 import { Prompt } from '@/lib/types/component-types'
-import type { Client } from '@/lib/types/client-types'
+import type { Client } from '@prisma/client'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean

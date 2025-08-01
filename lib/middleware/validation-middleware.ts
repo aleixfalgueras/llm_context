@@ -1,12 +1,12 @@
 import {auth} from "@clerk/nextjs/server";
 import {logger} from "@/lib/logger";
 import {ModelTier} from "@/lib/types/subscription-types";
-import {ApiSubscriptionErrorCode} from "@/lib/types/enums";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/ai/models-config";
 import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 import {prisma} from "@/lib/prisma";
 import { SubscriptionPlan } from "@prisma/client";
 import {TokenUsageValidationResult, ValidationErrorDetails} from "@/lib/types/middleware-validation-types";
+import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 /**
  * Simple authentication middleware that validates user authentication via Clerk.
@@ -267,10 +267,10 @@ export function throwTokenValidationError(validationResult: TokenUsageValidation
  * - Upgrade URLs provide direct paths for subscription management
  */
 export function createTokenValidationErrorDetails(validationResult: TokenUsageValidationResult): ValidationErrorDetails {
-  const isExpired = validationResult.reason === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED;
+  const isExpired = validationResult.reason === SubscriptionErrorCode.SUBSCRIPTION_EXPIRED;
 
   return {
-    code: validationResult.reason || ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED,
+    code: validationResult.reason || SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED,
     status: isExpired ? 402 : 429,
     message: isExpired
       ? 'Your subscription has expired. Please upgrade to continue using AI features.'
@@ -379,7 +379,7 @@ export async function checkModelAccess(userId: string, modelId: string) {
         tier: ModelTier.BASIC,
         plan: subscription.plan,
         modelId,
-        reason: ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED
+        reason: SubscriptionErrorCode.SUBSCRIPTION_EXPIRED
       }
     }
 

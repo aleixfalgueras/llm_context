@@ -5,7 +5,8 @@ import {
   apiSuccess,
   ApiContext 
 } from '@/lib/middleware/api-middleware'
-import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
+
+import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {
@@ -30,7 +31,7 @@ export const POST = withEnhancedApi(
         })
         const noCustomerError = new Error('No active subscription found')
         ;(noCustomerError as any).status = 404
-        ;(noCustomerError as any).code = ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
+        ;(noCustomerError as any).code = SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
         throw noCustomerError
       }
       throw error

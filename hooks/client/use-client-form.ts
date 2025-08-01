@@ -2,20 +2,35 @@
 
 import { useFormState } from '../use-form-state'
 import { useFormOperations } from '../use-async-operation'
-import { createClient, updateClient, type ClientData } from '@/app/actions/client-action'
+import { createClient, updateClient } from '@/app/actions/client-action'
+import { Prisma } from '@prisma/client'
 import { validateClientForm } from '@/lib/utils/validation'
 import { capitalizeName } from '@/lib/utils/general'
 import { getLanguageOptions } from '@/lib/types/enums'
+import React from "react";
 
 interface UseClientFormProps {
   client?: any
   onSuccess?: () => void
 }
 
+// Form-safe version of ClientCreateInput with strings instead of nulls
+type ClientFormData = {
+  name: string
+  email: string
+  phone: string
+  country: string
+  generalContext: string
+  specificContext1: string
+  specificContext2: string
+  specificContext3: string
+  documentsLanguage: string
+}
+
 interface UseClientFormReturn {
   // Form state
-  formData: ClientData
-  errors: Partial<Record<keyof ClientData, string>>
+  formData: ClientFormData
+  errors: Partial<Record<keyof ClientFormData, string>>
   isValid: boolean
   isDirty: boolean
   
@@ -24,7 +39,7 @@ interface UseClientFormReturn {
   error: string | null
   
   // Actions
-  updateField: (field: keyof ClientData, value: string) => void
+  updateField: (field: keyof ClientFormData, value: string) => void
   handleSubmit: (e: React.FormEvent) => Promise<void>
   resetForm: () => void
   clearError: () => void
@@ -33,7 +48,7 @@ interface UseClientFormReturn {
   languages: Array<{ value: string; label: string; flag: string }>
 }
 
-const validationRules: Partial<Record<keyof ClientData, (value: any) => string | null>> = {
+const validationRules: Partial<Record<keyof ClientFormData, (value: any) => string | null>> = {
   name: (value: string) => {
     if (!value?.trim()) return 'Name is required'
     if (value.trim().length < 2) return 'Name must be at least 2 characters'
@@ -53,18 +68,35 @@ const validationRules: Partial<Record<keyof ClientData, (value: any) => string |
   },
 }
 
+/**
+ * Convert form data (with empty strings) to Prisma format (with nulls)
+ */
+function convertFormDataToPrismaFormat(formData: ClientFormData): Omit<Prisma.ClientCreateInput, 'userId'> {
+  return {
+    name: formData.name,
+    email: formData.email || null,
+    phone: formData.phone || null,
+    country: formData.country || null,
+    generalContext: formData.generalContext || null,
+    specificContext1: formData.specificContext1 || null,
+    specificContext2: formData.specificContext2 || null,
+    specificContext3: formData.specificContext3 || null,
+    documentsLanguage: formData.documentsLanguage || 'english',
+  }
+}
+
 export function useClientForm({ client, onSuccess }: UseClientFormProps): UseClientFormReturn {
   const { isLoading, error, clearError, save, create } = useFormOperations()
 
-  const initialData: ClientData = {
+  const initialData: ClientFormData = {
     name: client?.name || '',
-    email: client?.email || '',
-    phone: client?.phone || '',
-    country: client?.country || '',
-    generalContext: client?.generalContext || '',
-    specificContext1: client?.specificContext1 || '',
-    specificContext2: client?.specificContext2 || '',
-    specificContext3: client?.specificContext3 || '',
+    email: client?.email ?? '',
+    phone: client?.phone ?? '',
+    country: client?.country ?? '',
+    generalContext: client?.generalContext ?? '',
+    specificContext1: client?.specificContext1 ?? '',
+    specificContext2: client?.specificContext2 ?? '',
+    specificContext3: client?.specificContext3 ?? '',
     documentsLanguage: client?.documentsLanguage || 'english'
   }
 
@@ -84,7 +116,7 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
   // Use centralized language options from enums - single source of truth
   const languages = getLanguageOptions()
 
-  const updateField = (field: keyof ClientData, value: string) => {
+  const updateField = (field: keyof ClientFormData, value: string) => {
     updateFormField(field, value)
   }
 
@@ -98,21 +130,24 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
       return
     }
 
-    // Format the name before saving
-    const formattedData = {
+    // Format and convert the data before saving
+    const formattedFormData = {
       ...formData,
       name: capitalizeName(formData.name)
     }
+    
+    // Convert to Prisma format (empty strings → null)
+    const prismaData = convertFormDataToPrismaFormat(formattedFormData)
 
     let result
     if (client?.id) {
       result = await save(
-        () => updateClient(client.id, formattedData),
+        () => updateClient(client.id, prismaData),
         'client'
       )
     } else {
       result = await create(
-        () => createClient(formattedData),
+        () => createClient(prismaData),
         'client'
       )
     }

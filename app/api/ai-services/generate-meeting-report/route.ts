@@ -2,7 +2,7 @@
 import { createAICompletion } from '@/lib/ai/wrapper'
 import { logger, withTiming } from '@/lib/logger'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
-import { handleApiError } from '@/lib/utils/error-handler'
+import { handleApiError } from '@/lib/api/api-error-handler'
 import {withAuth, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
 
 export async function POST(req: Request) {

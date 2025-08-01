@@ -143,17 +143,6 @@ export const LANGUAGE_INFO: Record<Language, { label: string; flag: string }> = 
   [Language.CATALAN]: { label: 'Catalan (Català)', flag: '🏴󠁥󠁳󠁣󠁴󠁿' }
 }
 
-// =============================================================================
-// API ERROR CODES
-// =============================================================================
-
-export enum ApiSubscriptionErrorCode {
-  SUBSCRIPTION_EXPIRED = 'SUBSCRIPTION_EXPIRED',
-  USAGE_LIMIT_EXCEEDED = 'USAGE_LIMIT_EXCEEDED',
-  MODEL_ACCESS_DENIED = 'MODEL_ACCESS_DENIED',
-  NO_SUBSCRIPTION_FOUND = 'NO_SUBSCRIPTION_FOUND'
-}
-
 // Helper function to get language options for forms
 export function getLanguageOptions() {
   return Object.entries(LANGUAGE_INFO).map(([value, info]) => ({

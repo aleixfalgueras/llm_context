@@ -44,7 +44,7 @@ Follow strict separation of concerns with these three layers:
 - **Database** (`prisma/`): Schema and migrations
 
 ### Architecture Rules
-- **Dependency flow**: UI/API → Services → Repositories (never reverse)
+- **Dependency flow**: UI/API → Services → Database (never reverse)
 - **No layer jumping**: Actions/APIs must go through services
 - **Single responsibility**: Each layer handles only its concerns
 - **Type safety**: Use Prisma types throughout, no manual duplicates

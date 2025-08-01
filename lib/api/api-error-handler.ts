@@ -5,8 +5,7 @@
 
 import {NextResponse} from 'next/server'
 import {logger} from '../logger'
-import {ApiSubscriptionErrorCode} from '@/lib/types/enums'
-import {getErrorMetadata, normalizeErrorData} from './error-code'
+import {getErrorMetadata, normalizeErrorData, SubscriptionErrorCode} from './api-error-codes'
 
 export interface ApiErrorOptions {
   /** Context or operation name for logging */
@@ -27,6 +26,12 @@ export interface ApiErrorOptions {
 
 /**
  * Unified API error handler that formats any error into consistent HTTP responses
+ *
+ * USED IN THE SERVER SIDE -> RETURN PROPER HTTP ERROR RESPONSE
+ * - Should propagate service error codes
+ * - No extra context, metadata, status; KEEP IT SIMPLE:
+ *  error field should be just a string with the service layer error code or default value
+ *
  */
 export function handleApiError(
   error: unknown, 
@@ -60,19 +65,19 @@ export function handleApiError(
     
     // Handle expected user limit errors as INFO instead of ERROR
     if (errorData && errorMetadata?.shouldLogAsInfo) {
-      if (errorData.code === ApiSubscriptionErrorCode.USAGE_LIMIT_EXCEEDED) {
+      if (errorData.code === SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED) {
         logger.info('User reached token limit', { 
           ...logContext,
           metadata: errorMetadata.usageInfo
         });
-      } else if (errorData.code === ApiSubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
+      } else if (errorData.code === SubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
         logger.info('User subscription expired', { 
           ...logContext,
           metadata: {
             plan: errorMetadata.plan
           }
         });
-      } else if (errorData.code === ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND) {
+      } else if (errorData.code === SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND) {
         logger.info('User attempted to access billing portal without subscription', { 
           ...logContext,
           metadata: {

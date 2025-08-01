@@ -1,11 +1,7 @@
-/**
- * Client-specific database operations
- */
-
 import {prisma} from '@/lib/prisma'
 import {BaseOperations} from './base-operations'
 import {DbOperationConfig, DbOperationResult, PaginationConfig} from "@/lib/types/database-types";
-import {Client} from '@prisma/client';
+import {Client, Prisma} from '@prisma/client';
 
 export class ClientOperations extends BaseOperations {
 
@@ -33,7 +29,7 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
-  static async createClient(userId: string, data: any): Promise<DbOperationResult<Client>> {
+  static async createClient(userId: string, data: Omit<Prisma.ClientCreateInput, 'userId'>): Promise<DbOperationResult<Client>> {
     return this.createUserOwnedRecord<Client>(
       prisma.client,
       userId,
@@ -42,7 +38,7 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
-  static async updateClient(clientId: string, userId: string, data: any): Promise<DbOperationResult<Client>> {
+  static async updateClient(clientId: string, userId: string, data: Partial<Omit<Prisma.ClientCreateInput, 'userId' | 'id' | 'createdAt' | 'updatedAt'>>): Promise<DbOperationResult<Client>> {
     return this.updateUserOwnedRecord<Client>(
       prisma.client,
       clientId,
