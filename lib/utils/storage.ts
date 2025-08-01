@@ -3,11 +3,11 @@ import {logger} from '../logger'
 import {getUserSubscription} from '../subscription/subscription-utils'
 
 // Storage limits per plan (in bytes)
-import {SubscriptionPlanType} from '@/types/subscription-types'
+import {SubscriptionPlanType} from '@/lib/types/subscription-types'
 import {cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} from "@/lib/subscription/subscription-cache";
 import {SubscriptionPlan} from "@prisma/client";
-import {StorageUsage, StorageSubscriptionUsage} from "@/types/subscription-usage-types";
-import {StorageUsageValidationResult} from "@/types/middleware-validation-types";
+import {StorageUsage, StorageSubscriptionUsage} from "@/lib/types/subscription-usage-types";
+import {StorageUsageValidationResult} from "@/lib/types/middleware-validation-types";
 
 export const STORAGE_LIMITS = {
   [SubscriptionPlan.basic]: 50 * 1024 * 1024,    // 50 MB for basic plan

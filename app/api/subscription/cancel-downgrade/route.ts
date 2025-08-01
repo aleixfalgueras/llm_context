@@ -8,7 +8,7 @@ import { invalidateAllUserCaches } from '@/lib/subscription/subscription-cache'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import {releaseSubscriptionSchedule} from "@/lib/stripe/stripe-subscription"
-import { SubscriptionOperations } from '@/lib/database/subscription-operations'
+import { SubscriptionOperations } from '@/database/subscription-operations'
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {

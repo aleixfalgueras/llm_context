@@ -2,9 +2,9 @@
  * Client-specific database operations
  */
 
-import { prisma } from '../prisma'
+import { prisma } from '../lib/prisma'
 import { BaseOperations } from './base-operations'
-import {DbOperationConfig, PaginationConfig} from "@/types/database-types";
+import {DbOperationConfig, PaginationConfig} from "@/lib/types/database-types";
 
 export class ClientOperations extends BaseOperations {
   static async findUserClients(

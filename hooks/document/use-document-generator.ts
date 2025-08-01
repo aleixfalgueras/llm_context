@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
+import { ClientContextSelection, defaultClientContextSelections } from '@/lib/types/client-context'
 import { getDefaultModel } from '@/lib/ai/models-config'
 import { clientLogger } from '@/lib/client-logger'
-import { Prompt } from '@/types/component-types'
-import type { Client } from '@/types/client'
+import { Prompt } from '@/lib/types/component-types'
+import type { Client } from '@/lib/types/client'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean

@@ -1,4 +1,4 @@
-import { ApiSubscriptionErrorCode } from '@/types/enums'
+import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
 
 /**
  * Shared error handling utilities to eliminate duplication between 

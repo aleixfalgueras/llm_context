@@ -7,8 +7,8 @@ import {Card} from '@/components/ui/card'
 import {Checkbox} from '@/components/ui/checkbox'
 import {Label} from '@/components/ui/label'
 import {ClientCombobox} from '@/components/ui/client-combobox'
-import {ClientContextSelection, defaultClientContextSelections} from '@/types/client-context'
-import {CLIENT_CONTEXT_FIELD_LABELS} from '@/types/client'
+import {ClientContextSelection, defaultClientContextSelections} from '@/lib/types/client-context'
+import {CLIENT_CONTEXT_FIELD_LABELS} from '@/lib/types/client'
 // Removed createChatAndReturn - now using lazy chat creation via API
 import {useRouter} from 'next/navigation'
 

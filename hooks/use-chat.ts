@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { useToast } from '@/hooks/use-toast'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
-import { Message } from '@/types/message-types'
+import { Message } from '@/lib/types/message-types'
 
 // Helper function to check if messages are likely duplicates
 function areMessagesSimilar(msg1: Message, msg2: Message): boolean {

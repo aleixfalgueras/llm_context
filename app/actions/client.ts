@@ -2,12 +2,12 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { getUserSubscription, isSubscriptionActive } from '../subscription/subscription-utils'
-import { logger } from '../logger'
-import { ClientOperations } from '../database'
-import { ClientFormData } from '@/types/client'
-import { processClientData } from '../utils/validation'
-import { ApiSubscriptionErrorCode } from '@/types/enums'
+import { getUserSubscription, isSubscriptionActive } from '../../lib/subscription/subscription-utils'
+import { logger } from '../../lib/logger'
+import { ClientOperations } from '../../database'
+import { ClientFormData } from '@/lib/types/client'
+import { processClientData } from '../../lib/utils/validation'
+import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
 
 export type ClientData = ClientFormData
 

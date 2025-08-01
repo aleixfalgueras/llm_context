@@ -8,7 +8,7 @@ import {ScrollArea} from '@/components/ui/scroll-area'
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {ChevronDown, FileText, Search, Star, TrendingUp} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
-import {Prompt} from '@/types/component-types'
+import {Prompt} from '@/lib/types/component-types'
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void

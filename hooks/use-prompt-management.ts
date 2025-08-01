@@ -8,7 +8,7 @@ import {
   PromptStats, 
   PromptFilters, 
   FilterActionHandlers 
-} from '@/types/prompt-management-types'
+} from '@/lib/types/prompt-management-types'
 
 interface UsePromptManagementReturn {
   // State

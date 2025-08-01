@@ -9,7 +9,7 @@ import { prisma } from '@/lib/prisma'
 import { 
   FeedbackState,
   isValidFeedbackState 
-} from '@/types/enums'
+} from '@/lib/types/enums'
 
 const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 

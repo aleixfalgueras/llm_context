@@ -17,8 +17,8 @@ import {
   Users,
   XCircle
 } from 'lucide-react'
-import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/types/enums'
-import {AdminDashboardClientProps, FeedbackItem} from '@/types/admin-types'
+import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/lib/types/enums'
+import {AdminDashboardClientProps, FeedbackItem} from '@/lib/types/admin-types'
 import { useToast } from '@/hooks/use-toast'
 
 export default function AdminDashboardClient({ data }: AdminDashboardClientProps) {

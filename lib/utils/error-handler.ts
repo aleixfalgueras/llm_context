@@ -5,7 +5,7 @@
 
 import {NextResponse} from 'next/server'
 import {logger} from '../logger'
-import {ApiSubscriptionErrorCode} from '@/types/enums'
+import {ApiSubscriptionErrorCode} from '@/lib/types/enums'
 import {getErrorMetadata, normalizeErrorData} from './error-code'
 
 export interface ApiErrorOptions {

@@ -12,7 +12,7 @@ import {
   isValidFeedbackType,
   isValidPriority,
   isValidFeedbackState 
-} from '@/types/enums'
+} from '@/lib/types/enums'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {

@@ -4,7 +4,7 @@ import {isDowngrade} from '@/lib/subscription/subscription-plan-utils'
 import {scheduleSubscriptionDowngrade} from '@/lib/stripe/stripe-subscription'
 import {logger} from '@/lib/logger'
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
-import {SubscriptionOperations} from "@/lib/database";
+import {SubscriptionOperations} from "@/database";
 import {SubscriptionPlan} from "@prisma/client";
 
 interface CheckoutResponse {

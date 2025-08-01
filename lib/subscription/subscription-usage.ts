@@ -2,10 +2,10 @@ import {cacheUsage, getCachedUsage, invalidateUsageCache} from "@/lib/subscripti
 import {logger} from "@/lib/logger";
 import {prisma} from "@/lib/prisma";
 import {getUserSubscription, getUserSubscriptionWithValidation} from "@/lib/subscription/subscription-utils";
-import {ApiSubscriptionErrorCode} from "@/types/enums";
+import {ApiSubscriptionErrorCode} from "@/lib/types/enums";
 import {getStorageSubscriptionUsage} from "@/lib/utils/storage";
-import {TokenUsageValidationResult} from "@/types/middleware-validation-types";
-import {SubscriptionUsage, UsageInfo} from "@/types/subscription-usage-types";
+import {TokenUsageValidationResult} from "@/lib/types/middleware-validation-types";
+import {SubscriptionUsage, UsageInfo} from "@/lib/types/subscription-usage-types";
 import {UserUsage} from "@prisma/client";
 
 /**

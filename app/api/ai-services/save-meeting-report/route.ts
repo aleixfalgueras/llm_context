@@ -1,5 +1,5 @@
-import { DocumentService } from '@/lib/services/document-service'
-import { DOCUMENT_TYPES } from '@/types/document-types'
+import { DocumentService } from '@/services/document-service'
+import { DOCUMENT_TYPES } from '@/lib/types/document-types'
 import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/middleware/api-middleware'
 import { apiValidation } from '@/lib/utils/validation'
 

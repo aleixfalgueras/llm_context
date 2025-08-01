@@ -1,5 +1,5 @@
-import {MessageService} from '@/lib/services/message-service'
-import {ChatService} from '@/lib/services/chat-service'
+import {MessageService} from '@/services/message-service'
+import {ChatService} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
 import {createAICompletionStream} from '@/lib/ai/wrapper'
 import {logger} from '@/lib/logger'

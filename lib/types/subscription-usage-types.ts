@@ -1,5 +1,5 @@
 import {UserUsage} from "@prisma/client";
-import {SubscriptionWithValidation} from "@/types/subscription-types";
+import {SubscriptionWithValidation} from "@/lib/types/subscription-types";
 
 export interface SubscriptionUsage {
   subscription: SubscriptionWithValidation

@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef} from 'react'
 import {useToast} from '@/hooks/use-toast'
-import {ToastVariant} from '@/types/enums'
+import {ToastVariant} from '@/lib/types/enums'
 
 interface UseSubscriptionRefreshProps {
   refetch: (retries?: number, delay?: number, forceRefresh?: boolean) => Promise<boolean>

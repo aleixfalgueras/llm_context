@@ -3,7 +3,7 @@
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Edit, FileText, Trash2} from 'lucide-react'
-import {Client, ClientActionHandlers, LanguageInfo} from '@/types/client-list-types'
+import {Client, ClientActionHandlers, LanguageInfo} from '@/lib/types/client-list-types'
 
 interface ClientGridViewProps {
   clients: Client[]

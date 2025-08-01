@@ -12,9 +12,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckIcon, ArrowRightIcon, CreditCardIcon, CalendarIcon } from 'lucide-react'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import { useToast } from '@/hooks/use-toast'
-import { ToastVariant } from '@/types/enums'
+import { ToastVariant } from '@/lib/types/enums'
 import {SubscriptionPlan} from "@prisma/client";
 
 interface UpgradePreview {

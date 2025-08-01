@@ -11,7 +11,7 @@ import {ClientVariablesTooltip} from '@/components/ui/client-variables-tooltip'
 import {Edit2, Loader2, Plus} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
-import {Prompt, PromptBasic} from '@/types/component-types'
+import {Prompt, PromptBasic} from '@/lib/types/component-types'
 
 interface PromptDialogProps {
   prompt?: Prompt | PromptBasic

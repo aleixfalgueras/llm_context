@@ -4,13 +4,13 @@
  */
 
 import { ChatOperations } from '../database'
-import { isSuccess, unwrapResult } from '../database/base-operations'
-import { generateChatTitleWithClient } from '../utils/general'
-import { buildClientContextSection, hasClientContext } from '../utils/client-context'
-import { getDefaultModel, getModelsByTier } from '../ai/models-config'
-import { checkModelAccess, withClientAccess } from '../middleware/validation-middleware'
-import { ApiSubscriptionErrorCode } from '@/types/enums'
-import { logger } from '../logger'
+import { isSuccess, unwrapResult } from '@/database/base-operations'
+import { generateChatTitleWithClient } from '../lib/utils/general'
+import { buildClientContextSection, hasClientContext } from '../lib/utils/client-context'
+import { getDefaultModel, getModelsByTier } from '../lib/ai/models-config'
+import { checkModelAccess, withClientAccess } from '../lib/middleware/validation-middleware'
+import { ApiSubscriptionErrorCode } from '@/lib/types/enums'
+import { logger } from '../lib/logger'
 
 export class ChatService {
   /**

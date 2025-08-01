@@ -7,8 +7,8 @@ import {Card, CardContent} from '@/components/ui/card'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {Label} from '@/components/ui/label'
 import {Download, Edit, Plus, Search, Trash2, TrashIcon} from 'lucide-react'
-import {ALL_DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
-import {Document} from '@/types/component-types'
+import {ALL_DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {Document} from '@/lib/types/component-types'
 
 interface DocumentListProps {
   documents: Document[]
