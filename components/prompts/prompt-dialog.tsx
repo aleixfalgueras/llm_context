@@ -12,6 +12,7 @@ import {Edit2, Loader2, Plus} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
 import {Prompt, PromptBasic} from '@/lib/types/component-types'
+import {handleClientApiError} from '@/lib/api/api-toast'
 
 interface PromptDialogProps {
   prompt?: Prompt | PromptBasic
@@ -127,7 +128,8 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save prompt')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to save prompt' }))
+        throw new Error(errorData.error)
       }
 
       toast({
@@ -143,11 +145,8 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
         resetForm()
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to save prompt. Please try again.',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save prompt'
+      handleClientApiError(errorMessage, 'Failed to save prompt')
     } finally {
       setLoading(false)
     }

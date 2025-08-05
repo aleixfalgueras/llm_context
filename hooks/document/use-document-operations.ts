@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/lib/types/enums'
 import { Document } from '@/lib/types/component-types'
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 interface UseDocumentOperationsProps {
   clientId: string
@@ -55,7 +56,8 @@ export function useDocumentOperations({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create document')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to create document' }))
+        throw new Error(errorData.error)
       }
 
       await response.json()
@@ -68,21 +70,7 @@ export function useDocumentOperations({
       return true
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create document'
-      
-      // Check for storage limit errors
-      if (errorMessage.includes('Storage limit exceeded')) {
-        toast({
-          title: 'Storage Limit Exceeded',
-          description: errorMessage,
-          variant: 'destructive',
-        })
-      } else {
-        toast({
-          title: 'Error',
-          description: errorMessage,
-          variant: 'destructive',
-        })
-      }
+      handleClientApiError(errorMessage, 'Failed to create document')
       return false
     } finally {
       setIsCreatingDocument(false)
@@ -124,8 +112,8 @@ export function useDocumentOperations({
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Failed to update document')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to update document' }))
+        throw new Error(errorData.error)
       }
 
       await response.json()
@@ -140,21 +128,7 @@ export function useDocumentOperations({
       return true
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update document'
-      
-      // Check for storage limit errors
-      if (errorMessage.includes('Storage limit exceeded')) {
-        toast({
-          title: 'Storage Limit Exceeded',
-          description: errorMessage,
-          variant: 'destructive',
-        })
-      } else {
-        toast({
-          title: 'Error',
-          description: errorMessage,
-          variant: 'destructive',
-        })
-      }
+      handleClientApiError(errorMessage, 'Failed to update document')
       return false
     }
   }
@@ -171,7 +145,8 @@ export function useDocumentOperations({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete document')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to delete document' }))
+        throw new Error(errorData.error)
       }
 
       await response.json()
@@ -186,11 +161,8 @@ export function useDocumentOperations({
       }
       return true
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete document',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete document'
+      handleClientApiError(errorMessage, 'Failed to delete document')
       return false
     }
   }
@@ -213,7 +185,8 @@ export function useDocumentOperations({
         })
 
         if (!response.ok) {
-          throw new Error('Failed to delete all documents')
+          const errorData = await response.json().catch(() => ({ error: 'Failed to delete all documents' }))
+          throw new Error(errorData.error)
         }
 
         await response.json()
@@ -227,11 +200,8 @@ export function useDocumentOperations({
         setShowDeleteAllConfirm(false)
         return true
       } catch (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to delete documents',
-          variant: 'destructive',
-        })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete all documents'
+        handleClientApiError(errorMessage, 'Failed to delete all documents')
         return false
       }
     } else {
@@ -245,7 +215,8 @@ export function useDocumentOperations({
       const response = await fetch(`/api/documents/${doc.id}/download`)
 
       if (!response.ok) {
-        throw new Error('Failed to download document')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to download document' }))
+        throw new Error(errorData.error)
       }
 
       // Create blob from response
@@ -269,12 +240,8 @@ export function useDocumentOperations({
       })
       return true
     } catch (error) {
-      console.error('Download error:', error)
-      toast({
-        title: 'Download Failed',
-        description: 'Failed to download document. Please try again.',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to download document'
+      handleClientApiError(errorMessage, 'Failed to download document')
       return false
     }
   }

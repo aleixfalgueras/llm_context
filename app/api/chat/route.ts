@@ -8,7 +8,7 @@ import {getDefaultModel} from '@/lib/ai/models-config'
 import {checkModelAccess} from "@/lib/api/api-validation";
 import {OpenRouterClient} from "@/lib/ai/openrouter";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
-import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
+import {SubscriptionErrorCode} from "@/services/error-codes";
 
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.

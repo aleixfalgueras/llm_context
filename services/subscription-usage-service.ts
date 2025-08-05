@@ -25,7 +25,7 @@ import {
   SubscriptionUsage, 
   UsageInfo 
 } from '@/lib/types/subscription-usage-types'
-import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
+import {SubscriptionErrorCode} from "@/services/error-codes";
 
 export class SubscriptionUsageService {
 

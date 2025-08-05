@@ -43,7 +43,6 @@ export function handleApiError(
     cleanup
   } = options
 
-  // Execute cleanup function if provided
   if (cleanup) {
     cleanup()
   }
@@ -54,12 +53,12 @@ export function handleApiError(
   if (resourceId) logContext[operation === 'chat' ? 'chatId' : 'clientId'] = resourceId
   if (operation) logContext.operation = operation
 
-  // Simple error logging
+
   if (logError) {
     logger.error(`Error in ${context}`, error as Error, logContext)
   }
 
-  // Handle Error instances - pass message directly to UI
+
   if (error instanceof Error) {
     return NextResponse.json(
       { error: error.message },
@@ -67,18 +66,13 @@ export function handleApiError(
     )
   }
 
-  // Handle unknown errors
   return NextResponse.json(
     { error: fallbackMessage },
     { status: 500 }
   )
 }
 
-// =============================================================================
 // COMMON API ERROR RESPONSES
-// =============================================================================
-
-// TODO: Add subscription and usage errors
 export const ApiErrors = {
   unauthorized: () => NextResponse.json(
     { error: 'Authentication required' },

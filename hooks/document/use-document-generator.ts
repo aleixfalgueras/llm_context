@@ -7,6 +7,7 @@ import { getDefaultModel } from '@/lib/ai/models-config'
 import { clientLogger } from '@/lib/client-logger'
 import { Prompt } from '@/lib/types/component-types'
 import type { Client } from '@prisma/client'
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
@@ -78,17 +79,16 @@ export function useDocumentGenerator({
     setIsLoadingPrompts(true)
     try {
       const response = await fetch('/api/prompts?active=true&includeContent=true')
-      if (response.ok) {
-        const data = await response.json()
-        setPrompts(data.data.prompts || [])
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to load prompts' }))
+        throw new Error(errorData.error)
       }
+      const data = await response.json()
+      setPrompts(data.data.prompts || [])
     } catch (error) {
       console.error('Error loading prompts:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to load prompts',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'
+      handleClientApiError(errorMessage, 'Failed to load prompts')
     } finally {
       setIsLoadingPrompts(false)
     }
@@ -137,8 +137,8 @@ export function useDocumentGenerator({
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null)
-        throw new Error(errorData?.error || `HTTP error! status: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Failed to generate document' }))
+        throw new Error(errorData.error)
       }
 
       const data = await response.json()
@@ -146,14 +146,8 @@ export function useDocumentGenerator({
       return data.content
     } catch (error) {
       console.error('Error generating document:', error)
-      
-      // Generic error handling
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate document. Please try again.'
-      toast({
-        title: 'Generation Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate document'
+      handleClientApiError(errorMessage, 'Failed to generate document')
       throw error
     }
   }
