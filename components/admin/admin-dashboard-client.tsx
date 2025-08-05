@@ -20,6 +20,7 @@ import {
 import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/lib/types/enums'
 import {AdminDashboardClientProps, FeedbackItem} from '@/lib/types/admin-types'
 import { useToast } from '@/hooks/use-toast'
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 export default function AdminDashboardClient({ data }: AdminDashboardClientProps) {
   const { toast } = useToast()
@@ -49,7 +50,8 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to clear caches: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Failed to clear caches' }))
+        throw new Error(errorData.error)
       }
 
       const result = await response.json()
@@ -60,11 +62,8 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
       })
     } catch (error) {
       console.error('Error clearing caches:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to clear caches. Please try again.',
-        variant: 'destructive'
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to clear caches'
+      handleClientApiError(errorMessage, 'Failed to clear caches')
     } finally {
       setClearingCaches(false)
     }
@@ -84,7 +83,8 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update feedback status')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to update feedback status' }))
+        throw new Error(errorData.error)
       }
 
       const result = await response.json()
@@ -103,7 +103,8 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
 
     } catch (error) {
       console.error('Error updating feedback status:', error)
-      // Handle error (you could add toast here)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update feedback status'
+      handleClientApiError(errorMessage, 'Failed to update feedback status')
     } finally {
       // Remove from updating items
       setUpdatingItems(prev => {

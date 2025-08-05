@@ -2,7 +2,7 @@ import {auth} from "@clerk/nextjs/server";
 import {logger} from "@/lib/logger";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/ai/models-config";
 import {SubscriptionUsageService} from "@/services/subscription-usage-service";
-import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
+import {SubscriptionErrorCode} from "@/services/error-codes";
 
 /**
  * Validates user authentication via Clerk and returns the user ID.

@@ -9,6 +9,7 @@ import {
   PromptFilters, 
   FilterActionHandlers 
 } from '@/lib/types/prompt-management-types'
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 interface UsePromptManagementReturn {
   // State
@@ -60,17 +61,16 @@ export function usePromptManagement(): UsePromptManagementReturn {
       params.append('includeContent', 'true')
 
       const response = await fetch(`/api/prompts?${params.toString()}`)
-      if (response.ok) {
-        const data = await response.json()
-        setPrompts(data.data.prompts || [])
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to load prompts' }))
+        throw new Error(errorData.error)
       }
+      const data = await response.json()
+      setPrompts(data.data.prompts || [])
     } catch (error) {
       console.error('Error fetching prompts:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to load prompts.',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'
+      handleClientApiError(errorMessage, 'Failed to load prompts')
     } finally {
       setLoading(false)
     }
@@ -118,21 +118,18 @@ export function usePromptManagement(): UsePromptManagementReturn {
         method: 'DELETE',
       })
 
-      if (response.ok) {
-        toast({
-          title: 'Prompt deleted',
-          description: 'Prompt has been deleted successfully.',
-        })
-        fetchPrompts()
-      } else {
-        throw new Error('Failed to delete prompt')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to delete prompt' }))
+        throw new Error(errorData.error)
       }
-    } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to delete prompt.',
-        variant: 'destructive',
+        title: 'Prompt deleted',
+        description: 'Prompt has been deleted successfully.',
       })
+      fetchPrompts()
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete prompt'
+      handleClientApiError(errorMessage, 'Failed to delete prompt')
     }
   }
 
@@ -149,21 +146,18 @@ export function usePromptManagement(): UsePromptManagementReturn {
         }),
       })
 
-      if (response.ok) {
-        toast({
-          title: prompt.isActive ? 'Prompt disabled' : 'Prompt enabled',
-          description: `"${prompt.name}" has been ${prompt.isActive ? 'disabled' : 'enabled'}.`,
-        })
-        fetchPrompts()
-      } else {
-        throw new Error('Failed to update prompt')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to update prompt' }))
+        throw new Error(errorData.error)
       }
-    } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to update prompt status.',
-        variant: 'destructive',
+        title: prompt.isActive ? 'Prompt disabled' : 'Prompt enabled',
+        description: `"${prompt.name}" has been ${prompt.isActive ? 'disabled' : 'enabled'}.`,
       })
+      fetchPrompts()
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update prompt status'
+      handleClientApiError(errorMessage, 'Failed to update prompt status')
     }
   }
 

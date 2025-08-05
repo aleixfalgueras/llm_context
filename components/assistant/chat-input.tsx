@@ -15,6 +15,7 @@ import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/ai/models-config'
 import {Message} from '@/lib/types/message-types'
 import {Prompt} from '@/lib/types/component-types'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
+import {handleClientApiError} from '@/lib/api/api-toast'
 
 // Separate component for just the textarea input to isolate re-renders
 interface TextareaInputProps {
@@ -192,8 +193,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(errorText || `HTTP error! status: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Failed to export chat' }))
+        throw new Error(errorData.error)
       }
 
       const data = await response.json()
@@ -220,13 +221,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
       })
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to export chat. Please try again.'
-      
-      toast({
-        title: 'Export Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export chat'
+      handleClientApiError(errorMessage, 'Failed to export chat')
     } finally {
       setIsExporting(false)
     }

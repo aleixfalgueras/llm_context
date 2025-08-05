@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { useToast } from '@/hooks/use-toast'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { Message } from '@/lib/types/message-types'
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 // Helper function to check if messages are likely duplicates
 function areMessagesSimilar(msg1: Message, msg2: Message): boolean {
@@ -54,7 +54,6 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
   const [isLoading, setIsLoading] = useState(false)
   const [onTitleUpdate, setOnTitleUpdate] = useState<((title: string) => void) | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
-  const { toast } = useToast()
 
   // Update messages when initialMessages changes (for server-side updates)
   // Use merge strategy to avoid overwriting optimistic updates
@@ -169,8 +168,8 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
       clientLogger.apiResponse('POST', '/api/chat', response.status, { chatId });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null)
-        throw new Error(errorData?.error || `Failed to send message: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Failed to send message' }))
+        throw new Error(errorData.error)
       }
 
       // Handle streaming response
@@ -259,12 +258,8 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
       clientLogger.error('Error sending message', error as Error, { chatId });
       
       // Generic error handling
-      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.'
-      toast({
-        title: 'Message Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message'
+      handleClientApiError(errorMessage, 'Failed to send message')
       
       // Remove both user and assistant messages on error
       setMessages(prev => prev.filter(msg => 
@@ -279,7 +274,7 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
       abortControllerRef.current = null
       endTiming();
     }
-  }, [chatId, isLoading, onTitleUpdate, toast])
+  }, [chatId, isLoading, onTitleUpdate])
 
   // Check if AI is currently streaming
   const isStreaming = useMemo(() => messages.some(message => message.isStreaming), [messages])

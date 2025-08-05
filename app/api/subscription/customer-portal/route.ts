@@ -6,7 +6,7 @@ import {
   ApiContext 
 } from '@/lib/api/api-middleware'
 
-import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
+import {SubscriptionErrorCode} from "@/services/error-codes";
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {

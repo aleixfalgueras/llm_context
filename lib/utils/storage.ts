@@ -7,7 +7,7 @@ import {SubscriptionPlanType} from '@/lib/types/subscription-types'
 import {cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} from "@/lib/subscription/subscription-cache";
 import {SubscriptionPlan} from "@prisma/client";
 import {StorageSubscriptionUsage, StorageUsage} from "@/lib/types/subscription-usage-types";
-import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
+import {SubscriptionErrorCode} from "@/services/error-codes";
 
 export const STORAGE_LIMITS = {
   [SubscriptionPlan.basic]: 50 * 1024 * 1024,    // 50 MB for basic plan

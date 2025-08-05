@@ -5,7 +5,7 @@
 
 import {toast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/lib/types/enums'
-import {SubscriptionErrorCode} from './api-error-codes'
+import {SubscriptionErrorCode} from '@/services/error-codes'
 
 
 export const errorToasts = {
@@ -23,18 +23,18 @@ export const errorToasts = {
       duration: 10000
     }),
 
-  usageLimitExceeded: (errorMessage: string) =>
+  usageLimitExceeded: () =>
     toast({
       title: 'Usage Limit Exceeded',
-      description: `${errorMessage} Please upgrade your plan to continue.`,
+      description: 'You have reached your tokens usage limit. Please upgrade your plan to continue.',
       variant: ToastVariant.DESTRUCTIVE,
       duration: 10000
     }),
 
-  modelAccessDenied: (errorMessage: string) =>
+  modelAccessDenied: () =>
     toast({
       title: 'Model Access Denied',
-      description: `${errorMessage} Please upgrade your plan to continue.`,
+      description: 'This model is not available on your current plan. Please upgrade to access this model.',
       variant: ToastVariant.DESTRUCTIVE,
       duration: 10000
     }),
@@ -43,6 +43,14 @@ export const errorToasts = {
     toast({
       title: 'No Subscription Found',
       description: 'No active subscription found. Please subscribe to a plan to continue.',
+      variant: ToastVariant.DESTRUCTIVE,
+      duration: 10000
+    }),
+
+  storageLimitExceeded: () =>
+    toast({
+      title: 'Storage Limit Exceeded',
+      description: 'You have reached your storage limit. Please upgrade your plan or delete some documents to continue.',
       variant: ToastVariant.DESTRUCTIVE,
       duration: 10000
     })
@@ -58,13 +66,16 @@ export function handleClientApiError(errorMessage: string, fallbackMessage: stri
       return errorToasts.subscriptionExpired()
     
     case SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED:
-      return errorToasts.usageLimitExceeded(errorMessage)
+      return errorToasts.usageLimitExceeded()
     
     case SubscriptionErrorCode.MODEL_ACCESS_DENIED:
-      return errorToasts.modelAccessDenied(errorMessage)
+      return errorToasts.modelAccessDenied()
     
     case SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND:
       return errorToasts.noSubscriptionFound()
+    
+    case SubscriptionErrorCode.STORAGE_LIMIT_EXCEEDED:
+      return errorToasts.storageLimitExceeded()
     
     default:
       return errorToasts.generic(errorMessage || fallbackMessage)

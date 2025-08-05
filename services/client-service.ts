@@ -4,7 +4,7 @@ import {ClientOperations} from '@/database'
 import {Client, Prisma} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 import {sanitizeToNull} from "@/lib/utils/validation";
-import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
+import {SubscriptionErrorCode} from "@/services/error-codes";
 
 /**
  * Process client data by trimming context fields and converting empty strings to null

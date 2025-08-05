@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 export default function PrivacySettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -28,16 +29,17 @@ export default function PrivacySettingsPage() {
         },
       })
 
-      const result = await response.json()
-      
-      if (response.ok) {
-        alert(result.message || 'Data export request submitted successfully!')
-      } else {
-        alert(result.error || 'Failed to submit export request')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to submit export request' }))
+        throw new Error(errorData.error)
       }
+
+      const result = await response.json()
+      alert(result.message || 'Data export request submitted successfully!')
     } catch (error) {
       console.error('Error requesting data export:', error)
-      alert('Error submitting export request. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit export request'
+      handleClientApiError(errorMessage, 'Failed to submit export request')
     } finally {
       setIsLoading(false)
     }
@@ -57,19 +59,20 @@ export default function PrivacySettingsPage() {
         })
       })
 
-      const result = await response.json()
-      
-      if (response.ok) {
-        setDeletionInfo(result)
-        setShowDeleteConfirm(false)
-        setShowDeletionScheduled(true)
-        setConfirmationText('')
-      } else {
-        alert(result.error || 'Failed to schedule account deletion')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to schedule account deletion' }))
+        throw new Error(errorData.error)
       }
+
+      const result = await response.json()
+      setDeletionInfo(result)
+      setShowDeleteConfirm(false)
+      setShowDeletionScheduled(true)
+      setConfirmationText('')
     } catch (error) {
       console.error('Error scheduling account deletion:', error)
-      alert('Error scheduling account deletion. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to schedule account deletion'
+      handleClientApiError(errorMessage, 'Failed to schedule account deletion')
     } finally {
       setIsLoading(false)
     }
@@ -90,18 +93,19 @@ export default function PrivacySettingsPage() {
         })
       })
 
-      const result = await response.json()
-      
-      if (response.ok) {
-        alert(result.message || 'Account deletion cancelled successfully!')
-        setShowDeletionScheduled(false)
-        setDeletionInfo(null)
-      } else {
-        alert(result.error || 'Failed to cancel account deletion')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to cancel account deletion' }))
+        throw new Error(errorData.error)
       }
+
+      const result = await response.json()
+      alert(result.message || 'Account deletion cancelled successfully!')
+      setShowDeletionScheduled(false)
+      setDeletionInfo(null)
     } catch (error) {
       console.error('Error cancelling account deletion:', error)
-      alert('Error cancelling account deletion. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to cancel account deletion'
+      handleClientApiError(errorMessage, 'Failed to cancel account deletion')
     } finally {
       setIsLoading(false)
     }
