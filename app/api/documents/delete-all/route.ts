@@ -4,7 +4,7 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // DELETE /api/documents/delete-all - Delete all documents for a client
 export const DELETE = withEnhancedApi(

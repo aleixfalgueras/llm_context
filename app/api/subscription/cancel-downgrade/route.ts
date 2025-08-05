@@ -2,7 +2,7 @@ import {
   withEnhancedApi, 
   apiSuccess, 
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 import { invalidateAllUserCaches } from '@/lib/subscription/subscription-cache'
 
 import { logger } from '@/lib/logger'

@@ -5,9 +5,10 @@ import {createAICompletionStream} from '@/lib/ai/wrapper'
 import {logger} from '@/lib/logger'
 import {NextResponse} from 'next/server'
 import {getDefaultModel} from '@/lib/ai/models-config'
-import {withTokenValidation} from "@/lib/middleware/validation-middleware";
+import {checkModelAccess, checkTokenUsage} from "@/lib/api/api-validation";
 import {OpenRouterClient} from "@/lib/ai/openrouter";
-import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
+import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
+import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.
@@ -48,7 +49,7 @@ export const POST = withEnhancedApi(
     let chatId: string = '';
 
     // Token validation using composable middleware
-    await withTokenValidation(userId)
+    await checkTokenUsage(userId)
 
     // Parse request body
     const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
@@ -58,14 +59,9 @@ export const POST = withEnhancedApi(
     const selectedModel = model || getDefaultModel()
 
     // Validate model access based on user's subscription tier
-    const modelAccessResult = await ChatService.validateModelAccess(userId, selectedModel, chatId)
-    if (!modelAccessResult.success) {
-      throw {
-        error: modelAccessResult.error,
-        code: modelAccessResult.code,
-        status: modelAccessResult.status,
-        metadata: modelAccessResult.metadata
-      }
+    const modelAccessResult = await checkModelAccess(userId, selectedModel)
+    if (!modelAccessResult) {
+      throw new Error(SubscriptionErrorCode.MODEL_ACCESS_DENIED)
     }
 
     logger.info('Chat request authenticated, model access and token usage validated', {

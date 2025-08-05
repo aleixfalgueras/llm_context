@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { withEnhancedApi, apiSuccess } from '@/lib/middleware/api-middleware'
+import { withEnhancedApi, apiSuccess } from '@/lib/api/api-middleware'
 import { ApiErrors } from '@/lib/api/api-error-handler'
 
 // Create a new data export request

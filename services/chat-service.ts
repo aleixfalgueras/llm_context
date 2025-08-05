@@ -2,11 +2,8 @@ import {ChatOperations} from '@/database'
 import {isSuccess} from '@/database/base-operations'
 import {generateChatTitleWithClient} from '@/lib/utils/general'
 import {buildClientContextSection, hasClientContext} from './client-context-service'
-import {getModelsByTier} from '@/lib/ai/models-config'
-import {checkModelAccess} from '@/lib/middleware/validation-middleware'
 import {ClientService} from './client-service'
 import {logger} from '@/lib/logger'
-import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 export class ChatService {
   /**
@@ -28,46 +25,6 @@ export class ChatService {
    */
   static async updateChatTitle(chatId: string, userId: string, title: string) {
     return ChatOperations.updateChatTitle(chatId, userId, title)
-  }
-
-  /**
-   * Validate model access for a user
-   */
-  static async validateModelAccess(userId: string, selectedModel: string, chatId?: string) {
-    const modelAccess = await checkModelAccess(userId, selectedModel)
-    
-    if (!modelAccess.allowed) {
-      const availableModels = getModelsByTier(modelAccess.tier)
-      const modelNames = availableModels.map(m => m.name).join(', ')
-
-      logger.warn('Model access denied', {
-        userId,
-        chatId,
-        metadata: {
-          requestedModel: selectedModel,
-          userTier: modelAccess.tier,
-          userPlan: modelAccess.plan
-        }
-      });
-
-      return {
-        success: false as const,
-        error: `Your ${modelAccess.plan} plan doesn't include access to this model. Available models: ${modelNames}`,
-        code: SubscriptionErrorCode.MODEL_ACCESS_DENIED,
-        status: 403,
-        metadata: {
-          tier: modelAccess.tier,
-          plan: modelAccess.plan,
-          modelId: selectedModel,
-          upgradeUrl: '/subscription'
-        }
-      }
-    }
-
-    return {
-      success: true as const,
-      data: modelAccess
-    }
   }
 
   /**

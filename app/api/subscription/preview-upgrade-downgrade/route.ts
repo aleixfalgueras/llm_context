@@ -1,4 +1,4 @@
-import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
+import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {stripe} from '@/lib/stripe/stripe'
 import {STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
 import {logger} from '@/lib/logger'

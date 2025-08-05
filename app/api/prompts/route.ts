@@ -4,7 +4,7 @@ import {
   extractPagination,
   parseJsonBody,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 import { PromptOperations } from '@/database'
 import { validatePromptForm } from '@/lib/utils/validation'
 import { logger } from '@/lib/logger'

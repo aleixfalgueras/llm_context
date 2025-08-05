@@ -4,7 +4,7 @@ import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 import { SubscriptionUsageOperations } from '@/database'
 
 export const POST = withEnhancedApi(
