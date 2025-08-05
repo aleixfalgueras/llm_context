@@ -6,8 +6,8 @@ import {SubscriptionUsageService} from '@/services/subscription-usage-service'
 import {SubscriptionPlanType} from '@/lib/types/subscription-types'
 import {cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} from "@/lib/subscription/subscription-cache";
 import {SubscriptionPlan} from "@prisma/client";
-import {StorageUsage, StorageSubscriptionUsage} from "@/lib/types/subscription-usage-types";
-import {StorageUsageValidationResult} from "@/lib/types/middleware-validation-types";
+import {StorageSubscriptionUsage, StorageUsage} from "@/lib/types/subscription-usage-types";
+import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 export const STORAGE_LIMITS = {
   [SubscriptionPlan.basic]: 50 * 1024 * 1024,    // 50 MB for basic plan
@@ -147,53 +147,6 @@ export async function getStorageSubscriptionUsage(userId: string, subscription?:
   }
 }
 
-/**
- * Validate storage limits before document creation or upload.
- * 
- * Checks if adding a new document of specified size would exceed the user's
- * storage quota based on their subscription plan. Uses the optimized storage
- * analytics function for consistent data and caching benefits.
- * 
- * @param userId - The user ID to validate storage limits for
- * @param documentSizeBytes - Size of document to validate, defaults to 0 for current usage check
- * @returns Promise<StorageUsageValidationResult> with validation result and limit details
- * @throws Error if data fetching fails
- * 
- * **Architecture:**
- * - Uses getStorageSubscriptionUsage() for consistent data source
- * - Leverages existing caching and performance optimizations
- * - Returns standardized validation result interface
- */
-export async function getStorageUsageValidationResult(userId: string, documentSizeBytes: number = 0): Promise<StorageUsageValidationResult> {
-  try {
-    const storageSubscriptionUsage = await getStorageSubscriptionUsage(userId)
-
-    // Check if adding this document would exceed the limit
-    const wouldExceedLimit = (storageSubscriptionUsage.usage.totalBytes + documentSizeBytes) > storageSubscriptionUsage.limit
-
-    if (wouldExceedLimit) {
-      return {
-        allowed: false,
-        limit: storageSubscriptionUsage.limit,
-        used: storageSubscriptionUsage.usage.totalBytes,
-        remaining: Math.max(0, storageSubscriptionUsage.limit - storageSubscriptionUsage.usage.totalBytes),
-        limitType: 'storage',
-        message: `Storage limit exceeded. Document size: ${formatBytes(documentSizeBytes)}, Available: ${formatBytes(Math.max(0, storageSubscriptionUsage.limit - storageSubscriptionUsage.usage.totalBytes))}`
-      }
-    }
-
-    return {
-      allowed: true,
-      limit: storageSubscriptionUsage.limit,
-      used: storageSubscriptionUsage.usage.totalBytes,
-      remaining: storageSubscriptionUsage.limit - storageSubscriptionUsage.usage.totalBytes,
-      limitType: 'storage'
-    }
-  } catch (error) {
-    logger.error('Error checking storage limit', error as Error, { userId })
-    throw error
-  }
-}
 
 /**
  * Validate if a document can be saved without exceeding storage limits.
@@ -210,10 +163,18 @@ export async function getStorageUsageValidationResult(userId: string, documentSi
  * @returns Promise that resolves if validation passes
  */
 export async function validateDocumentStorage(content: string, userId: string): Promise<void> {
-  const documentSize = calculateDocumentSize(content)
-  const storageUsageValidationResult = await getStorageUsageValidationResult(userId, documentSize)
+  try {
+    const documentSize = calculateDocumentSize(content)
+    const storageSubscriptionUsage = await getStorageSubscriptionUsage(userId)
+    const wouldExceedLimit = (storageSubscriptionUsage.usage.totalBytes + documentSize) > storageSubscriptionUsage.limit
 
-  if (!storageUsageValidationResult.allowed) {
-    throw new Error(storageUsageValidationResult.message || 'Storage limit exceeded')
+    if (wouldExceedLimit) {
+      throw new Error(SubscriptionErrorCode.STORAGE_LIMIT_EXCEEDED)
+    }
+
+  } catch (error) {
+    logger.error('Error checking storage limit', error as Error, { userId })
+    throw error
   }
+
 }

@@ -21,9 +21,7 @@ export const GET = withEnhancedApi(
     })
 
     if (!document) {
-      const error = new Error('Document not found or unauthorized')
-      ;(error as any).status = 404
-      throw error
+      throw new Error('Document not found or unauthorized')
     }
 
     // Get document content

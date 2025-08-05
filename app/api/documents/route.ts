@@ -34,25 +34,15 @@ export const POST = withEnhancedApi(
       throw new Error('Missing required fields')
     }
 
-    try {
-      const result = await DocumentService.createDocument(
-        userId,
-        clientId,
-        documentName,
-        documentType,
-        content
-      )
+    const result = await DocumentService.createDocument(
+      userId,
+      clientId,
+      documentName,
+      documentType,
+      content
+    )
 
-      return apiSuccess(result, 201)
-    } catch (error) {
-      // Check for storage limit errors
-      if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
-        const storageError = new Error(error.message)
-        ;(storageError as any).status = 413
-        throw storageError
-      }
-      throw error
-    }
+    return apiSuccess(result, 201)
   },
   { 
     context: 'Create document',
