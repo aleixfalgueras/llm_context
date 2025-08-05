@@ -3,7 +3,8 @@ import {isSuccess} from '@/database/base-operations'
 import {generateChatTitleWithClient} from '@/lib/utils/general'
 import {buildClientContextSection, hasClientContext} from './client-context-service'
 import {getModelsByTier} from '@/lib/ai/models-config'
-import {checkModelAccess, withClientAccess} from '@/lib/middleware/validation-middleware'
+import {checkModelAccess} from '@/lib/middleware/validation-middleware'
+import {ClientService} from './client-service'
 import {logger} from '@/lib/logger'
 import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
@@ -168,7 +169,11 @@ Respond naturally and conversationally while keeping this context in mind.`
     }))
 
     // Get client information for this chat
-    const client = await withClientAccess(userId, chat.clientId)
+    const clientResult = await ClientService.getUserClientById(chat.clientId, userId)
+    if (!clientResult.success) {
+      throw new Error(clientResult.error || 'Client not found')
+    }
+    const client = clientResult.data
 
     // Build system prompt with client context
     const selectedContextFields = chat.contextFields || []

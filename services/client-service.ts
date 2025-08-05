@@ -85,7 +85,7 @@ export class ClientService {
   /**
    * Update an existing client with business validation
    */
-  static async updateClient(
+  static async updateUserClient(
     clientId: string,
     userId: string,
     data: Omit<Prisma.ClientCreateInput, 'userId'>
@@ -106,7 +106,7 @@ export class ClientService {
         documentsLanguage: data.documentsLanguage || 'english',
       })
 
-      const result = await ClientOperations.updateClient(clientId, userId, clientData)
+      const result = await ClientOperations.updateUserClient(clientId, userId, clientData)
       
       if (!result.success) {
         logger.error('Error updating client', new Error(result.error), { userId, clientId })
@@ -125,12 +125,12 @@ export class ClientService {
   /**
    * Delete a client
    */
-  static async deleteClient(
+  static async deleteUserClient(
     clientId: string,
     userId: string
   ): Promise<DbOperationResult<{ id: string }>> {
     try {
-      const result = await ClientOperations.deleteClient(clientId, userId)
+      const result = await ClientOperations.deleteUserClient(clientId, userId)
       
       if (!result.success) {
         logger.error('Error deleting client', new Error(result.error), { userId, clientId })
@@ -142,6 +142,30 @@ export class ClientService {
       return {
         success: false,
         error: 'An unexpected error occurred while deleting the client'
+      }
+    }
+  }
+
+  /**
+   * Get a single client by ID with ownership validation
+   */
+  static async getUserClientById(
+    clientId: string,
+    userId: string
+  ): Promise<DbOperationResult<Client>> {
+    try {
+      const result = await ClientOperations.findUserClientById(clientId, userId)
+      
+      if (!result.success) {
+        logger.error('User client not found', new Error(result.error), { userId, clientId })
+      }
+
+      return result
+    } catch (error) {
+      logger.error('Unexpected error in getClientById service', error as Error, { userId, clientId })
+      return {
+        success: false,
+        error: 'An unexpected error occurred while getting the client'
       }
     }
   }

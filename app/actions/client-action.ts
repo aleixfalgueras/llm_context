@@ -15,13 +15,12 @@ export async function createClient(data: Omit<Prisma.ClientCreateInput, 'userId'
 
   revalidatePath('/clients')
   return result.data
-
 }
 
 export async function updateClient(clientId: string, data: Omit<Prisma.ClientCreateInput, 'userId'>): Promise<Client> {
   const userId = await withAuth()
 
-  const result = await ClientService.updateClient(clientId, userId, data)
+  const result = await ClientService.updateUserClient(clientId, userId, data)
 
   if (!result.success) {
     throw new Error(result.error || 'Failed to update client')
@@ -33,7 +32,7 @@ export async function updateClient(clientId: string, data: Omit<Prisma.ClientCre
 
 export async function deleteClient(id: string): Promise<void> {
   const userId = await withAuth()
-  const result = await ClientService.deleteClient(id, userId)
+  const result = await ClientService.deleteUserClient(id, userId)
   
   if (!result.success) {
     throw new Error(result.error || 'Failed to delete client')

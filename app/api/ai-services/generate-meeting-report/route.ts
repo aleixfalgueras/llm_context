@@ -3,7 +3,8 @@ import { createAICompletion } from '@/lib/ai/wrapper'
 import { logger, withTiming } from '@/lib/logger'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { handleApiError } from '@/lib/api/api-error-handler'
-import {withAuth, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
+import {withAuth, withTokenValidation} from "@/lib/middleware/validation-middleware";
+import {ClientService} from "@/services/client-service";
 
 export async function POST(req: Request) {
   const endTiming = logger.startTiming('Generate Meeting Report API');
@@ -20,8 +21,11 @@ export async function POST(req: Request) {
     clientId = requestClientId;
     logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
 
-    // Validate client access after parsing clientId
-    const client = await withClientAccess(userId, clientId)
+    const clientResult = await ClientService.getUserClientById(clientId, userId)
+    if (!clientResult.success) {
+      throw new Error(clientResult.error || 'Client not found')
+    }
+    const client = clientResult.data
 
     // Log additional instructions if provided
     if (additionalInfo && additionalInfo.trim()) {

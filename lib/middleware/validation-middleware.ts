@@ -35,7 +35,7 @@ import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
  *
  * **Security Notes:**
  * - Relies on Clerk's session validation for security
- * - Does not perform additional authorization checks (use withClientAccess for resource access)
+ * - Does not perform additional authorization checks
  * - Essential for protecting all user-specific API endpoints
  */
 export async function withAuth(): Promise<string> {
@@ -46,64 +46,6 @@ export async function withAuth(): Promise<string> {
   }
 
   return userId
-}
-
-/**
- * Client access validation middleware that verifies user ownership of client resources.
- * 
- * This middleware enforces resource-level authorization by validating that the authenticated
- * user has legitimate access to the specified client. It prevents unauthorized access to
- * client data and ensures proper data isolation between users.
- * 
- * @param userId - The authenticated user ID (typically from withAuth())
- * @param clientId - The client ID being accessed
- * 
- * @returns Promise<Client> - Complete client object if access is granted:
- *   - All client fields from the database
- *   - Confirms ownership relationship
- *   - Ready for use in business logic
- * 
- * @throws Error - Throws error with proper HTTP status if access denied:
- *   - 404 status: Client not found or user doesn't own the client
- *   - Error message: 'Client not found'
- *   - Prevents information disclosure about client existence
- * 
- * **Authorization Logic:**
- * 1. Queries database for client with matching ID and user ID
- * 2. Uses composite WHERE clause to ensure both client existence and ownership
- * 3. Returns complete client object if both conditions met
- * 4. Throws 404 error if either condition fails (security through obscurity)
- * 
- * **Database Query:**
- * - Uses findFirst for efficient single-record retrieval
- * - Composite WHERE clause prevents SQL injection and ensures data isolation
- * - No sensitive data exposure in error responses
- * 
- * **Security Features:**
- * - Prevents horizontal privilege escalation (user accessing other users' clients)
- * - Consistent error response prevents client enumeration attacks
- * - Validates ownership at the database level for accuracy
- * 
- * **Integration Pattern:**
- * - Called after withAuth() to validate resource access
- * - Return value used directly in business logic
- * - Error handling managed by API error middleware
- */
-export async function withClientAccess(userId: string, clientId: string): Promise<any> {
-  const client = await prisma.client.findFirst({
-    where: {
-      id: clientId,
-      userId,
-    },
-  })
-
-  if (!client) {
-    const error = new Error('Client not found')
-    ;(error as any).status = 404
-    throw error
-  }
-
-  return client
 }
 
 /**
