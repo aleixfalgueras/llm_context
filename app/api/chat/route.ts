@@ -5,7 +5,7 @@ import {createAICompletionStream} from '@/lib/ai/wrapper'
 import {logger} from '@/lib/logger'
 import {NextResponse} from 'next/server'
 import {getDefaultModel} from '@/lib/ai/models-config'
-import {checkModelAccess, checkTokenUsage} from "@/lib/api/api-validation";
+import {checkModelAccess} from "@/lib/api/api-validation";
 import {OpenRouterClient} from "@/lib/ai/openrouter";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
@@ -48,8 +48,6 @@ export const POST = withEnhancedApi(
   async ({userId, req}: ApiContext) => {
     let chatId: string = '';
 
-    // Token validation using composable middleware
-    await checkTokenUsage(userId)
 
     // Parse request body
     const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
@@ -358,5 +356,6 @@ export const POST = withEnhancedApi(
   {
     context: 'Chat API',
     allowedMethods: ['POST'],
-    expectedContentType: 'application/json'
+    expectedContentType: 'application/json',
+    requireToken: true
   })

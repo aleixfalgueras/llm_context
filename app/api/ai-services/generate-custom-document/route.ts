@@ -6,7 +6,6 @@ import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
 import { logger } from '@/lib/logger'
 import { ClientService } from '@/services/client-service'
-import { checkTokenUsage } from '@/lib/api/api-validation'
 import { 
   withEnhancedApi, 
   parseJsonBody,
@@ -26,8 +25,6 @@ export const POST = withEnhancedApi(
       model: selectedModel = DEFAULT_MODEL
     } = await parseJsonBody(req)
 
-    // Validate token usage and subscription limits
-    await checkTokenUsage(userId)
 
     // Validate required fields
     if (!clientId || (!promptId && !customPrompt) || !documentTitle) {
@@ -165,6 +162,7 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
   {
     context: 'Generate Custom Document',
     allowedMethods: ['POST'],
-    expectedContentType: 'application/json'
+    expectedContentType: 'application/json',
+    requireToken: true
   }
 ) 

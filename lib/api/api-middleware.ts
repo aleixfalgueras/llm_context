@@ -2,6 +2,7 @@ import {NextRequest, NextResponse} from 'next/server'
 import {auth} from '@clerk/nextjs/server'
 import {ApiErrors, handleApiError} from './api-error-handler'
 import {logger} from '../logger'
+import {checkTokenUsage} from './api-validation'
 
 /**
  * Request context passed to API handlers:
@@ -29,6 +30,8 @@ export type EnhancedApiHandler<T = any> = (
 export interface EnhancedApiConfig {
   /** Whether authentication is required (default: true) */
   requireAuth?: boolean
+  /** Whether token usage validation is required (default: false) */
+  requireToken?: boolean
   /** Context string for error logging */
   context?: string
   /** Method validation */
@@ -47,6 +50,7 @@ export function withEnhancedApi<T = any>(
 ) {
   const {
     requireAuth = true,
+    requireToken = false,
     context = 'API operation',
     allowedMethods,
     expectedContentType
@@ -79,6 +83,11 @@ export function withEnhancedApi<T = any>(
           return ApiErrors.unauthorized()
         }
         userId = authUserId
+        
+        // Token usage validation if required
+        if (requireToken) {
+          await checkTokenUsage(userId)
+        }
       }
 
       // Log the API request
@@ -102,8 +111,8 @@ export function withEnhancedApi<T = any>(
     } catch (error) {
       // Log error API response
       logger.apiResponse(req.method, req.nextUrl.pathname, 500)
-      
       return handleApiError(error, { context })
+
     }
   }
 }

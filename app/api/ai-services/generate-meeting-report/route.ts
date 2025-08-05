@@ -3,7 +3,6 @@ import { createAICompletion } from '@/lib/ai/wrapper'
 import { logger, withTiming } from '@/lib/logger'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { ClientService } from '@/services/client-service'
-import { checkTokenUsage } from '@/lib/api/api-validation'
 import { 
   withEnhancedApi, 
   parseJsonBody,
@@ -15,8 +14,6 @@ export const POST = withEnhancedApi(
     // Parse request body
     const { clientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL } = await parseJsonBody(req)
 
-    // Validate token usage and subscription limits
-    await checkTokenUsage(userId)
 
     // Validate required fields
     if (!clientId || !meetingTranscription || !meetingDate) {
@@ -101,6 +98,7 @@ INSTRUCTIONS:
   {
     context: 'Generate Meeting Report',
     allowedMethods: ['POST'],
-    expectedContentType: 'application/json'
+    expectedContentType: 'application/json',
+    requireToken: true
   }
 ) 
