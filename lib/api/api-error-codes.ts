@@ -7,7 +7,6 @@ export enum SubscriptionErrorCode {
   NO_SUBSCRIPTION_FOUND = 'NO_SUBSCRIPTION_FOUND'
 }
 
-
 // #######################################################################################
 
 /**

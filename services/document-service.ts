@@ -3,6 +3,7 @@
  */
 
 import {DocumentStorageService} from './storage-service'
+import {ClientService} from './client-service'
 import {calculateDocumentSize, validateDocumentStorage} from '../lib/utils/storage'
 import {logger} from '../lib/logger'
 import {prisma} from '../lib/prisma'
@@ -81,17 +82,11 @@ export class DocumentService {
     // Validate storage constraints (throws error if validation fails)
     await validateDocumentStorage(content, userId)
 
-    // Validate client exists and belongs to user
-    const client = await prisma.client.findFirst({
-      where: {
-        id: clientId,
-        userId,
-      },
-    })
-    
-    if (!client) {
-      throw new Error('Client not found')
+    const clientResult = await ClientService.getUserClientById(clientId, userId)
+    if (!clientResult.success) {
+      throw new Error(clientResult.error)
     }
+    const client = clientResult.data
 
     // Generate document name if not provided
     const finalDocumentName = documentName || this.generateDefaultDocumentName(

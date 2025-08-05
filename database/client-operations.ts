@@ -29,6 +29,15 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
+  static async findUserClientById(clientId: string, userId: string, config: DbOperationConfig = {}): Promise<DbOperationResult<Client>> {
+    return this.findUserOwnedRecord<Client>(
+      prisma.client,
+      clientId,
+      userId,
+      { context: 'Find client by ID', ...config }
+    )
+  }
+
   static async createClient(userId: string, data: Omit<Prisma.ClientCreateInput, 'userId'>): Promise<DbOperationResult<Client>> {
     return this.createUserOwnedRecord<Client>(
       prisma.client,
@@ -38,7 +47,7 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
-  static async updateClient(clientId: string, userId: string, data: Partial<Omit<Prisma.ClientCreateInput, 'userId' | 'id' | 'createdAt' | 'updatedAt'>>): Promise<DbOperationResult<Client>> {
+  static async updateUserClient(clientId: string, userId: string, data: Partial<Omit<Prisma.ClientCreateInput, 'userId' | 'id' | 'createdAt' | 'updatedAt'>>): Promise<DbOperationResult<Client>> {
     return this.updateUserOwnedRecord<Client>(
       prisma.client,
       clientId,
@@ -48,7 +57,7 @@ export class ClientOperations extends BaseOperations {
     )
   }
 
-  static async deleteClient(clientId: string, userId: string): Promise<DbOperationResult<{ id: string }>> {
+  static async deleteUserClient(clientId: string, userId: string): Promise<DbOperationResult<{ id: string }>> {
     return this.deleteUserOwnedRecord(
       prisma.client,
       clientId,
