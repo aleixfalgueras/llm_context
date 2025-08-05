@@ -2,7 +2,7 @@ import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 
 // Force dynamic rendering since we use auth() which accesses headers

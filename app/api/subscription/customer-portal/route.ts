@@ -4,7 +4,7 @@ import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 

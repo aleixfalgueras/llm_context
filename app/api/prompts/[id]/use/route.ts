@@ -3,7 +3,7 @@ import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // POST /api/prompts/[id]/use - Track prompt usage
 export const POST = withEnhancedApi(

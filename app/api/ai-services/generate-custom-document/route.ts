@@ -5,19 +5,17 @@ import { createAICompletion } from '@/lib/ai/wrapper'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
 import { logger } from '@/lib/logger'
-import { handleApiError } from '@/lib/api/api-error-handler'
-import {withAuth, withTokenValidation} from "@/lib/middleware/validation-middleware";
-import {ClientService} from "@/services/client-service";
+import { ClientService } from '@/services/client-service'
+import { checkTokenUsage } from '@/lib/api/api-validation'
+import { 
+  withEnhancedApi, 
+  parseJsonBody,
+  ApiContext 
+} from '@/lib/api/api-middleware'
 
-export async function POST(request: Request) {
-  let userId: string = '';
-  
-  try {
-    // Use composable middleware for auth and token validation first
-    userId = await withAuth()
-    await withTokenValidation(userId)
-
-    // Parse request body after authentication
+export const POST = withEnhancedApi(
+  async ({ userId, req }: ApiContext) => {
+    // Parse request body
     const { 
       clientId, 
       promptId,
@@ -26,7 +24,15 @@ export async function POST(request: Request) {
       additionalInstructions,
       selectedContextFields = [],
       model: selectedModel = DEFAULT_MODEL
-    } = await request.json()
+    } = await parseJsonBody(req)
+
+    // Validate token usage and subscription limits
+    await checkTokenUsage(userId)
+
+    // Validate required fields
+    if (!clientId || (!promptId && !customPrompt) || !documentTitle) {
+      throw new Error('Missing required fields: clientId, documentTitle, and either promptId or customPrompt are required')
+    }
 
     // Validate client access after parsing clientId
     const clientResult = await ClientService.getUserClientById(clientId, userId)
@@ -34,11 +40,6 @@ export async function POST(request: Request) {
       throw new Error(clientResult.error || 'Client not found')
     }
     const client = clientResult.data
-
-    // Validate required fields
-    if (!clientId || (!promptId && !customPrompt) || !documentTitle) {
-      return new Response('Missing required fields', { status: 400 })
-    }
 
     // Get prompt content
     let promptContent = ''
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
       })
 
       if (!prompt) {
-        return new Response('Prompt not found', { status: 404 })
+        throw new Error('Prompt not found')
       }
 
       promptContent = prompt.content
@@ -151,7 +152,7 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
     const generatedContent = completion.content
 
     if (!generatedContent) {
-      return new Response('Failed to generate document', { status: 500 })
+      throw new Error('Failed to generate document')
     }
 
     return Response.json({
@@ -160,11 +161,10 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
       clientName: client.name,
       documentTitle,
     })
-  } catch (error) {
-    return handleApiError(error, {
-      context: 'generate custom document',
-      userId,
-      operation: 'generate-custom-document'
-    });
+  },
+  {
+    context: 'Generate Custom Document',
+    allowedMethods: ['POST'],
+    expectedContentType: 'application/json'
   }
-} 
+) 

@@ -25,7 +25,6 @@ import {
   SubscriptionUsage, 
   UsageInfo 
 } from '@/lib/types/subscription-usage-types'
-import { TokenUsageValidationResult } from '@/lib/types/middleware-validation-types'
 import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 export class SubscriptionUsageService {
@@ -328,65 +327,29 @@ export class SubscriptionUsageService {
 
   /**
    * Check token usage limits before AI requests to enforce subscription quotas.
-   * 
-   * Validates whether a user can make AI requests based on their current subscription
-   * status and monthly token usage. Now uses the unified data service for improved
-   * performance and consistency.
-   * 
+
    * @param userId - The user ID to check token usage limits for
-   * 
-   * @returns Promise<TokenUsageValidationResult> - Standardized validation result object
-   * 
-   * @throws Never throws - Returns safe fallback values on error
-   * 
-   * **Optimized Implementation:**
-   * - Uses unified getUserLimitsAndUsage() for single data fetch
-   * - Eliminates redundant subscription status checks
-   * - Consistent return structure via TokenValidationResult interface
-   * - Better error handling with proper fallback values
+   * @returns Promise<boolean>
+   **
    */
-  static async getTokenUsageValidationResult(userId: string): Promise<TokenUsageValidationResult> {
+  static async isTokenUsageAllowed(userId: string): Promise<boolean> {
     try {
       const subscriptionUsage = await this.getUserSubscriptionUsage(userId);
 
-      // Check if subscription is active first
       if (!subscriptionUsage.subscription.isActive) {
-        logger.warn('Subscription is not active for token usage limit check', {
-          userId,
-          metadata: {
-            plan: subscriptionUsage.subscription.plan,
-            status: subscriptionUsage.subscription.status,
-            currentPeriodEnd: subscriptionUsage.subscription.currentPeriodEnd
-          }
-        });
-        return {
-          allowed: false,
-          limit: 0,
-          used: 0,
-          limitType: 'tokens',
-          reason: SubscriptionErrorCode.SUBSCRIPTION_EXPIRED
-        };
+        throw new Error(SubscriptionErrorCode.SUBSCRIPTION_EXPIRED)
       }
 
       const tokenLimit = subscriptionUsage.subscription.tokenLimit;
       const tokensUsed = subscriptionUsage.usage.tokensUsed;
 
-      return {
-        allowed: tokensUsed < tokenLimit,
-        limit: tokenLimit,
-        used: tokensUsed,
-        remaining: Math.max(0, tokenLimit - tokensUsed),
-        limitType: 'tokens'
-      };
+      return tokensUsed < tokenLimit
+
     } catch (error) {
       logger.error('Error checking token usage limit', error as Error, { userId });
-      return {
-        allowed: false,
-        limit: 0,
-        used: 0,
-        limitType: 'tokens'
-      };
+      throw error
     }
+
   }
 
   /**

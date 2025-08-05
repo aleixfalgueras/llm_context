@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server'
 import {auth} from '@clerk/nextjs/server'
-import {ApiErrors, handleApiError} from '../api/api-error-handler'
+import {ApiErrors, handleApiError} from './api-error-handler'
 import {logger} from '../logger'
 
 /**

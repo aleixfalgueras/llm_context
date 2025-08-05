@@ -4,7 +4,7 @@ import { DocumentService } from '@/services/document-service'
 import { 
   withEnhancedApi,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // GET /api/documents/[id]/download - Download document as file
 export const GET = withEnhancedApi(

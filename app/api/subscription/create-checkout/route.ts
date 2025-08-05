@@ -3,7 +3,7 @@ import {createCheckoutSession, STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils
 import {isDowngrade} from '@/lib/subscription/subscription-plan-utils'
 import {scheduleSubscriptionDowngrade} from '@/lib/stripe/stripe-subscription'
 import {logger} from '@/lib/logger'
-import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
+import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionUsageOperations} from "@/database";
 import {SubscriptionPlan} from "@prisma/client";
 
