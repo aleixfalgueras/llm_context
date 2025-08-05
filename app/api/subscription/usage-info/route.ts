@@ -20,9 +20,7 @@ export const GET = withEnhancedApi(
     const usageInfo = await SubscriptionUsageService.getUserUsageInfo(userId, forceRefresh)
     
     if (!usageInfo) {
-      const error = new Error('Failed to fetch usage information')
-      ;(error as any).status = 500
-      throw error
+      throw new Error('Failed to fetch usage information')
     }
     
     return apiSuccess(usageInfo)

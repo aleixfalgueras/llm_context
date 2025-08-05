@@ -1,11 +1,10 @@
 /**
- * Unified Error Handler
- * Combines provider error handling and API response formatting
+ * Simplified Error Handler
+ * Handles all API errors with consistent responses
  */
 
 import {NextResponse} from 'next/server'
 import {logger} from '../logger'
-import {getErrorMetadata, normalizeErrorData, SubscriptionErrorCode} from './api-error-codes'
 
 export interface ApiErrorOptions {
   /** Context or operation name for logging */
@@ -25,13 +24,10 @@ export interface ApiErrorOptions {
 }
 
 /**
- * Unified API error handler that formats any error into consistent HTTP responses
- *
- * USED IN THE SERVER SIDE -> RETURN PROPER HTTP ERROR RESPONSE
- * - Should propagate service error codes
- * - No extra context, metadata, status; KEEP IT SIMPLE:
- *  error field should be just a string with the service layer error code or default value
- *
+ * Simplified API error handler that returns consistent HTTP responses
+ * - Propagates error messages directly to the UI
+ * - All errors return 500 status for simplicity
+ * - Business error codes (like SubscriptionErrorCode) are passed through as messages
  */
 export function handleApiError(
   error: unknown, 
@@ -58,51 +54,12 @@ export function handleApiError(
   if (resourceId) logContext[operation === 'chat' ? 'chatId' : 'clientId'] = resourceId
   if (operation) logContext.operation = operation
 
+  // Simple error logging
   if (logError) {
-    // Normalize error data for consistent handling
-    const errorData = normalizeErrorData(error)
-    const errorMetadata = errorData ? getErrorMetadata(errorData) : null
-    
-    // Handle expected user limit errors as INFO instead of ERROR
-    if (errorData && errorMetadata?.shouldLogAsInfo) {
-      if (errorData.code === SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED) {
-        logger.info('User reached token limit', { 
-          ...logContext,
-          metadata: errorMetadata.usageInfo
-        });
-      } else if (errorData.code === SubscriptionErrorCode.SUBSCRIPTION_EXPIRED) {
-        logger.info('User subscription expired', { 
-          ...logContext,
-          metadata: {
-            plan: errorMetadata.plan
-          }
-        });
-      } else if (errorData.code === SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND) {
-        logger.info('User attempted to access billing portal without subscription', { 
-          ...logContext,
-          metadata: {
-            message: 'Expected behavior for free trial users'
-          }
-        });
-      }
-    } else {
-      logger.error(`Error in ${context}`, error as Error, logContext)
-    }
+    logger.error(`Error in ${context}`, error as Error, logContext)
   }
 
-  // Handle structured middleware errors (auth, token validation, etc.)
-  if (error instanceof Error && (error as any).code && (error as any).status) {
-    return NextResponse.json(
-      {
-        error: error.message,
-        code: (error as any).code,
-        ...(error as any).metadata
-      },
-      { status: (error as any).status }
-    )
-  }
-
-  // Handle known Error instances
+  // Handle Error instances - pass message directly to UI
   if (error instanceof Error) {
     return NextResponse.json(
       { error: error.message },

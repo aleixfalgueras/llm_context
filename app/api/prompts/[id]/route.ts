@@ -21,9 +21,7 @@ export const GET = withEnhancedApi(
     })
 
     if (!prompt) {
-      const error = new Error('Prompt not found')
-      ;(error as any).status = 404
-      throw error
+      throw new Error('Prompt not found')
     }
 
     return apiSuccess(prompt)

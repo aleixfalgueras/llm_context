@@ -29,10 +29,7 @@ export const POST = withEnhancedApi(
             message: 'User has no Stripe customer - expected behavior for free trial users'
           }
         })
-        const noCustomerError = new Error('No active subscription found')
-        ;(noCustomerError as any).status = 404
-        ;(noCustomerError as any).code = SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
-        throw noCustomerError
+        throw new Error(SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND)
       }
       throw error
     }
