@@ -1,15 +1,10 @@
-/**
- * Chat business logic service
- * Pure business logic without Next.js dependencies
- */
-
-import { ChatOperations } from '../database'
-import { isSuccess, unwrapResult } from '@/database/base-operations'
-import { generateChatTitleWithClient } from '../lib/utils/general'
-import { buildClientContextSection, hasClientContext } from './client-context-service'
-import { getDefaultModel, getModelsByTier } from '../lib/ai/models-config'
-import { checkModelAccess, withClientAccess } from '../lib/middleware/validation-middleware'
-import { logger } from '../lib/logger'
+import {ChatOperations} from '@/database'
+import {isSuccess} from '@/database/base-operations'
+import {generateChatTitleWithClient} from '@/lib/utils/general'
+import {buildClientContextSection, hasClientContext} from './client-context-service'
+import {getModelsByTier} from '@/lib/ai/models-config'
+import {checkModelAccess, withClientAccess} from '@/lib/middleware/validation-middleware'
+import {logger} from '@/lib/logger'
 import {SubscriptionErrorCode} from "@/lib/api/api-error-codes";
 
 export class ChatService {

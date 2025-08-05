@@ -2,7 +2,7 @@
  * Message-specific database operations
  */
 
-import { prisma } from '../lib/prisma'
+import { prisma } from '@/lib/prisma'
 import { BaseOperations } from './base-operations'
 import {DbOperationConfig} from "@/lib/types/database-types";
 
