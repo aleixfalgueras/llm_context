@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { DEFAULT_MODEL } from '@/lib/ai/models-config'
+import { DEFAULT_MODEL } from '@/lib/models-config'
 import { handleClientApiError } from '@/lib/api/api-toast'
 import {MessageWithStreaming} from "@/lib/types/message-types";
 

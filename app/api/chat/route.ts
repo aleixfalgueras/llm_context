@@ -1,12 +1,11 @@
 import {MessageService} from '@/services/message-service'
 import {ChatService} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
-import {createAICompletionStream} from '@/lib/ai/wrapper'
+import {openRouterService, OpenRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
 import {NextResponse} from 'next/server'
-import {getDefaultModel} from '@/lib/ai/models-config'
+import {getDefaultModel} from '@/lib/models-config'
 import {checkModelAccess} from "@/lib/api/api-validation";
-import {OpenRouterClient} from "@/lib/ai/openrouter";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
 import {Role} from '@prisma/client';
@@ -167,15 +166,9 @@ export const POST = withEnhancedApi(
           // Use unified AI wrapper with automatic usage tracking (streaming version)
           logger.aiRequest(selectedModel, undefined, {userId, chatId});
 
-          completionStream = createAICompletionStream(
-            {
-              model: selectedModel,
-              messages: aiMessages
-            },
-            {
-              userId,
-              resourceId: chatId
-            }
+          completionStream = openRouterService.createStreamingCompletion(
+            {model: selectedModel, messages: aiMessages},
+            {userId, resourceId: chatId}
           );
 
           for await (const chunk of completionStream) {
@@ -199,8 +192,8 @@ export const POST = withEnhancedApi(
                   // Add a small delay - generation stats might not be immediately available
                   await new Promise(resolve => setTimeout(resolve, 1000));
 
-                  const client = new OpenRouterClient();
-                  const stats = await client.getGenerationStats(chunk.generationId);
+                  const service = new OpenRouterService();
+                  const stats = await service.getGenerationStats(chunk.generationId);
 
                   if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
                     finalUsage = {

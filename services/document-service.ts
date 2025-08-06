@@ -3,7 +3,7 @@
  */
 
 import {DocumentStorageService} from './storage-service'
-import {ClientService} from './client-service'
+import {ClientService} from './client/client-service'
 import {calculateDocumentSize, validateDocumentStorage} from '../lib/utils/storage'
 import {logger} from '../lib/logger'
 import {prisma} from '../lib/prisma'

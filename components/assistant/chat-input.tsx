@@ -11,7 +11,7 @@ import {useToast} from '@/hooks/use-toast'
 import {Message, Role} from '@prisma/client'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {clientLogger} from '@/lib/client-logger'
-import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/ai/models-config'
+import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/models-config'
 import {Prompt} from '@/lib/types/component-types'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'

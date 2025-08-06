@@ -1,8 +1,8 @@
 // Language utilities removed - meeting reports are now generated in English only
-import { createAICompletion } from '@/lib/ai/wrapper'
+import { openRouterService } from '@/services/openrouter'
 import { logger, withTiming } from '@/lib/logger'
-import { DEFAULT_MODEL } from '@/lib/ai/models-config'
-import { ClientService } from '@/services/client-service'
+import { DEFAULT_MODEL } from '@/lib/models-config'
+import { ClientService } from '@/services/client/client-service'
 import { 
   withEnhancedApi, 
   parseJsonBody,
@@ -62,8 +62,8 @@ INSTRUCTIONS:
 - Focus on practical next steps that can be implemented immediately
 - Generate the response in English with clear, professional language`
 
-    // Use unified AI wrapper with automatic usage tracking
-    const completion = await createAICompletion(
+    // Use OpenRouter service with automatic usage tracking
+    const completion = await openRouterService.createCompletion(
       {
         model: selectedModel,
         messages: [

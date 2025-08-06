@@ -8,11 +8,11 @@ import type { Client } from '@prisma/client'
  */
 export function replaceClientVariables(content: string, client: Client): string {
   return content
-    .replace(/\{country\}/g, client.country || '[Country]')
-    .replace(/\{general_context\}/g, client.generalContext || '[General Context]')
-    .replace(/\{specific_context_1\}/g, client.specificContext1 || '[Specific Context 1]')
-    .replace(/\{specific_context_2\}/g, client.specificContext2 || '[Specific Context 2]')
-    .replace(/\{specific_context_3\}/g, client.specificContext3 || '[Specific Context 3]')
+    .replace(/\{country}/g, client.country || '[Country]')
+    .replace(/\{general_context}/g, client.generalContext || '[General Context]')
+    .replace(/\{specific_context_1}/g, client.specificContext1 || '[Specific Context 1]')
+    .replace(/\{specific_context_2}/g, client.specificContext2 || '[Specific Context 2]')
+    .replace(/\{specific_context_3}/g, client.specificContext3 || '[Specific Context 3]')
 }
 
 /**

@@ -1,30 +1,35 @@
 /**
- * OpenRouter service - orchestrates client, error handling, and usage tracking
+ * OpenRouter service - handles API communication, usage tracking, and stream processing
  */
 
-import { OpenRouterClient, OpenRouterCompletionOptions, StreamChunk } from './client'
-import { processOpenRouterStream } from './stream-handler'
-import { logger } from '../../logger'
-import { 
-  getDefaultModel, 
-  getDefaultTemperature, 
+import OpenAI from 'openai'
+import {processOpenRouterStream} from './stream-handler'
+import {logger} from '@/lib/logger'
+import {
+  getDefaultFrequencyPenalty,
   getDefaultMaxTokens,
-  getDefaultPresencePenalty, 
-  getDefaultFrequencyPenalty 
-} from '../models-config'
-import {SubscriptionUsageService} from "@/services/subscription-usage-service";
+  getDefaultModel,
+  getDefaultPresencePenalty,
+  getDefaultTemperature
+} from '@/lib/models-config'
+import {SubscriptionUsageService} from "@/services/subscription-usage-service"
+import {OpenRouterCompletionOptions, StreamChunk, UsageTrackingOptions} from "@/lib/types/openrouter-types";
 
-export interface UsageTrackingOptions {
-  userId: string
-  resourceId?: string
-  additionalMetadata?: Record<string, any>
-}
-
+/**
+ * OpenRouter service using OpenAI SDK (OpenRouter is OpenAI-compatible)
+ */
 export class OpenRouterService {
-  private client: OpenRouterClient
+  private client: OpenAI
 
   constructor() {
-    this.client = new OpenRouterClient()
+    this.client = new OpenAI({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      baseURL: "https://openrouter.ai/api/v1",
+      defaultHeaders: {
+        "HTTP-Referer": process.env.SITE_URL || "http://localhost:3000",
+        "X-Title": process.env.SITE_NAME || "LLM Context App",
+      },
+    })
   }
 
   /**
@@ -36,8 +41,17 @@ export class OpenRouterService {
   ): AsyncGenerator<StreamChunk, void, unknown> {
     const finalOptions = this.applyDefaults(options)
     
+    // Ensure model is provided
+    if (!finalOptions.model) {
+      throw new Error('Model is required for completion')
+    }
+    
     try {
-      const stream = await this.client.createStreamingCompletion(finalOptions)
+      const stream = await this.client.chat.completions.create({
+        ...finalOptions,
+        model: finalOptions.model,
+        stream: true
+      })
       
       let finalChunk: StreamChunk | null = null
       
@@ -53,6 +67,7 @@ export class OpenRouterService {
         await this.handleUsageTracking(finalChunk, finalOptions, usageOptions)
       }
     } catch (error) {
+      logger.error('OpenRouter streaming error', error instanceof Error ? error : new Error(String(error)))
       throw error
     }
   }
@@ -66,8 +81,17 @@ export class OpenRouterService {
   ): Promise<{ content: string; usage?: StreamChunk['usage'] }> {
     const finalOptions = this.applyDefaults(options)
     
+    // Ensure model is provided
+    if (!finalOptions.model) {
+      throw new Error('Model is required for completion')
+    }
+    
     try {
-      const completion = await this.client.createCompletion(finalOptions)
+      const completion = await this.client.chat.completions.create({
+        ...finalOptions,
+        model: finalOptions.model,
+        stream: false
+      })
       
       const content = completion.choices[0]?.message?.content || ''
       const usage = completion.usage ? {
@@ -79,7 +103,7 @@ export class OpenRouterService {
       // Track usage if options provided
       if (usage && usageOptions) {
         await this.trackUsage(usageOptions, {
-          model: finalOptions.model || getDefaultModel(),
+          model: finalOptions.model,
           totalTokens: usage.totalTokens,
           promptTokens: usage.promptTokens,
           completionTokens: usage.completionTokens,
@@ -89,8 +113,33 @@ export class OpenRouterService {
       
       return { content, usage }
     } catch (error) {
+      logger.error('OpenRouter completion error', error instanceof Error ? error : new Error(String(error)))
       throw error
     }
+  }
+
+  /**
+   * Get generation stats by ID (for token usage fallback)
+   */
+  async getGenerationStats(generationId: string) {    
+    // Use query parameter instead of path parameter based on OpenRouter docs
+    const url = new URL('https://openrouter.ai/api/v1/generation');
+    url.searchParams.append('id', generationId);
+    
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+      }
+    })
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch generation stats: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    return data
   }
 
   /**
@@ -128,7 +177,7 @@ export class OpenRouterService {
         // Add a small delay - generation stats might not be immediately available
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        const stats = await this.client.getGenerationStats(finalChunk.generationId);
+        const stats = await this.getGenerationStats(finalChunk.generationId);
         
         if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
           usage = {
