@@ -1,12 +1,12 @@
 import {ChatOperations} from '@/database'
 import {isSuccess} from '@/database/base-operations'
 import {generateChatTitleWithClient} from '@/lib/utils/general'
-import {buildClientContextSection, hasClientContext} from './client-context-service'
-import {ClientService} from './client-service'
+import {buildClientContextSection, hasClientContext} from './client/client-context-service'
+import {ClientService} from './client/client-service'
 import {logger} from '@/lib/logger'
 import {Chat, Client, Message, Role} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
-import {AIMessageRole} from '@/lib/ai/openrouter/client'
+import {AIMessageRole} from '@/lib/types/openrouter-types'
 
 export class ChatService {
   /**

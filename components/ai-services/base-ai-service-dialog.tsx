@@ -14,7 +14,7 @@ import {useToast} from '@/hooks/use-toast'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {ClientCombobox} from '@/components/ui/client-combobox'
 import {handleClientApiError} from '@/lib/api/api-toast'
-import {getDefaultModel} from '@/lib/ai/models-config'
+import {getDefaultModel} from '@/lib/models-config'
 import type {Client} from '@prisma/client'
 import {ValidationResult} from '@/lib/types/api-types'
 import {logger} from "@/lib/logger";

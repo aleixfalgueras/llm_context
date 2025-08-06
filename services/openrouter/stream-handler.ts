@@ -2,8 +2,9 @@
  * OpenRouter streaming response handler
  */
 
-import { logger } from '../../logger'
-import type { StreamChunk } from './client'
+import { logger } from '../../lib/logger'
+
+import {StreamChunk} from "@/lib/types/openrouter-types";
 
 /**
  * Process OpenRouter streaming completion

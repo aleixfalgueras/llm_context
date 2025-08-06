@@ -18,7 +18,7 @@ import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import type {Prompt} from '@/lib/types/component-types'
 import {replaceClientVariables} from '@/lib/ai/variable-replacement'
-import {getDefaultModel} from '@/lib/ai/models-config'
+import {getDefaultModel} from '@/lib/models-config'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean

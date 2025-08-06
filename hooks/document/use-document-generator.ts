@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { getDefaultModel } from '@/lib/ai/models-config'
+import { getDefaultModel } from '@/lib/models-config'
 import { clientLogger } from '@/lib/client-logger'
 import { Prompt } from '@/lib/types/component-types'
 import type { Client } from '@prisma/client'

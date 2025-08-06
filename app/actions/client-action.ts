@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { ClientService } from '@/services/client-service'
+import { ClientService } from '@/services/client/client-service'
 import { checkAuth } from '@/lib/api/api-validation'
 import { Prisma, Client } from '@prisma/client'
 

@@ -1,11 +1,11 @@
 import { prisma } from '@/lib/prisma'
-import { buildClientContextSection } from '@/services/client-context-service'
+import { buildClientContextSection } from '@/services/client/client-context-service'
 import { replaceClientVariables } from '@/lib/ai/variable-replacement'
-import { createAICompletion } from '@/lib/ai/wrapper'
-import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
+import { openRouterService } from '@/services/openrouter'
+import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
 import { logger } from '@/lib/logger'
-import { ClientService } from '@/services/client-service'
+import { ClientService } from '@/services/client/client-service'
 import { 
   withEnhancedApi, 
   parseJsonBody,
@@ -124,8 +124,8 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
       }
     })
 
-    // Use unified AI wrapper with automatic usage tracking
-    const completion = await createAICompletion(
+    // Use OpenRouter service with automatic usage tracking
+    const completion = await openRouterService.createCompletion(
       {
         model: selectedModel,
         messages: [

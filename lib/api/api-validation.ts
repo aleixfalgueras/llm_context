@@ -1,6 +1,6 @@
 import {auth} from "@clerk/nextjs/server";
 import {logger} from "@/lib/logger";
-import {getTierFromPlan, isModelAvailableForTier} from "@/lib/ai/models-config";
+import {getTierFromPlan, isModelAvailableForTier} from "@/lib/models-config";
 import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 import {SubscriptionErrorCode} from "@/services/error-codes";
 

@@ -10,7 +10,7 @@ import {DatePicker} from '@/components/ui/date-picker'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import type {Client} from '@prisma/client'
-import {getDefaultModel} from '@/lib/ai/models-config'
+import {getDefaultModel} from '@/lib/models-config'
 
 interface MeetingReportDialogProps {
   open: boolean
