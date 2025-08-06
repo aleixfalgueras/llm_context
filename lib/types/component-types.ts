@@ -17,13 +17,6 @@ export interface DocumentBasic {
   documentType: string
 }
 
-// Chat interface - used in chat-related components
-export interface Chat {
-  id: string
-  title: string
-  updatedAt: Date
-}
-
 // Re-export Prompt interface from existing centralized location for convenience
 export type { Prompt } from './prompt-management-types'
 

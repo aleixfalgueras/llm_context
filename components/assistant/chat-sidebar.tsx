@@ -10,7 +10,7 @@ import Link from 'next/link'
 import {useState} from 'react'
 import {usePathname} from 'next/navigation'
 import {Input} from '@/components/ui/input'
-import {Chat} from '@/lib/types/component-types'
+import {Chat} from '@prisma/client'
 
 interface ChatSidebarProps {
   chats: Chat[]
