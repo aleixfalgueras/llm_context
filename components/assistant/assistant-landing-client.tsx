@@ -4,7 +4,7 @@ import {useState} from 'react'
 import {ChatSidebar} from '@/components/assistant/chat-sidebar'
 import {ChatInterface} from '@/components/assistant/chat-interface'
 import {ClientContextSidebar} from '@/components/assistant/client-context-sidebar'
-import {ClientContextSelection, defaultClientContextSelections} from '@/lib/types/client-context'
+import {ClientContextSelection, defaultClientContextSelections} from "@/lib/types/client-types";
 
 interface AssistantLandingClientProps {
   chats: any[]
