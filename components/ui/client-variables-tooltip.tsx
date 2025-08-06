@@ -4,10 +4,10 @@ import { getAvailableVariables } from '@/lib/ai/variable-replacement'
 
 const variableDescriptions: Record<string, string> = {
   '{country}': "Client's country/location",
-  '{general_context}': "Client's general context",
-  '{specific_context_1}': "Client's specific context 1",
-  '{specific_context_2}': "Client's specific context 2",
-  '{specific_context_3}': "Client's specific context 3",
+  '{generalContext}': "Client's general context",
+  '{specificContext1}': "Client's specific context 1",
+  '{specificContext2}': "Client's specific context 2",
+  '{specificContext3}': "Client's specific context 3",
 }
 
 export function ClientVariablesTooltip() {

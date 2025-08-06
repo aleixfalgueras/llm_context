@@ -8,9 +8,9 @@ import {FileText} from 'lucide-react'
 import {ClientVariablesTooltip} from '@/components/ui/client-variables-tooltip'
 import type {Client} from '@prisma/client'
 import {
-  CLIENT_CONTEXT_FIELD_LABELS,
-  CLIENT_CONTEXT_FIELDS, ClientContextSelection,
-  defaultClientContextSelections
+  CLIENT_CONTEXT_FIELDS, 
+  ClientContextSelection,
+  DEFAULT_CLIENT_CONTEXT
 } from '@/lib/types/client-types'
 import {useDocumentGenerator} from '@/hooks/document/use-document-generator'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
@@ -121,7 +121,7 @@ export function CustomDocumentGeneratorDialog({
   const handleClientChange = (clientId: string) => {
     setSelectedClient(clientId)
     // Reset client context when client changes
-    setClientContext(defaultClientContextSelections.general)
+    setClientContext(DEFAULT_CLIENT_CONTEXT)
   }
 
 
@@ -228,9 +228,8 @@ export function CustomDocumentGeneratorDialog({
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(CLIENT_CONTEXT_FIELD_LABELS).map(([key, label]) => {
-            const actualFieldName = CLIENT_CONTEXT_FIELDS[key as keyof typeof CLIENT_CONTEXT_FIELDS]
-            const fieldValue = selectedClientData[actualFieldName as keyof Client]
+          {Object.entries(CLIENT_CONTEXT_FIELDS).map(([key, config]) => {
+            const fieldValue = selectedClientData[config.dbField as keyof Client]
             const hasValue = fieldValue && String(fieldValue).trim() !== ''
             
             // Only render fields that have values
@@ -250,7 +249,7 @@ export function CustomDocumentGeneratorDialog({
                   }}
                 />
                 <Label htmlFor={`context-${key}`}>
-                  {label}
+                  {config.label}
                 </Label>
               </div>
             )
