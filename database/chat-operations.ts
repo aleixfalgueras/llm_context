@@ -4,12 +4,14 @@
 
 import { prisma } from '@/lib/prisma'
 import { BaseOperations } from './base-operations'
+import { Chat, Client, Message, Prisma } from '@prisma/client'
+import { DbOperationResult } from '@/lib/types/database-types'
 
 export class ChatOperations extends BaseOperations {
   /**
    * Delete a single chat with ownership verification
    */
-  static async deleteChat(chatId: string, userId: string) {
+  static async deleteChat(chatId: string, userId: string): Promise<DbOperationResult<{ id: string }>> {
     return this.deleteUserOwnedRecord(
       prisma.chat,
       chatId,
@@ -21,7 +23,7 @@ export class ChatOperations extends BaseOperations {
   /**
    * Update chat title with ownership verification
    */
-  static async updateChatTitle(chatId: string, userId: string, title: string) {
+  static async updateChatTitle(chatId: string, userId: string, title: string): Promise<DbOperationResult<Chat>> {
     return this.updateUserOwnedRecord(
       prisma.chat,
       chatId,
@@ -35,7 +37,7 @@ export class ChatOperations extends BaseOperations {
    * Alternative method for deleting all user chats using deleteMany
    * This is more efficient than bulk delete for this specific case
    */
-  static async deleteAllUserChats(userId: string) {
+  static async deleteAllUserChats(userId: string): Promise<DbOperationResult<{ deletedCount: number }>> {
     try {
       const result = await prisma.chat.deleteMany({
         where: { userId }
@@ -57,7 +59,7 @@ export class ChatOperations extends BaseOperations {
   /**
    * Create a new chat with client validation
    */
-  static async createChatWithClient(userId: string, clientId: string, title: string, contextFields: string[] = []) {
+  static async createChatWithClient(userId: string, clientId: string, title: string, contextFields: string[] = []): Promise<DbOperationResult<{ chat: Chat & { messages: Message[] }, client: Pick<Client, 'name'> }>> {
     try {
       // Verify client exists and belongs to user
       const client = await prisma.client.findFirst({
@@ -108,7 +110,7 @@ export class ChatOperations extends BaseOperations {
   /**
    * Get existing chat with messages
    */
-  static async getChatWithMessages(chatId: string, userId: string) {
+  static async getChatWithMessages(chatId: string, userId: string): Promise<DbOperationResult<Chat & { messages: Message[] }>> {
     try {
       const chat = await prisma.chat.findFirst({
         where: {
@@ -147,7 +149,7 @@ export class ChatOperations extends BaseOperations {
   /**
    * Update chat title if it matches the default title
    */
-  static async updateChatTitleIfDefault(chatId: string, userId: string, newTitle: string, defaultTitle: string = 'New Chat') {
+  static async updateChatTitleIfDefault(chatId: string, userId: string, newTitle: string, defaultTitle: string = 'New Chat'): Promise<DbOperationResult<{ updated: boolean }>> {
     try {
       const result = await prisma.chat.updateMany({
         where: {
@@ -169,6 +171,29 @@ export class ChatOperations extends BaseOperations {
       return {
         success: false as const,
         error: 'Failed to update chat title'
+      }
+    }
+  }
+
+  /**
+   * Get all chats for a user
+   */
+  static async getAllUserChats(userId: string): Promise<DbOperationResult<Chat[]>> {
+    try {
+      const chats = await prisma.chat.findMany({
+        where: { userId },
+        orderBy: { updatedAt: 'desc' }
+      })
+
+      return {
+        success: true as const,
+        data: chats
+      }
+    } catch (error) {
+      console.error('Error getting user chats:', error)
+      return {
+        success: false as const,
+        error: 'Failed to retrieve chats'
       }
     }
   }

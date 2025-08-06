@@ -4,33 +4,35 @@ import {generateChatTitleWithClient} from '@/lib/utils/general'
 import {buildClientContextSection, hasClientContext} from './client-context-service'
 import {ClientService} from './client-service'
 import {logger} from '@/lib/logger'
+import {Chat, Client, Message} from '@prisma/client'
+import {DbOperationResult} from '@/lib/types/database-types'
 
 export class ChatService {
   /**
    * Delete a chat with ownership verification
    */
-  static async deleteChat(chatId: string, userId: string) {
+  static async deleteChat(chatId: string, userId: string): Promise<DbOperationResult<{ id: string }>> {
     return ChatOperations.deleteChat(chatId, userId)
   }
 
   /**
    * Delete all chats for a user
    */
-  static async deleteAllUserChats(userId: string) {
+  static async deleteAllUserChats(userId: string): Promise<DbOperationResult<{ deletedCount: number }>> {
     return ChatOperations.deleteAllUserChats(userId)
   }
 
   /**
    * Update chat title with ownership verification
    */
-  static async updateChatTitle(chatId: string, userId: string, title: string) {
+  static async updateChatTitle(chatId: string, userId: string, title: string): Promise<DbOperationResult<Chat>> {
     return ChatOperations.updateChatTitle(chatId, userId, title)
   }
 
   /**
    * Build system prompt with client context
    */
-  static buildSystemPrompt(client: any, selectedContextFields: string[]) {
+  static buildSystemPrompt(client: any, selectedContextFields: string[]): string {
     const clientContextSection = buildClientContextSection(client, selectedContextFields)
     const hasContextData = hasClientContext(selectedContextFields)
 
@@ -50,9 +52,12 @@ Respond naturally and conversationally while keeping this context in mind.`
   /**
    * Process new chat creation
    */
-  static async processNewChat(userId: string, clientId: string, contextFields: string[] = []) {
+  static async processNewChat(userId: string, clientId: string, contextFields: string[] = []): Promise<DbOperationResult<{
+    chat: Chat & { messages: Message[] },
+    client: Pick<Client, 'name'>
+  }>> {
     if (!clientId) {
-      logger.warn('Chat creation attempted without client ID', { userId });
+      logger.warn('Chat creation attempted without client ID', {userId});
       return {
         success: false as const,
         error: 'Client selection is required for new chat'
@@ -61,15 +66,15 @@ Respond naturally and conversationally while keeping this context in mind.`
 
     const chatTitle = generateChatTitleWithClient('')
     const result = await ChatOperations.createChatWithClient(userId, clientId, chatTitle, contextFields)
-    
+
     if (!isSuccess(result)) {
-      logger.warn('Client not found for chat creation', { userId, clientId });
+      logger.warn('Client not found for chat creation', {userId, clientId});
       return result
     }
 
-    const { chat, client } = result.data
+    const {chat, client} = result.data
     const actualTitle = generateChatTitleWithClient(client.name)
-    
+
     // Update title with actual client name
     if (actualTitle !== chatTitle) {
       const updateResult = await ChatOperations.updateChatTitle(chat.id, userId, actualTitle)
@@ -83,23 +88,25 @@ Respond naturally and conversationally while keeping this context in mind.`
       userId,
       chatId: chat.id,
       clientId,
-      metadata: { title: actualTitle, contextFieldCount: contextFields.length }
+      metadata: {title: actualTitle, contextFieldCount: contextFields.length}
     });
 
     return {
       success: true as const,
-      data: { chat, client }
+      data: {chat, client}
     }
   }
 
   /**
    * Process existing chat retrieval
    */
-  static async processExistingChat(chatId: string, userId: string) {
+  static async processExistingChat(chatId: string, userId: string): Promise<DbOperationResult<Chat & {
+    messages: Message[]
+  }>> {
     const result = await ChatOperations.getChatWithMessages(chatId, userId)
-    
+
     if (!isSuccess(result)) {
-      logger.warn('Chat not found', { userId, chatId });
+      logger.warn('Chat not found', {userId, chatId});
       return result
     }
 
@@ -112,7 +119,12 @@ Respond naturally and conversationally while keeping this context in mind.`
   /**
    * Prepare chat data for AI processing
    */
-  static async prepareChatForAI(chat: any, userId: string, newMessageContent: string) {
+  static async prepareChatForAI(chat: any, userId: string, newMessageContent: string): Promise<DbOperationResult<{
+    aiMessages: Array<{ role: 'system' | 'user' | 'assistant', content: string }>,
+    client: Client,
+    isFirstUserMessage: boolean,
+    selectedContextFields: string[]
+  }>> {
     const existingMessages = chat.messages
     const isFirstUserMessage = existingMessages.length === 0
 
@@ -176,29 +188,39 @@ Respond naturally and conversationally while keeping this context in mind.`
   /**
    * Update chat title for first message if still default
    */
-  static async updateChatTitleForFirstMessage(chatId: string, userId: string, clientName: string, isFirstMessage: boolean, currentTitle: string) {
+  static async updateChatTitleForFirstMessage(chatId: string, userId: string, clientName: string, isFirstMessage: boolean, currentTitle: string): Promise<DbOperationResult<{
+    newTitle?: string,
+    updated: boolean
+  }>> {
     if (isFirstMessage && currentTitle === 'New Chat') {
       const newTitle = generateChatTitleWithClient(clientName)
-      
+
       const result = await ChatOperations.updateChatTitleIfDefault(chatId, userId, newTitle)
-      
+
       if (isSuccess(result) && result.data.updated) {
         logger.info('Chat title updated', {
           userId,
           chatId,
-          metadata: { newTitle }
+          metadata: {newTitle}
         });
-        
+
         return {
           success: true as const,
-          data: { newTitle, updated: true }
+          data: {newTitle, updated: true}
         }
       }
     }
 
     return {
       success: true as const,
-      data: { updated: false }
+      data: {updated: false}
     }
+  }
+
+  /**
+   * Get all chats for a user
+   */
+  static async getUserChats(userId: string): Promise<DbOperationResult<Chat[]>> {
+    return ChatOperations.getAllUserChats(userId)
   }
 }
