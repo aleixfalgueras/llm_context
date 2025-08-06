@@ -7,8 +7,11 @@ import {Checkbox} from '@/components/ui/checkbox'
 import {FileText} from 'lucide-react'
 import {ClientVariablesTooltip} from '@/components/ui/client-variables-tooltip'
 import type {Client} from '@prisma/client'
-import {CLIENT_CONTEXT_FIELD_LABELS, CLIENT_CONTEXT_FIELDS} from '@/lib/types/client-types'
-import {ClientContextSelection, defaultClientContextSelections} from '@/lib/types/client-context'
+import {
+  CLIENT_CONTEXT_FIELD_LABELS,
+  CLIENT_CONTEXT_FIELDS, ClientContextSelection,
+  defaultClientContextSelections
+} from '@/lib/types/client-types'
 import {useDocumentGenerator} from '@/hooks/document/use-document-generator'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'

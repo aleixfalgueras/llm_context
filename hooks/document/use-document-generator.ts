@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { ClientContextSelection, defaultClientContextSelections } from '@/lib/types/client-context'
 import { getDefaultModel } from '@/lib/ai/models-config'
 import { clientLogger } from '@/lib/client-logger'
 import { Prompt } from '@/lib/types/component-types'
 import type { Client } from '@prisma/client'
 import { handleClientApiError } from '@/lib/api/api-toast'
+import {ClientContextSelection, defaultClientContextSelections} from "@/lib/types/client-types";
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
