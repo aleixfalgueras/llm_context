@@ -26,6 +26,10 @@ import {
   UsageInfo 
 } from '@/lib/types/subscription-usage-types'
 import {SubscriptionErrorCode} from "@/services/error-codes";
+import {clerkClient} from '@clerk/nextjs/server'
+import {createCheckoutSession, STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
+import {isDowngrade} from '@/lib/subscription/subscription-plan-utils'
+import {scheduleSubscriptionDowngrade, releaseSubscriptionSchedule} from '@/lib/stripe/stripe-subscription'
 
 export class SubscriptionUsageService {
 
@@ -432,6 +436,144 @@ export class SubscriptionUsageService {
       return subscription
     } catch (error) {
       logger.error('Error clearing schedule fields', error as Error, { userId });
+      throw error
+    }
+  }
+
+  /**
+   * Create checkout session handling both upgrades and downgrades through proper business logic
+   */
+  static async createCheckoutSession(userId: string, planId: SubscriptionPlan): Promise<{
+    isDowngrade: boolean
+    message?: string
+    effectiveDate?: string
+    url?: string | null
+  }> {
+    try {
+      if (!planId || !Object.values(SubscriptionPlan).includes(planId)) {
+        logger.warn('Invalid plan ID provided', { metadata: { planId } })
+        throw new Error('Invalid plan ID')
+      }
+
+      const priceId = STRIPE_PRICE_IDS[planId]
+      if (!priceId) {
+        logger.warn('No price ID found for plan', { metadata: { planId } })
+        throw new Error('Price not found')
+      }
+
+      // Check if user has existing subscription through service layer
+      const existingSubscription = await SubscriptionUsageOperations.findByUserId(userId)
+
+      // If user has active subscription and this is a downgrade, handle downgrade scheduling
+      if (existingSubscription?.stripeSubscriptionId && 
+          isDowngrade(existingSubscription.plan as SubscriptionPlan, planId)) {
+        
+        logger.info('Detected downgrade request, handling downgrade scheduling', {
+          userId,
+          metadata: {
+            currentPlan: existingSubscription.plan,
+            targetPlan: planId
+          }
+        })
+        
+        // Schedule the downgrade using shared utility function
+        const { effectiveDate, message } = await scheduleSubscriptionDowngrade(
+          existingSubscription.stripeSubscriptionId,
+          priceId,
+          userId,
+          existingSubscription.plan as SubscriptionPlan,
+          planId
+        )
+
+        return {
+          isDowngrade: true,
+          message,
+          effectiveDate: effectiveDate.toISOString()
+        }
+      }
+
+      // Get user email from Clerk for upgrades/new subscriptions
+      const client = await clerkClient()
+      const user = await client.users.getUser(userId)
+      const email = user.emailAddresses[0]?.emailAddress
+
+      if (!email) {
+        logger.warn('No email found for user', { userId })
+        throw new Error('User email not found')
+      }
+
+      const session = await createCheckoutSession(userId, email, priceId, planId)
+
+      // All customers now go through checkout flow (for upgrades/new subscriptions)
+      logger.info('Checkout session created successfully', { 
+        userId, 
+        metadata: {
+          planId, 
+          checkoutUrl: session.url
+        }
+      })
+
+      return {
+        isDowngrade: false,
+        url: session.url
+      }
+    } catch (error) {
+      logger.error('Error creating checkout session', error as Error, { userId });
+      throw error
+    }
+  }
+
+  /**
+   * Cancel pending subscription downgrade through proper business logic
+   */
+  static async cancelDowngrade(userId: string): Promise<{
+    message: string
+    currentPlan: string
+  }> {
+    try {
+      // Get current subscription to check for pending downgrade through database layer
+      const subscription = await SubscriptionUsageOperations.findByUserId(userId)
+
+      if (!subscription) {
+        logger.warn('No subscription found for downgrade cancellation', { userId })
+        throw new Error('No subscription found')
+      }
+
+      if (!subscription.stripeScheduleId || !subscription.pendingPlanChange) {
+        logger.warn('No pending downgrade found to cancel', { 
+          userId,
+          metadata: {
+            hasScheduleId: !!subscription.stripeScheduleId,
+            hasPendingPlanChange: !!subscription.pendingPlanChange,
+            currentPlan: subscription.plan
+          }
+        })
+        throw new Error('No pending downgrade found to cancel')
+      }
+
+      // Release the Stripe subscription schedule
+      await releaseSubscriptionSchedule(subscription.stripeScheduleId, subscription.stripeSubscriptionId)
+      logger.info('Successfully cancelled subscription downgrade', {
+        userId,
+        metadata: {
+          scheduleId: subscription.stripeScheduleId,
+          canceledPlan: subscription.pendingPlanChange,
+          currentPlan: subscription.plan
+        }
+      })
+
+      // Clear schedule fields in database through database operations
+      await SubscriptionUsageOperations.clearScheduleFields(userId)
+
+      // Invalidate all user caches after canceling downgrade
+      await invalidateAllUserCaches(userId)
+
+      return {
+        message: 'Subscription downgrade canceled successfully',
+        currentPlan: subscription.plan
+      }
+    } catch (error) {
+      logger.error('Error canceling downgrade', error as Error, { userId });
       throw error
     }
   }

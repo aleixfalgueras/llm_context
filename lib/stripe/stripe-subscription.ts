@@ -126,10 +126,8 @@ export async function synchronizeSubscriptionWithStripe(
   stripeScheduleId?: string | null
 ) {
   try {
-    // Only one subscription per customer
-    const subscription = await prisma.userSubscription.findFirst({
-      where: { stripeCustomerId: customerId },
-    })
+    // Only one subscription per customer - get through database operations
+    const subscription = await SubscriptionUsageOperations.findByCustomerId(customerId)
 
     if (!subscription) {
       logger.warn('No subscription found for customer', { metadata: { customerId } })
@@ -386,13 +384,10 @@ export async function scheduleSubscriptionDowngrade(
     throw error
   }
 
-  // Update database with pending plan change and schedule ID
-  await prisma.userSubscription.update({
-    where: { userId },
-    data: { 
-      pendingPlanChange: targetPlan,
-      stripeScheduleId: schedule.id
-    }
+  // Update database with pending plan change and schedule ID through database layer
+  await SubscriptionUsageOperations.updateSubscription(userId, {
+    pendingPlanChange: targetPlan,
+    stripeScheduleId: schedule.id
   })
 
   logger.info('Downgrade scheduled successfully', {

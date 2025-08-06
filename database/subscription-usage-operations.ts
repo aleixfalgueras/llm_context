@@ -25,6 +25,20 @@ export class SubscriptionUsageOperations extends BaseOperations {
   }
 
   /**
+   * Find user subscription by stripeCustomerId
+   */
+  static async findByCustomerId(customerId: string): Promise<UserSubscription | null> {
+    try {
+      return await prisma.userSubscription.findFirst({
+        where: { stripeCustomerId: customerId },
+      })
+    } catch (error) {
+      logger.error('Failed to find subscription by customerId', error as Error, { metadata: { customerId } })
+      throw error
+    }
+  }
+
+  /**
    * Upsert user subscription
    */
   static async upsertSubscription(
