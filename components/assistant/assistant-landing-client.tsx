@@ -4,7 +4,7 @@ import {useState} from 'react'
 import {ChatSidebar} from '@/components/assistant/chat-sidebar'
 import {ChatInterface} from '@/components/assistant/chat-interface'
 import {ClientContextSidebar} from '@/components/assistant/client-context-sidebar'
-import {ClientContextSelection, defaultClientContextSelections} from "@/lib/types/client-types";
+import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types";
 
 interface AssistantLandingClientProps {
   chats: any[]
@@ -13,7 +13,7 @@ interface AssistantLandingClientProps {
 
 export function AssistantLandingClient({ chats, clients }: AssistantLandingClientProps) {
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
-  const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
+  const [clientContext, setClientContext] = useState<ClientContextSelection>(DEFAULT_CLIENT_CONTEXT)
 
   return (
     <div className="flex h-full overflow-hidden">

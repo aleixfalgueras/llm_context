@@ -1,11 +1,11 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { redirect, notFound } from 'next/navigation'
-import { ChatPageClient } from '@/components/assistant/chat-page-client'
-import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/app/actions/client-action'
-import { getChats } from '@/app/actions/chat-action'
-import { ChatService } from '@/services/chat-service'
-import { isSuccess } from '@/database/base-operations'
+import {auth, currentUser} from '@clerk/nextjs/server'
+import {notFound} from 'next/navigation'
+import {ChatPageClient} from '@/components/assistant/chat-page-client'
+import {Navbar} from '@/components/global/navbar'
+import {getClients} from '@/app/actions/client-action'
+import {getChats} from '@/app/actions/chat-action'
+import {ChatService} from '@/services/chat-service'
+import {isSuccess} from '@/database/base-operations'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
@@ -31,7 +31,6 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   const chat = chatResult.data
-
 
   // Find the last model used in this chat (from the most recent user message)
   const lastUserMessage = chat.messages

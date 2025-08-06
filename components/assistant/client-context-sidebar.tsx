@@ -8,9 +8,9 @@ import {Checkbox} from '@/components/ui/checkbox'
 import {Label} from '@/components/ui/label'
 import {ClientCombobox} from '@/components/ui/client-combobox'
 import {
-  CLIENT_CONTEXT_FIELD_LABELS,
+  CLIENT_CONTEXT_FIELDS,
   ClientContextSelection,
-  defaultClientContextSelections
+  DEFAULT_CLIENT_CONTEXT
 } from '@/lib/types/client-types'
 import {useRouter} from 'next/navigation'
 
@@ -31,7 +31,7 @@ export function ClientContextSidebar({
   onClientSelect,
   clients = [],
   hasActiveChat = false,
-  clientContext = defaultClientContextSelections.general,
+  clientContext = DEFAULT_CLIENT_CONTEXT,
   onClientContextChange,
   chatContextFields = [],
   isMobile = false
@@ -92,20 +92,8 @@ export function ClientContextSidebar({
           if (!value) return false
           
           // Only include fields where the client actually has data
-          switch (key) {
-            case 'country':
-              return selectedClient?.country
-            case 'general_context':
-              return selectedClient?.generalContext
-            case 'specific_context_1':
-              return selectedClient?.specificContext1
-            case 'specific_context_2':
-              return selectedClient?.specificContext2
-            case 'specific_context_3':
-              return selectedClient?.specificContext3
-            default:
-              return false
-          }
+          if (!(key in CLIENT_CONTEXT_FIELDS)) return false
+          return selectedClient?.[key as keyof typeof selectedClient]
         })
         .map(([key]) => key)
       
@@ -201,71 +189,30 @@ export function ClientContextSidebar({
                         Choose which client information to include when chatting with AI. Your privacy choices are strictly respected.
                       </p>
                       <div className="grid grid-cols-1 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                        {selectedClient?.country && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-country"
-                              checked={clientContext.country}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                country: e.target.checked
-                              })}
-                              label={`Country (${selectedClient.country})`}
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.generalContext && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-general-context"
-                              checked={clientContext.general_context}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                general_context: e.target.checked
-                              })}
-                              label={CLIENT_CONTEXT_FIELD_LABELS.general_context}
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.specificContext1 && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-specific-context-1"
-                              checked={clientContext.specific_context_1}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                specific_context_1: e.target.checked
-                              })}
-                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_1}
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.specificContext2 && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-specific-context-2"
-                              checked={clientContext.specific_context_2}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                specific_context_2: e.target.checked
-                              })}
-                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_2}
-                            />
-                          </div>
-                        )}
-                        {selectedClient?.specificContext3 && (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="context-specific-context-3"
-                              checked={clientContext.specific_context_3}
-                              onChange={(e) => onClientContextChange({
-                                ...clientContext,
-                                specific_context_3: e.target.checked
-                              })}
-                              label={CLIENT_CONTEXT_FIELD_LABELS.specific_context_3}
-                            />
-                          </div>
-                        )}
+                        {Object.entries(CLIENT_CONTEXT_FIELDS).map(([fieldKey, fieldLabel]) => {
+                          const typedFieldKey = fieldKey as keyof ClientContextSelection;
+                          const hasFieldData = selectedClient?.[typedFieldKey];
+                          
+                          if (!hasFieldData) return null;
+                          
+                          const displayLabel = fieldKey === 'country' 
+                            ? `${fieldLabel} (${selectedClient.country})`
+                            : fieldLabel;
+                            
+                          return (
+                            <div key={fieldKey} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`context-${fieldKey.replace(/([A-Z])/g, '-$1').toLowerCase()}`}
+                                checked={clientContext[typedFieldKey]}
+                                onChange={(e) => onClientContextChange({
+                                  ...clientContext,
+                                  [typedFieldKey]: e.target.checked
+                                })}
+                                label={displayLabel}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                       <div className="flex gap-2 justify-end">
                         <Button
@@ -274,10 +221,10 @@ export function ClientContextSidebar({
                           size="sm"
                           onClick={() => onClientContextChange({
                             country: !!selectedClient?.country,
-                            general_context: !!selectedClient?.generalContext,
-                            specific_context_1: !!selectedClient?.specificContext1,
-                            specific_context_2: !!selectedClient?.specificContext2,
-                            specific_context_3: !!selectedClient?.specificContext3
+                            generalContext: !!selectedClient?.generalContext,
+                            specificContext1: !!selectedClient?.specificContext1,
+                            specificContext2: !!selectedClient?.specificContext2,
+                            specificContext3: !!selectedClient?.specificContext3
                           })}
                         >
                           Select All
@@ -288,10 +235,10 @@ export function ClientContextSidebar({
                           size="sm"
                           onClick={() => onClientContextChange({
                             country: false,
-                            general_context: false,
-                            specific_context_1: false,
-                            specific_context_2: false,
-                            specific_context_3: false
+                            generalContext: false,
+                            specificContext1: false,
+                            specificContext2: false,
+                            specificContext3: false
                           })}
                         >
                           Deselect All
@@ -356,14 +303,7 @@ export function ClientContextSidebar({
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border text-xs">
                   {chatContextFields && chatContextFields.length > 0 ? (
                     chatContextFields.map(field => {
-                      const fieldNames = {
-                        country: 'Country',
-                        general_context: 'General Context',
-                        specific_context_1: 'Specific Context 1',
-                        specific_context_2: 'Specific Context 2',
-                        specific_context_3: 'Specific Context 3'
-                      }
-                      return fieldNames[field as keyof typeof fieldNames]
+                      return CLIENT_CONTEXT_FIELDS[field as keyof typeof CLIENT_CONTEXT_FIELDS] || field
                     }).join(', ')
                   ) : 'None selected'}
                 </div>

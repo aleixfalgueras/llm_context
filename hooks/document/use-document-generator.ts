@@ -7,7 +7,7 @@ import { clientLogger } from '@/lib/client-logger'
 import { Prompt } from '@/lib/types/component-types'
 import type { Client } from '@prisma/client'
 import { handleClientApiError } from '@/lib/api/api-toast'
-import {ClientContextSelection, defaultClientContextSelections} from "@/lib/types/client-types";
+import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types";
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
@@ -54,7 +54,7 @@ export function useDocumentGenerator({
   const [selectedPrompt, setSelectedPrompt] = useState<string>('')
   const [selectedPromptContent, setSelectedPromptContent] = useState('')
   const [customPrompt, setCustomPrompt] = useState('')
-  const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
+  const [clientContext, setClientContext] = useState<ClientContextSelection>(DEFAULT_CLIENT_CONTEXT)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
   const [promptName, setPromptName] = useState('')
@@ -71,7 +71,7 @@ export function useDocumentGenerator({
   // Reset client context when client changes
   useEffect(() => {
     if (selectedClient) {
-      setClientContext(defaultClientContextSelections.general)
+      setClientContext(DEFAULT_CLIENT_CONTEXT)
     }
   }, [selectedClient])
 
@@ -159,7 +159,7 @@ export function useDocumentGenerator({
     setSelectedPrompt('')
     setSelectedPromptContent('')
     setCustomPrompt('')
-    setClientContext(defaultClientContextSelections.general)
+    setClientContext(DEFAULT_CLIENT_CONTEXT)
     setPromptName('')
     setUseCustomPrompt(false)
   }
@@ -167,20 +167,20 @@ export function useDocumentGenerator({
   const selectAllContext = () => {
     setClientContext({
       country: true,
-      general_context: true,
-      specific_context_1: true,
-      specific_context_2: true,
-      specific_context_3: true
+      generalContext: true,
+      specificContext1: true,
+      specificContext2: true,
+      specificContext3: true
     })
   }
 
   const deselectAllContext = () => {
     setClientContext({
       country: false,
-      general_context: false,
-      specific_context_1: false,
-      specific_context_2: false,
-      specific_context_3: false
+      generalContext: false,
+      specificContext1: false,
+      specificContext2: false,
+      specificContext3: false
     })
   }
 
