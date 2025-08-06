@@ -1,11 +1,4 @@
-export interface Message {
-  id: string
-  content: string
-  role: 'USER' | 'ASSISTANT'
-  createdAt: Date
-  model?: string
-  tokensUsed?: number
-  inputTokens?: number
-  outputTokens?: number
-  isStreaming?: boolean // For UI state during streaming
-}
+import {Message} from "@prisma/client";
+
+// Message type with optional streaming state for UI components
+export type MessageWithStreaming = Message & { isStreaming?: boolean }

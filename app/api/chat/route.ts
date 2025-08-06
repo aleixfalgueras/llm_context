@@ -9,6 +9,7 @@ import {checkModelAccess} from "@/lib/api/api-validation";
 import {OpenRouterClient} from "@/lib/ai/openrouter";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
+import {Role} from '@prisma/client';
 
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.
@@ -118,7 +119,15 @@ export const POST = withEnhancedApi(
     }
 
     // Save the user message to the database (tokens will be updated after AI response)
-    const userMessageResult = await MessageService.createMessage(chatId, userId, lastMessage.content, 'USER', selectedModel)
+    const userMessageResult = await MessageService.createMessage({
+      content: lastMessage.content,
+      role: Role.USER,
+      model: selectedModel,
+      tokensUsed: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      chat: { connect: { id: chatId } }
+    }, userId)
     
     if (!userMessageResult.success) {
       return NextResponse.json({ error: userMessageResult.error || 'Failed to save user message' }, { status: 500 })
@@ -249,16 +258,15 @@ export const POST = withEnhancedApi(
               }
 
               // Save the assistant's response to the database
-              const assistantMessageResult = await MessageService.createMessage(
-                chatId,
-                userId,
-                fullContent,
-                'ASSISTANT',
-                selectedModel,
-                finalUsage?.completionTokens,
-                0, // inputTokens for assistant message
-                finalUsage?.completionTokens
-              )
+              const assistantMessageResult = await MessageService.createMessage({
+                content: fullContent,
+                role: Role.ASSISTANT,
+                model: selectedModel,
+                tokensUsed: finalUsage?.completionTokens || 0,
+                inputTokens: 0, // inputTokens for assistant message
+                outputTokens: finalUsage?.completionTokens || 0,
+                chat: { connect: { id: chatId } }
+              }, userId)
               
               if (!assistantMessageResult.success) {
                 logger.error('Failed to save assistant message', new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
@@ -298,7 +306,15 @@ export const POST = withEnhancedApi(
 
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
-                  const partialMessageResult = await MessageService.createMessage(chatId, userId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
+                  const partialMessageResult = await MessageService.createMessage({
+                    content: fullContent,
+                    role: Role.ASSISTANT,
+                    model: selectedModel,
+                    tokensUsed: 0, // 0 tokens for partial message
+                    inputTokens: 0,
+                    outputTokens: 0,
+                    chat: { connect: { id: chatId } }
+                  }, userId)
                   if (partialMessageResult.success) {
                     logger.info('Partial assistant message saved', {userId, chatId});
                   } else {

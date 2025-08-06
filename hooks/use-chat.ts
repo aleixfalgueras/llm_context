@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { clientLogger, withClientTiming } from '@/lib/client-logger'
 import { DEFAULT_MODEL } from '@/lib/ai/models-config'
-import { Message } from '@/lib/types/message-types'
 import { handleClientApiError } from '@/lib/api/api-toast'
+import {MessageWithStreaming} from "@/lib/types/message-types";
 
 // Helper function to check if messages are likely duplicates
-function areMessagesSimilar(msg1: Message, msg2: Message): boolean {
+function areMessagesSimilar(msg1: MessageWithStreaming, msg2: MessageWithStreaming): boolean {
   return (
     msg1.content === msg2.content &&
     msg1.role === msg2.role &&
@@ -16,7 +16,7 @@ function areMessagesSimilar(msg1: Message, msg2: Message): boolean {
 }
 
 // Helper function to merge messages avoiding duplicates
-function mergeMessages(serverMessages: Message[], currentMessages: Message[]): Message[] {
+function mergeMessages(serverMessages: MessageWithStreaming[], currentMessages: MessageWithStreaming[]): MessageWithStreaming[] {
   const mergedMessages = [...serverMessages]
   
   // Add optimistic messages that don't have server equivalents
@@ -49,8 +49,8 @@ interface NewChatParams {
   contextFields: string[];
 }
 
-export function useChat(chatId: string, initialMessages: Message[] = [], newChatParams?: NewChatParams) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
+export function useChat(chatId: string, initialMessages: MessageWithStreaming[] = [], newChatParams?: NewChatParams) {
+  const [messages, setMessages] = useState<MessageWithStreaming[]>(initialMessages)
   const [isLoading, setIsLoading] = useState(false)
   const [onTitleUpdate, setOnTitleUpdate] = useState<((title: string) => void) | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -117,18 +117,28 @@ export function useChat(chatId: string, initialMessages: Message[] = [], newChat
     setIsLoading(true)
 
     // Create user message with more unique temporary ID
-    const userMessage: Message = {
+    const userMessage: MessageWithStreaming = {
       id: `temp-user-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       content,
       role: 'USER',
+      model: null,
+      tokensUsed: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      chatId,
       createdAt: new Date(),
     }
 
     // Create initial assistant message (will be updated as content streams)
-    const assistantMessage: Message = {
+    const assistantMessage: MessageWithStreaming = {
       id: `temp-assistant-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       content: '',
       role: 'ASSISTANT',
+      model: null,
+      tokensUsed: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      chatId,
       createdAt: new Date(),
       isStreaming: true,
     }

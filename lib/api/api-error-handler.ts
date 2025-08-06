@@ -58,7 +58,6 @@ export function handleApiError(
     logger.error(`Error in ${context}`, error as Error, logContext)
   }
 
-
   if (error instanceof Error) {
     return NextResponse.json(
       { error: error.message },
