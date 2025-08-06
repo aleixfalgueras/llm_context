@@ -5,7 +5,7 @@ import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 import {Checkbox} from '@/components/ui/checkbox'
 import {FileText} from 'lucide-react'
-import {ClientVariablesTooltip} from '@/components/ui/client-variables-tooltip'
+import {ClientContextVariablesTooltip} from '@/components/ui/client-context-variables-tooltip'
 import type {Client} from '@prisma/client'
 import {
   CLIENT_CONTEXT_FIELDS, 
@@ -17,8 +17,8 @@ import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-servic
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import type {Prompt} from '@/lib/types/component-types'
-import {replaceClientVariables} from '@/lib/ai/variable-replacement'
 import {getDefaultModel} from '@/lib/models-config'
+import {replaceClientContextVariables} from "@/services/client/client-context-service";
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
@@ -270,7 +270,7 @@ export function CustomDocumentGeneratorDialog({
               handlePromptChange(prompt.id)
               // Replace variables with client data if available
               const processedContent = selectedClientData 
-                ? replaceClientVariables(prompt.content, selectedClientData)
+                ? replaceClientContextVariables(prompt.content, selectedClientData)
                 : prompt.content
               setSelectedPromptContent(processedContent)
             }}
@@ -295,7 +295,7 @@ export function CustomDocumentGeneratorDialog({
               placeholder="Write your custom prompt here..."
               className="min-h-[120px]"
             />
-            <ClientVariablesTooltip />
+            <ClientContextVariablesTooltip />
           </div>
         ) : (
           <div className="space-y-4">
@@ -311,7 +311,7 @@ export function CustomDocumentGeneratorDialog({
                   placeholder="Prompt content will appear here..."
                   className="min-h-[120px]"
                 />
-                <ClientVariablesTooltip />
+                <ClientContextVariablesTooltip />
               </div>
             )}
           </div>

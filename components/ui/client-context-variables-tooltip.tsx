@@ -1,17 +1,20 @@
 import { Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { getAvailableVariables } from '@/lib/ai/variable-replacement'
+import { CLIENT_CONTEXT_VARIABLES, CLIENT_FIELD_LABELS } from '@/lib/types/client-types'
+import {getAvailableClientContextVariables} from "@/services/client/client-context-service";
 
-const variableDescriptions: Record<string, string> = {
-  '{country}': "Client's country/location",
-  '{generalContext}': "Client's general context",
-  '{specificContext1}': "Client's specific context 1",
-  '{specificContext2}': "Client's specific context 2",
-  '{specificContext3}': "Client's specific context 3",
-}
+// Generate variable descriptions dynamically from CLIENT_CONTEXT_VARIABLES
+const variableDescriptions: Record<string, string> = Object.entries(CLIENT_CONTEXT_VARIABLES).reduce(
+  (acc, [field, variable]) => {
+    const key = `{${variable}}`
+    const description = CLIENT_FIELD_LABELS[field as keyof typeof CLIENT_FIELD_LABELS] || 'Client data'
+    return { ...acc, [key]: description }
+  },
+  {} as Record<string, string>
+)
 
-export function ClientVariablesTooltip() {
-  const availableVariables = getAvailableVariables()
+export function ClientContextVariablesTooltip() {
+  const availableVariables = getAvailableClientContextVariables()
 
   return (
     <TooltipProvider>
@@ -37,4 +40,4 @@ export function ClientVariablesTooltip() {
       </Tooltip>
     </TooltipProvider>
   )
-} 
+}

@@ -6,7 +6,6 @@ import {Textarea} from '@/components/ui/textarea'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
-import {replaceClientVariables} from '@/lib/ai/variable-replacement'
 import {useToast} from '@/hooks/use-toast'
 import {Message, Role} from '@prisma/client'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
@@ -15,6 +14,7 @@ import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/models-config'
 import {Prompt} from '@/lib/types/component-types'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'
+import {replaceClientContextVariables} from "@/services/client/client-context-service";
 
 // Separate component for just the textarea input to isolate re-renders
 interface TextareaInputProps {
@@ -143,7 +143,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
 
     // Replace variables with client data if available using shared utility
     const processedContent = clientData 
-      ? replaceClientVariables(prompt.content, clientData)
+      ? replaceClientContextVariables(prompt.content, clientData)
       : prompt.content
 
     // If there's existing input, add the prompt on a new line

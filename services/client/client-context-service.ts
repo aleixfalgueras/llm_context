@@ -1,5 +1,5 @@
-import type { Client } from '@prisma/client'
-import { CLIENT_CONTEXT_FIELDS, CLIENT_FIELD_LABELS } from '@/lib/types/client-types'
+import type {Client} from '@prisma/client'
+import {CLIENT_CONTEXT_FIELDS, CLIENT_CONTEXT_VARIABLES, CLIENT_FIELD_LABELS} from '@/lib/types/client-types'
 
 /**
  * Builds just the client context section for AI prompts
@@ -59,4 +59,29 @@ export function buildClientContextSection(client: Client, selectedFields: string
 export function hasClientContext(selectedFields: string[] = []): boolean {
   return selectedFields.length > 0 && 
          selectedFields.some(field => Object.keys(CLIENT_CONTEXT_FIELDS).includes(field))
+}
+
+/**
+ * Replaces client context variables (CLIENT_CONTEXT_VARIABLES) in content with actual client data
+ */
+export function replaceClientContextVariables(content: string, client: Client): string {
+  let result = content
+
+  // Iterate through all context variables and replace them
+  Object.entries(CLIENT_CONTEXT_VARIABLES).forEach(([field, variable]) => {
+    const variablePattern = new RegExp(`\\{${variable}\\}`, 'g')
+    const fieldValue = client[field as keyof Client]
+    const defaultValue = `[${variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}]`
+
+    result = result.replace(variablePattern, (fieldValue as string) || defaultValue)
+  })
+
+  return result
+}
+
+/**
+ * Get list of available client context variables (CLIENT_CONTEXT_VARIABLES) for display in UI
+ */
+export function getAvailableClientContextVariables(): string[] {
+  return Object.values(CLIENT_CONTEXT_VARIABLES).map(variable => `{${variable}}`)
 }
