@@ -12,7 +12,7 @@ import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import {clientLogger} from '@/lib/client-logger'
 import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/ai/models-config'
-import {Message} from '@/lib/types/message-types'
+import {Message} from '@prisma/client'
 import {Prompt} from '@/lib/types/component-types'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'

@@ -5,7 +5,8 @@ import {useChat} from '@/hooks/use-chat'
 import {ChatMessages} from '@/components/assistant/chat-messages'
 import {ChatInput} from '@/components/assistant/chat-input'
 import {ErrorBoundary} from '@/components/global/error-boundary'
-import {Message} from '@/lib/types/message-types'
+
+import {MessageWithStreaming} from "@/lib/types/message-types";
 
 interface NewChatParams {
   clientId: string;
@@ -14,7 +15,7 @@ interface NewChatParams {
 
 interface ChatContainerProps {
   chatId: string
-  initialMessages: Message[]
+  initialMessages: MessageWithStreaming[]
   userImageUrl?: string
   userName?: string
   clientData?: any

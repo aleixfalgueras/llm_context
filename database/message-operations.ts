@@ -3,33 +3,18 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { Prisma, Message, Chat } from '@prisma/client'
 import { BaseOperations } from './base-operations'
-import {DbOperationConfig} from "@/lib/types/database-types";
+import { DbOperationResult } from '@/lib/types/database-types'
 
 export class MessageOperations extends BaseOperations {
   /**
    * Create a new message
    */
-  static async createMessage(
-    chatId: string,
-    content: string,
-    role: 'USER' | 'ASSISTANT',
-    model?: string,
-    tokensUsed?: number,
-    inputTokens?: number,
-    outputTokens?: number
-  ) {
+  static async createMessage(data: Prisma.MessageCreateInput): Promise<DbOperationResult<Message>> {
     try {
       const message = await prisma.message.create({
-        data: {
-          content,
-          role,
-          model,
-          tokensUsed: tokensUsed || 0,
-          inputTokens: inputTokens || 0,
-          outputTokens: outputTokens || 0,
-          chatId,
-        },
+        data,
       })
 
       return {
@@ -48,7 +33,7 @@ export class MessageOperations extends BaseOperations {
   /**
    * Find chat with ownership verification
    */
-  static async findUserChat(chatId: string, userId: string) {
+  static async findUserChat(chatId: string, userId: string): Promise<DbOperationResult<Chat>> {
     return this.findUserOwnedRecord(
       prisma.chat,
       chatId,
@@ -60,7 +45,7 @@ export class MessageOperations extends BaseOperations {
   /**
    * Get messages for a chat with ownership verification
    */
-  static async getChatMessages(chatId: string, userId: string) {
+  static async getChatMessages(chatId: string, userId: string): Promise<DbOperationResult<Message[]>> {
     try {
       // First verify chat ownership
       const chatResult = await this.findUserChat(chatId, userId)
@@ -93,7 +78,7 @@ export class MessageOperations extends BaseOperations {
     inputTokens?: number,
     tokensUsed?: number,
     outputTokens?: number
-  }) {
+  }): Promise<DbOperationResult<Message>> {
     try {
       // First verify the message belongs to a user-owned chat
       const message = await prisma.message.findFirst({
