@@ -7,7 +7,7 @@ import {Input} from '@/components/ui/input'
 import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
-import {ClientVariablesTooltip} from '@/components/ui/client-variables-tooltip'
+import {ClientContextVariablesTooltip} from '@/components/ui/client-context-variables-tooltip'
 import {Edit2, Loader2, Plus} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
@@ -238,7 +238,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="content">Prompt Content *</Label>
-              <ClientVariablesTooltip />
+              <ClientContextVariablesTooltip />
             </div>
             <Textarea
               id="content"

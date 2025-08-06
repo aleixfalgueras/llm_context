@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { buildClientContextSection } from '@/services/client/client-context-service'
-import { replaceClientVariables } from '@/lib/ai/variable-replacement'
+import {buildClientContextSection, replaceClientContextVariables} from '@/services/client/client-context-service'
 import { openRouterService } from '@/services/openrouter'
 import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/models-config'
 import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
@@ -74,7 +73,7 @@ export const POST = withEnhancedApi(
     }
 
     // Replace client variables in prompt using shared utility
-    const processedPrompt = replaceClientVariables(promptContent, client)
+    const processedPrompt = replaceClientContextVariables(promptContent, client)
 
     // Get language instruction from client's documentsLanguage preference
     const targetLanguage = getLanguageInstruction(client.documentsLanguage || 'english')
