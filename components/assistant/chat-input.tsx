@@ -8,11 +8,10 @@ import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
 import {replaceClientVariables} from '@/lib/ai/variable-replacement'
 import {useToast} from '@/hooks/use-toast'
+import {Message, Role} from '@prisma/client'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
-import {useRouter} from 'next/navigation'
 import {clientLogger} from '@/lib/client-logger'
 import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/ai/models-config'
-import {Message} from '@prisma/client'
 import {Prompt} from '@/lib/types/component-types'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'
@@ -99,7 +98,6 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
   })
   
   const { toast } = useToast()
-  const router = useRouter()
 
   // Handle input change with logging - use ref to avoid re-renders
   const handleInputChange = useCallback((value: string) => {
@@ -241,7 +239,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     
     messages.forEach((message) => {
       const timestamp = new Date(message.createdAt).toLocaleString()
-      const role = message.role === 'USER' ? 'You' : 'AI Assistant'
+      const role = message.role === Role.USER ? 'You' : 'AI Assistant'
       
       content += `## ${role} - ${timestamp}\n\n`
       content += `${message.content}\n\n`

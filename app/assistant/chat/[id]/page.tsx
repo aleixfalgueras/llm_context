@@ -1,40 +1,30 @@
 import {auth, currentUser} from '@clerk/nextjs/server'
-import {notFound} from 'next/navigation'
 import {ChatPageClient} from '@/components/assistant/chat-page-client'
 import {Navbar} from '@/components/global/navbar'
 import {getClients} from '@/app/actions/client-action'
-import {getChats} from '@/app/actions/chat-action'
-import {ChatService} from '@/services/chat-service'
-import {isSuccess} from '@/database/base-operations'
+import {getChats, getChatWithMessagesById} from '@/app/actions/chat-action'
+import {Role} from '@prisma/client'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
 }
 
 export default async function ChatPage({ params }: ChatPageProps) {
-  const { userId } = await auth()
   const { id } = await params
 
   // Get current user data from Clerk
   const user = await currentUser()
 
   // Get the specific chat and verify ownership, all user's chats, and clients in parallel
-  const [chatResult, chats, clients] = await Promise.all([
-    ChatService.processExistingChat(id, userId!),
+  const [chat, chats, clients] = await Promise.all([
+    getChatWithMessagesById(id),
     getChats(),
     getClients({ includeDetails: true })
   ])
 
-  // Handle chat service result
-  if (!isSuccess(chatResult)) {
-    notFound()
-  }
-
-  const chat = chatResult.data
-
   // Find the last model used in this chat (from the most recent user message)
   const lastUserMessage = chat.messages
-    .filter((msg: any) => msg.role === 'USER' && msg.model)
+    .filter((msg: any) => msg.role === Role.USER && msg.model)
     .reverse()[0]
   
   // Only pass lastUsedModel if there are actual messages, otherwise let ChatInput use localStorage

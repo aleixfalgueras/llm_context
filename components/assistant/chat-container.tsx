@@ -40,7 +40,6 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
     <ErrorBoundary 
       onError={(error, errorInfo) => {
         console.error('Chat container error:', error, errorInfo)
-        // Could add error reporting here
       }}
     >
       {/* Messages Area */}

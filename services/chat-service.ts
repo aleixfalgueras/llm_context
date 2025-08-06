@@ -4,8 +4,9 @@ import {generateChatTitleWithClient} from '@/lib/utils/general'
 import {buildClientContextSection, hasClientContext} from './client-context-service'
 import {ClientService} from './client-service'
 import {logger} from '@/lib/logger'
-import {Chat, Client, Message} from '@prisma/client'
+import {Chat, Client, Message, Role} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
+import {AIMessageRole} from '@/lib/ai/openrouter/client'
 
 export class ChatService {
   /**
@@ -36,15 +37,34 @@ export class ChatService {
     const clientContextSection = buildClientContextSection(client, selectedContextFields)
     const hasContextData = hasClientContext(selectedContextFields)
 
-    return `You are a professional AI assistant helping a marketing service provider with their business.${hasContextData ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' : ''}${clientContextSection}
+    return `You are a professional AI assistant helping a marketing service provider with their business.${
+      hasContextData 
+        ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' 
+        : ''
+    }${clientContextSection}
 
 INSTRUCTIONS:
-- ${hasContextData ? 'Use this client information to personalize your responses when relevant' : 'Provide helpful general business advice'}
-- ${hasContextData ? 'Reference their specific circumstances when it adds value to your response' : 'Keep responses broadly applicable but actionable'}
-- Be professional, knowledgeable, and supportive
-- Help with any aspect of marketing business operations: strategy, client management, content creation, campaigns, analysis, operations, industry insights, problem-solving, etc.
-- Provide practical, actionable advice tailored to marketing professionals
-- Maintain confidentiality and professionalism at all times
+	- ${
+      hasContextData 
+        ? 'Use this client information to personalize your responses when relevant' 
+        : 'Provide helpful general business advice'
+    }
+	- ${
+      hasContextData 
+        ? 'Reference their specific circumstances when it adds value to your response' 
+        : 'Keep responses broadly applicable but actionable'
+    }
+	- Be professional, knowledgeable, and supportive
+	- Help with any aspect of marketing business operations: 
+		• Strategy and planning
+		• Client management
+		• Content creation
+		• Campaigns and analysis
+		• Operations and workflows
+		• Industry insights
+		• Problem-solving and optimization
+	- Provide practical, actionable advice tailored to marketing professionals
+	- Maintain confidentiality and professionalism at all times
 
 Respond naturally and conversationally while keeping this context in mind.`
   }
@@ -52,7 +72,7 @@ Respond naturally and conversationally while keeping this context in mind.`
   /**
    * Process new chat creation
    */
-  static async processNewChat(userId: string, clientId: string, contextFields: string[] = []): Promise<DbOperationResult<{
+  static async createNewChat(userId: string, clientId: string, contextFields: string[] = []): Promise<DbOperationResult<{
     chat: Chat & { messages: Message[] },
     client: Pick<Client, 'name'>
   }>> {
@@ -98,12 +118,12 @@ Respond naturally and conversationally while keeping this context in mind.`
   }
 
   /**
-   * Process existing chat retrieval
+   * Get user chat with messages using chatId
    */
-  static async processExistingChat(chatId: string, userId: string): Promise<DbOperationResult<Chat & {
+  static async getChatWithMessagesById(chatId: string, userId: string): Promise<DbOperationResult<Chat & {
     messages: Message[]
   }>> {
-    const result = await ChatOperations.getChatWithMessages(chatId, userId)
+    const result = await ChatOperations.getChatWithMessagesById(chatId, userId)
 
     if (!isSuccess(result)) {
       logger.warn('Chat not found', {userId, chatId});
@@ -118,9 +138,14 @@ Respond naturally and conversationally while keeping this context in mind.`
 
   /**
    * Prepare chat data for AI processing
+   *
+   * @param chat - Chat object with messages and client context
+   * @param userId - User ID for ownership verification
+   * @param newMessageContent - New message content to add
+   * @returns Formatted messages array with system prompt and client context
    */
   static async prepareChatForAI(chat: any, userId: string, newMessageContent: string): Promise<DbOperationResult<{
-    aiMessages: Array<{ role: 'system' | 'user' | 'assistant', content: string }>,
+    aiMessages: Array<{ role: AIMessageRole, content: string }>,
     client: Client,
     isFirstUserMessage: boolean,
     selectedContextFields: string[]
@@ -130,10 +155,10 @@ Respond naturally and conversationally while keeping this context in mind.`
 
     // Format existing messages for AI provider
     const aiMessages: Array<{
-      role: 'system' | 'user' | 'assistant',
+      role: AIMessageRole,
       content: string
     }> = existingMessages.map((msg: any) => ({
-      role: msg.role.toLowerCase() as 'user' | 'assistant',
+      role: msg.role === Role.USER ? 'user' as const : 'assistant' as const,
       content: msg.content,
     }))
 

@@ -7,6 +7,7 @@ import {memo, useEffect, useMemo, useRef} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 
 import {MessageWithStreaming} from "@/lib/types/message-types";
+import {Role} from '@prisma/client'
 
 interface ChatMessagesProps {
   messages: MessageWithStreaming[]
@@ -48,9 +49,9 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
           </div>
         ) : (
           messages.map((message: MessageWithStreaming) => (
-            <div key={message.id} className={`flex gap-3 ${message.role === 'USER' ? 'flex-row-reverse' : ''}`}>
+            <div key={message.id} className={`flex gap-3 ${message.role === Role.USER ? 'flex-row-reverse' : ''}`}>
               <Avatar className="w-8 h-8">
-                {message.role === 'USER' ? (
+                {message.role === Role.USER ? (
                   <>
                     {userImageUrl && <AvatarImage src={userImageUrl} alt={userName || 'User'} />}
                     <AvatarFallback>
@@ -67,10 +68,10 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
                   </AvatarFallback>
                 )}
               </Avatar>
-              <div className={`space-y-1 max-w-[70%] ${message.role === 'USER' ? 'ml-auto' : ''}`}>
-                <div className={`flex items-center gap-2 ${message.role === 'USER' ? 'flex-row-reverse' : ''}`}>
+              <div className={`space-y-1 max-w-[70%] ${message.role === Role.USER ? 'ml-auto' : ''}`}>
+                <div className={`flex items-center gap-2 ${message.role === Role.USER ? 'flex-row-reverse' : ''}`}>
                   <span className="font-medium text-sm">
-                    {message.role === 'USER' ? (userName || 'You') : 'AI Assistant'}
+                    {message.role === Role.USER ? (userName || 'You') : 'AI Assistant'}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(message.createdAt).toLocaleTimeString()}
@@ -82,7 +83,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
                     </span>
                   )}
                 </div>
-                {message.role === 'ASSISTANT' ? (
+                {message.role === Role.ASSISTANT ? (
                   <div className="relative border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                     <MarkdownRenderer content={message.content} />
                     {message.isStreaming && message.content && (

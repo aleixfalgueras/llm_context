@@ -4,9 +4,11 @@
 
 import OpenAI from 'openai'
 
+export type AIMessageRole = 'system' | 'user' | 'assistant'
+
 export interface OpenRouterCompletionOptions {
   model?: string
-  messages: Array<{role: 'system' | 'user' | 'assistant', content: string}>
+  messages: Array<{role: AIMessageRole, content: string}>
   temperature?: number
   max_tokens?: number
   presence_penalty?: number

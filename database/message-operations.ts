@@ -2,10 +2,10 @@
  * Message-specific database operations
  */
 
-import { prisma } from '@/lib/prisma'
-import { Prisma, Message, Chat } from '@prisma/client'
-import { BaseOperations } from './base-operations'
-import { DbOperationResult } from '@/lib/types/database-types'
+import {prisma} from '@/lib/prisma'
+import {Chat, Message, Prisma} from '@prisma/client'
+import {BaseOperations} from './base-operations'
+import {DbOperationResult} from '@/lib/types/database-types'
 
 export class MessageOperations extends BaseOperations {
   /**
@@ -40,35 +40,6 @@ export class MessageOperations extends BaseOperations {
       userId,
       { context: 'Find user chat for message creation' }
     )
-  }
-
-  /**
-   * Get messages for a chat with ownership verification
-   */
-  static async getChatMessages(chatId: string, userId: string): Promise<DbOperationResult<Message[]>> {
-    try {
-      // First verify chat ownership
-      const chatResult = await this.findUserChat(chatId, userId)
-      if (!chatResult.success) {
-        return chatResult
-      }
-
-      const messages = await prisma.message.findMany({
-        where: { chatId },
-        orderBy: { createdAt: 'asc' }
-      })
-
-      return {
-        success: true,
-        data: messages
-      }
-    } catch (error) {
-      console.error('Error getting chat messages:', error)
-      return {
-        success: false,
-        error: 'Failed to get chat messages'
-      }
-    }
   }
 
   /**
