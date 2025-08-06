@@ -3,8 +3,7 @@ import { redirect } from 'next/navigation'
 import { ChatPageClient } from '@/components/assistant/chat-page-client'
 import { Navbar } from '@/components/global/navbar'
 import { getClients } from '@/app/actions/client-action'
-import { ChatService } from '@/services/chat-service'
-import { isSuccess } from '@/database/base-operations'
+import { getChats } from '@/app/actions/chat-action'
 
 interface NewChatPageProps {
   searchParams: Promise<{ clientId?: string; contextFields?: string }>
@@ -22,13 +21,10 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
   const user = await currentUser()
 
   // Get all user's chats and clients in parallel
-  const [chatsResult, clients] = await Promise.all([
-    ChatService.getUserChats(userId!),
+  const [chats, clients] = await Promise.all([
+    getChats(),
     getClients({ includeDetails: true })
   ])
-
-  // Handle chats service result
-  const chats = isSuccess(chatsResult) ? chatsResult.data : []
 
   // Parse context fields
   let parsedContextFields: string[] = []

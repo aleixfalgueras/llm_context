@@ -14,9 +14,9 @@ import {Role} from '@prisma/client';
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.
  *
- * It manages the complete chat flow including model access validation, chat
- * creation/retrieval, client context integration, and AI response streaming. It supports
- * both new chat creation and continuation of existing chats with full client context awareness.
+ * Manages the complete chat flow including model access validation, chat creation/retrieval,
+ * client context integration, and AI response streaming. Supports both new chat creation
+ * and continuation of existing chats with full client context awareness.
  *
  * @param context - ApiContext object containing userId and request
  * @param context.userId - Authenticated user ID (provided by withEnhancedApi middleware)
@@ -27,28 +27,39 @@ import {Role} from '@prisma/client';
  * @param context.req.body.clientId - Required client ID for new chats, determines context
  * @param context.req.body.contextFields - Array of client context fields to include in system prompt
  *
- * @returns StreamingResponse - Server-sent events stream with the following data types:
+ * @returns StreamingResponse - Server-sent events stream with data types:
  *   - `content`: Streaming AI response content chunks
  *   - `complete`: Final completion signal with chatId and optional newTitle
- *   - `error`: Error information with type, message, and retry details
-
- * Authentication & Validation Flow:
- * 1. Authentication handled automatically by withEnhancedApi middleware
+ *   - `error`: Error information with message details
+ *
+ * Authentication & Validation:
+ * 1. Authentication handled by withEnhancedApi middleware
  * 2. Token usage validation and limits checking
  * 3. Model access verification based on subscription tier
  *
- * Chat Processing Flow:
+ * Chat Processing:
  * 1. Parse and validate request parameters
  * 2. Create new chat or retrieve existing chat with messages
  * 3. Build client context system prompt from selected fields
  * 4. Process user message and save to database
  * 5. Stream AI response with real-time content delivery
  * 6. Save complete AI response and update token usage
+ *
+ * Error Handling:
+ * - MODEL_ACCESS_DENIED: Subscription tier doesn't allow requested model
+ * - Chat creation/retrieval failures return appropriate error messages
+ * - Streaming errors are caught and sent as error events
+ * - Client disconnects during streaming save partial messages
+ *
+ * Token Usage:
+ * - Input tokens tracked on user messages
+ * - Output tokens tracked on assistant messages  
+ * - Fallback to OpenRouter generation stats if usage data missing
+ * - Rough estimation (4 chars/token) as final fallback
  */
 export const POST = withEnhancedApi(
   async ({userId, req}: ApiContext) => {
     let chatId: string = '';
-
 
     // Parse request body
     const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
