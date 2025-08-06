@@ -74,20 +74,13 @@ export const POST = withEnhancedApi(
       throw new Error(SubscriptionErrorCode.MODEL_ACCESS_DENIED)
     }
 
-    logger.info('Chat request authenticated, model access and token usage validated', {
-      userId,
-      chatId,
-      model: selectedModel
-    });
-
-    // LAZY CHAT CREATION:
-    // If no chatId provided, create a new chat first
+    // LAZY CHAT CREATION: If no chatId provided, create a new chat first
     let chat: any = null;
     let client: any = null;
 
     if (!chatId) {
       // Create new chat - clientId and contextFields are required for new chats
-      const newChatResult = await ChatService.processNewChat(userId, clientId, contextFields || [])
+      const newChatResult = await ChatService.createNewChat(userId, clientId, contextFields || [])
       
       if (!newChatResult.success) {
         throw new Error(newChatResult.error)
@@ -98,7 +91,7 @@ export const POST = withEnhancedApi(
       chatId = chat.id
     } else {
       // Get existing chat
-      const existingChatResult = await ChatService.processExistingChat(chatId, userId)
+      const existingChatResult = await ChatService.getChatWithMessagesById(chatId, userId)
       
       if (!existingChatResult.success) {
         throw new Error(existingChatResult.error)
@@ -106,13 +99,6 @@ export const POST = withEnhancedApi(
 
       chat = existingChatResult.data
     }
-
-    logger.info('Chat data retrieved', {
-      userId,
-      chatId,
-      clientId: chat.clientId,
-      metadata: {messageCount: chat.messages.length}
-    });
 
     // Prepare chat data for AI processing
     const lastMessage = messages[messages.length - 1]
@@ -122,7 +108,7 @@ export const POST = withEnhancedApi(
       throw new Error('Failed to prepare chat for AI processing')
     }
 
-    const { aiMessages, client: chatClient, isFirstUserMessage, selectedContextFields } = prepareResult.data
+    const { aiMessages, client: chatClient, isFirstUserMessage } = prepareResult.data
     
     // Use the client from the preparation if we don't have one yet (for existing chats)
     if (!client) {
@@ -141,16 +127,9 @@ export const POST = withEnhancedApi(
     }, userId)
     
     if (!userMessageResult.success) {
-      return NextResponse.json({ error: userMessageResult.error || 'Failed to save user message' }, { status: 500 })
+      throw new Error(userMessageResult.error || 'Failed to save user message' )
     }
-    
-    const userMessage = (userMessageResult as { success: true; data: any }).data
-    logger.info('User message saved', {
-      userId,
-      chatId,
-      model: selectedModel,
-      metadata: {messageLength: lastMessage.content.length}
-    });
+    const userMessage = userMessageResult.data
 
     // If this is the first user message, update the chat title only if it's still the default
     const titleUpdateResult = await ChatService.updateChatTitleForFirstMessage(
@@ -162,9 +141,8 @@ export const POST = withEnhancedApi(
     )
 
     if (titleUpdateResult.success && titleUpdateResult.data.updated) {
-      // Revalidate the chat page and home page to show the updated title
+      // Revalidate the chat page to show the updated title
       revalidatePath(`/assistant/chat/${chatId}`)
-      revalidatePath('/')
     }
 
     // Create a streaming response

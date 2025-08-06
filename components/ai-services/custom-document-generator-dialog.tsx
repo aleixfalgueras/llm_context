@@ -228,8 +228,8 @@ export function CustomDocumentGeneratorDialog({
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(CLIENT_CONTEXT_FIELDS).map(([key, config]) => {
-            const fieldValue = selectedClientData[config.dbField as keyof Client]
+          {Object.entries(CLIENT_CONTEXT_FIELDS).map(([key, label]) => {
+            const fieldValue = selectedClientData[key as keyof Client]
             const hasValue = fieldValue && String(fieldValue).trim() !== ''
             
             // Only render fields that have values
@@ -249,7 +249,7 @@ export function CustomDocumentGeneratorDialog({
                   }}
                 />
                 <Label htmlFor={`context-${key}`}>
-                  {config.label}
+                  {label}
                 </Label>
               </div>
             )

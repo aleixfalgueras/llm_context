@@ -1,11 +1,7 @@
-/**
- * Chat-specific database operations
- */
-
-import { prisma } from '@/lib/prisma'
-import { BaseOperations } from './base-operations'
-import { Chat, Client, Message, Prisma } from '@prisma/client'
-import { DbOperationResult } from '@/lib/types/database-types'
+import {prisma} from '@/lib/prisma'
+import {BaseOperations} from './base-operations'
+import {Chat, Client, Message} from '@prisma/client'
+import {DbOperationResult} from '@/lib/types/database-types'
 
 export class ChatOperations extends BaseOperations {
   /**
@@ -16,7 +12,7 @@ export class ChatOperations extends BaseOperations {
       prisma.chat,
       chatId,
       userId,
-      { context: 'Delete chat' }
+      {context: 'Delete chat'}
     )
   }
 
@@ -28,8 +24,8 @@ export class ChatOperations extends BaseOperations {
       prisma.chat,
       chatId,
       userId,
-      { title },
-      { context: 'Update chat title' }
+      {title},
+      {context: 'Update chat title'}
     )
   }
 
@@ -40,12 +36,12 @@ export class ChatOperations extends BaseOperations {
   static async deleteAllUserChats(userId: string): Promise<DbOperationResult<{ deletedCount: number }>> {
     try {
       const result = await prisma.chat.deleteMany({
-        where: { userId }
+        where: {userId}
       })
 
       return {
         success: true,
-        data: { deletedCount: result.count }
+        data: {deletedCount: result.count}
       }
     } catch (error) {
       console.error('Error deleting all user chats:', error)
@@ -59,7 +55,10 @@ export class ChatOperations extends BaseOperations {
   /**
    * Create a new chat with client validation
    */
-  static async createChatWithClient(userId: string, clientId: string, title: string, contextFields: string[] = []): Promise<DbOperationResult<{ chat: Chat & { messages: Message[] }, client: Pick<Client, 'name'> }>> {
+  static async createChatWithClient(userId: string, clientId: string, title: string, contextFields: string[] = []): Promise<DbOperationResult<{
+    chat: Chat & { messages: Message[] },
+    client: Pick<Client, 'name'>
+  }>> {
     try {
       // Verify client exists and belongs to user
       const client = await prisma.client.findFirst({
@@ -67,7 +66,7 @@ export class ChatOperations extends BaseOperations {
           id: clientId,
           userId
         },
-        select: { name: true }
+        select: {name: true}
       })
 
       if (!client) {
@@ -96,7 +95,7 @@ export class ChatOperations extends BaseOperations {
 
       return {
         success: true as const,
-        data: { chat, client }
+        data: {chat, client}
       }
     } catch (error) {
       console.error('Error creating chat with client:', error)
@@ -108,9 +107,11 @@ export class ChatOperations extends BaseOperations {
   }
 
   /**
-   * Get existing chat with messages
+   * Get existing user chat with messages using chatId
    */
-  static async getChatWithMessages(chatId: string, userId: string): Promise<DbOperationResult<Chat & { messages: Message[] }>> {
+  static async getChatWithMessagesById(chatId: string, userId: string): Promise<DbOperationResult<Chat & {
+    messages: Message[]
+  }>> {
     try {
       const chat = await prisma.chat.findFirst({
         where: {
@@ -149,7 +150,9 @@ export class ChatOperations extends BaseOperations {
   /**
    * Update chat title if it matches the default title
    */
-  static async updateChatTitleIfDefault(chatId: string, userId: string, newTitle: string, defaultTitle: string = 'New Chat'): Promise<DbOperationResult<{ updated: boolean }>> {
+  static async updateChatTitleIfDefault(chatId: string, userId: string, newTitle: string, defaultTitle: string = 'New Chat'): Promise<DbOperationResult<{
+    updated: boolean
+  }>> {
     try {
       const result = await prisma.chat.updateMany({
         where: {
@@ -164,7 +167,7 @@ export class ChatOperations extends BaseOperations {
 
       return {
         success: true as const,
-        data: { updated: result.count > 0 }
+        data: {updated: result.count > 0}
       }
     } catch (error) {
       console.error('Error updating chat title:', error)
@@ -181,8 +184,8 @@ export class ChatOperations extends BaseOperations {
   static async getAllUserChats(userId: string): Promise<DbOperationResult<Chat[]>> {
     try {
       const chats = await prisma.chat.findMany({
-        where: { userId },
-        orderBy: { updatedAt: 'desc' }
+        where: {userId},
+        orderBy: {updatedAt: 'desc'}
       })
 
       return {

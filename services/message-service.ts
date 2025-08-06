@@ -1,6 +1,6 @@
 import {MessageOperations} from '@/database'
 import {logger} from '@/lib/logger'
-import {Prisma, Message} from '@prisma/client'
+import {Message, Prisma} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 
 export class MessageService {
@@ -43,13 +43,6 @@ export class MessageService {
         error: 'Failed to create message'
       }
     }
-  }
-
-  /**
-   * Get messages for a chat with ownership verification
-   */
-  static async getChatMessages(chatId: string, userId: string): Promise<DbOperationResult<Message[]>> {
-    return MessageOperations.getChatMessages(chatId, userId)
   }
 
   /**

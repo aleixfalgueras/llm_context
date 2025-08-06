@@ -8,6 +8,7 @@ import {ChatContainer} from '@/components/assistant/chat-container'
 import {ClientContextSidebar} from '@/components/assistant/client-context-sidebar'
 import {ClientDocuments} from '@/components/clients/client-documents'
 import {ErrorBoundary} from '@/components/global/error-boundary'
+import {handleClientApiError} from '@/lib/api/api-toast'
 
 interface ChatPageClientProps {
   chat: {
@@ -48,7 +49,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
     <ErrorBoundary 
       onError={(error, errorInfo) => {
         console.error('Chat page error:', error, errorInfo)
-        // Could add error reporting here
+        handleClientApiError(error.message, 'Chat error occurred - please try refreshing')
       }}
     >
       <div className="flex h-full overflow-hidden relative">
