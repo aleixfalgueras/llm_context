@@ -104,10 +104,10 @@ export function ClientContextSidebar({
         contextFields: JSON.stringify(selectedFields)
       })
       router.push(`/assistant/chat/new?${params.toString()}`)
+      // Don't reset loading state here - let the navigation complete
     } catch (error) {
       console.error('Failed to create chat:', error)
-    } finally {
-      setIsCreatingChat(false)
+      setIsCreatingChat(false) // Only reset on error
     }
   }
 
@@ -251,7 +251,7 @@ export function ClientContextSidebar({
                   <Button 
                     onClick={handleCreateChat}
                     disabled={isCreatingChat}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     {isCreatingChat ? 'Creating Chat...' : 'New Chat'}
