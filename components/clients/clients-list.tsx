@@ -51,10 +51,6 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
   }
 
   const handleDelete = async (clientId: string, clientName: string) => {
-    if (!confirm(`Are you sure you want to delete ${clientName}? This action cannot be undone.`)) {
-      return
-    }
-
     setIsDeleting(clientId)
     try {
       await deleteClient(clientId, clientName)
