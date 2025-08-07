@@ -8,7 +8,8 @@ import {ScrollArea} from '@/components/ui/scroll-area'
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {ChevronDown, FileText, Search, Star, TrendingUp} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
-import {Prompt} from "@prisma/client";
+import {Prompt} from "@prisma/client"
+import {getPrompts, trackPromptUsage} from '@/app/actions/prompt-action'
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void
@@ -25,13 +26,11 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
   const fetchPrompts = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/prompts?active=true&includeContent=true')
-      if (response.ok) {
-        const data = await response.json()
-        // Handle API response structure - API returns Prompt[] directly
-        const promptsData = data.data || []
-        setPrompts(Array.isArray(promptsData) ? promptsData : [])
-      }
+      const data = await getPrompts({
+        isActive: true,
+        includeContent: true
+      })
+      setPrompts(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching prompts:', error)
     } finally {
@@ -60,12 +59,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
   const handlePromptSelect = async (prompt: Prompt) => {
     try {
       // Track usage
-      await fetch(`/api/prompts/${prompt.id}/use`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      await trackPromptUsage(prompt.id)
       
       onPromptSelect(prompt)
       setOpen(false)

@@ -10,6 +10,8 @@ import {
   PromptFilterActionHandlers
 } from '@/lib/types/prompt-types'
 import { handleClientApiError } from '@/lib/api/api-toast'
+import { getPrompts, deletePrompt as deletePromptAction, updatePrompt } from '@/app/actions/prompt-action'
+import { PromptListFilters } from '@/services/prompt-service'
 
 interface UsePromptManagementReturn {
   // State
@@ -51,22 +53,14 @@ export function usePromptManagement(): UsePromptManagementReturn {
   const fetchPrompts = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams()
-      if (filters.selectedCategory !== 'all') {
-        params.append('category', filters.selectedCategory)
+      const promptFilters: PromptListFilters = {
+        category: filters.selectedCategory !== 'all' ? filters.selectedCategory : undefined,
+        isActive: !filters.showInactive ? true : undefined,
+        includeContent: true
       }
-      if (!filters.showInactive) {
-        params.append('active', 'true')
-      }
-      params.append('includeContent', 'true')
 
-      const response = await fetch(`/api/prompts?${params.toString()}`)
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load prompts' }))
-        throw new Error(errorData.error)
-      }
-      const data = await response.json()
-      setPrompts(data.data || [])
+      const data = await getPrompts(promptFilters)
+      setPrompts(data || [])
     } catch (error) {
       console.error('Error fetching prompts:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'
@@ -86,7 +80,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
 
   // Fetch prompts on mount and when filters change
   useEffect(() => {
-    fetchPrompts()
+    void fetchPrompts()
   }, [filters.selectedCategory, filters.showInactive])
 
   const filteredAndSortedPrompts = (Array.isArray(prompts) ? prompts : [])
@@ -114,19 +108,12 @@ export function usePromptManagement(): UsePromptManagementReturn {
 
   const deletePrompt = async (promptId: string) => {
     try {
-      const response = await fetch(`/api/prompts/${promptId}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to delete prompt' }))
-        throw new Error(errorData.error)
-      }
+      await deletePromptAction(promptId)
       toast({
         title: 'Prompt deleted',
         description: 'Prompt has been deleted successfully.',
       })
-      fetchPrompts()
+      await fetchPrompts()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete prompt'
       handleClientApiError(errorMessage, 'Failed to delete prompt')
@@ -135,26 +122,14 @@ export function usePromptManagement(): UsePromptManagementReturn {
 
   const togglePromptStatus = async (prompt: Prompt) => {
     try {
-      const response = await fetch(`/api/prompts/${prompt.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...prompt,
-          isActive: !prompt.isActive,
-        }),
+      await updatePrompt(prompt.id, {
+        isActive: !prompt.isActive,
       })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to update prompt' }))
-        throw new Error(errorData.error)
-      }
       toast({
         title: prompt.isActive ? 'Prompt disabled' : 'Prompt enabled',
         description: `"${prompt.name}" has been ${prompt.isActive ? 'disabled' : 'enabled'}.`,
       })
-      fetchPrompts()
+      await fetchPrompts()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update prompt status'
       handleClientApiError(errorMessage, 'Failed to update prompt status')

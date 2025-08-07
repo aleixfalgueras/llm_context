@@ -13,7 +13,8 @@ import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {PromptInput} from '@/lib/types/prompt-types'
-import {Prompt} from "@prisma/client";
+import {Prompt} from "@prisma/client"
+import {createPrompt, updatePrompt} from '@/app/actions/prompt-action'
 
 interface PromptDialogProps {
   prompt?: Prompt | PromptInput
@@ -117,20 +118,10 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
     setLoading(true)
 
     try {
-      const url = isEditing ? `/api/prompts/${prompt!.id}` : '/api/prompts'
-      const method = isEditing ? 'PUT' : 'POST'
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to save prompt' }))
-        throw new Error(errorData.error)
+      if (isEditing) {
+        await updatePrompt(prompt!.id, formData)
+      } else {
+        await createPrompt(formData)
       }
 
       toast({
