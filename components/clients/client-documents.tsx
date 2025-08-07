@@ -149,6 +149,7 @@ export function ClientDocuments({
                 editedContent={documentState.editedContent}
                 editedDocumentName={documentState.editedDocumentName}
                 loadingContent={documentState.loadingContent}
+                isSaving={operations.isSavingDocument}
                 onEdit={handleEditMode}
                 onSave={handleSaveDocument}
                 onCancel={handleCancelEdit}

@@ -27,6 +27,7 @@ export function useDocumentOperations({
 }: UseDocumentOperationsProps) {
   const { toast } = useToast()
   const [isCreatingDocument, setIsCreatingDocument] = useState(false)
+  const [isSavingDocument, setIsSavingDocument] = useState(false)
 
   const handleCreateDocument = async (
     documentName: string,
@@ -101,6 +102,7 @@ export function useDocumentOperations({
       return false
     }
 
+    setIsSavingDocument(true)
     try {
       const response = await fetch(`/api/documents/${selectedDocument.id}`, {
         method: 'PUT',
@@ -130,6 +132,8 @@ export function useDocumentOperations({
       const errorMessage = error instanceof Error ? error.message : 'Failed to update document'
       handleClientApiError(errorMessage, 'Failed to update document')
       return false
+    } finally {
+      setIsSavingDocument(false)
     }
   }
 
@@ -255,5 +259,6 @@ export function useDocumentOperations({
     handleDeleteAllDocuments,
     handleDownloadDocument,
     isCreatingDocument,
+    isSavingDocument,
   }
 } 

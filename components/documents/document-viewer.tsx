@@ -3,6 +3,7 @@
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Textarea} from '@/components/ui/textarea'
+import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Edit, Eye, FileText, Loader2, Save, X} from 'lucide-react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {Document, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
@@ -14,6 +15,7 @@ interface DocumentViewerProps {
   editedContent: string
   editedDocumentName: string
   loadingContent?: boolean
+  isSaving?: boolean
   onEdit: () => void
   onSave: () => void
   onCancel: () => void
@@ -29,6 +31,7 @@ export function DocumentViewer({
   editedContent,
   editedDocumentName,
   loadingContent = false,
+  isSaving = false,
   onEdit,
   onSave,
   onCancel,
@@ -91,11 +94,17 @@ export function DocumentViewer({
               <Button
                 size="sm"
                 onClick={onSave}
-                disabled={!editedDocumentName?.trim() || !editedContent?.trim()}
+                disabled={!editedDocumentName?.trim() || !editedContent?.trim() || isSaving}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                <Save className="h-4 w-4 mr-1" />
-                Save
+                {isSaving ? (
+                  <LoadingSpinner size="sm" text="Saving..." className="text-white" />
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
+                  </>
+                )}
               </Button>
             </>
           ) : (
