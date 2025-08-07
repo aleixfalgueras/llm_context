@@ -29,7 +29,11 @@ export function DeletePromptDialog({ onDelete, promptName }: DeletePromptDialogP
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
         </Button>
       </DialogTrigger>
