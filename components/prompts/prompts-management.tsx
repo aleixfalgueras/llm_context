@@ -22,14 +22,18 @@ export function PromptsManagement() {
     
     // Dialog states
     showPromptDialog,
+    isViewDialogOpen,
+    viewingPrompt,
     
     // Actions
     fetchPrompts,
     deletePrompt,
     togglePromptStatus,
     handleNewPrompt,
+    handleViewPrompt,
     clearFilters,
     setShowPromptDialog,
+    setIsViewDialogOpen,
     
     // Filter handlers
     filterActionHandlers,
@@ -120,6 +124,7 @@ export function PromptsManagement() {
                 onEdit={() => fetchPrompts()}
                 onDelete={() => deletePrompt(prompt.id)}
                 onToggleStatus={() => togglePromptStatus(prompt)}
+                onViewPrompt={handleViewPrompt}
               />
             ))}
           </div>
@@ -134,6 +139,14 @@ export function PromptsManagement() {
           setShowPromptDialog(false)
           fetchPrompts()
         }}
+      />
+
+      {/* Prompt View Dialog */}
+      <PromptDialog 
+        prompt={viewingPrompt}
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        viewMode={true}
       />
 
     </div>
