@@ -180,7 +180,6 @@ export function ClientDocuments({
         confirmText="Save Document"
       />
 
-
     </Dialog>
   )
 } 

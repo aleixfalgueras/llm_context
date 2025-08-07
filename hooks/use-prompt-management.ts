@@ -24,7 +24,11 @@ interface UsePromptManagementReturn {
   // Dialog states
   showPromptDialog: boolean
   isViewDialogOpen: boolean
+  isEditDialogOpen: boolean
+  isDeleteDialogOpen: boolean
   viewingPrompt: Prompt | null
+  editingPrompt: Prompt | null
+  deletingPrompt: Prompt | null
   
   // Actions
   fetchPrompts: () => Promise<void>
@@ -32,9 +36,13 @@ interface UsePromptManagementReturn {
   togglePromptStatus: (prompt: Prompt) => Promise<void>
   handleNewPrompt: () => Promise<void>
   handleViewPrompt: (prompt: Prompt) => void
+  handleEditPrompt: (prompt: Prompt) => void
+  handleDeletePrompt: (prompt: Prompt) => void
   clearFilters: () => void
   setShowPromptDialog: (show: boolean) => void
   setIsViewDialogOpen: (open: boolean) => void
+  setIsEditDialogOpen: (open: boolean) => void
+  setIsDeleteDialogOpen: (open: boolean) => void
   
   // Filter handlers
   filterActionHandlers: PromptFilterActionHandlers
@@ -53,7 +61,11 @@ export function usePromptManagement(): UsePromptManagementReturn {
   })
   const [showPromptDialog, setShowPromptDialog] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [viewingPrompt, setViewingPrompt] = useState<Prompt | null>(null)
+  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null)
+  const [deletingPrompt, setDeletingPrompt] = useState<Prompt | null>(null)
   const { toast } = useToast()
 
   const fetchPrompts = async () => {
@@ -167,6 +179,16 @@ export function usePromptManagement(): UsePromptManagementReturn {
     setIsViewDialogOpen(true)
   }
 
+  const handleEditPrompt = (prompt: Prompt) => {
+    setEditingPrompt(prompt)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleDeletePrompt = (prompt: Prompt) => {
+    setDeletingPrompt(prompt)
+    setIsDeleteDialogOpen(true)
+  }
+
   // Prepare data for child components
   const stats: PromptStats = {
     total: prompts.length,
@@ -195,7 +217,11 @@ export function usePromptManagement(): UsePromptManagementReturn {
     // Dialog states
     showPromptDialog,
     isViewDialogOpen,
+    isEditDialogOpen,
+    isDeleteDialogOpen,
     viewingPrompt,
+    editingPrompt,
+    deletingPrompt,
     
     // Actions
     fetchPrompts,
@@ -203,9 +229,13 @@ export function usePromptManagement(): UsePromptManagementReturn {
     togglePromptStatus,
     handleNewPrompt,
     handleViewPrompt,
+    handleEditPrompt,
+    handleDeletePrompt,
     clearFilters,
     setShowPromptDialog,
     setIsViewDialogOpen,
+    setIsEditDialogOpen,
+    setIsDeleteDialogOpen,
     
     // Filter handlers
     filterActionHandlers,

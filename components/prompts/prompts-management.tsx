@@ -3,6 +3,7 @@
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
 import {PromptDialog} from '@/components/prompts/prompt-dialog'
+import {DeletePromptDialog} from '@/components/prompts/delete-prompt-dialog'
 import {FileText, Lightbulb, Plus} from 'lucide-react'
 import {PromptStatsCards} from '@/components/prompts/prompt-stats-cards'
 import {PromptFiltersBar} from '@/components/prompts/prompt-filters-bar'
@@ -23,7 +24,11 @@ export function PromptsManagement() {
     // Dialog states
     showPromptDialog,
     isViewDialogOpen,
+    isEditDialogOpen,
+    isDeleteDialogOpen,
     viewingPrompt,
+    editingPrompt,
+    deletingPrompt,
     
     // Actions
     fetchPrompts,
@@ -31,9 +36,13 @@ export function PromptsManagement() {
     togglePromptStatus,
     handleNewPrompt,
     handleViewPrompt,
+    handleEditPrompt,
+    handleDeletePrompt,
     clearFilters,
     setShowPromptDialog,
     setIsViewDialogOpen,
+    setIsEditDialogOpen,
+    setIsDeleteDialogOpen,
     
     // Filter handlers
     filterActionHandlers,
@@ -122,7 +131,9 @@ export function PromptsManagement() {
                 key={prompt.id}
                 prompt={prompt}
                 onEdit={() => fetchPrompts()}
+                onEditPrompt={handleEditPrompt}
                 onDelete={() => deletePrompt(prompt.id)}
+                onDeletePrompt={handleDeletePrompt}
                 onToggleStatus={() => togglePromptStatus(prompt)}
                 onViewPrompt={handleViewPrompt}
               />
@@ -147,6 +158,30 @@ export function PromptsManagement() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         viewMode={true}
+      />
+
+      {/* Prompt Edit Dialog */}
+      <PromptDialog 
+        prompt={editingPrompt}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onSuccess={() => {
+          setIsEditDialogOpen(false)
+          fetchPrompts()
+        }}
+      />
+
+      {/* Prompt Delete Dialog */}
+      <DeletePromptDialog 
+        promptName={deletingPrompt?.name || ''}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDelete={() => {
+          if (deletingPrompt) {
+            deletePrompt(deletingPrompt.id)
+            setIsDeleteDialogOpen(false)
+          }
+        }}
       />
 
     </div>
