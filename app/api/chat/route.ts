@@ -1,9 +1,8 @@
 import {MessageService} from '@/services/message-service'
 import {ChatService} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
-import {openRouterService, OpenRouterService} from '@/services/openrouter'
+import {openRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
-import {NextResponse} from 'next/server'
 import {getDefaultModel} from '@/lib/models-config'
 import {checkModelAccess} from "@/lib/api/api-validation";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
@@ -163,9 +162,6 @@ export const POST = withEnhancedApi(
         }
 
         try {
-          // Use unified AI wrapper with automatic usage tracking (streaming version)
-          logger.aiRequest(selectedModel, undefined, {userId, chatId});
-
           completionStream = openRouterService.createStreamingCompletion(
             {model: selectedModel, messages: aiMessages},
             {userId, resourceId: chatId}
@@ -174,16 +170,6 @@ export const POST = withEnhancedApi(
           for await (const chunk of completionStream) {
             if (chunk.isComplete) {
               // Final chunk - save the complete message to database
-              logger.info('AI response received', {
-                userId,
-                chatId,
-                model: selectedModel,
-                metadata: {
-                  responseLength: fullContent.length,
-                  tokensUsed: chunk.usage?.totalTokens
-                }
-              });
-
               let finalUsage = chunk.usage;
 
               // Fallback: Query generation stats if usage data is missing
@@ -191,9 +177,7 @@ export const POST = withEnhancedApi(
                 try {
                   // Add a small delay - generation stats might not be immediately available
                   await new Promise(resolve => setTimeout(resolve, 1000));
-
-                  const service = new OpenRouterService();
-                  const stats = await service.getGenerationStats(chunk.generationId);
+                  const stats = await openRouterService.getGenerationStats(chunk.generationId);
 
                   if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
                     finalUsage = {
@@ -202,10 +186,10 @@ export const POST = withEnhancedApi(
                       totalTokens: (stats.data.tokens_prompt || 0) + (stats.data.tokens_completion || 0)
                     };
                   } else {
-                    console.log('DEBUG: Generation stats available but no token data:', stats);
+                    console.log('Generation stats available but no token data:', stats);
                   }
                 } catch (error) {
-                  console.log('DEBUG: Failed to get generation stats:', error);
+                  console.error('Failed to get generation stats:', error);
 
                   // If generation stats fail, provide a rough estimate based on content length
                   // This is a very rough estimate: ~4 characters per token for English text
@@ -218,7 +202,7 @@ export const POST = withEnhancedApi(
                     totalTokens: estimatedPromptTokens + estimatedCompletionTokens
                   };
 
-                  console.log('DEBUG: Using estimated token counts:', finalUsage);
+                  console.log('Using estimated token counts:', finalUsage);
                 }
               }
 
@@ -254,7 +238,6 @@ export const POST = withEnhancedApi(
                 logger.error('Failed to save assistant message', new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
               }
               logger.info('Assistant message saved', {userId, chatId});
-
 
               // Send completion signal
               const completionData = {
