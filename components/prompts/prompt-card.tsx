@@ -3,21 +3,21 @@
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Badge} from '@/components/ui/badge'
-import {Edit2, Eye, EyeOff} from 'lucide-react'
+import {Edit2, Eye, EyeOff, Trash2} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
 import {Prompt} from '@prisma/client'
-import {PromptDialog} from '@/components/prompts/prompt-dialog'
-import {DeletePromptDialog} from '@/components/prompts/delete-prompt-dialog'
 
 interface PromptCardProps {
   prompt: Prompt
   onEdit: () => void
+  onEditPrompt: (prompt: Prompt) => void
   onDelete: () => void
+  onDeletePrompt: (prompt: Prompt) => void
   onToggleStatus: () => void
   onViewPrompt: (prompt: Prompt) => void
 }
 
-export function PromptCard({ prompt, onEdit, onDelete, onToggleStatus, onViewPrompt }: PromptCardProps) {
+export function PromptCard({ prompt, onEdit, onEditPrompt, onDelete, onDeletePrompt, onToggleStatus, onViewPrompt }: PromptCardProps) {
   return (
     <Card 
       className={cn(
@@ -62,19 +62,17 @@ export function PromptCard({ prompt, onEdit, onDelete, onToggleStatus, onViewPro
       <CardContent className="pt-0">
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex gap-1">
-            <PromptDialog 
-              prompt={prompt} 
-              onSuccess={onEdit}
-              trigger={
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-              }
-            />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEditPrompt(prompt)
+              }}
+              title="Edit Prompt"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
             
             <Button
               variant="ghost"
@@ -91,7 +89,17 @@ export function PromptCard({ prompt, onEdit, onDelete, onToggleStatus, onViewPro
               )}
             </Button>
             
-            <DeletePromptDialog onDelete={onDelete} promptName={prompt.name} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDeletePrompt(prompt)
+              }}
+              title="Delete Prompt"
+            >
+              <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
+            </Button>
           </div>
           
           <div className="text-xs text-muted-foreground">

@@ -1,6 +1,5 @@
 'use client'
 
-import {useState} from 'react'
 import {Button} from '@/components/ui/button'
 import {
   Dialog,
@@ -8,35 +7,26 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog'
 import {Trash2} from 'lucide-react'
 
 interface DeletePromptDialogProps {
   onDelete: () => void
   promptName: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-export function DeletePromptDialog({ onDelete, promptName }: DeletePromptDialogProps) {
-  const [open, setOpen] = useState(false)
+export function DeletePromptDialog({ onDelete, promptName, open, onOpenChange }: DeletePromptDialogProps) {
 
   const handleDelete = () => {
     onDelete()
-    setOpen(false)
+    onOpenChange(false)
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Prompt</DialogTitle>
@@ -45,7 +35,7 @@ export function DeletePromptDialog({ onDelete, promptName }: DeletePromptDialogP
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
