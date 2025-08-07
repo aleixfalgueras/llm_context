@@ -404,7 +404,7 @@ export class SubscriptionUsageService {
           metadata.tokensUsed
         );
 
-        logger.info('Updated tokensUsed for billing period', {
+        logger.debug('Updated tokensUsed for billing period', {
           userId,
           tokensUsed: result.tokensUsed,
           metadata: {
