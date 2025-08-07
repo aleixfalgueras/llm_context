@@ -1,9 +1,11 @@
 'use client'
 
+import {useState} from 'react'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Edit, FileText, Trash2} from 'lucide-react'
 import {Client, ClientActionHandlers, LanguageInfo} from '@/lib/types/client-list-types'
+import {DeleteClientDialog} from './delete-client-dialog'
 
 interface ClientGridViewProps {
   clients: Client[]
@@ -19,6 +21,19 @@ export function ClientGridView({
   getLanguageInfo 
 }: ClientGridViewProps) {
   const { onEditClient, onViewClient, onViewDocuments, onDeleteClient } = actionHandlers
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [clientToDelete, setClientToDelete] = useState<{id: string, name: string} | null>(null)
+
+  const handleDeleteClick = (client: Client) => {
+    setClientToDelete({ id: client.id, name: client.name })
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (clientToDelete) {
+      onDeleteClient(clientToDelete.id, clientToDelete.name)
+    }
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -66,7 +81,7 @@ export function ClientGridView({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
-                      onDeleteClient(client.id, client.name)
+                      handleDeleteClick(client)
                     }}
                     disabled={isDeleting === client.id}
                     title="Delete Client"
@@ -104,6 +119,14 @@ export function ClientGridView({
           </Card>
         )
       })}
+      {clientToDelete && (
+        <DeleteClientDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          clientName={clientToDelete.name}
+          onDelete={handleConfirmDelete}
+        />
+      )}
     </div>
   )
 } 

@@ -1,8 +1,10 @@
 'use client'
 
+import {useState} from 'react'
 import {Button} from '@/components/ui/button'
 import {Edit, FileText, Trash2} from 'lucide-react'
 import {Client, ClientActionHandlers, LanguageInfo} from '@/lib/types/client-list-types'
+import {DeleteClientDialog} from './delete-client-dialog'
 
 interface ClientTableViewProps {
   clients: Client[]
@@ -18,6 +20,19 @@ export function ClientTableView({
   getLanguageInfo 
 }: ClientTableViewProps) {
   const { onEditClient, onViewClient, onViewDocuments, onDeleteClient } = actionHandlers
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [clientToDelete, setClientToDelete] = useState<{id: string, name: string} | null>(null)
+
+  const handleDeleteClick = (client: Client) => {
+    setClientToDelete({ id: client.id, name: client.name })
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (clientToDelete) {
+      onDeleteClient(clientToDelete.id, clientToDelete.name)
+    }
+  }
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -109,7 +124,7 @@ export function ClientTableView({
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          onDeleteClient(client.id, client.name)
+                          handleDeleteClick(client)
                         }}
                         disabled={isDeleting === client.id}
                         title="Delete Client"
@@ -124,6 +139,14 @@ export function ClientTableView({
           </tbody>
         </table>
       </div>
+      {clientToDelete && (
+        <DeleteClientDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          clientName={clientToDelete.name}
+          onDelete={handleConfirmDelete}
+        />
+      )}
     </div>
   )
 } 
