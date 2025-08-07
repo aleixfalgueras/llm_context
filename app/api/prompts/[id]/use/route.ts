@@ -1,4 +1,4 @@
-import { PromptOperations } from '@/database/prompt-operations'
+import { PromptService } from '@/services/prompt-service'
 import { 
   withEnhancedApi, 
   apiSuccess,
@@ -11,7 +11,11 @@ export const POST = withEnhancedApi(
     const { id } = params!
     const promptId = id as string
 
-    await PromptOperations.incrementPromptUsage(promptId, userId)
+    const result = await PromptService.trackPromptUsage(promptId, userId)
+
+    if (!result.success) {
+      throw new Error(result.error)
+    }
 
     return apiSuccess({ message: 'Prompt usage tracked' })
   },

@@ -8,7 +8,7 @@ import {ScrollArea} from '@/components/ui/scroll-area'
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {ChevronDown, FileText, Search, Star, TrendingUp} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
-import {Prompt} from '@/lib/types/component-types'
+import {Prompt} from "@prisma/client";
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void
@@ -28,8 +28,8 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
       const response = await fetch('/api/prompts?active=true&includeContent=true')
       if (response.ok) {
         const data = await response.json()
-        // Handle API response structure - API returns { data: { prompts: [...] } }
-        const promptsData = data.data?.prompts || data.prompts || []
+        // Handle API response structure - API returns Prompt[] directly
+        const promptsData = data.data || []
         setPrompts(Array.isArray(promptsData) ? promptsData : [])
       }
     } catch (error) {

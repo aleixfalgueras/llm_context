@@ -3,7 +3,8 @@
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Badge} from '@/components/ui/badge'
 import {FileText, TrendingUp} from 'lucide-react'
-import {Prompt, PromptStats} from '@/lib/types/prompt-management-types'
+import {PromptStats} from '@/lib/types/prompt-types'
+import {Prompt} from "@prisma/client";
 
 interface PromptStatsCardsProps {
   stats: PromptStats

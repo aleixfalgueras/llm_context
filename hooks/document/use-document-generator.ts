@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useToast } from '@/hooks/use-toast'
-import { getDefaultModel } from '@/lib/models-config'
-import { clientLogger } from '@/lib/client-logger'
-import { Prompt } from '@/lib/types/component-types'
-import type { Client } from '@prisma/client'
-import { handleClientApiError } from '@/lib/api/api-toast'
+import {useEffect, useState} from 'react'
+import {useToast} from '@/hooks/use-toast'
+import {getDefaultModel} from '@/lib/models-config'
+import {clientLogger} from '@/lib/client-logger'
+import type {Client, Prompt} from '@prisma/client'
+import {handleClientApiError} from '@/lib/api/api-toast'
 import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types";
 
 interface UseDocumentGeneratorProps {
@@ -84,7 +83,7 @@ export function useDocumentGenerator({
         throw new Error(errorData.error)
       }
       const data = await response.json()
-      setPrompts(data.data.prompts || [])
+      setPrompts(data.data || [])
     } catch (error) {
       console.error('Error loading prompts:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'

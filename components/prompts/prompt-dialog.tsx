@@ -11,11 +11,12 @@ import {ClientContextVariablesTooltip} from '@/components/ui/client-context-vari
 import {Edit2, Loader2, Plus} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
-import {Prompt, PromptBasic} from '@/lib/types/component-types'
 import {handleClientApiError} from '@/lib/api/api-toast'
+import {PromptInput} from '@/lib/types/prompt-types'
+import {Prompt} from "@prisma/client";
 
 interface PromptDialogProps {
-  prompt?: Prompt | PromptBasic
+  prompt?: Prompt | PromptInput
   trigger?: React.ReactNode
   onSuccess?: () => void
   isTemplate?: boolean

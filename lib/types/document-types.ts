@@ -25,4 +25,20 @@ export const ALL_DOCUMENT_TYPES: DocumentType[] = [
 // Utility function to get display label for a document type
 export function getDocumentTypeLabel(type: DocumentType): string {
   return DOCUMENT_TYPE_LABELS[type] || type
-} 
+}
+
+// Simplified Document interface for combobox usage
+export interface Document {
+  id: string
+  documentName: string
+  documentType: string
+  documentPath: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface DocumentBasic {
+  id: string
+  documentName: string
+  documentType: string
+}

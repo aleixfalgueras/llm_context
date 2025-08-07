@@ -1,10 +1,8 @@
-/**
- * Prompt-specific database operations
- */
-
-import { prisma } from '../lib/prisma'
+import { prisma } from '@/lib/prisma'
 import { BaseOperations } from './base-operations'
-import {DbOperationConfig, PaginationConfig} from "@/lib/types/database-types";
+import {DbOperationConfig, PaginationConfig, DbOperationResult} from "@/lib/types/database-types"
+import { Prompt } from '@prisma/client'
+import { PromptStats } from '@/lib/types/prompt-types'
 
 export class PromptOperations extends BaseOperations {
   static async findUserPrompts(
@@ -59,4 +57,18 @@ export class PromptOperations extends BaseOperations {
       { context: 'Increment prompt usage' }
     )
   }
+
+  static async findPromptById(
+    promptId: string, 
+    userId: string, 
+    config: DbOperationConfig = {}
+  ): Promise<DbOperationResult<Prompt>> {
+    return this.findUserOwnedRecord(
+      prisma.prompt,
+      promptId,
+      userId,
+      { context: 'Find prompt by ID', ...config }
+    )
+  }
+
 }
