@@ -1,22 +1,16 @@
-import { prisma } from '@/lib/prisma'
 import {buildClientContextSection, replaceClientContextVariables} from '@/services/client/client-context-service'
-import { openRouterService } from '@/services/openrouter'
-import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/models-config'
-import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
-import { logger } from '@/lib/logger'
-import { ClientService } from '@/services/client/client-service'
-import { 
-  withEnhancedApi, 
-  parseJsonBody,
-  ApiContext 
-} from '@/lib/api/api-middleware'
+import {openRouterService} from '@/services/openrouter'
+import {DEFAULT_MODEL, getDefaultTemperature} from '@/lib/models-config'
+import {getLanguageInstruction, getLanguageRequirementSection} from '@/lib/utils/language'
+import {logger} from '@/lib/logger'
+import {ClientService} from '@/services/client/client-service'
+import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
     // Parse request body
     const { 
       clientId, 
-      promptId,
       customPrompt,
       documentTitle,
       additionalInstructions,
@@ -26,8 +20,8 @@ export const POST = withEnhancedApi(
 
 
     // Validate required fields
-    if (!clientId || (!promptId && !customPrompt) || !documentTitle) {
-      throw new Error('Missing required fields: clientId, documentTitle, and either promptId or customPrompt are required')
+    if (!clientId || !customPrompt || !documentTitle) {
+      throw new Error('Missing required fields: clientId, documentTitle, and customPrompt are required')
     }
 
     // Validate client access after parsing clientId
@@ -37,40 +31,9 @@ export const POST = withEnhancedApi(
     }
     const client = clientResult.data
 
-    // Get prompt content
-    let promptContent = ''
-    let promptName = 'Custom Document'
-
-    if (promptId) {
-      // Use existing prompt
-      const prompt = await prisma.prompt.findFirst({
-        where: {
-          id: promptId,
-          userId: userId,
-          isActive: true,
-        },
-      })
-
-      if (!prompt) {
-        throw new Error('Prompt not found')
-      }
-
-      promptContent = prompt.content
-      promptName = prompt.name
-
-      // Track prompt usage
-      await prisma.prompt.update({
-        where: { id: promptId },
-        data: {
-          usageCount: {
-            increment: 1,
-          },
-        },
-      })
-    } else {
-      // Use custom prompt provided in request
-      promptContent = customPrompt
-    }
+    // Use the prompt content provided in request
+    const promptContent = customPrompt
+    const promptName = 'Custom Document'
 
     // Replace client variables in prompt using shared utility
     const processedPrompt = replaceClientContextVariables(promptContent, client)
@@ -115,7 +78,6 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
         documentTitle,
         clientName: client.name,
         targetLanguage,
-        hasCustomPrompt: !!customPrompt,
         hasAdditionalInstructions: !!additionalInstructions,
         selectedContextFields,
         promptLength: completePrompt.length,

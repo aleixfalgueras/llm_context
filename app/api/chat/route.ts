@@ -237,7 +237,6 @@ export const POST = withEnhancedApi(
               if (!assistantMessageResult.success) {
                 logger.error('Failed to save assistant message', new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
               }
-              logger.info('Assistant message saved', {userId, chatId});
 
               // Send completion signal
               const completionData = {

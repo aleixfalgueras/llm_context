@@ -170,7 +170,7 @@ export class OpenRouterService {
     // Fallback: Query generation stats if usage data is missing
     if (!usage && finalChunk.generationId) {
       try {
-        logger.info('No usage data in stream, querying generation stats', { 
+          logger.debug('No usage data in stream, querying generation stats', {
           metadata: { generationId: finalChunk.generationId }
         });
         
@@ -186,7 +186,7 @@ export class OpenRouterService {
             totalTokens: (stats.data.tokens_prompt || 0) + (stats.data.tokens_completion || 0)
           };
           
-          logger.info('Retrieved usage from generation stats', { 
+          logger.debug('Retrieved usage from generation stats', {
             metadata: { generationId: finalChunk.generationId, usage }
           });
         } else {
