@@ -1,11 +1,10 @@
-import { prisma } from '@/lib/prisma'
-import { PromptOperations } from '@/database/prompt-operations'
 import { 
   withEnhancedApi, 
   apiSuccess, 
   parseJsonBody,
   ApiContext 
 } from '@/lib/api/api-middleware'
+import { PromptService } from '@/services/prompt-service'
 
 // GET /api/prompts/[id] - Get specific prompt
 export const GET = withEnhancedApi(
@@ -13,18 +12,13 @@ export const GET = withEnhancedApi(
     const { id } = params!
     const promptId = id as string
 
-    const prompt = await prisma.prompt.findFirst({
-      where: {
-        id: promptId,
-        userId,
-      },
-    })
+    const result = await PromptService.getPromptById(promptId, userId)
 
-    if (!prompt) {
-      throw new Error('Prompt not found')
+    if (!result.success) {
+      throw new Error(result.error)
     }
 
-    return apiSuccess(prompt)
+    return apiSuccess(result.data)
   },
   { 
     context: 'Get prompt',
@@ -37,22 +31,15 @@ export const PUT = withEnhancedApi(
   async ({ userId, req, params }: ApiContext) => {
     const { id } = params!
     const promptId = id as string
-    const { name, description, content, category, isActive } = await parseJsonBody(req)
+    const updateData = await parseJsonBody(req)
 
-    // Validate required fields
-    if (!name || !content) {
-      throw new Error('Name and content are required')
+    const result = await PromptService.updatePrompt(promptId, userId, updateData)
+
+    if (!result.success) {
+      throw new Error(result.error)
     }
 
-    const updatedPrompt = await PromptOperations.updatePrompt(promptId, userId, {
-      name,
-      description,
-      content,
-      category,
-      isActive,
-    })
-
-    return apiSuccess(updatedPrompt)
+    return apiSuccess(result.data)
   },
   { 
     context: 'Update prompt',
@@ -67,7 +54,11 @@ export const DELETE = withEnhancedApi(
     const { id } = params!
     const promptId = id as string
 
-    await PromptOperations.deletePrompt(promptId, userId)
+    const result = await PromptService.deletePrompt(promptId, userId)
+
+    if (!result.success) {
+      throw new Error(result.error)
+    }
 
     return apiSuccess({ message: 'Prompt deleted' })
   },

@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { getSamplePromptsByCategory } from '@/lib/sample-prompts'
+import { Prompt } from '@prisma/client'
 import { 
-  Prompt, 
   PromptStats, 
   PromptFilters, 
-  FilterActionHandlers 
-} from '@/lib/types/prompt-management-types'
+  PromptFilterActionHandlers
+} from '@/lib/types/prompt-types'
 import { handleClientApiError } from '@/lib/api/api-toast'
 
 interface UsePromptManagementReturn {
@@ -31,7 +31,7 @@ interface UsePromptManagementReturn {
   setShowPromptDialog: (show: boolean) => void
   
   // Filter handlers
-  filterActionHandlers: FilterActionHandlers
+  filterActionHandlers: PromptFilterActionHandlers
   filteredSamplePrompts: any[]
 }
 
@@ -66,7 +66,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
         throw new Error(errorData.error)
       }
       const data = await response.json()
-      setPrompts(data.data.prompts || [])
+      setPrompts(data.data || [])
     } catch (error) {
       console.error('Error fetching prompts:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'
@@ -188,7 +188,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
     mostUsed: prompts.reduce((max, p) => p.usageCount > (max?.usageCount || 0) ? p : max, prompts[0] || null),
   }
 
-  const filterActionHandlers: FilterActionHandlers = {
+  const filterActionHandlers: PromptFilterActionHandlers = {
     onSearchChange: (search) => setFilters(prev => ({ ...prev, searchTerm: search })),
     onCategoryChange: (category) => setFilters(prev => ({ ...prev, selectedCategory: category })),
     onSortChange: (sort) => setFilters(prev => ({ ...prev, sortBy: sort })),

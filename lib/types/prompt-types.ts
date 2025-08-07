@@ -1,14 +1,6 @@
-export interface Prompt {
-  id: string
-  name: string
-  description?: string
-  content: string
-  category: string
-  isActive: boolean
-  usageCount: number
-  createdAt: string
-  updatedAt: string
-}
+import { Prompt } from '@prisma/client'
+
+export type PromptInput = Omit<Prompt, 'userId' | 'createdAt' | 'updatedAt'>
 
 export interface PromptStats {
   total: number
@@ -24,13 +16,7 @@ export interface PromptFilters {
   showTemplates: boolean
 }
 
-export interface PromptActionHandlers {
-  onEdit: (prompt: Prompt) => void
-  onDelete: (promptId: string) => void
-  onToggleStatus: (prompt: Prompt) => void
-}
-
-export interface FilterActionHandlers {
+export interface PromptFilterActionHandlers {
   onSearchChange: (search: string) => void
   onCategoryChange: (category: string) => void
   onSortChange: (sort: string) => void
@@ -38,7 +24,7 @@ export interface FilterActionHandlers {
   onToggleTemplates: () => void
 }
 
-export const CATEGORIES = [
+export const PROMPT_CATEGORIES = [
   { value: 'all', label: 'All Categories' },
   { value: 'general', label: 'General' },
   { value: 'marketing', label: 'Marketing' },
@@ -46,7 +32,7 @@ export const CATEGORIES = [
   { value: 'analysis', label: 'Analysis' },
 ]
 
-export const SORT_OPTIONS = [
+export const PROMPT_SORT_OPTIONS = [
   { value: 'usage', label: 'Most Used' },
   { value: 'recent', label: 'Recently Updated' },
   { value: 'name', label: 'Name A-Z' },

@@ -6,7 +6,7 @@ import {Textarea} from '@/components/ui/textarea'
 import {Checkbox} from '@/components/ui/checkbox'
 import {FileText} from 'lucide-react'
 import {ClientContextVariablesTooltip} from '@/components/ui/client-context-variables-tooltip'
-import type {Client} from '@prisma/client'
+import type {Client, Prompt} from '@prisma/client'
 import {
   CLIENT_CONTEXT_FIELDS, 
   ClientContextSelection,
@@ -16,7 +16,6 @@ import {useDocumentGenerator} from '@/hooks/document/use-document-generator'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
-import type {Prompt} from '@/lib/types/component-types'
 import {getDefaultModel} from '@/lib/models-config'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
 

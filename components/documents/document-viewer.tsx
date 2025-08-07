@@ -5,8 +5,7 @@ import {Input} from '@/components/ui/input'
 import {Textarea} from '@/components/ui/textarea'
 import {Edit, Eye, FileText, Loader2, Save, X} from 'lucide-react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
-import {type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
-import {Document} from '@/lib/types/component-types'
+import {Document, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
 
 interface DocumentViewerProps {
   document: Document | null

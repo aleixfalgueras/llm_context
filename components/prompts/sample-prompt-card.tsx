@@ -13,6 +13,7 @@ interface SamplePromptCardProps {
   onSuccess: () => void
 }
 
+
 export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
   return (
     <Card className="h-[240px] hover:shadow-lg transition-all duration-200 hover:border-amber-200 dark:hover:border-amber-800 hover:bg-amber-50/30 dark:hover:bg-amber-950/10 border-amber-100 dark:border-amber-900 bg-amber-50/20 dark:bg-amber-950/5 flex flex-col">

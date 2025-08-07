@@ -7,11 +7,10 @@ import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
 import {useToast} from '@/hooks/use-toast'
-import {Message, Role} from '@prisma/client'
+import {Message, Prompt, Role} from '@prisma/client'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {clientLogger} from '@/lib/client-logger'
 import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/models-config'
-import {Prompt} from '@/lib/types/component-types'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";

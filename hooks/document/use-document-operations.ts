@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/lib/types/enums'
-import { Document } from '@/lib/types/component-types'
 import { handleClientApiError } from '@/lib/api/api-toast'
+import {Document} from "@/lib/types/document-types";
 
 interface UseDocumentOperationsProps {
   clientId: string

@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { DOCUMENT_TYPES } from '@/lib/types/document-types'
-import { Document } from '@/lib/types/component-types'
+import {Document, DOCUMENT_TYPES} from '@/lib/types/document-types'
 import { handleClientApiError } from '@/lib/api/api-toast'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
