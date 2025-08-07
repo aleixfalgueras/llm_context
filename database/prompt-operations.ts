@@ -2,7 +2,6 @@ import { prisma } from '@/lib/prisma'
 import { BaseOperations } from './base-operations'
 import {DbOperationConfig, PaginationConfig, DbOperationResult} from "@/lib/types/database-types"
 import { Prompt } from '@prisma/client'
-import { PromptStats } from '@/lib/types/prompt-types'
 
 export class PromptOperations extends BaseOperations {
   static async findUserPrompts(

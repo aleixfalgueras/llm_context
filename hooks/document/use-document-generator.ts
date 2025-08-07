@@ -6,7 +6,8 @@ import {getDefaultModel} from '@/lib/models-config'
 import {clientLogger} from '@/lib/client-logger'
 import type {Client, Prompt} from '@prisma/client'
 import {handleClientApiError} from '@/lib/api/api-toast'
-import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types";
+import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types"
+import {getPrompts} from '@/app/actions/prompt-action'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
@@ -77,13 +78,11 @@ export function useDocumentGenerator({
   const loadPrompts = async () => {
     setIsLoadingPrompts(true)
     try {
-      const response = await fetch('/api/prompts?active=true&includeContent=true')
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load prompts' }))
-        throw new Error(errorData.error)
-      }
-      const data = await response.json()
-      setPrompts(data.data || [])
+      const data = await getPrompts({
+        isActive: true,
+        includeContent: true
+      })
+      setPrompts(data || [])
     } catch (error) {
       console.error('Error loading prompts:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'
