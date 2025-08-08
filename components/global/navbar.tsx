@@ -40,7 +40,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
           <div className="flex items-center">
@@ -50,8 +50,8 @@ export function Navbar() {
                 <Image 
                   src="/mia_logo.svg" 
                   alt="MIA" 
-                  width={60}
-                  height={60}
+                  width={70}
+                  height={70}
                   className="mr-2"
                 />
               </Link>
