@@ -54,7 +54,7 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
       </div>
 
       {/* Input Area */}
-      <div className="border-t p-4">
+      <div className="p-4">
         <ErrorBoundary>
           <ChatInput 
             chatId={chatId}

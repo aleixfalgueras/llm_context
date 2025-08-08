@@ -91,7 +91,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
                     )}
                   </div>
                 ) : (
-                  <div className="prose prose-sm max-w-none dark:prose-invert border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                  <div className="prose max-w-none dark:prose-invert border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                     <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.content}</p>
                   </div>
                 )}
