@@ -125,7 +125,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
         
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Enhanced Chat Header */}
-          <div className="border-b p-4">
+          <div className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 min-w-0 flex-1">
                 {/* Mobile Chat Sidebar Toggle */}

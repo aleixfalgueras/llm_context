@@ -150,7 +150,7 @@ export function ClientContextSidebar({
       {/* Sidebar Content */}
       <div className={`flex flex-col flex-1 ${isMobile ? '' : 'ml-1'}`}>
         {/* Header */}
-        <div className="p-2 sm:p-4 border-b">
+        <div className="p-2 sm:p-4">
           <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
             <User className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             <h2 className="font-semibold text-sm sm:text-base truncate">
