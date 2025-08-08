@@ -42,7 +42,8 @@ export function ClientGridView({
         return (
           <Card 
             key={client.id} 
-            className="hover:shadow-lg transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/30 dark:hover:bg-blue-950/10 cursor-pointer"
+            className="hover:shadow-lg transition-all duration-200 border-blue-200 hover:bg-blue-50/30
+             dark:hover:bg-blue-950/10 cursor-pointer"
             onClick={() => onViewClient(client)}
           >
             <CardHeader className="pb-3">

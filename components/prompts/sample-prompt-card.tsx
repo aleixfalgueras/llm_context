@@ -16,7 +16,7 @@ interface SamplePromptCardProps {
 
 export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
   return (
-    <Card className="h-[240px] hover:shadow-lg transition-all duration-200 hover:border-amber-200 dark:hover:border-amber-800 hover:bg-amber-50/30 dark:hover:bg-amber-950/10 border-amber-100 dark:border-amber-900 bg-amber-50/20 dark:bg-amber-950/5 flex flex-col">
+    <Card className="h-[240px] hover:shadow-lg transition-all duration-200 flex flex-col">
       <CardHeader className="pb-3 flex-1 flex flex-col">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
@@ -40,7 +40,7 @@ export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
           <Badge variant="secondary" className="text-xs capitalize">
             {prompt.category}
           </Badge>
-          <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+          <Badge variant="outline" className="text-xs">
             Template
           </Badge>
         </div>
@@ -61,7 +61,7 @@ export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
             isTemplate={true}
             onSuccess={onSuccess}
             trigger={
-              <Button size="sm" className="flex-1 bg-amber-600 hover:bg-amber-700 text-white">
+              <Button size="sm" className="flex-1 bg-blue-600">
                 <Copy className="h-3 w-3 mr-1" />
                 Use Template
               </Button>

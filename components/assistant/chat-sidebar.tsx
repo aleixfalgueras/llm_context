@@ -56,13 +56,14 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
   return (
     <div className={`flex flex-col h-full ${
       isMobile 
-        ? 'bg-gray-50 dark:bg-gray-900 w-full' 
-        : 'border-r bg-gray-50 dark:bg-gray-900 w-[300px] min-w-[280px] max-w-[350px]'
+        ? ' w-full' 
+        : 'border-r w-[300px] min-w-[280px] max-w-[350px]'
     }`}>
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Chats</h1>
+      <div className="p-2 sm:p-4 border-b">
+        <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
+          <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"  />
+          <h2 className="font-semibold text-sm sm:text-base truncate">Chats</h2>
         </div>
         <div className="space-y-2">
           {!hideNewChatButton && (
@@ -99,7 +100,6 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
         <div className="p-2">
           {chats.length === 0 ? (
             <div className="text-center text-gray-500 mt-8">
-              <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>No chats yet</p>
               <p className="text-sm">Start a new conversation</p>
             </div>
