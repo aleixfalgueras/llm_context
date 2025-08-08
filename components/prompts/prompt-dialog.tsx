@@ -17,7 +17,7 @@ import {Prompt} from "@prisma/client"
 import {createPrompt, updatePrompt} from '@/app/actions/prompt-action'
 
 interface PromptDialogProps {
-  prompt?: Prompt | PromptInput
+  prompt?: Prompt | PromptInput | null
   trigger?: React.ReactNode
   onSuccess?: () => void
   isTemplate?: boolean
