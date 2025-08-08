@@ -20,7 +20,9 @@
       "Bash(npx tsx:*)",
       "Bash(cat:*)",
       "WebFetch(domain:docs.stripe.com)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(sed:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
