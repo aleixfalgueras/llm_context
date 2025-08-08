@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </div>
             <p className="text-lg text-muted-foreground">
-              Your privacy is important to us. This privacy policy explains how SpeedBrand collects, uses, and protects your information.
+              Your privacy is important to us. This privacy policy explains how MIA collects, uses, and protects your information.
             </p>
           </div>
 
@@ -224,7 +224,7 @@ export default function PrivacyPolicyPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  This section explains how SpeedBrand uses cookies and similar technologies. 
+                  This section explains how MIA uses cookies and similar technologies. 
                   Currently, we only use essential cookies for authentication and security.
                 </p>
                 

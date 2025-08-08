@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import {usePathname} from 'next/navigation'
 import {UserButton, useUser} from '@clerk/nextjs'
 import {ThemeToggle} from '@/components/global/theme-toggle'
@@ -46,7 +47,13 @@ export function Navbar() {
             <div className="flex space-x-8">
               {/* Logo */}
               <Link href="/" className="flex items-center">
-                <h1 className="text-xl font-bold">SpeedBrand</h1>
+                <Image 
+                  src="/mia_logo.svg" 
+                  alt="MIA" 
+                  width={60}
+                  height={60}
+                  className="mr-2"
+                />
               </Link>
               
               {/* Navigation links */}

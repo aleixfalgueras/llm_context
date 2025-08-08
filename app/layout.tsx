@@ -19,8 +19,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-      title: "SpeedBrand",
-  description: "AI-powered marketing content generation and client management platform for marketing professionals",
+  title: "MIA",
+  description: "AI-powered marketing content generation platform",
 };
 
 export default function RootLayout({
