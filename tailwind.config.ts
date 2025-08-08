@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['var(--font-poppins)', 'sans-serif'],
+  		},
   		screens: {
   			'wide': '1400px',
   		},
