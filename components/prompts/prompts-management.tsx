@@ -148,7 +148,7 @@ export function PromptsManagement() {
         onOpenChange={setShowPromptDialog}
         onSuccess={() => {
           setShowPromptDialog(false)
-          fetchPrompts()
+          void fetchPrompts()
         }}
       />
 
@@ -167,7 +167,7 @@ export function PromptsManagement() {
         onOpenChange={setIsEditDialogOpen}
         onSuccess={() => {
           setIsEditDialogOpen(false)
-          fetchPrompts()
+          void fetchPrompts()
         }}
       />
 
@@ -178,7 +178,7 @@ export function PromptsManagement() {
         onOpenChange={setIsDeleteDialogOpen}
         onDelete={() => {
           if (deletingPrompt) {
-            deletePrompt(deletingPrompt.id)
+            void deletePrompt(deletingPrompt.id)
             setIsDeleteDialogOpen(false)
           }
         }}
