@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { withdrawAllConsent } from '@/lib/utils/consent'
 
-// Account deletion request (soft delete with grace period)
+// Account deletion - immediate processing
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth()
@@ -63,107 +63,131 @@ export async function POST(request: NextRequest) {
         feedbacks: await tx.feedback.count({ where: { userId } })
       }
 
-      // 4. Schedule deletion (immediate for demo, could be delayed in production)
-      const scheduledDeletion = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days grace period
-
-      // Create deletion request record
-      const deletionRequest = await tx.dataExportRequest.create({
+      // 4. Create deletion request record for audit trail
+      const deletionRequest = await tx.accountDeletionRequest.create({
         data: {
           userId,
-          requestType: 'account_deletion',
-          status: 'pending',
           requestData: {
             reason,
-            dataCounts,
-            scheduledDeletion: scheduledDeletion.toISOString(),
+            originalCounts: dataCounts,
             ipAddress: clientIP,
             userAgent,
-            gracePeriodEnds: scheduledDeletion.toISOString()
+            processedAt: new Date().toISOString()
           },
-          expiresAt: scheduledDeletion
+          reason
         }
       })
 
-      return { deletionLog, deletionRequest, dataCounts, scheduledDeletion }
+      // 5. Delete user data in the correct order (respecting foreign key constraints)
+      
+      // Delete messages (has foreign key to chat)
+      const deletedMessages = await tx.message.deleteMany({
+        where: {
+          chat: { userId }
+        }
+      })
+
+      // Delete chats
+      const deletedChats = await tx.chat.deleteMany({
+        where: { userId }
+      })
+
+      // Delete documents
+      const deletedDocuments = await tx.document.deleteMany({
+        where: { userId }
+      })
+
+      // Delete clients
+      const deletedClients = await tx.client.deleteMany({
+        where: { userId }
+      })
+
+      // Delete prompts
+      const deletedPrompts = await tx.prompt.deleteMany({
+        where: { userId }
+      })
+
+      // Delete feedback
+      const deletedFeedbacks = await tx.feedback.deleteMany({
+        where: { userId }
+      })
+
+      // Delete user consent records
+      const deletedUserConsent = await tx.userConsent.deleteMany({
+        where: { userId }
+      })
+
+      // 6. Update deletion request with actual deletion counts
+      await tx.accountDeletionRequest.update({
+        where: { id: deletionRequest.id },
+        data: {
+          requestData: {
+            reason,
+            originalCounts: dataCounts,
+            actualDeletionCounts: {
+              messages: deletedMessages.count,
+              chats: deletedChats.count,
+              documents: deletedDocuments.count,
+              clients: deletedClients.count,
+              prompts: deletedPrompts.count,
+              feedbacks: deletedFeedbacks.count,
+              userConsent: deletedUserConsent.count
+            },
+            ipAddress: clientIP,
+            userAgent,
+            processedAt: new Date().toISOString()
+          }
+        }
+      })
+
+      // 7. Create final audit log entry
+      await tx.consentAuditLog.create({
+        data: {
+          userId,
+          action: 'account_deletion_completed',
+          consentType: 'account_deletion',
+          previousValue: false,
+          newValue: false,
+          reason: `immediate_processing_${deletionRequest.id}`,
+          ipAddress: clientIP,
+          userAgent
+        }
+      })
+
+      return { 
+        deletionLog, 
+        deletionRequest, 
+        dataCounts,
+        actualDeletionCounts: {
+          messages: deletedMessages.count,
+          chats: deletedChats.count,
+          documents: deletedDocuments.count,
+          clients: deletedClients.count,
+          prompts: deletedPrompts.count,
+          feedbacks: deletedFeedbacks.count,
+          userConsent: deletedUserConsent.count
+        }
+      }
     })
+
+    // 8. Delete from Clerk (external service) - outside transaction
+    try {
+      const clerk = await clerkClient()
+      await clerk.users.deleteUser(userId)
+    } catch (clerkError) {
+      console.error('Failed to delete user from Clerk:', clerkError)
+      // Note: We continue with the deletion even if Clerk fails
+      // The audit log will show this was processed
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Account deletion scheduled. You have 7 days to cancel this request.',
+      message: 'Account deleted successfully',
       deletionId: result.deletionRequest.id,
-      scheduledDeletion: result.scheduledDeletion,
-      dataToBeDeleted: result.dataCounts,
-      gracePeriodDays: 7
+      dataDeleted: result.actualDeletionCounts
     })
   } catch (error) {
-    console.error('Error scheduling account deletion:', error)
+    console.error('Error processing account deletion:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-
-// Cancel account deletion (during grace period)
-export async function DELETE(request: NextRequest) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { deletionId } = await request.json()
-
-    // Find the pending deletion request
-    const deletionRequest = await prisma.dataExportRequest.findFirst({
-      where: {
-        id: deletionId,
-        userId,
-        requestType: 'account_deletion',
-        status: 'pending'
-      }
-    })
-
-    if (!deletionRequest) {
-      return NextResponse.json({
-        error: 'No pending deletion request found'
-      }, { status: 404 })
-    }
-
-    // Check if grace period has expired
-    if (new Date() > deletionRequest.expiresAt!) {
-      return NextResponse.json({
-        error: 'Grace period has expired. Account deletion cannot be cancelled.'
-      }, { status: 400 })
-    }
-
-    // Cancel the deletion request
-    await prisma.dataExportRequest.update({
-      where: { id: deletionId },
-      data: {
-        status: 'cancelled',
-        completedAt: new Date()
-      }
-    })
-
-    // Log the cancellation
-    await prisma.consentAuditLog.create({
-      data: {
-        userId,
-        action: 'account_deletion_cancelled',
-        consentType: 'account_deletion',
-        previousValue: false,
-        newValue: true,
-        reason: 'user_request',
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: request.headers.get('user-agent') || 'unknown',
-      }
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Account deletion cancelled successfully'
-    })
-  } catch (error) {
-    console.error('Error cancelling account deletion:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-} 

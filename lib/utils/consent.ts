@@ -263,48 +263,27 @@ export async function getConsentAuditLog(userId: string, limit: number = 50) {
   }
 }
 
-// Check if user has any pending deletion requests
+// Check if user has any pending deletion requests (always returns null since deletions are immediate)
 export async function getPendingDeletionRequest(userId: string) {
-  try {
-    const pendingDeletion = await prisma.dataExportRequest.findFirst({
-      where: {
-        userId,
-        requestType: 'account_deletion',
-        status: 'pending',
-        expiresAt: {
-          gte: new Date()
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-
-    return pendingDeletion
-  } catch (error) {
-    console.error('Error fetching pending deletion request:', error)
-    return null
-  }
+  // Since account deletions are now processed immediately, there are no pending requests
+  return null
 }
 
 // Get all deletion requests for a user
 export async function getDeletionRequestHistory(userId: string) {
   try {
-    const deletionHistory = await prisma.dataExportRequest.findMany({
+    const deletionHistory = await prisma.accountDeletionRequest.findMany({
       where: {
-        userId,
-        requestType: 'account_deletion'
+        userId
       },
       orderBy: {
         createdAt: 'desc'
       },
       select: {
         id: true,
-        status: true,
         requestData: true,
-        expiresAt: true,
-        createdAt: true,
-        completedAt: true
+        reason: true,
+        createdAt: true
       }
     })
 
