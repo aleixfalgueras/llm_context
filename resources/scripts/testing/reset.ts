@@ -14,7 +14,7 @@ const VALID_TABLES = [
   'feedback',
   'consentAuditLog',
   'userConsent',
-  'dataExportRequest',
+  'accountDeletionRequest',
   'userUsage',
   'userSubscription'
 ] as const
@@ -98,10 +98,10 @@ async function clearDatabaseData(tablesToKeep: string[] = []) {
         description: 'user consent'
       },
       {
-        name: 'dataExportRequest',
-        emoji: '📦',
-        operation: () => prisma.dataExportRequest.deleteMany({}),
-        description: 'data export requests'
+        name: 'accountDeletionRequest',
+        emoji: '🗑️',
+        operation: () => prisma.accountDeletionRequest.deleteMany({}),
+        description: 'account deletion requests'
       },
       {
         name: 'userUsage',

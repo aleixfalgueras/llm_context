@@ -3,47 +3,21 @@
 import { Navbar } from '@/components/global/navbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { ArrowLeft, Shield, Download, Trash2, Edit, Eye, Settings } from 'lucide-react'
+import { ArrowLeft, Shield, Trash2, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { handleClientApiError } from '@/lib/api/api-toast'
+import { useRouter } from 'next/navigation'
 
 export default function PrivacySettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [showDeletionScheduled, setShowDeletionScheduled] = useState(false)
   const [confirmationText, setConfirmationText] = useState('')
   const [deletionReason, setDeletionReason] = useState('user_request')
-  const [deletionInfo, setDeletionInfo] = useState<any>(null)
-
-  const handleDataExport = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/data-export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to submit export request' }))
-        throw new Error(errorData.error)
-      }
-
-      const result = await response.json()
-      alert(result.message || 'Data export request submitted successfully!')
-    } catch (error) {
-      console.error('Error requesting data export:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to submit export request'
-      handleClientApiError(errorMessage, 'Failed to submit export request')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const router = useRouter()
 
   const handleAccountDeletion = async () => {
     setIsLoading(true)
@@ -60,58 +34,32 @@ export default function PrivacySettingsPage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to schedule account deletion' }))
+        const errorData = await response.json().catch(() => ({ error: 'Failed to delete account' }))
         throw new Error(errorData.error)
       }
 
       const result = await response.json()
-      setDeletionInfo(result)
+      
+      // Show success message and redirect to home page
+      alert(`Account deleted successfully. Deletion ID: ${result.deletionId}`)
+      
+      // Clear form and close dialog
       setShowDeleteConfirm(false)
-      setShowDeletionScheduled(true)
       setConfirmationText('')
+      
+      // Redirect to home page since user is now deleted
+      router.push('/')
     } catch (error) {
-      console.error('Error scheduling account deletion:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to schedule account deletion'
-      handleClientApiError(errorMessage, 'Failed to schedule account deletion')
+      console.error('Error deleting account:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete account'
+      handleClientApiError(errorMessage, 'Failed to delete account')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleCancelDeletion = async () => {
-    if (!deletionInfo?.deletionId) return
-    
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/account/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          deletionId: deletionInfo.deletionId
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to cancel account deletion' }))
-        throw new Error(errorData.error)
-      }
-
-      const result = await response.json()
-      alert(result.message || 'Account deletion cancelled successfully!')
-      setShowDeletionScheduled(false)
-      setDeletionInfo(null)
-    } catch (error) {
-      console.error('Error cancelling account deletion:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to cancel account deletion'
-      handleClientApiError(errorMessage, 'Failed to cancel account deletion')
-    } finally {
-      setIsLoading(false)
-    }
-  }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen">
       <Navbar />
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto">
@@ -137,13 +85,13 @@ export default function PrivacySettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
-                  Consent Management
+                  <Settings className="w-5 h-5" />
+                  Privacy Controls
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  Review and update your consent preferences for data processing and communications.
+                  Manage your data processing consent and account settings.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="border rounded-lg p-4">
@@ -156,91 +104,12 @@ export default function PrivacySettingsPage() {
                     </Button>
                   </div>
                   <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-2">Analytics</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Help us improve our service
-                    </p>
-                    <Button size="sm" variant="outline">
-                      Manage Preference
-                    </Button>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-2">Marketing</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Updates and marketing communications
-                    </p>
-                    <Button size="sm" variant="outline">
-                      Manage Preference
-                    </Button>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-2">Cookies</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Website functionality and preferences
-                    </p>
-                    <Button size="sm" variant="outline">
-                      Cookie Settings
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Eye className="w-5 h-5" />
-                  Your Data Rights
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Exercise your rights under GDPR and other privacy laws.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Download className="w-4 h-4" />
-                      <h4 className="font-medium">Export My Data</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Download all your personal data and generated content
-                    </p>
-                    <Button size="sm" onClick={handleDataExport} disabled={isLoading}>
-                      {isLoading ? 'Requesting...' : 'Request Export'}
-                    </Button>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Edit className="w-4 h-4" />
-                      <h4 className="font-medium">Correct My Data</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Update or correct your personal information
-                    </p>
-                    <Button size="sm" variant="outline">
-                      Edit Profile
-                    </Button>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Eye className="w-4 h-4" />
-                      <h4 className="font-medium">Access My Data</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      View what data we have about you
-                    </p>
-                    <Button size="sm" variant="outline">
-                      View Data
-                    </Button>
-                  </div>
-                  <div className="border rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Trash2 className="w-4 h-4" />
                       <h4 className="font-medium">Delete My Account</h4>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">
-                      Permanently delete your account and data
+                      Permanently and immediately delete your account and all data
                     </p>
                     <Button 
                       size="sm" 
@@ -280,10 +149,11 @@ export default function PrivacySettingsPage() {
             <DialogTitle className="text-red-900">Delete Account</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              This action will permanently delete your account and all associated data. 
-              You will have a 7-day grace period to cancel this request.
-            </p>
+            <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-2">
+                ⚠️ This action cannot be undone
+              </p>
+            </div>
             
             <div className="space-y-2">
               <Label htmlFor="confirmationText">
@@ -322,6 +192,7 @@ export default function PrivacySettingsPage() {
                   setConfirmationText('')
                 }}
                 className="flex-1"
+                disabled={isLoading}
               >
                 Cancel
               </Button>
@@ -331,52 +202,7 @@ export default function PrivacySettingsPage() {
                 disabled={confirmationText !== 'DELETE MY ACCOUNT' || isLoading}
                 className="flex-1"
               >
-                {isLoading ? 'Processing...' : 'Delete Account'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Deletion Scheduled Dialog */}
-      <Dialog open={showDeletionScheduled} onOpenChange={setShowDeletionScheduled}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-green-900">Account Deletion Scheduled</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Your account deletion has been scheduled. You have 7 days to cancel this request.
-            </p>
-            
-            {deletionInfo && (
-              <div className="space-y-2 text-sm">
-                <p><strong>Deletion ID:</strong> {deletionInfo.deletionId}</p>
-                <p><strong>Scheduled for:</strong> {new Date(deletionInfo.scheduledDeletion).toLocaleDateString()}</p>
-                <p><strong>Data to be deleted:</strong></p>
-                <ul className="list-disc list-inside ml-4 space-y-1">
-                  {Object.entries(deletionInfo.dataToBeDeleted).map(([key, count]) => (
-                    <li key={key}>{key}: {String(count)} records</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowDeletionScheduled(false)}
-                className="flex-1"
-              >
-                OK
-              </Button>
-              <Button 
-                variant="destructive" 
-                onClick={handleCancelDeletion}
-                disabled={isLoading}
-                className="flex-1"
-              >
-                {isLoading ? 'Cancelling...' : 'Cancel Deletion'}
+                {isLoading ? 'Deleting...' : 'Delete Account'}
               </Button>
             </div>
           </div>
@@ -384,4 +210,4 @@ export default function PrivacySettingsPage() {
       </Dialog>
     </div>
   )
-} 
+}

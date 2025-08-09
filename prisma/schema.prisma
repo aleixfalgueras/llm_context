@@ -194,19 +194,14 @@ model WebhookEvent {
   @@map("webhook_events")
 }
 
-model DataExportRequest {
+model AccountDeletionRequest {
   id          String    @id @default(cuid())
   userId      String
-  requestType String
-  status      String
   requestData Json?
-  filePath    String?
-  expiresAt   DateTime?
-  completedAt DateTime?
+  reason      String?
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 
-  @@map("data_export_requests")
+  @@map("account_deletion_requests")
 }
 
 enum SubscriptionPlan {
