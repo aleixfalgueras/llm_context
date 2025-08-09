@@ -119,10 +119,9 @@ export function Navbar() {
               </TooltipProvider>
               
               <UserButton 
-                afterSignOutUrl="/"
                 appearance={{
                   elements: {
-                    avatarBox: "h-8 w-8 hover:scale-105 transition-transform"
+                    avatarBox: "h-8 w-8 hover:scale-105 transition-transform",
                   }
                 }}
               />

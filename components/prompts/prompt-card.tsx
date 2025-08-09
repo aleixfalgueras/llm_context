@@ -21,8 +21,7 @@ export function PromptCard({ prompt, onEdit, onEditPrompt, onDelete, onDeletePro
   return (
     <Card 
       className={cn(
-        'h-[240px] hover:shadow-lg transition-all duration-200 flex flex-col dark:hover:bg-blue-950/10 ' +
-        'border-blue-200 cursor-pointer',
+        'h-[240px] hover:shadow-lg transition-all duration-200 flex flex-col dark:hover:bg-blue-950/10 cursor-pointer',
         !prompt.isActive && 'opacity-60'
       )}
       onClick={() => onViewPrompt(prompt)}
