@@ -4,12 +4,12 @@ import {useEffect, useState} from 'react'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Badge} from '@/components/ui/badge'
-import {ScrollArea} from '@/components/ui/scroll-area'
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {ChevronDown, FileText, Search, Star, TrendingUp} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
 import {Prompt} from "@prisma/client"
 import {getPrompts, trackPromptUsage} from '@/app/actions/prompt-action'
+import {PROMPT_CATEGORIES} from '@/lib/types/prompt-types'
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void
@@ -40,7 +40,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
 
   useEffect(() => {
     if (open) {
-      fetchPrompts()
+      void fetchPrompts()
     }
   }, [open])
 
@@ -52,7 +52,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
     return matchesSearch && matchesCategory
   })
 
-  const categories = Array.from(new Set((prompts || []).map(p => p.category)))
+  // Use predefined categories instead of dynamic generation
   const popularPrompts = (prompts || []).filter(p => p.usageCount > 0).slice(0, 3)
   const recentPrompts = (prompts || []).slice(0, 3)
 
@@ -72,7 +72,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
@@ -84,8 +84,13 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="start">
-        <div className="p-4">
+      <PopoverContent 
+        className="w-96 p-0 max-h-[50vh] overflow-hidden flex flex-col z-[9999]" 
+        align="start"
+        sideOffset={5}
+        side="top"
+      >
+        <div className="p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center space-x-2 mb-4">
             <Search className="w-4 h-4 text-muted-foreground" />
             <Input
@@ -96,28 +101,21 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
             />
           </div>
           
-          <div className="flex flex-wrap gap-1 mb-4">
-            <Badge
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
-              className="cursor-pointer text-xs"
-              onClick={() => setSelectedCategory('all')}
-            >
-              All
-            </Badge>
-            {categories.map((category) => (
+          <div className="flex flex-wrap gap-1">
+            {PROMPT_CATEGORIES.map((category) => (
               <Badge
-                key={category}
-                variant={selectedCategory === category ? 'default' : 'outline'}
-                className="cursor-pointer text-xs capitalize"
-                onClick={() => setSelectedCategory(category)}
+                key={category.value}
+                variant={selectedCategory === category.value ? 'default' : 'outline'}
+                className="cursor-pointer text-xs"
+                onClick={() => setSelectedCategory(category.value)}
               >
-                {category}
+                {category.label}
               </Badge>
             ))}
           </div>
         </div>
 
-        <ScrollArea className="max-h-80">
+        <div className="overflow-y-auto max-h-[calc(50vh-150px)] pointer-events-auto">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">
               Loading prompts...
@@ -128,61 +126,79 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
             </div>
           ) : (
             <div className="p-2">
-              {/* Quick Access Sections */}
-              {!searchTerm && selectedCategory === 'all' && (
-                <div className="mb-4">
-                  {popularPrompts.length > 0 && (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
-                        <TrendingUp className="w-3 h-3" />
-                        Most Used
+                {/* Quick Access Sections - only show when no filters applied */}
+                {!searchTerm && selectedCategory === 'all' && (
+                  <div className="mb-4">
+                    {popularPrompts.length > 0 && (
+                      <div className="mb-3">
+                        <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
+                          <TrendingUp className="w-3 h-3" />
+                          Most Used
+                        </div>
+                        {popularPrompts.map((prompt) => (
+                          <PromptItem
+                            key={`popular-${prompt.id}`}
+                            prompt={prompt}
+                            onSelect={handlePromptSelect}
+                          />
+                        ))}
                       </div>
-                      {popularPrompts.map((prompt) => (
-                        <PromptItem
-                          key={`popular-${prompt.id}`}
-                          prompt={prompt}
-                          onSelect={handlePromptSelect}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  
-                  {recentPrompts.length > 0 && (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
-                        <Star className="w-3 h-3" />
-                        Recent
+                    )}
+                    
+                    {recentPrompts.length > 0 && (
+                      <div className="mb-3">
+                        <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
+                          <Star className="w-3 h-3" />
+                          Recent
+                        </div>
+                        {recentPrompts.map((prompt) => (
+                          <PromptItem
+                            key={`recent-${prompt.id}`}
+                            prompt={prompt}
+                            onSelect={handlePromptSelect}
+                          />
+                        ))}
                       </div>
-                      {recentPrompts.map((prompt) => (
-                        <PromptItem
-                          key={`recent-${prompt.id}`}
-                          prompt={prompt}
-                          onSelect={handlePromptSelect}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* All Prompts */}
-              <div>
-                {(searchTerm || selectedCategory !== 'all') && (
-                  <div className="px-2 py-1 text-xs font-medium text-muted-foreground mb-2">
-                    {filteredPrompts.length} prompt{filteredPrompts.length !== 1 ? 's' : ''}
+                    )}
                   </div>
                 )}
-                {filteredPrompts.map((prompt) => (
-                  <PromptItem
-                    key={prompt.id}
-                    prompt={prompt}
-                    onSelect={handlePromptSelect}
-                  />
-                ))}
-              </div>
+
+                {/* Filtered Results - show when search or category filter is applied */}
+                {(searchTerm || selectedCategory !== 'all') && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground mb-2 capitalize">
+                      <FileText className="w-3 h-3" />
+                      {searchTerm ? 'Search Results' : `${selectedCategory} Prompts`}
+                    </div>
+                    {filteredPrompts.map((prompt) => (
+                      <PromptItem
+                        key={`filtered-${prompt.id}`}
+                        prompt={prompt}
+                        onSelect={handlePromptSelect}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* All Prompts - show when no filters applied, after quick access sections */}
+                {!searchTerm && selectedCategory === 'all' && filteredPrompts.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground mb-2">
+                      <FileText className="w-3 h-3" />
+                      All Prompts
+                    </div>
+                    {filteredPrompts.map((prompt) => (
+                      <PromptItem
+                        key={`all-${prompt.id}`}
+                        prompt={prompt}
+                        onSelect={handlePromptSelect}
+                      />
+                    ))}
+                  </div>
+                )}
             </div>
           )}
-        </ScrollArea>
+        </div>
       </PopoverContent>
     </Popover>
   )
