@@ -262,7 +262,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
             </div>
             {viewMode ? (
               <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[200px] max-h-[300px] overflow-y-auto">
-                <pre className="text-sm whitespace-pre-wrap font-sans">{formData.content || '-'}</pre>
+                <span className="text-sm whitespace-pre-wrap">{formData.content || '-'}</span>
               </div>
             ) : (
               <>

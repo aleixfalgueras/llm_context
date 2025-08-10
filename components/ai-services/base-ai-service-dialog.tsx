@@ -1,6 +1,6 @@
 'use client'
 
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
@@ -129,6 +129,16 @@ export function BaseAIServiceDialog<TFormData = any>({
   const isGenerating = customIsGenerating ?? internalIsGenerating
   const isSaving = customIsSaving ?? internalIsSaving
   const isEditMode = customIsEditMode ?? internalIsEditMode
+
+  // Reset internal state when dialog opens
+  useEffect(() => {
+    if (open) {
+      setInternalGeneratedContent('')
+      setInternalIsEditMode(false)
+      setInternalIsGenerating(false)
+      setInternalIsSaving(false)
+    }
+  }, [open])
 
   // Get theme colors
   const getThemeColors = () => {

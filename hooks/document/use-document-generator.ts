@@ -55,9 +55,17 @@ export function useDocumentGenerator({
   const [promptName, setPromptName] = useState('')
   const { toast } = useToast()
 
-  // Load prompts when dialog opens
+  // Load prompts and reset form when dialog opens
   useEffect(() => {
     if (isOpen) {
+      // Reset form state when dialog opens
+      setSelectedClient('')
+      setDocumentTitle('')
+      setSelectedPrompt('')
+      setPromptContent('')
+      setClientContext(DEFAULT_CLIENT_CONTEXT)
+      setPromptName('')
+      // Load prompts
       loadPrompts()
     }
   }, [isOpen])
