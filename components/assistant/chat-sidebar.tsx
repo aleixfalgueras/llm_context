@@ -10,6 +10,7 @@ import Link from 'next/link'
 import {useState} from 'react'
 import {usePathname} from 'next/navigation'
 import {Input} from '@/components/ui/input'
+import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Chat} from '@prisma/client'
 
 interface ChatSidebarProps {
@@ -24,6 +25,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const pathname = usePathname()
 
   const handleEditStart = (chat: Chat) => {
@@ -45,7 +47,13 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
 
   const handleDeleteAllChats = async () => {
     if (showDeleteAllConfirm) {
-      await deleteAllChats(pathname)
+      setIsDeleting(true)
+      try {
+        await deleteAllChats(pathname)
+      } finally {
+        setIsDeleting(false)
+        setShowDeleteAllConfirm(false)
+      }
     } else {
       setShowDeleteAllConfirm(true)
       // Reset confirmation after 3 seconds
@@ -87,9 +95,16 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                   : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
               } shadow-sm`}
               size="sm"
+              disabled={isDeleting}
             >
-              <TrashIcon className="w-4 h-4 mr-2" />
-              {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All Chats'}
+              {isDeleting ? (
+                <LoadingSpinner size="sm" text="Deleting..." />
+              ) : (
+                <>
+                  <TrashIcon className="w-4 h-4 mr-2" />
+                  {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All Chats'}
+                </>
+              )}
             </Button>
           )}
         </div>

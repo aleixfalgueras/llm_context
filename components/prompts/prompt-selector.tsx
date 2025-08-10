@@ -214,12 +214,9 @@ function PromptItem({ prompt, onSelect }: PromptItemProps) {
         </div>
         {prompt.description && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-            {prompt.description}
+            {prompt.description.substring(0, 30)}...
           </p>
         )}
-        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-          {prompt.content.substring(0, 80)}...
-        </p>
       </div>
     </div>
   )
