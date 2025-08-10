@@ -28,7 +28,8 @@ export function ClientEmptyState({ searchTerm, onAddClient }: ClientEmptyStatePr
         {!searchTerm && (
           <Button 
             onClick={onAddClient} 
-            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+            className="mt-4"
+            variant="blue"
             title="Add your first client"
           >
             Add Your First Client

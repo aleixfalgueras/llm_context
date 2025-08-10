@@ -156,7 +156,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               </p>
               <Button
                 onClick={() => setIsConfigOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                variant="blue"
               >
                 Configure Services
               </Button>

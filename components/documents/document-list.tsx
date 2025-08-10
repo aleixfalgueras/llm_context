@@ -96,7 +96,7 @@ export function DocumentList({
                 {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All'}
               </Button>
             )}
-            <Button size="sm" onClick={onCreateNew} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button size="sm" onClick={onCreateNew} variant="blue">
               <Plus className="h-4 w-4 mr-1" />
               New
             </Button>

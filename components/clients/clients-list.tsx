@@ -140,8 +140,8 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
         </div>
         <Button 
           onClick={onAddClient} 
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
           title="Add a new client"
+          variant="blue"
         >
           <Plus className="h-4 w-4" />
           Add Client
