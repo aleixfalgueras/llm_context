@@ -170,8 +170,9 @@ export function FeedbackForm() {
           )}
 
           <Button 
-            type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+            type="submit"
+            variant="blue"
+            className="w-full"
             disabled={isSubmitting || !formData.type || !formData.title || !formData.description || !formData.priority}
           >
             {isSubmitting ? 'Submitting...' : 

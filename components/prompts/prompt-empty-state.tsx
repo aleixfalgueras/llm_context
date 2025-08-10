@@ -31,7 +31,7 @@ export function PromptEmptyState({ searchTerm, selectedCategory, onRefresh }: Pr
         <PromptDialog 
           onSuccess={onRefresh}
           trigger={
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button variant="blue">
               Create Your First Prompt
             </Button>
           }

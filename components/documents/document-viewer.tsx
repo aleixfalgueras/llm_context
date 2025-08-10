@@ -95,7 +95,7 @@ export function DocumentViewer({
                 size="sm"
                 onClick={onSave}
                 disabled={!editedDocumentName?.trim() || !editedContent?.trim() || isSaving}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                variant="blue"
               >
                 {isSaving ? (
                   <LoadingSpinner size="sm" text="Saving..." className="text-white" />
@@ -108,7 +108,7 @@ export function DocumentViewer({
               </Button>
             </>
           ) : (
-            <Button size="sm" onClick={onEdit} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button size="sm" onClick={onEdit} variant="blue">
               <Edit className="h-4 w-4 mr-1" />
               Edit
             </Button>

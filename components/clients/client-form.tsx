@@ -299,7 +299,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              variant="blue"
             >
               {isLoading ? 'Saving...' : (client?.id ? 'Update Client' : 'Create Client')}
             </Button>
