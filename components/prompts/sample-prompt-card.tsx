@@ -61,7 +61,7 @@ export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
             isTemplate={true}
             onSuccess={onSuccess}
             trigger={
-              <Button size="sm" className="flex-1 bg-blue-600">
+              <Button size="sm" className="flex-1 bg-amber-600 hover:bg-amber-700">
                 <Copy className="h-3 w-3 mr-1" />
                 Use Template
               </Button>
