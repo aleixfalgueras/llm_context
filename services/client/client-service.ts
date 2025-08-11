@@ -5,6 +5,7 @@ import {Client, Prisma} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 import {sanitizeToNull} from "@/lib/utils/validation";
 import {SubscriptionErrorCode} from "@/services/error-codes";
+import {DocumentStorageService} from '@/services/storage-service';
 
 /**
  * Process client data by trimming context fields and converting empty strings to null
@@ -123,17 +124,33 @@ export class ClientService {
   }
 
   /**
-   * Delete a client
+   * Delete a client and all associated document storage
    */
   static async deleteUserClient(
     clientId: string,
     userId: string
   ): Promise<DbOperationResult<{ id: string }>> {
     try {
+      // First, clean up document storage for this client
+      try {
+        await DocumentStorageService.deleteClientFolder(userId, clientId)
+        logger.info(`Successfully cleaned up document storage for client ${clientId}`)
+      } catch (storageError) {
+        // Log the storage error but don't fail the deletion
+        logger.error('Failed to clean up document storage during client deletion', 
+          storageError instanceof Error ? storageError : new Error(String(storageError)), 
+          { userId, clientId }
+        )
+        // Continue with database deletion even if storage cleanup fails
+      }
+
+      // Delete client from database (this will cascade delete related documents due to onDelete: Cascade)
       const result = await ClientOperations.deleteUserClient(clientId, userId)
       
       if (!result.success) {
-        logger.error('Error deleting client', new Error(result.error), { userId, clientId })
+        logger.error('Error deleting client from database', new Error(result.error), { userId, clientId })
+      } else {
+        logger.info(`Successfully deleted client ${clientId} and associated data`)
       }
 
       return result

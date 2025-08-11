@@ -120,11 +120,6 @@ export function DocumentViewer({
       <div className="flex-1 overflow-hidden">
         {isEditing ? (
           <div className="h-full flex flex-col">
-            <div className="p-4 border-b border-border bg-muted/5">
-              <p className="text-sm text-muted-foreground">
-                Edit your document content using Markdown. Use the preview button to see how it will look.
-              </p>
-            </div>
             <div className="flex-1 p-4">
               <Textarea
                 value={editedContent}
