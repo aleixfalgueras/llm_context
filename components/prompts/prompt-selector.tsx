@@ -86,7 +86,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-96 p-0 overflow-hidden flex flex-col"
+        className="w-120 p-0 overflow-hidden flex flex-col"
         align="start"
         sideOffset={5}
         side="top"
