@@ -1,43 +1,34 @@
 // Language utilities removed - meeting reports are now generated in English only
-import { createAICompletion } from '@/lib/ai/wrapper'
+import { openRouterService } from '@/services/openrouter'
 import { logger, withTiming } from '@/lib/logger'
-import { DEFAULT_MODEL } from '@/lib/ai/models-config'
-import { handleApiError } from '@/lib/utils/error-handler'
-import {withAuth, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
+import { DEFAULT_MODEL } from '@/lib/models-config'
+import { ClientService } from '@/services/client/client-service'
+import { 
+  withEnhancedApi, 
+  parseJsonBody,
+  ApiContext 
+} from '@/lib/api/api-middleware'
 
-export async function POST(req: Request) {
-  const endTiming = logger.startTiming('Generate Meeting Report API');
-  let clientId: string = '';
-  let userId: string = '';
-  
-  try {
-    // Use composable middleware for auth and token validation first
-    userId = await withAuth()
-    await withTokenValidation(userId)
+export const POST = withEnhancedApi(
+  async ({ userId, req }: ApiContext) => {
+    // Parse request body
+    const { clientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL } = await parseJsonBody(req)
 
-    // Parse request body after authentication
-    const { clientId: requestClientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL } = await req.json()
-    clientId = requestClientId;
-    logger.apiRequest('POST', '/api/ai-services/generate-meeting-report', { clientId });
 
-    // Validate client access after parsing clientId
-    const client = await withClientAccess(userId, clientId)
+    // Validate required fields
+    if (!clientId || !meetingTranscription || !meetingDate) {
+      throw new Error('Missing required fields: clientId, meetingTranscription, and meetingDate are required')
+    }
+
+    const clientResult = await ClientService.getUserClientById(clientId, userId)
+    if (!clientResult.success) {
+      throw new Error(clientResult.error || 'Client not found')
+    }
+    const client = clientResult.data
 
     // Log additional instructions if provided
     if (additionalInfo && additionalInfo.trim()) {
       logger.info(`Meeting Report - Additional Instructions provided: ${additionalInfo}`);
-    }
-
-    if (!clientId || !meetingTranscription || !meetingDate) {
-      logger.warn('Missing required fields for meeting report', { 
-        clientId,
-        metadata: { 
-          hasClientId: !!clientId, 
-          hasTranscription: !!meetingTranscription,
-          hasMeetingDate: !!meetingDate
-        }
-      });
-      return new Response('Missing required fields', { status: 400 })
     }
 
     // Build the meeting report prompt (always in English)
@@ -71,14 +62,10 @@ INSTRUCTIONS:
 - Focus on practical next steps that can be implemented immediately
 - Generate the response in English with clear, professional language`
 
-    // Use unified AI wrapper with automatic usage tracking
-    logger.aiRequest(selectedModel, undefined, { userId: userId, clientId });
-    
-    const completion = await withTiming(
-      'AI Meeting Report Generation',
-      () => createAICompletion(
-        {
-          model: selectedModel,
+    // Use OpenRouter service with automatic usage tracking
+    const completion = await openRouterService.createCompletion(
+      {
+        model: selectedModel,
         messages: [
           {
             role: 'system',
@@ -98,38 +85,20 @@ INSTRUCTIONS:
           documentType: 'meeting-report'
         }
       }
-      ),
-      { userId: userId, clientId, model: selectedModel }
-    );
+    )
 
     const meetingReport = completion.content
     
     if (!meetingReport) {
-      logger.error('Failed to generate meeting report - empty response', undefined, { 
-        userId: userId, 
-        clientId 
-      });
-      return new Response('Failed to generate meeting report', { status: 500 })
+      throw new Error('Failed to generate meeting report')
     }
 
-
-
-    logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 200, { 
-      userId: userId, 
-      clientId 
-    });
-    endTiming();
     return Response.json({ report: meetingReport })
-  } catch (error) {
-    return handleApiError(error, {
-      context: 'generate meeting report',
-      userId,
-      resourceId: clientId,
-      operation: 'generate-meeting-report',
-      cleanup: () => {
-        logger.apiResponse('POST', '/api/ai-services/generate-meeting-report', 500, { clientId });
-        endTiming();
-      }
-    });
+  },
+  {
+    context: 'Generate Meeting Report',
+    allowedMethods: ['POST'],
+    expectedContentType: 'application/json',
+    requireToken: true
   }
-} 
+) 

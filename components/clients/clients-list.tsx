@@ -9,8 +9,8 @@ import {ClientGridView} from '@/components/clients/client-grid-view'
 import {ClientTableView} from '@/components/clients/client-table-view'
 import {ClientPagination} from '@/components/clients/client-pagination'
 import {ClientEmptyState} from '@/components/clients/client-empty-state'
-import {Client, ClientActionHandlers, UsageInfo} from '@/types/client-list-types'
-import {ButtonVariant, ClientSortMode, ViewMode} from '@/types/enums'
+import {Client, ClientActionHandlers, UsageInfo} from '@/lib/types/client-list-types'
+import {ButtonVariant, ClientSortMode, ViewMode} from '@/lib/types/enums'
 import {useClientList} from '@/hooks/client/use-client-list'
 
 interface ClientsListProps {
@@ -51,10 +51,6 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
   }
 
   const handleDelete = async (clientId: string, clientName: string) => {
-    if (!confirm(`Are you sure you want to delete ${clientName}? This action cannot be undone.`)) {
-      return
-    }
-
     setIsDeleting(clientId)
     try {
       await deleteClient(clientId, clientName)
@@ -144,8 +140,8 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
         </div>
         <Button 
           onClick={onAddClient} 
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
           title="Add a new client"
+          variant="blue"
         >
           <Plus className="h-4 w-4" />
           Add Client

@@ -1,11 +1,11 @@
-import { DocumentService } from '@/lib/services/document-service'
-import { DOCUMENT_TYPES } from '@/types/document-types'
+import { DocumentService } from '@/services/document-service'
+import { DOCUMENT_TYPES } from '@/lib/types/document-types'
 import { 
   withEnhancedApi, 
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {

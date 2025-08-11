@@ -7,9 +7,10 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Label} from '@/components/ui/label'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
-import {CLIENT_FIELD_LABELS} from '@/types/client'
+import {CLIENT_FIELD_LABELS} from '@/lib/types/client-types'
 import {Globe, HelpCircle, Shield} from 'lucide-react'
 import {useClientForm} from '@/hooks/client/use-client-form'
+import React from "react";
 
 interface ClientFormProps {
   client?: any
@@ -298,7 +299,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              variant="blue"
             >
               {isLoading ? 'Saving...' : (client?.id ? 'Update Client' : 'Create Client')}
             </Button>

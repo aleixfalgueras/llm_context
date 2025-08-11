@@ -5,12 +5,13 @@ import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
-import {deleteAllChats, deleteChat, updateChatTitle} from '@/lib/actions/chat'
+import {deleteAllChats, deleteChat, updateChatTitle} from '@/app/actions/chat-action'
 import Link from 'next/link'
 import {useState} from 'react'
 import {usePathname} from 'next/navigation'
 import {Input} from '@/components/ui/input'
-import {Chat} from '@/types/component-types'
+import {LoadingSpinner} from '@/components/ui/loading-spinner'
+import {Chat} from '@prisma/client'
 
 interface ChatSidebarProps {
   chats: Chat[]
@@ -24,6 +25,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const pathname = usePathname()
 
   const handleEditStart = (chat: Chat) => {
@@ -45,7 +47,13 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
 
   const handleDeleteAllChats = async () => {
     if (showDeleteAllConfirm) {
-      await deleteAllChats(pathname)
+      setIsDeleting(true)
+      try {
+        await deleteAllChats(pathname)
+      } finally {
+        setIsDeleting(false)
+        setShowDeleteAllConfirm(false)
+      }
     } else {
       setShowDeleteAllConfirm(true)
       // Reset confirmation after 3 seconds
@@ -56,15 +64,16 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
   return (
     <div className={`flex flex-col h-full ${
       isMobile 
-        ? 'bg-gray-50 dark:bg-gray-900 w-full' 
-        : 'border-r bg-gray-50 dark:bg-gray-900 w-[300px] min-w-[280px] max-w-[350px]'
+        ? ' w-full' 
+        : 'border-r w-[300px] min-w-[280px] max-w-[350px]'
     }`}>
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Chats</h1>
+      <div className="p-2 sm:p-4">
+        <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
+          <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"  />
+          <h2 className="font-semibold text-sm sm:text-base truncate">Chats</h2>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 mt-6">
           {!hideNewChatButton && (
             <Link href="/assistant">
               <Button 
@@ -86,9 +95,16 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                   : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
               } shadow-sm`}
               size="sm"
+              disabled={isDeleting}
             >
-              <TrashIcon className="w-4 h-4 mr-2" />
-              {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All Chats'}
+              {isDeleting ? (
+                <LoadingSpinner size="sm" text="Deleting..." />
+              ) : (
+                <>
+                  <TrashIcon className="w-4 h-4 mr-2" />
+                  {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All Chats'}
+                </>
+              )}
             </Button>
           )}
         </div>
@@ -99,7 +115,6 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
         <div className="p-2">
           {chats.length === 0 ? (
             <div className="text-center text-gray-500 mt-8">
-              <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>No chats yet</p>
               <p className="text-sm">Start a new conversation</p>
             </div>

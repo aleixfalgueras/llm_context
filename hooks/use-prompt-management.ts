@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { getSamplePromptsByCategory } from '@/lib/sample-prompts'
+import { Prompt } from '@prisma/client'
 import { 
-  Prompt, 
   PromptStats, 
   PromptFilters, 
-  FilterActionHandlers 
-} from '@/types/prompt-management-types'
+  PromptFilterActionHandlers
+} from '@/lib/types/prompt-types'
+import { handleClientApiError } from '@/lib/api/api-toast'
+import { getPrompts, deletePrompt as deletePromptAction, updatePrompt } from '@/app/actions/prompt-action'
+import { PromptListFilters } from '@/services/prompt-service'
 
 interface UsePromptManagementReturn {
   // State
@@ -20,17 +23,29 @@ interface UsePromptManagementReturn {
   
   // Dialog states
   showPromptDialog: boolean
+  isViewDialogOpen: boolean
+  isEditDialogOpen: boolean
+  isDeleteDialogOpen: boolean
+  viewingPrompt: Prompt | null
+  editingPrompt: Prompt | null
+  deletingPrompt: Prompt | null
   
   // Actions
   fetchPrompts: () => Promise<void>
   deletePrompt: (id: string) => Promise<void>
   togglePromptStatus: (prompt: Prompt) => Promise<void>
   handleNewPrompt: () => Promise<void>
+  handleViewPrompt: (prompt: Prompt) => void
+  handleEditPrompt: (prompt: Prompt) => void
+  handleDeletePrompt: (prompt: Prompt) => void
   clearFilters: () => void
   setShowPromptDialog: (show: boolean) => void
+  setIsViewDialogOpen: (open: boolean) => void
+  setIsEditDialogOpen: (open: boolean) => void
+  setIsDeleteDialogOpen: (open: boolean) => void
   
   // Filter handlers
-  filterActionHandlers: FilterActionHandlers
+  filterActionHandlers: PromptFilterActionHandlers
   filteredSamplePrompts: any[]
 }
 
@@ -45,32 +60,29 @@ export function usePromptManagement(): UsePromptManagementReturn {
     showTemplates: true
   })
   const [showPromptDialog, setShowPromptDialog] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [viewingPrompt, setViewingPrompt] = useState<Prompt | null>(null)
+  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null)
+  const [deletingPrompt, setDeletingPrompt] = useState<Prompt | null>(null)
   const { toast } = useToast()
 
   const fetchPrompts = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams()
-      if (filters.selectedCategory !== 'all') {
-        params.append('category', filters.selectedCategory)
+      const promptFilters: PromptListFilters = {
+        category: filters.selectedCategory !== 'all' ? filters.selectedCategory : undefined,
+        isActive: !filters.showInactive ? true : undefined,
+        includeContent: true
       }
-      if (!filters.showInactive) {
-        params.append('active', 'true')
-      }
-      params.append('includeContent', 'true')
 
-      const response = await fetch(`/api/prompts?${params.toString()}`)
-      if (response.ok) {
-        const data = await response.json()
-        setPrompts(data.data.prompts || [])
-      }
+      const data = await getPrompts(promptFilters)
+      setPrompts(data || [])
     } catch (error) {
       console.error('Error fetching prompts:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to load prompts.',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'
+      handleClientApiError(errorMessage, 'Failed to load prompts')
     } finally {
       setLoading(false)
     }
@@ -86,7 +98,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
 
   // Fetch prompts on mount and when filters change
   useEffect(() => {
-    fetchPrompts()
+    void fetchPrompts()
   }, [filters.selectedCategory, filters.showInactive])
 
   const filteredAndSortedPrompts = (Array.isArray(prompts) ? prompts : [])
@@ -114,56 +126,31 @@ export function usePromptManagement(): UsePromptManagementReturn {
 
   const deletePrompt = async (promptId: string) => {
     try {
-      const response = await fetch(`/api/prompts/${promptId}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        toast({
-          title: 'Prompt deleted',
-          description: 'Prompt has been deleted successfully.',
-        })
-        fetchPrompts()
-      } else {
-        throw new Error('Failed to delete prompt')
-      }
-    } catch (error) {
+      await deletePromptAction(promptId)
       toast({
-        title: 'Error',
-        description: 'Failed to delete prompt.',
-        variant: 'destructive',
+        title: 'Prompt deleted',
+        description: 'Prompt has been deleted successfully.',
       })
+      await fetchPrompts()
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete prompt'
+      handleClientApiError(errorMessage, 'Failed to delete prompt')
     }
   }
 
   const togglePromptStatus = async (prompt: Prompt) => {
     try {
-      const response = await fetch(`/api/prompts/${prompt.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...prompt,
-          isActive: !prompt.isActive,
-        }),
+      await updatePrompt(prompt.id, {
+        isActive: !prompt.isActive,
       })
-
-      if (response.ok) {
-        toast({
-          title: prompt.isActive ? 'Prompt disabled' : 'Prompt enabled',
-          description: `"${prompt.name}" has been ${prompt.isActive ? 'disabled' : 'enabled'}.`,
-        })
-        fetchPrompts()
-      } else {
-        throw new Error('Failed to update prompt')
-      }
-    } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to update prompt status.',
-        variant: 'destructive',
+        title: prompt.isActive ? 'Prompt disabled' : 'Prompt enabled',
+        description: `"${prompt.name}" has been ${prompt.isActive ? 'disabled' : 'enabled'}.`,
       })
+      await fetchPrompts()
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update prompt status'
+      handleClientApiError(errorMessage, 'Failed to update prompt status')
     }
   }
 
@@ -187,6 +174,21 @@ export function usePromptManagement(): UsePromptManagementReturn {
     setShowPromptDialog(true)
   }
 
+  const handleViewPrompt = (prompt: Prompt) => {
+    setViewingPrompt(prompt)
+    setIsViewDialogOpen(true)
+  }
+
+  const handleEditPrompt = (prompt: Prompt) => {
+    setEditingPrompt(prompt)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleDeletePrompt = (prompt: Prompt) => {
+    setDeletingPrompt(prompt)
+    setIsDeleteDialogOpen(true)
+  }
+
   // Prepare data for child components
   const stats: PromptStats = {
     total: prompts.length,
@@ -194,7 +196,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
     mostUsed: prompts.reduce((max, p) => p.usageCount > (max?.usageCount || 0) ? p : max, prompts[0] || null),
   }
 
-  const filterActionHandlers: FilterActionHandlers = {
+  const filterActionHandlers: PromptFilterActionHandlers = {
     onSearchChange: (search) => setFilters(prev => ({ ...prev, searchTerm: search })),
     onCategoryChange: (category) => setFilters(prev => ({ ...prev, selectedCategory: category })),
     onSortChange: (sort) => setFilters(prev => ({ ...prev, sortBy: sort })),
@@ -214,14 +216,26 @@ export function usePromptManagement(): UsePromptManagementReturn {
     
     // Dialog states
     showPromptDialog,
+    isViewDialogOpen,
+    isEditDialogOpen,
+    isDeleteDialogOpen,
+    viewingPrompt,
+    editingPrompt,
+    deletingPrompt,
     
     // Actions
     fetchPrompts,
     deletePrompt,
     togglePromptStatus,
     handleNewPrompt,
+    handleViewPrompt,
+    handleEditPrompt,
+    handleDeletePrompt,
     clearFilters,
     setShowPromptDialog,
+    setIsViewDialogOpen,
+    setIsEditDialogOpen,
+    setIsDeleteDialogOpen,
     
     // Filter handlers
     filterActionHandlers,

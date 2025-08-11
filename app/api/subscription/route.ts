@@ -2,8 +2,8 @@ import {
   withEnhancedApi,
   apiSuccess,
   ApiContext
-} from '@/lib/middleware/api-middleware'
-import {getUserSubscriptionWithValidation} from "@/lib/subscription/subscription-utils";
+} from '@/lib/api/api-middleware'
+import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'
@@ -17,7 +17,7 @@ export const GET = withEnhancedApi(
       console.log('🔄 API: Cache bypass requested for subscription userId:', userId)
     }
     
-    const subscriptionWithValidation = await getUserSubscriptionWithValidation(userId, forceRefresh)
+    const subscriptionWithValidation = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId, forceRefresh)
     
     return apiSuccess(subscriptionWithValidation)
   },

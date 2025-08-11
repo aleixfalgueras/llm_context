@@ -88,7 +88,8 @@ export function SubscriptionStatusBanners({
             <Button
               onClick={onRetryPayment}
               disabled={retryPaymentLoading}
-              className="bg-blue-600 hover:bg-blue-700 border-blue-600 text-white font-semibold px-6 py-2"
+              variant="blue"
+              className="font-semibold px-6 py-2"
             >
               {retryPaymentLoading ? 'Processing Payment...' : 'Pay Now to Restore Access'}
             </Button>

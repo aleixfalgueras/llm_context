@@ -1,6 +1,6 @@
 'use client'
 
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import {Button} from '@/components/ui/button'
 import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
@@ -9,8 +9,8 @@ import {useToast} from '@/hooks/use-toast'
 import {DatePicker} from '@/components/ui/date-picker'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
-import type {Client} from '@/types/client'
-import {getDefaultModel} from '@/lib/ai/models-config'
+import type {Client} from '@prisma/client'
+import {getDefaultModel} from '@/lib/models-config'
 
 interface MeetingReportDialogProps {
   open: boolean
@@ -44,6 +44,21 @@ export function MeetingReportDialog({
     documentName: ''
   })
   const [isUploadingFile, setIsUploadingFile] = useState(false)
+
+  // Reset form data when dialog opens
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        clientId: '',
+        meetingDate: new Date().toISOString().split('T')[0],
+        meetingTranscription: '',
+        additionalInfo: '',
+        formatDocumentId: '',
+        documentName: ''
+      })
+      setIsUploadingFile(false)
+    }
+  }, [open])
 
   // Get selected client
   const getSelectedClient = (data: MeetingFormData) => 

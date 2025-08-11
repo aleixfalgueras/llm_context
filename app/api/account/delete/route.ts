@@ -1,169 +1,235 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { clerkClient } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { withdrawAllConsent } from '@/lib/utils/consent'
+import { withdrawAllConsent, extractClientInfo } from '@/lib/utils/consent'
+import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api/api-middleware'
+import { ApiErrors } from '@/lib/api/api-error-handler'
+import { cancelSubscriptionImmediately } from '@/lib/stripe/stripe-subscription'
+import { stripe } from '@/lib/stripe/stripe'
+import { SubscriptionUsageOperations } from '@/database'
 
-// Account deletion request (soft delete with grace period)
-export async function POST(request: NextRequest) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export const POST = withEnhancedApi(async ({ userId, req }) => {
+  const { confirmationText, reason = 'user_request' } = await parseJsonBody(req)
 
-    const { confirmationText, reason = 'user_request' } = await request.json()
+  if (confirmationText !== 'DELETE MY ACCOUNT') {
+    return ApiErrors.badRequest('Please type "DELETE MY ACCOUNT" to confirm deletion')
+  }
 
-    // Require confirmation text for safety
-    if (confirmationText !== 'DELETE MY ACCOUNT') {
-      return NextResponse.json({
-        error: 'Please type "DELETE MY ACCOUNT" to confirm deletion'
-      }, { status: 400 })
-    }
+  // Get client IP and user agent for audit trail
+  const { ipAddress: clientIP, userAgent } = extractClientInfo(req)
 
-    // Get client IP and user agent for audit trail
-    const clientIP = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown'
-    const userAgent = request.headers.get('user-agent') || 'unknown'
+  const userSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
-    // Start a transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Withdraw all consent first
-      await withdrawAllConsent(userId, 'account_deletion', {
+  // Start a transaction to ensure data consistency
+  const result = await prisma.$transaction(async (tx) => {
+    // 1. Withdraw all consent first
+    await withdrawAllConsent(userId, 'account_deletion', {
+      ipAddress: clientIP,
+      userAgent
+    })
+
+    // 2. Create account deletion audit log
+    const deletionLog = await tx.consentAuditLog.create({
+      data: {
+        userId,
+        action: 'account_deletion_requested',
+        consentType: 'account_deletion',
+        previousValue: true,
+        newValue: false,
+        reason,
         ipAddress: clientIP,
-        userAgent
-      })
+        userAgent,
+      }
+    })
 
-      // 2. Create account deletion audit log
-      const deletionLog = await tx.consentAuditLog.create({
-        data: {
-          userId,
-          action: 'account_deletion_requested',
-          consentType: 'account_deletion',
-          previousValue: true,
-          newValue: false,
+    // 3. Count user data for audit purposes
+    const dataCounts = {
+      clients: await tx.client.count({ where: { userId } }),
+      documents: await tx.document.count({ where: { userId } }),
+      chats: await tx.chat.count({ where: { userId } }),
+      messages: await tx.message.count({
+        where: {
+          chat: { userId }
+        }
+      }),
+      prompts: await tx.prompt.count({ where: { userId } }),
+      feedbacks: await tx.feedback.count({ where: { userId } }),
+      subscription: userSubscription ? 1 : 0,
+      stripeCustomerId: userSubscription?.stripeCustomerId || null,
+      stripeSubscriptionId: userSubscription?.stripeSubscriptionId || null,
+      subscriptionPlan: userSubscription?.plan || null,
+      subscriptionStatus: userSubscription?.status || null
+    }
+
+    // 4. Create deletion request record for audit trail
+    const deletionRequest = await tx.accountDeletionRequest.create({
+      data: {
+        userId,
+        requestData: {
           reason,
+          originalCounts: dataCounts,
           ipAddress: clientIP,
           userAgent,
-        }
-      })
-
-      // 3. Count user data for audit purposes
-      const dataCounts = {
-        clients: await tx.client.count({ where: { userId } }),
-        documents: await tx.document.count({ where: { userId } }),
-        chats: await tx.chat.count({ where: { userId } }),
-        messages: await tx.message.count({
-          where: {
-            chat: { userId }
-          }
-        }),
-        prompts: await tx.prompt.count({ where: { userId } }),
-        feedbacks: await tx.feedback.count({ where: { userId } })
+          processedAt: new Date().toISOString()
+        },
+        reason
       }
-
-      // 4. Schedule deletion (immediate for demo, could be delayed in production)
-      const scheduledDeletion = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days grace period
-
-      // Create deletion request record
-      const deletionRequest = await tx.dataExportRequest.create({
-        data: {
-          userId,
-          requestType: 'account_deletion',
-          status: 'pending',
-          requestData: {
-            reason,
-            dataCounts,
-            scheduledDeletion: scheduledDeletion.toISOString(),
-            ipAddress: clientIP,
-            userAgent,
-            gracePeriodEnds: scheduledDeletion.toISOString()
-          },
-          expiresAt: scheduledDeletion
-        }
-      })
-
-      return { deletionLog, deletionRequest, dataCounts, scheduledDeletion }
     })
 
-    return NextResponse.json({
-      success: true,
-      message: 'Account deletion scheduled. You have 7 days to cancel this request.',
-      deletionId: result.deletionRequest.id,
-      scheduledDeletion: result.scheduledDeletion,
-      dataToBeDeleted: result.dataCounts,
-      gracePeriodDays: 7
-    })
-  } catch (error) {
-    console.error('Error scheduling account deletion:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-// Cancel account deletion (during grace period)
-export async function DELETE(request: NextRequest) {
-  try {
-    const { userId } = await auth()
+    // 5. Delete user data in the correct order (respecting foreign key constraints)
     
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { deletionId } = await request.json()
-
-    // Find the pending deletion request
-    const deletionRequest = await prisma.dataExportRequest.findFirst({
+    // Delete messages (has foreign key to chat)
+    const deletedMessages = await tx.message.deleteMany({
       where: {
-        id: deletionId,
-        userId,
-        requestType: 'account_deletion',
-        status: 'pending'
+        chat: { userId }
       }
     })
 
-    if (!deletionRequest) {
-      return NextResponse.json({
-        error: 'No pending deletion request found'
-      }, { status: 404 })
-    }
+    // Delete chats
+    const deletedChats = await tx.chat.deleteMany({
+      where: { userId }
+    })
 
-    // Check if grace period has expired
-    if (new Date() > deletionRequest.expiresAt!) {
-      return NextResponse.json({
-        error: 'Grace period has expired. Account deletion cannot be cancelled.'
-      }, { status: 400 })
-    }
+    // Delete documents
+    const deletedDocuments = await tx.document.deleteMany({
+      where: { userId }
+    })
 
-    // Cancel the deletion request
-    await prisma.dataExportRequest.update({
-      where: { id: deletionId },
+    // Delete clients
+    const deletedClients = await tx.client.deleteMany({
+      where: { userId }
+    })
+
+    // Delete prompts
+    const deletedPrompts = await tx.prompt.deleteMany({
+      where: { userId }
+    })
+
+    // Delete feedback
+    const deletedFeedbacks = await tx.feedback.deleteMany({
+      where: { userId }
+    })
+
+    // Delete user consent records
+    const deletedUserConsent = await tx.userConsent.deleteMany({
+      where: { userId }
+    })
+
+    // 6. Update deletion request with actual deletion counts
+    await tx.accountDeletionRequest.update({
+      where: { id: deletionRequest.id },
       data: {
-        status: 'cancelled',
-        completedAt: new Date()
+        requestData: {
+          reason,
+          originalCounts: dataCounts,
+          actualDeletionCounts: {
+            messages: deletedMessages.count,
+            chats: deletedChats.count,
+            documents: deletedDocuments.count,
+            clients: deletedClients.count,
+            prompts: deletedPrompts.count,
+            feedbacks: deletedFeedbacks.count,
+            userConsent: deletedUserConsent.count
+          },
+          ipAddress: clientIP,
+          userAgent,
+          processedAt: new Date().toISOString()
+        }
       }
     })
 
-    // Log the cancellation
-    await prisma.consentAuditLog.create({
+    // 7. Create final audit log entry
+    await tx.consentAuditLog.create({
       data: {
         userId,
-        action: 'account_deletion_cancelled',
+        action: 'account_deletion_completed',
         consentType: 'account_deletion',
         previousValue: false,
-        newValue: true,
-        reason: 'user_request',
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: request.headers.get('user-agent') || 'unknown',
+        newValue: false,
+        reason: `immediate_processing_${deletionRequest.id}`,
+        ipAddress: clientIP,
+        userAgent
       }
     })
 
-    return NextResponse.json({
-      success: true,
-      message: 'Account deletion cancelled successfully'
-    })
-  } catch (error) {
-    console.error('Error cancelling account deletion:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return { 
+      deletionLog, 
+      deletionRequest, 
+      dataCounts,
+      actualDeletionCounts: {
+        messages: deletedMessages.count,
+        chats: deletedChats.count,
+        documents: deletedDocuments.count,
+        clients: deletedClients.count,
+        prompts: deletedPrompts.count,
+        feedbacks: deletedFeedbacks.count,
+        userConsent: deletedUserConsent.count
+      }
+    }
+  })
+
+  // 8. Handle Stripe subscription and customer cleanup
+  let stripeCleanupResults = {
+    subscriptionCancelled: false,
+    customerDeleted: false,
+    subscriptionError: null as string | null,
+    customerError: null as string | null
   }
-} 
+
+  if (userSubscription?.stripeSubscriptionId) {
+    try {
+      await cancelSubscriptionImmediately(
+        userSubscription.stripeSubscriptionId,
+        'account_deletion'
+      )
+      stripeCleanupResults.subscriptionCancelled = true
+    } catch (subscriptionError) {
+      stripeCleanupResults.subscriptionError = subscriptionError instanceof Error 
+        ? subscriptionError.message 
+        : 'Unknown subscription cancellation error'
+      console.error('Failed to cancel Stripe subscription:', subscriptionError)
+      // Continue with deletion even if subscription cancellation fails
+    }
+  }
+
+  if (userSubscription?.stripeCustomerId) {
+    try {
+      await stripe.customers.del(userSubscription.stripeCustomerId)
+      stripeCleanupResults.customerDeleted = true
+    } catch (customerError) {
+      stripeCleanupResults.customerError = customerError instanceof Error
+        ? customerError.message
+        : 'Unknown customer deletion error'
+      console.error('Failed to delete Stripe customer:', customerError)
+      // Continue with deletion even if customer deletion fails
+    }
+  }
+
+  // 9. Delete from Clerk (external service) - outside transaction
+  try {
+    const clerk = await clerkClient()
+    await clerk.users.deleteUser(userId)
+  } catch (clerkError) {
+    console.error('Failed to delete user from Clerk:', clerkError)
+    // Note: We continue with the deletion even if Clerk fails
+    // The audit log will show this was processed
+  }
+
+  return apiSuccess({
+    message: 'Account deleted successfully',
+    deletionId: result.deletionRequest.id,
+    dataDeleted: result.actualDeletionCounts,
+    stripeCleanup: {
+      hadSubscription: !!userSubscription?.stripeSubscriptionId,
+      subscriptionCancelled: stripeCleanupResults.subscriptionCancelled,
+      customerDeleted: stripeCleanupResults.customerDeleted,
+      errors: {
+        subscription: stripeCleanupResults.subscriptionError,
+        customer: stripeCleanupResults.customerError
+      }
+    }
+  })
+}, {
+  context: 'Account deletion',
+  allowedMethods: ['POST'],
+  expectedContentType: 'application/json'
+})

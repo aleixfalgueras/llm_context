@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { adminPrisma } from '@/lib/prisma'
 import { Navbar } from '@/components/global/navbar'
 import AdminDashboardClient from '@/components/admin/admin-dashboard-client'
-import { AdminDashboardData } from '@/types/admin-types'
+import { AdminDashboardData } from '@/lib/types/admin-types'
 
 const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 

@@ -15,11 +15,12 @@ import {
   Zap,
   ZapIcon
 } from 'lucide-react'
+import Image from 'next/image'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
 import {getPlanNameColor} from '@/lib/subscription/subscription-plan-utils'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import Link from 'next/link'
 import {SubscriptionPlan} from "@prisma/client";
 
@@ -45,18 +46,20 @@ export function LandingPage() {
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="text-center mb-16">
-          {/* Brand Name - Centered */}
-          <div className="mb-8">
-            <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              SpeedBrand
-            </h1>
+          {/* Logo - Centered */}
+          <div className="mb-8 flex justify-center">
+            <Image 
+              src="/mia_logo.svg" 
+              alt="MIA - Millennials Influencers Assistant" 
+              width={350}
+              height={350}
+              className="max-w-xs md:max-w-sm"
+            />
           </div>
           
 
           <p className="text-xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-            Create personalized marketing content 
-            <br />
-            with an AI that understands your clients' business context.
+            Create personalized marketing content with an AI that understands your clients' business context.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -301,7 +304,7 @@ export function LandingPage() {
       <footer className="border-t border-gray-200 dark:border-gray-700 py-8 mt-16">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-600 dark:text-gray-400 text-sm">
-            <p>&copy; 2025 SpeedBrand. AI platform for marketing professionals.</p>
+            <p>&copy; 2025 MIA. AI-powered marketing content generation platform.</p>
             <div className="flex items-center gap-6 mt-4 md:mt-0">
               <Link href="/terms" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors underline underline-offset-4">
                 Terms of Service

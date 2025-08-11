@@ -4,8 +4,9 @@ import {
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
-import { ApiSubscriptionErrorCode } from '@/types/enums'
+} from '@/lib/api/api-middleware'
+
+import {SubscriptionErrorCode} from "@/services/error-codes";
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {
@@ -28,10 +29,7 @@ export const POST = withEnhancedApi(
             message: 'User has no Stripe customer - expected behavior for free trial users'
           }
         })
-        const noCustomerError = new Error('No active subscription found')
-        ;(noCustomerError as any).status = 404
-        ;(noCustomerError as any).code = ApiSubscriptionErrorCode.NO_SUBSCRIPTION_FOUND
-        throw noCustomerError
+        throw new Error(SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND)
       }
       throw error
     }

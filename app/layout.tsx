@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from "@/components/ui/toaster"
@@ -18,9 +19,15 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+const poppins = Poppins({
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
-      title: "SpeedBrand",
-  description: "AI-powered marketing content generation and client management platform for marketing professionals",
+  title: "MIA",
+  description: "AI-powered marketing content generation platform",
 };
 
 export default function RootLayout({
@@ -35,7 +42,7 @@ export default function RootLayout({
     >
       <html lang="en-GB" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
         >
           <ThemeProvider>
             <TooltipProvider>

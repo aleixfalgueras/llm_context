@@ -6,7 +6,7 @@ import {Input} from '@/components/ui/input'
 import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
-import {FeedbackType} from '@/types/enums'
+import {FeedbackType} from '@/lib/types/enums'
 import {useFeedbackForm} from '@/hooks/use-feedback-form'
 
 export function FeedbackForm() {
@@ -170,8 +170,9 @@ export function FeedbackForm() {
           )}
 
           <Button 
-            type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+            type="submit"
+            variant="blue"
+            className="w-full"
             disabled={isSubmitting || !formData.type || !formData.title || !formData.description || !formData.priority}
           >
             {isSubmitting ? 'Submitting...' : 

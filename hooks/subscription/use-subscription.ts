@@ -1,7 +1,7 @@
 'use client'
 
 import {useEffect, useState} from 'react'
-import {SubscriptionWithValidation} from '@/types/subscription-types'
+import {SubscriptionWithValidation} from '@/lib/types/subscription-types'
 import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 
 // Default values for initial state to prevent null pointer errors during prerendering

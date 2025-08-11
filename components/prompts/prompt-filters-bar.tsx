@@ -4,11 +4,11 @@ import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {Eye, EyeOff, Lightbulb, Search} from 'lucide-react'
-import {CATEGORIES, FilterActionHandlers, PromptFilters, SORT_OPTIONS} from '@/types/prompt-management-types'
+import {PROMPT_CATEGORIES, PromptFilterActionHandlers, PromptFilters, PROMPT_SORT_OPTIONS} from '@/lib/types/prompt-types'
 
 interface PromptFiltersBarProps {
   filters: PromptFilters
-  actionHandlers: FilterActionHandlers
+  actionHandlers: PromptFilterActionHandlers
 }
 
 export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarProps) {
@@ -47,7 +47,7 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {CATEGORIES.map((category) => (
+          {PROMPT_CATEGORIES.map((category) => (
             <SelectItem key={category.value} value={category.value}>
               {category.label}
             </SelectItem>
@@ -60,7 +60,7 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {SORT_OPTIONS.map((option) => (
+          {PROMPT_SORT_OPTIONS.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>

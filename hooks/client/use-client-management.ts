@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import type { Client } from '@/types/client'
+import type { Client } from '@prisma/client'
 
 interface UseClientManagementReturn {
   // State

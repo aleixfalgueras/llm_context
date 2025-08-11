@@ -3,6 +3,7 @@
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
 import {PromptDialog} from '@/components/prompts/prompt-dialog'
+import {DeletePromptDialog} from '@/components/prompts/delete-prompt-dialog'
 import {FileText, Lightbulb, Plus} from 'lucide-react'
 import {PromptStatsCards} from '@/components/prompts/prompt-stats-cards'
 import {PromptFiltersBar} from '@/components/prompts/prompt-filters-bar'
@@ -22,14 +23,26 @@ export function PromptsManagement() {
     
     // Dialog states
     showPromptDialog,
+    isViewDialogOpen,
+    isEditDialogOpen,
+    isDeleteDialogOpen,
+    viewingPrompt,
+    editingPrompt,
+    deletingPrompt,
     
     // Actions
     fetchPrompts,
     deletePrompt,
     togglePromptStatus,
     handleNewPrompt,
+    handleViewPrompt,
+    handleEditPrompt,
+    handleDeletePrompt,
     clearFilters,
     setShowPromptDialog,
+    setIsViewDialogOpen,
+    setIsEditDialogOpen,
+    setIsDeleteDialogOpen,
     
     // Filter handlers
     filterActionHandlers,
@@ -52,7 +65,7 @@ export function PromptsManagement() {
           </p>
         </div>
         <Button 
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          variant="blue"
           onClick={handleNewPrompt}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -118,8 +131,11 @@ export function PromptsManagement() {
                 key={prompt.id}
                 prompt={prompt}
                 onEdit={() => fetchPrompts()}
+                onEditPrompt={handleEditPrompt}
                 onDelete={() => deletePrompt(prompt.id)}
+                onDeletePrompt={handleDeletePrompt}
                 onToggleStatus={() => togglePromptStatus(prompt)}
+                onViewPrompt={handleViewPrompt}
               />
             ))}
           </div>
@@ -132,7 +148,39 @@ export function PromptsManagement() {
         onOpenChange={setShowPromptDialog}
         onSuccess={() => {
           setShowPromptDialog(false)
-          fetchPrompts()
+          void fetchPrompts()
+        }}
+      />
+
+      {/* Prompt View Dialog */}
+      <PromptDialog 
+        prompt={viewingPrompt}
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        viewMode={true}
+      />
+
+      {/* Prompt Edit Dialog */}
+      <PromptDialog 
+        prompt={editingPrompt}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onSuccess={() => {
+          setIsEditDialogOpen(false)
+          void fetchPrompts()
+        }}
+      />
+
+      {/* Prompt Delete Dialog */}
+      <DeletePromptDialog 
+        promptName={deletingPrompt?.name || ''}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDelete={() => {
+          if (deletingPrompt) {
+            void deletePrompt(deletingPrompt.id)
+            setIsDeleteDialogOpen(false)
+          }
         }}
       />
 

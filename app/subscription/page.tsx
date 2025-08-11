@@ -1,10 +1,15 @@
 'use client'
 
-import {Suspense} from 'react'
+import {Suspense, useState} from 'react'
 import {Button} from '@/components/ui/button'
-import {SettingsIcon} from 'lucide-react'
+import {SettingsIcon, Trash2} from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { handleClientApiError } from '@/lib/api/api-toast'
+import { useRouter } from 'next/navigation'
 import {isDowngrade as checkIsDowngrade} from '@/lib/subscription/subscription-plan-utils'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {Navbar} from '@/components/global/navbar'
 import {UpgradeDowngradeDialog} from '@/components/subscription/upgrade-downgrade-dialog'
 import {SubscriptionUrlHandler} from '@/components/subscription/subscription-url-handler'
@@ -33,6 +38,13 @@ export default function SubscriptionPage() {
     isExpired
   } = useSubscriptionStatus()
 
+  // Delete account state
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [confirmationText, setConfirmationText] = useState('')
+  const [deletionReason, setDeletionReason] = useState('user_request')
+  const router = useRouter()
+
   const { isRefreshing, setIsRefreshing, refreshSubscriptionWithFallback } = useSubscriptionRefresh({ refetch: subscription.refetch })
 
   const {
@@ -52,6 +64,46 @@ export default function SubscriptionPage() {
 
   const handlePlanActionWrapper = (planId: string) => {
     handlePlanAction(planId, isPendingDowngrade(), isPendingPlanChange(planId))
+  }
+
+  // Delete account handler
+  const handleAccountDeletion = async () => {
+    setIsDeleting(true)
+    try {
+      const response = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          confirmationText,
+          reason: deletionReason
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to delete account' }))
+        throw new Error(errorData.error)
+      }
+
+      const result = await response.json()
+      
+      // Show success message and redirect to home page
+      alert(`Account deleted successfully. Deletion ID: ${result.deletionId}`)
+      
+      // Clear form and close dialog
+      setShowDeleteConfirm(false)
+      setConfirmationText('')
+      
+      // Redirect to home page since user is now deleted
+      router.push('/')
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete account'
+      handleClientApiError(errorMessage, 'Failed to delete account')
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   // Helper function to get dynamic button text based on subscription status
@@ -76,7 +128,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-background">
       <Suspense fallback={null}>
         <SubscriptionUrlHandler 
           subscription={subscription}
@@ -88,6 +140,19 @@ export default function SubscriptionPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-16 relative">
+          {/* Delete Account Section - Top Left */}
+          <div className="absolute top-0 left-0">
+            <Button
+              onClick={() => setShowDeleteConfirm(true)}
+              variant="outline"
+              className="inline-flex items-center gap-2"
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete Account
+            </Button>
+          </div>
+
           {/* Manage Subscription Section - Top Right */}
           <div className="absolute top-0 right-0">
             <div className="flex flex-col items-end gap-2">
@@ -185,6 +250,73 @@ export default function SubscriptionPage() {
         hasActiveSubscription={!!subscription.stripeSubscriptionId && subscription.isActive && !isExpired()}
         isDowngrade={confirmationDialog.targetPlan ? checkIsDowngrade(subscription.plan as SubscriptionPlan, confirmationDialog.targetPlan) : false}
       />
+
+      {/* Account Deletion Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-900">Delete Account</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-2">
+                ⚠️ This action cannot be undone
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirmationText">
+                Type "DELETE MY ACCOUNT" to confirm:
+              </Label>
+              <Input
+                id="confirmationText"
+                value={confirmationText}
+                onChange={(e) => setConfirmationText(e.target.value)}
+                placeholder="DELETE MY ACCOUNT"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="deletionReason">
+                Reason for deletion (optional):
+              </Label>
+              <select
+                id="deletionReason"
+                value={deletionReason}
+                onChange={(e) => setDeletionReason(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="user_request">I no longer need the service</option>
+                <option value="privacy_concerns">Privacy concerns</option>
+                <option value="service_issues">Service issues</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowDeleteConfirm(false)
+                  setConfirmationText('')
+                }}
+                className="flex-1"
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleAccountDeletion}
+                disabled={confirmationText !== 'DELETE MY ACCOUNT' || isDeleting}
+                className="flex-1"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Account'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

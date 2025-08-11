@@ -6,15 +6,14 @@ import {Textarea} from '@/components/ui/textarea'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
-import {replaceClientVariables} from '@/lib/ai/variable-replacement'
 import {useToast} from '@/hooks/use-toast'
+import {Message, Prompt, Role} from '@prisma/client'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
-import {useRouter} from 'next/navigation'
 import {clientLogger} from '@/lib/client-logger'
-import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/ai/models-config'
-import {Message} from '@/types/message-types'
-import {Prompt} from '@/types/component-types'
+import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/models-config'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
+import {handleClientApiError} from '@/lib/api/api-toast'
+import {replaceClientContextVariables} from "@/services/client/client-context-service";
 
 // Separate component for just the textarea input to isolate re-renders
 interface TextareaInputProps {
@@ -98,7 +97,6 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
   })
   
   const { toast } = useToast()
-  const router = useRouter()
 
   // Handle input change with logging - use ref to avoid re-renders
   const handleInputChange = useCallback((value: string) => {
@@ -144,7 +142,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
 
     // Replace variables with client data if available using shared utility
     const processedContent = clientData 
-      ? replaceClientVariables(prompt.content, clientData)
+      ? replaceClientContextVariables(prompt.content, clientData)
       : prompt.content
 
     // If there's existing input, add the prompt on a new line
@@ -192,8 +190,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(errorText || `HTTP error! status: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Failed to export chat' }))
+        throw new Error(errorData.error)
       }
 
       const data = await response.json()
@@ -220,13 +218,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
       })
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to export chat. Please try again.'
-      
-      toast({
-        title: 'Export Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export chat'
+      handleClientApiError(errorMessage, 'Failed to export chat')
     } finally {
       setIsExporting(false)
     }
@@ -245,7 +238,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     
     messages.forEach((message) => {
       const timestamp = new Date(message.createdAt).toLocaleString()
-      const role = message.role === 'USER' ? 'You' : 'AI Assistant'
+      const role = message.role === Role.USER ? 'You' : 'AI Assistant'
       
       content += `## ${role} - ${timestamp}\n\n`
       content += `${message.content}\n\n`

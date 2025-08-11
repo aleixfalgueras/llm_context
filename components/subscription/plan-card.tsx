@@ -55,7 +55,7 @@ export function PlanCard({
 
   return (
     <Card 
-      className={`relative ${
+      className={`relative h-full flex flex-col ${
         isCurrentPlan 
           ? 'border-green-500 shadow-lg scale-105 bg-green-50 dark:bg-green-900/20' 
           : ''
@@ -69,15 +69,15 @@ export function PlanCard({
           {getPlanIcon(planId)}
         </div>
         <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
-        <CardDescription className="text-sm">{plan.description}</CardDescription>
-        <div className="mt-4">
-          <span className="text-4xl font-bold">{plan.price}€</span>
-          {plan.price > 0 && <span className="text-gray-500">/month</span>}
+        <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{plan.description}</CardDescription>
+        <div className="mt-4 pt-4 pb-2 flex items-end justify-center min-h-[4rem]">
+          <span className="text-4xl font-bold leading-none">{plan.price}€</span>
+          {plan.price > 0 && <span className="text-gray-500 mb-1">/month</span>}
         </div>
       </CardHeader>
       
-      <CardContent>
-        <ul className="space-y-3 mb-6">
+      <CardContent className="flex flex-col flex-grow">
+        <ul className="space-y-3 mb-6 flex-grow">
           {plan.features_list.map((feature, index) => (
             <li key={index} className="flex items-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
@@ -89,7 +89,7 @@ export function PlanCard({
         <Button 
           onClick={() => onPlanAction(plan.id)}
           disabled={upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan || (isPendingDowngrade && !isPendingPlanChange) || (isActiveCancelled && !isExpired) || isPastDueOrUnpaid}
-          className={`w-full ${getButtonStyles(
+          className={`w-full mt-auto ${getButtonStyles(
             isCurrentPlan,
             isPendingDowngrade,
             isPendingPlanChange

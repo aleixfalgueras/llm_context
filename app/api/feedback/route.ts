@@ -4,7 +4,7 @@ import {
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 import { prisma } from '@/lib/prisma'
 import { 
   FeedbackType, 
@@ -12,7 +12,7 @@ import {
   isValidFeedbackType,
   isValidPriority,
   isValidFeedbackState 
-} from '@/types/enums'
+} from '@/lib/types/enums'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {

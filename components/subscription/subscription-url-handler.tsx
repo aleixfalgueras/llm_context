@@ -3,7 +3,7 @@
 import {useState, useEffect} from 'react'
 import {useSearchParams, useRouter} from 'next/navigation'
 import {useToast} from '@/hooks/use-toast'
-import {ToastVariant} from '@/types/enums'
+import {ToastVariant} from '@/lib/types/enums'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 
 // Helper function to clean up URL parameters
