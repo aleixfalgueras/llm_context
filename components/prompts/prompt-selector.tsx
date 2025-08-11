@@ -5,6 +5,7 @@ import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Badge} from '@/components/ui/badge'
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {ChevronDown, FileText, Search, Star, TrendingUp} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
 import {Prompt} from "@prisma/client"
@@ -85,13 +86,13 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-96 p-0 max-h-[50vh] overflow-hidden flex flex-col z-[9999]" 
+        className="w-96 p-0 overflow-hidden flex flex-col"
         align="start"
         sideOffset={5}
         side="top"
       >
         <div className="p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex items-center space-x-2 mb-4">
+          <div className="flex items-center space-x-2">
             <Search className="w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search prompts..."
@@ -99,19 +100,18 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
               onChange={(e) => setSearchTerm(e.target.value)}
               className="flex-1"
             />
-          </div>
-          
-          <div className="flex flex-wrap gap-1">
-            {PROMPT_CATEGORIES.map((category) => (
-              <Badge
-                key={category.value}
-                variant={selectedCategory === category.value ? 'default' : 'outline'}
-                className="cursor-pointer text-xs"
-                onClick={() => setSelectedCategory(category.value)}
-              >
-                {category.label}
-              </Badge>
-            ))}
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PROMPT_CATEGORIES.map((category) => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
