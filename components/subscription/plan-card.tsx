@@ -58,7 +58,7 @@ export function PlanCard({
     <Card 
       className={`relative h-full flex flex-col ${
         isCurrentPlan 
-          ? 'border-green-500 shadow-lg scale-105 bg-green-50 dark:bg-green-900/20' 
+          ? 'border-2 border-green-500 shadow-lg bg-green-50 dark:bg-green-900/20' 
           : ''
       }`}
     >
