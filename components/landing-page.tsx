@@ -247,9 +247,10 @@ export function LandingPage() {
             {Object.entries(SUBSCRIPTION_PLAN_DETAIL).map(([planId, plan]) => {
               const getPlanIcon = (planId: string) => {
                 switch (planId) {
-                  case SubscriptionPlan.basic: return <ZapIcon className="h-8 w-8" />
-                  case SubscriptionPlan.pro: return <StarIcon className="h-8 w-8" />
-                  case SubscriptionPlan.business: return <CrownIcon className="h-8 w-8" />
+                  case SubscriptionPlan.apprentice: return <ZapIcon className="h-8 w-8" />
+                  case SubscriptionPlan.knight: return <Shield className="h-8 w-8" />
+                  case SubscriptionPlan.master: return <StarIcon className="h-8 w-8" />
+                  case SubscriptionPlan.jedi: return <CrownIcon className="h-8 w-8" />
                   default: return <ZapIcon className="h-8 w-8" />
                 }
               }

@@ -21,15 +21,19 @@ export const MODEL_IDS = {
 
 // Model Tiers Configuration - All tiers use both models
 export const MODEL_TIERS = {
-  [ModelTier.BASIC]: [
+  [ModelTier.APPRENTICE]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     MODEL_IDS.OPENAI_GPT_4_1_NANO,
   ],
-  [ModelTier.PRO]: [
+  [ModelTier.KNIGHT]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     MODEL_IDS.OPENAI_GPT_4_1_NANO,
   ],
-  [ModelTier.BUSINESS]: [
+  [ModelTier.MASTER]: [
+    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    MODEL_IDS.OPENAI_GPT_4_1_NANO,
+  ],
+  [ModelTier.JEDI]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     MODEL_IDS.OPENAI_GPT_4_1_NANO,
   ],
@@ -44,7 +48,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     provider: 'google',
     contextLength: 1000000,
     pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
-    tier: ModelTier.BASIC
+    tier: ModelTier.APPRENTICE
   },
   // Secondary Model - OpenAI GPT-4.1 Nano
   {
@@ -53,8 +57,8 @@ export const AVAILABLE_MODELS: AIModel[] = [
     description: 'Efficient OpenAI model with excellent performance and reasoning capabilities',
     provider: 'openai',
     contextLength: 200000,
-    pricing: { input: 0.0001, output: 0.0004 }, // Same cost as Gemini 2.0 Flash
-    tier: ModelTier.BASIC
+    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
+    tier: ModelTier.APPRENTICE
   }
 ]
 
@@ -125,13 +129,15 @@ export function isModelAvailableForTier(modelId: string, tier: ModelTierType): b
  */
 export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
   switch (plan) {
-    case SubscriptionPlan.basic:
-      return ModelTier.BASIC
-    case SubscriptionPlan.pro:
-      return ModelTier.PRO
-    case SubscriptionPlan.business:
-      return ModelTier.BUSINESS
+    case SubscriptionPlan.apprentice:
+      return ModelTier.APPRENTICE
+    case SubscriptionPlan.knight:
+      return ModelTier.KNIGHT
+    case SubscriptionPlan.master:
+      return ModelTier.MASTER
+    case SubscriptionPlan.jedi:
+      return ModelTier.JEDI
     default:
-      return ModelTier.BASIC
+      return ModelTier.APPRENTICE
   }
 } 

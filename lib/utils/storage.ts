@@ -10,21 +10,24 @@ import {StorageSubscriptionUsage, StorageUsage} from "@/lib/types/subscription-u
 import {SubscriptionErrorCode} from "@/services/error-codes";
 
 export const STORAGE_LIMITS = {
-  [SubscriptionPlan.basic]: 50 * 1024 * 1024,    // 50 MB for basic plan
-  [SubscriptionPlan.pro]: 200 * 1024 * 1024,     // 200 MB for pro plan
-  [SubscriptionPlan.business]: 2 * 1024 * 1024 * 1024, // 2 GB for business plan
+  [SubscriptionPlan.apprentice]: 100 * 1024 * 1024,    // 100 MB for apprentice plan
+  [SubscriptionPlan.knight]: 500 * 1024 * 1024,        // 500 MB for knight plan
+  [SubscriptionPlan.master]: 2 * 1024 * 1024 * 1024,   // 2 GB for master plan
+  [SubscriptionPlan.jedi]: 10 * 1024 * 1024 * 1024,    // 10 GB for jedi plan
 } as const
 
 export function getStorageLimitForPlan(plan: SubscriptionPlanType): number {
   switch (plan) {
-    case SubscriptionPlan.basic:
-      return STORAGE_LIMITS[SubscriptionPlan.basic]
-    case SubscriptionPlan.pro:
-      return STORAGE_LIMITS[SubscriptionPlan.pro]
-    case SubscriptionPlan.business:
-      return STORAGE_LIMITS[SubscriptionPlan.business]
+    case SubscriptionPlan.apprentice:
+      return STORAGE_LIMITS[SubscriptionPlan.apprentice]
+    case SubscriptionPlan.knight:
+      return STORAGE_LIMITS[SubscriptionPlan.knight]
+    case SubscriptionPlan.master:
+      return STORAGE_LIMITS[SubscriptionPlan.master]
+    case SubscriptionPlan.jedi:
+      return STORAGE_LIMITS[SubscriptionPlan.jedi]
     default:
-      return STORAGE_LIMITS[SubscriptionPlan.basic] // Default to basic plan limits
+      return STORAGE_LIMITS[SubscriptionPlan.apprentice] // Default to apprentice plan limits
   }
 }
 

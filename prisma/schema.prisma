@@ -111,7 +111,7 @@ model Prompt {
 model UserSubscription {
   id                   String             @id @default(cuid())
   userId               String             @unique
-  plan                 SubscriptionPlan   @default(basic)
+  plan                 SubscriptionPlan   @default(apprentice)
   status               SubscriptionStatus @default(active)
   stripeCustomerId     String?
   stripeSubscriptionId String?
@@ -209,9 +209,10 @@ model AccountDeletionRequest {
 }
 
 enum SubscriptionPlan {
-  basic
-  pro
-  business
+  apprentice
+  knight
+  master
+  jedi
 }
 
 enum SubscriptionStatus {
