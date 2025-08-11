@@ -370,7 +370,7 @@ export function BaseAIServiceDialog<TFormData = any>({
 
           {/* Generated Content */}
           {generatedContent && (
-            <Card className={`${themeColors.secondary}`}>
+            <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -410,12 +410,12 @@ export function BaseAIServiceDialog<TFormData = any>({
                         setInternalGeneratedContent(e.target.value)
                       }
                     }}
-                    className="min-h-[400px] font-mono text-sm"
+                    className="min-h-[400px] text-sm"
                     placeholder="Generated content will appear here..."
                     readOnly={customGeneratedContent !== undefined}
                   />
                 ) : (
-                  <div className="max-h-[400px] overflow-y-auto prose prose-sm max-w-none">
+                  <div className="max-h-[400px] overflow-y-auto max-w-none">
                     <MarkdownRenderer content={generatedContent} />
                   </div>
                 )}

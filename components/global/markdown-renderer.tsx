@@ -21,14 +21,14 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
             const match = /language-(\w+)/.exec(className || '')
             return !inline && match ? (
               <code
-                className={`${className} block bg-gray-100 dark:bg-gray-800 rounded-md p-3 overflow-x-auto text-sm`}
+                className={`${className} block bg-muted rounded-md p-3 overflow-x-auto text-sm`}
                 {...props}
               >
                 {children}
               </code>
             ) : (
               <code
-                className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono"
+                className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono"
                 {...props}
               >
                 {children}
@@ -37,27 +37,27 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           },
           // Custom styling for blockquotes
           blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-blue-500 pl-4 italic bg-blue-50 dark:bg-blue-950/20 py-2 rounded-r">
+            <blockquote className="border-l-4 border-primary pl-4 italic bg-muted py-2 rounded-r">
               {children}
             </blockquote>
           ),
           // Custom styling for tables
           table: ({ children }) => (
             <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
+              <table className="min-w-full border-collapse border border-border">
                 {children}
               </table>
             </div>
           ),
           // Custom styling for table headers
           th: ({ children }) => (
-            <th className="border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-left font-semibold">
+            <th className="border border-border bg-muted px-4 py-2 text-left font-semibold">
               {children}
             </th>
           ),
           // Custom styling for table data
           td: ({ children }) => (
-            <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+            <td className="border border-border px-4 py-2">
               {children}
             </td>
           ),
@@ -67,7 +67,7 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
               href={href} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-primary hover:underline"
             >
               {children}
             </a>
