@@ -1,9 +1,9 @@
-import { DocumentService } from '@/lib/services/document-service'
+import { DocumentService } from '@/services/document-service'
 import { 
   withEnhancedApi, 
   apiSuccess,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // GET /api/documents/[id]/content - Get document content as JSON
 export const GET = withEnhancedApi(

@@ -6,8 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { ChevronDown, Cpu, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils/general'
-import { AVAILABLE_MODELS } from '@/lib/ai/models-config'
-import { ModelTierType } from '@/types/subscription-types'
+import { AVAILABLE_MODELS } from '@/lib/models-config'
+import { ModelTierType } from '@/lib/types/subscription-types'
 
 interface ModelSelectorProps {
   selectedModel: string

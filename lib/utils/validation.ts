@@ -3,7 +3,7 @@
  * across forms and API routes. Provides consistent validation logic and error messages.
  */
 
-import { ValidationResult } from '@/types/api-types'
+import {ValidationResult} from '@/lib/types/api-types'
 
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -165,6 +165,12 @@ export function sanitizeString(value: string | null | undefined): string {
   return value?.trim() || ''
 }
 
+// Helper function to sanitize and convert empty strings to null
+export function sanitizeToNull (value: string | null | undefined): string | null {
+  const sanitized = sanitizeString(value)
+  return sanitized === '' ? null : sanitized
+}
+
 /**
  * Form field error state helper
  */
@@ -183,29 +189,6 @@ export function hasFieldError(
   field: string
 ): boolean {
   return Boolean(errors[field])
-}
-
-/**
- * Process client data by trimming context fields
- */
-export function processClientData<T extends Record<string, any>>(data: T): T {
-  const processed = { ...data }
-  
-  // Trim context fields if they exist
-  if ('generalContext' in processed && processed.generalContext) {
-    (processed as any).generalContext = sanitizeString((processed as any).generalContext)
-  }
-  if ('specificContext1' in processed && processed.specificContext1) {
-    (processed as any).specificContext1 = sanitizeString((processed as any).specificContext1)
-  }
-  if ('specificContext2' in processed && processed.specificContext2) {
-    (processed as any).specificContext2 = sanitizeString((processed as any).specificContext2)
-  }
-  if ('specificContext3' in processed && processed.specificContext3) {
-    (processed as any).specificContext3 = sanitizeString((processed as any).specificContext3)
-  }
-  
-  return processed
 }
 
 /**

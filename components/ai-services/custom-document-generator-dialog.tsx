@@ -5,17 +5,18 @@ import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 import {Checkbox} from '@/components/ui/checkbox'
 import {FileText} from 'lucide-react'
-import {ClientVariablesTooltip} from '@/components/ui/client-variables-tooltip'
-import type {Client} from '@/types/client'
-import {CLIENT_CONTEXT_FIELD_LABELS, CLIENT_CONTEXT_FIELDS} from '@/types/client'
-import {ClientContextSelection, defaultClientContextSelections} from '@/types/client-context'
+import type {Client, Prompt} from '@prisma/client'
+import {
+  CLIENT_CONTEXT_FIELDS, 
+  ClientContextSelection,
+  DEFAULT_CLIENT_CONTEXT
+} from '@/lib/types/client-types'
 import {useDocumentGenerator} from '@/hooks/document/use-document-generator'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
-import type {Prompt} from '@/types/component-types'
-import {replaceClientVariables} from '@/lib/ai/variable-replacement'
-import {getDefaultModel} from '@/lib/ai/models-config'
+import {getDefaultModel} from '@/lib/models-config'
+import {replaceClientContextVariables} from "@/services/client/client-context-service";
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
@@ -28,9 +29,7 @@ interface CustomDocumentFormData {
   clientId: string
   documentTitle: string
   selectedPrompt: string
-  selectedPromptContent: string
-  customPrompt: string
-  useCustomPrompt: boolean
+  promptContent: string
   clientContext: ClientContextSelection
 }
 
@@ -45,11 +44,9 @@ export function CustomDocumentGeneratorDialog({
     selectedClient,
     documentTitle,
     selectedPrompt,
-    selectedPromptContent,
-    customPrompt,
+    promptContent,
     clientContext,
     prompts,
-    useCustomPrompt,
     
     // Loading states
     isLoadingPrompts,
@@ -58,10 +55,8 @@ export function CustomDocumentGeneratorDialog({
     setSelectedClient,
     setDocumentTitle,
     handlePromptChange,
-    setSelectedPromptContent,
+    setPromptContent,
     setClientContext,
-    setCustomPrompt,
-    setUseCustomPrompt,
     generateDocument,
     resetForm,
     selectAllContext,
@@ -77,9 +72,7 @@ export function CustomDocumentGeneratorDialog({
     clientId: selectedClient,
     documentTitle: documentTitle,
     selectedPrompt: selectedPrompt,
-    selectedPromptContent: selectedPromptContent,
-    customPrompt: customPrompt,
-    useCustomPrompt: useCustomPrompt,
+    promptContent: promptContent,
     clientContext: clientContext
   }
 
@@ -100,14 +93,8 @@ export function CustomDocumentGeneratorDialog({
     if (newData.selectedPrompt !== selectedPrompt) {
       handlePromptChange(newData.selectedPrompt)
     }
-    if (newData.selectedPromptContent !== selectedPromptContent) {
-      setSelectedPromptContent(newData.selectedPromptContent)
-    }
-    if (newData.customPrompt !== customPrompt) {
-      setCustomPrompt(newData.customPrompt)
-    }
-    if (newData.useCustomPrompt !== useCustomPrompt) {
-      setUseCustomPrompt(newData.useCustomPrompt)
+    if (newData.promptContent !== promptContent) {
+      setPromptContent(newData.promptContent)
     }
     if (JSON.stringify(newData.clientContext) !== JSON.stringify(clientContext)) {
       setClientContext(newData.clientContext)
@@ -118,7 +105,7 @@ export function CustomDocumentGeneratorDialog({
   const handleClientChange = (clientId: string) => {
     setSelectedClient(clientId)
     // Reset client context when client changes
-    setClientContext(defaultClientContextSelections.general)
+    setClientContext(DEFAULT_CLIENT_CONTEXT)
   }
 
 
@@ -139,13 +126,10 @@ export function CustomDocumentGeneratorDialog({
     saveEndpoint: '/api/ai-services/save-custom-document',
     
     buildGeneratePayload: (formData: CustomDocumentFormData, client?: Client) => {
-      // Always send the current content from the textarea (either custom or modified selected prompt)
-      const finalPrompt = formData.useCustomPrompt ? formData.customPrompt : formData.selectedPromptContent || ''
-      
       return {
         clientId: formData.clientId,
         documentTitle: formData.documentTitle,
-        customPrompt: finalPrompt,
+        customPrompt: formData.promptContent,
         selectedContextFields: Object.entries(formData.clientContext)
           .filter(([, value]) => value)
           .map(([key]) => key),
@@ -159,7 +143,7 @@ export function CustomDocumentGeneratorDialog({
         clientId: formData.clientId,
         content: content,
         documentTitle: formData.documentTitle,
-        promptName: formData.useCustomPrompt ? 'Custom Prompt' : prompt?.name || '',
+        promptName: prompt?.name || 'Custom Prompt',
       }
     },
     
@@ -170,11 +154,8 @@ export function CustomDocumentGeneratorDialog({
       if (!data.documentTitle.trim()) {
         return { isValid: false, message: 'Please provide a document title' }
       }
-      if (data.useCustomPrompt && !data.customPrompt.trim()) {
-        return { isValid: false, message: 'Please provide a custom prompt' }
-      }
-      if (!data.useCustomPrompt && !data.selectedPrompt) {
-        return { isValid: false, message: 'Please select a prompt or write a custom one' }
+      if (!data.promptContent.trim()) {
+        return { isValid: false, message: 'Please provide prompt instructions' }
       }
       return { isValid: true }
     },
@@ -191,8 +172,7 @@ export function CustomDocumentGeneratorDialog({
     
     generateDefaultName: (data: CustomDocumentFormData, client?: Client) => {
       if (client) {
-        const promptTitle = data.useCustomPrompt ? 'Custom Document' : 
-          (prompts.find(p => p.id === data.selectedPrompt)?.name || 'Document')
+        const promptTitle = prompts.find(p => p.id === data.selectedPrompt)?.name || 'Custom Document'
         return `${client.name} - ${promptTitle}`
       }
       return 'Custom Document'
@@ -225,9 +205,8 @@ export function CustomDocumentGeneratorDialog({
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(CLIENT_CONTEXT_FIELD_LABELS).map(([key, label]) => {
-            const actualFieldName = CLIENT_CONTEXT_FIELDS[key as keyof typeof CLIENT_CONTEXT_FIELDS]
-            const fieldValue = selectedClientData[actualFieldName as keyof Client]
+          {Object.entries(CLIENT_CONTEXT_FIELDS).map(([key, label]) => {
+            const fieldValue = selectedClientData[key as keyof Client]
             const hasValue = fieldValue && String(fieldValue).trim() !== ''
             
             // Only render fields that have values
@@ -262,58 +241,37 @@ export function CustomDocumentGeneratorDialog({
     <>
       {/* Prompt Selection */}
       <div className="space-y-4">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center">
           <PromptSelector
             onPromptSelect={(prompt: Prompt) => {
               handlePromptChange(prompt.id)
               // Replace variables with client data if available
               const processedContent = selectedClientData 
-                ? replaceClientVariables(prompt.content, selectedClientData)
+                ? replaceClientContextVariables(prompt.content, selectedClientData)
                 : prompt.content
-              setSelectedPromptContent(processedContent)
+              
+              // If there's existing content, add two line breaks before appending
+              const currentContent = promptContent.trim()
+              const newContent = currentContent 
+                ? `${currentContent}\n\n${processedContent}`
+                : processedContent
+              
+              setPromptContent(newContent)
             }}
           />
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="use-custom-prompt"
-              checked={useCustomPrompt}
-              onChange={(e) => setUseCustomPrompt(e.target.checked)}
-            />
-            <Label htmlFor="use-custom-prompt">Use custom prompt</Label>
-          </div>
         </div>
 
-        {useCustomPrompt ? (
-          <div className="space-y-2">
-            <Label htmlFor="custom-prompt">Custom Prompt *</Label>
-            <Textarea
-              id="custom-prompt"
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="Write your custom prompt here..."
-              className="min-h-[120px]"
-            />
-            <ClientVariablesTooltip />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            
-            {/* Prompt Content Preview/Editor */}
-            {selectedPrompt && selectedPromptContent && (
-              <div className="space-y-2">
-                <Label htmlFor="prompt-content">Prompt Content</Label>
-                <Textarea
-                  id="prompt-content"
-                  value={selectedPromptContent}
-                  onChange={(e) => setSelectedPromptContent(e.target.value)}
-                  placeholder="Prompt content will appear here..."
-                  className="min-h-[120px]"
-                />
-                <ClientVariablesTooltip />
-              </div>
-            )}
-          </div>
-        )}
+        {/* Prompt Content Editor */}
+        <div className="space-y-2">
+          <Label htmlFor="prompt-content">Prompt Content</Label>
+          <Textarea
+            id="prompt-content"
+            value={promptContent}
+            onChange={(e) => setPromptContent(e.target.value)}
+            placeholder="Select a prompt from above or write your custom instructions here..."
+            className="min-h-[120px]"
+          />
+        </div>
       </div>
     </>
   )

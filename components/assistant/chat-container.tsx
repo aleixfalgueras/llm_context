@@ -5,7 +5,8 @@ import {useChat} from '@/hooks/use-chat'
 import {ChatMessages} from '@/components/assistant/chat-messages'
 import {ChatInput} from '@/components/assistant/chat-input'
 import {ErrorBoundary} from '@/components/global/error-boundary'
-import {Message} from '@/types/message-types'
+
+import {MessageWithStreaming} from "@/lib/types/message-types";
 
 interface NewChatParams {
   clientId: string;
@@ -14,7 +15,7 @@ interface NewChatParams {
 
 interface ChatContainerProps {
   chatId: string
-  initialMessages: Message[]
+  initialMessages: MessageWithStreaming[]
   userImageUrl?: string
   userName?: string
   clientData?: any
@@ -39,7 +40,6 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
     <ErrorBoundary 
       onError={(error, errorInfo) => {
         console.error('Chat container error:', error, errorInfo)
-        // Could add error reporting here
       }}
     >
       {/* Messages Area */}
@@ -54,7 +54,7 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
       </div>
 
       {/* Input Area */}
-      <div className="border-t p-4">
+      <div className="p-4">
         <ErrorBoundary>
           <ChatInput 
             chatId={chatId}

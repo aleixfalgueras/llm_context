@@ -1,10 +1,10 @@
-import { DocumentService } from '@/lib/services/document-service'
+import { DocumentService } from '@/services/document-service'
 import { 
   withEnhancedApi, 
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // PUT /api/documents/[id] - Update document
 export const PUT = withEnhancedApi(
@@ -37,26 +37,9 @@ export const PUT = withEnhancedApi(
       }
     }
 
-    try {
-      const result = await DocumentService.updateDocument(userId, documentId, updates)
-      return apiSuccess(result)
-    } catch (error) {
-      // Handle specific error types
-      if (error instanceof Error) {
-        if (error.message.includes('Storage limit exceeded')) {
-          const storageError = new Error(error.message)
-          ;(storageError as any).status = 413
-          throw storageError
-        }
-        
-        if (error.message.includes('not found')) {
-          const notFoundError = new Error('Document not found')
-          ;(notFoundError as any).status = 404
-          throw notFoundError
-        }
-      }
-      throw error
-    }
+    const result = await DocumentService.updateDocument(userId, documentId, updates)
+    return apiSuccess(result)
+
   },
   { 
     context: 'Update document',

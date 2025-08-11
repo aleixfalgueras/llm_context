@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { DocumentService } from '@/lib/services/document-service'
+import { DocumentService } from '@/services/document-service'
 import { 
   withEnhancedApi,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // GET /api/documents/[id]/download - Download document as file
 export const GET = withEnhancedApi(
@@ -21,9 +21,7 @@ export const GET = withEnhancedApi(
     })
 
     if (!document) {
-      const error = new Error('Document not found or unauthorized')
-      ;(error as any).status = 404
-      throw error
+      throw new Error('Document not found or unauthorized')
     }
 
     // Get document content

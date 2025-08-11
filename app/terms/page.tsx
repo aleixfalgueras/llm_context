@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
@@ -25,7 +25,7 @@ export default function TermsOfServicePage() {
               </div>
             </div>
             <p className="text-lg text-muted-foreground">
-              These Terms of Service govern your use of SpeedBrand. By using our service, you agree to be bound by these terms.
+              These Terms of Service govern your use of MIA. By using our service, you agree to be bound by these terms.
             </p>
             
             <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mt-4">
@@ -52,13 +52,13 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  By accessing or using SpeedBrand ("Service"), you agree to be bound by these Terms of Service ("Terms"). 
+                  By accessing or using MIA ("Service"), you agree to be bound by these Terms of Service ("Terms"). 
                   If you disagree with any part of these terms, you may not access the Service.
                 </p>
                 <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                   <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">✓ Legal Agreement</p>
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    These Terms constitute a legally binding agreement between you and SpeedBrand. 
+                    These Terms constitute a legally binding agreement between you and MIA. 
                     Please read them carefully before using our Service.
                   </p>
                 </div>
@@ -74,7 +74,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-semibold mb-2">SpeedBrand provides:</h4>
+                  <h4 className="font-semibold mb-2">MIA provides:</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>AI-powered content generation for marketing materials</li>
                     <li>Client management and document organisation tools</li>

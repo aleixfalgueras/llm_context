@@ -1,10 +1,10 @@
-import { DocumentService } from '@/lib/services/document-service'
+import { DocumentService } from '@/services/document-service'
 import { 
   withEnhancedApi, 
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // DELETE /api/documents/delete-all - Delete all documents for a client
 export const DELETE = withEnhancedApi(

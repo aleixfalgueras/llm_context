@@ -1,7 +1,8 @@
 import {useState} from 'react'
 import {useToast} from '@/hooks/use-toast'
-import {ToastVariant} from '@/types/enums'
+import {ToastVariant} from '@/lib/types/enums'
 import {SubscriptionPlan} from "@prisma/client";
+import {handleClientApiError} from '@/lib/api/api-toast'
 
 interface UseSubscriptionActionsProps {
   refreshSubscriptionWithFallback: (withDelay?: boolean) => Promise<void>
@@ -71,15 +72,13 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
           }
         }
       } else {
-        throw new Error('Failed to create checkout session')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to create checkout session' }))
+        throw new Error(errorData.error)
       }
     } catch (error) {
       console.error('Error creating checkout session:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to create checkout session. Please try again.',
-        variant: ToastVariant.DESTRUCTIVE
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create checkout session'
+      handleClientApiError(errorMessage, 'Failed to create checkout session')
     } finally {
       setUpgradeLoading(null)
       setConfirmationDialog({ isOpen: false, targetPlan: null })
@@ -101,22 +100,14 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
       if (response.ok) {
         const { data: { url } } = await response.json()
         window.open(url, '_blank')
-      } else if (response.status === 404) {
-        toast({
-          title: 'Free Trial Period',
-          description: "You're currently in your free trial period. No subscription has been created yet. Upgrade to a paid plan to manage your subscription.",
-          variant: ToastVariant.DEFAULT
-        })
       } else {
-        throw new Error('Failed to create portal session')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to create portal session' }))
+        throw new Error(errorData.error)
       }
     } catch (error) {
       console.error('Error accessing customer portal:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to access subscription management. Please try again.',
-        variant: ToastVariant.DESTRUCTIVE
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create portal session'
+      handleClientApiError(errorMessage, 'Failed to access subscription management')
     } finally {
       setPortalLoading(false)
     }
@@ -142,16 +133,13 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
         // Refresh subscription to show updated state
         await refreshSubscriptionWithFallback(true)
       } else {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Failed to cancel downgrade')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to cancel downgrade' }))
+        throw new Error(errorData.error)
       }
     } catch (error) {
       console.error('Error canceling downgrade:', error)
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to cancel downgrade. Please try again.',
-        variant: ToastVariant.DESTRUCTIVE
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to cancel downgrade'
+      handleClientApiError(errorMessage, 'Failed to cancel downgrade')
     } finally {
       setCancelDowngradeLoading(false)
     }
@@ -177,16 +165,13 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
         // Refresh subscription to show updated active state
         await refreshSubscriptionWithFallback(true)
       } else {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Failed to process payment')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to process payment' }))
+        throw new Error(errorData.error)
       }
     } catch (error) {
       console.error('Error retrying payment:', error)
-      toast({
-        title: 'Payment Failed',
-        description: error instanceof Error ? error.message : 'Failed to process payment. Please try again or update your payment method.',
-        variant: ToastVariant.DESTRUCTIVE
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment'
+      handleClientApiError(errorMessage, 'Failed to process payment')
     } finally {
       setRetryPaymentLoading(false)
     }

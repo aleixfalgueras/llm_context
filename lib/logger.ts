@@ -173,9 +173,26 @@ class Logger {
   error(message: string, error?: Error, context?: LogContext): void {
     const entry = this.createLogEntry('ERROR', message, context, error);
     console.error(this.formatLogOutput(entry));
+
     if (error?.stack) {
       console.error(`${colors.dim}${colors.red}Stack trace: ${error.stack}${colors.reset}`);
     }
+  }
+
+  handleError(error: unknown, fallbackMessage = "An unexpected error occurred"): string {
+    if (error instanceof Error) {
+      logger.error(error.message, error)
+      return error.message
+    }
+    else if (typeof error === 'string') {
+      logger.error(error)
+      return error
+    }
+    else {
+      logger.error(fallbackMessage)
+      return fallbackMessage
+    }
+
   }
 
   // Performance timing helpers - only log when operations take too long
@@ -257,13 +274,3 @@ export function withTiming<T>(
   const endTiming = logger.startTiming(operation, context, threshold);
   return fn().finally(endTiming);
 }
-
-// Function to create context from request
-export function createRequestContext(req: Request, userId?: string): LogContext {
-  const url = new URL(req.url);
-  return {
-    userId,
-    operation: `${req.method} ${url.pathname}`,
-    // Removed verbose metadata (userAgent, origin) to keep logs clean
-  };
-} 

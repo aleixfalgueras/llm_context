@@ -5,10 +5,12 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Loader2, User} from 'lucide-react'
 import {memo, useEffect, useMemo, useRef} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
-import {Message} from '@/types/message-types'
+
+import {MessageWithStreaming} from "@/lib/types/message-types";
+import {Role} from '@prisma/client'
 
 interface ChatMessagesProps {
-  messages: Message[]
+  messages: MessageWithStreaming[]
   userImageUrl?: string
   userName?: string
 }
@@ -46,10 +48,10 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
             <p className="text-sm">Send a message to begin chatting with your AI assistant.</p>
           </div>
         ) : (
-          messages.map((message: Message) => (
-            <div key={message.id} className={`flex gap-3 ${message.role === 'USER' ? 'flex-row-reverse' : ''}`}>
+          messages.map((message: MessageWithStreaming) => (
+            <div key={message.id} className={`flex gap-3 ${message.role === Role.USER ? 'flex-row-reverse' : ''}`}>
               <Avatar className="w-8 h-8">
-                {message.role === 'USER' ? (
+                {message.role === Role.USER ? (
                   <>
                     {userImageUrl && <AvatarImage src={userImageUrl} alt={userName || 'User'} />}
                     <AvatarFallback>
@@ -66,10 +68,10 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
                   </AvatarFallback>
                 )}
               </Avatar>
-              <div className={`space-y-1 max-w-[70%] ${message.role === 'USER' ? 'ml-auto' : ''}`}>
-                <div className={`flex items-center gap-2 ${message.role === 'USER' ? 'flex-row-reverse' : ''}`}>
+              <div className={`space-y-1 max-w-[70%] ${message.role === Role.USER ? 'ml-auto' : ''}`}>
+                <div className={`flex items-center gap-2 ${message.role === Role.USER ? 'flex-row-reverse' : ''}`}>
                   <span className="font-medium text-sm">
-                    {message.role === 'USER' ? (userName || 'You') : 'AI Assistant'}
+                    {message.role === Role.USER ? (userName || 'You') : 'AI Assistant'}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(message.createdAt).toLocaleTimeString()}
@@ -81,7 +83,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
                     </span>
                   )}
                 </div>
-                {message.role === 'ASSISTANT' ? (
+                {message.role === Role.ASSISTANT ? (
                   <div className="relative border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                     <MarkdownRenderer content={message.content} />
                     {message.isStreaming && message.content && (
@@ -89,7 +91,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
                     )}
                   </div>
                 ) : (
-                  <div className="prose prose-sm max-w-none dark:prose-invert border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                  <div className="prose max-w-none dark:prose-invert border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                     <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.content}</p>
                   </div>
                 )}

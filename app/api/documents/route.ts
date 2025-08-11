@@ -1,10 +1,10 @@
-import { DocumentService } from '@/lib/services/document-service'
+import { DocumentService } from '@/services/document-service'
 import { 
   withEnhancedApi, 
   apiSuccess, 
   parseJsonBody,
   ApiContext 
-} from '@/lib/middleware/api-middleware'
+} from '@/lib/api/api-middleware'
 
 // GET /api/documents - List user's documents
 export const GET = withEnhancedApi(
@@ -34,25 +34,15 @@ export const POST = withEnhancedApi(
       throw new Error('Missing required fields')
     }
 
-    try {
-      const result = await DocumentService.createDocument(
-        userId,
-        clientId,
-        documentName,
-        documentType,
-        content
-      )
+    const result = await DocumentService.createDocument(
+      userId,
+      clientId,
+      documentName,
+      documentType,
+      content
+    )
 
-      return apiSuccess(result, 201)
-    } catch (error) {
-      // Check for storage limit errors
-      if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
-        const storageError = new Error(error.message)
-        ;(storageError as any).status = 413
-        throw storageError
-      }
-      throw error
-    }
+    return apiSuccess(result, 201)
   },
   { 
     context: 'Create document',

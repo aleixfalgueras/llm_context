@@ -1,5 +1,5 @@
 import {prisma} from '../prisma'
-import {ConsentAction, ConsentType} from '@/types/enums'
+import {ConsentAction, ConsentType} from '@/lib/types/enums'
 import {NextRequest} from "next/server";
 
 // Current policy versions - update these when you change Terms/Privacy Policy
@@ -28,8 +28,8 @@ export interface ConsentMetadata {
 // Get user's current consent status
 export async function getUserConsent(userId: string) {
   try {
-    const consent = await prisma.userConsent.findUnique({
-      where: { userId },
+    return await prisma.userConsent.findUnique({
+      where: {userId},
       select: {
         id: true,
         dataProcessing: true,
@@ -48,8 +48,6 @@ export async function getUserConsent(userId: string) {
         withdrawnAt: true,
       }
     })
-
-    return consent
   } catch (error) {
     console.error('Error fetching user consent:', error)
     return null
@@ -216,34 +214,12 @@ export async function withdrawAllConsent(userId: string, reason: string = 'user_
   }
 }
 
-// Check if user has given required consent
-export async function hasRequiredConsent(userId: string): Promise<boolean> {
-  try {
-    const consent = await getUserConsent(userId)
-    return !!(consent?.dataProcessing && consent?.agreedToTerms && consent?.agreedToPrivacy && !consent?.withdrawnAt)
-  } catch (error) {
-    console.error('Error checking required consent:', error)
-    return false
-  }
-}
-
-// Check specific consent type
-export async function hasConsentFor(userId: string, consentType: 'analytics' | 'marketing' | 'cookiesAnalytics' | 'cookiesMarketing' | 'cookiesFunctional'): Promise<boolean> {
-  try {
-    const consent = await getUserConsent(userId)
-    return !!(consent?.[consentType] && !consent?.withdrawnAt)
-  } catch (error) {
-    console.error(`Error checking ${consentType} consent:`, error)
-    return false
-  }
-}
-
 // Get consent audit log for a user
 export async function getConsentAuditLog(userId: string, limit: number = 50) {
   try {
-    const auditLog = await prisma.consentAuditLog.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
+    return await prisma.consentAuditLog.findMany({
+      where: {userId},
+      orderBy: {createdAt: 'desc'},
       take: limit,
       select: {
         id: true,
@@ -255,62 +231,8 @@ export async function getConsentAuditLog(userId: string, limit: number = 50) {
         createdAt: true,
       }
     })
-
-    return auditLog
   } catch (error) {
     console.error('Error fetching consent audit log:', error)
-    return []
-  }
-}
-
-// Check if user has any pending deletion requests
-export async function getPendingDeletionRequest(userId: string) {
-  try {
-    const pendingDeletion = await prisma.dataExportRequest.findFirst({
-      where: {
-        userId,
-        requestType: 'account_deletion',
-        status: 'pending',
-        expiresAt: {
-          gte: new Date()
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-
-    return pendingDeletion
-  } catch (error) {
-    console.error('Error fetching pending deletion request:', error)
-    return null
-  }
-}
-
-// Get all deletion requests for a user
-export async function getDeletionRequestHistory(userId: string) {
-  try {
-    const deletionHistory = await prisma.dataExportRequest.findMany({
-      where: {
-        userId,
-        requestType: 'account_deletion'
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      select: {
-        id: true,
-        status: true,
-        requestData: true,
-        expiresAt: true,
-        createdAt: true,
-        completedAt: true
-      }
-    })
-
-    return deletionHistory
-  } catch (error) {
-    console.error('Error fetching deletion request history:', error)
     return []
   }
 }

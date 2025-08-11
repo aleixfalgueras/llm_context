@@ -1,6 +1,6 @@
 'use client'
 
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
@@ -13,10 +13,11 @@ import {Edit, Eye, FileText, RefreshCw, Save, X} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {ClientCombobox} from '@/components/ui/client-combobox'
-import {handleClientApiError} from '@/lib/utils/toast'
-import {getDefaultModel} from '@/lib/ai/models-config'
-import type {Client} from '@/types/client'
-import {ValidationResult} from '@/types/api-types'
+import {handleClientApiError} from '@/lib/api/api-toast'
+import {getDefaultModel} from '@/lib/models-config'
+import type {Client} from '@prisma/client'
+import {ValidationResult} from '@/lib/types/api-types'
+import {logger} from "@/lib/logger";
 
 /**
  * Base configuration for AI service dialogs
@@ -129,6 +130,16 @@ export function BaseAIServiceDialog<TFormData = any>({
   const isSaving = customIsSaving ?? internalIsSaving
   const isEditMode = customIsEditMode ?? internalIsEditMode
 
+  // Reset internal state when dialog opens
+  useEffect(() => {
+    if (open) {
+      setInternalGeneratedContent('')
+      setInternalIsEditMode(false)
+      setInternalIsGenerating(false)
+      setInternalIsSaving(false)
+    }
+  }, [open])
+
   // Get theme colors
   const getThemeColors = () => {
     switch (config.themeColor) {
@@ -198,8 +209,9 @@ export function BaseAIServiceDialog<TFormData = any>({
       }
 
     } catch (error) {
-      console.error('Generation error:', error)
-      handleClientApiError(error, 'Generation failed')
+      const errorMessage = logger.handleError(error)
+      handleClientApiError(errorMessage, 'Generation failed')
+
     } finally {
       setInternalIsGenerating(false)
     }
@@ -358,7 +370,7 @@ export function BaseAIServiceDialog<TFormData = any>({
 
           {/* Generated Content */}
           {generatedContent && (
-            <Card className={`${themeColors.secondary}`}>
+            <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -398,12 +410,12 @@ export function BaseAIServiceDialog<TFormData = any>({
                         setInternalGeneratedContent(e.target.value)
                       }
                     }}
-                    className="min-h-[400px] font-mono text-sm"
+                    className="min-h-[400px] text-sm"
                     placeholder="Generated content will appear here..."
                     readOnly={customGeneratedContent !== undefined}
                   />
                 ) : (
-                  <div className="max-h-[400px] overflow-y-auto prose prose-sm max-w-none">
+                  <div className="max-h-[400px] overflow-y-auto max-w-none">
                     <MarkdownRenderer content={generatedContent} />
                   </div>
                 )}

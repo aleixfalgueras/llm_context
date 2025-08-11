@@ -8,7 +8,7 @@ import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Mic } f
 import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dialog'
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
-import { ServiceStatus } from '@/types/enums'
+import { ServiceStatus } from '@/lib/types/enums'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 
 interface AIServicesClientProps {
@@ -156,7 +156,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               </p>
               <Button
                 onClick={() => setIsConfigOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                variant="blue"
               >
                 Configure Services
               </Button>

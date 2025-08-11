@@ -1,20 +1,20 @@
-import {MessageService} from '@/lib/services/message-service'
-import {ChatService} from '@/lib/services/chat-service'
+import {MessageService} from '@/services/message-service'
+import {ChatService} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
-import {createAICompletionStream} from '@/lib/ai/wrapper'
+import {openRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
-import {NextResponse} from 'next/server'
-import {getDefaultModel} from '@/lib/ai/models-config'
-import {withTokenValidation} from "@/lib/middleware/validation-middleware";
-import {OpenRouterClient} from "@/lib/ai/openrouter";
-import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-middleware'
+import {getDefaultModel} from '@/lib/models-config'
+import {checkModelAccess} from "@/lib/api/api-validation";
+import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
+import {SubscriptionErrorCode} from "@/services/error-codes";
+import {Role} from '@prisma/client';
 
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.
  *
- * It manages the complete chat flow including model access validation, chat
- * creation/retrieval, client context integration, and AI response streaming. It supports
- * both new chat creation and continuation of existing chats with full client context awareness.
+ * Manages the complete chat flow including model access validation, chat creation/retrieval,
+ * client context integration, and AI response streaming. Supports both new chat creation
+ * and continuation of existing chats with full client context awareness.
  *
  * @param context - ApiContext object containing userId and request
  * @param context.userId - Authenticated user ID (provided by withEnhancedApi middleware)
@@ -25,30 +25,39 @@ import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/middleware/api-m
  * @param context.req.body.clientId - Required client ID for new chats, determines context
  * @param context.req.body.contextFields - Array of client context fields to include in system prompt
  *
- * @returns StreamingResponse - Server-sent events stream with the following data types:
+ * @returns StreamingResponse - Server-sent events stream with data types:
  *   - `content`: Streaming AI response content chunks
  *   - `complete`: Final completion signal with chatId and optional newTitle
- *   - `error`: Error information with type, message, and retry details
-
- * Authentication & Validation Flow:
- * 1. Authentication handled automatically by withEnhancedApi middleware
+ *   - `error`: Error information with message details
+ *
+ * Authentication & Validation:
+ * 1. Authentication handled by withEnhancedApi middleware
  * 2. Token usage validation and limits checking
  * 3. Model access verification based on subscription tier
  *
- * Chat Processing Flow:
+ * Chat Processing:
  * 1. Parse and validate request parameters
  * 2. Create new chat or retrieve existing chat with messages
  * 3. Build client context system prompt from selected fields
  * 4. Process user message and save to database
  * 5. Stream AI response with real-time content delivery
  * 6. Save complete AI response and update token usage
+ *
+ * Error Handling:
+ * - MODEL_ACCESS_DENIED: Subscription tier doesn't allow requested model
+ * - Chat creation/retrieval failures return appropriate error messages
+ * - Streaming errors are caught and sent as error events
+ * - Client disconnects during streaming save partial messages
+ *
+ * Token Usage:
+ * - Input tokens tracked on user messages
+ * - Output tokens tracked on assistant messages  
+ * - Fallback to OpenRouter generation stats if usage data missing
+ * - Rough estimation (4 chars/token) as final fallback
  */
 export const POST = withEnhancedApi(
   async ({userId, req}: ApiContext) => {
     let chatId: string = '';
-
-    // Token validation using composable middleware
-    await withTokenValidation(userId)
 
     // Parse request body
     const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
@@ -58,30 +67,18 @@ export const POST = withEnhancedApi(
     const selectedModel = model || getDefaultModel()
 
     // Validate model access based on user's subscription tier
-    const modelAccessResult = await ChatService.validateModelAccess(userId, selectedModel, chatId)
-    if (!modelAccessResult.success) {
-      throw {
-        error: modelAccessResult.error,
-        code: modelAccessResult.code,
-        status: modelAccessResult.status,
-        metadata: modelAccessResult.metadata
-      }
+    const modelAccessResult = await checkModelAccess(userId, selectedModel)
+    if (!modelAccessResult) {
+      throw new Error(SubscriptionErrorCode.MODEL_ACCESS_DENIED)
     }
 
-    logger.info('Chat request authenticated, model access and token usage validated', {
-      userId,
-      chatId,
-      model: selectedModel
-    });
-
-    // LAZY CHAT CREATION:
-    // If no chatId provided, create a new chat first
+    // LAZY CHAT CREATION: If no chatId provided, create a new chat first
     let chat: any = null;
     let client: any = null;
 
     if (!chatId) {
       // Create new chat - clientId and contextFields are required for new chats
-      const newChatResult = await ChatService.processNewChat(userId, clientId, contextFields || [])
+      const newChatResult = await ChatService.createNewChat(userId, clientId, contextFields || [])
       
       if (!newChatResult.success) {
         throw new Error(newChatResult.error)
@@ -92,7 +89,7 @@ export const POST = withEnhancedApi(
       chatId = chat.id
     } else {
       // Get existing chat
-      const existingChatResult = await ChatService.processExistingChat(chatId, userId)
+      const existingChatResult = await ChatService.getChatWithMessagesById(chatId, userId)
       
       if (!existingChatResult.success) {
         throw new Error(existingChatResult.error)
@@ -100,13 +97,6 @@ export const POST = withEnhancedApi(
 
       chat = existingChatResult.data
     }
-
-    logger.info('Chat data retrieved', {
-      userId,
-      chatId,
-      clientId: chat.clientId,
-      metadata: {messageCount: chat.messages.length}
-    });
 
     // Prepare chat data for AI processing
     const lastMessage = messages[messages.length - 1]
@@ -116,7 +106,7 @@ export const POST = withEnhancedApi(
       throw new Error('Failed to prepare chat for AI processing')
     }
 
-    const { aiMessages, client: chatClient, isFirstUserMessage, selectedContextFields } = prepareResult.data
+    const { aiMessages, client: chatClient, isFirstUserMessage } = prepareResult.data
     
     // Use the client from the preparation if we don't have one yet (for existing chats)
     if (!client) {
@@ -124,19 +114,20 @@ export const POST = withEnhancedApi(
     }
 
     // Save the user message to the database (tokens will be updated after AI response)
-    const userMessageResult = await MessageService.createMessage(chatId, userId, lastMessage.content, 'USER', selectedModel)
+    const userMessageResult = await MessageService.createMessage({
+      content: lastMessage.content,
+      role: Role.USER,
+      model: selectedModel,
+      tokensUsed: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      chat: { connect: { id: chatId } }
+    }, userId)
     
     if (!userMessageResult.success) {
-      return NextResponse.json({ error: userMessageResult.error || 'Failed to save user message' }, { status: 500 })
+      throw new Error(userMessageResult.error || 'Failed to save user message' )
     }
-    
-    const userMessage = (userMessageResult as { success: true; data: any }).data
-    logger.info('User message saved', {
-      userId,
-      chatId,
-      model: selectedModel,
-      metadata: {messageLength: lastMessage.content.length}
-    });
+    const userMessage = userMessageResult.data
 
     // If this is the first user message, update the chat title only if it's still the default
     const titleUpdateResult = await ChatService.updateChatTitleForFirstMessage(
@@ -148,9 +139,8 @@ export const POST = withEnhancedApi(
     )
 
     if (titleUpdateResult.success && titleUpdateResult.data.updated) {
-      // Revalidate the chat page and home page to show the updated title
+      // Revalidate the chat page to show the updated title
       revalidatePath(`/assistant/chat/${chatId}`)
-      revalidatePath('/')
     }
 
     // Create a streaming response
@@ -172,33 +162,14 @@ export const POST = withEnhancedApi(
         }
 
         try {
-          // Use unified AI wrapper with automatic usage tracking (streaming version)
-          logger.aiRequest(selectedModel, undefined, {userId, chatId});
-
-          completionStream = createAICompletionStream(
-            {
-              model: selectedModel,
-              messages: aiMessages
-            },
-            {
-              userId,
-              resourceId: chatId
-            }
+          completionStream = openRouterService.createStreamingCompletion(
+            {model: selectedModel, messages: aiMessages},
+            {userId, resourceId: chatId}
           );
 
           for await (const chunk of completionStream) {
             if (chunk.isComplete) {
               // Final chunk - save the complete message to database
-              logger.info('AI response received', {
-                userId,
-                chatId,
-                model: selectedModel,
-                metadata: {
-                  responseLength: fullContent.length,
-                  tokensUsed: chunk.usage?.totalTokens
-                }
-              });
-
               let finalUsage = chunk.usage;
 
               // Fallback: Query generation stats if usage data is missing
@@ -206,9 +177,7 @@ export const POST = withEnhancedApi(
                 try {
                   // Add a small delay - generation stats might not be immediately available
                   await new Promise(resolve => setTimeout(resolve, 1000));
-
-                  const client = new OpenRouterClient();
-                  const stats = await client.getGenerationStats(chunk.generationId);
+                  const stats = await openRouterService.getGenerationStats(chunk.generationId);
 
                   if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
                     finalUsage = {
@@ -217,10 +186,10 @@ export const POST = withEnhancedApi(
                       totalTokens: (stats.data.tokens_prompt || 0) + (stats.data.tokens_completion || 0)
                     };
                   } else {
-                    console.log('DEBUG: Generation stats available but no token data:', stats);
+                    console.log('Generation stats available but no token data:', stats);
                   }
                 } catch (error) {
-                  console.log('DEBUG: Failed to get generation stats:', error);
+                  console.error('Failed to get generation stats:', error);
 
                   // If generation stats fail, provide a rough estimate based on content length
                   // This is a very rough estimate: ~4 characters per token for English text
@@ -233,7 +202,7 @@ export const POST = withEnhancedApi(
                     totalTokens: estimatedPromptTokens + estimatedCompletionTokens
                   };
 
-                  console.log('DEBUG: Using estimated token counts:', finalUsage);
+                  console.log('Using estimated token counts:', finalUsage);
                 }
               }
 
@@ -255,22 +224,19 @@ export const POST = withEnhancedApi(
               }
 
               // Save the assistant's response to the database
-              const assistantMessageResult = await MessageService.createMessage(
-                chatId,
-                userId,
-                fullContent,
-                'ASSISTANT',
-                selectedModel,
-                finalUsage?.completionTokens,
-                0, // inputTokens for assistant message
-                finalUsage?.completionTokens
-              )
+              const assistantMessageResult = await MessageService.createMessage({
+                content: fullContent,
+                role: Role.ASSISTANT,
+                model: selectedModel,
+                tokensUsed: finalUsage?.completionTokens || 0,
+                inputTokens: 0, // inputTokens for assistant message
+                outputTokens: finalUsage?.completionTokens || 0,
+                chat: { connect: { id: chatId } }
+              }, userId)
               
               if (!assistantMessageResult.success) {
                 logger.error('Failed to save assistant message', new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
               }
-              logger.info('Assistant message saved', {userId, chatId});
-
 
               // Send completion signal
               const completionData = {
@@ -304,7 +270,15 @@ export const POST = withEnhancedApi(
 
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
-                  const partialMessageResult = await MessageService.createMessage(chatId, userId, fullContent, 'ASSISTANT', selectedModel, 0) // 0 tokens for partial message
+                  const partialMessageResult = await MessageService.createMessage({
+                    content: fullContent,
+                    role: Role.ASSISTANT,
+                    model: selectedModel,
+                    tokensUsed: 0, // 0 tokens for partial message
+                    inputTokens: 0,
+                    outputTokens: 0,
+                    chat: { connect: { id: chatId } }
+                  }, userId)
                   if (partialMessageResult.success) {
                     logger.info('Partial assistant message saved', {userId, chatId});
                   } else {
@@ -362,5 +336,6 @@ export const POST = withEnhancedApi(
   {
     context: 'Chat API',
     allowedMethods: ['POST'],
-    expectedContentType: 'application/json'
+    expectedContentType: 'application/json',
+    requireToken: true
   })

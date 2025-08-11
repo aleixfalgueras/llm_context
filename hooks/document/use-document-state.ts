@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { DOCUMENT_TYPES } from '@/types/document-types'
-import { Document } from '@/types/component-types'
+import {Document, DOCUMENT_TYPES} from '@/lib/types/document-types'
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()
@@ -33,7 +33,8 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
       const response = await fetch(`/api/documents?${params}`)
 
       if (!response.ok) {
-        throw new Error('Failed to fetch client documents')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to load documents' }))
+        throw new Error(errorData.error)
       }
 
       const result = await response.json()
@@ -43,11 +44,8 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
       
       setDocuments(Array.isArray(docs) ? docs : [])
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load documents',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load documents'
+      handleClientApiError(errorMessage, 'Failed to load documents')
     } finally {
       setLoading(false)
     }
@@ -62,7 +60,8 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
       const response = await fetch(`/api/documents/${document.id}/content`)
 
       if (!response.ok) {
-        throw new Error('Failed to fetch document content')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to load document content' }))
+        throw new Error(errorData.error)
       }
 
       const result = await response.json()
@@ -84,11 +83,8 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
       setEditedContent('')
       setEditedDocumentName('')
       
-      toast({
-        title: 'Error',
-        description: 'Failed to load document content',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load document content'
+      handleClientApiError(errorMessage, 'Failed to load document content')
     } finally {
       setLoadingContent(false)
     }

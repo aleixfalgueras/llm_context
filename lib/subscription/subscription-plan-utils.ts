@@ -1,4 +1,4 @@
-import {SUBSCRIPTION_PLAN_NAMES} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_NAMES} from '@/lib/types/subscription-types'
 import { SubscriptionPlan } from '@prisma/client'
 
 // Plan hierarchy for upgrade/downgrade detection
@@ -35,7 +35,7 @@ export function getButtonStyles(isCurrentPlan: boolean, isPendingDowngrade: bool
   if (isPendingDowngrade && !isPendingPlanChange) {
     return 'bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed'
   }
-  return 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
+  return 'bg-blue-600 hover:bg-blue-700 text-white'
 }
 
 // Get button text based on plan state

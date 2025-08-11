@@ -12,10 +12,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckIcon, ArrowRightIcon, CreditCardIcon, CalendarIcon } from 'lucide-react'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import { useToast } from '@/hooks/use-toast'
-import { ToastVariant } from '@/types/enums'
+import { ToastVariant } from '@/lib/types/enums'
 import {SubscriptionPlan} from "@prisma/client";
+import { handleClientApiError } from '@/lib/api/api-toast'
 
 interface UpgradePreview {
   currentPlan: SubscriptionPlan
@@ -66,18 +67,16 @@ export function UpgradeDowngradeDialog({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to load upgrade preview')
+        const errorData = await response.json().catch(() => ({ error: 'Failed to load upgrade preview' }))
+        throw new Error(errorData.error)
       }
 
       const { data } = await response.json()
       setPreview(data)
     } catch (error) {
       console.error('Error loading upgrade preview:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to load upgrade preview. Please try again.',
-        variant: ToastVariant.DESTRUCTIVE
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load upgrade preview'
+      handleClientApiError(errorMessage, 'Failed to load upgrade preview')
       onClose()
     } finally {
       setPreviewLoading(false)

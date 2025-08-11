@@ -1,16 +1,15 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
-import { ChatPageClient } from '@/components/assistant/chat-page-client'
-import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/lib/actions/client'
-import { prisma } from '@/lib/prisma'
+import {currentUser} from '@clerk/nextjs/server'
+import {redirect} from 'next/navigation'
+import {ChatPageClient} from '@/components/assistant/chat-page-client'
+import {Navbar} from '@/components/global/navbar'
+import {getClients} from '@/app/actions/client-action'
+import {getChats} from '@/app/actions/chat-action'
 
 interface NewChatPageProps {
   searchParams: Promise<{ clientId?: string; contextFields?: string }>
 }
 
 export default async function NewChatPage({ searchParams }: NewChatPageProps) {
-  const { userId } = await auth()
   const { clientId, contextFields } = await searchParams
 
   if (!clientId) {
@@ -22,14 +21,7 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
 
   // Get all user's chats and clients in parallel
   const [chats, clients] = await Promise.all([
-    prisma.chat.findMany({
-      where: {
-        userId: userId!,
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    }),
+    getChats(),
     getClients({ includeDetails: true })
   ])
 

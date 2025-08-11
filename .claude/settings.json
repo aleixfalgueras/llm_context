@@ -2,7 +2,6 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
-      "Bash(npm run dev:*)",
       "Bash(node:*)",
       "Bash(mv:*)",
       "Bash(find:*)",
@@ -21,7 +20,9 @@
       "Bash(npx tsx:*)",
       "Bash(cat:*)",
       "WebFetch(domain:docs.stripe.com)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(sed:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

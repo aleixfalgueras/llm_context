@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useToast } from '@/hooks/use-toast'
-import { ClientContextSelection, defaultClientContextSelections } from '@/types/client-context'
-import { getDefaultModel } from '@/lib/ai/models-config'
-import { clientLogger } from '@/lib/client-logger'
-import { Prompt } from '@/types/component-types'
-import type { Client } from '@/types/client'
+import {useEffect, useState} from 'react'
+import {useToast} from '@/hooks/use-toast'
+import {getDefaultModel} from '@/lib/models-config'
+import {clientLogger} from '@/lib/client-logger'
+import type {Client, Prompt} from '@prisma/client'
+import {handleClientApiError} from '@/lib/api/api-toast'
+import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types"
+import {getPrompts} from '@/app/actions/prompt-action'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
@@ -19,12 +20,10 @@ interface UseDocumentGeneratorReturn {
   selectedClient: string
   documentTitle: string
   selectedPrompt: string
-  selectedPromptContent: string
-  customPrompt: string
+  promptContent: string
   clientContext: ClientContextSelection
   prompts: Prompt[]
   promptName: string
-  useCustomPrompt: boolean
   
   // Loading states
   isLoadingPrompts: boolean
@@ -33,10 +32,8 @@ interface UseDocumentGeneratorReturn {
   setSelectedClient: (id: string) => void
   setDocumentTitle: (title: string) => void
   handlePromptChange: (promptId: string) => void
-  setSelectedPromptContent: (content: string) => void
+  setPromptContent: (content: string) => void
   setClientContext: (context: ClientContextSelection) => void
-  setCustomPrompt: (prompt: string) => void
-  setUseCustomPrompt: (use: boolean) => void
   generateDocument: () => Promise<string>
   resetForm: () => void
   selectAllContext: () => void
@@ -51,18 +48,24 @@ export function useDocumentGenerator({
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [documentTitle, setDocumentTitle] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<string>('')
-  const [selectedPromptContent, setSelectedPromptContent] = useState('')
-  const [customPrompt, setCustomPrompt] = useState('')
-  const [clientContext, setClientContext] = useState<ClientContextSelection>(defaultClientContextSelections.general)
+  const [promptContent, setPromptContent] = useState('')
+  const [clientContext, setClientContext] = useState<ClientContextSelection>(DEFAULT_CLIENT_CONTEXT)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
   const [promptName, setPromptName] = useState('')
-  const [useCustomPrompt, setUseCustomPrompt] = useState(false)
   const { toast } = useToast()
 
-  // Load prompts when dialog opens
+  // Load prompts and reset form when dialog opens
   useEffect(() => {
     if (isOpen) {
+      // Reset form state when dialog opens
+      setSelectedClient('')
+      setDocumentTitle('')
+      setSelectedPrompt('')
+      setPromptContent('')
+      setClientContext(DEFAULT_CLIENT_CONTEXT)
+      setPromptName('')
+      // Load prompts
       loadPrompts()
     }
   }, [isOpen])
@@ -70,25 +73,22 @@ export function useDocumentGenerator({
   // Reset client context when client changes
   useEffect(() => {
     if (selectedClient) {
-      setClientContext(defaultClientContextSelections.general)
+      setClientContext(DEFAULT_CLIENT_CONTEXT)
     }
   }, [selectedClient])
 
   const loadPrompts = async () => {
     setIsLoadingPrompts(true)
     try {
-      const response = await fetch('/api/prompts?active=true&includeContent=true')
-      if (response.ok) {
-        const data = await response.json()
-        setPrompts(data.data.prompts || [])
-      }
+      const data = await getPrompts({
+        isActive: true,
+        includeContent: true
+      })
+      setPrompts(data || [])
     } catch (error) {
       console.error('Error loading prompts:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to load prompts',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load prompts'
+      handleClientApiError(errorMessage, 'Failed to load prompts')
     } finally {
       setIsLoadingPrompts(false)
     }
@@ -98,17 +98,15 @@ export function useDocumentGenerator({
     setSelectedPrompt(promptId)
     const prompt = prompts.find(p => p.id === promptId)
     if (prompt) {
-      setSelectedPromptContent(prompt.content)
+      setPromptContent(prompt.content)
     }
   }
 
   const generateDocument = async (): Promise<string> => {
-    const finalPrompt = useCustomPrompt ? customPrompt : selectedPromptContent || ''
-    
-    if (!selectedClient || !documentTitle || !finalPrompt.trim()) {
+    if (!selectedClient || !documentTitle || !promptContent.trim()) {
       toast({
         title: 'Missing Information',
-        description: 'Please select a client, enter a document title, and choose a prompt or write custom instructions.',
+        description: 'Please select a client, enter a document title, and provide prompt instructions.',
         variant: 'destructive',
       })
       throw new Error('Missing required fields')
@@ -128,7 +126,7 @@ export function useDocumentGenerator({
         body: JSON.stringify({
           clientId: selectedClient,
           documentTitle: documentTitle,
-          customPrompt: finalPrompt,
+          customPrompt: promptContent,
           selectedContextFields: Object.entries(clientContext)
             .filter(([, value]) => value)
             .map(([key]) => key),
@@ -137,23 +135,17 @@ export function useDocumentGenerator({
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null)
-        throw new Error(errorData?.error || `HTTP error! status: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Failed to generate document' }))
+        throw new Error(errorData.error)
       }
 
       const data = await response.json()
-      setPromptName(data.promptName || (useCustomPrompt ? 'Custom Prompt' : prompts.find(p => p.id === selectedPrompt)?.name || ''))
+      setPromptName(data.promptName || prompts.find(p => p.id === selectedPrompt)?.name || 'Custom Prompt')
       return data.content
     } catch (error) {
       console.error('Error generating document:', error)
-      
-      // Generic error handling
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate document. Please try again.'
-      toast({
-        title: 'Generation Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate document'
+      handleClientApiError(errorMessage, 'Failed to generate document')
       throw error
     }
   }
@@ -163,30 +155,28 @@ export function useDocumentGenerator({
     setSelectedClient('')
     setDocumentTitle('')
     setSelectedPrompt('')
-    setSelectedPromptContent('')
-    setCustomPrompt('')
-    setClientContext(defaultClientContextSelections.general)
+    setPromptContent('')
+    setClientContext(DEFAULT_CLIENT_CONTEXT)
     setPromptName('')
-    setUseCustomPrompt(false)
   }
 
   const selectAllContext = () => {
     setClientContext({
       country: true,
-      general_context: true,
-      specific_context_1: true,
-      specific_context_2: true,
-      specific_context_3: true
+      generalContext: true,
+      specificContext1: true,
+      specificContext2: true,
+      specificContext3: true
     })
   }
 
   const deselectAllContext = () => {
     setClientContext({
       country: false,
-      general_context: false,
-      specific_context_1: false,
-      specific_context_2: false,
-      specific_context_3: false
+      generalContext: false,
+      specificContext1: false,
+      specificContext2: false,
+      specificContext3: false
     })
   }
 
@@ -195,12 +185,10 @@ export function useDocumentGenerator({
     selectedClient,
     documentTitle,
     selectedPrompt,
-    selectedPromptContent,
-    customPrompt,
+    promptContent,
     clientContext,
     prompts,
     promptName,
-    useCustomPrompt,
     
     // Loading states
     isLoadingPrompts,
@@ -209,10 +197,8 @@ export function useDocumentGenerator({
     setSelectedClient,
     setDocumentTitle,
     handlePromptChange,
-    setSelectedPromptContent,
+    setPromptContent,
     setClientContext,
-    setCustomPrompt,
-    setUseCustomPrompt,
     generateDocument,
     resetForm,
     selectAllContext,

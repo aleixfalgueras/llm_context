@@ -3,10 +3,10 @@
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Textarea} from '@/components/ui/textarea'
+import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Edit, Eye, FileText, Loader2, Save, X} from 'lucide-react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
-import {type DocumentType, getDocumentTypeLabel} from '@/types/document-types'
-import {Document} from '@/types/component-types'
+import {Document, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
 
 interface DocumentViewerProps {
   document: Document | null
@@ -15,6 +15,7 @@ interface DocumentViewerProps {
   editedContent: string
   editedDocumentName: string
   loadingContent?: boolean
+  isSaving?: boolean
   onEdit: () => void
   onSave: () => void
   onCancel: () => void
@@ -30,6 +31,7 @@ export function DocumentViewer({
   editedContent,
   editedDocumentName,
   loadingContent = false,
+  isSaving = false,
   onEdit,
   onSave,
   onCancel,
@@ -92,15 +94,21 @@ export function DocumentViewer({
               <Button
                 size="sm"
                 onClick={onSave}
-                disabled={!editedDocumentName?.trim() || !editedContent?.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={!editedDocumentName?.trim() || !editedContent?.trim() || isSaving}
+                variant="blue"
               >
-                <Save className="h-4 w-4 mr-1" />
-                Save
+                {isSaving ? (
+                  <LoadingSpinner size="sm" text="Saving..." className="text-white" />
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
+                  </>
+                )}
               </Button>
             </>
           ) : (
-            <Button size="sm" onClick={onEdit} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button size="sm" onClick={onEdit} variant="blue">
               <Edit className="h-4 w-4 mr-1" />
               Edit
             </Button>
@@ -112,16 +120,11 @@ export function DocumentViewer({
       <div className="flex-1 overflow-hidden">
         {isEditing ? (
           <div className="h-full flex flex-col">
-            <div className="p-4 border-b border-border bg-muted/5">
-              <p className="text-sm text-muted-foreground">
-                Edit your document content using Markdown. Use the preview button to see how it will look.
-              </p>
-            </div>
             <div className="flex-1 p-4">
               <Textarea
                 value={editedContent}
                 onChange={(e) => onContentChange(e.target.value)}
-                className="w-full h-full resize-none font-mono text-sm"
+                className="w-full h-full resize-none text-sm"
                 placeholder="Enter your document content here using Markdown..."
               />
             </div>

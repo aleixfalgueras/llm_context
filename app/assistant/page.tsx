@@ -1,22 +1,15 @@
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
 import { AssistantLandingClient } from '@/components/assistant/assistant-landing-client'
 import { Navbar } from '@/components/global/navbar'
-import { getClients } from '@/lib/actions/client'
+import { getClients } from '@/app/actions/client-action'
+import { getChats } from '@/app/actions/chat-action'
 
 export default async function AssistantPage() {
   const { userId } = await auth()
 
   // Get user's chats and clients
   const [chats, clients] = await Promise.all([
-    prisma.chat.findMany({
-      where: {
-        userId: userId!,
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    }),
+    getChats(),
     getClients({ includeDetails: true })
   ])
 

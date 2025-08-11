@@ -7,19 +7,23 @@ import {Input} from '@/components/ui/input'
 import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
-import {ClientVariablesTooltip} from '@/components/ui/client-variables-tooltip'
+import {ClientContextVariablesTooltip} from '@/components/ui/client-context-variables-tooltip'
 import {Edit2, Loader2, Plus} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
-import {Prompt, PromptBasic} from '@/types/component-types'
+import {handleClientApiError} from '@/lib/api/api-toast'
+import {PromptInput} from '@/lib/types/prompt-types'
+import {Prompt} from "@prisma/client"
+import {createPrompt, updatePrompt} from '@/app/actions/prompt-action'
 
 interface PromptDialogProps {
-  prompt?: Prompt | PromptBasic
+  prompt?: Prompt | PromptInput | null
   trigger?: React.ReactNode
   onSuccess?: () => void
   isTemplate?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  viewMode?: boolean
 }
 
 const CATEGORIES = [
@@ -57,7 +61,7 @@ const getValidationRules = () => ({
   },
 })
 
-export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, open: externalOpen, onOpenChange: externalOnOpenChange }: PromptDialogProps) {
+export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, open: externalOpen, onOpenChange: externalOnOpenChange, viewMode = false }: PromptDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   
   // Use external state if provided, otherwise use internal state
@@ -107,6 +111,11 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Don't submit in view mode
+    if (viewMode) {
+      return
+    }
+    
     // Validate form before submitting
     if (!validateForm()) {
       return
@@ -115,19 +124,10 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
     setLoading(true)
 
     try {
-      const url = isEditing ? `/api/prompts/${prompt!.id}` : '/api/prompts'
-      const method = isEditing ? 'PUT' : 'POST'
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to save prompt')
+      if (isEditing) {
+        await updatePrompt(prompt!.id, formData)
+      } else {
+        await createPrompt(formData)
       }
 
       toast({
@@ -143,11 +143,8 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
         resetForm()
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to save prompt. Please try again.',
-        variant: 'destructive',
-      })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save prompt'
+      handleClientApiError(errorMessage, 'Failed to save prompt')
     } finally {
       setLoading(false)
     }
@@ -180,97 +177,139 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
           {trigger || defaultTrigger}
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Prompt' : isTemplate ? 'Create Prompt from Template' : 'Create New Prompt'}
+            {viewMode ? 'View Prompt' : isEditing ? 'Edit Prompt' : isTemplate ? 'Create Prompt from Template' : 'Create New Prompt'}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                placeholder="e.g., Generate Marketing Strategy Report"
-                value={formData.name}
-                onChange={(e) => updateField('name', e.target.value)}
-                className={errors.name ? 'border-red-500' : ''}
-                required
-              />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name}</p>
+              <Label htmlFor="name">Name {!viewMode && '*'}</Label>
+              {viewMode ? (
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
+                  <span className="text-sm">{formData.name || '-'}</span>
+                </div>
+              ) : (
+                <>
+                  <Input
+                    id="name"
+                    placeholder="e.g., Generate Marketing Strategy Report"
+                    value={formData.name}
+                    onChange={(e) => updateField('name', e.target.value)}
+                    className={errors.name ? 'border-red-500' : ''}
+                    required
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-red-500">{errors.name}</p>
+                  )}
+                </>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => updateField('category', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {viewMode ? (
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
+                  <span className="text-sm capitalize">{formData.category || '-'}</span>
+                </div>
+              ) : (
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => updateField('category', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              placeholder="Brief description of what this prompt does"
-              value={formData.description}
-              onChange={(e) => updateField('description', e.target.value)}
-              className={errors.description ? 'border-red-500' : ''}
-            />
-            {errors.description && (
-              <p className="text-sm text-red-500">{errors.description}</p>
+            {viewMode ? (
+              <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
+                <span className="text-sm">{formData.description || '-'}</span>
+              </div>
+            ) : (
+              <>
+                <Input
+                  id="description"
+                  placeholder="Brief description of what this prompt does"
+                  value={formData.description}
+                  onChange={(e) => updateField('description', e.target.value)}
+                  className={errors.description ? 'border-red-500' : ''}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">{errors.description}</p>
+                )}
+              </>
             )}
           </div>
           
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label htmlFor="content">Prompt Content *</Label>
-              <ClientVariablesTooltip />
+              <Label htmlFor="content">Prompt Content {!viewMode && '*'}</Label>
+              {!viewMode && <ClientContextVariablesTooltip />}
             </div>
-            <Textarea
-              id="content"
-              placeholder="Enter your prompt template here."
-              value={formData.content}
-              onChange={(e) => updateField('content', e.target.value)}
-              className={`min-h-[200px] ${errors.content ? 'border-red-500' : ''}`}
-              required
-            />
-            {errors.content && (
-              <p className="text-sm text-red-500">{errors.content}</p>
+            {viewMode ? (
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[200px] max-h-[300px] overflow-y-auto">
+                <span className="text-sm whitespace-pre-wrap">{formData.content || '-'}</span>
+              </div>
+            ) : (
+              <>
+                <Textarea
+                  id="content"
+                  placeholder="Enter your prompt template here."
+                  value={formData.content}
+                  onChange={(e) => updateField('content', e.target.value)}
+                  className={`min-h-[200px] ${errors.content ? 'border-red-500' : ''}`}
+                  required
+                />
+                {errors.content && (
+                  <p className="text-sm text-red-500">{errors.content}</p>
+                )}
+              </>
             )}
           </div>
           
           <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={loading || !isValid}
-              className={isTemplate ? "bg-amber-600 hover:bg-amber-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
-            >
-              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {isEditing ? 'Update' : isTemplate ? 'Create from Template' : 'Create'} Prompt
-            </Button>
+            {viewMode ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+              >
+                Close
+              </Button>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={loading || !isValid}
+                  className={isTemplate ? "bg-amber-600 hover:bg-amber-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
+                >
+                  {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {isEditing ? 'Update' : isTemplate ? 'Create from Template' : 'Create'} Prompt
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </DialogContent>

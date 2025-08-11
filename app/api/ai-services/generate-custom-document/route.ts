@@ -1,77 +1,42 @@
-import { prisma } from '@/lib/prisma'
-import { buildClientContextSection } from '@/lib/utils/client-context'
-import { replaceClientVariables } from '@/lib/ai/variable-replacement'
-import { createAICompletion } from '@/lib/ai/wrapper'
-import { getDefaultTemperature, DEFAULT_MODEL } from '@/lib/ai/models-config'
-import { getLanguageInstruction, getLanguageRequirementSection } from '@/lib/utils/language'
-import { logger } from '@/lib/logger'
-import { handleApiError } from '@/lib/utils/error-handler'
-import {withAuth, withClientAccess, withTokenValidation} from "@/lib/middleware/validation-middleware";
+import {buildClientContextSection, replaceClientContextVariables} from '@/services/client/client-context-service'
+import {openRouterService} from '@/services/openrouter'
+import {DEFAULT_MODEL, getDefaultTemperature} from '@/lib/models-config'
+import {getLanguageInstruction, getLanguageRequirementSection} from '@/lib/utils/language'
+import {logger} from '@/lib/logger'
+import {ClientService} from '@/services/client/client-service'
+import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 
-export async function POST(request: Request) {
-  let userId: string = '';
-  
-  try {
-    // Use composable middleware for auth and token validation first
-    userId = await withAuth()
-    await withTokenValidation(userId)
-
-    // Parse request body after authentication
+export const POST = withEnhancedApi(
+  async ({ userId, req }: ApiContext) => {
+    // Parse request body
     const { 
       clientId, 
-      promptId,
       customPrompt,
       documentTitle,
       additionalInstructions,
       selectedContextFields = [],
       model: selectedModel = DEFAULT_MODEL
-    } = await request.json()
+    } = await parseJsonBody(req)
 
-    // Validate client access after parsing clientId
-    const client = await withClientAccess(userId, clientId)
 
     // Validate required fields
-    if (!clientId || (!promptId && !customPrompt) || !documentTitle) {
-      return new Response('Missing required fields', { status: 400 })
+    if (!clientId || !customPrompt || !documentTitle) {
+      throw new Error('Missing required fields: clientId, documentTitle, and customPrompt are required')
     }
 
-    // Get prompt content
-    let promptContent = ''
-    let promptName = 'Custom Document'
-
-    if (promptId) {
-      // Use existing prompt
-      const prompt = await prisma.prompt.findFirst({
-        where: {
-          id: promptId,
-          userId: userId,
-          isActive: true,
-        },
-      })
-
-      if (!prompt) {
-        return new Response('Prompt not found', { status: 404 })
-      }
-
-      promptContent = prompt.content
-      promptName = prompt.name
-
-      // Track prompt usage
-      await prisma.prompt.update({
-        where: { id: promptId },
-        data: {
-          usageCount: {
-            increment: 1,
-          },
-        },
-      })
-    } else {
-      // Use custom prompt provided in request
-      promptContent = customPrompt
+    // Validate client access after parsing clientId
+    const clientResult = await ClientService.getUserClientById(clientId, userId)
+    if (!clientResult.success) {
+      throw new Error(clientResult.error || 'Client not found')
     }
+    const client = clientResult.data
+
+    // Use the prompt content provided in request
+    const promptContent = customPrompt
+    const promptName = 'Custom Document'
 
     // Replace client variables in prompt using shared utility
-    const processedPrompt = replaceClientVariables(promptContent, client)
+    const processedPrompt = replaceClientContextVariables(promptContent, client)
 
     // Get language instruction from client's documentsLanguage preference
     const targetLanguage = getLanguageInstruction(client.documentsLanguage || 'english')
@@ -113,7 +78,6 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
         documentTitle,
         clientName: client.name,
         targetLanguage,
-        hasCustomPrompt: !!customPrompt,
         hasAdditionalInstructions: !!additionalInstructions,
         selectedContextFields,
         promptLength: completePrompt.length,
@@ -121,8 +85,8 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
       }
     })
 
-    // Use unified AI wrapper with automatic usage tracking
-    const completion = await createAICompletion(
+    // Use OpenRouter service with automatic usage tracking
+    const completion = await openRouterService.createCompletion(
       {
         model: selectedModel,
         messages: [
@@ -146,7 +110,7 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
     const generatedContent = completion.content
 
     if (!generatedContent) {
-      return new Response('Failed to generate document', { status: 500 })
+      throw new Error('Failed to generate document')
     }
 
     return Response.json({
@@ -155,11 +119,11 @@ IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining profes
       clientName: client.name,
       documentTitle,
     })
-  } catch (error) {
-    return handleApiError(error, {
-      context: 'generate custom document',
-      userId,
-      operation: 'generate-custom-document'
-    });
+  },
+  {
+    context: 'Generate Custom Document',
+    allowedMethods: ['POST'],
+    expectedContentType: 'application/json',
+    requireToken: true
   }
-} 
+) 

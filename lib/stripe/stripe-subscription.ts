@@ -1,10 +1,10 @@
 import {stripe} from '@/lib/stripe/stripe'
 import {logger} from '../logger'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils"
 import {prisma} from '../prisma'
 import {invalidateAllUserCaches} from '../subscription/subscription-cache'
-import {SubscriptionOperations} from "@/lib/database";
+import {SubscriptionUsageOperations} from "@/database";
 import Stripe from "stripe";
 import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 
@@ -126,10 +126,8 @@ export async function synchronizeSubscriptionWithStripe(
   stripeScheduleId?: string | null
 ) {
   try {
-    // Only one subscription per customer
-    const subscription = await prisma.userSubscription.findFirst({
-      where: { stripeCustomerId: customerId },
-    })
+    // Only one subscription per customer - get through database operations
+    const subscription = await SubscriptionUsageOperations.findByCustomerId(customerId)
 
     if (!subscription) {
       logger.warn('No subscription found for customer', { metadata: { customerId } })
@@ -211,7 +209,7 @@ export async function synchronizeSubscriptionWithStripe(
       updateData.tokenLimit = planLimits.tokenLimit
     }
 
-    const updatedSubscription = await SubscriptionOperations.updateSubscription(subscription.userId, updateData)
+    const updatedSubscription = await SubscriptionUsageOperations.updateSubscription(subscription.userId, updateData)
 
     logger.info('Updated subscription in database', {
       userId: subscription.userId,
@@ -386,13 +384,10 @@ export async function scheduleSubscriptionDowngrade(
     throw error
   }
 
-  // Update database with pending plan change and schedule ID
-  await prisma.userSubscription.update({
-    where: { userId },
-    data: { 
-      pendingPlanChange: targetPlan,
-      stripeScheduleId: schedule.id
-    }
+  // Update database with pending plan change and schedule ID through database layer
+  await SubscriptionUsageOperations.updateSubscription(userId, {
+    pendingPlanChange: targetPlan,
+    stripeScheduleId: schedule.id
   })
 
   logger.info('Downgrade scheduled successfully', {
