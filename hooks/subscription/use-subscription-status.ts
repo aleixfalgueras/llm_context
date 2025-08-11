@@ -18,7 +18,7 @@ export function useSubscriptionStatus() {
 
   // Helper function to detect if user is in free mode
   const isFreeMode = () => {
-    return subscription.plan === SubscriptionPlan.basic && !subscription.stripeSubscriptionId
+    return subscription.plan === SubscriptionPlan.apprentice && !subscription.stripeSubscriptionId
   }
 
   // Helper function to calculate remaining trial days

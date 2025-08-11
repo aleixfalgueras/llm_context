@@ -62,7 +62,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
   }
 
   /**
-   * Create default basic subscription for new users
+   * Create default apprentice subscription for new users
    */
   static async createDefaultBasicSubscription(userId: string): Promise<UserSubscription> {
     try {
@@ -73,17 +73,17 @@ export class SubscriptionUsageOperations extends BaseOperations {
         userId,
         {}, // Don't update if exists
         {
-          plan: SubscriptionPlan.basic,
+          plan: SubscriptionPlan.apprentice,
           status: SubscriptionStatus.active,
           currentPeriodStart: now,
           currentPeriodEnd: periodEnd,
-          tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.basic].tokenLimit,
+          tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].tokenLimit,
           cancelAtPeriodEnd: false,
           pendingPlanChange: null,
         }
       )
     } catch (error) {
-      logger.error('Failed to create default basic subscription', error as Error, { userId })
+      logger.error('Failed to create default apprentice subscription', error as Error, { userId })
       throw error
     }
   }

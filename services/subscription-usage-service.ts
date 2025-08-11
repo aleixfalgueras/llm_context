@@ -74,7 +74,7 @@ export class SubscriptionUsageService {
 
       // Create default basic subscription if none exists using upsert to prevent race conditions
       if (!subscription) {
-        logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.basic } });
+        logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.apprentice } });
         subscription = await SubscriptionUsageOperations.createDefaultBasicSubscription(userId)
       }
 
