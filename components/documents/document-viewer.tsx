@@ -124,7 +124,7 @@ export function DocumentViewer({
               <Textarea
                 value={editedContent}
                 onChange={(e) => onContentChange(e.target.value)}
-                className="w-full h-full resize-none font-mono text-sm"
+                className="w-full h-full resize-none text-sm"
                 placeholder="Enter your document content here using Markdown..."
               />
             </div>
