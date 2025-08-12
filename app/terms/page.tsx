@@ -176,10 +176,10 @@ export default function TermsOfServicePage() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Free Month Promotion</h4>
+                  <h4 className="font-semibold mb-2">Free Period Promotion</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Basic plan includes first month free promotion</li>
-                    <li>Free month is subject to Basic plan usage limitations</li>
+                    <li>Apprentice plan includes free period promotion</li>
+                    <li>Free period is subject to Apprentice plan usage limitations</li>
                     <li>Credit card required for account activation</li>
                     <li>Cancel before second month to avoid charges</li>
                   </ul>

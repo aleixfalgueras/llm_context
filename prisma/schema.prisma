@@ -88,6 +88,7 @@ model Feedback {
   stepsToReproduce String?
   createdAt        DateTime @default(now())
 
+  @@index([userId])
   @@map("feedbacks")
 }
 
@@ -103,13 +104,14 @@ model Prompt {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([userId])
   @@map("prompts")
 }
 
 model UserSubscription {
   id                   String             @id @default(cuid())
   userId               String             @unique
-  plan                 SubscriptionPlan   @default(basic)
+  plan                 SubscriptionPlan   @default(apprentice)
   status               SubscriptionStatus @default(active)
   stripeCustomerId     String?
   stripeSubscriptionId String?
@@ -179,6 +181,7 @@ model ConsentAuditLog {
   userAgent     String?
   createdAt     DateTime @default(now())
 
+  @@index([userId])
   @@map("consent_audit_logs")
 }
 
@@ -201,13 +204,15 @@ model AccountDeletionRequest {
   reason      String?
   createdAt   DateTime  @default(now())
 
+  @@index([userId])
   @@map("account_deletion_requests")
 }
 
 enum SubscriptionPlan {
-  basic
-  pro
-  business
+  apprentice
+  knight
+  master
+  jedi
 }
 
 enum SubscriptionStatus {
