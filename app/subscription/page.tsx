@@ -139,43 +139,44 @@ export default function SubscriptionPage() {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <h1 className="text-4xl font-bold mb-4 text-center">
-          Choose Your Plan
-        </h1>
+        <h1 className="text-4xl font-bold text-center">Choose Your Plan</h1>
 
-        <div className="text-center mb-16">
-          {/* Status Banners */}
-          <SubscriptionStatusBanners
-            isFreeMode={isFreeMode()}
-            isActiveCancelled={isActiveCancelled()}
-            isPendingDowngrade={isPendingDowngrade()}
-            isPastDueOrUnpaid={isPastDueOrUnpaid()}
-            currentPeriodEnd={new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB') || null}
-            getRemainingTrialDays={getRemainingTrialDays}
-            getRemainingActiveDays={getRemainingActiveDays}
-            getRemainingDowngradeDays={getRemainingDowngradeDays}
-            capitalizePlanName={capitalizePlanName}
-            pendingPlanChange={subscription.pendingPlanChange ?? ""}
-            onRetryPayment={handleRetryPayment}
-            retryPaymentLoading={retryPaymentLoading}
-          />
+        {/* Main Layout: Delete Account Button | Status Banners | Manage Subscription Button */}
+        <div className="text-center mb-8 ml-10">
+          <div className="flex justify-center items-center gap-6">
+            {/* Delete Account Button - Left */}
+            <div className="flex-shrink-0">
+              <Button
+                onClick={() => setShowDeleteConfirm(true)}
+                variant="outline"
+                className="inline-flex items-center gap-2"
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Account
+              </Button>
+            </div>
 
-          {/* Action Buttons and Subscription Status Layout */}
-          <div className="mt-8">
-            {!isPastDueOrUnpaid() && !isFreeMode() && !isActiveCancelled() &&
-              !isPendingDowngrade() && subscription.currentPeriodEnd ? (
-              <div className="flex justify-between items-center">
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="outline"
-                  className="inline-flex items-center gap-2"
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete Account
-                </Button>
-                
-                <div className="text-center">
+            {/* Status Banners - Center */}
+            <div className="flex-shrink-0">
+              <SubscriptionStatusBanners
+                isFreeMode={isFreeMode()}
+                isActiveCancelled={isActiveCancelled()}
+                isPendingDowngrade={isPendingDowngrade()}
+                isPastDueOrUnpaid={isPastDueOrUnpaid()}
+                currentPeriodEnd={new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB') || null}
+                getRemainingTrialDays={getRemainingTrialDays}
+                getRemainingActiveDays={getRemainingActiveDays}
+                getRemainingDowngradeDays={getRemainingDowngradeDays}
+                capitalizePlanName={capitalizePlanName}
+                pendingPlanChange={subscription.pendingPlanChange ?? ""}
+                onRetryPayment={handleRetryPayment}
+                retryPaymentLoading={retryPaymentLoading}
+              />
+              
+              {/* Show subscription status info when there are no status banners */}
+              {!isFreeMode() && !isActiveCancelled() && !isPendingDowngrade() && !isPastDueOrUnpaid() && subscription.currentPeriodEnd && (
+                <div className="mt-4">
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
                     subscription.isActive
                       ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
@@ -187,39 +188,21 @@ export default function SubscriptionPage() {
                     </span>
                   </div>
                 </div>
+              )}
+            </div>
 
-                <Button
-                  onClick={handleManageSubscription}
-                  disabled={portalLoading}
-                  variant="outline"
-                  className="inline-flex items-center gap-2"
-                >
-                  <SettingsIcon className="h-4 w-4" />
-                  {portalLoading ? 'Loading...' : getManageButtonText()}
-                </Button>
-              </div>
-            ) : (
-              <div className="flex justify-center items-center gap-4">
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="outline"
-                  className="inline-flex items-center gap-2"
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete Account
-                </Button>
-                <Button
-                  onClick={handleManageSubscription}
-                  disabled={portalLoading}
-                  variant="outline"
-                  className="inline-flex items-center gap-2"
-                >
-                  <SettingsIcon className="h-4 w-4" />
-                  {portalLoading ? 'Loading...' : getManageButtonText()}
-                </Button>
-              </div>
-            )}
+            {/* Manage Subscription Button - Right */}
+            <div className="flex-shrink-0">
+              <Button
+                onClick={handleManageSubscription}
+                disabled={portalLoading}
+                variant="outline"
+                className="inline-flex items-center gap-2"
+              >
+                <SettingsIcon className="h-4 w-4" />
+                {portalLoading ? 'Loading...' : getManageButtonText()}
+              </Button>
+            </div>
           </div>
         </div>
 
