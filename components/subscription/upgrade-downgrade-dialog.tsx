@@ -95,16 +95,9 @@ export function UpgradeDowngradeDialog({
     return new Date(dateString).toLocaleDateString('en-GB')
   }
 
-  const formatPrice = (amount: number, currency: string = 'eur') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase()
-    }).format(amount)
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCardIcon className="h-5 w-5" />
@@ -118,6 +111,7 @@ export function UpgradeDowngradeDialog({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="flex-1 overflow-y-auto px-1 py-2">
         {previewLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="flex items-center gap-2">
@@ -247,6 +241,7 @@ export function UpgradeDowngradeDialog({
             </div>
           </div>
         ) : null}
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={isLoading}>
