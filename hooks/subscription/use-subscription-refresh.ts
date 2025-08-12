@@ -41,13 +41,6 @@ export function useSubscriptionRefresh({ refetch }: UseSubscriptionRefreshProps)
         debounceTimer = setTimeout(async () => {
           try {
             await refreshSubscriptionWithFallback(true)
-            
-            // Always show success toast when returning to tab (user likely made changes elsewhere)
-            toast({
-              title: 'Subscription Updated',
-              description: 'Your subscription data has been refreshed.',
-              variant: ToastVariant.SUCCESS
-            })
           } catch (error) {
             console.error('Failed to refresh subscription:', error)
             toast({
