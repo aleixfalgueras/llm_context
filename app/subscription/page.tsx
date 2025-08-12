@@ -139,23 +139,60 @@ export default function SubscriptionPage() {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-16 relative">
-          {/* Delete Account Section - Top Left */}
-          <div className="absolute top-0 left-0">
-            <Button
-              onClick={() => setShowDeleteConfirm(true)}
-              variant="outline"
-              className="inline-flex items-center gap-2"
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete Account
-            </Button>
-          </div>
+        <h1 className="text-4xl font-bold text-center">Choose Your Plan</h1>
 
-          {/* Manage Subscription Section - Top Right */}
-          <div className="absolute top-0 right-0">
-            <div className="flex flex-col items-end gap-2">
+        {/* Main Layout: Delete Account Button | Status Banners | Manage Subscription Button */}
+        <div className="text-center mb-8 ml-10">
+          <div className="flex justify-center items-center gap-6">
+            {/* Delete Account Button - Left */}
+            <div className="flex-shrink-0">
+              <Button
+                onClick={() => setShowDeleteConfirm(true)}
+                variant="outline"
+                className="inline-flex items-center gap-2"
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Account
+              </Button>
+            </div>
+
+            {/* Status Banners - Center */}
+            <div className="flex-shrink-0">
+              <SubscriptionStatusBanners
+                isFreeMode={isFreeMode()}
+                isActiveCancelled={isActiveCancelled()}
+                isPendingDowngrade={isPendingDowngrade()}
+                isPastDueOrUnpaid={isPastDueOrUnpaid()}
+                currentPeriodEnd={new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB') || null}
+                getRemainingTrialDays={getRemainingTrialDays}
+                getRemainingActiveDays={getRemainingActiveDays}
+                getRemainingDowngradeDays={getRemainingDowngradeDays}
+                capitalizePlanName={capitalizePlanName}
+                pendingPlanChange={subscription.pendingPlanChange ?? ""}
+                onRetryPayment={handleRetryPayment}
+                retryPaymentLoading={retryPaymentLoading}
+              />
+              
+              {/* Show subscription status info when there are no status banners */}
+              {!isFreeMode() && !isActiveCancelled() && !isPendingDowngrade() && !isPastDueOrUnpaid() && subscription.currentPeriodEnd && (
+                <div className="mt-4">
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
+                    subscription.isActive
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  }`}>
+                    <span className="font-medium">
+                      {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} -
+                      {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Manage Subscription Button - Right */}
+            <div className="flex-shrink-0">
               <Button
                 onClick={handleManageSubscription}
                 disabled={portalLoading}
@@ -165,57 +202,12 @@ export default function SubscriptionPage() {
                 <SettingsIcon className="h-4 w-4" />
                 {portalLoading ? 'Loading...' : getManageButtonText()}
               </Button>
-              
-              {/* Updating Status Message */}
-              {isRefreshing && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Updating...</span>
-                </div>
-              )}
             </div>
           </div>
-          
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Choose Your Plan
-          </h1>
-
-          {/* Status Banners */}
-          <SubscriptionStatusBanners
-            isFreeMode={isFreeMode()}
-            isActiveCancelled={isActiveCancelled()}
-            isPendingDowngrade={isPendingDowngrade()}
-            isPastDueOrUnpaid={isPastDueOrUnpaid()}
-            currentPeriodEnd={new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB') || null}
-            getRemainingTrialDays={getRemainingTrialDays}
-            getRemainingActiveDays={getRemainingActiveDays}
-            getRemainingDowngradeDays={getRemainingDowngradeDays}
-            capitalizePlanName={capitalizePlanName}
-            pendingPlanChange={subscription.pendingPlanChange ?? ""}
-            onRetryPayment={handleRetryPayment}
-            retryPaymentLoading={retryPaymentLoading}
-          />
-          
-          {/* Current Subscription Status - Only show for paid subscriptions that are not marked for cancellation or downgrade */}
-          {!isPastDueOrUnpaid() && !isFreeMode() && !isActiveCancelled() &&
-            !isPendingDowngrade() && subscription.currentPeriodEnd && (
-            <div className="mt-8 text-center">
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
-                subscription.isActive
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-              }`}>
-                <span className="font-medium">
-                  {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} -
-                  {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB')}
-                </span>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {Object.entries(SUBSCRIPTION_PLAN_DETAIL).map(([planId, plan]) => (
             <PlanCard
               key={planId}
@@ -245,7 +237,7 @@ export default function SubscriptionPage() {
         isOpen={confirmationDialog.isOpen}
         onClose={handleCloseConfirmation}
         onConfirm={handleConfirmUpgrade}
-        targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.basic}
+        targetPlan={confirmationDialog.targetPlan || SubscriptionPlan.apprentice}
         isLoading={upgradeLoading !== null}
         hasActiveSubscription={!!subscription.stripeSubscriptionId && subscription.isActive && !isExpired()}
         isDowngrade={confirmationDialog.targetPlan ? checkIsDowngrade(subscription.plan as SubscriptionPlan, confirmationDialog.targetPlan) : false}

@@ -6,9 +6,10 @@ import {SubscriptionUsageService} from "@/services/subscription-usage-service";
 import { SubscriptionPlan } from '@prisma/client';
 
 export const STRIPE_PRICE_IDS = {
-  [SubscriptionPlan.basic]: process.env.STRIPE_BASIC_PRICE_ID || 'price_1RgN2fH1IwPXt7SI6fY3NRQF',
-  [SubscriptionPlan.pro]: process.env.STRIPE_PRO_PRICE_ID || 'price_1RiV0KH1IwPXt7SIphwW0d6Z',
-  [SubscriptionPlan.business]: process.env.STRIPE_BUSINESS_PRICE_ID || 'price_1RiV0uH1IwPXt7SInp95Km4L',
+  [SubscriptionPlan.apprentice]: process.env.STRIPE_APPRENTICE_PRICE_ID || 'price_apprentice_placeholder',
+  [SubscriptionPlan.knight]: process.env.STRIPE_KNIGHT_PRICE_ID || 'price_knight_placeholder',
+  [SubscriptionPlan.master]: process.env.STRIPE_MASTER_PRICE_ID || 'price_master_placeholder',
+  [SubscriptionPlan.jedi]: process.env.STRIPE_JEDI_PRICE_ID || 'price_jedi_placeholder',
 } as const
 
 /**

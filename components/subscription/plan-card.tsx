@@ -1,7 +1,7 @@
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
-import {CheckIcon, ZapIcon, StarIcon, CrownIcon} from 'lucide-react'
+import {CheckIcon, ZapIcon, StarIcon, CrownIcon, Shield} from 'lucide-react'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {getPlanNameColor, getPlanIconType, getButtonStyles, getButtonText, shouldShowPlanBadge} from '@/lib/subscription/subscription-plan-utils'
 import {SubscriptionPlan} from "@prisma/client";
@@ -47,6 +47,7 @@ export function PlanCard({
     const iconType = getPlanIconType(planId)
     switch (iconType) {
       case 'ZapIcon': return <ZapIcon className="h-6 w-6" />
+      case 'ShieldIcon': return <Shield className="h-6 w-6" />
       case 'StarIcon': return <StarIcon className="h-6 w-6" />
       case 'CrownIcon': return <CrownIcon className="h-6 w-6" />
       default: return <ZapIcon className="h-6 w-6" />
@@ -57,7 +58,7 @@ export function PlanCard({
     <Card 
       className={`relative h-full flex flex-col ${
         isCurrentPlan 
-          ? 'border-green-500 shadow-lg scale-105 bg-green-50 dark:bg-green-900/20' 
+          ? 'border-2 border-green-500 shadow-lg bg-green-50 dark:bg-green-900/20' 
           : ''
       }`}
     >

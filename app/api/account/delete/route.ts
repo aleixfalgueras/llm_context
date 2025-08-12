@@ -19,48 +19,46 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
 
   const userSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
-  // Start a transaction to ensure data consistency
-  const result = await prisma.$transaction(async (tx) => {
-    // 1. Withdraw all consent first
-    await withdrawAllConsent(userId, 'account_deletion', {
-      ipAddress: clientIP,
-      userAgent
-    })
+  // 1. Withdraw all consent first (outside transaction to avoid timeout)
+  await withdrawAllConsent(userId, 'account_deletion', {
+    ipAddress: clientIP,
+    userAgent
+  })
 
-    // 2. Create account deletion audit log
-    const deletionLog = await tx.consentAuditLog.create({
-      data: {
-        userId,
-        action: 'account_deletion_requested',
-        consentType: 'account_deletion',
-        previousValue: true,
-        newValue: false,
-        reason,
-        ipAddress: clientIP,
-        userAgent,
+  // 2. Count user data for audit purposes (parallelized)
+  const dataCountsPromise = Promise.all([
+    prisma.client.count({ where: { userId } }),
+    prisma.document.count({ where: { userId } }),
+    prisma.chat.count({ where: { userId } }),
+    prisma.message.count({
+      where: {
+        chat: { userId }
       }
-    })
+    }),
+    prisma.prompt.count({ where: { userId } }),
+    prisma.feedback.count({ where: { userId } })
+  ])
 
-    // 3. Count user data for audit purposes
-    const dataCounts = {
-      clients: await tx.client.count({ where: { userId } }),
-      documents: await tx.document.count({ where: { userId } }),
-      chats: await tx.chat.count({ where: { userId } }),
-      messages: await tx.message.count({
-        where: {
-          chat: { userId }
-        }
-      }),
-      prompts: await tx.prompt.count({ where: { userId } }),
-      feedbacks: await tx.feedback.count({ where: { userId } }),
-      subscription: userSubscription ? 1 : 0,
-      stripeCustomerId: userSubscription?.stripeCustomerId || null,
-      stripeSubscriptionId: userSubscription?.stripeSubscriptionId || null,
-      subscriptionPlan: userSubscription?.plan || null,
-      subscriptionStatus: userSubscription?.status || null
-    }
+  const [clientsCount, documentsCount, chatsCount, messagesCount, promptsCount, feedbacksCount] = await dataCountsPromise
 
-    // 4. Create deletion request record for audit trail
+  const dataCounts = {
+    clients: clientsCount,
+    documents: documentsCount,
+    chats: chatsCount,
+    messages: messagesCount,
+    prompts: promptsCount,
+    feedbacks: feedbacksCount,
+    subscription: userSubscription ? 1 : 0,
+    stripeCustomerId: userSubscription?.stripeCustomerId || null,
+    stripeSubscriptionId: userSubscription?.stripeSubscriptionId || null,
+    subscriptionPlan: userSubscription?.plan || null,
+    subscriptionStatus: userSubscription?.status || null
+  }
+
+  // 3. Start a transaction for core deletion operations with extended timeout
+  const result = await prisma.$transaction(async (tx) => {
+
+    // Create deletion request record for audit trail
     const deletionRequest = await tx.accountDeletionRequest.create({
       data: {
         userId,
@@ -75,7 +73,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       }
     })
 
-    // 5. Delete user data in the correct order (respecting foreign key constraints)
+    // Delete user data in the correct order (respecting foreign key constraints)
     
     // Delete messages (has foreign key to chat)
     const deletedMessages = await tx.message.deleteMany({
@@ -114,7 +112,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       where: { userId }
     })
 
-    // 6. Update deletion request with actual deletion counts
+    // Update deletion request with actual deletion counts
     await tx.accountDeletionRequest.update({
       where: { id: deletionRequest.id },
       data: {
@@ -137,22 +135,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       }
     })
 
-    // 7. Create final audit log entry
-    await tx.consentAuditLog.create({
-      data: {
-        userId,
-        action: 'account_deletion_completed',
-        consentType: 'account_deletion',
-        previousValue: false,
-        newValue: false,
-        reason: `immediate_processing_${deletionRequest.id}`,
-        ipAddress: clientIP,
-        userAgent
-      }
-    })
-
     return { 
-      deletionLog, 
       deletionRequest, 
       dataCounts,
       actualDeletionCounts: {
@@ -165,9 +148,25 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
         userConsent: deletedUserConsent.count
       }
     }
+  }, {
+    timeout: 30000 // 30 second timeout for this specific transaction
   })
 
-  // 8. Handle Stripe subscription and customer cleanup
+  // 4. Create final audit log entry (outside transaction)
+  await prisma.consentAuditLog.create({
+    data: {
+      userId,
+      action: 'account_deletion_completed',
+      consentType: 'account_deletion',
+      previousValue: false,
+      newValue: false,
+      reason: `immediate_processing_${result.deletionRequest.id}`,
+      ipAddress: clientIP,
+      userAgent
+    }
+  })
+
+  // 5. Handle Stripe subscription and customer cleanup
   let stripeCleanupResults = {
     subscriptionCancelled: false,
     customerDeleted: false,
@@ -204,7 +203,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     }
   }
 
-  // 9. Delete from Clerk (external service) - outside transaction
+  // 6. Delete from Clerk (external service) - outside transaction
   try {
     const clerk = await clerkClient()
     await clerk.users.deleteUser(userId)

@@ -46,7 +46,7 @@ async function getUserSubscription(userId: string) {
   })
 
   if (!subscription) {
-    console.log(`⚠️  No subscription found for user ${userId}. Creating a basic subscription...`)
+    console.log(`⚠️  No subscription found for user ${userId}. Creating an apprentice subscription...`)
     
     const now = new Date()
     const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
@@ -54,15 +54,15 @@ async function getUserSubscription(userId: string) {
     const newSubscription = await prisma.userSubscription.create({
       data: {
         userId,
-        plan: SubscriptionPlan.basic,
+        plan: SubscriptionPlan.apprentice,
         status: 'active',
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
-        tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.basic].tokenLimit,
+        tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].tokenLimit,
       }
     })
     
-    console.log(`✅ Created basic subscription for user ${userId}`)
+    console.log(`✅ Created apprentice subscription for user ${userId}`)
     return newSubscription
   }
 
@@ -91,11 +91,11 @@ async function updateUserUsageToMax(userId: string, subscription: any) {
   // Determine target token usage based on plan
   let targetTokens: number
   
-  if (subscription.plan === SubscriptionPlan.business) {
-    // For business plan, use high but finite value
-    targetTokens = 4000000  // Business plan limit
+  if (subscription.plan === SubscriptionPlan.jedi) {
+    // For jedi plan, use high but finite value
+    targetTokens = 4000000  // Jedi plan limit
   } else {
-    // For basic and pro plans, use plan limits
+    // For other plans, use plan limits
     targetTokens = plan.tokenLimit
   }
   

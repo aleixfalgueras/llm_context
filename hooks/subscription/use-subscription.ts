@@ -8,7 +8,7 @@ import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 const defaultSubscriptionWithValidation: SubscriptionWithValidation = {
   id: '',
   userId: '',
-  plan: SubscriptionPlan.basic,
+  plan: SubscriptionPlan.apprentice,
   status: SubscriptionStatus.active,
   stripeCustomerId: null,
   stripeSubscriptionId: null,

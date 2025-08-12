@@ -71,7 +71,7 @@ export function DocumentList({
   return (
     <div className="w-1/3 border-r border-border flex flex-col overflow-hidden">
       {/* Header with actions */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Documents ({documents.length})</h3>
           <div className="flex gap-2">
@@ -142,7 +142,7 @@ export function DocumentList({
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>Active filters:</span>
                 {searchTerm && (
-                  <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                  <span className="px-2 py-1 rounded text-sm">
                     Search: "{searchTerm}"
                   </span>
                 )}
@@ -188,7 +188,7 @@ export function DocumentList({
               key={doc.id} 
               className={`cursor-pointer transition-all duration-200 ${
                 selectedDocument?.id === doc.id 
-                  ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-700 shadow-md' 
+                  ? 'bg-blue-50  shadow-md' 
                   : 'hover:bg-blue-50/50 dark:hover:bg-blue-950/10 hover:border-blue-200 dark:hover:border-blue-800'
               }`}
               onClick={() => onViewDocument(doc)}
