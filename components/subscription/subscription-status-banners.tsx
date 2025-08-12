@@ -34,8 +34,8 @@ export function SubscriptionStatusBanners({
       {/* Free Trial Banner */}
       {isFreeMode && currentPeriodEnd && (
         <div className="mt-8 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
-            <span className="font-semibold text-[18px]">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
+            <span className="text-[18px]">
               Free Trial Active (Apprentice Plan) - {getRemainingTrialDays()} days remaining
             </span>
           </div>
@@ -49,7 +49,7 @@ export function SubscriptionStatusBanners({
       {isActiveCancelled && currentPeriodEnd && (
         <div className="mt-8 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-700">
-            <span className="font-semibold text-[18px]">
+            <span className="text-[18px]">
               Active Subscription (Cancelled) - {getRemainingActiveDays()} days remaining
             </span>
           </div>
@@ -63,7 +63,7 @@ export function SubscriptionStatusBanners({
       {isPendingDowngrade && currentPeriodEnd && (
         <div className="mt-8 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 border border-orange-200 dark:border-orange-700">
-            <span className="font-semibold text-[18px]">
+            <span className="text-[18px]">
               Active Subscription (Downgrading) - {getRemainingDowngradeDays()} days until downgrade to {capitalizePlanName(pendingPlanChange)}
             </span>
           </div>
@@ -77,7 +77,7 @@ export function SubscriptionStatusBanners({
       {isPastDueOrUnpaid && (
         <div className="mt-8 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border border-red-200 dark:border-red-700">
-            <span className="font-semibold text-[18px]">
+            <span className="text-[18px]">
               ⚠️ Payment Required - Subscription Suspended
             </span>
           </div>
@@ -89,7 +89,7 @@ export function SubscriptionStatusBanners({
               onClick={onRetryPayment}
               disabled={retryPaymentLoading}
               variant="blue"
-              className="font-semibold px-6 py-2"
+              className="px-6 py-2"
             >
               {retryPaymentLoading ? 'Processing Payment...' : 'Pay Now to Restore Access'}
             </Button>
