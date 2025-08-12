@@ -33,7 +33,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 50,
     currency: 'EUR',
     tokenLimit: 15000000,
-    description: 'For SMEs and content creators building their presence',
+    description: 'For SMEs and content creators',
     features_list: [
       '🤖 Access to MIA AI platform',
       '👥 Discount on access to local meetups about AI Education & Defi',
