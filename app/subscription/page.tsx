@@ -176,13 +176,13 @@ export default function SubscriptionPage() {
               
               {/* Show subscription status info when there are no status banners */}
               {!isFreeMode() && !isActiveCancelled() && !isPendingDowngrade() && !isPastDueOrUnpaid() && subscription.currentPeriodEnd && (
-                <div className="mt-4">
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
+                <div className="mt-8 text-center">
+                  <div className={`inline-flex items-center gap-2 px-6 py-2 rounded-lg ${
                     subscription.isActive
                       ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
                       : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                   }`}>
-                    <span className="font-medium">
+                    <span className="text-[18px]">
                       {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} -
                       {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB')}
                     </span>
