@@ -74,16 +74,6 @@ export function getButtonText(
   return `Upgrade to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
 }
 
-// Get plan badge visibility for current plan
-export function shouldShowPlanBadge(isFreeMode: boolean, isCurrentPlan: boolean) {
-  // Free mode users don't get a "Current Plan" badge
-  if (isFreeMode) {
-    return false
-  }
-  
-  return isCurrentPlan
-}
-
 /**
  * Determine if a plan change is a downgrade
  */
