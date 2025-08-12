@@ -243,37 +243,37 @@ export function LandingPage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {Object.entries(SUBSCRIPTION_PLAN_DETAIL).map(([planId, plan]) => {
               const getPlanIcon = (planId: string) => {
                 switch (planId) {
-                  case SubscriptionPlan.apprentice: return <ZapIcon className="h-8 w-8" />
-                  case SubscriptionPlan.knight: return <Shield className="h-8 w-8" />
-                  case SubscriptionPlan.master: return <StarIcon className="h-8 w-8" />
-                  case SubscriptionPlan.jedi: return <CrownIcon className="h-8 w-8" />
-                  default: return <ZapIcon className="h-8 w-8" />
+                  case SubscriptionPlan.apprentice: return <ZapIcon className="h-6 w-6" />
+                  case SubscriptionPlan.knight: return <Shield className="h-6 w-6" />
+                  case SubscriptionPlan.master: return <StarIcon className="h-6 w-6" />
+                  case SubscriptionPlan.jedi: return <CrownIcon className="h-6 w-6" />
+                  default: return <ZapIcon className="h-6 w-6" />
                 }
               }
               
               return (
                 <Card key={planId} className="hover:shadow-lg transition-shadow h-full flex flex-col">
-                  <CardHeader className="text-center flex-1">
+                  <CardHeader className="text-center">
                     <div className="flex justify-center mb-4">
                       {getPlanIcon(planId)}
                     </div>
-                    <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
+                    <CardTitle className={`text-xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
                     <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{plan.description}</CardDescription>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">{plan.price}€</span>
-                      {plan.price > 0 && <span className="text-gray-500">/month</span>}
+                    <div className="mt-4 pt-2 pb-2 flex items-end justify-center min-h-[4rem]">
+                      <span className="text-3xl font-bold leading-none">{plan.price}€</span>
+                      {plan.price > 0 && <span className="text-gray-500 mb-1">/month</span>}
                     </div>
                   </CardHeader>
                   
-                  <CardContent>
-                    <ul className="space-y-3">
+                  <CardContent className="flex flex-col flex-grow">
+                    <ul className="space-y-2 flex-grow">
                       {plan.features_list.map((feature, index) => (
                         <li key={index} className="flex items-center">
-                          <CheckIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                          <CheckIcon className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
                           <span className="text-sm">{feature}</span>
                         </li>
                       ))}
