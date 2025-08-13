@@ -1,5 +1,4 @@
 import {PromptOperations} from '@/database'
-import {validatePromptForm} from '@/lib/utils/validation'
 import {logger} from '@/lib/logger'
 import {Prompt} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
@@ -85,20 +84,6 @@ export class PromptService {
     data: any
   ): Promise<DbOperationResult<Prompt>> {
     try {
-      // Validate input using centralized validation
-      const validation = validatePromptForm(data)
-
-      if (!validation.isValid) {
-        logger.warn('Validation failed for prompt creation', { 
-          userId,
-          metadata: { errors: validation.errors }
-        })
-        return {
-          success: false,
-          error: validation.firstError || 'Validation failed'
-        }
-      }
-
       // Set default category if not provided
       const promptData = {
         ...data,
