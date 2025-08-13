@@ -126,7 +126,16 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     // Use centralized validation
     const validation = validateClientForm(formData)
     if (!validation.isValid) {
-      // Show first validation error (toast will be shown by async operation)
+      // Show validation error toast
+      if (validation.firstError) {
+        clearError() // Clear any previous errors
+        const { toast } = await import('@/hooks/use-toast')
+        toast({
+          title: 'Validation Error',
+          description: validation.firstError,
+          variant: 'destructive'
+        })
+      }
       return
     }
 
