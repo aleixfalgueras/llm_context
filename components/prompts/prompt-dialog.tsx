@@ -12,6 +12,7 @@ import {Edit2, Loader2, Plus} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
 import {handleClientApiError} from '@/lib/api/api-toast'
+import {validatePromptForm} from '@/lib/utils/validation'
 import {PromptInput} from '@/lib/types/prompt-types'
 import {Prompt} from "@prisma/client"
 import {createPrompt, updatePrompt} from '@/app/actions/prompt-action'
@@ -116,8 +117,17 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       return
     }
     
-    // Validate form before submitting
-    if (!validateForm()) {
+    // Use centralized validation
+    const validation = validatePromptForm(formData)
+    if (!validation.isValid) {
+      // Show validation error toast
+      if (validation.firstError) {
+        toast({
+          title: 'Validation Error',
+          description: validation.firstError,
+          variant: 'destructive'
+        })
+      }
       return
     }
     
