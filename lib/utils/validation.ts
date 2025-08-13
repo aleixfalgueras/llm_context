@@ -9,7 +9,7 @@ import {ValidationResult} from '@/lib/types/api-types'
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Phone validation regex (international format)
-const PHONE_REGEX = /^[\+]?[1-9][\d]{0,15}$/
+const PHONE_REGEX = /^[\+]?[\d\s\-\(\)]+$/
 
 /**
  * Common validation functions
@@ -139,7 +139,7 @@ export function validatePromptForm(data: {
 }
 
 /**
- * Document form validation schema
+ * Document form validation schema TODO: Delete or use that
  */
 export function validateDocumentForm(data: {
   documentName?: string | null
