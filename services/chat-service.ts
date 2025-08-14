@@ -1,6 +1,5 @@
 import {ChatOperations} from '@/database'
 import {isSuccess} from '@/database/base-operations'
-import {generateChatTitleWithClient} from '@/lib/utils/general'
 import {buildClientContextSection, hasClientContext} from './client/client-context-service'
 import {ClientService} from './client/client-service'
 import {logger} from '@/lib/logger'
@@ -226,25 +225,29 @@ Respond naturally and conversationally while keeping this context in mind.`
   /**
    * Update chat title for first message if still default
    */
-  static async updateChatTitleForFirstMessage(chatId: string, userId: string, clientName: string | null, isFirstMessage: boolean, currentTitle: string, firstMessageContent?: string): Promise<DbOperationResult<{
-    newTitle?: string,
-    updated: boolean
+  static async updateChatTitleForFirstMessage(
+    chatId: string,
+    userId: string,
+    clientName: string | null,
+    isFirstMessage: boolean,
+    currentTitle: string,
+    firstMessageContent: string): Promise<DbOperationResult<{ newTitle?: string, updated: boolean
   }>> {
-    if (isFirstMessage && currentTitle === 'New Chat') {
-      // Generate title based on whether we have a client or use first message
+    if (isFirstMessage || currentTitle === 'New Chat') {
       let newTitle: string
-      if (clientName) {
-        newTitle = generateChatTitleWithClient(clientName)
+
+      // Generate title based on client name (if any) and first message content
+      if (clientName && firstMessageContent) {
+        newTitle = `${clientName} - ${firstMessageContent}`
       } else if (firstMessageContent) {
-        // For general chats, use the first few words of the message
-        const truncatedMessage = firstMessageContent.substring(0, 30)
-        newTitle = truncatedMessage.length < firstMessageContent.length ? `${truncatedMessage}...` : truncatedMessage
+        newTitle = firstMessageContent
       } else {
-        // Fallback to timestamp-based title
+        // fallback case
         newTitle = `Chat ${new Date().toLocaleDateString()}`
       }
 
-      const result = await ChatOperations.updateChatTitleIfDefault(chatId, userId, newTitle)
+      const newTitleTruncated = newTitle.length < 70 ? newTitle : `${newTitle.substring(0, 70)}...`
+      const result = await ChatOperations.updateChatTitleIfDefault(chatId, userId, newTitleTruncated)
 
       if (isSuccess(result) && result.data.updated) {
         logger.info('Chat title updated', {

@@ -5,6 +5,7 @@ import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import {Tooltip, TooltipTrigger, TooltipContent} from '@/components/ui/tooltip'
 import {deleteAllChats, deleteChat, updateChatTitle} from '@/app/actions/chat-action'
 import Link from 'next/link'
 import {useState} from 'react'
@@ -124,16 +125,16 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
               return (
                 <Card 
                   key={chat.id} 
-                  className={`mb-2 p-3 transition-all duration-200 ${
+                  className={`mb-2 p-3 transition-all duration-200 overflow-hidden ${
                     isCurrentChat 
                       ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 shadow-md ring-2 ring-blue-500/20' 
                       : 'hover:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
-                <div className="flex items-center justify-between">
+                <div className="grid grid-cols-[1fr,auto] items-center gap-2">
                   <Link 
                     href={`/assistant/chat/${chat.id}`} 
-                    className="flex-1 min-w-0"
+                    className="min-w-0 overflow-hidden"
                     onClick={onChatSelect}
                   >
                     {editingChatId === chat.id ? (
@@ -152,9 +153,14 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                         autoFocus
                       />
                     ) : (
-                      <div>
-                        <h3 className="font-medium text-sm truncate">{chat.title}</h3>
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h3 className="font-medium text-sm truncate">{chat.title}</h3>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{chat.title}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </Link>
                   

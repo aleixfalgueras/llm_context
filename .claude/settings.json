@@ -22,7 +22,8 @@
       "WebFetch(domain:docs.stripe.com)",
       "Bash(mkdir:*)",
       "Bash(sed:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "WebSearch"
     ],
     "deny": []
   }
