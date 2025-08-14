@@ -8,8 +8,8 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {Tooltip, TooltipTrigger, TooltipContent} from '@/components/ui/tooltip'
 import {deleteAllChats, deleteChat, updateChatTitle} from '@/app/actions/chat-action'
 import Link from 'next/link'
-import {useState} from 'react'
-import {usePathname} from 'next/navigation'
+import {useState, useTransition, useEffect} from 'react'
+import {usePathname, useRouter} from 'next/navigation'
 import {Input} from '@/components/ui/input'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Chat} from '@prisma/client'
@@ -27,7 +27,17 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [loadingChatId, setLoadingChatId] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
+  const router = useRouter()
+
+  // Clear loading state when transition completes
+  useEffect(() => {
+    if (!isPending && loadingChatId) {
+      setLoadingChatId(null)
+    }
+  }, [isPending, loadingChatId])
 
   const handleEditStart = (chat: Chat) => {
     setEditingChatId(chat.id)
@@ -44,6 +54,16 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
   const handleEditCancel = () => {
     setEditingChatId(null)
     setEditTitle('')
+  }
+
+  const handleChatNavigation = (chatId: string) => {
+    if (loadingChatId || editingChatId) return // Prevent navigation during loading or editing
+    
+    setLoadingChatId(chatId)
+    startTransition(() => {
+      router.push(`/assistant/chat/${chatId}`)
+    })
+    onChatSelect?.()
   }
 
   const handleDeleteAllChats = async () => {
@@ -129,13 +149,14 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                     isCurrentChat 
                       ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 shadow-md ring-2 ring-blue-500/20' 
                       : 'hover:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-800'
+                  } ${
+                    loadingChatId === chat.id ? 'opacity-70' : ''
                   }`}
                 >
                 <div className="grid grid-cols-[1fr,auto] items-center gap-2">
-                  <Link 
-                    href={`/assistant/chat/${chat.id}`} 
-                    className="min-w-0 overflow-hidden"
-                    onClick={onChatSelect}
+                  <div 
+                    className="min-w-0 overflow-hidden cursor-pointer"
+                    onClick={() => handleChatNavigation(chat.id)}
                   >
                     {editingChatId === chat.id ? (
                       <Input
@@ -152,6 +173,12 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                         className="h-6 px-1 text-sm"
                         autoFocus
                       />
+                    ) : loadingChatId === chat.id ? (
+                      <LoadingSpinner 
+                        size="sm" 
+                        text="Loading..." 
+                        className="text-xs text-gray-600 dark:text-gray-400"
+                      />
                     ) : (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -162,9 +189,9 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                         </TooltipContent>
                       </Tooltip>
                     )}
-                  </Link>
+                  </div>
                   
-                  {editingChatId !== chat.id && (
+                  {editingChatId !== chat.id && loadingChatId !== chat.id && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
