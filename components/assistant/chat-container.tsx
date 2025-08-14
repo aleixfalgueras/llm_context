@@ -9,7 +9,7 @@ import {ErrorBoundary} from '@/components/global/error-boundary'
 import {MessageWithStreaming} from "@/lib/types/message-types";
 
 interface NewChatParams {
-  clientId: string;
+  clientId: string | null;
   contextFields: string[];
 }
 

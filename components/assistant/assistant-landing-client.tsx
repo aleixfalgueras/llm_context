@@ -1,6 +1,7 @@
 'use client'
 
 import {useState} from 'react'
+import {useRouter} from 'next/navigation'
 import {ChatSidebar} from '@/components/assistant/chat-sidebar'
 import {ChatInterface} from '@/components/assistant/chat-interface'
 import {ClientContextSidebar} from '@/components/assistant/client-context-sidebar'
@@ -12,8 +13,16 @@ interface AssistantLandingClientProps {
 }
 
 export function AssistantLandingClient({ chats, clients }: AssistantLandingClientProps) {
+  const router = useRouter()
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
   const [clientContext, setClientContext] = useState<ClientContextSelection>(DEFAULT_CLIENT_CONTEXT)
+  const [isCreatingGeneralChat, setIsCreatingGeneralChat] = useState(false)
+
+  const handleStartGeneralChat = () => {
+    setIsCreatingGeneralChat(true)
+    // Navigate to new chat without client
+    router.push('/assistant/chat/new')
+  }
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -22,7 +31,7 @@ export function AssistantLandingClient({ chats, clients }: AssistantLandingClien
         hideNewChatButton={true}
       />
       <div className="flex-1 flex items-center justify-center min-w-0">
-        <ChatInterface />
+        <ChatInterface onStartGeneralChat={handleStartGeneralChat} isCreatingGeneralChat={isCreatingGeneralChat} />
       </div>
       
       {/* Client Context Sidebar - Always visible */}

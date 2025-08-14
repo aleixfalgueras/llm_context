@@ -77,8 +77,7 @@ export const POST = withEnhancedApi(
     let client: any = null;
 
     if (!chatId) {
-      // Create new chat - clientId and contextFields are required for new chats
-      const newChatResult = await ChatService.createNewChat(userId, clientId, contextFields || [])
+      const newChatResult = await ChatService.createNewChat(userId, clientId || null, contextFields || [])
       
       if (!newChatResult.success) {
         throw new Error(newChatResult.error)
@@ -133,9 +132,10 @@ export const POST = withEnhancedApi(
     const titleUpdateResult = await ChatService.updateChatTitleForFirstMessage(
       chatId, 
       userId, 
-      client.name, 
+      client?.name || null, 
       isFirstUserMessage, 
-      chat.title
+      chat.title,
+      lastMessage.content
     )
 
     if (titleUpdateResult.success && titleUpdateResult.data.updated) {

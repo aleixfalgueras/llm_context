@@ -15,7 +15,7 @@ interface ChatPageClientProps {
     id: string
     title: string
     messages: any[]
-    clientId: string
+    clientId: string | null
     contextFields?: string[]
   }
   chats: any[]
@@ -33,8 +33,8 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
   const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false)
   const [isClientSidebarOpen, setIsClientSidebarOpen] = useState(false)
 
-  // Get selected client info for context
-  const selectedClient = clients.find(client => client.id === chat.clientId)
+  // Get selected client info for context (if chat has a client)
+  const selectedClient = chat.clientId ? clients.find(client => client.id === chat.clientId) : null
 
   // Handle document creation (for chat export)
   const handleDocumentCreated = (clientId: string, documentId: string) => {

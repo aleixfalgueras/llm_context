@@ -53,26 +53,30 @@ export class ChatOperations extends BaseOperations {
   }
 
   /**
-   * Create a new chat with client validation
+   * Create a new chat with optional client validation
    */
-  static async createChatWithClient(userId: string, clientId: string, title: string, contextFields: string[] = []): Promise<DbOperationResult<{
+  static async createChat(userId: string, clientId: string | null, title: string, contextFields: string[] = []): Promise<DbOperationResult<{
     chat: Chat & { messages: Message[] },
-    client: Pick<Client, 'name'>
+    client: Pick<Client, 'name'> | null
   }>> {
     try {
-      // Verify client exists and belongs to user
-      const client = await prisma.client.findFirst({
-        where: {
-          id: clientId,
-          userId
-        },
-        select: {name: true}
-      })
+      let client: Pick<Client, 'name'> | null = null
+      
+      // If clientId provided, verify client exists and belongs to user
+      if (clientId) {
+        client = await prisma.client.findFirst({
+          where: {
+            id: clientId,
+            userId
+          },
+          select: {name: true}
+        })
 
-      if (!client) {
-        return {
-          success: false as const,
-          error: 'Client not found'
+        if (!client) {
+          return {
+            success: false as const,
+            error: 'Client not found'
+          }
         }
       }
 
@@ -82,7 +86,7 @@ export class ChatOperations extends BaseOperations {
           title,
           userId,
           clientId,
-          contextFields,
+          contextFields: clientId ? contextFields : [], // Only save context fields if there's a client
         },
         include: {
           messages: {
@@ -98,7 +102,7 @@ export class ChatOperations extends BaseOperations {
         data: {chat, client}
       }
     } catch (error) {
-      console.error('Error creating chat with client:', error)
+      console.error('Error creating chat:', error)
       return {
         success: false as const,
         error: 'Failed to create chat'

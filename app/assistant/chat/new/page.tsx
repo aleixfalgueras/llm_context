@@ -12,10 +12,6 @@ interface NewChatPageProps {
 export default async function NewChatPage({ searchParams }: NewChatPageProps) {
   const { clientId, contextFields } = await searchParams
 
-  if (!clientId) {
-    redirect('/assistant')
-  }
-
   // Get current user data from Clerk
   const user = await currentUser()
 
@@ -40,7 +36,7 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
     id: '', // Empty ID indicates new chat
     title: 'New Chat',
     messages: [],
-    clientId,
+    clientId: clientId || null,
     contextFields: parsedContextFields,
   }
 

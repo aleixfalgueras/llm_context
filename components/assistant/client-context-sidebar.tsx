@@ -1,7 +1,7 @@
 'use client'
 
 import {useEffect, useRef, useState} from 'react'
-import {GripVertical, Lightbulb, Plus, User} from 'lucide-react'
+import {GripVertical, Lightbulb, MessageSquare, Plus, User} from 'lucide-react'
 import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
 import {Checkbox} from '@/components/ui/checkbox'
@@ -259,7 +259,7 @@ export function ClientContextSidebar({
                 </>
               )}
             </div>
-          ) : hasActiveChat && selectedClient ? (
+          ) : hasActiveChat ? (
             // Show selected client information when chat has started
             <div className="space-y-4">
               {/* Client Selector */}
@@ -276,43 +276,57 @@ export function ClientContextSidebar({
                 </div>
               )}
 
-              <Card className="p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <User className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedClient.name}</span>
+              {/* Show client info only if a client is selected */}
+              {selectedClient && (
+                <Card className="p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium text-blue-900 dark:text-blue-100">{selectedClient.name}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {selectedClient.email && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          📧 {selectedClient.email}
+                        </p>
+                      )}
+                      {selectedClient.country && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          🌍 {selectedClient.country}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    {selectedClient.email && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        📧 {selectedClient.email}
-                      </p>
-                    )}
-                    {selectedClient.country && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        🌍 {selectedClient.country}
-                      </p>
-                    )}
+                </Card>
+              )}
+
+              {/* Selected Context Display - Read-only after chat created - only show if client selected */}
+              {selectedClient && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">AI Context Used:</Label>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border text-xs">
+                    {chatContextFields && chatContextFields.length > 0 ? (
+                      chatContextFields.map(field => {
+                        return CLIENT_CONTEXT_FIELDS[field as keyof typeof CLIENT_CONTEXT_FIELDS] || field
+                      }).join(', ')
+                    ) : 'None selected'}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Context is set for the first message only and cannot be changed during the chat.
+                  </p>
                 </div>
-              </Card>
+              )}
 
-              {/* Selected Context Display - Read-only after chat created */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">AI Context Used:</Label>
-                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border text-xs">
-                  {chatContextFields && chatContextFields.length > 0 ? (
-                    chatContextFields.map(field => {
-                      return CLIENT_CONTEXT_FIELDS[field as keyof typeof CLIENT_CONTEXT_FIELDS] || field
-                    }).join(', ')
-                  ) : 'None selected'}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Context is set for the first message only and cannot be changed during the chat.
-                </p>
-              </div>
+              {/* General Chat Info - Only show when no client is selected */}
+              {!selectedClient && (
+                <Card className="p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    No client has been selected for this chat. Select a client before starting a new chat to get contextual responses.
+                  </p>
+                </Card>
+              )}
 
-              {/* Tips Section */}
+              {/* Tips Section - Always show for both client and general chats */}
               <Card className="p-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
@@ -333,15 +347,7 @@ export function ClientContextSidebar({
                 </div>
               </Card>
             </div>
-          ) : (
-            <div className="text-center text-gray-500 mt-8">
-              <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm font-medium">No Client Associated</p>
-              <p className="text-xs text-gray-400 mt-1">
-                This chat doesn't have a client associated with it.
-              </p>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
