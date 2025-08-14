@@ -31,9 +31,33 @@ export class ChatService {
   }
 
   /**
-   * Build system prompt with client context
+   * Build system prompt with optional client context
    */
-  static buildSystemPrompt(client: any, selectedContextFields: string[]): string {
+  static buildSystemPrompt(client: any | null, selectedContextFields: string[]): string {
+    // Handle case where there's no client - act as a general-purpose assistant
+    if (!client) {
+      return `You are a helpful, harmless, and honest AI assistant.
+
+INSTRUCTIONS:
+	- Provide accurate, thoughtful, and nuanced responses
+	- Be helpful with a wide range of topics and questions
+	- Support various tasks including but not limited to:
+		• Answering questions and providing explanations
+		• Creative writing and brainstorming
+		• Analysis and problem-solving
+		• Learning and educational support
+		• Technical assistance and coding help
+		• General conversation and discussion
+		• Research and information synthesis
+	- Be conversational and engaging while maintaining accuracy
+	- Admit when you're uncertain or don't know something
+	- Provide balanced perspectives when appropriate
+	- Respect user privacy and maintain ethical boundaries
+
+Respond naturally and conversationally while being helpful and informative.`
+    }
+    
+    // Original client-based system prompt
     const clientContextSection = buildClientContextSection(client, selectedContextFields)
     const hasContextData = hasClientContext(selectedContextFields)
 
@@ -70,45 +94,28 @@ Respond naturally and conversationally while keeping this context in mind.`
   }
 
   /**
-   * Process new chat creation
+   * Process new chat creation with optional client
    */
-  static async createNewChat(userId: string, clientId: string, contextFields: string[] = []): Promise<DbOperationResult<{
+  static async createNewChat(userId: string, clientId: string | null = null, contextFields: string[] = []): Promise<DbOperationResult<{
     chat: Chat & { messages: Message[] },
-    client: Pick<Client, 'name'>
+    client: Pick<Client, 'name'> | null
   }>> {
-    if (!clientId) {
-      logger.warn('Chat creation attempted without client ID', {userId});
-      return {
-        success: false as const,
-        error: 'Client selection is required for new chat'
-      }
-    }
-
-    const chatTitle = generateChatTitleWithClient('')
-    const result = await ChatOperations.createChatWithClient(userId, clientId, chatTitle, contextFields)
+    // All new chats start with a generic title - will be updated when first message is sent
+    const chatTitle = 'New Chat'
+    const result = await ChatOperations.createChat(userId, clientId, chatTitle, contextFields)
 
     if (!isSuccess(result)) {
-      logger.warn('Client not found for chat creation', {userId, clientId});
+      logger.warn('Failed to create chat', {userId, clientId: clientId || undefined});
       return result
     }
 
     const {chat, client} = result.data
-    const actualTitle = generateChatTitleWithClient(client.name)
-
-    // Update title with actual client name
-    if (actualTitle !== chatTitle) {
-      const updateResult = await ChatOperations.updateChatTitle(chat.id, userId, actualTitle)
-      if (isSuccess(updateResult)) {
-        chat.title = actualTitle
-      }
-      // Note: We don't fail the entire operation if title update fails, just log it
-    }
 
     logger.info('New chat created', {
       userId,
       chatId: chat.id,
-      clientId,
-      metadata: {title: actualTitle, contextFieldCount: contextFields.length}
+      clientId: clientId || undefined,
+      metadata: {title: chat.title, contextFieldCount: contextFields.length, hasClient: !!client}
     });
 
     return {
@@ -139,14 +146,14 @@ Respond naturally and conversationally while keeping this context in mind.`
   /**
    * Prepare chat data for AI processing
    *
-   * @param chat - Chat object with messages and client context
+   * @param chat - Chat object with messages and optional client context
    * @param userId - User ID for ownership verification
    * @param newMessageContent - New message content to add
-   * @returns Formatted messages array with system prompt and client context
+   * @returns Formatted messages array with system prompt and optional client context
    */
   static async prepareChatForAI(chat: any, userId: string, newMessageContent: string): Promise<DbOperationResult<{
     aiMessages: Array<{ role: AIMessageRole, content: string }>,
-    client: Client,
+    client: Client | null,
     isFirstUserMessage: boolean,
     selectedContextFields: string[]
   }>> {
@@ -162,27 +169,33 @@ Respond naturally and conversationally while keeping this context in mind.`
       content: msg.content,
     }))
 
-    // Get client information for this chat
-    const clientResult = await ClientService.getUserClientById(chat.clientId, userId)
-    if (!clientResult.success) {
-      throw new Error(clientResult.error || 'Client not found')
+    // Get client information for this chat (if it has a client)
+    let client: Client | null = null
+    if (chat.clientId) {
+      const clientResult = await ClientService.getUserClientById(chat.clientId, userId)
+      if (!clientResult.success) {
+        // Log warning but don't fail - chat might not have a client
+        logger.warn('Client not found for chat', {chatId: chat.id, clientId: chat.clientId || undefined})
+      } else {
+        client = clientResult.data
+      }
     }
-    const client = clientResult.data
 
-    // Build system prompt with client context
+    // Build system prompt with or without client context
     const selectedContextFields = chat.contextFields || []
     const systemPrompt = this.buildSystemPrompt(client, selectedContextFields)
 
     logger.info('System prompt created for chat', {
       userId,
       chatId: chat.id,
-      clientId: client.id,
+      clientId: chat.clientId || undefined,
       metadata: {
         systemPrompt,
         promptLength: systemPrompt.length,
+        hasClient: !!client,
         hasClientContext: hasClientContext(selectedContextFields),
         contextFields: selectedContextFields,
-        clientName: client.name,
+        clientName: client?.name || 'N/A',
         isFirstMessage: isFirstUserMessage
       }
     });
@@ -213,12 +226,23 @@ Respond naturally and conversationally while keeping this context in mind.`
   /**
    * Update chat title for first message if still default
    */
-  static async updateChatTitleForFirstMessage(chatId: string, userId: string, clientName: string, isFirstMessage: boolean, currentTitle: string): Promise<DbOperationResult<{
+  static async updateChatTitleForFirstMessage(chatId: string, userId: string, clientName: string | null, isFirstMessage: boolean, currentTitle: string, firstMessageContent?: string): Promise<DbOperationResult<{
     newTitle?: string,
     updated: boolean
   }>> {
     if (isFirstMessage && currentTitle === 'New Chat') {
-      const newTitle = generateChatTitleWithClient(clientName)
+      // Generate title based on whether we have a client or use first message
+      let newTitle: string
+      if (clientName) {
+        newTitle = generateChatTitleWithClient(clientName)
+      } else if (firstMessageContent) {
+        // For general chats, use the first few words of the message
+        const truncatedMessage = firstMessageContent.substring(0, 30)
+        newTitle = truncatedMessage.length < firstMessageContent.length ? `${truncatedMessage}...` : truncatedMessage
+      } else {
+        // Fallback to timestamp-based title
+        newTitle = `Chat ${new Date().toLocaleDateString()}`
+      }
 
       const result = await ChatOperations.updateChatTitleIfDefault(chatId, userId, newTitle)
 
@@ -248,4 +272,5 @@ Respond naturally and conversationally while keeping this context in mind.`
   static async getUserChats(userId: string): Promise<DbOperationResult<Chat[]>> {
     return ChatOperations.getAllUserChats(userId)
   }
+
 }

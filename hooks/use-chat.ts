@@ -45,7 +45,7 @@ function mergeMessages(serverMessages: MessageWithStreaming[], currentMessages: 
 }
 
 interface NewChatParams {
-  clientId: string;
+  clientId: string | null;
   contextFields: string[];
 }
 
