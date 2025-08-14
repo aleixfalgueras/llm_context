@@ -99,13 +99,13 @@ export const POST = withEnhancedApi(
 
     // Prepare chat data for AI processing
     const lastMessage = messages[messages.length - 1]
-    const prepareResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content)
+    const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content)
     
-    if (!prepareResult.success) {
+    if (!prepareChatForAIResult.success) {
       throw new Error('Failed to prepare chat for AI processing')
     }
 
-    const { aiMessages, client: chatClient, isFirstUserMessage } = prepareResult.data
+    const { aiMessages, client: chatClient, isFirstUserMessage } = prepareChatForAIResult.data
     
     // Use the client from the preparation if we don't have one yet (for existing chats)
     if (!client) {
