@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import {Document, DOCUMENT_TYPES} from '@/lib/types/document-types'
+import {DocumentType} from '@prisma/client'
+import {Document} from '@prisma/client'
 import { handleClientApiError } from '@/lib/api/api-toast'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
@@ -24,7 +25,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const [isCreating, setIsCreating] = useState(false)
   const [newDocumentName, setNewDocumentName] = useState('')
   const [newDocumentContent, setNewDocumentContent] = useState('')
-  const [newDocumentType, setNewDocumentType] = useState<string>(DOCUMENT_TYPES.MANUAL)
+  const [newDocumentType, setNewDocumentType] = useState<DocumentType>(DocumentType.manual)
 
   const loadDocuments = async () => {
     setLoading(true)
@@ -98,7 +99,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setIsCreating(false)
     setNewDocumentName('')
     setNewDocumentContent('')
-    setNewDocumentType(DOCUMENT_TYPES.MANUAL)
+    setNewDocumentType(DocumentType.manual)
   }
 
   // Reset all document-related state when dialog opens

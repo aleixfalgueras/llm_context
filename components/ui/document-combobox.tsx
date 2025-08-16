@@ -18,8 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {Document} from '@prisma/client'
 
-import {DocumentBasic} from "@/lib/types/document-types";
+type DocumentBasic = Pick<Document, 'id' | 'documentName' | 'documentType'>
 
 interface DocumentComboboxProps {
   documents: DocumentBasic[]

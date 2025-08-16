@@ -2,9 +2,9 @@
  * Document storage service - handles Supabase file operations only
  */
 
-import { supabaseServer } from '../lib/supabase'
-import { STORAGE_CONFIG } from '../lib/config'
-import { logger } from '../lib/logger'
+import { supabaseServer } from '@/lib/supabase'
+import { STORAGE_CONFIG } from '@/lib/config'
+import { logger } from '@/lib/logger'
 
 export class DocumentStorageService {
   /**
@@ -57,7 +57,7 @@ export class DocumentStorageService {
   /**
    * Retrieve document content from storage
    */
-  static async getDocument(documentPath: string): Promise<string> {
+  static async getDocumentContent(documentPath: string): Promise<string> {
     try {
       const { data, error } = await supabaseServer.storage
         .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
@@ -126,27 +126,9 @@ export class DocumentStorageService {
   }
 
   /**
-   * Check if document exists in storage
-   */
-  static async documentExists(documentPath: string): Promise<boolean> {
-    try {
-      const { data, error } = await supabaseServer.storage
-        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
-        .list(documentPath.split('/').slice(0, -1).join('/'), {
-          search: documentPath.split('/').pop()
-        })
-
-      return !error && data && data.length > 0
-    } catch (error) {
-      logger.error('Document existence check error', error instanceof Error ? error : new Error(String(error)))
-      return false
-    }
-  }
-
-  /**
    * Update document content in storage
    */
-  static async updateDocument(
+  static async updateDocumentContent(
     documentPath: string,
     content: string,
     mimeType: string = 'text/markdown'
@@ -239,12 +221,4 @@ export class DocumentStorageService {
     }
   }
 
-  /**
-   * Generate storage file path for document
-   */
-  static generateFilePath(userId: string, fileName: string): string {
-    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const timestamp = Date.now()
-    return `${userId}/documents/${timestamp}_${sanitizedFileName}`
-  }
 }

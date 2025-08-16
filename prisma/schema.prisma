@@ -59,16 +59,16 @@ model Client {
 }
 
 model Document {
-  id           String   @id @default(cuid())
+  id           String       @id @default(cuid())
   userId       String
   clientId     String
   documentName String
   documentPath String
-  documentType String
-  fileSize     Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  documentType DocumentType
+  fileSize     Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("documents")
@@ -226,4 +226,11 @@ enum SubscriptionStatus {
 enum Role {
   USER
   ASSISTANT
+}
+
+enum DocumentType {
+  meeting
+  custom_document
+  manual
+  chat
 }
