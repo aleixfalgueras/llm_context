@@ -1,5 +1,5 @@
 import { DocumentService } from '@/services/document-service'
-import { DOCUMENT_TYPES } from '@/lib/types/document-types'
+import { DocumentType } from '@prisma/client'
 import { 
   withEnhancedApi, 
   apiSuccess, 
@@ -29,7 +29,7 @@ export const POST = withEnhancedApi(
         userId,
         clientId,
         documentTitle,
-        DOCUMENT_TYPES.CUSTOM_DOCUMENT,
+        DocumentType.custom_document,
         content
       )
 

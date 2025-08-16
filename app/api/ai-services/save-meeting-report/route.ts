@@ -1,5 +1,5 @@
 import { DocumentService } from '@/services/document-service'
-import { DOCUMENT_TYPES } from '@/lib/types/document-types'
+import { DocumentType } from '@prisma/client'
 import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api/api-middleware'
 import { apiValidation } from '@/lib/utils/validation'
 
@@ -15,7 +15,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       userId,
       clientId,
       documentName,
-      DOCUMENT_TYPES.MEETING,
+      DocumentType.meeting,
       reportContent
     )
 

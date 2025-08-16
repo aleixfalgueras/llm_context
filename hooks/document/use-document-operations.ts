@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/lib/types/enums'
 import { handleClientApiError } from '@/lib/api/api-toast'
-import {Document} from "@/lib/types/document-types";
+import {Document} from '@prisma/client'
 
 interface UseDocumentOperationsProps {
   clientId: string

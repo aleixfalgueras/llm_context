@@ -4,12 +4,12 @@
 
 import {DocumentStorageService} from './storage-service'
 import {ClientService} from './client/client-service'
-import {calculateDocumentSize, validateDocumentStorage} from '../lib/utils/storage'
-import {logger} from '../lib/logger'
-import {prisma} from '../lib/prisma'
-import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
-import {isSuccess, BaseOperations} from '@/database/base-operations'
-import {DocumentOperations} from '../database'
+import {calculateDocumentSize, validateDocumentStorage} from '@/lib/utils/storage'
+import {logger} from '@/lib/logger'
+import {DOCUMENT_TYPE_LABELS, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {DocumentType as DocumentTypeEnum} from '@prisma/client'
+import {isSuccess} from '@/database/base-operations'
+import {DocumentOperations} from '@/database'
 import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
 import { Document } from '@prisma/client'
 
@@ -18,7 +18,7 @@ export class DocumentService {
   /**
    * Get client documents
    */
-  static async getClientDocuments(userId: string, clientId: string) {
+  static async getClientDocuments(userId: string, clientId: string): Promise<{ records: Document[]; total?: number }> {
     const config = {
       context: 'Get client documents',
       select: {
@@ -43,15 +43,29 @@ export class DocumentService {
   }
 
   /**
+   * Get document metadata
+   */
+  static async getDocumentMetadata(userId: string, documentId: string): Promise<Document> {
+    const documentResult = await DocumentOperations.getDocumentById(
+      documentId,
+      userId
+    )
+    
+    if (!documentResult.success || !documentResult.data) {
+      throw new Error('Document not found or unauthorized')
+    }
+    
+    return documentResult.data
+  }
+
+  /**
    * Get document content
    */
   static async getDocumentContent(userId: string, documentId: string): Promise<string> {
     // Get document metadata
-    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
-      prisma.document,
+    const documentResult = await DocumentOperations.getDocumentById(
       documentId,
-      userId,
-      { context: 'Get document by ID' }
+      userId
     )
     
     if (!documentResult.success || !documentResult.data) {
@@ -65,7 +79,7 @@ export class DocumentService {
     }
 
     // Get content from storage
-    return DocumentStorageService.getDocument(document.documentPath)
+    return DocumentStorageService.getDocumentContent(document.documentPath)
   }
 
   /**
@@ -77,7 +91,7 @@ export class DocumentService {
     documentName: string | undefined,
     documentType: DocumentType,
     content: string
-  ) {
+  ): Promise<{ success: true; document: { id: string; name: string; path: string; type: DocumentType } }> {
 
     // Validate storage constraints (throws error if validation fails)
     await validateDocumentStorage(content, userId)
@@ -180,14 +194,12 @@ export class DocumentService {
     userId: string,
     documentId: string,
     updates: Partial<Pick<Document, 'documentName' | 'documentType'>> & { content?: string }
-  ) {
+  ): Promise<Document> {
 
     // Get current document to check permissions and get storage path
-    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
-      prisma.document,
+    const documentResult = await DocumentOperations.getDocumentById(
       documentId,
-      userId,
-      { context: 'Get document by ID' }
+      userId
     )
     
     if (!documentResult.success || !documentResult.data) {
@@ -206,7 +218,7 @@ export class DocumentService {
       await validateDocumentStorage(updates.content, userId)
 
       // Update content in storage
-      await DocumentStorageService.updateDocument(
+      await DocumentStorageService.updateDocumentContent(
         currentDocument.documentPath,
         updates.content,
         'text/markdown'
@@ -254,14 +266,12 @@ export class DocumentService {
   /**
    * Delete document and its content
    */
-  static async deleteDocument(userId: string, documentId: string) {
+  static async deleteDocument(userId: string, documentId: string): Promise<{ id: string }> {
 
     // Get document to find storage path
-    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
-      prisma.document,
+    const documentResult = await DocumentOperations.getDocumentById(
       documentId,
-      userId,
-      { context: 'Get document by ID' }
+      userId
     )
     
     if (!documentResult.success || !documentResult.data) {
@@ -293,21 +303,17 @@ export class DocumentService {
   /**
    * Bulk delete documents
    */
-  static async bulkDeleteDocuments(userId: string, documentIds: string[]) {
+  static async bulkDeleteDocuments(userId: string, documentIds: string[]): Promise<{ deletedCount: number }> {
 
     // Get all documents first to find storage paths
-    const documents = await Promise.all(
-      documentIds.map(id => BaseOperations.findUserOwnedRecord<Document>(
-        prisma.document,
-        id,
-        userId,
-        { context: 'Get document by ID' }
-      ))
+    const documents = await DocumentOperations.bulkGetDocuments(
+      documentIds,
+      userId
     )
 
     const validDocuments = documents
       .filter(isSuccess)
-      .map(result => result.data)
+      .map(result => result.data as Document)
 
     if (validDocuments.length === 0) {
       throw new Error('No valid documents found')
@@ -324,11 +330,9 @@ export class DocumentService {
     }
 
     // Delete from database
-    const deleteResult = await BaseOperations.bulkDeleteUserOwnedRecords(
-      prisma.document,
+    const deleteResult = await DocumentOperations.bulkDeleteDocuments(
       validDocuments.map(doc => doc.id),
-      userId,
-      { context: 'Bulk delete documents' }
+      userId
     )
 
     if (!deleteResult.success) {
@@ -351,13 +355,11 @@ export class DocumentService {
   /**
    * Fallback method for individual document deletion (used when documents belong to different clients)
    */
-  private static async bulkDeleteDocumentsIndividually(userId: string, validDocuments: any[]) {
+  private static async bulkDeleteDocumentsIndividually(userId: string, validDocuments: Document[]): Promise<{ deletedCount: number }> {
     // Delete from database
-    const deleteResult = await BaseOperations.bulkDeleteUserOwnedRecords(
-      prisma.document,
+    const deleteResult = await DocumentOperations.bulkDeleteDocuments(
       validDocuments.map(doc => doc.id),
-      userId,
-      { context: 'Bulk delete documents' }
+      userId
     )
 
     if (!deleteResult.success) {
@@ -396,18 +398,18 @@ export class DocumentService {
     documentType: DocumentType
   ): string {
     switch (documentType) {
-      case DOCUMENT_TYPES.MEETING:
+      case DocumentTypeEnum.meeting:
         const meetingDateFormatted = new Date().toISOString().split('T')[0]
-        return `${clientName} Meeting Report ${meetingDateFormatted}`
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.meeting]} ${meetingDateFormatted}`
       
-      case DOCUMENT_TYPES.CUSTOM_DOCUMENT:
-        return `${clientName} Custom Document`
+      case DocumentTypeEnum.custom_document:
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.custom_document]}`
       
-      case DOCUMENT_TYPES.MANUAL:
-        return `${clientName} Manual Document`
+      case DocumentTypeEnum.manual:
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.manual]}`
       
-      case DOCUMENT_TYPES.CHAT:
-        return `${clientName} Chat Export`
+      case DocumentTypeEnum.chat:
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.chat]}`
       
       default:
         return `${clientName} ${getDocumentTypeLabel(documentType)}`

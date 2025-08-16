@@ -8,18 +8,18 @@ import {Label} from '@/components/ui/label'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Eye, Plus, X} from 'lucide-react'
-import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {ALL_DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
 
 interface DocumentCreationFormProps {
   documentName: string
   documentContent: string
-  documentType: string
+  documentType: DocumentType
   isCreating: boolean
   isCreatingDocument?: boolean
   hideDocumentType?: boolean
   onNameChange: (name: string) => void
   onContentChange: (content: string) => void
-  onTypeChange: (type: string) => void
+  onTypeChange: (type: DocumentType) => void
   onCreate: () => void
   onCancel: () => void
   onPreview: () => void
@@ -72,9 +72,9 @@ export function DocumentCreationForm({
                 <SelectValue placeholder="Select document type" />
               </SelectTrigger>
               <SelectContent>
-                {Object.values(DOCUMENT_TYPES).map((type: string) => (
+                {ALL_DOCUMENT_TYPES.map((type: DocumentType) => (
                   <SelectItem key={type} value={type}>
-                    {getDocumentTypeLabel(type as DocumentType)}
+                    {getDocumentTypeLabel(type)}
                   </SelectItem>
                 ))}
               </SelectContent>
