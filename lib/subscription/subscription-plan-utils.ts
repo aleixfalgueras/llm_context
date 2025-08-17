@@ -1,8 +1,5 @@
-import {SUBSCRIPTION_PLAN_NAMES} from '@/lib/types/subscription-types'
-import { SubscriptionPlan } from '@prisma/client'
-
-// Plan hierarchy for upgrade/downgrade detection
-export const SUBSCRIPTION_PLAN_HIERARCHY = [SubscriptionPlan.apprentice, SubscriptionPlan.knight, SubscriptionPlan.master, SubscriptionPlan.jedi]
+import {SUBSCRIPTION_PLAN_HIERARCHY, SUBSCRIPTION_PLAN_NAMES} from '@/lib/types/subscription-types'
+import {SubscriptionPlan} from '@prisma/client'
 
 // Plan name color utilities
 export function getPlanNameColor(planId: string) {
