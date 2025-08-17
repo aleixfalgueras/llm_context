@@ -1,4 +1,4 @@
-import {SubscriptionUsageService} from '@/services/subscription-usage-service'
+import {SubscriptionService} from '@/services/subscription-service'
 import {logger} from '@/lib/logger'
 import {ClientOperations} from '@/database'
 import {Client, Prisma} from '@prisma/client'
@@ -53,7 +53,7 @@ export class ClientService {
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before creating client
-      const subscriptionWithValidation = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId)
+      const subscriptionWithValidation = await SubscriptionService.getUserSubscriptionWithValidation(userId)
       if (!subscriptionWithValidation.isActive) {
         return {
           success: false,
@@ -93,7 +93,7 @@ export class ClientService {
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before updating client
-      const subscriptionWithValidation = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId)
+      const subscriptionWithValidation = await SubscriptionService.getUserSubscriptionWithValidation(userId)
       if (!subscriptionWithValidation.isActive) {
         return {
           success: false,

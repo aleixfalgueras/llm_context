@@ -1,7 +1,7 @@
 import {logger} from '@/lib/logger'
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionPlan} from "@prisma/client";
-import {SubscriptionUsageService} from '@/services/subscription-usage-service'
+import {SubscriptionService} from '@/services/subscription-service'
 
 interface CheckoutResponse {
   isDowngrade: boolean
@@ -15,7 +15,7 @@ export const POST = withEnhancedApi(
     const { planId } = await parseJsonBody(req)
 
     // Delegate all business logic to service layer
-    const response = await SubscriptionUsageService.createCheckoutSession(userId, planId as SubscriptionPlan)
+    const response = await SubscriptionService.createCheckoutSession(userId, planId as SubscriptionPlan)
     
     return apiSuccess(response)
   },

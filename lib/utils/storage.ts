@@ -1,6 +1,6 @@
 import {prisma} from '../prisma'
 import {logger} from '../logger'
-import {SubscriptionUsageService} from '@/services/subscription-usage-service'
+import {SubscriptionService} from '@/services/subscription-service'
 
 // Storage limits per plan (in bytes)
 import {SubscriptionPlanType} from '@/lib/types/subscription-types'
@@ -125,7 +125,7 @@ export async function getStorageSubscriptionUsage(userId: string, subscription?:
 
     // If subscription is provided, use it; otherwise fetch it
     const [userSubscription, storageUsage] = await Promise.all([
-      subscription ? Promise.resolve(subscription) : SubscriptionUsageService.getUserSubscription(userId),
+      subscription ? Promise.resolve(subscription) : SubscriptionService.getUserSubscription(userId),
       getStorageUsage(userId)
     ])
 
