@@ -14,6 +14,7 @@ import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/models-config'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
+import {exportChat} from '@/app/actions/chat-action'
 
 // Separate component for just the textarea input to isolate re-renders
 interface TextareaInputProps {
@@ -177,25 +178,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     try {
       const chatContent = formatChatForExport(messages, chatTitle, clientData)
       
-      const response = await fetch('/api/ai-services/save-chat-export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientId: clientData.id,
-          content: chatContent,
-          chatTitle,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to export chat' }))
-        throw new Error(errorData.error)
-      }
-
-      const data = await response.json()
-      const documentId = data.data?.documentId
+      const result = await exportChat(clientData.id, chatContent, chatTitle)
+      const documentId = result.documentId
 
       toast({
         title: 'Chat Exported 📄',
