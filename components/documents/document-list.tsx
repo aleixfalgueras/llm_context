@@ -189,7 +189,7 @@ export function DocumentList({
               key={doc.id} 
               className={`cursor-pointer transition-all duration-200 ${
                 selectedDocument?.id === doc.id 
-                  ? 'bg-blue-50  shadow-md' 
+                  ? 'bg-blue-50 dark:bg-blue-950 shadow-md ' 
                   : 'hover:bg-blue-50/50 dark:hover:bg-blue-950/10 hover:border-blue-200 dark:hover:border-blue-800'
               }`}
               onClick={() => onViewDocument(doc)}
