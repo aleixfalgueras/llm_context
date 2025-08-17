@@ -2,7 +2,7 @@ import {stripe} from './stripe'
 import {logger} from '../logger'
 import {SubscriptionUsageOperations} from '@/database'
 import Stripe from 'stripe'
-import {SubscriptionService} from "@/services/subscription-service";
+import {SubscriptionService} from "@/services/subscription/subscription-service";
 import { SubscriptionPlan } from '@prisma/client';
 
 export const STRIPE_PRICE_IDS = {
@@ -50,7 +50,7 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
       },
     })
 
-    await SubscriptionUsageOperations.updateSubscription(userId, { stripeCustomerId: customer.id })
+    await SubscriptionService.updateSubscription(userId, { stripeCustomerId: customer.id })
 
     logger.info('Created new Stripe customer', { userId, metadata: { customerId: customer.id } })
     return customer

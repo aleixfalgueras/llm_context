@@ -1,6 +1,6 @@
 import {logger} from '@/lib/logger'
 import {SubscriptionUsageOperations} from '@/database'
-import {cacheUsage, getCachedUsage, invalidateUsageCache, cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} from '@/lib/subscription/subscription-cache'
+import {cacheUsage, getCachedUsage, invalidateUsageCache, cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} from '@/services/subscription/subscription-cache'
 import {UserUsage} from '@prisma/client'
 import {SubscriptionUsage, UsageInfo, StorageSubscriptionUsage} from '@/lib/types/subscription-usage-types'
 import {SubscriptionErrorCode} from "@/services/error-codes"
@@ -201,7 +201,7 @@ export class SubscriptionUsageService {
    * - Optimized for frequent usage validation calls
    */
   static async getStorageSubscriptionUsage(userId: string, subscription?: any): Promise<StorageSubscriptionUsage> {
-    const {StorageService} = await import('./storage-service')
+    const {StorageService} = await import('../storage-service')
     
     try {
       // Check cache first

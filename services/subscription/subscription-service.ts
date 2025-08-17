@@ -1,12 +1,12 @@
 import {logger} from '@/lib/logger'
 import {SubscriptionUsageOperations} from '@/database'
-import {cacheSubscription, getCachedSubscription, invalidateAllUserCaches} from '@/lib/subscription/subscription-cache'
+import {cacheSubscription, getCachedSubscription, invalidateAllUserCaches} from '@/services/subscription/subscription-cache'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
 import {SubscriptionWithValidation} from '@/lib/types/subscription-types'
 import {clerkClient} from '@clerk/nextjs/server'
 import {createCheckoutSession, STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
 import {releaseSubscriptionSchedule, scheduleSubscriptionDowngrade} from '@/lib/stripe/stripe-subscription'
-import {isDowngrade} from "@/lib/subscription/subscription-client-utils";
+import {isDowngrade} from "@/lib/utils/subscription-client-utils";
 
 
 export class SubscriptionService {
@@ -102,7 +102,9 @@ export class SubscriptionService {
   /**
    * Update existing subscription
    */
-  static async updateSubscription(userId: string, updateData: Partial<Omit<UserSubscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>): Promise<UserSubscription> {
+  static async updateSubscription(userId: string,
+                                  updateData: Partial<Omit<UserSubscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>):
+    Promise<UserSubscription> {
     try {
       const subscription = await SubscriptionUsageOperations.updateSubscription(userId, updateData)
       
@@ -121,12 +123,10 @@ export class SubscriptionService {
    */
   static async clearScheduleFields(userId: string): Promise<UserSubscription> {
     try {
-      const subscription = await SubscriptionUsageOperations.clearScheduleFields(userId)
-      
-      // Invalidate subscription cache
-      await invalidateAllUserCaches(userId)
-      
-      return subscription
+      return await this.updateSubscription(userId, {
+        pendingPlanChange: null,
+        stripeScheduleId: null
+      })
     } catch (error) {
       logger.error('Error clearing schedule fields', error as Error, { userId });
       throw error
@@ -255,8 +255,8 @@ export class SubscriptionService {
         }
       })
 
-      // Clear schedule fields in database through database operations
-      await SubscriptionUsageOperations.clearScheduleFields(userId)
+      // Clear schedule fields in database through service layer
+      await this.clearScheduleFields(userId)
 
       // Invalidate all user caches after canceling downgrade
       await invalidateAllUserCaches(userId)

@@ -3,7 +3,7 @@ import {
   apiSuccess,
   ApiContext
 } from '@/lib/api/api-middleware'
-import {SubscriptionService} from "@/services/subscription-service";
+import {SubscriptionService} from "@/services/subscription/subscription-service";
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { logger } from '@/lib/logger'
-import { clearAllCaches } from '@/lib/subscription/subscription-cache'
+import { clearAllCaches } from '@/services/subscription/subscription-cache'
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'

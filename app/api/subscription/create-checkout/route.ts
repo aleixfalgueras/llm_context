@@ -1,7 +1,7 @@
 import {logger} from '@/lib/logger'
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionPlan} from "@prisma/client";
-import {SubscriptionService} from '@/services/subscription-service'
+import {SubscriptionService} from '@/services/subscription/subscription-service'
 
 interface CheckoutResponse {
   isDowngrade: boolean

@@ -1,4 +1,4 @@
-import {SubscriptionService} from '@/services/subscription-service'
+import {SubscriptionService} from '@/services/subscription/subscription-service'
 import {logger} from '@/lib/logger'
 import {ClientOperations} from '@/database'
 import {Client, Prisma} from '@prisma/client'

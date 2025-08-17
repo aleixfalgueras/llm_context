@@ -236,7 +236,7 @@ export class StorageService {
     
     try {
       // Get all documents for the user through DocumentService (proper service layer)
-      const documents = await DocumentService.getAllUserDocumentsForStorage(userId)
+      const documents = await DocumentService.getAllUserDocuments(userId)
 
       let totalBytes = 0
       const usageByClient: Record<string, number> = {}
