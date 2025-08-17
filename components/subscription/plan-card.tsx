@@ -7,7 +7,7 @@ import {
   getButtonText,
   getPlanIconType,
   getPlanNameColor
-} from '@/lib/subscription/subscription-client-utils'
+} from '@/lib/utils/subscription-client-utils'
 import {SubscriptionPlan} from "@prisma/client";
 
 interface PlanCardProps {

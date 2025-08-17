@@ -21,7 +21,7 @@ import {useSubscriptionRefresh} from '@/hooks/subscription/use-subscription-refr
 import {useToast} from '@/hooks/use-toast'
 import {SubscriptionPlan} from "@prisma/client";
 
-import {isDowngrade as checkIsDowngrade} from "@/lib/subscription/subscription-client-utils";
+import {isDowngrade as checkIsDowngrade} from "@/lib/utils/subscription-client-utils";
 
 export default function SubscriptionPage() {
   const {

@@ -12,7 +12,7 @@ import {
   getDefaultPresencePenalty,
   getDefaultTemperature
 } from '@/lib/models-config'
-import {SubscriptionUsageService} from "@/services/subscription-usage-service"
+import {SubscriptionUsageService} from "@/services/subscription/subscription-usage-service"
 import {OpenRouterCompletionOptions, StreamChunk, UsageTrackingOptions} from "@/lib/types/openrouter-types";
 
 /**

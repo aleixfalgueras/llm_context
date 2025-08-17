@@ -3,7 +3,7 @@ import {
   apiSuccess, 
   ApiContext 
 } from '@/lib/api/api-middleware'
-import {SubscriptionService} from '@/services/subscription-service'
+import {SubscriptionService} from '@/services/subscription/subscription-service'
 
 export const POST = withEnhancedApi(
   async ({ userId }: ApiContext) => {

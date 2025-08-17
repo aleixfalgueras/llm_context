@@ -5,7 +5,7 @@ import {DOCUMENT_TYPE_LABELS, type DocumentType, getDocumentTypeLabel} from '@/l
 import {Document, DocumentType as DocumentTypeEnum} from '@prisma/client'
 import {isSuccess} from '@/database/base-operations'
 import {DocumentOperations} from '@/database'
-import {invalidateStorageCache} from "@/lib/subscription/subscription-cache"
+import {invalidateStorageCache} from "@/services/subscription/subscription-cache"
 import {SubscriptionErrorCode} from './error-codes'
 
 
@@ -30,8 +30,8 @@ export class DocumentService {
    * @returns Promise that resolves if validation passes
    */
   static async validateDocumentStorage(content: string, userId: string): Promise<void> {
-    const {SubscriptionUsageService} = await import('./subscription-usage-service')
-    
+    const {SubscriptionUsageService} = await import('./subscription/subscription-usage-service')
+
     try {
       const documentSize = this.calculateDocumentSize(content)
       const storageSubscriptionUsage = await SubscriptionUsageService.getStorageSubscriptionUsage(userId)
@@ -50,7 +50,7 @@ export class DocumentService {
    * Get all user documents for storage calculations.
    * Returns minimal document data needed for storage usage analytics.
    */
-  static async getAllUserDocumentsForStorage(userId: string): Promise<Array<{ id: string; clientId: string; fileSize: number | null }>> {
+  static async getAllUserDocuments(userId: string): Promise<Array<{ id: string; clientId: string; fileSize: number | null }>> {
     const config = {
       context: 'Get user documents for storage calculations',
       select: {
@@ -82,7 +82,7 @@ export class DocumentService {
         createdAt: true,
         updatedAt: true
       },
-      orderBy: { 
+      orderBy: {
         createdAt: 'desc'
       }
     }
@@ -104,11 +104,11 @@ export class DocumentService {
       documentId,
       userId
     )
-    
+
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or unauthorized')
     }
-    
+
     return documentResult.data
   }
 
@@ -121,13 +121,13 @@ export class DocumentService {
       documentId,
       userId
     )
-    
+
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
     }
 
     const document = documentResult.data as any
-    
+
     if (!document.documentPath) {
       throw new Error('Document path not found')
     }
@@ -255,7 +255,7 @@ export class DocumentService {
       documentId,
       userId
     )
-    
+
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
     }
@@ -280,13 +280,13 @@ export class DocumentService {
 
       // Calculate new file size for database update
       const newFileSize = this.calculateDocumentSize(updates.content)
-      
+
       // Add file size to metadata updates
       const metadataUpdates = {
         ...updates,
         fileSize: newFileSize
       }
-      
+
       // Remove content from metadata updates since it's not stored in database
       delete metadataUpdates.content
 
@@ -327,7 +327,7 @@ export class DocumentService {
       documentId,
       userId
     )
-    
+
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
     }
@@ -336,7 +336,7 @@ export class DocumentService {
 
     // Delete from database first
     const deleteResult = await DocumentOperations.deleteDocument(documentId, userId)
-    
+
     if (!deleteResult.success) {
       throw new Error(deleteResult.error || 'Failed to delete document')
     }
@@ -375,7 +375,7 @@ export class DocumentService {
 
     // Get the clientId from the first document (all documents should belong to the same client)
     const clientId = validDocuments[0].clientId
-    
+
     // Verify all documents belong to the same client
     const allSameClient = validDocuments.every(doc => doc.clientId === clientId)
     if (!allSameClient) {
@@ -423,7 +423,7 @@ export class DocumentService {
     // Delete from storage individually (fallback approach)
     const documentsWithStoragePaths = validDocuments.filter(doc => doc.documentPath)
     const storageErrors: string[] = []
-    
+
     for (const doc of documentsWithStoragePaths) {
       try {
         await StorageService.deleteDocumentFromStorage(doc.documentPath)
@@ -455,16 +455,16 @@ export class DocumentService {
       case DocumentTypeEnum.meeting:
         const meetingDateFormatted = new Date().toISOString().split('T')[0]
         return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.meeting]} ${meetingDateFormatted}`
-      
+
       case DocumentTypeEnum.custom_document:
         return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.custom_document]}`
-      
+
       case DocumentTypeEnum.manual:
         return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.manual]}`
-      
+
       case DocumentTypeEnum.chat:
         return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.chat]}`
-      
+
       default:
         return `${clientName} ${getDocumentTypeLabel(documentType)}`
     }

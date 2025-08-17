@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 import { PrismaClient } from '@prisma/client'
 import { SubscriptionStatus } from '@prisma/client'
-import { invalidateAllUserCaches } from '@/lib/subscription/subscription-cache'
+import { invalidateAllUserCaches } from '@/services/subscription/subscription-cache'
 
 const prisma = new PrismaClient()
 
