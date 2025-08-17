@@ -1,20 +1,74 @@
-/**
- * Document service - orchestrates repository and storage operations
- */
-
-import {DocumentStorageService} from './storage-service'
+import {StorageService} from './storage-service'
 import {ClientService} from './client/client-service'
-import {calculateDocumentSize, validateDocumentStorage} from '@/lib/utils/storage'
 import {logger} from '@/lib/logger'
 import {DOCUMENT_TYPE_LABELS, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
-import {DocumentType as DocumentTypeEnum} from '@prisma/client'
+import {Document, DocumentType as DocumentTypeEnum} from '@prisma/client'
 import {isSuccess} from '@/database/base-operations'
 import {DocumentOperations} from '@/database'
 import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
-import { Document } from '@prisma/client'
 
 
 export class DocumentService {
+  /**
+   * Calculate document size in bytes (UTF-8 encoding)
+   */
+  static calculateDocumentSize(content: string): number {
+    return new Blob([content]).size
+  }
+
+  /**
+   * Validate if a document can be saved without exceeding storage limits.
+   *
+   * Helper function that checks if saving a document would exceed the user's
+   * storage quota. Calculates document size and performs storage validation.
+   * Throws an error if validation fails.
+   *
+   * @param content - The document content to validate
+   * @param userId - The user ID to validate storage limits for
+   * @throws Error if storage limit would be exceeded
+   * @returns Promise that resolves if validation passes
+   */
+  static async validateDocumentStorage(content: string, userId: string): Promise<void> {
+    const {SubscriptionUsageService} = await import('./subscription-usage-service')
+    const {SubscriptionErrorCode} = await import('./error-codes')
+    
+    try {
+      const documentSize = this.calculateDocumentSize(content)
+      const storageSubscriptionUsage = await SubscriptionUsageService.getStorageSubscriptionUsage(userId)
+      const wouldExceedLimit = (storageSubscriptionUsage.usage.totalBytes + documentSize) > storageSubscriptionUsage.limit
+
+      if (wouldExceedLimit) {
+        throw new Error(SubscriptionErrorCode.STORAGE_LIMIT_EXCEEDED)
+      }
+    } catch (error) {
+      logger.error('Error checking storage limit', error as Error, { userId })
+      throw error
+    }
+  }
+
+  /**
+   * Get all user documents for storage calculations.
+   * Returns minimal document data needed for storage usage analytics.
+   */
+  static async getAllUserDocumentsForStorage(userId: string): Promise<Array<{ id: string; clientId: string; fileSize: number | null }>> {
+    const config = {
+      context: 'Get user documents for storage calculations',
+      select: {
+        id: true,
+        clientId: true,
+        fileSize: true
+      }
+    }
+
+    const result = await DocumentOperations.findUserDocuments(userId, undefined, undefined, config)
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch documents for storage calculations')
+    }
+
+    return result.data.records
+  }
+
   /**
    * Get client documents
    */
@@ -79,7 +133,7 @@ export class DocumentService {
     }
 
     // Get content from storage
-    return DocumentStorageService.getDocumentContent(document.documentPath)
+    return StorageService.getDocumentContentFromStorage(document.documentPath)
   }
 
   /**
@@ -94,7 +148,7 @@ export class DocumentService {
   ): Promise<{ success: true; document: { id: string; name: string; path: string; type: DocumentType } }> {
 
     // Validate storage constraints (throws error if validation fails)
-    await validateDocumentStorage(content, userId)
+    await this.validateDocumentStorage(content, userId)
 
     const clientResult = await ClientService.getUserClientById(clientId, userId)
     if (!clientResult.success) {
@@ -109,7 +163,7 @@ export class DocumentService {
     )
 
     // Calculate file size before uploading
-    const fileSize = calculateDocumentSize(content)
+    const fileSize = this.calculateDocumentSize(content)
 
     // Create database record first to get the generated ID
     const documentData: Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'userId'> = {
@@ -135,7 +189,7 @@ export class DocumentService {
     const fileName = `${finalDocumentName}.md`
     let storagePath: string
     try {
-      const storageResult = await DocumentStorageService.storeDocument(
+      const storageResult = await StorageService.storeDocumentInStorage(
         userId,
         clientId,
         documentId,
@@ -153,7 +207,7 @@ export class DocumentService {
       if (!updateResult.success) {
         // Cleanup storage if database update failed
         try {
-          await DocumentStorageService.deleteDocument(storageResult.path)
+          await StorageService.deleteDocumentFromStorage(storageResult.path)
         } catch (cleanupError) {
           logger.error('Failed to cleanup storage after database update error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
         }
@@ -215,17 +269,17 @@ export class DocumentService {
       }
 
       // Validate storage constraints for content update
-      await validateDocumentStorage(updates.content, userId)
+      await this.validateDocumentStorage(updates.content, userId)
 
       // Update content in storage
-      await DocumentStorageService.updateDocumentContent(
+      await StorageService.updateDocumentContentInStorage(
         currentDocument.documentPath,
         updates.content,
         'text/markdown'
       )
 
       // Calculate new file size for database update
-      const newFileSize = calculateDocumentSize(updates.content)
+      const newFileSize = this.calculateDocumentSize(updates.content)
       
       // Add file size to metadata updates
       const metadataUpdates = {
@@ -290,7 +344,7 @@ export class DocumentService {
     // Delete from storage (non-blocking if it fails)
     if (document.documentPath) {
       try {
-        await DocumentStorageService.deleteDocument(document.documentPath)
+        await StorageService.deleteDocumentFromStorage(document.documentPath)
       } catch (storageError) {
         logger.error('Failed to delete document from storage', storageError instanceof Error ? storageError : new Error(String(storageError)))
         // Don't throw - database deletion was successful
@@ -341,7 +395,7 @@ export class DocumentService {
 
     // Delete entire client folder from storage (optimized approach)
     try {
-      await DocumentStorageService.deleteClientFolder(userId, clientId)
+      await StorageService.deleteClientFolderFromStorage(userId, clientId)
       logger.info(`Successfully deleted client folder for client ${clientId} with ${validDocuments.length} documents`)
     } catch (error) {
       const errorMessage = `Failed to delete client folder for client ${clientId}: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -372,7 +426,7 @@ export class DocumentService {
     
     for (const doc of documentsWithStoragePaths) {
       try {
-        await DocumentStorageService.deleteDocument(doc.documentPath)
+        await StorageService.deleteDocumentFromStorage(doc.documentPath)
         logger.info(`Successfully deleted document ${doc.id} from storage`)
       } catch (error) {
         const errorMessage = `Failed to delete document ${doc.id} from storage: ${error instanceof Error ? error.message : 'Unknown error'}`

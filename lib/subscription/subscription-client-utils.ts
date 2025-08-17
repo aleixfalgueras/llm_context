@@ -37,6 +37,15 @@ export function getButtonStyles(isCurrentPlan: boolean, isPendingDowngrade: bool
   return 'bg-blue-600 hover:bg-blue-700 text-white'
 }
 
+/**
+ * Determine if a plan change is a downgrade
+ */
+export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {
+  const currentIndex = SUBSCRIPTION_PLAN_HIERARCHY.indexOf(currentPlan)
+  const targetIndex = SUBSCRIPTION_PLAN_HIERARCHY.indexOf(targetPlan)
+  return targetIndex < currentIndex
+}
+
 // Get button text based on plan state
 export function getButtonText(
   planId: string, 
@@ -71,11 +80,3 @@ export function getButtonText(
   return `Upgrade to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
 }
 
-/**
- * Determine if a plan change is a downgrade
- */
-export function isDowngrade(currentPlan: SubscriptionPlan, targetPlan: SubscriptionPlan): boolean {
-  const currentIndex = SUBSCRIPTION_PLAN_HIERARCHY.indexOf(currentPlan)
-  const targetIndex = SUBSCRIPTION_PLAN_HIERARCHY.indexOf(targetPlan)
-  return targetIndex < currentIndex
-}

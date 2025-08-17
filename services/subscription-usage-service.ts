@@ -1,11 +1,11 @@
 import {logger} from '@/lib/logger'
 import {SubscriptionUsageOperations} from '@/database'
 import {cacheUsage, getCachedUsage, invalidateUsageCache} from '@/lib/subscription/subscription-cache'
-import {getStorageSubscriptionUsage} from '@/lib/utils/storage'
 import {UserUsage} from '@prisma/client'
-import {SubscriptionUsage, UsageInfo} from '@/lib/types/subscription-usage-types'
+import {SubscriptionUsage, UsageInfo, StorageSubscriptionUsage} from '@/lib/types/subscription-usage-types'
 import {SubscriptionErrorCode} from "@/services/error-codes"
 import {SubscriptionService} from './subscription-service'
+
 
 export class SubscriptionUsageService {
 
@@ -169,7 +169,7 @@ export class SubscriptionUsageService {
     try {
       const [subscriptionUsage, storageSubscriptionUsage] = await Promise.all([
         this.getUserSubscriptionUsage(userId, bypassCache),
-        getStorageSubscriptionUsage(userId)
+        this.getStorageSubscriptionUsage(userId)
       ]);
 
       return {
@@ -179,6 +179,72 @@ export class SubscriptionUsageService {
     } catch (error) {
       console.error('Error getting usage info:', error)
       return null
+    }
+  }
+
+  /**
+   * Get comprehensive storage usage for a user with subscription context.
+   * 
+   * Combines storage usage data with subscription plan limits to provide formatted
+   * analytics including usage percentages, remaining space, and formatted values.
+   * Implements intelligent caching and parallel data fetching for performance.
+   * 
+   * @param userId - The user ID to get storage analytics for
+   * @param subscription - Optional subscription data, fetched if not provided
+   * @returns Promise<StorageSubscriptionUsage> with usage data, limits, and formatted values
+   * @throws Error if data fetching or calculation fails
+   * 
+   * **Performance Features:**
+   * - Redis caching with automatic cache population
+   * - Parallel fetching of subscription and usage data
+   * - Optimized for frequent usage validation calls
+   */
+  static async getStorageSubscriptionUsage(userId: string, subscription?: any): Promise<StorageSubscriptionUsage> {
+    const {cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} = await import('@/lib/subscription/subscription-cache')
+    const {getStorageLimitForPlan} = await import('@/lib/types/storage-types')
+    const {StorageService} = await import('./storage-service')
+    
+    try {
+      // Check cache first
+      const cached = await getCachedStorageSubscriptionUsage(userId)
+      if (cached) {
+        return cached
+      }
+
+      // If subscription is provided, use it; otherwise fetch it
+      const [userSubscription, storageUsage] = await Promise.all([
+        subscription ? Promise.resolve(subscription) : SubscriptionService.getUserSubscription(userId),
+        StorageService.getStorageUsage(userId)
+      ])
+
+      const storageLimit = getStorageLimitForPlan(userSubscription.plan)
+
+      const formatBytes = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes'
+
+        const k = 1024
+        const sizes = ['Bytes', 'KB', 'MB', 'GB']
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+      }
+
+      const storageSubscriptionUsage = {
+        usage: storageUsage,
+        limit: storageLimit,
+        limitFormatted: formatBytes(storageLimit),
+        usedFormatted: formatBytes(storageUsage.totalBytes),
+        usagePercentage: Math.round((storageUsage.totalBytes / storageLimit) * 100),
+        remainingFormatted: formatBytes(Math.max(0, storageLimit - storageUsage.totalBytes))
+      }
+
+      // Cache the result
+      await cacheStorageSubscriptionUsage(userId, storageSubscriptionUsage)
+
+      return storageSubscriptionUsage
+    } catch (error) {
+      logger.error('Error getting storage analytics', error as Error, { userId })
+      throw error
     }
   }
 
