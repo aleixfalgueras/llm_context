@@ -1,16 +1,15 @@
-/**
- * Document storage service - handles Supabase file operations only
- */
+import {supabaseServer} from '@/lib/supabase'
+import {STORAGE_CONFIG} from '@/lib/config'
+import {logger} from '@/lib/logger'
+import {StorageUsage} from "@/lib/types/storage-types";
 
-import { supabaseServer } from '@/lib/supabase'
-import { STORAGE_CONFIG } from '@/lib/config'
-import { logger } from '@/lib/logger'
 
-export class DocumentStorageService {
+export class StorageService {
+
   /**
    * Store document content in Supabase storage
    */
-  static async storeDocument(
+  static async storeDocumentInStorage(
     userId: string,
     clientId: string,
     documentId: string,
@@ -57,7 +56,7 @@ export class DocumentStorageService {
   /**
    * Retrieve document content from storage
    */
-  static async getDocumentContent(documentPath: string): Promise<string> {
+  static async getDocumentContentFromStorage(documentPath: string): Promise<string> {
     try {
       const { data, error } = await supabaseServer.storage
         .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
@@ -82,7 +81,7 @@ export class DocumentStorageService {
   /**
    * Delete document from storage
    */
-  static async deleteDocument(documentPath: string): Promise<void> {
+  static async deleteDocumentFromStorage(documentPath: string): Promise<void> {
     try {
       // Try to delete the document at the given path
       const { error } = await supabaseServer.storage
@@ -128,7 +127,7 @@ export class DocumentStorageService {
   /**
    * Update document content in storage
    */
-  static async updateDocumentContent(
+  static async updateDocumentContentInStorage(
     documentPath: string,
     content: string,
     mimeType: string = 'text/markdown'
@@ -172,7 +171,7 @@ export class DocumentStorageService {
    * Delete all documents for a specific client (entire folder)
    * This is more efficient than deleting documents one by one
    */
-  static async deleteClientFolder(userId: string, clientId: string): Promise<void> {
+  static async deleteClientFolderFromStorage(userId: string, clientId: string): Promise<void> {
     try {
       const folderPath = `${userId}/${clientId}`
       
@@ -221,4 +220,46 @@ export class DocumentStorageService {
     }
   }
 
+  /**
+   * Get current storage usage statistics for a user.
+   * 
+   * Queries the database to calculate total storage usage across all user documents.
+   * Aggregates file sizes from the document records and provides breakdown by client.
+   * Uses database-stored file sizes for accurate tracking.
+   * 
+   * @param userId - The user ID to calculate storage usage for
+   * @returns Promise<StorageUsage> containing total bytes, document count, and usage by client
+   * @throws Error if database query fails
+   */
+  static async getStorageUsage(userId: string): Promise<StorageUsage> {
+    const {DocumentService} = await import('./document-service')
+    
+    try {
+      // Get all documents for the user through DocumentService (proper service layer)
+      const documents = await DocumentService.getAllUserDocumentsForStorage(userId)
+
+      let totalBytes = 0
+      const usageByClient: Record<string, number> = {}
+
+      // Calculate storage usage from database file sizes
+      for (const doc of documents) {
+        const fileSize = doc.fileSize || 0
+        totalBytes += fileSize
+        
+        if (!usageByClient[doc.clientId]) {
+          usageByClient[doc.clientId] = 0
+        }
+        usageByClient[doc.clientId] += fileSize
+      }
+
+      return {
+        totalBytes,
+        documentCount: documents.length,
+        usageByClient
+      }
+    } catch (error) {
+      logger.error('Error calculating storage usage', error as Error, { userId })
+      throw error
+    }
+  }
 }

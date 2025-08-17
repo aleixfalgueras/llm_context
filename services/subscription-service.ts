@@ -1,26 +1,13 @@
-/**
- * Subscription business logic service
- * Handles pure subscription management functionality
- */
+import {logger} from '@/lib/logger'
+import {SubscriptionUsageOperations} from '@/database'
+import {cacheSubscription, getCachedSubscription, invalidateAllUserCaches} from '@/lib/subscription/subscription-cache'
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
+import {SubscriptionWithValidation} from '@/lib/types/subscription-types'
+import {clerkClient} from '@clerk/nextjs/server'
+import {createCheckoutSession, STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
+import {releaseSubscriptionSchedule, scheduleSubscriptionDowngrade} from '@/lib/stripe/stripe-subscription'
+import {isDowngrade} from "@/lib/subscription/subscription-client-utils";
 
-import { logger } from '@/lib/logger'
-import { SubscriptionUsageOperations } from '@/database'
-import { 
-  cacheSubscription, 
-  getCachedSubscription,
-  invalidateAllUserCaches 
-} from '@/lib/subscription/subscription-cache'
-import {
-  UserSubscription, 
-  SubscriptionPlan, 
-  SubscriptionStatus 
-} from '@prisma/client'
-import { SubscriptionWithValidation } from '@/lib/types/subscription-types'
-import { SubscriptionErrorCode } from "@/services/error-codes"
-import { clerkClient } from '@clerk/nextjs/server'
-import { createCheckoutSession, STRIPE_PRICE_IDS } from '@/lib/stripe/stripe-utils'
-import { isDowngrade } from '@/lib/subscription/subscription-plan-utils'
-import { scheduleSubscriptionDowngrade, releaseSubscriptionSchedule } from '@/lib/stripe/stripe-subscription'
 
 export class SubscriptionService {
 
