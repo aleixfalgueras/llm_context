@@ -5,7 +5,8 @@ import {DOCUMENT_TYPE_LABELS, type DocumentType, getDocumentTypeLabel} from '@/l
 import {Document, DocumentType as DocumentTypeEnum} from '@prisma/client'
 import {isSuccess} from '@/database/base-operations'
 import {DocumentOperations} from '@/database'
-import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
+import {invalidateStorageCache} from "@/lib/subscription/subscription-cache"
+import {SubscriptionErrorCode} from './error-codes'
 
 
 export class DocumentService {
@@ -30,7 +31,6 @@ export class DocumentService {
    */
   static async validateDocumentStorage(content: string, userId: string): Promise<void> {
     const {SubscriptionUsageService} = await import('./subscription-usage-service')
-    const {SubscriptionErrorCode} = await import('./error-codes')
     
     try {
       const documentSize = this.calculateDocumentSize(content)

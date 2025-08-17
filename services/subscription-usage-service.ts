@@ -1,10 +1,11 @@
 import {logger} from '@/lib/logger'
 import {SubscriptionUsageOperations} from '@/database'
-import {cacheUsage, getCachedUsage, invalidateUsageCache} from '@/lib/subscription/subscription-cache'
+import {cacheUsage, getCachedUsage, invalidateUsageCache, cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} from '@/lib/subscription/subscription-cache'
 import {UserUsage} from '@prisma/client'
 import {SubscriptionUsage, UsageInfo, StorageSubscriptionUsage} from '@/lib/types/subscription-usage-types'
 import {SubscriptionErrorCode} from "@/services/error-codes"
 import {SubscriptionService} from './subscription-service'
+import {getStorageLimitForPlan} from '@/lib/types/storage-types'
 
 
 export class SubscriptionUsageService {
@@ -200,8 +201,6 @@ export class SubscriptionUsageService {
    * - Optimized for frequent usage validation calls
    */
   static async getStorageSubscriptionUsage(userId: string, subscription?: any): Promise<StorageSubscriptionUsage> {
-    const {cacheStorageSubscriptionUsage, getCachedStorageSubscriptionUsage} = await import('@/lib/subscription/subscription-cache')
-    const {getStorageLimitForPlan} = await import('@/lib/types/storage-types')
     const {StorageService} = await import('./storage-service')
     
     try {
