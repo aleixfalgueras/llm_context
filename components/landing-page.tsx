@@ -19,7 +19,7 @@ import Image from 'next/image'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
-import {getPlanNameColor} from '@/lib/subscription/subscription-plan-utils'
+import {getPlanNameColor} from '@/lib/utils/subscription-client-utils'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import Link from 'next/link'
 import {SubscriptionPlan} from "@prisma/client";
@@ -132,7 +132,7 @@ export function LandingPage() {
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-4">Dual Premium AI Models Available</h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              All subscription tiers include both Google Gemini 2.0 and OpenAI GPT-4.1 through our unified OpenRouter platform. Identical pricing, maximum flexibility.
+              All subscription tiers include both Google Gemini 2.0 and OpenAI GPT-4.1 through our unified model system.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">

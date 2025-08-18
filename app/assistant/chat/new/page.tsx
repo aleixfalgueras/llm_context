@@ -35,9 +35,12 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
   const newChat = {
     id: '', // Empty ID indicates new chat
     title: 'New Chat',
+    userId: '', // Will be set when chat is actually created
     messages: [],
     clientId: clientId || null,
     contextFields: parsedContextFields,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   }
 
   return (

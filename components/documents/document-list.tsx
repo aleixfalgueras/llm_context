@@ -7,7 +7,8 @@ import {Card, CardContent} from '@/components/ui/card'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {Label} from '@/components/ui/label'
 import {Download, Edit, Plus, Search, Trash2, TrashIcon} from 'lucide-react'
-import {ALL_DOCUMENT_TYPES, Document, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {ALL_DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {Document} from '@prisma/client'
 
 interface DocumentListProps {
   documents: Document[]
@@ -188,7 +189,7 @@ export function DocumentList({
               key={doc.id} 
               className={`cursor-pointer transition-all duration-200 ${
                 selectedDocument?.id === doc.id 
-                  ? 'bg-blue-50  shadow-md' 
+                  ? 'bg-blue-50 dark:bg-blue-950 shadow-md ' 
                   : 'hover:bg-blue-50/50 dark:hover:bg-blue-950/10 hover:border-blue-200 dark:hover:border-blue-800'
               }`}
               onClick={() => onViewDocument(doc)}

@@ -1,11 +1,11 @@
-import {SubscriptionUsageService} from '@/services/subscription-usage-service'
+import {SubscriptionService} from '@/services/subscription/subscription-service'
 import {logger} from '@/lib/logger'
 import {ClientOperations} from '@/database'
 import {Client, Prisma} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 import {sanitizeToNull} from "@/lib/utils/validation";
 import {SubscriptionErrorCode} from "@/services/error-codes";
-import {DocumentStorageService} from '@/services/storage-service';
+import {StorageService} from '@/services/storage-service';
 
 /**
  * Process client data by trimming context fields and converting empty strings to null
@@ -53,7 +53,7 @@ export class ClientService {
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before creating client
-      const subscriptionWithValidation = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId)
+      const subscriptionWithValidation = await SubscriptionService.getUserSubscriptionWithValidation(userId)
       if (!subscriptionWithValidation.isActive) {
         return {
           success: false,
@@ -93,7 +93,7 @@ export class ClientService {
   ): Promise<DbOperationResult<Client>> {
     try {
       // Check subscription expiration before updating client
-      const subscriptionWithValidation = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId)
+      const subscriptionWithValidation = await SubscriptionService.getUserSubscriptionWithValidation(userId)
       if (!subscriptionWithValidation.isActive) {
         return {
           success: false,
@@ -133,7 +133,7 @@ export class ClientService {
     try {
       // First, clean up document storage for this client
       try {
-        await DocumentStorageService.deleteClientFolder(userId, clientId)
+        await StorageService.deleteClientFolderFromStorage(userId, clientId)
         logger.info(`Successfully cleaned up document storage for client ${clientId}`)
       } catch (storageError) {
         // Log the storage error but don't fail the deletion

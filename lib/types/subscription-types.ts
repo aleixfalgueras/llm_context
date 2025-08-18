@@ -4,6 +4,9 @@
  */
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from "@prisma/client";
 
+// Plan hierarchy for upgrade/downgrade detection
+export const SUBSCRIPTION_PLAN_HIERARCHY = [SubscriptionPlan.apprentice, SubscriptionPlan.knight, SubscriptionPlan.master, SubscriptionPlan.jedi]
+
 // Subscription Plan names constant
 export const SUBSCRIPTION_PLAN_NAMES = {
   [SubscriptionPlan.apprentice]: 'Apprentice',

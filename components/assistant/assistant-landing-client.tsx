@@ -6,10 +6,11 @@ import {ChatSidebar} from '@/components/assistant/chat-sidebar'
 import {ChatInterface} from '@/components/assistant/chat-interface'
 import {ClientContextSidebar} from '@/components/assistant/client-context-sidebar'
 import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types";
+import {Chat, Client} from '@prisma/client'
 
 interface AssistantLandingClientProps {
-  chats: any[]
-  clients: any[]
+  chats: Chat[]
+  clients: Client[]
 }
 
 export function AssistantLandingClient({ chats, clients }: AssistantLandingClientProps) {

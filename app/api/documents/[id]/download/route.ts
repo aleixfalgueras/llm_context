@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { DocumentService } from '@/services/document-service'
 import { 
   withEnhancedApi,
@@ -13,16 +12,7 @@ export const GET = withEnhancedApi(
     const documentId = id as string
 
     // Get the document from database to verify ownership and get name
-    const document = await prisma.document.findFirst({
-      where: { 
-        id: documentId,
-        userId 
-      }
-    })
-
-    if (!document) {
-      throw new Error('Document not found or unauthorized')
-    }
+    const document = await DocumentService.getDocumentMetadata(userId, documentId)
 
     // Get document content
     const documentContent = await DocumentService.getDocumentContent(userId, documentId)
