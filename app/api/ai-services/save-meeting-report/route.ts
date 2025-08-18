@@ -1,35 +1,21 @@
-import { DocumentService } from '@/services/document-service'
-import { DocumentType } from '@prisma/client'
+import { MeetingReportService } from '@/services/ai-services/meeting-report-service'
 import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api/api-middleware'
-import { apiValidation } from '@/lib/utils/validation'
 
 export const POST = withEnhancedApi(async ({ userId, req }) => {
-  const { clientId, meetingDate, reportContent, additionalInfo: _additionalInfo, documentName } = await parseJsonBody(req)
+  const { clientId, meetingDate, reportContent, additionalInfo, documentName } = await parseJsonBody(req)
 
-  // Use centralized validation to eliminate duplicate validation patterns
-  apiValidation.meetingReport({ clientId, meetingDate, reportContent })
+  // Use the Meeting Report Service
+  const data = await MeetingReportService.saveReport(userId, {
+    clientId,
+    meetingDate,
+    reportContent,
+    documentName,
+    additionalInfo
+  })
 
-  try {
-    // Use the unified document service with tracking enabled
-    const result = await DocumentService.createDocument(
-      userId,
-      clientId,
-      documentName,
-      DocumentType.meeting,
-      reportContent
-    )
-
-    return apiSuccess({
-      ...result,
-      documentId: result.document.id
-    }, 201)
-  } catch (error) {
-    // Check for storage limit errors
-    if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
-      throw new Error(error.message) // Let enhanced middleware handle as standard error
-    }
-    throw error // Let enhanced middleware handle other errors
-  }
+  return apiSuccess({
+    documentId: data.documentId
+  }, 201)
 }, {
   context: 'Save meeting report',
   allowedMethods: ['POST'],
