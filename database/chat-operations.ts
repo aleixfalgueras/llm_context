@@ -2,6 +2,7 @@ import {prisma} from '@/lib/prisma'
 import {BaseOperations} from './base-operations'
 import {Chat, Client, Message} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
+import {ChatWithMessages} from "@/lib/types/chat-types";
 
 export class ChatOperations extends BaseOperations {
   /**
@@ -56,7 +57,7 @@ export class ChatOperations extends BaseOperations {
    * Create a new chat with optional client validation
    */
   static async createChat(userId: string, clientId: string | null, title: string, contextFields: string[] = []): Promise<DbOperationResult<{
-    chat: Chat & { messages: Message[] },
+    chat: ChatWithMessages,
     client: Pick<Client, 'name'> | null
   }>> {
     try {

@@ -13,12 +13,13 @@ import {
   DEFAULT_CLIENT_CONTEXT
 } from '@/lib/types/client-types'
 import {useRouter} from 'next/navigation'
+import {Client} from '@prisma/client'
 
 interface ClientContextSidebarProps {
   chatId?: string
   selectedClientId?: string | null
   onClientSelect?: (clientId: string | null) => void
-  clients?: any[]
+  clients?: Client[]
   hasActiveChat?: boolean // Whether there's an active chat selected
   clientContext?: ClientContextSelection
   onClientContextChange?: (context: ClientContextSelection) => void
