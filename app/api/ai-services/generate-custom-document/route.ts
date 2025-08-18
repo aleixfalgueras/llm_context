@@ -1,10 +1,6 @@
-import {buildClientContextSection, replaceClientContextVariables} from '@/services/client/client-context-service'
-import {openRouterService} from '@/services/openrouter'
-import {DEFAULT_MODEL, getDefaultTemperature} from '@/lib/models-config'
-import {getLanguageInstruction, getLanguageRequirementSection} from '@/lib/utils/language'
-import {logger} from '@/lib/logger'
-import {ClientService} from '@/services/client/client-service'
-import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
+import { CustomDocumentService } from '@/services/ai-services/custom-document-service'
+import { ApiContext, parseJsonBody, withEnhancedApi } from '@/lib/api/api-middleware'
+import { DEFAULT_MODEL } from '@/lib/models-config'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
@@ -18,107 +14,22 @@ export const POST = withEnhancedApi(
       model: selectedModel = DEFAULT_MODEL
     } = await parseJsonBody(req)
 
-
     // Validate required fields
     if (!clientId || !customPrompt || !documentTitle) {
       throw new Error('Missing required fields: clientId, documentTitle, and customPrompt are required')
     }
 
-    // Validate client access after parsing clientId
-    const clientResult = await ClientService.getUserClientById(clientId, userId)
-    if (!clientResult.success) {
-      throw new Error(clientResult.error || 'Client not found')
-    }
-    const client = clientResult.data
-
-    // Use the prompt content provided in request
-    const promptContent = customPrompt
-    const promptName = 'Custom Document'
-
-    // Replace client variables in prompt using shared utility
-    const processedPrompt = replaceClientContextVariables(promptContent, client)
-
-    // Get language instruction from client's documentsLanguage preference
-    const targetLanguage = getLanguageInstruction(client.documentsLanguage || 'english')
-
-    // Build client context section if fields are selected - RESPECTS user privacy choices
-    const clientContextSection = buildClientContextSection(client, selectedContextFields)
-
-    // Create the complete prompt with client context section
-    let completePrompt = processedPrompt
-
-    if (clientContextSection) {
-      completePrompt = `${processedPrompt}${clientContextSection}`
-    }
-
-    if (additionalInstructions) {
-      completePrompt += `
-
-ADDITIONAL INSTRUCTIONS:
-${additionalInstructions}`
-    }
-
-    // Add language requirements
-    completePrompt += `
-
-${getLanguageRequirementSection(targetLanguage, 'custom-document')}
-
-Please generate a professional, well-structured document based on the above prompt and client information. 
-
-IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining professional language and cultural appropriateness for this language.`
-
-    // Log the prompt used for document generation
-    logger.info('🤖 Custom Document Generation - Prompt Used', {
-      userId: userId,
+    // Use the Custom Document Service
+    const data = await CustomDocumentService.generateDocument(userId, {
       clientId,
-      operation: 'custom-document-generation',
-      model: selectedModel,
-      metadata: {
-        promptName,
-        documentTitle,
-        clientName: client.name,
-        targetLanguage,
-        hasAdditionalInstructions: !!additionalInstructions,
-        selectedContextFields,
-        promptLength: completePrompt.length,
-        prompt: completePrompt
-      }
-    })
-
-    // Use OpenRouter service with automatic usage tracking
-    const completion = await openRouterService.createCompletion(
-      {
-        model: selectedModel,
-        messages: [
-          {
-            role: 'user',
-            content: completePrompt,
-          },
-        ],
-        temperature: getDefaultTemperature(),
-      },
-      {
-        userId: userId,
-        resourceId: clientId,
-        additionalMetadata: {
-          documentType: 'custom-document',
-          promptName
-        }
-      }
-    )
-
-    const generatedContent = completion.content
-
-    if (!generatedContent) {
-      throw new Error('Failed to generate document')
-    }
-
-    return Response.json({
-      content: generatedContent,
-      promptName,
-      clientName: client.name,
+      customPrompt,
       documentTitle,
+      additionalInstructions,
+      selectedContextFields,
+      model: selectedModel
     })
+
+    return Response.json(data)
   },
   {
     context: 'Generate Custom Document',

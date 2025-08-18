@@ -1,5 +1,4 @@
-import { DocumentService } from '@/services/document-service'
-import { DocumentType } from '@prisma/client'
+import { CustomDocumentService } from '@/services/ai-services/custom-document-service'
 import { 
   withEnhancedApi, 
   apiSuccess, 
@@ -23,29 +22,19 @@ export const POST = withEnhancedApi(
       throw new Error('Missing required fields: clientId, content, and documentTitle are required')
     }
 
-    try {
-      // Use the unified document service with tracking enabled
-      const result = await DocumentService.createDocument(
-        userId,
-        clientId,
-        documentTitle,
-        DocumentType.custom_document,
-        content
-      )
+    // Use the Custom Document Service
+    const data = await CustomDocumentService.saveDocument(userId, {
+      clientId,
+      content,
+      documentTitle,
+      promptName
+    })
 
-      return apiSuccess({
-        ...result,
-        documentId: result.document.id,
-        promptName,
-        message: 'Custom document saved successfully'
-      })
-    } catch (error) {
-      // Check for storage limit errors
-      if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
-        throw new Error(`Storage limit exceeded: ${error.message}`)
-      }
-      throw error
-    }
+    return apiSuccess({
+      documentId: data.documentId,
+      promptName,
+      message: data.message
+    })
   },
   {
     context: 'Save Custom Document',
