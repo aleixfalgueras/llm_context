@@ -268,8 +268,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
           />
         </div>
         <div className="flex gap-2">
-          {/* Export Chat Button - show if there are messages */}
-          {messages.length > 0 && (
+          {/* Export Chat Button - show if there are messages and client data */}
+          {messages.length > 0 && clientData && (
             <Button 
               variant="outline" 
               size="sm" 
