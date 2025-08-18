@@ -5,6 +5,7 @@ import {useChat} from '@/hooks/use-chat'
 import {ChatMessages} from '@/components/assistant/chat-messages'
 import {ChatInput} from '@/components/assistant/chat-input'
 import {ErrorBoundary} from '@/components/global/error-boundary'
+import {Client} from '@prisma/client'
 
 import {MessageWithStreaming} from "@/lib/types/message-types";
 
@@ -18,7 +19,7 @@ interface ChatContainerProps {
   initialMessages: MessageWithStreaming[]
   userImageUrl?: string
   userName?: string
-  clientData?: any
+  clientData?: Client | null
   onTitleUpdate?: (title: string) => void
   chatTitle?: string
   onDocumentCreated?: (clientId: string, documentId: string) => void

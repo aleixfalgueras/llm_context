@@ -11,14 +11,16 @@ export class StorageService {
    */
   static async storeDocumentInStorage(
     userId: string,
-    clientId: string,
+    clientId: string | null,
     documentId: string,
     fileName: string,
     content: string,
     mimeType: string = 'text/plain'
   ): Promise<{ path: string; url?: string }> {
     try {
-      const filePath = `${userId}/${clientId}/${documentId}_${fileName}`
+      const filePath = clientId 
+        ? `${userId}/${clientId}/${documentId}_${fileName}`
+        : `${userId}/${documentId}_${fileName}`
       const contentBuffer = Buffer.from(content, 'utf-8')
 
       const { data, error } = await supabaseServer.storage
@@ -246,10 +248,12 @@ export class StorageService {
         const fileSize = doc.fileSize || 0
         totalBytes += fileSize
         
-        if (!usageByClient[doc.clientId]) {
-          usageByClient[doc.clientId] = 0
+        // Handle documents with or without clientId
+        const clientKey = doc.clientId || 'general'
+        if (!usageByClient[clientKey]) {
+          usageByClient[clientKey] = 0
         }
-        usageByClient[doc.clientId] += fileSize
+        usageByClient[clientKey] += fileSize
       }
 
       return {

@@ -68,11 +68,11 @@ export async function updateChatTitle(chatId: string, title: string) {
   revalidatePath(`/assistant/chat/${chatId}`)
 }
 
-export async function exportChat(clientId: string, content: string, chatTitle: string) {
+export async function exportChat(clientId: string | null, content: string, chatTitle: string) {
   const userId = await checkAuth()
 
-  if (!clientId || !content || !chatTitle) {
-    throw new Error('Missing required fields: clientId, content, and chatTitle are required')
+  if (!content || !chatTitle) {
+    throw new Error('Missing required fields: content and chatTitle are required')
   }
 
   try {

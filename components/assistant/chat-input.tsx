@@ -165,10 +165,10 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
   }, [chatId, clientData, autoResize])
 
   const handleExportChat = async () => {
-    if (!clientData?.id || !messages.length || !chatTitle) {
+    if (!messages.length || !chatTitle) {
       toast({
         title: 'Export Not Available',
-        description: 'Cannot export chat without client association and messages.',
+        description: 'Cannot export chat without messages and title.',
         variant: 'destructive',
       })
       return
@@ -178,7 +178,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     try {
       const chatContent = formatChatForExport(messages, chatTitle, clientData)
       
-      const result = await exportChat(clientData.id, chatContent, chatTitle)
+      const result = await exportChat(clientData?.id || null, chatContent, chatTitle)
       const documentId = result.documentId
 
       toast({
@@ -186,16 +186,16 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
         description: (
           <div>
             <p>Chat "{chatTitle}" has been saved as a document.</p>
-            <button 
-              onClick={() => {
-                if (onDocumentCreated && documentId) {
+            {onDocumentCreated && documentId && clientData?.id && (
+              <button 
+                onClick={() => {
                   onDocumentCreated(clientData.id, documentId)
-                }
-              }}
-              className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
-            >
-              📄 View Document
-            </button>
+                }}
+                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
+              >
+                📄 View Document
+              </button>
+            )}
           </div>
         ),
         duration: 10000,
@@ -214,9 +214,16 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     const exportTime = new Date().toLocaleTimeString()
     
     let content = `# ${title}\n\n`
-    content += `**Client:** ${clientData.name}\n`
-    if (clientData.email) content += `**Email:** ${clientData.email}\n`
-    if (clientData.country) content += `**Country:** ${clientData.country}\n`
+    
+    // Add client information if available
+    if (clientData) {
+      content += `**Client:** ${clientData.name}\n\n`
+      if (clientData.email) content += `**Email:** ${clientData.email}\n\n`
+      if (clientData.country) content += `**Country:** ${clientData.country}\n\n`
+    } else {
+      content += `**Type:** General Chat\n\n`
+    }
+    
     content += `**Export Date:** ${exportDate} at ${exportTime}\n\n`
     content += `---\n\n`
     
@@ -261,8 +268,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
           />
         </div>
         <div className="flex gap-2">
-          {/* Export Chat Button - only show if client is associated and has messages */}
-          {clientData?.id && messages.length > 0 && (
+          {/* Export Chat Button - show if there are messages */}
+          {messages.length > 0 && (
             <Button 
               variant="outline" 
               size="sm" 

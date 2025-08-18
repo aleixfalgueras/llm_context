@@ -50,7 +50,7 @@ export class DocumentService {
    * Get all user documents for storage calculations.
    * Returns minimal document data needed for storage usage analytics.
    */
-  static async getAllUserDocuments(userId: string): Promise<Array<{ id: string; clientId: string; fileSize: number | null }>> {
+  static async getAllUserDocuments(userId: string): Promise<Array<{ id: string; clientId: string | null; fileSize: number | null }>> {
     const config = {
       context: 'Get user documents for storage calculations',
       select: {
@@ -141,24 +141,29 @@ export class DocumentService {
    */
   static async createDocument(
     userId: string,
-    clientId: string,
+    clientId: string | null,
     documentName: string | undefined,
     documentType: DocumentType,
     content: string
-  ): Promise<{ success: true; document: { id: string; name: string; path: string; type: DocumentType } }> {
+  ): Promise<{ success: true; document: Document }> {
 
     // Validate storage constraints (throws error if validation fails)
     await this.validateDocumentStorage(content, userId)
 
-    const clientResult = await ClientService.getUserClientById(clientId, userId)
-    if (!clientResult.success) {
-      throw new Error(clientResult.error)
+    let clientName = 'General'
+    
+    // Only validate client if clientId is provided
+    if (clientId) {
+      const clientResult = await ClientService.getUserClientById(clientId, userId)
+      if (!clientResult.success) {
+        throw new Error(clientResult.error)
+      }
+      clientName = clientResult.data.name
     }
-    const client = clientResult.data
 
     // Generate document name if not provided
     const finalDocumentName = documentName || this.generateDefaultDocumentName(
-      client.name,
+      clientName,
       documentType
     )
 
@@ -187,7 +192,7 @@ export class DocumentService {
 
     // Store content in Supabase using the generated document ID
     const fileName = `${finalDocumentName}.md`
-    let storagePath: string
+    let finalDocument: Document
     try {
       const storageResult = await StorageService.storeDocumentInStorage(
         userId,
@@ -197,7 +202,6 @@ export class DocumentService {
         content,
         'text/markdown'
       )
-      storagePath = storageResult.path
 
       // Update document record with storage path
       const updateResult = await DocumentOperations.updateDocument(documentId, userId, {
@@ -213,6 +217,12 @@ export class DocumentService {
         }
         throw new Error(updateResult.error || 'Failed to update document with storage path')
       }
+
+      if (!updateResult.data) {
+        throw new Error('Failed to get updated document after storage path update')
+      }
+      
+      finalDocument = updateResult.data
     } catch (storageError) {
       // Cleanup database record if storage failed
       try {
@@ -232,12 +242,7 @@ export class DocumentService {
 
     return {
       success: true,
-      document: {
-        id: documentId,
-        name: finalDocumentName,
-        path: storagePath,
-        type: documentType
-      }
+      document: finalDocument
     }
   }
 
@@ -393,14 +398,27 @@ export class DocumentService {
       throw new Error(deleteResult.error || 'Failed to bulk delete documents')
     }
 
-    // Delete entire client folder from storage (optimized approach)
-    try {
-      await StorageService.deleteClientFolderFromStorage(userId, clientId)
-      logger.info(`Successfully deleted client folder for client ${clientId} with ${validDocuments.length} documents`)
-    } catch (error) {
-      const errorMessage = `Failed to delete client folder for client ${clientId}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      logger.error(errorMessage, error instanceof Error ? error : new Error(String(error)))
-      throw new Error(errorMessage)
+    // Delete entire client folder from storage (optimized approach) - only if clientId exists
+    if (clientId) {
+      try {
+        await StorageService.deleteClientFolderFromStorage(userId, clientId)
+        logger.info(`Successfully deleted client folder for client ${clientId} with ${validDocuments.length} documents`)
+      } catch (error) {
+        const errorMessage = `Failed to delete client folder for client ${clientId}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        logger.error(errorMessage, error instanceof Error ? error : new Error(String(error)))
+        throw new Error(errorMessage)
+      }
+    } else {
+      // For general documents without clientId, delete individually
+      for (const doc of validDocuments) {
+        if (doc.documentPath) {
+          try {
+            await StorageService.deleteDocumentFromStorage(doc.documentPath)
+          } catch (storageError) {
+            logger.error('Failed to delete document from storage', storageError instanceof Error ? storageError : new Error(String(storageError)))
+          }
+        }
+      }
     }
 
     return deleteResult.data
