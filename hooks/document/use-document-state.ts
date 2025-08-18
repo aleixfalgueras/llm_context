@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast'
 import {DocumentType} from '@prisma/client'
 import {Document} from '@prisma/client'
 import { handleClientApiError } from '@/lib/api/api-toast'
+import { getDocuments, getDocumentContent } from '@/app/actions/document-action'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()
@@ -30,18 +31,10 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ clientId })
-      const response = await fetch(`/api/documents?${params}`)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load documents' }))
-        throw new Error(errorData.error)
-      }
-
-      const result = await response.json()
+      const result = await getDocuments(clientId)
       
       // Handle DbOperationResult structure
-      const docs = result.data?.records || result.records || result.data || result || []
+      const docs = result.records || []
       
       setDocuments(Array.isArray(docs) ? docs : [])
     } catch (error) {
@@ -58,15 +51,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setLoadingContent(true)
     
     try {
-      const response = await fetch(`/api/documents/${document.id}/content`)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load document content' }))
-        throw new Error(errorData.error)
-      }
-
-      const result = await response.json()
-      const content = result.data.content
+      const content = await getDocumentContent(document.id)
       
       // Update all related state atomically
       setDocumentContent(content)
