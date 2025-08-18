@@ -2,9 +2,9 @@ import {stripe} from '@/lib/stripe/stripe'
 import {logger} from '../logger'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils"
-import {prisma} from '../prisma'
-import {invalidateAllUserCaches} from '../subscription/subscription-cache'
+import {invalidateAllUserCaches} from '@/services/subscription/subscription-cache'
 import {SubscriptionUsageOperations} from "@/database";
+import {SubscriptionService} from '@/services/subscription/subscription-service'
 import Stripe from "stripe";
 import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 
@@ -209,7 +209,7 @@ export async function synchronizeSubscriptionWithStripe(
       updateData.tokenLimit = planLimits.tokenLimit
     }
 
-    const updatedSubscription = await SubscriptionUsageOperations.updateSubscription(subscription.userId, updateData)
+    const updatedSubscription = await SubscriptionService.updateSubscription(subscription.userId, updateData)
 
     logger.info('Updated subscription in database', {
       userId: subscription.userId,
@@ -384,8 +384,8 @@ export async function scheduleSubscriptionDowngrade(
     throw error
   }
 
-  // Update database with pending plan change and schedule ID through database layer
-  await SubscriptionUsageOperations.updateSubscription(userId, {
+  // Update database with pending plan change and schedule ID through service layer
+  await SubscriptionService.updateSubscription(userId, {
     pendingPlanChange: targetPlan,
     stripeScheduleId: schedule.id
   })

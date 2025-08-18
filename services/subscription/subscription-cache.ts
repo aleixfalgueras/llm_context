@@ -5,7 +5,7 @@
  */
 
 import { Redis } from '@upstash/redis'
-import { logger } from '../logger'
+import { logger } from '../../lib/logger'
 import { UserSubscription, UserUsage } from '@prisma/client'
 import {StorageSubscriptionUsage} from "@/lib/types/subscription-usage-types";
 
@@ -180,8 +180,8 @@ export async function invalidateAllUserCaches(userId: string): Promise<void> {
     
     // Invalidate current billing period usage cache
     // Note: We need to get the subscription to know the billing period dates
-    const { SubscriptionUsageService } = await import('@/services/subscription-usage-service')
-    const subscription = await SubscriptionUsageService.getUserSubscription(userId)
+    const { SubscriptionService } = await import('@/services/subscription/subscription-service')
+    const subscription = await SubscriptionService.getUserSubscription(userId)
     
     if (subscription.currentPeriodStart && subscription.currentPeriodEnd) {
       const usageCacheKey = `${userId}_${subscription.currentPeriodStart.toISOString()}_${subscription.currentPeriodEnd.toISOString()}`

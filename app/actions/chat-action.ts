@@ -1,10 +1,11 @@
 'use server'
 
 import {ChatService} from '@/services/chat-service'
+import {DocumentService} from '@/services/document-service'
 import {checkAuth} from '@/lib/api/api-validation'
 import {revalidatePath} from 'next/cache'
 import {redirect, notFound} from 'next/navigation'
-import {Chat, Message} from '@prisma/client'
+import {Chat, Message, DocumentType} from '@prisma/client'
 
 export async function getChats(): Promise<Chat[]> {
   const userId = await checkAuth()
@@ -65,4 +66,33 @@ export async function updateChatTitle(chatId: string, title: string) {
   }
 
   revalidatePath(`/assistant/chat/${chatId}`)
+}
+
+export async function exportChat(clientId: string | null, content: string, chatTitle: string) {
+  const userId = await checkAuth()
+
+  if (!content || !chatTitle) {
+    throw new Error('Missing required fields: content and chatTitle are required')
+  }
+
+  try {
+    const result = await DocumentService.createDocument(
+      userId,
+      clientId,
+      chatTitle,
+      DocumentType.chat,
+      content
+    )
+
+    return {
+      ...result,
+      documentId: result.document.id,
+      message: 'Chat export saved successfully'
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('Storage limit exceeded')) {
+      throw new Error(error.message)
+    }
+    throw error
+  }
 }

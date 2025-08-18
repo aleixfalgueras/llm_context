@@ -1,25 +1,26 @@
-/**
- * Document storage service - handles Supabase file operations only
- */
+import {supabaseServer} from '@/lib/supabase'
+import {STORAGE_CONFIG} from '@/lib/config'
+import {logger} from '@/lib/logger'
+import {StorageUsage} from "@/lib/types/storage-types";
 
-import { supabaseServer } from '../lib/supabase'
-import { STORAGE_CONFIG } from '../lib/config'
-import { logger } from '../lib/logger'
 
-export class DocumentStorageService {
+export class StorageService {
+
   /**
    * Store document content in Supabase storage
    */
-  static async storeDocument(
+  static async storeDocumentInStorage(
     userId: string,
-    clientId: string,
+    clientId: string | null,
     documentId: string,
     fileName: string,
     content: string,
     mimeType: string = 'text/plain'
   ): Promise<{ path: string; url?: string }> {
     try {
-      const filePath = `${userId}/${clientId}/${documentId}_${fileName}`
+      const filePath = clientId 
+        ? `${userId}/${clientId}/${documentId}_${fileName}`
+        : `${userId}/${documentId}_${fileName}`
       const contentBuffer = Buffer.from(content, 'utf-8')
 
       const { data, error } = await supabaseServer.storage
@@ -57,7 +58,7 @@ export class DocumentStorageService {
   /**
    * Retrieve document content from storage
    */
-  static async getDocument(documentPath: string): Promise<string> {
+  static async getDocumentContentFromStorage(documentPath: string): Promise<string> {
     try {
       const { data, error } = await supabaseServer.storage
         .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
@@ -82,7 +83,7 @@ export class DocumentStorageService {
   /**
    * Delete document from storage
    */
-  static async deleteDocument(documentPath: string): Promise<void> {
+  static async deleteDocumentFromStorage(documentPath: string): Promise<void> {
     try {
       // Try to delete the document at the given path
       const { error } = await supabaseServer.storage
@@ -126,27 +127,9 @@ export class DocumentStorageService {
   }
 
   /**
-   * Check if document exists in storage
-   */
-  static async documentExists(documentPath: string): Promise<boolean> {
-    try {
-      const { data, error } = await supabaseServer.storage
-        .from(STORAGE_CONFIG.DOCUMENTS_BUCKET)
-        .list(documentPath.split('/').slice(0, -1).join('/'), {
-          search: documentPath.split('/').pop()
-        })
-
-      return !error && data && data.length > 0
-    } catch (error) {
-      logger.error('Document existence check error', error instanceof Error ? error : new Error(String(error)))
-      return false
-    }
-  }
-
-  /**
    * Update document content in storage
    */
-  static async updateDocument(
+  static async updateDocumentContentInStorage(
     documentPath: string,
     content: string,
     mimeType: string = 'text/markdown'
@@ -190,7 +173,7 @@ export class DocumentStorageService {
    * Delete all documents for a specific client (entire folder)
    * This is more efficient than deleting documents one by one
    */
-  static async deleteClientFolder(userId: string, clientId: string): Promise<void> {
+  static async deleteClientFolderFromStorage(userId: string, clientId: string): Promise<void> {
     try {
       const folderPath = `${userId}/${clientId}`
       
@@ -240,11 +223,47 @@ export class DocumentStorageService {
   }
 
   /**
-   * Generate storage file path for document
+   * Get current storage usage statistics for a user.
+   * 
+   * Queries the database to calculate total storage usage across all user documents.
+   * Aggregates file sizes from the document records and provides breakdown by client.
+   * Uses database-stored file sizes for accurate tracking.
+   * 
+   * @param userId - The user ID to calculate storage usage for
+   * @returns Promise<StorageUsage> containing total bytes, document count, and usage by client
+   * @throws Error if database query fails
    */
-  static generateFilePath(userId: string, fileName: string): string {
-    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const timestamp = Date.now()
-    return `${userId}/documents/${timestamp}_${sanitizedFileName}`
+  static async getStorageUsage(userId: string): Promise<StorageUsage> {
+    const {DocumentService} = await import('./document-service')
+    
+    try {
+      // Get all documents for the user through DocumentService (proper service layer)
+      const documents = await DocumentService.getAllUserDocuments(userId)
+
+      let totalBytes = 0
+      const usageByClient: Record<string, number> = {}
+
+      // Calculate storage usage from database file sizes
+      for (const doc of documents) {
+        const fileSize = doc.fileSize || 0
+        totalBytes += fileSize
+        
+        // Handle documents with or without clientId
+        const clientKey = doc.clientId || 'general'
+        if (!usageByClient[clientKey]) {
+          usageByClient[clientKey] = 0
+        }
+        usageByClient[clientKey] += fileSize
+      }
+
+      return {
+        totalBytes,
+        documentCount: documents.length,
+        usageByClient
+      }
+    } catch (error) {
+      logger.error('Error calculating storage usage', error as Error, { userId })
+      throw error
+    }
   }
 }

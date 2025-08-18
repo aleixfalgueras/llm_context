@@ -1,24 +1,78 @@
-/**
- * Document service - orchestrates repository and storage operations
- */
-
-import {DocumentStorageService} from './storage-service'
+import {StorageService} from './storage-service'
 import {ClientService} from './client/client-service'
-import {calculateDocumentSize, validateDocumentStorage} from '../lib/utils/storage'
-import {logger} from '../lib/logger'
-import {prisma} from '../lib/prisma'
-import {DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
-import {isSuccess, BaseOperations} from '@/database/base-operations'
-import {DocumentOperations} from '../database'
-import {invalidateStorageCache} from "@/lib/subscription/subscription-cache";
-import { Document } from '@prisma/client'
+import {logger} from '@/lib/logger'
+import {DOCUMENT_TYPE_LABELS, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {Document, DocumentType as DocumentTypeEnum} from '@prisma/client'
+import {isSuccess} from '@/database/base-operations'
+import {DocumentOperations} from '@/database'
+import {invalidateStorageCache} from "@/services/subscription/subscription-cache"
+import {SubscriptionErrorCode} from './error-codes'
 
 
 export class DocumentService {
   /**
+   * Calculate document size in bytes (UTF-8 encoding)
+   */
+  static calculateDocumentSize(content: string): number {
+    return new Blob([content]).size
+  }
+
+  /**
+   * Validate if a document can be saved without exceeding storage limits.
+   *
+   * Helper function that checks if saving a document would exceed the user's
+   * storage quota. Calculates document size and performs storage validation.
+   * Throws an error if validation fails.
+   *
+   * @param content - The document content to validate
+   * @param userId - The user ID to validate storage limits for
+   * @throws Error if storage limit would be exceeded
+   * @returns Promise that resolves if validation passes
+   */
+  static async validateDocumentStorage(content: string, userId: string): Promise<void> {
+    const {SubscriptionUsageService} = await import('./subscription/subscription-usage-service')
+
+    try {
+      const documentSize = this.calculateDocumentSize(content)
+      const storageSubscriptionUsage = await SubscriptionUsageService.getStorageSubscriptionUsage(userId)
+      const wouldExceedLimit = (storageSubscriptionUsage.usage.totalBytes + documentSize) > storageSubscriptionUsage.limit
+
+      if (wouldExceedLimit) {
+        throw new Error(SubscriptionErrorCode.STORAGE_LIMIT_EXCEEDED)
+      }
+    } catch (error) {
+      logger.error('Error checking storage limit', error as Error, { userId })
+      throw error
+    }
+  }
+
+  /**
+   * Get all user documents for storage calculations.
+   * Returns minimal document data needed for storage usage analytics.
+   */
+  static async getAllUserDocuments(userId: string): Promise<Array<{ id: string; clientId: string | null; fileSize: number | null }>> {
+    const config = {
+      context: 'Get user documents for storage calculations',
+      select: {
+        id: true,
+        clientId: true,
+        fileSize: true
+      }
+    }
+
+    const result = await DocumentOperations.findUserDocuments(userId, undefined, undefined, config)
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch documents for storage calculations')
+    }
+
+    return result.data.records
+  }
+
+  /**
    * Get client documents
    */
-  static async getClientDocuments(userId: string, clientId: string) {
+  static async getClientDocuments(userId: string, clientId: string): Promise<{ records: Document[]; total?: number }> {
     const config = {
       context: 'Get client documents',
       select: {
@@ -28,7 +82,7 @@ export class DocumentService {
         createdAt: true,
         updatedAt: true
       },
-      orderBy: { 
+      orderBy: {
         createdAt: 'desc'
       }
     }
@@ -43,29 +97,43 @@ export class DocumentService {
   }
 
   /**
+   * Get document metadata
+   */
+  static async getDocumentMetadata(userId: string, documentId: string): Promise<Document> {
+    const documentResult = await DocumentOperations.getDocumentById(
+      documentId,
+      userId
+    )
+
+    if (!documentResult.success || !documentResult.data) {
+      throw new Error('Document not found or unauthorized')
+    }
+
+    return documentResult.data
+  }
+
+  /**
    * Get document content
    */
   static async getDocumentContent(userId: string, documentId: string): Promise<string> {
     // Get document metadata
-    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
-      prisma.document,
+    const documentResult = await DocumentOperations.getDocumentById(
       documentId,
-      userId,
-      { context: 'Get document by ID' }
+      userId
     )
-    
+
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
     }
 
     const document = documentResult.data as any
-    
+
     if (!document.documentPath) {
       throw new Error('Document path not found')
     }
 
     // Get content from storage
-    return DocumentStorageService.getDocument(document.documentPath)
+    return StorageService.getDocumentContentFromStorage(document.documentPath)
   }
 
   /**
@@ -73,29 +141,34 @@ export class DocumentService {
    */
   static async createDocument(
     userId: string,
-    clientId: string,
+    clientId: string | null,
     documentName: string | undefined,
     documentType: DocumentType,
     content: string
-  ) {
+  ): Promise<{ success: true; document: Document }> {
 
     // Validate storage constraints (throws error if validation fails)
-    await validateDocumentStorage(content, userId)
+    await this.validateDocumentStorage(content, userId)
 
-    const clientResult = await ClientService.getUserClientById(clientId, userId)
-    if (!clientResult.success) {
-      throw new Error(clientResult.error)
+    let clientName = 'General'
+    
+    // Only validate client if clientId is provided
+    if (clientId) {
+      const clientResult = await ClientService.getUserClientById(clientId, userId)
+      if (!clientResult.success) {
+        throw new Error(clientResult.error)
+      }
+      clientName = clientResult.data.name
     }
-    const client = clientResult.data
 
     // Generate document name if not provided
     const finalDocumentName = documentName || this.generateDefaultDocumentName(
-      client.name,
+      clientName,
       documentType
     )
 
     // Calculate file size before uploading
-    const fileSize = calculateDocumentSize(content)
+    const fileSize = this.calculateDocumentSize(content)
 
     // Create database record first to get the generated ID
     const documentData: Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'userId'> = {
@@ -119,9 +192,9 @@ export class DocumentService {
 
     // Store content in Supabase using the generated document ID
     const fileName = `${finalDocumentName}.md`
-    let storagePath: string
+    let finalDocument: Document
     try {
-      const storageResult = await DocumentStorageService.storeDocument(
+      const storageResult = await StorageService.storeDocumentInStorage(
         userId,
         clientId,
         documentId,
@@ -129,7 +202,6 @@ export class DocumentService {
         content,
         'text/markdown'
       )
-      storagePath = storageResult.path
 
       // Update document record with storage path
       const updateResult = await DocumentOperations.updateDocument(documentId, userId, {
@@ -139,12 +211,18 @@ export class DocumentService {
       if (!updateResult.success) {
         // Cleanup storage if database update failed
         try {
-          await DocumentStorageService.deleteDocument(storageResult.path)
+          await StorageService.deleteDocumentFromStorage(storageResult.path)
         } catch (cleanupError) {
           logger.error('Failed to cleanup storage after database update error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)))
         }
         throw new Error(updateResult.error || 'Failed to update document with storage path')
       }
+
+      if (!updateResult.data) {
+        throw new Error('Failed to get updated document after storage path update')
+      }
+      
+      finalDocument = updateResult.data
     } catch (storageError) {
       // Cleanup database record if storage failed
       try {
@@ -164,12 +242,7 @@ export class DocumentService {
 
     return {
       success: true,
-      document: {
-        id: documentId,
-        name: finalDocumentName,
-        path: storagePath,
-        type: documentType
-      }
+      document: finalDocument
     }
   }
 
@@ -180,16 +253,14 @@ export class DocumentService {
     userId: string,
     documentId: string,
     updates: Partial<Pick<Document, 'documentName' | 'documentType'>> & { content?: string }
-  ) {
+  ): Promise<Document> {
 
     // Get current document to check permissions and get storage path
-    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
-      prisma.document,
+    const documentResult = await DocumentOperations.getDocumentById(
       documentId,
-      userId,
-      { context: 'Get document by ID' }
+      userId
     )
-    
+
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
     }
@@ -203,24 +274,24 @@ export class DocumentService {
       }
 
       // Validate storage constraints for content update
-      await validateDocumentStorage(updates.content, userId)
+      await this.validateDocumentStorage(updates.content, userId)
 
       // Update content in storage
-      await DocumentStorageService.updateDocument(
+      await StorageService.updateDocumentContentInStorage(
         currentDocument.documentPath,
         updates.content,
         'text/markdown'
       )
 
       // Calculate new file size for database update
-      const newFileSize = calculateDocumentSize(updates.content)
-      
+      const newFileSize = this.calculateDocumentSize(updates.content)
+
       // Add file size to metadata updates
       const metadataUpdates = {
         ...updates,
         fileSize: newFileSize
       }
-      
+
       // Remove content from metadata updates since it's not stored in database
       delete metadataUpdates.content
 
@@ -254,16 +325,14 @@ export class DocumentService {
   /**
    * Delete document and its content
    */
-  static async deleteDocument(userId: string, documentId: string) {
+  static async deleteDocument(userId: string, documentId: string): Promise<{ id: string }> {
 
     // Get document to find storage path
-    const documentResult = await BaseOperations.findUserOwnedRecord<Document>(
-      prisma.document,
+    const documentResult = await DocumentOperations.getDocumentById(
       documentId,
-      userId,
-      { context: 'Get document by ID' }
+      userId
     )
-    
+
     if (!documentResult.success || !documentResult.data) {
       throw new Error('Document not found or access denied')
     }
@@ -272,7 +341,7 @@ export class DocumentService {
 
     // Delete from database first
     const deleteResult = await DocumentOperations.deleteDocument(documentId, userId)
-    
+
     if (!deleteResult.success) {
       throw new Error(deleteResult.error || 'Failed to delete document')
     }
@@ -280,7 +349,7 @@ export class DocumentService {
     // Delete from storage (non-blocking if it fails)
     if (document.documentPath) {
       try {
-        await DocumentStorageService.deleteDocument(document.documentPath)
+        await StorageService.deleteDocumentFromStorage(document.documentPath)
       } catch (storageError) {
         logger.error('Failed to delete document from storage', storageError instanceof Error ? storageError : new Error(String(storageError)))
         // Don't throw - database deletion was successful
@@ -293,21 +362,17 @@ export class DocumentService {
   /**
    * Bulk delete documents
    */
-  static async bulkDeleteDocuments(userId: string, documentIds: string[]) {
+  static async bulkDeleteDocuments(userId: string, documentIds: string[]): Promise<{ deletedCount: number }> {
 
     // Get all documents first to find storage paths
-    const documents = await Promise.all(
-      documentIds.map(id => BaseOperations.findUserOwnedRecord<Document>(
-        prisma.document,
-        id,
-        userId,
-        { context: 'Get document by ID' }
-      ))
+    const documents = await DocumentOperations.bulkGetDocuments(
+      documentIds,
+      userId
     )
 
     const validDocuments = documents
       .filter(isSuccess)
-      .map(result => result.data)
+      .map(result => result.data as Document)
 
     if (validDocuments.length === 0) {
       throw new Error('No valid documents found')
@@ -315,7 +380,7 @@ export class DocumentService {
 
     // Get the clientId from the first document (all documents should belong to the same client)
     const clientId = validDocuments[0].clientId
-    
+
     // Verify all documents belong to the same client
     const allSameClient = validDocuments.every(doc => doc.clientId === clientId)
     if (!allSameClient) {
@@ -324,25 +389,36 @@ export class DocumentService {
     }
 
     // Delete from database
-    const deleteResult = await BaseOperations.bulkDeleteUserOwnedRecords(
-      prisma.document,
+    const deleteResult = await DocumentOperations.bulkDeleteDocuments(
       validDocuments.map(doc => doc.id),
-      userId,
-      { context: 'Bulk delete documents' }
+      userId
     )
 
     if (!deleteResult.success) {
       throw new Error(deleteResult.error || 'Failed to bulk delete documents')
     }
 
-    // Delete entire client folder from storage (optimized approach)
-    try {
-      await DocumentStorageService.deleteClientFolder(userId, clientId)
-      logger.info(`Successfully deleted client folder for client ${clientId} with ${validDocuments.length} documents`)
-    } catch (error) {
-      const errorMessage = `Failed to delete client folder for client ${clientId}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      logger.error(errorMessage, error instanceof Error ? error : new Error(String(error)))
-      throw new Error(errorMessage)
+    // Delete entire client folder from storage (optimized approach) - only if clientId exists
+    if (clientId) {
+      try {
+        await StorageService.deleteClientFolderFromStorage(userId, clientId)
+        logger.info(`Successfully deleted client folder for client ${clientId} with ${validDocuments.length} documents`)
+      } catch (error) {
+        const errorMessage = `Failed to delete client folder for client ${clientId}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        logger.error(errorMessage, error instanceof Error ? error : new Error(String(error)))
+        throw new Error(errorMessage)
+      }
+    } else {
+      // For general documents without clientId, delete individually
+      for (const doc of validDocuments) {
+        if (doc.documentPath) {
+          try {
+            await StorageService.deleteDocumentFromStorage(doc.documentPath)
+          } catch (storageError) {
+            logger.error('Failed to delete document from storage', storageError instanceof Error ? storageError : new Error(String(storageError)))
+          }
+        }
+      }
     }
 
     return deleteResult.data
@@ -351,13 +427,11 @@ export class DocumentService {
   /**
    * Fallback method for individual document deletion (used when documents belong to different clients)
    */
-  private static async bulkDeleteDocumentsIndividually(userId: string, validDocuments: any[]) {
+  private static async bulkDeleteDocumentsIndividually(userId: string, validDocuments: Document[]): Promise<{ deletedCount: number }> {
     // Delete from database
-    const deleteResult = await BaseOperations.bulkDeleteUserOwnedRecords(
-      prisma.document,
+    const deleteResult = await DocumentOperations.bulkDeleteDocuments(
       validDocuments.map(doc => doc.id),
-      userId,
-      { context: 'Bulk delete documents' }
+      userId
     )
 
     if (!deleteResult.success) {
@@ -367,10 +441,10 @@ export class DocumentService {
     // Delete from storage individually (fallback approach)
     const documentsWithStoragePaths = validDocuments.filter(doc => doc.documentPath)
     const storageErrors: string[] = []
-    
+
     for (const doc of documentsWithStoragePaths) {
       try {
-        await DocumentStorageService.deleteDocument(doc.documentPath)
+        await StorageService.deleteDocumentFromStorage(doc.documentPath)
         logger.info(`Successfully deleted document ${doc.id} from storage`)
       } catch (error) {
         const errorMessage = `Failed to delete document ${doc.id} from storage: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -396,19 +470,19 @@ export class DocumentService {
     documentType: DocumentType
   ): string {
     switch (documentType) {
-      case DOCUMENT_TYPES.MEETING:
+      case DocumentTypeEnum.meeting:
         const meetingDateFormatted = new Date().toISOString().split('T')[0]
-        return `${clientName} Meeting Report ${meetingDateFormatted}`
-      
-      case DOCUMENT_TYPES.CUSTOM_DOCUMENT:
-        return `${clientName} Custom Document`
-      
-      case DOCUMENT_TYPES.MANUAL:
-        return `${clientName} Manual Document`
-      
-      case DOCUMENT_TYPES.CHAT:
-        return `${clientName} Chat Export`
-      
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.meeting]} ${meetingDateFormatted}`
+
+      case DocumentTypeEnum.custom_document:
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.custom_document]}`
+
+      case DocumentTypeEnum.manual:
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.manual]}`
+
+      case DocumentTypeEnum.chat:
+        return `${clientName} ${DOCUMENT_TYPE_LABELS[DocumentTypeEnum.chat]}`
+
       default:
         return `${clientName} ${getDocumentTypeLabel(documentType)}`
     }

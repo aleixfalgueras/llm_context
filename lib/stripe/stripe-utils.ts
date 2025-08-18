@@ -2,7 +2,7 @@ import {stripe} from './stripe'
 import {logger} from '../logger'
 import {SubscriptionUsageOperations} from '@/database'
 import Stripe from 'stripe'
-import {SubscriptionUsageService} from "@/services/subscription-usage-service";
+import {SubscriptionService} from "@/services/subscription/subscription-service";
 import { SubscriptionPlan } from '@prisma/client';
 
 export const STRIPE_PRICE_IDS = {
@@ -50,7 +50,7 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
       },
     })
 
-    await SubscriptionUsageOperations.updateSubscription(userId, { stripeCustomerId: customer.id })
+    await SubscriptionService.updateSubscription(userId, { stripeCustomerId: customer.id })
 
     logger.info('Created new Stripe customer', { userId, metadata: { customerId: customer.id } })
     return customer
@@ -84,7 +84,7 @@ export async function createCheckoutSession(
     // Check if customer has existing active subscription
     const existingSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
-    const isUpgrade = existingSubscription?.stripeSubscriptionId && SubscriptionUsageService.isSubscriptionActive(existingSubscription)
+    const isUpgrade = existingSubscription?.stripeSubscriptionId && SubscriptionService.isSubscriptionActive(existingSubscription)
     
     logger.info(isUpgrade ? 'Creating checkout session for subscription upgrade' : 'Creating checkout session for new customer', { 
       userId, 

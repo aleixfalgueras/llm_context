@@ -1,7 +1,8 @@
 import {auth} from "@clerk/nextjs/server";
 import {logger} from "@/lib/logger";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/models-config";
-import {SubscriptionUsageService} from "@/services/subscription-usage-service";
+import {SubscriptionUsageService} from "@/services/subscription/subscription-usage-service";
+import {SubscriptionService} from "@/services/subscription/subscription-service";
 import {SubscriptionErrorCode} from "@/services/error-codes";
 
 /**
@@ -46,7 +47,7 @@ export async function checkTokenUsage(userId: string): Promise<void> {
  */
 export async function checkModelAccess(userId: string, modelId: string): Promise<boolean> {
   try {
-    const subscription = await SubscriptionUsageService.getUserSubscriptionWithValidation(userId)
+    const subscription = await SubscriptionService.getUserSubscriptionWithValidation(userId)
 
     // Check if subscription is active first
     if (!subscription.isActive) {

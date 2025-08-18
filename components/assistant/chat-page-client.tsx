@@ -9,17 +9,13 @@ import {ClientContextSidebar} from '@/components/assistant/client-context-sideba
 import {ClientDocuments} from '@/components/clients/client-documents'
 import {ErrorBoundary} from '@/components/global/error-boundary'
 import {handleClientApiError} from '@/lib/api/api-toast'
+import {Chat, Client} from '@prisma/client'
+import {ChatWithMessages} from "@/lib/types/chat-types";
 
 interface ChatPageClientProps {
-  chat: {
-    id: string
-    title: string
-    messages: any[]
-    clientId: string | null
-    contextFields?: string[]
-  }
-  chats: any[]
-  clients: any[]
+  chat: ChatWithMessages
+  chats: Chat[]
+  clients: Client[]
   userImageUrl?: string
   userName: string
   lastUsedModel?: string

@@ -1,4 +1,4 @@
-import {auth, currentUser} from '@clerk/nextjs/server'
+import {currentUser} from '@clerk/nextjs/server'
 import {ChatPageClient} from '@/components/assistant/chat-page-client'
 import {Navbar} from '@/components/global/navbar'
 import {getClients} from '@/app/actions/client-action'

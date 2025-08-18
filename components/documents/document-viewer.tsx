@@ -6,7 +6,8 @@ import {Textarea} from '@/components/ui/textarea'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Edit, Eye, FileText, Loader2, Save, X} from 'lucide-react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
-import {Document, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {Document} from '@prisma/client'
 
 interface DocumentViewerProps {
   document: Document | null

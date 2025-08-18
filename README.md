@@ -1,129 +1,124 @@
 # LLM Context
 
-A production-ready AI-powered marketing assistant platform built with Next.js 14, React 18, and OpenRouter AI integration. Designed for marketing professionals and content creators to streamline client management, generate personalized marketing content, and scale their business operations efficiently with enterprise-grade privacy compliance and modular architecture.
+A Next.js application for managing client contexts and AI-powered chat interactions with comprehensive document generation capabilities.
 
-## ✨ Key Features
+## Tech Stack
 
-- **AI-Powered Assistant**: Chat interface with Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano via OpenRouter
-- **Client Management**: Store client profiles with business context for personalized content generation
-- **Prompt Library**: Create and organize reusable AI templates with variable replacement
-- **Document Generation**: Meeting reports and custom documents with automatic storage
-- **Multi-language Support**: Generate content in 10 languages
-- **Privacy & Compliance**: GDPR-compliant with consent management and data export
-- **Subscription Management**: Usage tracking with Stripe integration
-- **Admin Dashboard**: System analytics and user management
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **TailwindCSS** - Utility-first CSS framework
+- **Radix UI** - Headless UI components
+- **shadcn/ui** - Pre-styled component library
 
+### Backend
+- **Next.js API Routes** - HTTP endpoints
+- **Server Actions** - Form handling and data mutations
+- **PostgreSQL** - Primary database
+- **Prisma ORM** - Type-safe database client
 
-## 🏗️ Tech Stack
+### Infrastructure & Services
+- **Supabase** - File storage and real-time features
+- **Clerk** - Authentication and user management
+- **Stripe** - Payment processing and subscriptions
+- **OpenRouter API** - AI model integration
+- **Upstash Redis** - Caching layer
+- **Vercel** - Deployment platform
 
-**Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS, shadcn/ui
+## 3-Layer Architecture Pattern
 
-**Backend:** Supabase (PostgreSQL), Prisma ORM, API Routes, Server Actions
+This application follows a strict 3-layer architecture pattern ensuring clear separation of concerns and maintainable code structure.
 
-**AI Integration:** OpenRouter (Google Gemini 2.0 Flash, OpenAI GPT-4.1 Nano)
+### Layer 1: Presentation Layer
+Handles all user interface and HTTP communication concerns.
 
-**Authentication:** Clerk
+**Responsibilities:**
+- Rendering UI components
+- Handling user interactions
+- Managing HTTP requests/responses
+- Form submissions and validation
 
-**Payments:** Stripe
+**Components:**
+- **Pages** (`app/[route]/`) - Next.js pages and layouts
+- **Components** (`components/`) - Reusable React components
+- **UI Library** (`components/ui/`) - shadcn/ui components
+- **Server Actions** (`app/actions/`) - Handle form submissions
+- **API Routes** (`app/api/`) - RESTful endpoints
 
-**File Storage:** Supabase Storage
+### Layer 2: Business Logic Layer
+Contains all business rules and orchestration logic.
 
-**Architecture:** Modular design with separated database, OpenRouter, and document management modules
+**Responsibilities:**
+- Business rule implementation
+- Data transformation and validation
+- Orchestrating multiple operations
+- Complex calculations and algorithms
 
-## 💰 Pricing
+**Components:**
+- **Services** (`services/`) - All business logic lives here
+- No knowledge of HTTP or UI concerns
+- Returns domain objects and DTOs
+- Orchestrates calls to data layer
 
-- **Basic ($10/month)**: 5M tokens, client profiles, 50MB storage
-- **Pro ($25/month)**: 15M tokens, client profiles, 200MB storage  
-- **Business ($50/month)**: 40M tokens, client profiles, 2GB storage
+### Layer 3: Data Access Layer
+Manages all database operations and external data sources.
 
-All plans include access to both Google Gemini 2.0 Flash and OpenAI GPT-4.1 Nano models.
+**Responsibilities:**
+- Database queries and mutations
+- Data persistence
+- External API integrations
+- Cache management
 
+**Components:**
+- **Database Operations** (`database/`) - Prisma queries
+- **Storage Service** (`services/storage-service.ts`) - File storage
+- **External APIs** (`services/openrouter/`) - AI model integration
 
-## 📂 Project Structure
+### Architectural Rules
 
-```
-├── app/                    # Next.js App Router pages and API routes
-├── components/             # React components organized by feature
-├── lib/                   # Core utilities and modules
-│   ├── database/          # Database operations
-│   ├── openrouter/        # AI integration
-│   └── documents/         # Document management
-├── prisma/               # Database schema and migrations
-├── hooks/                # Custom React hooks
-├── types/                # TypeScript definitions
-└── scripts/              # Utility scripts
-```
+1. **Dependency Flow**: Always downward (Presentation � Business � Data)
+2. **No Layer Jumping**: UI/API must go through services
+3. **Single Responsibility**: Each layer handles only its designated concerns
+4. **Type Safety**: Use Prisma-generated types throughout
+5. **No Reverse Dependencies**: Lower layers never reference upper layers
 
+## Project Structure
 
-## 🚀 Getting Started
+The codebase is organized to reflect the 3-layer architecture:
 
-### Prerequisites
-- Node.js 18+
-- Supabase account
-- OpenRouter API key
-- Clerk account
-- Stripe account (for payments)
+### Presentation Layer Structure
+- `app/` - Next.js App Router pages and routes
+  - `actions/` - Server actions for forms
+  - `api/` - RESTful API endpoints
+  - `[routes]/` - Page components
+- `components/` - React components
+  - `ui/` - Base UI components (shadcn/ui)
+  - `[feature]/` - Feature-specific components
+- `hooks/` - Custom React hooks
 
-### Installation
+### Business Logic Layer Structure
+- `services/` - All business logic
+  - `ai-services/` - AI document generation
+  - `client/` - Client management logic
+  - `subscription/` - Subscription handling
+  - `openrouter/` - AI model orchestration
+  - Individual service files for each domain
 
-1. **Clone and install:**
-```bash
-git clone <repo-url>
-npm install --legacy-peer-deps
-```
+### Data Access Layer Structure
+- `database/` - All database operations
+  - `base-operations.ts` - Common patterns
+  - `[entity]-operations.ts` - Entity-specific queries
+- `prisma/` - Database schema and migrations
+  - `schema.prisma` - Database models
+  - `migrations/` - Schema evolution
 
-2. **Set up environment variables in `.env.local`:**
-```env
-DATABASE_URL="your_supabase_database_url"
-OPENROUTER_API_KEY="your_openrouter_api_key"
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_key"
-CLERK_SECRET_KEY="your_clerk_secret"
-SUPABASE_URL="your_supabase_url"
-SUPABASE_KEY="your_supabase_key"
-STRIPE_SECRET_KEY="your_stripe_key"
-```
-
-3. **Set up database:**
-```bash
-npx prisma generate
-npx prisma db push
-```
-
-4. **Start development:**
-```bash
-npm run dev
-```
-
-## 📋 Usage
-
-1. **Sign up** and complete consent process
-2. **Create client profiles** with business context
-3. **Build prompt library** with reusable templates
-4. **Chat with AI** using client context
-5. **Generate documents** (meetings, custom content)
-6. **Export and manage** all generated content
-
-## 🔧 Development
-
-```bash
-npm run dev              # Start development
-npm run build           # Build for production
-npx prisma generate     # Generate Prisma client
-npx prisma db push      # Push schema changes
-npx prisma studio       # Database GUI
-```
-
-## 🚀 Deployment
-
-Deploy to Vercel with these environment variables:
-- All `.env.local` variables
-- Set build command: `npm run vercel-build`
-- Run `npx prisma migrate deploy` after deployment
-
-## 📄 License
-
-This project is proprietary software. All rights reserved.
-
----
-
-**Built with ❤️ for marketing professionals**
+### Supporting Structure
+- `lib/` - Shared utilities and configurations
+  - `types/` - TypeScript type definitions
+  - `utils/` - Helper functions
+  - `stripe/` - Payment integration
+  - Configuration files
+- `resources/` - Documentation and scripts
+  - `readme/` - Technical documentation
+  - `scripts/` - Utility scripts

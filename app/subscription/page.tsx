@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { handleClientApiError } from '@/lib/api/api-toast'
 import { useRouter } from 'next/navigation'
-import {isDowngrade as checkIsDowngrade} from '@/lib/subscription/subscription-plan-utils'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {Navbar} from '@/components/global/navbar'
 import {UpgradeDowngradeDialog} from '@/components/subscription/upgrade-downgrade-dialog'
@@ -21,6 +20,8 @@ import {useSubscriptionActions} from '@/hooks/subscription/use-subscription-acti
 import {useSubscriptionRefresh} from '@/hooks/subscription/use-subscription-refresh'
 import {useToast} from '@/hooks/use-toast'
 import {SubscriptionPlan} from "@prisma/client";
+
+import {isDowngrade as checkIsDowngrade} from "@/lib/utils/subscription-client-utils";
 
 export default function SubscriptionPage() {
   const {

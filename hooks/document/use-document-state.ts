@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import {Document, DOCUMENT_TYPES} from '@/lib/types/document-types'
+import {DocumentType} from '@prisma/client'
+import {Document} from '@prisma/client'
 import { handleClientApiError } from '@/lib/api/api-toast'
+import { getDocuments, getDocumentContent } from '@/app/actions/document-action'
 
 export function useDocumentState(clientId: string, open: boolean, documentToHighlight?: string | null) {
   const { toast } = useToast()
@@ -24,23 +26,15 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
   const [isCreating, setIsCreating] = useState(false)
   const [newDocumentName, setNewDocumentName] = useState('')
   const [newDocumentContent, setNewDocumentContent] = useState('')
-  const [newDocumentType, setNewDocumentType] = useState<string>(DOCUMENT_TYPES.MANUAL)
+  const [newDocumentType, setNewDocumentType] = useState<DocumentType>(DocumentType.manual)
 
   const loadDocuments = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ clientId })
-      const response = await fetch(`/api/documents?${params}`)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load documents' }))
-        throw new Error(errorData.error)
-      }
-
-      const result = await response.json()
+      const result = await getDocuments(clientId)
       
       // Handle DbOperationResult structure
-      const docs = result.data?.records || result.records || result.data || result || []
+      const docs = result.records || []
       
       setDocuments(Array.isArray(docs) ? docs : [])
     } catch (error) {
@@ -57,15 +51,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setLoadingContent(true)
     
     try {
-      const response = await fetch(`/api/documents/${document.id}/content`)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load document content' }))
-        throw new Error(errorData.error)
-      }
-
-      const result = await response.json()
-      const content = result.data.content
+      const content = await getDocumentContent(document.id)
       
       // Update all related state atomically
       setDocumentContent(content)
@@ -98,7 +84,7 @@ export function useDocumentState(clientId: string, open: boolean, documentToHigh
     setIsCreating(false)
     setNewDocumentName('')
     setNewDocumentContent('')
-    setNewDocumentType(DOCUMENT_TYPES.MANUAL)
+    setNewDocumentType(DocumentType.manual)
   }
 
   // Reset all document-related state when dialog opens

@@ -6,6 +6,7 @@ import {logger} from '@/lib/logger'
 import {Chat, Client, Message, Role} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 import {AIMessageRole} from '@/lib/types/openrouter-types'
+import {ChatWithMessages} from "@/lib/types/chat-types";
 
 export class ChatService {
   /**
@@ -96,7 +97,7 @@ Respond naturally and conversationally while keeping this context in mind.`
    * Process new chat creation with optional client
    */
   static async createNewChat(userId: string, clientId: string | null = null, contextFields: string[] = []): Promise<DbOperationResult<{
-    chat: Chat & { messages: Message[] },
+    chat: ChatWithMessages,
     client: Pick<Client, 'name'> | null
   }>> {
     // All new chats start with a generic title - will be updated when first message is sent
@@ -238,9 +239,9 @@ Respond naturally and conversationally while keeping this context in mind.`
 
       // Generate title based on client name (if any) and first message content
       if (clientName && firstMessageContent) {
-        newTitle = `${clientName} - ${firstMessageContent}`
+        newTitle = `${clientName} - ${firstMessageContent.replace(/\n+/g, ' ')}`
       } else if (firstMessageContent) {
-        newTitle = firstMessageContent
+        newTitle = firstMessageContent.replace(/\n+/g, ' ')
       } else {
         // fallback case
         newTitle = `Chat ${new Date().toLocaleDateString()}`
