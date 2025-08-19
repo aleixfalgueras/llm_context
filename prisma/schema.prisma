@@ -208,6 +208,20 @@ model AccountDeletionRequest {
   @@map("account_deletion_requests")
 }
 
+model Affiliation {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  affiliationCode       String   @unique
+  parentAffiliationCode String
+  status                String   @default("Gen Y")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+  @@index([parentAffiliationCode])
+  @@map("affiliations")
+}
+
 enum SubscriptionPlan {
   apprentice
   knight
