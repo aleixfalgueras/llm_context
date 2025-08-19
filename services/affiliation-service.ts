@@ -1,6 +1,6 @@
 import {logger} from '@/lib/logger'
 import {AffiliationOperations} from '@/database'
-import {Affiliation} from '@prisma/client'
+import {Affiliation, AffiliationStatus} from '@prisma/client'
 
 export class AffiliationService {
   
@@ -69,7 +69,7 @@ export class AffiliationService {
         userId,
         affiliationCode: newAffiliationCode,
         parentAffiliationCode: finalParentCode,
-        status: 'Gen Y'
+        status: AffiliationStatus.GenY
       })
 
       if (!createResult.success) {
@@ -169,7 +169,7 @@ export class AffiliationService {
    */
   static async updateAffiliationStatus(
     userId: string,
-    status: string
+    status: AffiliationStatus
   ): Promise<Affiliation> {
     try {
       // First get the affiliation

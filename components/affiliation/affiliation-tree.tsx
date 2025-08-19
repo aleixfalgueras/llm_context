@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils/general'
+import { AffiliationStatusLabels } from '@/lib/types/affiliation-types'
 
 interface AffiliationTreeProps {
   userAffiliation: Affiliation
@@ -91,7 +92,7 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
           
           <div className="flex items-center gap-2 mt-1">
             <Badge variant={isRoot ? "default" : "secondary"} className="text-xs">
-              {affiliation.status}
+              {AffiliationStatusLabels[affiliation.status]}
             </Badge>
             {hasChildren && (
               <span className="text-xs text-muted-foreground">

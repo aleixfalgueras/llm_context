@@ -10,8 +10,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AffiliationTree } from '@/components/affiliation/affiliation-tree'
 import { createUserAffiliation } from '@/app/actions/affiliation-action'
 import { Affiliation } from '@prisma/client'
-import { Copy, Users, Link, AlertCircle } from 'lucide-react'
+import { Copy, Link, AlertCircle, HelpCircle } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { AffiliationStatusEmoji, AffiliationStatusComissions } from '@/lib/types/affiliation-types'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface AffiliationClientProps {
   userAffiliation: Affiliation | null
@@ -116,7 +118,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <Link className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold">Affiliation System</h1>
+          <h1 className="text-3xl font-bold">Affiliation Network</h1>
         </div>
         <p className="text-muted-foreground">
           Manage your affiliation network and track your referrals
@@ -131,7 +133,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <span className="text-2xl font-mono font-bold">
+              <span className="text-xl font-mono font-bold">
                 {userAffiliation.affiliationCode}
               </span>
               <Button
@@ -142,9 +144,6 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Share this code with others to grow your network
-            </p>
           </CardContent>
         </Card>
 
@@ -168,9 +167,6 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
                 </Button>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              The code that brought you into the network
-            </p>
           </CardContent>
         </Card>
 
@@ -180,15 +176,24 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
             <CardTitle className="text-lg">Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <Badge className="text-base px-3 py-1" variant="default">
-                {userAffiliation.status}
-              </Badge>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span>{affiliationChildren.length} direct referrals</span>
+            <TooltipProvider>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge className="text-base px-3 py-1" variant="default">
+                  {AffiliationStatusEmoji[userAffiliation.status]}
+                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm">
+                    <p className="text-sm">
+                      <strong>Benefits:</strong><br />
+                      {AffiliationStatusComissions[userAffiliation.status]}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-            </div>
+            </TooltipProvider>
           </CardContent>
         </Card>
       </div>
