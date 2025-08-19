@@ -14,6 +14,7 @@ import { Copy, Link, AlertCircle, HelpCircle } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { AffiliationStatusEmoji, AffiliationStatusComissions } from '@/lib/types/affiliation-types'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { StatusGuideDialog } from '@/components/affiliation/status-guide-dialog'
 
 interface AffiliationClientProps {
   userAffiliation: Affiliation | null
@@ -194,6 +195,10 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
                 </Tooltip>
               </div>
             </TooltipProvider>
+            
+            <div className="mt-4">
+              <StatusGuideDialog currentStatus={userAffiliation.status} />
+            </div>
           </CardContent>
         </Card>
       </div>
