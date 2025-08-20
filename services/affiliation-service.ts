@@ -68,7 +68,9 @@ export class AffiliationService {
         if (parentResult.success && parentResult.data) {
           finalParentCode = parentAffiliationCode
         } else {
-          logger.warn(`Invalid parent affiliation code ${parentAffiliationCode} for user ${userId}, creating without parent`)
+          const errorMessage = `Invalid parent affiliation code: ${parentAffiliationCode} does not exist`
+          logger.error(errorMessage, new Error(errorMessage))
+          throw new Error(errorMessage)
         }
       }
       
