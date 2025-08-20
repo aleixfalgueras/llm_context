@@ -175,6 +175,153 @@ export class AffiliationService {
   }
 
   /**
+   * Calculate the appropriate affiliation status based on children count and their statuses
+   * @param children Array of child affiliations
+   * @returns The calculated AffiliationStatus
+   */
+  static calculateAffiliationStatus(children: Affiliation[]): AffiliationStatus {
+    try {
+      if (!children || !Array.isArray(children)) {
+        logger.warn('Invalid children array provided to calculateAffiliationStatus, returning GenY')
+        return AffiliationStatus.GenY
+      }
+
+      const totalChildren = children.length
+      
+      // Helper function to count children with specific status
+      const countChildrenWithStatus = (status: AffiliationStatus): number => {
+        return children.filter(child => child.status === status).length
+      }
+
+      // Get counts for specific status levels needed for tier calculations
+      const genYCount = countChildrenWithStatus(AffiliationStatus.GenY)
+      const cristalClubCount = countChildrenWithStatus(AffiliationStatus.CristalClub)
+      const sevenStarsCount = countChildrenWithStatus(AffiliationStatus.SevenStars)
+
+      logger.debug(`Calculating status for ${totalChildren} children: GenY=${genYCount}, CristalClub=${cristalClubCount}, SevenStars=${sevenStarsCount}`)
+
+      // Check conditions from highest to lowest tier
+      // Omega: 1000+ users & 1+ SevenStars user
+      if (totalChildren >= 1000 && sevenStarsCount >= 1) {
+        logger.debug('Qualified for Omega status')
+        return AffiliationStatus.Omega
+      }
+
+      // Alpha: 4000+ users & 10+ CristalClub users
+      if (totalChildren >= 4000 && cristalClubCount >= 10) {
+        logger.debug('Qualified for Alpha status')
+        return AffiliationStatus.Alpha
+      }
+
+      // InfinityStars: 2000+ users & 5+ CristalClub users
+      if (totalChildren >= 2000 && cristalClubCount >= 5) {
+        logger.debug('Qualified for InfinityStars status')
+        return AffiliationStatus.InfinityStars
+      }
+
+      // SevenStars: 1000+ users & 1+ CristalClub user
+      if (totalChildren >= 1000 && cristalClubCount >= 1) {
+        logger.debug('Qualified for SevenStars status')
+        return AffiliationStatus.SevenStars
+      }
+
+      // Walkin: 400+ users & 10+ GenY users
+      if (totalChildren >= 400 && genYCount >= 10) {
+        logger.debug('Qualified for Walkin status')
+        return AffiliationStatus.Walkin
+      }
+
+      // D5Level: 200+ users & 5+ GenY users
+      if (totalChildren >= 200 && genYCount >= 5) {
+        logger.debug('Qualified for D5Level status')
+        return AffiliationStatus.D5Level
+      }
+
+      // CristalClub: 100+ users & 1+ GenY user
+      if (totalChildren >= 100 && genYCount >= 1) {
+        logger.debug('Qualified for CristalClub status')
+        return AffiliationStatus.CristalClub
+      }
+
+      // LightWorker: 50+ users
+      if (totalChildren >= 50) {
+        logger.debug('Qualified for LightWorker status')
+        return AffiliationStatus.LightWorker
+      }
+
+      // Indigo: 25+ users
+      if (totalChildren >= 25) {
+        logger.debug('Qualified for Indigo status')
+        return AffiliationStatus.Indigo
+      }
+
+      // GenY: Default status (no requirements)
+      logger.debug('Using default GenY status')
+      return AffiliationStatus.GenY
+
+    } catch (error) {
+      logger.error('Unexpected error in calculateAffiliationStatus', error as Error)
+      // Return GenY as safe fallback
+      return AffiliationStatus.GenY
+    }
+  }
+
+  /**
+   * Check and update user affiliation status if needed based on their children
+   * @param userId The user ID to check and update
+   * @returns Object with update info: { updated: boolean, oldStatus?: AffiliationStatus, newStatus: AffiliationStatus }
+   */
+  static async checkAndUpdateUserStatus(
+    userId: string
+  ): Promise<{ updated: boolean; oldStatus?: AffiliationStatus; newStatus: AffiliationStatus }> {
+    try {
+      // Get user's current affiliation
+      const userAffiliation = await this.getUserAffiliation(userId)
+      
+      if (!userAffiliation) {
+        // No affiliation exists, nothing to update
+        return {
+          updated: false,
+          newStatus: AffiliationStatus.GenY
+        }
+      }
+
+      // Get user's children to calculate new status
+      const childrenResult = await this.getUserAffiliationChildren(userAffiliation.affiliationCode)
+      const calculatedStatus = this.calculateAffiliationStatus(childrenResult.children)
+
+      // Check if status needs updating
+      if (calculatedStatus === userAffiliation.status) {
+        logger.debug(`User ${userId} status is already up-to-date: ${userAffiliation.status}`)
+        return {
+          updated: false,
+          newStatus: userAffiliation.status
+        }
+      }
+
+      // Status needs updating
+      const oldStatus = userAffiliation.status
+      logger.info(`Updating user ${userId} status from ${oldStatus} to ${calculatedStatus} based on ${childrenResult.children.length} children`)
+
+      // Update the status
+      await this.updateAffiliationStatus(userId, calculatedStatus)
+
+      return {
+        updated: true,
+        oldStatus,
+        newStatus: calculatedStatus
+      }
+
+    } catch (error) {
+      logger.error(`Unexpected error in checkAndUpdateUserStatus for user ${userId}`, error as Error)
+      if (error instanceof Error) {
+        throw error
+      }
+      throw new Error('An unexpected error occurred while checking and updating user status')
+    }
+  }
+
+  /**
    * Update affiliation status
    */
   static async updateAffiliationStatus(

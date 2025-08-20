@@ -33,6 +33,26 @@ export async function createUserAffiliation(parentAffiliationCode: string): Prom
   return result
 }
 
+export async function checkAndUpdateAffiliationStatus(): Promise<{ updated: boolean; oldStatus?: string; newStatus: string }> {
+  const userId = await checkAuth()
+  
+  try {
+    const result = await AffiliationService.checkAndUpdateUserStatus(userId)
+    
+    return {
+      updated: result.updated,
+      oldStatus: result.oldStatus,
+      newStatus: result.newStatus
+    }
+  } catch (error) {
+    console.error('Error checking and updating affiliation status:', error)
+    return {
+      updated: false,
+      newStatus: 'GenY'
+    }
+  }
+}
+
 export async function getAffiliationChildren(): Promise<{ children: Affiliation[]; count: number }> {
   const userId = await checkAuth()
   
