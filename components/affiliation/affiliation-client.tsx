@@ -108,9 +108,9 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
             </div>
 
             {error && (
-              <Alert variant="destructive">
+              <Alert>
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="pt-1">{error}</AlertDescription>
               </Alert>
             )}
 

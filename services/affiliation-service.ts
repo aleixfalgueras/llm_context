@@ -9,7 +9,7 @@ export class AffiliationService {
    * Format: 6 random alphanumeric characters (uppercase)
    */
   private static generateAffiliationCode(): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789'
     let code = ''
     for (let i = 0; i < 6; i++) {
       code += characters.charAt(Math.floor(Math.random() * characters.length))
@@ -58,23 +58,27 @@ export class AffiliationService {
         }
       }
 
-      // Generate new unique affiliation code
-      const newAffiliationCode = await this.generateUniqueAffiliationCode()
-      
       // Validate parent code if provided
       let finalParentCode: string | null = null
       if (parentAffiliationCode) {
-        const parentResult = await AffiliationOperations.findAffiliationByCode(parentAffiliationCode)
-        if (parentResult.success && parentResult.data) {
-          finalParentCode = parentAffiliationCode
+        // Special handling for admin/root network code
+        if (parentAffiliationCode === '000000') {
+          finalParentCode = null
+          logger.info(`Using special admin root code 000000 - creating root-level affiliation for user ${userId}`)
         } else {
-          const errorMessage = `Invalid parent affiliation code: ${parentAffiliationCode} does not exist`
-          logger.error(errorMessage, new Error(errorMessage))
-          throw new Error(errorMessage)
+          const parentResult = await AffiliationOperations.findAffiliationByCode(parentAffiliationCode)
+          if (parentResult.success && parentResult.data) {
+            finalParentCode = parentAffiliationCode
+          } else {
+            const errorMessage = `Invalid parent affiliation code: ${parentAffiliationCode} does not exist`
+            logger.error(errorMessage, new Error(errorMessage))
+            throw new Error(errorMessage)
+          }
         }
       }
       
       // Create new affiliation
+      const newAffiliationCode = await this.generateUniqueAffiliationCode()
       const createResult = await AffiliationOperations.createAffiliation({
         userId,
         affiliationCode: newAffiliationCode,
