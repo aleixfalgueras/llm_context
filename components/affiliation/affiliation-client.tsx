@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast'
 import { AffiliationStatusEmoji, AffiliationStatusComissions } from '@/lib/types/affiliation-types'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { StatusGuideDialog } from '@/components/affiliation/status-guide-dialog'
+import { CommissionsGuideDialog } from '@/components/affiliation/commissions-guide-dialog'
 
 interface AffiliationClientProps {
   userAffiliation: Affiliation | null
@@ -209,8 +210,9 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
               </div>
             </TooltipProvider>
             
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-2">
               <StatusGuideDialog currentStatus={userAffiliation.status} />
+              <CommissionsGuideDialog />
             </div>
           </CardContent>
         </Card>
