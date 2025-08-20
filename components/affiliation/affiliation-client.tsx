@@ -202,8 +202,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
                   </TooltipTrigger>
                   <TooltipContent className="max-w-sm">
                     <p className="text-sm">
-                      <strong>Benefits:</strong><br />
-                      {AffiliationStatusComissions[userAffiliation.status]}
+                      Only users with a valid Stripe subscription are considered for status calculation.
                     </p>
                   </TooltipContent>
                 </Tooltip>
