@@ -24,6 +24,7 @@ const isPublicRoute = createRouteMatcher([
   '/terms',
   '/privacy',
   '/api/subscription/webhook',
+  '/api/webhook/clerk',
   ...BOT_CRAWLER_ROUTES
 ])
 

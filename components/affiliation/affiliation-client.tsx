@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AffiliationTree } from '@/components/affiliation/affiliation-tree'
 import { createUserAffiliation } from '@/app/actions/affiliation-action'
 import { Affiliation } from '@prisma/client'
-import { Copy, Link, AlertCircle, HelpCircle } from 'lucide-react'
+import { Copy, Link, AlertCircle, HelpCircle, Share2, UserPlus } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { AffiliationStatusEmoji, AffiliationStatusComissions } from '@/lib/types/affiliation-types'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -22,29 +22,29 @@ interface AffiliationClientProps {
 }
 
 export function AffiliationClient({ userAffiliation, affiliationChildren }: AffiliationClientProps) {
-  const [parentCode, setParentCode] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Get the current host for referral link
+  const getReferralLink = () => {
+    if (typeof window === 'undefined' || !userAffiliation) return ''
+    return `${window.location.origin}/sign-up?ref=${userAffiliation.affiliationCode}`
+  }
 
   const handleCreateAffiliation = async () => {
-    if (!parentCode.trim()) {
-      setError('Please enter a parent affiliation code')
-      return
-    }
-
     setIsCreating(true)
     setError(null)
 
     try {
-      const result = await createUserAffiliation(parentCode)
+      // Call the server action to create affiliation without parent code
+      const result = await createUserAffiliation()
       
       toast({
         title: 'Success',
         description: `Your affiliation code ${result.affiliationCode} has been created`,
       })
       
-      // Reload the page to show the new affiliation
-      window.location.reload()
+      // No need to reload - revalidatePath in server action handles the update
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create affiliation')
     } finally {
@@ -52,46 +52,36 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
     }
   }
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, type: string = 'code') => {
     navigator.clipboard.writeText(text)
     toast({
       title: 'Copied',
-      description: 'Affiliation code copied to clipboard',
+      description: type === 'link' ? 'Referral link copied to clipboard' : 'Affiliation code copied to clipboard',
     })
   }
 
-  // If user doesn't have an affiliation, show creation form
+  // If user doesn't have an affiliation, show creation form (for existing users before this feature)
   if (!userAffiliation) {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <Card className="max-w-lg mx-auto mt-14">
           <CardHeader>
-            <CardTitle>Create Your Affiliation Code</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Generate Your Referral Link
+            </CardTitle>
             <CardDescription>
-              To get started, you need to enter an existing user's affiliation code
+              It looks like you signed up before our referral system was launched. Generate your code now!
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                You need an affiliation code from an existing user to join the network. 
-                This code will become your parent affiliation, and you'll receive your own unique code to share with others.
+                Click the button below to generate your unique affiliation code. 
+                Once generated, you'll be able to share your referral link with others to grow your network.
               </AlertDescription>
             </Alert>
-
-            <div className="space-y-2">
-              <Label htmlFor="parentCode">Parent Affiliation Code</Label>
-              <Input
-                id="parentCode"
-                type="text"
-                placeholder="Enter code (e.g., ABC123)"
-                value={parentCode}
-                onChange={(e) => setParentCode(e.target.value.toUpperCase())}
-                disabled={isCreating}
-                maxLength={6}
-              />
-            </div>
 
             {error && (
               <Alert variant="destructive">
@@ -102,11 +92,16 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
 
             <Button 
               onClick={handleCreateAffiliation}
-              disabled={isCreating || !parentCode.trim()}
+              disabled={isCreating}
               className="w-full"
+              size="lg"
             >
-              {isCreating ? 'Creating...' : 'Create My Affiliation Code'}
+              {isCreating ? 'Generating...' : 'Generate My Referral Link'}
             </Button>
+            
+            <p className="text-sm text-muted-foreground text-center">
+              Note: Since you're an existing user, you won't have a parent affiliation.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -156,13 +151,13 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
           <CardContent>
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <span className="text-xl font-mono">
-                {userAffiliation.parentAffiliationCode}
+                {userAffiliation.parentAffiliationCode || 'None'}
               </span>
-              {userAffiliation.parentAffiliationCode !== 'SYSTEM' && (
+              {userAffiliation.parentAffiliationCode && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => copyToClipboard(userAffiliation.parentAffiliationCode)}
+                  onClick={() => copyToClipboard(userAffiliation.parentAffiliationCode!)}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -203,6 +198,38 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
         </Card>
       </div>
 
+      {/* Referral Link Card */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" />
+            Your Referral Link
+          </CardTitle>
+          <CardDescription>
+            Share this link with others to grow your network
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <Input
+              value={getReferralLink()}
+              readOnly
+              className="font-mono text-sm"
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => copyToClipboard(getReferralLink(), 'link')}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            When someone signs up using this link, they'll automatically be added to your network.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Affiliation Tree */}
       <Card>
         <CardHeader>
@@ -216,7 +243,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                You don't have any referrals yet. Share your affiliation code <strong>{userAffiliation.affiliationCode}</strong> with others to grow your network.
+                You don't have any referrals yet. Share your referral link with others to grow your network.
               </AlertDescription>
             </Alert>
           ) : (
