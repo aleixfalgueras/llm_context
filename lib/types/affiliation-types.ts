@@ -40,7 +40,7 @@ export const AffiliationStatusComissions = {
 }
 
 export const AffiliationStatusConditions = {
-  [AffiliationStatus.GenY]: "10 users",
+  [AffiliationStatus.GenY]: "-",
   [AffiliationStatus.Indigo]: "25 users",
   [AffiliationStatus.LightWorker]: "50 users",
   [AffiliationStatus.CristalClub]: `100 users & 1 ${AffiliationStatusLabels[AffiliationStatus.GenY]} user`,
