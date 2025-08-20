@@ -16,16 +16,13 @@ export async function getUserAffiliation(): Promise<Affiliation | null> {
   }
 }
 
-export async function createUserAffiliation(parentAffiliationCode: string): Promise<{ affiliationCode: string; isNew: boolean }> {
+// for users that didn't use any referral link
+export async function createUserAffiliation(): Promise<{ affiliationCode: string; isNew: boolean }> {
   const userId = await checkAuth()
-  
-  if (!parentAffiliationCode || parentAffiliationCode.trim().length === 0) {
-    throw new Error('Parent affiliation code is required')
-  }
   
   const result = await AffiliationService.getOrCreateUserAffiliationCode(
     userId,
-    parentAffiliationCode.trim().toUpperCase()
+    undefined
   )
   
   revalidatePath('/affiliation')

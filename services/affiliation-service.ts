@@ -61,8 +61,16 @@ export class AffiliationService {
       // Generate new unique affiliation code
       const newAffiliationCode = await this.generateUniqueAffiliationCode()
       
-      // Use provided parent code or default to 'SYSTEM' for root affiliations
-      const finalParentCode = parentAffiliationCode || 'SYSTEM'
+      // Validate parent code if provided
+      let finalParentCode: string | null = null
+      if (parentAffiliationCode) {
+        const parentResult = await AffiliationOperations.findAffiliationByCode(parentAffiliationCode)
+        if (parentResult.success && parentResult.data) {
+          finalParentCode = parentAffiliationCode
+        } else {
+          logger.warn(`Invalid parent affiliation code ${parentAffiliationCode} for user ${userId}, creating without parent`)
+        }
+      }
       
       // Create new affiliation
       const createResult = await AffiliationOperations.createAffiliation({
@@ -73,12 +81,12 @@ export class AffiliationService {
       })
 
       if (!createResult.success) {
-        const errorMessage = `Failed to create affiliation for user ${userId} with parent ${finalParentCode}: ${createResult.error}`
+        const errorMessage = `Failed to create affiliation for user ${userId}: ${createResult.error}`
         logger.error(errorMessage, new Error(createResult.error))
         throw new Error(errorMessage)
       }
 
-      logger.info(`Created new affiliation for user ${userId} with code ${newAffiliationCode} and parent ${finalParentCode}`)
+      logger.info(`Created new affiliation for user ${userId} with code ${newAffiliationCode} and parent ${finalParentCode || 'none'}`)
       
       return {
         affiliationCode: newAffiliationCode,
