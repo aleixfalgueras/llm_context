@@ -24,6 +24,7 @@ interface AffiliationClientProps {
 export function AffiliationClient({ userAffiliation, affiliationChildren }: AffiliationClientProps) {
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [parentCode, setParentCode] = useState('')
   
   // Get the current host for referral link
   const getReferralLink = () => {
@@ -32,12 +33,17 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
   }
 
   const handleCreateAffiliation = async () => {
+    if (!parentCode.trim()) {
+      setError('Parent affiliation code is required')
+      return
+    }
+
     setIsCreating(true)
     setError(null)
 
     try {
-      // Call the server action to create affiliation without parent code
-      const result = await createUserAffiliation()
+      // Call the server action to create affiliation with parent code
+      const result = await createUserAffiliation(parentCode.trim().toUpperCase())
       
       toast({
         title: 'Success',
@@ -78,10 +84,27 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Click the button below to generate your unique affiliation code. 
-                Once generated, you'll be able to share your referral link with others to grow your network.
+                To generate your affiliation code, you need to provide a parent affiliation code from someone who referred you to join our network.
               </AlertDescription>
             </Alert>
+
+            <div className="space-y-2">
+              <Label htmlFor="parentCode">Parent Affiliation Code</Label>
+              <Input
+                id="parentCode"
+                value={parentCode}
+                onChange={(e) => {
+                  setParentCode(e.target.value.toUpperCase())
+                  if (error) setError(null)
+                }}
+                placeholder="e.g. ABC123"
+                className="font-mono"
+                maxLength={6}
+              />
+              <p className="text-sm text-muted-foreground">
+                Ask the person who introduced you to the platform for their affiliation code.
+              </p>
+            </div>
 
             {error && (
               <Alert variant="destructive">
@@ -92,16 +115,12 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
 
             <Button 
               onClick={handleCreateAffiliation}
-              disabled={isCreating}
+              disabled={isCreating || !parentCode.trim()}
               className="w-full"
               size="lg"
             >
               {isCreating ? 'Generating...' : 'Generate My Referral Link'}
             </Button>
-            
-            <p className="text-sm text-muted-foreground text-center">
-              Note: Since you're an existing user, you won't have a parent affiliation.
-            </p>
           </CardContent>
         </Card>
       </div>
