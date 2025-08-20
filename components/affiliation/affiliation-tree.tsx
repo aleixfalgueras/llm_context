@@ -67,7 +67,7 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
           {isRoot ? (
             <User className="h-5 w-5" />
           ) : (
-            <Users className="h-5 w-5" />
+            <Users className="h-5 w-5  text-yellow-500" />
           )}
         </div>
 
@@ -137,10 +137,6 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
 export function AffiliationTree({ userAffiliation, children }: AffiliationTreeProps) {
   return (
     <div className="space-y-2">
-      <div className="text-sm text-muted-foreground mb-4">
-        Click on affiliation codes to copy them. Expand/collapse nodes to explore your network.
-      </div>
-      
       <TreeNode
         affiliation={userAffiliation}
         children={children}
