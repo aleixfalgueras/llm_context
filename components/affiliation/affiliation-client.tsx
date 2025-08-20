@@ -129,7 +129,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <span className="text-xl font-mono font-bold">
+              <span className="text-xl font-mono">
                 {userAffiliation.affiliationCode}
               </span>
               <Button
