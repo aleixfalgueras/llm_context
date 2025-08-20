@@ -41,8 +41,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
       '🤖 Access to MIA AI platform',
       '👥 Discount on access to local meetups about AI Education & Defi',
       '💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace',
-      '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)',
-      '🚀 Eligible Affiliate Starter Program'
+      '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)'
     ]
   },
   [SubscriptionPlan.master]: {
@@ -57,7 +56,6 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
       '👥 Discount on access to local meetups about AI Education, Defi & Influencers',
       '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
       '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)',
-      '🚀 Eligible Affiliate Starter Program',
       '🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)'
     ]
   },
@@ -73,7 +71,6 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
       '👥 Discount on access to local meetups about AI Education, Defi & Influencers',
       '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
       '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)',
-      '🚀 Eligible Affiliate Starter Program',
       '🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)',
       '📞 60 minutes private call per month to discuss personal branding and business scaling'
     ]
