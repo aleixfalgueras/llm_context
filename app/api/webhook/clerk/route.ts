@@ -48,16 +48,29 @@ export async function POST(req: NextRequest) {
   const eventType = evt.type
 
   if (eventType === 'user.created') {
-    const { id, unsafe_metadata } = evt.data
+    const { id, unsafe_metadata, first_name, last_name, email_addresses } = evt.data
     
     try {
       // Extract referral code from unsafe metadata if it exists
       const referralCode = unsafe_metadata?.referralCode as string | undefined
       
+      // Build public name from available data
+      let publicName: string
+      if (first_name && last_name) {
+        publicName = `${first_name} ${last_name}`
+      } else if (first_name) {
+        publicName = first_name
+      } else if (email_addresses && email_addresses.length > 0) {
+        publicName = email_addresses[0].email_address
+      } else {
+        publicName = 'Anonymous'
+      }
+      
       // Always create affiliation for ALL new users (with or without referral code)
       const result = await AffiliationService.getOrCreateUserAffiliationCode(
         id,
-        referralCode // Will be undefined if no referral code was used
+        referralCode, // Will be undefined if no referral code was used
+        publicName
       )
       
       logger.info(`Webhook: Created affiliation for new user ${id} - code: ${result.affiliationCode}, parent: ${referralCode || 'none'}, isNew: ${result.isNew}`)

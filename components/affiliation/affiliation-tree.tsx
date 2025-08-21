@@ -120,7 +120,7 @@ function TreeNode({ affiliation, children, allChildren, level, isRoot = false }:
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="font-semibold">
-              {isRoot ? 'You' : `User ${affiliation.id.slice(-6)}`}
+              {isRoot ? 'You' : (affiliation.publicName || `User ${affiliation.id.slice(-6)}`)}
             </span>
             <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
               {affiliation.affiliationCode}
