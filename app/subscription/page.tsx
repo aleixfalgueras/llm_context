@@ -248,11 +248,11 @@ export default function SubscriptionPage() {
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-red-900">Delete Account</DialogTitle>
+            <DialogTitle >Delete Account</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-2">
+            <div className="rounded-lg">
+              <p className="text-sm font-medium mb-2">
                 ⚠️ This action cannot be undone
               </p>
             </div>

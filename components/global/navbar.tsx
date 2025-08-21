@@ -23,6 +23,7 @@ export function Navbar() {
     { name: 'Prompts', href: '/prompts', icon: '📝' },
     { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
     { name: 'AI Services', href: '/ai-services', icon: '⚡' },
+    { name: 'Affiliation', href: '/affiliation', icon: '🔗' },
     { name: 'Feedback', href: '/feedback', icon: '💬' },
     ...(isAdmin ? [{ name: 'Admin', href: '/admin', icon: '🛡️' }] : []),
   ], [isAdmin])

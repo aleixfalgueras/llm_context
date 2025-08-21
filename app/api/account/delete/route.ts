@@ -26,6 +26,12 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
   })
 
   // 2. Count user data for audit purposes (parallelized)
+  // First get user's affiliation code for child count
+  const userAffiliation = await prisma.affiliation.findUnique({
+    where: { userId },
+    select: { affiliationCode: true }
+  })
+
   const dataCountsPromise = Promise.all([
     prisma.client.count({ where: { userId } }),
     prisma.document.count({ where: { userId } }),
@@ -36,10 +42,14 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       }
     }),
     prisma.prompt.count({ where: { userId } }),
-    prisma.feedback.count({ where: { userId } })
+    prisma.feedback.count({ where: { userId } }),
+    prisma.affiliation.count({ where: { userId } }),
+    userAffiliation ? prisma.affiliation.count({ 
+      where: { parentAffiliationCode: userAffiliation.affiliationCode } 
+    }) : Promise.resolve(0)
   ])
 
-  const [clientsCount, documentsCount, chatsCount, messagesCount, promptsCount, feedbacksCount] = await dataCountsPromise
+  const [clientsCount, documentsCount, chatsCount, messagesCount, promptsCount, feedbacksCount, affiliationsCount, affiliationChildrenCount] = await dataCountsPromise
 
   const dataCounts = {
     clients: clientsCount,
@@ -48,6 +58,8 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     messages: messagesCount,
     prompts: promptsCount,
     feedbacks: feedbacksCount,
+    affiliations: affiliationsCount,
+    affiliationChildren: affiliationChildrenCount,
     subscription: userSubscription ? 1 : 0,
     stripeCustomerId: userSubscription?.stripeCustomerId || null,
     stripeSubscriptionId: userSubscription?.stripeSubscriptionId || null,
@@ -112,6 +124,23 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       where: { userId }
     })
 
+    // Handle affiliation cleanup
+    let deletedAffiliationChildren = { count: 0 }
+    let deletedAffiliations = { count: 0 }
+    
+    // First, update any child affiliations to remove parent reference
+    if (userAffiliation?.affiliationCode) {
+      deletedAffiliationChildren = await tx.affiliation.updateMany({
+        where: { parentAffiliationCode: userAffiliation.affiliationCode },
+        data: { parentAffiliationCode: null }
+      })
+    }
+    
+    // Then delete the user's own affiliation record
+    deletedAffiliations = await tx.affiliation.deleteMany({
+      where: { userId }
+    })
+
     // Update deletion request with actual deletion counts
     await tx.accountDeletionRequest.update({
       where: { id: deletionRequest.id },
@@ -126,7 +155,9 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
             clients: deletedClients.count,
             prompts: deletedPrompts.count,
             feedbacks: deletedFeedbacks.count,
-            userConsent: deletedUserConsent.count
+            userConsent: deletedUserConsent.count,
+            affiliations: deletedAffiliations.count,
+            affiliationChildrenOrphaned: deletedAffiliationChildren.count
           },
           ipAddress: clientIP,
           userAgent,
@@ -145,7 +176,9 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
         clients: deletedClients.count,
         prompts: deletedPrompts.count,
         feedbacks: deletedFeedbacks.count,
-        userConsent: deletedUserConsent.count
+        userConsent: deletedUserConsent.count,
+        affiliations: deletedAffiliations.count,
+        affiliationChildrenOrphaned: deletedAffiliationChildren.count
       }
     }
   }, {

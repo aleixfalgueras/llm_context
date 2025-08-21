@@ -37,9 +37,6 @@ export function LandingPage() {
           <Button variant="ghost" asChild>
             <Link href="/sign-in">Sign in</Link>
           </Button>
-          <Button asChild>
-            <Link href="/sign-up">Sign up</Link>
-          </Button>
         </div>
       </nav>
 
@@ -61,15 +58,6 @@ export function LandingPage() {
           <p className="text-xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto mb-8">
             Create personalized marketing content with an AI that understands your clients' business context.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8" asChild>
-              <Link href="/sign-up">
-                Start Free Trial
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
-            </Button>
-          </div>
         </div>
 
         {/* Core Features Grid */}
@@ -286,17 +274,16 @@ export function LandingPage() {
         </div>
         
         {/* CTA Section */}
-        <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">
-            Ready to Create?
-          </h2>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-              <Link href="/sign-up">
-                Start Free Trial
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
-            </Button>
+        <div className="flex flex-col items-center justify-center">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 text-center">MIA is invite-only</h3>
+            <p className="text-gray-700 dark:text-gray-300 text-center max-w-lg">
+              Connect with a current member to receive your personal invitation and join our selective community of marketing professionals.              </p>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Business inquiries: <Link href="mailto:hello@mia-ai.com" className="text-blue-600 dark:text-blue-400 hover:underline">hello@mia-ai.com</Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
