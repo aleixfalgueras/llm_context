@@ -213,6 +213,7 @@ model Affiliation {
   userId                String            @unique
   affiliationCode       String            @unique
   parentAffiliationCode String?
+  publicName            String?
   status                AffiliationStatus @default(GenY)
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
