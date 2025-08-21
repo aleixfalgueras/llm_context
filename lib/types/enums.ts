@@ -4,17 +4,6 @@
  * for better type safety, consistency, and maintainability.
  */
 
-// =============================================================================
-// REQUEST AND PROCESS STATUS
-// =============================================================================
-
-export enum RequestStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
-}
 
 export enum ServiceStatus {
   AVAILABLE = 'available',
@@ -92,24 +81,12 @@ export enum BadgeVariant {
 
 export enum ViewMode {
   GRID = 'grid',
-  TABLE = 'table',
-  LIST = 'list'
+  TABLE = 'table'
 }
 
 export enum ClientSortMode {
   CREATED = 'created',
   NAME = 'name'
-}
-
-// =============================================================================
-// LOGGING
-// =============================================================================
-
-export enum LogLevel {
-  DEBUG = 'DEBUG',
-  INFO = 'INFO',
-  WARN = 'WARN',
-  ERROR = 'ERROR'
 }
 
 // =============================================================================

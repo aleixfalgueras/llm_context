@@ -208,6 +208,20 @@ model AccountDeletionRequest {
   @@map("account_deletion_requests")
 }
 
+model Affiliation {
+  id                    String            @id @default(cuid())
+  userId                String            @unique
+  affiliationCode       String            @unique
+  parentAffiliationCode String?
+  status                AffiliationStatus @default(GenY)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([parentAffiliationCode])
+  @@map("affiliations")
+}
+
 enum SubscriptionPlan {
   apprentice
   knight
@@ -233,4 +247,17 @@ enum DocumentType {
   custom_document
   manual
   chat
+}
+
+enum AffiliationStatus {
+  GenY
+  Indigo
+  LightWorker
+  CristalClub
+  D5Level
+  Walkin
+  SevenStars
+  InfinityStars
+  Alpha
+  Omega
 }
