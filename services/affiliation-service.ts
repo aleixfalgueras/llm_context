@@ -1,6 +1,8 @@
 import {logger} from '@/lib/logger'
 import {AffiliationOperations} from '@/database'
 import {Affiliation, AffiliationStatus} from '@prisma/client'
+import {AffiliationWithValid} from '@/lib/types/affiliation-types'
+import {SubscriptionService} from '@/services/subscription/subscription-service'
 
 export class AffiliationService {
   
@@ -110,10 +112,12 @@ export class AffiliationService {
   /**
    * Get all affiliation children of a user by their affiliation code
    * Returns all rows where parentAffiliationCode matches the provided code
+   * Always checks and includes subscription validity status for each child
+   * @param affiliationCode The affiliation code to find children for
    */
   static async getUserAffiliationChildren(
     affiliationCode: string
-  ): Promise<{ children: Affiliation[]; count: number }> {
+  ): Promise<{ children: AffiliationWithValid[]; count: number }> {
     try {
       // First verify the affiliation code exists
       const parentResult = await AffiliationOperations.findAffiliationByCode(affiliationCode)
@@ -138,11 +142,28 @@ export class AffiliationService {
 
       const children = childrenResult.data || []
       
-      logger.info(`Fetched ${children.length} affiliation children for code ${affiliationCode}`)
+      const childrenWithValid: AffiliationWithValid[] = await Promise.all(
+        children.map(async (child) => {
+          try {
+            const subscriptionWithValidation = await SubscriptionService.getUserSubscriptionWithValidation(child.userId)
+            return {
+              ...child,
+              valid: subscriptionWithValidation.isActive && subscriptionWithValidation.stripeSubscriptionId != null
+            }
+          } catch (error) {
+            logger.warn(`Failed to check subscription validity for user ${child.userId}`)
+            // If subscription check fails, consider it invalid
+            return {
+              ...child,
+              valid: false
+            }
+          }
+        })
+      )
 
       return {
-        children,
-        count: children.length
+        children: childrenWithValid,
+        count: childrenWithValid.length
       }
     } catch (error) {
       logger.error(`Unexpected error in getUserAffiliationChildren for code ${affiliationCode}`, error as Error)
@@ -275,7 +296,7 @@ export class AffiliationService {
    * @param userId The user ID to check and update
    * @returns Object with update info: { updated: boolean, oldStatus?: AffiliationStatus, newStatus: AffiliationStatus }
    */
-  static async checkAndUpdateUserStatus(
+  static async checkAndUpdateUserAffiliationStatus(
     userId: string
   ): Promise<{ updated: boolean; oldStatus?: AffiliationStatus; newStatus: AffiliationStatus }> {
     try {
@@ -292,7 +313,13 @@ export class AffiliationService {
 
       // Get user's children to calculate new status
       const childrenResult = await this.getUserAffiliationChildren(userAffiliation.affiliationCode)
-      const calculatedStatus = this.calculateAffiliationStatus(childrenResult.children)
+      
+      // Filter only children with valid subscriptions for status calculation
+      const validChildren = childrenResult.children.filter(child => child.valid)
+      logger.debug(`User ${userId} has ${childrenResult.children.length} total children, 
+      ${validChildren.length} with valid subscriptions`)
+      
+      const calculatedStatus = this.calculateAffiliationStatus(validChildren)
 
       // Check if status needs updating
       if (calculatedStatus === userAffiliation.status) {
@@ -305,7 +332,7 @@ export class AffiliationService {
 
       // Status needs updating
       const oldStatus = userAffiliation.status
-      logger.info(`Updating user ${userId} status from ${oldStatus} to ${calculatedStatus} based on ${childrenResult.children.length} children`)
+      logger.info(`Updating user ${userId} status from ${oldStatus} to ${calculatedStatus} based on ${validChildren.length} valid children (${childrenResult.children.length} total)`)
 
       // Update the status
       await this.updateAffiliationStatus(userId, calculatedStatus)
