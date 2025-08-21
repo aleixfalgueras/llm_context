@@ -47,7 +47,8 @@ export class AffiliationService {
    */
   static async getOrCreateUserAffiliationCode(
     userId: string,
-    parentAffiliationCode?: string
+    parentAffiliationCode?: string,
+    publicName?: string
   ): Promise<{ affiliationCode: string; isNew: boolean }> {
     try {
       // Check if user already has an affiliation
@@ -85,6 +86,7 @@ export class AffiliationService {
         userId,
         affiliationCode: newAffiliationCode,
         parentAffiliationCode: finalParentCode,
+        publicName: publicName || null,
         status: AffiliationStatus.GenY
       })
 

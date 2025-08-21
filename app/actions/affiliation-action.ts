@@ -5,6 +5,7 @@ import { AffiliationService } from '@/services/affiliation-service'
 import { checkAuth } from '@/lib/api/api-validation'
 import { Affiliation } from '@prisma/client'
 import { AffiliationWithValid } from '@/lib/types/affiliation-types'
+import { currentUser } from '@clerk/nextjs/server'
 
 export async function getUserAffiliation(): Promise<Affiliation | null> {
   const userId = await checkAuth()
@@ -25,9 +26,23 @@ export async function createUserAffiliation(parentAffiliationCode: string): Prom
     throw new Error('Parent affiliation code is required')
   }
   
+  // Get current user information for public name
+  const user = await currentUser()
+  let publicName: string
+  if (user?.firstName && user?.lastName) {
+    publicName = `${user.firstName} ${user.lastName}`
+  } else if (user?.firstName) {
+    publicName = user.firstName
+  } else if (user?.emailAddresses && user.emailAddresses.length > 0) {
+    publicName = user.emailAddresses[0].emailAddress
+  } else {
+    publicName = 'Anonymous'
+  }
+  
   const result = await AffiliationService.getOrCreateUserAffiliationCode(
     userId,
-    parentAffiliationCode.trim().toUpperCase()
+    parentAffiliationCode.trim().toUpperCase(),
+    publicName
   )
   
   revalidatePath('/affiliation')
