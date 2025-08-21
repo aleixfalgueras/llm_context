@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { AffiliationService } from '@/services/affiliation-service'
 import { checkAuth } from '@/lib/api/api-validation'
 import { Affiliation } from '@prisma/client'
+import { AffiliationWithValid } from '@/lib/types/affiliation-types'
 
 export async function getUserAffiliation(): Promise<Affiliation | null> {
   const userId = await checkAuth()
@@ -53,7 +54,7 @@ export async function checkAndUpdateAffiliationStatus(): Promise<{ updated: bool
   }
 }
 
-export async function getAffiliationChildren(): Promise<{ children: Affiliation[]; count: number }> {
+export async function getAffiliationChildren(): Promise<{ children: AffiliationWithValid[]; count: number }> {
   const userId = await checkAuth()
   
   try {
