@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { Affiliation } from '@prisma/client'
-import { ChevronDown, ChevronRight, User, Users, Copy } from 'lucide-react'
+import { ChevronDown, ChevronRight, User, Users, Copy, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils/general'
 import { AffiliationStatusLabels, AffiliationWithValid } from '@/lib/types/affiliation-types'
+import { unlinkChildAffiliation } from '@/app/actions/affiliation-action'
 
 interface AffiliationTreeProps {
   userAffiliation: Affiliation
@@ -23,6 +24,7 @@ interface TreeNodeProps {
 
 function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true)
+  const [isRemoving, setIsRemoving] = useState(false)
   const hasChildren = children.length > 0
 
   const copyToClipboard = (code: string) => {
@@ -31,6 +33,38 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
       title: 'Copied',
       description: `Affiliation code ${code} copied to clipboard`,
     })
+  }
+
+  const handleRemove = async () => {
+    if (!window.confirm('Are you sure you want to remove this user from your network?')) {
+      return
+    }
+
+    setIsRemoving(true)
+    try {
+      const result = await unlinkChildAffiliation(affiliation.affiliationCode)
+      
+      if (result.success) {
+        toast({
+          title: 'Success',
+          description: result.message,
+        })
+      } else {
+        toast({
+          title: 'Error',
+          description: result.message,
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove affiliation',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsRemoving(false)
+    }
   }
 
   // Helper function to get icon color based on subscription validity
@@ -96,6 +130,18 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
             >
               <Copy className="h-3 w-3" />
             </Button>
+            {!isRoot && level === 1 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-destructive hover:text-destructive"
+                onClick={handleRemove}
+                disabled={isRemoving}
+                title="Remove from network"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
           </div>
           
           <div className="flex items-center gap-2 mt-1">

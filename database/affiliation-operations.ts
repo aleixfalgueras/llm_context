@@ -146,4 +146,36 @@ export class AffiliationOperations extends BaseOperations {
       }
     }
   }
+
+  static async unlinkAffiliation(
+    affiliationCode: string
+  ): Promise<DbOperationResult<Affiliation>> {
+    try {
+      const affiliation = await prisma.affiliation.update({
+        where: { affiliationCode },
+        data: { parentAffiliationCode: null }
+      })
+      
+      return {
+        success: true,
+        data: affiliation
+      }
+    } catch (error) {
+      logger.dbError('AffiliationOperations', 'unlinkAffiliation', error as Error)
+      
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          return {
+            success: false,
+            error: 'Affiliation not found'
+          }
+        }
+      }
+      
+      return {
+        success: false,
+        error: 'Failed to unlink affiliation'
+      }
+    }
+  }
 }

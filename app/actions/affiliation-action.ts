@@ -70,3 +70,23 @@ export async function getAffiliationChildren(): Promise<{ children: Affiliation[
     return { children: [], count: 0 }
   }
 }
+
+export async function unlinkChildAffiliation(childAffiliationCode: string): Promise<{ success: boolean; message: string }> {
+  const userId = await checkAuth()
+  
+  try {
+    const result = await AffiliationService.unlinkChildAffiliation(userId, childAffiliationCode)
+    
+    if (result.success) {
+      revalidatePath('/affiliation')
+    }
+    
+    return result
+  } catch (error) {
+    console.error('Error unlinking child affiliation:', error)
+    return {
+      success: false,
+      message: 'Failed to remove affiliation from network'
+    }
+  }
+}

@@ -389,4 +389,64 @@ export class AffiliationService {
       throw new Error('An unexpected error occurred while updating affiliation status')
     }
   }
+
+  /**
+   * Unlink a child affiliation from its parent
+   * Sets the child's parentAffiliationCode to null, making it a root affiliation
+   * @param parentUserId The user ID of the parent attempting to unlink
+   * @param childAffiliationCode The affiliation code of the child to unlink
+   */
+  static async unlinkChildAffiliation(
+    parentUserId: string,
+    childAffiliationCode: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Get parent's affiliation to verify ownership
+      const parentAffiliation = await this.getUserAffiliation(parentUserId)
+      
+      if (!parentAffiliation) {
+        throw new Error('Parent affiliation not found')
+      }
+
+      // Verify the child actually belongs to this parent
+      const childResult = await AffiliationOperations.findAffiliationByCode(childAffiliationCode)
+      
+      if (!childResult.success || !childResult.data) {
+        throw new Error('Child affiliation not found')
+      }
+
+      if (childResult.data.parentAffiliationCode !== parentAffiliation.affiliationCode) {
+        throw new Error('This affiliation does not belong to your network')
+      }
+
+      // Unlink the child
+      const unlinkResult = await AffiliationOperations.unlinkAffiliation(childAffiliationCode)
+      
+      if (!unlinkResult.success) {
+        throw new Error(unlinkResult.error || 'Failed to unlink affiliation')
+      }
+
+      logger.info(`Unlinked child affiliation ${childAffiliationCode} from parent ${parentAffiliation.affiliationCode}`)
+
+      // Trigger status recalculation for the parent
+      await this.checkAndUpdateUserAffiliationStatus(parentUserId)
+
+      return {
+        success: true,
+        message: 'Affiliation successfully removed from your network'
+      }
+    } catch (error) {
+      logger.error(`Error unlinking child affiliation ${childAffiliationCode} for user ${parentUserId}`, error as Error)
+      if (error instanceof Error) {
+        return {
+          success: false,
+          message: error.message
+        }
+      }
+      return {
+        success: false,
+        message: 'An unexpected error occurred while unlinking affiliation'
+      }
+    }
+  }
 }
