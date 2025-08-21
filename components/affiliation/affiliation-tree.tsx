@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { Affiliation } from '@prisma/client'
-import { ChevronDown, ChevronRight, User, Users, Copy, X } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Affiliation, AffiliationStatus } from '@prisma/client'
+import { ChevronDown, ChevronRight, User, Users, Copy, X, Filter, FilterX } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils/general'
 import { AffiliationStatusLabels, AffiliationWithValid } from '@/lib/types/affiliation-types'
@@ -18,11 +20,12 @@ interface AffiliationTreeProps {
 interface TreeNodeProps {
   affiliation: Affiliation | AffiliationWithValid
   children: AffiliationWithValid[]
+  allChildren?: AffiliationWithValid[] // All children for count display in root
   level: number
   isRoot?: boolean
 }
 
-function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProps) {
+function TreeNode({ affiliation, children, allChildren, level, isRoot = false }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [isRemoving, setIsRemoving] = useState(false)
   const hasChildren = children.length > 0
@@ -148,12 +151,15 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
             <Badge variant={isRoot ? "default" : "secondary"} className="text-xs">
               {AffiliationStatusLabels[affiliation.status]}
             </Badge>
-            {hasChildren && (
+            {(hasChildren || (isRoot && allChildren && allChildren.length > 0)) && (
               <span className="text-xs text-muted-foreground">
-                {isRoot ? (
+                {isRoot && allChildren ? (
                   <>
-                    {children.length} {children.length === 1 ? 'referral' : 'referrals'}
-                    {' '}({children.filter(child => child.valid).length} with active {children.filter(child => child.valid).length === 1 ? 'subscription' : 'subscriptions'})
+                    {allChildren.length} {allChildren.length === 1 ? 'referral' : 'referrals'}
+                    {' '}({allChildren.filter(child => child.valid).length} with active {allChildren.filter(child => child.valid).length === 1 ? 'subscription' : 'subscriptions'})
+                    {children.length !== allChildren.length && (
+                      <span className="text-blue-600 font-medium"> • {children.length} shown</span>
+                    )}
                   </>
                 ) : (
                   <>
@@ -198,14 +204,141 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
 }
 
 export function AffiliationTree({ userAffiliation, children }: AffiliationTreeProps) {
+  const [validityFilter, setValidityFilter] = useState<'all' | 'active' | 'inactive'>('all')
+  const [statusFilter, setStatusFilter] = useState<AffiliationStatus | 'all'>('all')
+
+  // Filter children based on current filters
+  const filteredChildren = useMemo(() => {
+    return children.filter(child => {
+      // Apply validity filter
+      if (validityFilter === 'active' && !child.valid) return false
+      if (validityFilter === 'inactive' && child.valid) return false
+      
+      // Apply status filter
+      if (statusFilter !== 'all' && child.status !== statusFilter) return false
+      
+      return true
+    })
+  }, [children, validityFilter, statusFilter])
+
+  // Check if any filters are active
+  const hasActiveFilters = validityFilter !== 'all' || statusFilter !== 'all'
+
+  const clearFilters = () => {
+    setValidityFilter('all')
+    setStatusFilter('all')
+  }
+
+  // Get all unique statuses from children for the filter dropdown
+  const availableStatuses = useMemo(() => {
+    const statuses = Array.from(new Set(children.map(child => child.status)))
+    return statuses.sort()
+  }, [children])
+
   return (
-    <div className="space-y-2">
-      <TreeNode
-        affiliation={userAffiliation}
-        children={children}
-        level={0}
-        isRoot={true}
-      />
+    <div className="space-y-4">
+      {/* Filter Controls */}
+      {children.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <CardTitle className="text-sm">Filters</CardTitle>
+              </div>
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="h-7 px-2 text-xs"
+                >
+                  <FilterX className="h-3 w-3 mr-1" />
+                  Clear
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Subscription Validity Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Subscription Status</label>
+                <Select value={validityFilter} onValueChange={(value: 'all' | 'active' | 'inactive') => setValidityFilter(value)}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="active">
+                      <span className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        Active Subscriptions
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="inactive">
+                      <span className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500" />
+                        Inactive Subscriptions
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Status Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Affiliation Status</label>
+                <Select value={statusFilter} onValueChange={(value: AffiliationStatus | 'all') => setStatusFilter(value)}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    {availableStatuses.map(status => (
+                      <SelectItem key={status} value={status}>
+                        {AffiliationStatusLabels[status]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Results Summary */}
+            <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t">
+              <span>
+                Showing {filteredChildren.length} of {children.length} referrals
+              </span>
+              {hasActiveFilters && (
+                <div className="flex gap-1">
+                  {validityFilter !== 'all' && (
+                    <Badge variant="secondary" className="text-xs">
+                      {validityFilter === 'active' ? 'Active' : 'Inactive'} only
+                    </Badge>
+                  )}
+                  {statusFilter !== 'all' && (
+                    <Badge variant="secondary" className="text-xs">
+                      {AffiliationStatusLabels[statusFilter as AffiliationStatus]}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tree Display */}
+      <div>
+        <TreeNode
+          affiliation={userAffiliation}
+          children={filteredChildren}
+          allChildren={children}
+          level={0}
+          isRoot={true}
+        />
+      </div>
     </div>
   )
 }
