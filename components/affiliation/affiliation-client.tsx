@@ -12,14 +12,14 @@ import { createUserAffiliation } from '@/app/actions/affiliation-action'
 import { Affiliation } from '@prisma/client'
 import { Copy, Link, AlertCircle, HelpCircle, Share2, UserPlus } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { AffiliationStatusEmoji, AffiliationStatusComissions } from '@/lib/types/affiliation-types'
+import { AffiliationStatusEmoji, AffiliationStatusComissions, AffiliationWithValid } from '@/lib/types/affiliation-types'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { StatusGuideDialog } from '@/components/affiliation/status-guide-dialog'
 import { CommissionsGuideDialog } from '@/components/affiliation/commissions-guide-dialog'
 
 interface AffiliationClientProps {
   userAffiliation: Affiliation | null
-  affiliationChildren: Affiliation[]
+  affiliationChildren: AffiliationWithValid[]
 }
 
 export function AffiliationClient({ userAffiliation, affiliationChildren }: AffiliationClientProps) {
@@ -255,7 +255,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
         <CardHeader>
           <CardTitle>Your Affiliation Network</CardTitle>
           <CardDescription>
-            View your referral tree and track your network growth
+            View your referral tree and track your network growth. Green icons indicate users with active subscriptions, red icons show users without active subscriptions.
           </CardDescription>
         </CardHeader>
         <CardContent>

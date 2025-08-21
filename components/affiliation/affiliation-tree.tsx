@@ -7,16 +7,16 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils/general'
-import { AffiliationStatusLabels } from '@/lib/types/affiliation-types'
+import { AffiliationStatusLabels, AffiliationWithValid } from '@/lib/types/affiliation-types'
 
 interface AffiliationTreeProps {
   userAffiliation: Affiliation
-  children: Affiliation[]
+  children: AffiliationWithValid[]
 }
 
 interface TreeNodeProps {
-  affiliation: Affiliation
-  children: Affiliation[]
+  affiliation: Affiliation | AffiliationWithValid
+  children: AffiliationWithValid[]
   level: number
   isRoot?: boolean
 }
@@ -31,6 +31,14 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
       title: 'Copied',
       description: `Affiliation code ${code} copied to clipboard`,
     })
+  }
+
+  // Helper function to get icon color based on subscription validity
+  const getIconColor = (affiliation: Affiliation | AffiliationWithValid) => {
+    if ('valid' in affiliation) {
+      return affiliation.valid ? 'text-green-500' : 'text-red-500'
+    }
+    return 'text-yellow-500' // Fallback for items without valid property
   }
 
   return (
@@ -67,7 +75,7 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
           {isRoot ? (
             <User className="h-5 w-5" />
           ) : (
-            <Users className="h-5 w-5  text-yellow-500" />
+            <Users className={cn("h-5 w-5", getIconColor(affiliation))} />
           )}
         </div>
 
@@ -96,7 +104,16 @@ function TreeNode({ affiliation, children, level, isRoot = false }: TreeNodeProp
             </Badge>
             {hasChildren && (
               <span className="text-xs text-muted-foreground">
-                {children.length} {children.length === 1 ? 'referral' : 'referrals'}
+                {isRoot ? (
+                  <>
+                    {children.length} {children.length === 1 ? 'referral' : 'referrals'}
+                    {' '}({children.filter(child => child.valid).length} with active {children.filter(child => child.valid).length === 1 ? 'subscription' : 'subscriptions'})
+                  </>
+                ) : (
+                  <>
+                    {children.length} {children.length === 1 ? 'referral' : 'referrals'}
+                  </>
+                )}
               </span>
             )}
             <span className="text-xs text-muted-foreground">

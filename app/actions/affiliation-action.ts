@@ -37,7 +37,7 @@ export async function checkAndUpdateAffiliationStatus(): Promise<{ updated: bool
   const userId = await checkAuth()
   
   try {
-    const result = await AffiliationService.checkAndUpdateUserStatus(userId)
+    const result = await AffiliationService.checkAndUpdateUserAffiliationStatus(userId)
     
     return {
       updated: result.updated,

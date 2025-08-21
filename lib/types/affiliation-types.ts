@@ -1,4 +1,8 @@
-import { AffiliationStatus } from "@prisma/client"
+import { AffiliationStatus, Affiliation } from "@prisma/client"
+
+export type AffiliationWithValid = Affiliation & {
+  valid: boolean
+}
 
 export const AffiliationStatusLabels: Record<AffiliationStatus, string> = {
   [AffiliationStatus.GenY]: "Gen Y",
