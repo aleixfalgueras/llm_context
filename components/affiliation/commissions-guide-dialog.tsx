@@ -7,10 +7,10 @@ import { DollarSign, Calendar, Users, CheckCircle2, AlertCircle } from 'lucide-r
 
 export function CommissionsGuideDialog() {
   const subscriptionLimits = [
-    { plan: 'Apprentice', limit: 50, color: 'bg-blue-100 text-blue-800' },
-    { plan: 'Knight', limit: 100, color: 'bg-green-100 text-green-800' },
-    { plan: 'Master', limit: 200, color: 'bg-purple-100 text-purple-800' },
-    { plan: 'Jedi', limit: 'All', color: 'bg-gold-100 text-gold-800' }
+    { plan: 'Apprentice', limit: 100, color: 'bg-blue-100 text-blue-800' },
+    { plan: 'Knight', limit: 500, color: 'bg-green-100 text-green-800' },
+    { plan: 'Master', limit: 5000, color: 'bg-purple-100 text-purple-800' },
+    { plan: 'Jedi', limit: 50000, color: 'bg-gold-100 text-gold-800' }
   ]
 
   return (
