@@ -1,0 +1,448 @@
+{
+  "app": {
+    "title": "MIA - Millennials Influencers Assistant",
+    "description": "AI-powered marketing content generation platform",
+    "copyright": "2025 MIA. AI-powered marketing content generation platform."
+  },
+  "navigation": {
+    "clients": "Clients",
+    "prompts": "Prompts",
+    "assistant": "AI Assistant",
+    "aiServices": "AI Services",
+    "affiliation": "Affiliation",
+    "feedback": "Feedback",
+    "admin": "Admin",
+    "subscription": "Subscription",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "menu": "Menu",
+    "signIn": "Sign in"
+  },
+  "landing": {
+    "hero": {
+      "tagline": "Create personalized marketing content with an AI that understands your clients' business context.",
+      "cta": "Get Started"
+    },
+    "features": {
+      "title": "Advanced AI Marketing Platform",
+      "clientIntelligence": {
+        "title": "Client Business Intelligence",
+        "description": "Store industry insights, business goals, target audiences, and competitive landscape for each client"
+      },
+      "campaignStrategy": {
+        "title": "Campaign Strategy AI",
+        "description": "Generate marketing strategies, campaign ideas, and tactical plans using deep client context"
+      },
+      "contentCreation": {
+        "title": "Branded Content Creation",
+        "description": "Create on-brand content that speaks to your client's audience using their voice and messaging"
+      },
+      "clientReporting": {
+        "title": "Client Reporting",
+        "description": "Generate comprehensive client reports and campaign summaries with full business context"
+      }
+    },
+    "security": {
+      "badge": "Enterprise-grade privacy and security"
+    },
+    "models": {
+      "title": "Dual Premium AI Models Available",
+      "description": "All subscription tiers include both Google Gemini 2.0 and OpenAI GPT-4.1 through our unified model system.",
+      "gemini": {
+        "title": "Google Gemini 2.0",
+        "context": "1M Context Length",
+        "description": "Latest Google AI with enhanced reasoning, multimodal capabilities, and superior performance for complex marketing strategies."
+      },
+      "gpt": {
+        "title": "OpenAI GPT-4.1",
+        "context": "200K Context Length",
+        "description": "Efficient OpenAI model perfect for creative campaign content, strategic planning, and versatile marketing copy."
+      },
+      "switch": "Switch between models seamlessly"
+    },
+    "howItWorks": {
+      "title": "From Client Onboarding to Campaign Success",
+      "step1": {
+        "title": "Capture Client Intelligence",
+        "description": "Store each client's industry, target market, brand voice, competitive landscape, and business objectives in one organized system."
+      },
+      "step2": {
+        "title": "AI-Powered Marketing",
+        "description": "Generate campaign strategies, content, and marketing materials that are perfectly tailored to each client's unique business context and goals."
+      },
+      "step3": {
+        "title": "Deliver Results",
+        "description": "Present campaigns that truly understand your client's market, speak to their audience, and align with their business objectives."
+      }
+    },
+    "stats": {
+      "targeted": {
+        "title": "Targeted",
+        "subtitle": "Campaign Creation",
+        "description": "Based on real client data"
+      },
+      "scalable": {
+        "title": "Scalable",
+        "subtitle": "Client Management",
+        "description": "Handle more clients efficiently"
+      },
+      "strategic": {
+        "title": "Strategic",
+        "subtitle": "Marketing Intelligence",
+        "description": "Data-driven decisions"
+      },
+      "professional": {
+        "title": "Professional",
+        "subtitle": "Client Deliverables",
+        "description": "Impress every client"
+      }
+    },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "description": "Choose the plan that fits your marketing needs. All plans include access to both Google Gemini 2.0 and OpenAI GPT-4.1.",
+      "perMonth": "/month"
+    },
+    "cta": {
+      "title": "MIA is invite-only",
+      "description": "Connect with a current member to receive your personal invitation and join our selective community of marketing professionals.",
+      "businessInquiries": "Business inquiries:"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "Manage your client profiles and track their marketing projects",
+    "searchPlaceholder": "Search clients by name or email...",
+    "addClient": "Add Client",
+    "addFirstClient": "Add Your First Client",
+    "noClientsFound": "No clients found",
+    "noClientsYet": "No clients yet",
+    "tryAdjustingSearch": "Try adjusting your search terms",
+    "startByAdding": "Start by adding your first client to begin managing their marketing content.",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "clients": "clients",
+    "previous": "Previous",
+    "next": "Next",
+    "form": {
+      "personalInformation": "Personal Information",
+      "documentsLanguage": "Documents Language",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "namePlaceholder": "Client's full name",
+      "emailPlaceholder": "client@example.com",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "countryPlaceholder": "e.g., United States, Canada, UK",
+      "nameHelp": "Enter the client's full name",
+      "emailHelp": "Client's email address for communications",
+      "phoneHelp": "Include country code for international numbers",
+      "countryHelp": "Client's primary business location",
+      "createClient": "Create Client",
+      "updateClient": "Update Client",
+      "saving": "Saving...",
+      "close": "Close",
+      "cancel": "Cancel"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "documents": "Documents",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDocuments": "View Documents",
+      "editClient": "Edit Client",
+      "deleteClient": "Delete Client"
+    },
+    "delete": {
+      "title": "Delete Client",
+      "message": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "sort": {
+      "byDate": "Sort by creation date",
+      "byName": "Sort by name"
+    },
+    "view": {
+      "grid": "Grid view",
+      "table": "Table view"
+    }
+  },
+  "prompts": {
+    "title": "Prompt Management",
+    "description": "Create, edit, and organize your AI prompts for better conversations.",
+    "examplePrompts": "Example Prompts",
+    "myPrompts": "My Prompts",
+    "newPrompt": "New Prompt",
+    "searchPlaceholder": "Search prompts...",
+    "hideInactive": "Hide Inactive",
+    "showAll": "Show All",
+    "hideTemplates": "Hide Templates",
+    "showTemplates": "Show Templates",
+    "templatesDescription": "Professional prompt templates to get you started. Click any template to create your own customized version.",
+    "used": "Used {{count}}x",
+    "noUsage": "No usage yet",
+    "totalPrompts": "Total Prompts",
+    "mostUsed": "Most Used",
+    "categories": "Categories",
+    "active": "active",
+    "dialog": {
+      "viewPrompt": "View Prompt",
+      "editPrompt": "Edit Prompt",
+      "createPrompt": "Create New Prompt",
+      "createFromTemplate": "Create Prompt from Template",
+      "name": "Name",
+      "category": "Category",
+      "description": "Description",
+      "promptContent": "Prompt Content",
+      "namePlaceholder": "e.g., Generate Marketing Strategy Report",
+      "descriptionPlaceholder": "Brief description of what this prompt does",
+      "contentPlaceholder": "Enter your prompt template here. You can use variables like {{client_name}}, {{industry}}, etc.",
+      "isActive": "Active",
+      "close": "Close",
+      "cancel": "Cancel",
+      "create": "Create Prompt",
+      "update": "Update Prompt",
+      "createFromTemplateButton": "Create from Template"
+    },
+    "categories": {
+      "general": "General",
+      "marketing": "Marketing",
+      "content": "Content",
+      "analysis": "Analysis"
+    },
+    "delete": {
+      "title": "Delete Prompt",
+      "message": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameMinLength": "Name must be at least 3 characters",
+      "nameMaxLength": "Name must be less than 100 characters",
+      "contentRequired": "Prompt content is required",
+      "contentMinLength": "Prompt content must be at least 10 characters",
+      "descriptionMaxLength": "Description must be less than 500 characters"
+    }
+  },
+  "assistant": {
+    "title": "AI Chat Assistant",
+    "getStarted": "Get Started",
+    "privacyProtected": "Privacy Protected",
+    "startChatting": "Start chatting immediately or select a client for contextual conversations.",
+    "privacyDescription": "We only share selected client information with the AI when you explicitly choose a client context.",
+    "newChat": "New Chat",
+    "starting": "Starting...",
+    "chat": {
+      "placeholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
+      "exportChat": "Export Chat",
+      "exporting": "Exporting...",
+      "exportNotAvailable": "Export Not Available",
+      "noMessagesToExport": "No messages to export",
+      "chatExported": "Chat Exported",
+      "exportSuccess": "Chat has been exported as {{filename}}",
+      "client": "Client",
+      "email": "Email",
+      "country": "Country",
+      "type": "Type",
+      "generalChat": "General Chat",
+      "exportDate": "Export Date",
+      "you": "You",
+      "aiAssistant": "AI Assistant"
+    }
+  },
+  "subscription": {
+    "title": "Subscription",
+    "perMonth": "/month",
+    "processing": "Processing...",
+    "canceling": "Canceling...",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "changeAnytime": {
+        "question": "Can I change plans anytime?",
+        "answer": "Yes! You can upgrade or downgrade your subscription at any time. Changes take effect immediately for upgrades, and at the end of the current billing period for downgrades."
+      },
+      "exceedLimits": {
+        "question": "What happens if I exceed my limits?",
+        "answer": "If you reach your plan's usage limits, you'll be notified and can either wait until the next billing cycle or upgrade to a higher plan for continued access."
+      },
+      "dataSecure": {
+        "question": "Is my data secure?",
+        "answer": "Absolutely. We use enterprise-grade encryption for all data storage and transmission. Your client information and generated content are private and never shared with third parties."
+      }
+    }
+  },
+  "affiliation": {
+    "title": "Affiliation Network",
+    "description": "Manage your affiliation network and track your referrals",
+    "generateLink": "Generate Your Referral Link",
+    "yourCode": "Your Affiliation Code",
+    "parentAffiliation": "Parent Affiliation",
+    "status": "Status",
+    "yourReferralLink": "Your Referral Link",
+    "yourNetwork": "Your Affiliation Network",
+    "generateLinkDescription": "Enter an email to generate a unique referral link. This link will allow new users to sign up under your affiliation.",
+    "emailPlaceholder": "friend@example.com",
+    "generateLink": "Generate Link",
+    "generating": "Generating...",
+    "linkGenerated": "Referral link generated and sent!",
+    "linkSent": "We've sent the invitation to {{email}} with your unique referral link.",
+    "copyLink": "Copy Link",
+    "statusGuide": {
+      "title": "Affiliation Status Guide",
+      "status": "Status",
+      "requirements": "Requirements",
+      "benefitsCommissions": "Benefits & Commissions",
+      "note": "Note: Status upgrades are automatic and based on your network's performance over the last 30 days."
+    },
+    "commissionsGuide": {
+      "title": "Commissions Guide",
+      "paymentProcessing": "Payment Processing",
+      "calculationLimits": "Commission Calculation Limits",
+      "paymentRules": "Commissions are automatically processed and paid out monthly via the payment method associated with your account.",
+      "importantNotes": "Important: Commissions are only calculated up to the 4th generation to maintain system sustainability."
+    }
+  },
+  "feedback": {
+    "title": "Share Your Feedback",
+    "description": "Help us improve MIA by sharing your thoughts, reporting issues, or suggesting new features.",
+    "type": "Feedback Type",
+    "typeFeature": "Feature Request",
+    "typeBug": "Bug Report",
+    "typeGeneral": "General Feedback",
+    "subject": "Subject",
+    "subjectPlaceholder": {
+      "feature": "e.g., Add bulk client import feature",
+      "bug": "e.g., Export function not working",
+      "general": "e.g., Great experience with the AI assistant"
+    },
+    "message": "Message",
+    "messagePlaceholder": {
+      "feature": "Describe the feature you'd like to see and how it would help your workflow...",
+      "bug": "Please describe what happened, what you expected, and steps to reproduce the issue...",
+      "general": "Share your thoughts, suggestions, or experience..."
+    },
+    "submitFeature": "Submit Feature Request",
+    "submitBug": "Submit Bug Report",
+    "submitGeneral": "Submit Feedback",
+    "submitting": "Submitting..."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "submit": "Submit",
+    "reset": "Reset",
+    "clear": "Clear",
+    "select": "Select",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "apply": "Apply",
+    "actions": "Actions",
+    "options": "Options",
+    "settings": "Settings",
+    "preferences": "Preferences",
+    "help": "Help",
+    "about": "About",
+    "version": "Version",
+    "documentation": "Documentation",
+    "support": "Support",
+    "contactUs": "Contact Us",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "Copyright",
+    "allRightsReserved": "All rights reserved",
+    "poweredBy": "Powered by"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be no more than {{max}} characters",
+    "minValue": "Must be at least {{min}}",
+    "maxValue": "Must be no more than {{max}}",
+    "invalidUrl": "Please enter a valid URL",
+    "invalidDate": "Please enter a valid date",
+    "invalidNumber": "Please enter a valid number",
+    "passwordMismatch": "Passwords do not match",
+    "weakPassword": "Password is too weak",
+    "duplicateEntry": "This value already exists",
+    "invalidFormat": "Invalid format",
+    "fileTooBig": "File size must be less than {{size}}",
+    "unsupportedFileType": "Unsupported file type",
+    "somethingWentWrong": "Something went wrong",
+    "tryAgain": "Please try again"
+  },
+  "errors": {
+    "subscription": {
+      "expired": "Subscription Expired",
+      "expiredMessage": "Your subscription has expired. Please renew to continue using this feature.",
+      "limitExceeded": "Usage Limit Exceeded",
+      "limitExceededMessage": "You've reached your plan's usage limit. Upgrade for continued access.",
+      "modelAccessDenied": "Model Access Denied",
+      "modelAccessDeniedMessage": "Your current plan doesn't include access to this AI model.",
+      "notFound": "No Subscription Found",
+      "notFoundMessage": "No active subscription found. Please subscribe to continue.",
+      "storageLimitExceeded": "Storage Limit Exceeded",
+      "storageLimitExceededMessage": "You've reached your storage limit. Please upgrade your plan or delete some documents."
+    },
+    "generic": {
+      "title": "Error",
+      "message": "An unexpected error occurred. Please try again.",
+      "notFound": "Not Found",
+      "notFoundMessage": "The requested resource was not found.",
+      "unauthorized": "Unauthorized",
+      "unauthorizedMessage": "You don't have permission to access this resource.",
+      "forbidden": "Forbidden",
+      "forbiddenMessage": "Access to this resource is forbidden.",
+      "serverError": "Server Error",
+      "serverErrorMessage": "A server error occurred. Please try again later.",
+      "networkError": "Network Error",
+      "networkErrorMessage": "Please check your internet connection and try again."
+    }
+  },
+  "language": {
+    "english": "English",
+    "spanish": "Spanish",
+    "french": "French",
+    "german": "German",
+    "italian": "Italian",
+    "portuguese": "Portuguese",
+    "dutch": "Dutch",
+    "russian": "Russian",
+    "chinese": "Chinese",
+    "japanese": "Japanese",
+    "korean": "Korean",
+    "arabic": "Arabic"
+  }
+}

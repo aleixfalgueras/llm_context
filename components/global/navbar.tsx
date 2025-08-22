@@ -10,23 +10,26 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip'
 import {Menu} from 'lucide-react'
 import {useMemo} from 'react'
+import {useTranslations} from '@/lib/translations/context'
+import {LanguageSwitcher} from '@/components/language-switcher'
 
 export function Navbar() {
   const pathname = usePathname()
   const { user } = useUser()
+  const t = useTranslations('navigation')
   
   // Check if current user is admin
   const isAdmin = user?.emailAddresses[0]?.emailAddress === 'feina.aleix@gmail.com'
 
   const navigation = useMemo(() => [
-    { name: 'Clients', href: '/clients', icon: '👥' },
-    { name: 'Prompts', href: '/prompts', icon: '📝' },
-    { name: 'AI Assistant', href: '/assistant', icon: '🤖' },
-    { name: 'AI Services', href: '/ai-services', icon: '⚡' },
-    { name: 'Affiliation', href: '/affiliation', icon: '🔗' },
-    { name: 'Feedback', href: '/feedback', icon: '💬' },
-    ...(isAdmin ? [{ name: 'Admin', href: '/admin', icon: '🛡️' }] : []),
-  ], [isAdmin])
+    { name: t('clients'), href: '/clients', icon: '👥' },
+    { name: t('prompts'), href: '/prompts', icon: '📝' },
+    { name: t('assistant'), href: '/assistant', icon: '🤖' },
+    { name: t('aiServices'), href: '/ai-services', icon: '⚡' },
+    { name: t('affiliation'), href: '/affiliation', icon: '🔗' },
+    { name: t('feedback'), href: '/feedback', icon: '💬' },
+    ...(isAdmin ? [{ name: t('admin'), href: '/admin', icon: '🛡️' }] : []),
+  ], [isAdmin, t])
 
   // Helper function to determine if a nav item is active
   const isActive = (href: string) => {
@@ -81,6 +84,7 @@ export function Navbar() {
           {/* Right side */}
           <div className="flex items-center">
             <div className="flex items-center space-x-2 mr-4">
+              <LanguageSwitcher />
               <ThemeToggle />
             </div>
             
@@ -95,24 +99,24 @@ export function Navbar() {
                       </DropdownMenuTrigger>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Menu</p>
+                      <p>{t('menu')}</p>
                     </TooltipContent>
                   </Tooltip>
                   
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
                       <Link href="/subscription" className="cursor-pointer flex items-center">
-                        <span>Subscription</span>
+                        <span>{t('subscription')}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/privacy" className="cursor-pointer flex items-center">
-                        <span>Privacy Policy</span>
+                        <span>{t('privacyPolicy')}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/terms" className="cursor-pointer flex items-center">
-                        <span>Terms of Service</span>
+                        <span>{t('termsOfService')}</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
