@@ -23,6 +23,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 20,
     currency: 'EUR',
     tokenLimit: 15000000,
+    commissionLimit: 100,
     description: 'Perfect for individuals starting their journey',
     features_list: [
       '🤖 Access to MIA AI platform',
@@ -36,6 +37,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 50,
     currency: 'EUR',
     tokenLimit: 15000000,
+    commissionLimit: 500,
     description: 'For SMEs and content creators',
     features_list: [
       '🤖 Access to MIA AI platform',
@@ -50,6 +52,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 200,
     currency: 'EUR',
     tokenLimit: 15000000,
+    commissionLimit: 5000,
     description: 'For startups and influencers scaling their impact',
     features_list: [
       '🤖 Access to MIA AI platform',
@@ -65,6 +68,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 500,
     currency: 'EUR',
     tokenLimit: 15000000,
+    commissionLimit: 50000,
     description: 'For corporate leaders and CEOs driving innovation',
     features_list: [
       '🤖 Access to MIA AI platform',

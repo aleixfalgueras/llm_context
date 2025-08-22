@@ -4,14 +4,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DollarSign, Calendar, Users, CheckCircle2, AlertCircle } from 'lucide-react'
+import { SUBSCRIPTION_PLAN_DETAIL } from '@/lib/types/subscription-types'
 
 export function CommissionsGuideDialog() {
-  const subscriptionLimits = [
-    { plan: 'Apprentice', limit: 50, color: 'bg-blue-100 text-blue-800' },
-    { plan: 'Knight', limit: 100, color: 'bg-green-100 text-green-800' },
-    { plan: 'Master', limit: 200, color: 'bg-purple-100 text-purple-800' },
-    { plan: 'Jedi', limit: 'All', color: 'bg-gold-100 text-gold-800' }
-  ]
+  const subscriptionLimits = Object.values(SUBSCRIPTION_PLAN_DETAIL).map((plan) => ({
+    plan: plan.name,
+    limit: plan.commissionLimit,
+    color: 'bg-blue-100 text-blue-800' // You can customize colors per plan if needed
+  }))
 
   return (
     <Dialog>
@@ -99,7 +99,7 @@ export function CommissionsGuideDialog() {
                   </tr>
                 </thead>
                 <tbody>
-                  {subscriptionLimits.map((item, index) => (
+                  {subscriptionLimits.map((item) => (
                     <tr key={item.plan} className="border-b hover:bg-muted/50 transition-colors">
                       <td className="p-4">
                         <Badge variant="secondary" className="text-sm">
@@ -108,15 +108,12 @@ export function CommissionsGuideDialog() {
                       </td>
                       <td className="p-4">
                         <div className="font-medium">
-                          {typeof item.limit === 'number' ? `${item.limit} users` : 'Unlimited users'}
+                          {item.limit} users
                         </div>
                       </td>
                       <td className="p-4">
                         <div className="text-sm text-muted-foreground">
-                          {typeof item.limit === 'number' 
-                            ? `Commissions calculated from your top ${item.limit} performing referrals`
-                            : 'Commissions calculated from all referrals in your network'
-                          }
+                          Commissions calculated from your top {item.limit} performing referrals
                         </div>
                       </td>
                     </tr>
@@ -134,14 +131,11 @@ export function CommissionsGuideDialog() {
                       {item.plan}
                     </Badge>
                     <div className="font-medium text-sm">
-                      {typeof item.limit === 'number' ? `${item.limit} users` : 'Unlimited'}
+                      {item.limit} users
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {typeof item.limit === 'number' 
-                      ? `Commissions calculated from your top ${item.limit} performing referrals`
-                      : 'Commissions calculated from all referrals in your network'
-                    }
+                    Commissions calculated from your top {item.limit} performing referrals
                   </p>
                 </div>
               ))}
