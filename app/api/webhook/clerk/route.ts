@@ -54,31 +54,43 @@ export async function POST(req: NextRequest) {
       // Extract referral code from unsafe metadata if it exists
       const referralCode = unsafe_metadata?.referralCode as string | undefined
       
-      // Build public name from available data
-      let publicName: string
-      if (first_name && last_name) {
-        publicName = `${first_name} ${last_name}`
-      } else if (first_name) {
-        publicName = first_name
-      } else if (email_addresses && email_addresses.length > 0) {
-        publicName = email_addresses[0].email_address
+      // Only create affiliations for users who signed up with a referral code
+      if (referralCode) {
+        // Build public name from available data
+        let publicName: string
+        if (first_name && last_name) {
+          publicName = `${first_name} ${last_name}`
+        } else if (first_name) {
+          publicName = first_name
+        } else if (email_addresses && email_addresses.length > 0) {
+          publicName = email_addresses[0].email_address
+        } else {
+          publicName = 'Anonymous'
+        }
+        
+        // Create affiliation for users who signed up through a referral link
+        const result = await AffiliationService.getOrCreateUserAffiliationCode(
+          id,
+          referralCode,
+          publicName
+        )
+        
+        logger.info(`Webhook: Created affiliation for new user ${id} - code: ${result.affiliationCode}, parent: ${referralCode}, isNew: ${result.isNew}`)
+        
+        return NextResponse.json({ 
+          success: true, 
+          affiliationCode: result.affiliationCode 
+        })
       } else {
-        publicName = 'Anonymous'
+        // User signed up without referral code - no affiliation created
+        // They can manually create one later if they choose to join a network
+        logger.info(`Webhook: User ${id} signed up without referral code - no affiliation created`)
+        
+        return NextResponse.json({ 
+          success: true, 
+          message: 'User created without referral - no affiliation created'
+        })
       }
-      
-      // Always create affiliation for ALL new users (with or without referral code)
-      const result = await AffiliationService.getOrCreateUserAffiliationCode(
-        id,
-        referralCode, // Will be undefined if no referral code was used
-        publicName
-      )
-      
-      logger.info(`Webhook: Created affiliation for new user ${id} - code: ${result.affiliationCode}, parent: ${referralCode || 'none'}, isNew: ${result.isNew}`)
-      
-      return NextResponse.json({ 
-        success: true, 
-        affiliationCode: result.affiliationCode 
-      })
     } catch (error) {
       logger.error(`Webhook: Failed to create affiliation for user ${id}`, error as Error)
       // Return success to prevent webhook retry, but log the error
