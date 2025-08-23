@@ -4,6 +4,7 @@ import {ChatPageClient} from '@/components/assistant/chat-page-client'
 import {Navbar} from '@/components/global/navbar'
 import {getClients} from '@/app/actions/client-action'
 import {getChats} from '@/app/actions/chat-action'
+import {getTranslations} from '@/lib/translations'
 
 interface NewChatPageProps {
   searchParams: Promise<{ clientId?: string; contextFields?: string }>
@@ -14,6 +15,7 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
 
   // Get current user data from Clerk
   const user = await currentUser()
+  const t = await getTranslations('assistant')
 
   // Get all user's chats and clients in parallel
   const [chats, clients] = await Promise.all([
@@ -34,7 +36,7 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
   // Create a mock chat object for new chat
   const newChat = {
     id: '', // Empty ID indicates new chat
-    title: 'New Chat',
+    title: t('newChatTitle'),
     userId: '', // Will be set when chat is actually created
     messages: [],
     clientId: clientId || null,

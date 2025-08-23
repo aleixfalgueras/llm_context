@@ -12,6 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {useTranslations} from '@/lib/translations/context'
 
 interface DatePickerProps {
   value?: string
@@ -25,10 +26,12 @@ interface DatePickerProps {
 export function DatePicker({
   value,
   onChange,
-  placeholder = "Pick a date",
+  placeholder,
   disabled = false,
   id
 }: DatePickerProps) {
+  const t = useTranslations()
+  const defaultPlaceholder = placeholder || t('ui.placeholders.pickDate')
   const [open, setOpen] = React.useState(false)
   
   // Convert string to Date object for the calendar
@@ -59,7 +62,7 @@ export function DatePicker({
           disabled={disabled}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(selectedDate!, "PPP") : <span>{placeholder}</span>}
+          {value ? format(selectedDate!, "PPP") : <span>{defaultPlaceholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

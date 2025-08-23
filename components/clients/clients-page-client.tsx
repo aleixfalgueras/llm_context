@@ -7,6 +7,7 @@ import {ClientForm} from '@/components/clients/client-form'
 import {ClientDocuments} from '@/components/clients/client-documents'
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog'
 import {useClientManagement} from '@/hooks/client/use-client-management'
+import {useTranslations} from '@/lib/translations/context'
 
 interface ClientsPageClientProps {
   clients: any[]
@@ -17,6 +18,7 @@ interface ClientsPageClientProps {
 export function ClientsPageClient({ clients: initialClients }: ClientsPageClientProps) {
   const [clients] = useState(initialClients)
   const router = useRouter()
+  const t = useTranslations('clients')
   
   const {
     // State
@@ -69,7 +71,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingClient ? 'Edit Client' : 'Add New Client'}
+              {editingClient ? t('actions.editClient') : t('addClient')}
             </DialogTitle>
           </DialogHeader>
           <ClientForm
@@ -84,7 +86,7 @@ export function ClientsPageClient({ clients: initialClients }: ClientsPageClient
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>View Client</DialogTitle>
+            <DialogTitle>{t('actions.viewClient')}</DialogTitle>
           </DialogHeader>
           <ClientForm
             client={viewingClient}

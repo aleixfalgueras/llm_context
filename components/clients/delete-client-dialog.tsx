@@ -1,5 +1,6 @@
 'use client'
 
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {
   Dialog,
@@ -19,6 +20,8 @@ interface DeleteClientDialogProps {
 }
 
 export function DeleteClientDialog({ onDelete, clientName, open, onOpenChange }: DeleteClientDialogProps) {
+  const t = useTranslations('clients')
+  const tCommon = useTranslations('common')
 
   const handleDelete = () => {
     onDelete()
@@ -29,17 +32,17 @@ export function DeleteClientDialog({ onDelete, clientName, open, onOpenChange }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Client</DialogTitle>
+          <DialogTitle>{t('delete.title')}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete "{clientName}"? This action cannot be undone.
+            {t('delete.message', { name: clientName })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            Delete
+            {tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -10,7 +10,8 @@ import {ClientDocuments} from '@/components/clients/client-documents'
 import {ErrorBoundary} from '@/components/global/error-boundary'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {Chat, Client} from '@prisma/client'
-import {ChatWithMessages} from "@/lib/types/chat-types";
+import {ChatWithMessages} from "@/lib/types/chat-types"
+import {useTranslations} from '@/lib/translations/context'
 
 interface ChatPageClientProps {
   chat: ChatWithMessages
@@ -23,6 +24,7 @@ interface ChatPageClientProps {
 }
 
 export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, lastUsedModel, isNewChat }: ChatPageClientProps) {
+  const t = useTranslations('assistant')
   const [currentTitle, setCurrentTitle] = useState(chat.title)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
@@ -45,7 +47,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
     <ErrorBoundary 
       onError={(error, errorInfo) => {
         console.error('Chat page error:', error, errorInfo)
-        handleClientApiError(error.message, 'Chat error occurred - please try refreshing')
+        handleClientApiError(error.message, t('errors.chatPageError'))
       }}
     >
       <div className="flex h-full overflow-hidden relative">
@@ -55,7 +57,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
             <div className="fixed inset-0 bg-black/50" onClick={() => setIsChatSidebarOpen(false)} />
             <div className="relative flex flex-col w-80 bg-background border-r shadow-xl">
               <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="font-semibold">Chats</h2>
+                <h2 className="font-semibold">{t('mobile.chatsHeader')}</h2>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -84,7 +86,7 @@ export function ChatPageClient({ chat, chats, clients, userImageUrl, userName, l
             <div className="fixed inset-0 bg-black/50" onClick={() => setIsClientSidebarOpen(false)} />
             <div className="relative flex flex-col w-80 bg-background border-l shadow-xl">
               <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="font-semibold">Client Info</h2>
+                <h2 className="font-semibold">{t('mobile.clientInfoHeader')}</h2>
                 <Button
                   variant="ghost"
                   size="sm"

@@ -1,6 +1,7 @@
 'use client'
 
 import {useState} from 'react'
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Edit, FileText, Trash2} from 'lucide-react'
@@ -20,6 +21,7 @@ export function ClientGridView({
   isDeleting, 
   getLanguageInfo 
 }: ClientGridViewProps) {
+  const t = useTranslations('clients')
   const { onEditClient, onViewClient, onViewDocuments, onDeleteClient } = actionHandlers
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [clientToDelete, setClientToDelete] = useState<{id: string, name: string} | null>(null)
@@ -62,7 +64,7 @@ export function ClientGridView({
                       e.stopPropagation()
                       onViewDocuments(client)
                     }}
-                    title="View Documents"
+                    title={t('actions.viewDocuments')}
                   >
                     <FileText className="h-4 w-4 text-yellow-600 hover:text-yellow-700" />
                   </Button>
@@ -73,7 +75,7 @@ export function ClientGridView({
                       e.stopPropagation()
                       onEditClient(client)
                     }}
-                    title="Edit Client"
+                    title={t('actions.editClient')}
                   >
                     <Edit className="h-4 w-4 text-blue-600 hover:text-blue-700" />
                   </Button>
@@ -85,7 +87,7 @@ export function ClientGridView({
                       handleDeleteClick(client)
                     }}
                     disabled={isDeleting === client.id}
-                    title="Delete Client"
+                    title={t('actions.deleteClient')}
                   >
                     <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
                   </Button>
@@ -96,20 +98,20 @@ export function ClientGridView({
               <div className="space-y-2">
                 {client.phone && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Phone:</span>
+                    <span className="text-muted-foreground">{t('table.phone')}:</span>
                     <span>{client.phone}</span>
                   </div>
                 )}
 
                 {client.country && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Country:</span>
+                    <span className="text-muted-foreground">{t('table.country')}:</span>
                     <span>{client.country}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Documents:</span>
+                  <span className="text-muted-foreground">{t('table.documents')}:</span>
                   <span className="flex items-center gap-1">
                     <span>{languageInfo.flag}</span>
                     <span>{languageInfo.label}</span>

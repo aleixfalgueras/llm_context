@@ -14,6 +14,7 @@ import {
 } from '@/lib/types/client-types'
 import {useRouter} from 'next/navigation'
 import {Client} from '@prisma/client'
+import {useTranslations} from '@/lib/translations/context'
 
 interface ClientContextSidebarProps {
   chatId?: string
@@ -37,6 +38,7 @@ export function ClientContextSidebar({
   chatContextFields = [],
   isMobile = false
 }: ClientContextSidebarProps) {
+  const t = useTranslations('assistant')
   const router = useRouter()
   const [sidebarWidth, setSidebarWidth] = useState(300)
   const [isResizing, setIsResizing] = useState(false)
@@ -128,8 +130,8 @@ export function ClientContextSidebar({
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border flex flex-col items-center space-y-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <div className="text-center">
-              <p className="font-medium text-gray-900 dark:text-gray-100">Creating Chat...</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Setting up your conversation</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">{t('clientContextSidebar.creatingChat')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t('clientContextSidebar.settingUpConversation')}</p>
             </div>
           </div>
         </div>
@@ -155,7 +157,7 @@ export function ClientContextSidebar({
           <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
             <User className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             <h2 className="font-semibold text-sm sm:text-base truncate">
-              Client Information
+              {t('clientContextSidebar.clientInformation')}
             </h2>
           </div>
         </div>
@@ -168,14 +170,14 @@ export function ClientContextSidebar({
               {/* Client Selector */}
               {clients.length > 0 && onClientSelect && (
                 <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Select Client</Label>
+                  <Label className="text-sm font-medium mb-2 block">{t('clientContextSidebar.selectClient')}</Label>
                   <ClientCombobox
                     clients={clients}
                     value={selectedClientId || ''}
                     onValueChange={(value) => onClientSelect(value || null)}
-                    placeholder="Choose a client..."
-                    searchPlaceholder="Search clients..."
-                    emptyMessage="No clients found."
+                    placeholder={t('clientContextSidebar.chooseClient')}
+                    searchPlaceholder={t('clientContextSidebar.searchClients')}
+                    emptyMessage={t('clientContextSidebar.noClientsFound')}
                   />
                 </div>
               )}
@@ -185,9 +187,9 @@ export function ClientContextSidebar({
                   {/* Client Context Selection - Only shown before chat creation */}
                   {onClientContextChange && (
                     <div className="space-y-3">
-                      <Label className="text-base font-medium">AI Context Selection</Label>
+                      <Label className="text-base font-medium">{t('clientContextSidebar.aiContextSelection')}</Label>
                       <p className="text-sm text-muted-foreground">
-                        Choose which client information to include when chatting with AI. Your privacy choices are strictly respected.
+                        {t('clientContextSidebar.contextSelectionDescription')}
                       </p>
                       <div className="grid grid-cols-1 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
                         {Object.entries(CLIENT_CONTEXT_FIELDS).map(([fieldKey, fieldLabel]) => {
@@ -228,7 +230,7 @@ export function ClientContextSidebar({
                             specificContext3: !!selectedClient?.specificContext3
                           })}
                         >
-                          Select All
+                          {t('clientContextSidebar.selectAll')}
                         </Button>
                         <Button
                           type="button"
@@ -242,7 +244,7 @@ export function ClientContextSidebar({
                             specificContext3: false
                           })}
                         >
-                          Deselect All
+                          {t('clientContextSidebar.deselectAll')}
                         </Button>
                       </div>
                     </div>
@@ -255,7 +257,7 @@ export function ClientContextSidebar({
                     className="w-full bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    {isCreatingChat ? 'Creating Chat...' : 'New Chat'}
+                    {isCreatingChat ? t('clientContextSidebar.creatingChat') : t('clientContextSidebar.newChat')}
                   </Button>
                 </>
               )}
@@ -270,9 +272,9 @@ export function ClientContextSidebar({
                     clients={clients}
                     value={selectedClientId || ''}
                     onValueChange={(value) => onClientSelect(value || null)}
-                    placeholder="Switch client..."
-                    searchPlaceholder="Search clients..."
-                    emptyMessage="No clients found."
+                    placeholder={t('clientContextSidebar.switchClient')}
+                    searchPlaceholder={t('clientContextSidebar.searchClients')}
+                    emptyMessage={t('clientContextSidebar.noClientsFound')}
                   />
                 </div>
               )}
@@ -304,16 +306,16 @@ export function ClientContextSidebar({
               {/* Selected Context Display - Read-only after chat created - only show if client selected */}
               {selectedClient && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">AI Context Used:</Label>
+                  <Label className="text-sm font-medium">{t('clientContextSidebar.aiContextUsed')}</Label>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border text-xs">
                     {chatContextFields && chatContextFields.length > 0 ? (
                       chatContextFields.map(field => {
                         return CLIENT_CONTEXT_FIELDS[field as keyof typeof CLIENT_CONTEXT_FIELDS] || field
                       }).join(', ')
-                    ) : 'None selected'}
+                    ) : t('clientContextSidebar.noneSelected')}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Context is set for the first message only and cannot be changed during the chat.
+                    {t('clientContextSidebar.contextSetFirstMessageOnly')}
                   </p>
                 </div>
               )}
@@ -322,7 +324,7 @@ export function ClientContextSidebar({
               {!selectedClient && (
                 <Card className="p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    No client has been selected for this chat. Select a client before starting a new chat to get contextual responses.
+                    {t('clientContextSidebar.noClientSelected')}
                   </p>
                 </Card>
               )}
@@ -332,17 +334,17 @@ export function ClientContextSidebar({
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                    <span className="font-medium text-amber-900 dark:text-amber-100 text-sm">Tips</span>
+                    <span className="font-medium text-amber-900 dark:text-amber-100 text-sm">{t('clientContextSidebar.tips')}</span>
                   </div>
                   <div className="space-y-2 text-xs">
                     <p className="text-amber-800 dark:text-amber-200">
-                      • Start a new chat for different topics to improve response quality
+                      • {t('clientContextSidebar.tipNewChatForTopics')}
                     </p>
                     <p className="text-amber-800 dark:text-amber-200">
-                      • Longer conversations use more tokens and increase costs
+                      • {t('clientContextSidebar.tipLongerConversations')}
                     </p>
                     <p className="text-amber-800 dark:text-amber-200">
-                      • Be polite and respectful - good manners improve AI interactions
+                      • {t('clientContextSidebar.tipBePoliteRespectful')}
                     </p>
                   </div>
                 </div>

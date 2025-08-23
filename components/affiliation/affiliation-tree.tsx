@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Affiliation, AffiliationStatus } from '@prisma/client'
 import { ChevronDown, ChevronRight, User, Users, Copy, X, Filter, FilterX } from 'lucide-react'
+import { useTranslations } from '@/lib/translations/context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,6 +27,7 @@ interface TreeNodeProps {
 }
 
 function TreeNode({ affiliation, children, allChildren, level, isRoot = false }: TreeNodeProps) {
+  const t = useTranslations('affiliation')
   const [isExpanded, setIsExpanded] = useState(true)
   const [isRemoving, setIsRemoving] = useState(false)
   const hasChildren = children.length > 0
@@ -33,13 +35,13 @@ function TreeNode({ affiliation, children, allChildren, level, isRoot = false }:
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code)
     toast({
-      title: 'Copied',
-      description: `Affiliation code ${code} copied to clipboard`,
+      title: t('tree.copySuccessTitle'),
+      description: t('tree.copySuccessMessage', { code }),
     })
   }
 
   const handleRemove = async () => {
-    if (!window.confirm('Are you sure you want to remove this user from your network?')) {
+    if (!window.confirm(t('tree.removeConfirmation'))) {
       return
     }
 
@@ -49,20 +51,20 @@ function TreeNode({ affiliation, children, allChildren, level, isRoot = false }:
       
       if (result.success) {
         toast({
-          title: 'Success',
+          title: t('tree.removeSuccessTitle'),
           description: result.message,
         })
       } else {
         toast({
-          title: 'Error',
+          title: t('tree.errorTitle'),
           description: result.message,
           variant: 'destructive',
         })
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to remove affiliation',
+        title: t('tree.errorTitle'),
+        description: t('tree.removeErrorMessage'),
         variant: 'destructive',
       })
     } finally {
@@ -120,7 +122,7 @@ function TreeNode({ affiliation, children, allChildren, level, isRoot = false }:
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="font-semibold">
-              {isRoot ? 'You' : (affiliation.publicName || `User ${affiliation.id.slice(-6)}`)}
+              {isRoot ? t('tree.youLabel') : (affiliation.publicName || t('tree.userLabel', { id: affiliation.id.slice(-6) }))}
             </span>
             <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
               {affiliation.affiliationCode}
@@ -140,7 +142,7 @@ function TreeNode({ affiliation, children, allChildren, level, isRoot = false }:
                 className="h-6 w-6 text-destructive hover:text-destructive"
                 onClick={handleRemove}
                 disabled={isRemoving}
-                title="Remove from network"
+                title={t('tree.removeFromNetworkTooltip')}
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -155,21 +157,23 @@ function TreeNode({ affiliation, children, allChildren, level, isRoot = false }:
               <span className="text-xs text-muted-foreground">
                 {isRoot && allChildren ? (
                   <>
-                    {allChildren.length} {allChildren.length === 1 ? 'referral' : 'referrals'}
-                    {' '}({allChildren.filter(child => child.valid).length} with active {allChildren.filter(child => child.valid).length === 1 ? 'subscription' : 'subscriptions'})
+                    {t('tree.referralsCount', { 
+                      count: allChildren.length,
+                      activeCount: allChildren.filter(child => child.valid).length 
+                    })}
                     {children.length !== allChildren.length && (
-                      <span className="text-blue-600 font-medium"> • {children.length} shown</span>
+                      <span className="text-blue-600 font-medium"> • {t('tree.shownCount', { count: children.length })}</span>
                     )}
                   </>
                 ) : (
                   <>
-                    {children.length} {children.length === 1 ? 'referral' : 'referrals'}
+                    {t('tree.referralsCountSimple', { count: children.length })}
                   </>
                 )}
               </span>
             )}
             <span className="text-xs text-muted-foreground">
-              Joined {new Date(affiliation.createdAt).toLocaleDateString()}
+              {t('tree.joinedDate', { date: new Date(affiliation.createdAt).toLocaleDateString() })}
             </span>
           </div>
         </div>
@@ -204,6 +208,7 @@ function TreeNode({ affiliation, children, allChildren, level, isRoot = false }:
 }
 
 export function AffiliationTree({ userAffiliation, children }: AffiliationTreeProps) {
+  const t = useTranslations('affiliation')
   const [validityFilter, setValidityFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [statusFilter, setStatusFilter] = useState<AffiliationStatus | 'all'>('all')
 
@@ -244,7 +249,7 @@ export function AffiliationTree({ userAffiliation, children }: AffiliationTreePr
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
-                <CardTitle className="text-sm">Filters</CardTitle>
+                <CardTitle className="text-sm">{t('tree.filtersTitle')}</CardTitle>
               </div>
               {hasActiveFilters && (
                 <Button
@@ -254,7 +259,7 @@ export function AffiliationTree({ userAffiliation, children }: AffiliationTreePr
                   className="h-7 px-2 text-xs"
                 >
                   <FilterX className="h-3 w-3 mr-1" />
-                  Clear
+                  {t('tree.clearFilters')}
                 </Button>
               )}
             </div>
@@ -263,23 +268,23 @@ export function AffiliationTree({ userAffiliation, children }: AffiliationTreePr
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Subscription Validity Filter */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Subscription Status</label>
+                <label className="text-sm font-medium">{t('tree.subscriptionStatusLabel')}</label>
                 <Select value={validityFilter} onValueChange={(value: 'all' | 'active' | 'inactive') => setValidityFilter(value)}>
                   <SelectTrigger className="h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="all">{t('tree.allUsersOption')}</SelectItem>
                     <SelectItem value="active">
                       <span className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500" />
-                        Active Subscriptions
+                        {t('tree.activeSubscriptionsOption')}
                       </span>
                     </SelectItem>
                     <SelectItem value="inactive">
                       <span className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-red-500" />
-                        Inactive Subscriptions
+                        {t('tree.inactiveSubscriptionsOption')}
                       </span>
                     </SelectItem>
                   </SelectContent>
@@ -288,13 +293,13 @@ export function AffiliationTree({ userAffiliation, children }: AffiliationTreePr
 
               {/* Status Filter */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Affiliation Status</label>
+                <label className="text-sm font-medium">{t('tree.affiliationStatusLabel')}</label>
                 <Select value={statusFilter} onValueChange={(value: AffiliationStatus | 'all') => setStatusFilter(value)}>
                   <SelectTrigger className="h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="all">{t('tree.allStatusOption')}</SelectItem>
                     {availableStatuses.map(status => (
                       <SelectItem key={status} value={status}>
                         {AffiliationStatusLabels[status]}
@@ -308,13 +313,16 @@ export function AffiliationTree({ userAffiliation, children }: AffiliationTreePr
             {/* Results Summary */}
             <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t">
               <span>
-                Showing {filteredChildren.length} of {children.length} referrals
+                {t('tree.showingCount', { 
+                  showing: filteredChildren.length, 
+                  total: children.length 
+                })}
               </span>
               {hasActiveFilters && (
                 <div className="flex gap-1">
                   {validityFilter !== 'all' && (
                     <Badge variant="secondary" className="text-xs">
-                      {validityFilter === 'active' ? 'Active' : 'Inactive'} only
+                      {t(`tree.${validityFilter}OnlyBadge`)}
                     </Badge>
                   )}
                   {statusFilter !== 'all' && (

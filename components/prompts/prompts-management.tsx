@@ -1,5 +1,6 @@
 'use client'
 
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
 import {PromptDialog} from '@/components/prompts/prompt-dialog'
@@ -13,6 +14,9 @@ import {PromptEmptyState} from '@/components/prompts/prompt-empty-state'
 import {usePromptManagement} from '@/hooks/use-prompt-management'
 
 export function PromptsManagement() {
+  const t = useTranslations('prompts')
+  const tCommon = useTranslations('common')
+  
   const {
     // State
     prompts,
@@ -59,9 +63,9 @@ export function PromptsManagement() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Prompt Management</h1>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Create, edit, and organize your AI prompts for better conversations.
+            {t('description')}
           </p>
         </div>
         <Button 
@@ -69,7 +73,7 @@ export function PromptsManagement() {
           onClick={handleNewPrompt}
         >
           <Plus className="w-4 h-4 mr-2" />
-          New Prompt
+          {t('newPrompt')}
         </Button>
       </div>
 
@@ -84,12 +88,12 @@ export function PromptsManagement() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Lightbulb className="h-5 w-5 text-amber-500" />
-            <h2 className="text-xl font-semibold">Example Prompts</h2>
-            <Badge variant="outline" className="text-xs">Templates</Badge>
+            <h2 className="text-xl font-semibold">{t('examplePrompts')}</h2>
+            <Badge variant="outline" className="text-xs">{t('showTemplates')}</Badge>
           </div>
           
           <p className="text-muted-foreground mb-6">
-            Professional prompt templates to get you started. Click "Use as Template" to create your own version.
+            {t('templatesDescription')}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {filteredSamplePrompts.map((samplePrompt) => (
@@ -108,7 +112,7 @@ export function PromptsManagement() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <FileText className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">My Prompts</h2>
+          <h2 className="text-xl font-semibold">{t('myPrompts')}</h2>
           {prompts.length > 0 && (
             <Badge variant="outline" className="text-xs">{prompts.length}</Badge>
           )}
@@ -116,7 +120,7 @@ export function PromptsManagement() {
         
         {loading ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">Loading prompts...</p>
+            <p className="text-muted-foreground">{tCommon('loading')}</p>
           </div>
         ) : filteredAndSortedPrompts.length === 0 ? (
           <PromptEmptyState 
@@ -186,4 +190,4 @@ export function PromptsManagement() {
 
     </div>
   )
-} 
+}

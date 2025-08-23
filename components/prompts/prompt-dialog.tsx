@@ -1,6 +1,7 @@
 'use client'
 
 import {useEffect, useState} from 'react'
+import {useTranslations} from '@/lib/translations/context'
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
@@ -27,11 +28,11 @@ interface PromptDialogProps {
   viewMode?: boolean
 }
 
-const CATEGORIES = [
-  { value: 'general', label: 'General' },
-  { value: 'marketing', label: 'Marketing' },
-  { value: 'content', label: 'Content' },
-  { value: 'analysis', label: 'Analysis' },
+const getCategoriesWithLabels = (t: any) => [
+  { value: 'general', label: t('categories.general') },
+  { value: 'marketing', label: t('categories.marketing') },
+  { value: 'content', label: t('categories.content') },
+  { value: 'analysis', label: t('categories.analysis') },
 ]
 
 interface PromptFormData {
@@ -41,28 +42,30 @@ interface PromptFormData {
   category: string
 }
 
-const getValidationRules = () => ({
+const getValidationRules = (t: any) => ({
   name: (value: string) => {
     if (!value || value.trim().length === 0) {
-      return 'Name is required'
+      return t('validation.nameRequired')
     }
     if (value.trim().length < 3) {
-      return 'Name must be at least 3 characters'
+      return t('validation.nameMinLength')
     }
     return null
   },
   content: (value: string) => {
     if (!value || value.trim().length === 0) {
-      return 'Prompt content is required'
+      return t('validation.contentRequired')
     }
     if (value.trim().length < 10) {
-      return 'Prompt content must be at least 10 characters'
+      return t('validation.contentMinLength')
     }
     return null
   },
 })
 
 export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, open: externalOpen, onOpenChange: externalOnOpenChange, viewMode = false }: PromptDialogProps) {
+  const t = useTranslations('prompts')
+  const tCommon = useTranslations('common')
   const [internalOpen, setInternalOpen] = useState(false)
   
   // Use external state if provided, otherwise use internal state
@@ -90,7 +93,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
     setFormData,
   } = useFormState({
     initialData: initialFormData,
-    validationRules: getValidationRules(),
+    validationRules: getValidationRules(t),
   })
   
   const { toast } = useToast()
@@ -123,7 +126,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       // Show validation error toast
       if (validation.firstError) {
         toast({
-          title: 'Validation Error',
+          title: t('validation.error'),
           description: validation.firstError,
           variant: 'destructive'
         })
@@ -141,8 +144,8 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       }
 
       toast({
-        title: isEditing ? 'Prompt updated' : isTemplate ? 'Prompt created from template' : 'Prompt created',
-        description: `"${formData.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`,
+        title: isEditing ? t('messages.promptUpdated') : isTemplate ? t('messages.promptCreatedFromTemplate') : t('messages.promptCreated'),
+        description: t(isEditing ? 'messages.promptUpdatedDesc' : 'messages.promptCreatedDesc', { name: formData.name }),
       })
 
       setOpen(false)
@@ -153,8 +156,8 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
         resetForm()
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to save prompt'
-      handleClientApiError(errorMessage, 'Failed to save prompt')
+      const errorMessage = error instanceof Error ? error.message : t('errors.failedToSave')
+      handleClientApiError(errorMessage, t('errors.failedToSave'))
     } finally {
       setLoading(false)
     }
@@ -169,12 +172,12 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       {isEditing ? (
         <>
           <Edit2 className="w-4 h-4 mr-2" />
-          Edit
+          {t('actions.edit')}
         </>
       ) : (
         <>
           <Plus className="w-4 h-4 mr-2" />
-          New Prompt
+          {t('actions.newPrompt')}
         </>
       )}
     </Button>
@@ -190,13 +193,13 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {viewMode ? 'View Prompt' : isEditing ? 'Edit Prompt' : isTemplate ? 'Create Prompt from Template' : 'Create New Prompt'}
+            {viewMode ? t('dialog.viewTitle') : isEditing ? t('dialog.editTitle') : isTemplate ? t('dialog.createFromTemplateTitle') : t('dialog.createTitle')}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name {!viewMode && '*'}</Label>
+              <Label htmlFor="name">{t('form.name')} {!viewMode && t('form.required')}</Label>
               {viewMode ? (
                 <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
                   <span className="text-sm">{formData.name || '-'}</span>
@@ -205,7 +208,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
                 <>
                   <Input
                     id="name"
-                    placeholder="e.g., Generate Marketing Strategy Report"
+                    placeholder={t('form.namePlaceholder')}
                     value={formData.name}
                     onChange={(e) => updateField('name', e.target.value)}
                     className={errors.name ? 'border-red-500' : ''}
@@ -218,7 +221,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t('form.category')}</Label>
               {viewMode ? (
                 <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
                   <span className="text-sm capitalize">{formData.category || '-'}</span>
@@ -232,7 +235,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((category) => (
+                    {getCategoriesWithLabels(t).map((category) => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}
                       </SelectItem>
@@ -244,7 +247,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('form.description')}</Label>
             {viewMode ? (
               <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
                 <span className="text-sm">{formData.description || '-'}</span>
@@ -253,7 +256,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
               <>
                 <Input
                   id="description"
-                  placeholder="Brief description of what this prompt does"
+                  placeholder={t('form.descriptionPlaceholder')}
                   value={formData.description}
                   onChange={(e) => updateField('description', e.target.value)}
                   className={errors.description ? 'border-red-500' : ''}
@@ -267,7 +270,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
           
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label htmlFor="content">Prompt Content {!viewMode && '*'}</Label>
+              <Label htmlFor="content">{t('form.content')} {!viewMode && t('form.required')}</Label>
               {!viewMode && <ClientContextVariablesTooltip />}
             </div>
             {viewMode ? (
@@ -278,7 +281,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
               <>
                 <Textarea
                   id="content"
-                  placeholder="Enter your prompt template here."
+                  placeholder={t('form.contentPlaceholder')}
                   value={formData.content}
                   onChange={(e) => updateField('content', e.target.value)}
                   className={`min-h-[200px] ${errors.content ? 'border-red-500' : ''}`}
@@ -298,7 +301,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
                 variant="outline"
                 onClick={() => setOpen(false)}
               >
-                Close
+                {tCommon('close')}
               </Button>
             ) : (
               <>
@@ -308,7 +311,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
                   onClick={() => setOpen(false)}
                   disabled={loading}
                 >
-                  Cancel
+                  {tCommon('cancel')}
                 </Button>
                 <Button 
                   type="submit" 
@@ -316,7 +319,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
                   className={isTemplate ? "bg-amber-600 hover:bg-amber-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
                 >
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {isEditing ? 'Update' : isTemplate ? 'Create from Template' : 'Create'} Prompt
+                  {isEditing ? t('actions.update') : isTemplate ? t('actions.createFromTemplate') : t('actions.create')} {t('form.prompt')}
                 </Button>
               </>
             )}

@@ -18,6 +18,7 @@ import {getDefaultModel} from '@/lib/models-config'
 import type {Client} from '@prisma/client'
 import {ValidationResult} from '@/lib/types/api-types'
 import {logger} from "@/lib/logger";
+import {useTranslations} from '@/lib/translations/context'
 
 /**
  * Base configuration for AI service dialogs
@@ -117,6 +118,8 @@ export function BaseAIServiceDialog<TFormData = any>({
   customIsEditMode,
   onCustomEditModeChange
 }: BaseAIServiceDialogProps<TFormData>) {
+  const t = useTranslations('aiServices')
+  const tCommon = useTranslations('common')
   const { toast } = useToast()
   
   // State management (use custom state if provided, otherwise use internal state)
@@ -177,7 +180,7 @@ export function BaseAIServiceDialog<TFormData = any>({
     const validation = config.validateGeneration(formData)
     if (!validation.isValid) {
       toast({
-        title: 'Validation Error',
+        title: t('common.validationError'),
         description: validation.message,
         variant: 'destructive'
       })
@@ -210,7 +213,7 @@ export function BaseAIServiceDialog<TFormData = any>({
 
     } catch (error) {
       const errorMessage = logger.handleError(error)
-      handleClientApiError(errorMessage, 'Generation failed')
+      handleClientApiError(errorMessage, t('common.generationFailed'))
 
     } finally {
       setInternalIsGenerating(false)
@@ -234,7 +237,7 @@ export function BaseAIServiceDialog<TFormData = any>({
     const validation = config.validateSave(formData, generatedContent)
     if (!validation.isValid) {
       toast({
-        title: 'Validation Error',
+        title: t('common.validationError'),
         description: validation.message,
         variant: 'destructive'
       })
@@ -253,7 +256,7 @@ export function BaseAIServiceDialog<TFormData = any>({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Failed to save document')
+        throw new Error(errorData.error || t('common.saveFailedDescription'))
       }
 
       const savedDocument = await response.json()
@@ -261,10 +264,10 @@ export function BaseAIServiceDialog<TFormData = any>({
       const documentId = savedDocument.data?.documentId || savedDocument.id
       
       toast({
-        title: 'Document Saved 📄',
+        title: t('common.documentSaved'),
         description: (
           <div>
-            <p>"{documentName}" has been saved successfully.</p>
+            <p>{t('common.documentSavedDescription', { documentName })}</p>
             <button 
               onClick={() => {
                 if (onDocumentCreated && documentId && selectedClient) {
@@ -273,7 +276,7 @@ export function BaseAIServiceDialog<TFormData = any>({
               }}
               className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
             >
-              📄 View Document
+              {t('common.viewDocument')}
             </button>
           </div>
         ),
@@ -292,8 +295,8 @@ export function BaseAIServiceDialog<TFormData = any>({
     } catch (error) {
       console.error('Save error:', error)
       toast({
-        title: 'Save Failed',
-        description: error instanceof Error ? error.message : 'Failed to save document',
+        title: t('common.saveFailed'),
+        description: error instanceof Error ? error.message : t('common.saveFailedDescription'),
         variant: 'destructive'
       })
     } finally {
@@ -337,12 +340,12 @@ export function BaseAIServiceDialog<TFormData = any>({
         <div className="flex-1 overflow-y-auto space-y-6 py-4">
           {/* Client Selection */}
           <div className="space-y-2">
-            <Label htmlFor="client-select">Select Client</Label>
+            <Label htmlFor="client-select">{t('common.selectClient')}</Label>
             <ClientCombobox
               clients={clients}
               value={selectedClient?.id || ''}
               onValueChange={onClientChange}
-              placeholder="Choose a client..."
+              placeholder={t('common.clientPlaceholder')}
             />
           </div>
 
@@ -351,14 +354,14 @@ export function BaseAIServiceDialog<TFormData = any>({
 
           {/* Document Name */}
           <div className="space-y-2">
-            <Label htmlFor="document-name">Document Name</Label>
+            <Label htmlFor="document-name">{t('common.documentName')}</Label>
             <Input
               id="document-name"
               value={documentName}
               onChange={(e) => {
                 onFormDataChange(config.setDocumentNameField(formData, e.target.value))
               }}
-              placeholder="Enter document name..."
+              placeholder={t('common.documentNamePlaceholder')}
             />
           </div>
 
@@ -375,7 +378,7 @@ export function BaseAIServiceDialog<TFormData = any>({
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Generated Content
+                    {t('common.generatedContent')}
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className={themeColors.badge}>
@@ -389,12 +392,12 @@ export function BaseAIServiceDialog<TFormData = any>({
                       {isEditMode ? (
                         <>
                           <Eye className="h-4 w-4 mr-1" />
-                          Preview
+                          {t('common.preview')}
                         </>
                       ) : (
                         <>
                           <Edit className="h-4 w-4 mr-1" />
-                          Edit
+                          {tCommon('edit')}
                         </>
                       )}
                     </Button>
@@ -411,7 +414,7 @@ export function BaseAIServiceDialog<TFormData = any>({
                       }
                     }}
                     className="min-h-[400px] text-sm"
-                    placeholder="Generated content will appear here..."
+                    placeholder={t('common.contentPlaceholder')}
                     readOnly={customGeneratedContent !== undefined}
                   />
                 ) : (
@@ -427,7 +430,7 @@ export function BaseAIServiceDialog<TFormData = any>({
         <DialogFooter className="flex-shrink-0 gap-2">
           <Button variant="outline" onClick={handleClose}>
             <X className="h-4 w-4 mr-1" />
-            Cancel
+            {tCommon('cancel')}
           </Button>
 
           {renderAdditionalActions?.()}
@@ -439,11 +442,11 @@ export function BaseAIServiceDialog<TFormData = any>({
               className={`bg-gradient-to-r ${themeColors.primary} hover:shadow-lg transition-all`}
             >
               {isGenerating ? (
-                <LoadingSpinner size="sm" text="Generating..." className="text-white" />
+                <LoadingSpinner size="sm" text={t('common.generating')} className="text-white" />
               ) : (
                 <>
                   <config.icon className="h-4 w-4 mr-2" />
-                  Generate
+                  {t('common.generate')}
                 </>
               )}
             </Button>
@@ -459,7 +462,7 @@ export function BaseAIServiceDialog<TFormData = any>({
                 ) : (
                   <RefreshCw className="h-4 w-4 mr-1" />
                 )}
-                Regenerate
+                {t('common.regenerate')}
               </Button>
               <Button
                 onClick={handleSave}
@@ -467,11 +470,11 @@ export function BaseAIServiceDialog<TFormData = any>({
                 className={`bg-gradient-to-r ${themeColors.primary} hover:shadow-lg transition-all`}
               >
                 {isSaving ? (
-                  <LoadingSpinner size="sm" text="Saving..." className="text-white" />
+                  <LoadingSpinner size="sm" text={tCommon('saving')} className="text-white" />
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    Save Document
+                    {t('common.saveDocument')}
                   </>
                 )}
               </Button>

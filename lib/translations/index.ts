@@ -1,16 +1,11 @@
 // Translation system configuration and type definitions
 import enMessages from '@/messages/en.json'
 
-// Define available locales
-export type Locale = 'en' // Can be extended with 'es' | 'fr' | 'de' etc.
 
-// Default locale
+export type Locale = 'en'
 export const defaultLocale: Locale = 'en'
-
-// Available locales array
 export const locales: Locale[] = ['en']
 
-// Messages type derived from the English messages structure
 export type Messages = typeof enMessages
 
 // Map of locale to messages

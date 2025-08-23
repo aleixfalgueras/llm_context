@@ -1,5 +1,6 @@
 'use client'
 
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Badge} from '@/components/ui/badge'
@@ -18,6 +19,8 @@ interface PromptCardProps {
 }
 
 export function PromptCard({ prompt, onEdit, onEditPrompt, onDelete, onDeletePrompt, onToggleStatus, onViewPrompt }: PromptCardProps) {
+  const t = useTranslations('prompts')
+  
   return (
     <Card 
       className={cn(
@@ -49,11 +52,11 @@ export function PromptCard({ prompt, onEdit, onEditPrompt, onDelete, onDeletePro
         
         <div className="flex items-center gap-2 mt-auto">
           <Badge variant="secondary" className="text-xs capitalize">
-            {prompt.category}
+            {t(`categories.${prompt.category}`)}
           </Badge>
           {prompt.usageCount > 0 && (
             <Badge variant="outline" className="text-xs">
-              Used {prompt.usageCount}x
+              {t('card.usedCount', { count: prompt.usageCount })}
             </Badge>
           )}
         </div>
@@ -69,7 +72,7 @@ export function PromptCard({ prompt, onEdit, onEditPrompt, onDelete, onDeletePro
                 e.stopPropagation()
                 onEditPrompt(prompt)
               }}
-              title="Edit Prompt"
+              title={t('actions.edit')}
             >
               <Edit2 className="h-4 w-4" />
             </Button>
@@ -81,6 +84,7 @@ export function PromptCard({ prompt, onEdit, onEditPrompt, onDelete, onDeletePro
                 e.stopPropagation()
                 onToggleStatus()
               }}
+              title={prompt.isActive ? t('actions.deactivate') : t('actions.activate')}
             >
               {prompt.isActive ? (
                 <EyeOff className="h-4 w-4" />
@@ -96,7 +100,7 @@ export function PromptCard({ prompt, onEdit, onEditPrompt, onDelete, onDeletePro
                 e.stopPropagation()
                 onDeletePrompt(prompt)
               }}
-              title="Delete Prompt"
+              title={t('actions.delete')}
             >
               <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
             </Button>

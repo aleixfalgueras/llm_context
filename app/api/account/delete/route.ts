@@ -6,12 +6,13 @@ import { ApiErrors } from '@/lib/api/api-error-handler'
 import { cancelSubscriptionImmediately } from '@/lib/stripe/stripe-subscription'
 import { stripe } from '@/lib/stripe/stripe'
 import { SubscriptionUsageOperations } from '@/database'
+import { DELETE_CONFIRMATION_TEXT } from '@/lib/constants/account-types'
 
 export const POST = withEnhancedApi(async ({ userId, req }) => {
   const { confirmationText, reason = 'user_request' } = await parseJsonBody(req)
 
-  if (confirmationText !== 'DELETE MY ACCOUNT') {
-    return ApiErrors.badRequest('Please type "DELETE MY ACCOUNT" to confirm deletion')
+  if (confirmationText !== DELETE_CONFIRMATION_TEXT) {
+    return ApiErrors.badRequest(`Please type "${DELETE_CONFIRMATION_TEXT}" to confirm deletion`)
   }
 
   // Get client IP and user agent for audit trail

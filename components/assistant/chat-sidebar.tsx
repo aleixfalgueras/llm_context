@@ -13,6 +13,7 @@ import {usePathname, useRouter} from 'next/navigation'
 import {Input} from '@/components/ui/input'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Chat} from '@prisma/client'
+import {useTranslations} from '@/lib/translations/context'
 
 interface ChatSidebarProps {
   chats: Chat[]
@@ -23,6 +24,8 @@ interface ChatSidebarProps {
 }
 
 export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, isMobile = false, onChatSelect }: ChatSidebarProps) {
+  const t = useTranslations('assistant')
+  const tCommon = useTranslations('common')
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
@@ -92,7 +95,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
       <div className="p-2 sm:p-4">
         <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
           <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"  />
-          <h2 className="font-semibold text-sm sm:text-base truncate">Chats</h2>
+          <h2 className="font-semibold text-sm sm:text-base truncate">{t('chats')}</h2>
         </div>
         <div className="space-y-2 mt-6">
           {!hideNewChatButton && (
@@ -102,7 +105,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                 size="sm"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                New Chat
+                {t('newChat')}
               </Button>
             </Link>
           )}
@@ -119,11 +122,11 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
               disabled={isDeleting}
             >
               {isDeleting ? (
-                <LoadingSpinner size="sm" text="Deleting..." />
+                <LoadingSpinner size="sm" text={tCommon('deleting')} />
               ) : (
                 <>
                   <TrashIcon className="w-4 h-4 mr-2" />
-                  {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All Chats'}
+                  {showDeleteAllConfirm ? t('clickToConfirm') : t('deleteAllChats')}
                 </>
               )}
             </Button>
@@ -136,8 +139,8 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
         <div className="p-2">
           {chats.length === 0 ? (
             <div className="text-center text-gray-500 mt-8">
-              <p>No chats yet</p>
-              <p className="text-sm">Start a new conversation</p>
+              <p>{t('noChatsYet')}</p>
+              <p className="text-sm">{t('startNewConversation')}</p>
             </div>
           ) : (
             chats.map((chat) => {
@@ -176,7 +179,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                     ) : loadingChatId === chat.id ? (
                       <LoadingSpinner 
                         size="sm" 
-                        text="Loading..." 
+                        text={tCommon('loading')}
                         className="text-xs text-gray-600 dark:text-gray-400"
                       />
                     ) : (
@@ -201,14 +204,14 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleEditStart(chat)}>
                           <Edit2 className="w-3 h-3 mr-2" />
-                          Edit title
+                          {t('editTitle')}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => deleteChat(chat.id)}
                           className="text-red-600"
                         >
                           <Trash2 className="w-3 h-3 mr-2" />
-                          Delete
+                          {tCommon('delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
