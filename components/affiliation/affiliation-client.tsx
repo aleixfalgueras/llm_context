@@ -16,6 +16,7 @@ import { AffiliationStatusEmoji, AffiliationStatusComissions, AffiliationWithVal
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { StatusGuideDialog } from '@/components/affiliation/status-guide-dialog'
 import { CommissionsGuideDialog } from '@/components/affiliation/commissions-guide-dialog'
+import { useTranslations } from '@/lib/translations/context'
 
 interface AffiliationClientProps {
   userAffiliation: Affiliation | null
@@ -23,6 +24,7 @@ interface AffiliationClientProps {
 }
 
 export function AffiliationClient({ userAffiliation, affiliationChildren }: AffiliationClientProps) {
+  const t = useTranslations('affiliation')
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [parentCode, setParentCode] = useState('')
@@ -35,7 +37,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
 
   const handleCreateAffiliation = async () => {
     if (!parentCode.trim()) {
-      setError('Parent affiliation code is required')
+      setError(t('setup.required'))
       return
     }
 
@@ -47,8 +49,8 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
       const result = await createUserAffiliation(parentCode.trim().toUpperCase())
       
       toast({
-        title: 'Success',
-        description: `Your affiliation code ${result.affiliationCode} has been created`,
+        title: t('toast.success'),
+        description: t('toast.codeCreated', { code: result.affiliationCode }),
       })
       
       // No need to reload - revalidatePath in server action handles the update
@@ -62,8 +64,8 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
   const copyToClipboard = (text: string, type: string = 'code') => {
     navigator.clipboard.writeText(text)
     toast({
-      title: 'Copied',
-      description: type === 'link' ? 'Referral link copied to clipboard' : 'Affiliation code copied to clipboard',
+      title: t('toast.copied'),
+      description: type === 'link' ? t('toast.linkCopied') : t('toast.codeCopied'),
     })
   }
 
@@ -75,22 +77,22 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              Generate Your Referral Link
+              {t('setup.title')}
             </CardTitle>
             <CardDescription>
-              It looks like you signed up before our referral system was launched. Generate your code now!
+              {t('setup.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                To generate your affiliation code, you need to provide a parent affiliation code from someone who referred you to join our network.
+                {t('setup.alert')}
               </AlertDescription>
             </Alert>
 
             <div className="space-y-2">
-              <Label htmlFor="parentCode">Parent Affiliation Code</Label>
+              <Label htmlFor="parentCode">{t('setup.parentCodeLabel')}</Label>
               <Input
                 id="parentCode"
                 value={parentCode}
@@ -98,12 +100,12 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
                   setParentCode(e.target.value.toUpperCase())
                   if (error) setError(null)
                 }}
-                placeholder="e.g. ABC123"
+                placeholder={t('setup.parentCodePlaceholder')}
                 className="font-mono"
                 maxLength={6}
               />
               <p className="text-sm text-muted-foreground">
-                Ask the person who introduced you to the platform for their affiliation code.
+                {t('setup.parentCodeHelp')}
               </p>
             </div>
 
@@ -120,7 +122,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
               className="w-full"
               size="lg"
             >
-              {isCreating ? 'Generating...' : 'Generate My Referral Link'}
+              {isCreating ? t('common.generating') : t('setup.generateButton')}
             </Button>
           </CardContent>
         </Card>
@@ -134,10 +136,10 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <Link className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold">Affiliation Network</h1>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
         </div>
         <p className="text-muted-foreground">
-          Manage your affiliation network and track your referrals
+          {t('description')}
         </p>
       </div>
 
@@ -145,7 +147,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
         {/* Affiliation Code Card */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Your Affiliation Code</CardTitle>
+            <CardTitle className="text-lg">{t('yourCode')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
@@ -166,12 +168,12 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
         {/* Parent Code Card */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Parent Affiliation</CardTitle>
+            <CardTitle className="text-lg">{t('parentAffiliation')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <span className="text-xl font-mono">
-                {userAffiliation.parentAffiliationCode || 'None'}
+                {userAffiliation.parentAffiliationCode || t('none')}
               </span>
               {userAffiliation.parentAffiliationCode && (
                 <Button
@@ -189,7 +191,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
         {/* Status Card */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Status</CardTitle>
+            <CardTitle className="text-lg">{t('status')}</CardTitle>
           </CardHeader>
           <CardContent>
             <TooltipProvider>
@@ -203,7 +205,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
                   </TooltipTrigger>
                   <TooltipContent className="max-w-sm">
                     <p className="text-sm">
-                      Only users with a valid Stripe subscription are considered for status calculation.
+                      {t('tooltipStatus')}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -223,10 +225,10 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5" />
-            Your Referral Link
+            {t('yourReferralLink')}
           </CardTitle>
           <CardDescription>
-            Share this link with others to grow your network
+            {t('referralLink.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -245,7 +247,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
             </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-2">
-            When someone signs up using this link, they'll automatically be added to your network.
+            {t('referralLink.autoDescription')}
           </p>
         </CardContent>
       </Card>
@@ -253,9 +255,9 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
       {/* Affiliation Tree */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Affiliation Network</CardTitle>
+          <CardTitle>{t('yourNetwork')}</CardTitle>
           <CardDescription>
-            View your referral tree and track your network growth. Green icons indicate users with active subscriptions, red icons show users without active subscriptions.
+            {t('network.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -263,7 +265,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                You don't have any referrals yet. Share your referral link with others to grow your network.
+                {t('network.empty')}
               </AlertDescription>
             </Alert>
           ) : (

@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import {Document} from '@prisma/client'
+import {useTranslations} from '@/lib/translations/context'
 
 type DocumentBasic = Pick<Document, 'id' | 'documentName' | 'documentType'>
 
@@ -43,13 +44,14 @@ export function DocumentCombobox({
   disabled = false,
   loading = false
 }: DocumentComboboxProps) {
+  const t = useTranslations()
   const [open, setOpen] = React.useState(false)
 
   const selectedDocument = documents.find((doc) => doc.id === value)
 
   const getPlaceholderText = () => {
     if (loading) return "Loading documents..."
-    if (documents.length === 0) return "No documents available"
+    if (documents.length === 0) return t("ui.combobox.document.empty")
     if (selectedDocument) return selectedDocument.documentName
     return placeholder
   }

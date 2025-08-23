@@ -15,6 +15,7 @@ import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
 import {exportChat} from '@/app/actions/chat-action'
+import {useTranslations} from '@/lib/translations/context'
 
 // Separate component for just the textarea input to isolate re-renders
 interface TextareaInputProps {
@@ -68,6 +69,7 @@ interface ChatInputProps {
 }
 
 function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
+  const t = useTranslations('assistant')
   const subscription = useSubscription()
   const [isExporting, setIsExporting] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -167,8 +169,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
   const handleExportChat = async () => {
     if (!messages.length || !chatTitle) {
       toast({
-        title: 'Export Not Available',
-        description: 'Cannot export chat without messages and title.',
+        title: t('chat.exportNotAvailable'),
+        description: t('exportNotAvailableDescription'),
         variant: 'destructive',
       })
       return
@@ -182,10 +184,10 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
       const documentId = result.documentId
 
       toast({
-        title: 'Chat Exported 📄',
+        title: t('chat.chatExported'),
         description: (
           <div>
-            <p>Chat "{chatTitle}" has been saved as a document.</p>
+            <p>{t('chatExportedDescription', { chatTitle })}</p>
             {onDocumentCreated && documentId && clientData?.id && (
               <button 
                 onClick={() => {
@@ -193,7 +195,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
                 }}
                 className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
               >
-                📄 View Document
+                {t('viewDocument')}
               </button>
             )}
           </div>
@@ -202,8 +204,8 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
       })
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to export chat'
-      handleClientApiError(errorMessage, 'Failed to export chat')
+      const errorMessage = error instanceof Error ? error.message : t('exportFailed')
+      handleClientApiError(errorMessage, t('exportFailed'))
     } finally {
       setIsExporting(false)
     }
@@ -217,19 +219,19 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     
     // Add client information if available
     if (clientData) {
-      content += `**Client:** ${clientData.name}\n\n`
-      if (clientData.email) content += `**Email:** ${clientData.email}\n\n`
-      if (clientData.country) content += `**Country:** ${clientData.country}\n\n`
+      content += `**${t('chat.client')}:** ${clientData.name}\n\n`
+      if (clientData.email) content += `**${t('chat.email')}:** ${clientData.email}\n\n`
+      if (clientData.country) content += `**${t('chat.country')}:** ${clientData.country}\n\n`
     } else {
-      content += `**Type:** General Chat\n\n`
+      content += `**${t('chat.type')}:** ${t('chat.generalChat')}\n\n`
     }
     
-    content += `**Export Date:** ${exportDate} at ${exportTime}\n\n`
+    content += `**${t('chat.exportDate')}:** ${exportDate} ${t('at')} ${exportTime}\n\n`
     content += `---\n\n`
     
     messages.forEach((message) => {
       const timestamp = new Date(message.createdAt).toLocaleString()
-      const role = message.role === Role.USER ? 'You' : 'AI Assistant'
+      const role = message.role === Role.USER ? t('chat.you') : t('chat.aiAssistant')
       
       content += `## ${role} - ${timestamp}\n\n`
       content += `${message.content}\n\n`
@@ -282,7 +284,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
-              {isExporting ? 'Exporting...' : 'Export Chat'} 📄
+{isExporting ? t('chat.exporting') : t('chat.exportChat')}
             </Button>
           )}
         </div>
@@ -294,7 +296,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
           onChange={handleInputChange}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
+          placeholder={t('inputPlaceholder')}
           inputRef={inputRef}
           autoResize={autoResize}
         />

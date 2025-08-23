@@ -1,5 +1,6 @@
 'use client'
 
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
@@ -12,6 +13,7 @@ interface PromptFiltersBarProps {
 }
 
 export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarProps) {
+  const t = useTranslations('prompts')
   const {
     searchTerm,
     selectedCategory,
@@ -34,7 +36,7 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            placeholder="Search prompts..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10"
@@ -49,7 +51,7 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
         <SelectContent>
           {PROMPT_CATEGORIES.map((category) => (
             <SelectItem key={category.value} value={category.value}>
-              {category.label}
+              {category.value === 'all' ? t('filters.allCategories') : t(`categories.${category.value}`)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -62,7 +64,7 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
         <SelectContent>
           {PROMPT_SORT_OPTIONS.map((option) => (
             <SelectItem key={option.value} value={option.value}>
-              {option.label}
+              {t(`filters.sort.${option.value}`)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -76,12 +78,12 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
         {showInactive ? (
           <>
             <EyeOff className="w-4 h-4 mr-2" />
-            Hide Inactive
+            {t('hideInactive')}
           </>
         ) : (
           <>
             <Eye className="w-4 h-4 mr-2" />
-            Show All
+            {t('showAll')}
           </>
         )}
       </Button>
@@ -94,12 +96,12 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
         {showTemplates ? (
           <>
             <Lightbulb className="w-4 h-4 mr-2" />
-            Hide Templates
+            {t('hideTemplates')}
           </>
         ) : (
           <>
             <Lightbulb className="w-4 h-4 mr-2" />
-            Show Templates
+            {t('showTemplates')}
           </>
         )}
       </Button>

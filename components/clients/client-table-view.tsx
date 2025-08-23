@@ -1,6 +1,7 @@
 'use client'
 
 import {useState} from 'react'
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Edit, FileText, Trash2} from 'lucide-react'
 import {Client, ClientActionHandlers, LanguageInfo} from '@/lib/types/client-list-types'
@@ -19,6 +20,7 @@ export function ClientTableView({
   isDeleting, 
   getLanguageInfo 
 }: ClientTableViewProps) {
+  const t = useTranslations('clients')
   const { onEditClient, onViewClient, onViewDocuments, onDeleteClient } = actionHandlers
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [clientToDelete, setClientToDelete] = useState<{id: string, name: string} | null>(null)
@@ -41,22 +43,22 @@ export function ClientTableView({
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[150px]">
-                Name
+                {t('table.name')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[180px] hidden sm:table-cell">
-                Email
+                {t('table.email')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[140px] hidden sm:table-cell">
-                Phone
+                {t('table.phone')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px] hidden md:table-cell">
-                Country
+                {t('table.country')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[130px] hidden lg:table-cell">
-                Documents
+                {t('table.documents')}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[120px] sticky right-0 bg-gray-50 dark:bg-gray-800">
-                Actions
+                {t('table.actions')}
               </th>
             </tr>
           </thead>
@@ -104,7 +106,7 @@ export function ClientTableView({
                           e.stopPropagation()
                           onViewDocuments(client)
                         }}
-                        title="View Documents"
+                        title={t('actions.viewDocuments')}
                       >
                         <FileText className="h-4 w-4 text-yellow-600 hover:text-yellow-700" />
                       </Button>
@@ -115,7 +117,7 @@ export function ClientTableView({
                           e.stopPropagation()
                           onEditClient(client)
                         }}
-                        title="Edit Client"
+                        title={t('actions.editClient')}
                       >
                         <Edit className="h-4 w-4 text-blue-600 hover:text-blue-700" />
                       </Button>
@@ -127,7 +129,7 @@ export function ClientTableView({
                           handleDeleteClick(client)
                         }}
                         disabled={isDeleting === client.id}
-                        title="Delete Client"
+                        title={t('actions.deleteClient')}
                       >
                         <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
                       </Button>

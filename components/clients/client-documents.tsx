@@ -10,6 +10,7 @@ import {useDocumentOperations} from '@/hooks/document/use-document-operations'
 import {useDocumentUIState} from '@/hooks/document/use-document-ui-state'
 
 import {useToast} from '@/hooks/use-toast'
+import {useTranslations} from '@/lib/translations/context'
 import type {ClientDocumentsProps} from '@/lib/types/client-document-types'
 import {Document} from '@prisma/client'
 
@@ -21,6 +22,7 @@ export function ClientDocuments({
   documentToHighlight 
 }: ClientDocumentsProps) {
   const { toast } = useToast()
+  const t = useTranslations('clients')
   
   // Custom hooks for state management
   const documentState = useDocumentState(clientId, open, documentToHighlight)
@@ -101,9 +103,9 @@ export function ClientDocuments({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Documents for {clientName}</DialogTitle>
+          <DialogTitle>{t('documents.title', { clientName })}</DialogTitle>
           <DialogDescription>
-            View, edit, and manage documents for this client
+            {t('documents.description')}
           </DialogDescription>
         </DialogHeader>
         
@@ -170,7 +172,7 @@ export function ClientDocuments({
         title={documentState.newDocumentName}
         content={documentState.newDocumentContent}
         onConfirm={handleCreateDocument}
-        confirmText="Create Document"
+        confirmText={t('documents.createDocument')}
       />
 
       <DocumentPreviewDialog
@@ -179,7 +181,7 @@ export function ClientDocuments({
         title={documentState.editedDocumentName || documentState.selectedDocument?.documentName || ''}
         content={documentState.editedContent}
         onConfirm={handleSaveDocument}
-        confirmText="Save Document"
+        confirmText={t('documents.saveDocument')}
       />
 
     </Dialog>

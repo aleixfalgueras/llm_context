@@ -29,10 +29,8 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-9 px-3">
-          <Globe className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline-block">{localeNames[locale]}</span>
-          <span className="sm:hidden">{locale.toUpperCase()}</span>
+        <Button variant="ghost" size="icon" className="w-8 h-8">
+          <Globe className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

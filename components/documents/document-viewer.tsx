@@ -8,6 +8,7 @@ import {Edit, Eye, FileText, Loader2, Save, X} from 'lucide-react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
 import {Document} from '@prisma/client'
+import {useTranslations} from '@/lib/translations/context'
 
 interface DocumentViewerProps {
   document: Document | null
@@ -40,6 +41,9 @@ export function DocumentViewer({
   onNameChange,
   onPreview
 }: DocumentViewerProps) {
+  const t = useTranslations('documents')
+  const tCommon = useTranslations('common')
+  
   if (!document) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -47,7 +51,7 @@ export function DocumentViewer({
           <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
             <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <p className="text-muted-foreground">Select a document to view its content</p>
+          <p className="text-muted-foreground">{t('viewer.selectDocument')}</p>
         </div>
       </div>
     )
@@ -63,7 +67,7 @@ export function DocumentViewer({
               value={editedDocumentName}
               onChange={(e) => onNameChange(e.target.value)}
               className="text-lg font-semibold bg-background"
-              placeholder="Document name"
+              placeholder="Enter document name"
             />
           ) : (
             <div>
@@ -82,7 +86,7 @@ export function DocumentViewer({
                 disabled={!editedContent?.trim()}
               >
                 <Eye className="h-4 w-4 mr-1" />
-                Preview
+                {tCommon('preview')}
               </Button>
               <Button
                 variant="outline"
@@ -90,7 +94,7 @@ export function DocumentViewer({
                 onClick={onCancel}
               >
                 <X className="h-4 w-4 mr-1" />
-                Cancel
+                {tCommon('cancel')}
               </Button>
               <Button
                 size="sm"
@@ -99,11 +103,11 @@ export function DocumentViewer({
                 variant="blue"
               >
                 {isSaving ? (
-                  <LoadingSpinner size="sm" text="Saving..." className="text-white" />
+                  <LoadingSpinner size="sm" text={tCommon('saving')} className="text-white" />
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-1" />
-                    Save
+                    {tCommon('save')}
                   </>
                 )}
               </Button>
@@ -111,7 +115,7 @@ export function DocumentViewer({
           ) : (
             <Button size="sm" onClick={onEdit} variant="blue">
               <Edit className="h-4 w-4 mr-1" />
-              Edit
+              {tCommon('edit')}
             </Button>
           )}
         </div>
@@ -126,7 +130,7 @@ export function DocumentViewer({
                 value={editedContent}
                 onChange={(e) => onContentChange(e.target.value)}
                 className="w-full h-full resize-none text-sm"
-                placeholder="Enter your document content here using Markdown..."
+                placeholder={t('form.contentPlaceholderEditor')}
               />
             </div>
           </div>
@@ -136,7 +140,7 @@ export function DocumentViewer({
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Loading document content...</p>
+                  <p className="text-muted-foreground">{t('viewer.loadingContent')}</p>
                 </div>
               </div>
             ) : (

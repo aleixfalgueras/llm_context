@@ -15,15 +15,18 @@ import {SubscriptionUrlHandler} from '@/components/subscription/subscription-url
 import {SubscriptionStatusBanners} from '@/components/subscription/subscription-status-banners'
 import {PlanCard} from '@/components/subscription/plan-card'
 import {SubscriptionFAQ} from '@/components/subscription/subscription-faq'
+import {useTranslations} from '@/lib/translations/context'
 import {useSubscriptionStatus} from '@/hooks/subscription/use-subscription-status'
 import {useSubscriptionActions} from '@/hooks/subscription/use-subscription-actions'
 import {useSubscriptionRefresh} from '@/hooks/subscription/use-subscription-refresh'
 import {useToast} from '@/hooks/use-toast'
 import {SubscriptionPlan} from "@prisma/client";
+import {DELETE_CONFIRMATION_TEXT} from '@/lib/constants/account-types'
 
 import {isDowngrade as checkIsDowngrade} from "@/lib/utils/subscription-client-utils";
 
 export default function SubscriptionPage() {
+  const t = useTranslations()
   const {
     subscription,
     isFreeMode,
@@ -83,7 +86,7 @@ export default function SubscriptionPage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to delete account' }))
+        const errorData = await response.json().catch(() => ({ error: t('errors.api.deleteAccount') }))
         throw new Error(errorData.error)
       }
 
@@ -100,8 +103,8 @@ export default function SubscriptionPage() {
       router.push('/')
     } catch (error) {
       console.error('Error deleting account:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete account'
-      handleClientApiError(errorMessage, 'Failed to delete account')
+      const errorMessage = error instanceof Error ? error.message : t('errors.api.deleteAccount')
+      handleClientApiError(errorMessage, t('errors.api.deleteAccount'))
     } finally {
       setIsDeleting(false)
     }
@@ -259,13 +262,13 @@ export default function SubscriptionPage() {
             
             <div className="space-y-2">
               <Label htmlFor="confirmationText">
-                Type "DELETE MY ACCOUNT" to confirm:
+                {t('ui.deleteAccount.confirmInstruction')}
               </Label>
               <Input
                 id="confirmationText"
                 value={confirmationText}
                 onChange={(e) => setConfirmationText(e.target.value)}
-                placeholder="DELETE MY ACCOUNT"
+                placeholder={t('ui.deleteAccount.confirmationText')}
               />
             </div>
             
@@ -301,7 +304,7 @@ export default function SubscriptionPage() {
               <Button 
                 variant="destructive" 
                 onClick={handleAccountDeletion}
-                disabled={confirmationText !== 'DELETE MY ACCOUNT' || isDeleting}
+                disabled={confirmationText !== DELETE_CONFIRMATION_TEXT || isDeleting}
                 className="flex-1"
               >
                 {isDeleting ? 'Deleting...' : 'Delete Account'}

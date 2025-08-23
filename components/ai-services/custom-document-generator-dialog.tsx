@@ -17,6 +17,7 @@ import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {getDefaultModel} from '@/lib/models-config'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
+import {useTranslations} from '@/lib/translations/context'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
@@ -39,6 +40,7 @@ export function CustomDocumentGeneratorDialog({
   clients,
   onDocumentCreated,
 }: CustomDocumentGeneratorDialogProps) {
+  const t = useTranslations('aiServices')
   const {
     // State from hook
     selectedClient,
@@ -117,8 +119,8 @@ export function CustomDocumentGeneratorDialog({
 
   // Configuration for the base dialog
   const config: BaseAIServiceDialogConfig<CustomDocumentFormData> = {
-    title: 'Document Generator',
-    description: 'Generate professional documents using your custom prompts with client-specific information.',
+    title: t('documentGenerator.title'),
+    description: t('documentGenerator.description'),
     icon: FileText,
     themeColor: 'blue',
     
@@ -143,39 +145,39 @@ export function CustomDocumentGeneratorDialog({
         clientId: formData.clientId,
         content: content,
         documentTitle: formData.documentTitle,
-        promptName: prompt?.name || 'Custom Prompt',
+        promptName: prompt?.name || t('documentGenerator.defaultNames.customPrompt'),
       }
     },
     
     validateGeneration: (data: CustomDocumentFormData): ValidationResult => {
       if (!data.clientId) {
-        return { isValid: false, message: 'Please select a client' }
+        return { isValid: false, message: t('documentGenerator.validation.selectClient') }
       }
       if (!data.documentTitle.trim()) {
-        return { isValid: false, message: 'Please provide a document title' }
+        return { isValid: false, message: t('documentGenerator.validation.documentTitle') }
       }
       if (!data.promptContent.trim()) {
-        return { isValid: false, message: 'Please provide prompt instructions' }
+        return { isValid: false, message: t('documentGenerator.validation.promptContent') }
       }
       return { isValid: true }
     },
     
     validateSave: (data: CustomDocumentFormData, content: string): ValidationResult => {
       if (!content.trim()) {
-        return { isValid: false, message: 'Please generate content before saving' }
+        return { isValid: false, message: t('documentGenerator.validation.generateContent') }
       }
       if (!data.documentTitle.trim()) {
-        return { isValid: false, message: 'Please provide a document title' }
+        return { isValid: false, message: t('documentGenerator.validation.documentTitle') }
       }
       return { isValid: true }
     },
     
     generateDefaultName: (data: CustomDocumentFormData, client?: Client) => {
       if (client) {
-        const promptTitle = prompts.find(p => p.id === data.selectedPrompt)?.name || 'Custom Document'
+        const promptTitle = prompts.find(p => p.id === data.selectedPrompt)?.name || t('documentGenerator.defaultNames.customDocument')
         return `${client.name} - ${promptTitle}`
       }
-      return 'Custom Document'
+      return t('documentGenerator.defaultNames.customDocument')
     },
     
     getDocumentNameField: (data: CustomDocumentFormData) => data.documentTitle,
@@ -186,7 +188,7 @@ export function CustomDocumentGeneratorDialog({
     }),
     
     getSuccessMessage: (client?: Client) => 
-      client ? `📄 Generating document for ${client.name}` : 'Generating document...'
+      client ? t('documentGenerator.success.generatingForClient', { clientName: client.name }) : t('documentGenerator.success.generating')
   }
 
   // Client Context section
@@ -194,13 +196,13 @@ export function CustomDocumentGeneratorDialog({
     selectedClientData && (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label>Client Context</Label>
+          <Label>{t('documentGenerator.clientContext.title')}</Label>
           <div className="space-x-2">
             <Button variant="outline" size="sm" onClick={selectAllContext}>
-              Select All
+              {t('documentGenerator.clientContext.selectAll')}
             </Button>
             <Button variant="outline" size="sm" onClick={deselectAllContext}>
-              Deselect All
+              {t('documentGenerator.clientContext.deselectAll')}
             </Button>
           </div>
         </div>
@@ -263,12 +265,12 @@ export function CustomDocumentGeneratorDialog({
 
         {/* Prompt Content Editor */}
         <div className="space-y-2">
-          <Label htmlFor="prompt-content">Prompt Content</Label>
+          <Label htmlFor="prompt-content">{t('documentGenerator.promptContent.title')}</Label>
           <Textarea
             id="prompt-content"
             value={promptContent}
             onChange={(e) => setPromptContent(e.target.value)}
-            placeholder="Select a prompt from above or write your custom instructions here..."
+            placeholder={t('documentGenerator.promptContent.placeholder')}
             className="min-h-[120px]"
           />
         </div>

@@ -10,23 +10,20 @@ import {
   TranslationFunction 
 } from './index'
 
-// Context type definition
 interface TranslationContextType {
   locale: Locale
   setLocale: (locale: Locale) => void
   t: TranslationFunction
 }
 
-// Create the context
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
 
-// Provider props
+
 interface TranslationProviderProps {
   children: ReactNode
   initialLocale?: Locale
 }
 
-// Storage key for persisting locale preference
 const LOCALE_STORAGE_KEY = 'app-locale'
 
 // Translation Provider Component
@@ -36,7 +33,6 @@ export function TranslationProvider({
 }: TranslationProviderProps) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale)
 
-  // Load saved locale from localStorage on mount
   useEffect(() => {
     try {
       const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY)

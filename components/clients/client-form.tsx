@@ -10,6 +10,7 @@ import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
 import {CLIENT_FIELD_LABELS} from '@/lib/types/client-types'
 import {Globe, HelpCircle, Shield} from 'lucide-react'
 import {useClientForm} from '@/hooks/client/use-client-form'
+import {useTranslations} from '@/lib/translations/context'
 import React from "react";
 
 interface ClientFormProps {
@@ -21,6 +22,9 @@ interface ClientFormProps {
 }
 
 export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = false }: ClientFormProps) {
+  const t = useTranslations('clients')
+  const tCommon = useTranslations('common')
+  
   const {
     // Form state
     formData,
@@ -54,16 +58,16 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
         <div className="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 dark:bg-blue-950/30 rounded-r-md">
           <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Personal Information
+            {t('form.personalInformation')}
           </h3>
           <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
-            This information is never shared with anyone and is kept strictly confidential.
+            {t('form.privacyMessage')}
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-25 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">{t('form.name')} {t('form.required')}</Label>
             {viewMode ? (
               <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
                 <span className="text-sm">{formData.name || '-'}</span>
@@ -75,7 +79,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
                   value={formData.name}
                   onChange={handleChange('name')}
                   required
-                  placeholder="Client's full name"
+                  placeholder={t('form.namePlaceholder')}
                   className={errors.name ? 'border-red-500' : ''}
                 />
                 {errors.name && (
@@ -86,7 +90,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('form.email')}</Label>
             {viewMode ? (
               <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
                 <span className="text-sm">{formData.email || '-'}</span>
@@ -98,7 +102,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
                   type="email"
                   value={formData.email}
                   onChange={handleChange('email')}
-                  placeholder="client@example.com"
+                  placeholder={t('form.emailPlaceholder')}
                   className={errors.email ? 'border-red-500' : ''}
                 />
                 {errors.email && (
@@ -109,7 +113,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">{t('form.phone')}</Label>
             {viewMode ? (
               <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
                 <span className="text-sm">{formData.phone || '-'}</span>
@@ -120,7 +124,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
                   id="phone"
                   value={formData.phone}
                   onChange={handleChange('phone')}
-                  placeholder="+1 (555) 123-4567"
+                  placeholder={t('form.phonePlaceholder')}
                   className={errors.phone ? 'border-red-500' : ''}
                 />
                 {errors.phone && (
@@ -136,7 +140,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <div className="flex items-center h-5">
-            <Label htmlFor="country">{CLIENT_FIELD_LABELS.country}</Label>
+            <Label htmlFor="country">{t('form.country')}</Label>
           </div>
           {viewMode ? (
             <div className="p-2 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[40px] flex items-center">
@@ -147,7 +151,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
               id="country"
               value={formData.country}
               onChange={handleChange('country')}
-              placeholder="e.g., United States, Canada, UK"
+              placeholder={t('form.countryPlaceholder')}
             />
           )}
         </div>
@@ -156,7 +160,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
           <div className="flex items-center gap-2 h-5">
             <Label htmlFor="documentsLanguage" className="flex items-center gap-2">
               <Globe className="h-4 w-4" />
-              Documents Language
+              {t('form.documentsLanguage')}
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -164,8 +168,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-xs">
-                  This language will be used when generating marketing content and reports 
-                  in the AI Services page for this client.
+                  {t('form.languageTooltip')}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -190,7 +193,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
               onValueChange={handleSelectChange('documentsLanguage')}
             >
               <SelectTrigger id="documentsLanguage">
-                <SelectValue placeholder="Select language for generated documents" />
+                <SelectValue placeholder={t('form.languageSelectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {languages.map((lang) => (
@@ -208,7 +211,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="generalContext">{CLIENT_FIELD_LABELS.generalContext}</Label>
+        <Label htmlFor="generalContext">{t('form.generalContextLabel')}</Label>
         {viewMode ? (
           <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[100px]">
             <span className="text-sm whitespace-pre-wrap">{formData.generalContext || '-'}</span>
@@ -218,14 +221,14 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
             id="generalContext"
             value={formData.generalContext}
             onChange={handleChange('generalContext')}
-            placeholder="Any general context about the client..."
+            placeholder={t('form.generalContextPlaceholder')}
             rows={4}
           />
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="specificContext1">{CLIENT_FIELD_LABELS.specificContext1}</Label>
+        <Label htmlFor="specificContext1">{t('form.specificContext1Label')}</Label>
         {viewMode ? (
           <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[80px]">
             <span className="text-sm whitespace-pre-wrap">{formData.specificContext1 || '-'}</span>
@@ -235,14 +238,14 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
             id="specificContext1"
             value={formData.specificContext1}
             onChange={handleChange('specificContext1')}
-            placeholder="Specific context 1 about the client..."
+            placeholder={t('form.specificContext1Placeholder')}
             rows={3}
           />
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="specificContext2">{CLIENT_FIELD_LABELS.specificContext2}</Label>
+        <Label htmlFor="specificContext2">{t('form.specificContext2Label')}</Label>
         {viewMode ? (
           <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[80px]">
             <span className="text-sm whitespace-pre-wrap">{formData.specificContext2 || '-'}</span>
@@ -252,14 +255,14 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
             id="specificContext2"
             value={formData.specificContext2}
             onChange={handleChange('specificContext2')}
-            placeholder="Specific context 2 about the client..."
+            placeholder={t('form.specificContext2Placeholder')}
             rows={3}
           />
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="specificContext3">{CLIENT_FIELD_LABELS.specificContext3}</Label>
+        <Label htmlFor="specificContext3">{t('form.specificContext3Label')}</Label>
         {viewMode ? (
           <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[80px]">
             <span className="text-sm whitespace-pre-wrap">{formData.specificContext3 || '-'}</span>
@@ -269,7 +272,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
             id="specificContext3"
             value={formData.specificContext3}
             onChange={handleChange('specificContext3')}
-            placeholder="Specific context 3 about the client..."
+            placeholder={t('form.specificContext3Placeholder')}
             rows={3}
           />
         )}
@@ -282,7 +285,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
             variant="outline"
             onClick={onCancel}
           >
-            Close
+            {tCommon('close')}
           </Button>
         ) : (
           <>
@@ -293,7 +296,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
                 onClick={onCancel}
                 disabled={isLoading}
               >
-                Cancel
+                {tCommon('cancel')}
               </Button>
             )}
             <Button
@@ -301,7 +304,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
               disabled={isLoading}
               variant="blue"
             >
-              {isLoading ? 'Saving...' : (client?.id ? 'Update Client' : 'Create Client')}
+              {isLoading ? tCommon('saving') : (client?.id ? t('form.updateClient') : t('form.createClient'))}
             </Button>
           </>
         )}
@@ -314,7 +317,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
       {!hideTitle && (
         <CardHeader>
           <CardTitle>
-            {viewMode ? 'View Client' : (client?.id ? 'Edit Client' : 'Add New Client')}
+            {viewMode ? t('form.viewClient') : (client?.id ? t('form.editClient') : t('form.addNewClient'))}
           </CardTitle>
         </CardHeader>
       )}

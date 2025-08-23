@@ -9,6 +9,7 @@ import {Label} from '@/components/ui/label'
 import {Download, Edit, Plus, Search, Trash2, TrashIcon} from 'lucide-react'
 import {ALL_DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
 import {Document} from '@prisma/client'
+import {useTranslations} from '@/lib/translations/context'
 
 interface DocumentListProps {
   documents: Document[]
@@ -37,6 +38,8 @@ export function DocumentList({
   showDeleteAllConfirm,
   setShowDeleteAllConfirm
 }: DocumentListProps) {
+  const t = useTranslations('documents')
+  const tCommon = useTranslations('common')
   const [searchTerm, setSearchTerm] = useState('')
   const [documentTypeFilter, setDocumentTypeFilter] = useState('')
 
@@ -59,11 +62,11 @@ export function DocumentList({
     const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
 
     if (diffInHours < 1) {
-      return 'Just now'
+      return t('time.justNow')
     } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)} hours ago`
+      return t('time.hoursAgo', { count: Math.floor(diffInHours) })
     } else if (diffInDays < 7) {
-      return `${Math.floor(diffInDays)} days ago`
+      return t('time.daysAgo', { count: Math.floor(diffInDays) })
     } else {
       return date.toLocaleDateString()
     }
@@ -73,35 +76,33 @@ export function DocumentList({
     <div className="w-1/3 border-r border-border flex flex-col overflow-hidden">
       {/* Header with actions */}
       <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Documents ({documents.length})</h3>
-          <div className="flex gap-2">
-            {documents.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (showDeleteAllConfirm) {
-                    onDeleteAllDocuments()
-                  } else {
-                    setShowDeleteAllConfirm(true)
-                  }
-                }}
-                className={`transition-all duration-200 ${
-                  showDeleteAllConfirm 
-                    ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 hover:bg-red-200 dark:hover:bg-red-900/50' 
-                    : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
-                } shadow-sm`}
-              >
-                <TrashIcon className="w-4 h-4 mr-2" />
-                {showDeleteAllConfirm ? 'Click to Confirm' : 'Delete All'}
-              </Button>
-            )}
-            <Button size="sm" onClick={onCreateNew} variant="blue">
-              <Plus className="h-4 w-4 mr-1" />
-              New
+        <h3 className="text-lg font-semibold mb-3">{t('list.title', { count: documents.length })}</h3>
+        <div className="flex gap-2 mb-4 justify-between">
+          {documents.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (showDeleteAllConfirm) {
+                  onDeleteAllDocuments()
+                } else {
+                  setShowDeleteAllConfirm(true)
+                }
+              }}
+              className={`transition-all duration-200 ${
+                showDeleteAllConfirm 
+                  ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 hover:bg-red-200 dark:hover:bg-red-900/50' 
+                  : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
+              } shadow-sm`}
+            >
+              <TrashIcon className="w-4 h-4 mr-2" />
+              {showDeleteAllConfirm ? t('actions.deleteAllConfirm') : t('actions.deleteAll')}
             </Button>
-          </div>
+          )}
+          <Button size="sm" onClick={onCreateNew} variant="blue">
+            <Plus className="h-4 w-4 mr-1" />
+            {t('actions.createNew')}
+          </Button>
         </div>
         
         {/* Search and Filter Controls */}
@@ -111,7 +112,7 @@ export function DocumentList({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search documents by name or type..."
+                placeholder={t('search.placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -121,14 +122,14 @@ export function DocumentList({
             {/* Document Type Filter */}
             <div className="flex items-center gap-2">
               <Label htmlFor="typeFilter" className="text-sm font-medium whitespace-nowrap">
-                Filter by type:
+                {t('filters.filterByType')}
               </Label>
               <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All types" />
+                  <SelectValue placeholder={t('search.allTypes')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
+                  <SelectItem value="all">{t('search.allTypes')}</SelectItem>
                   {ALL_DOCUMENT_TYPES.map((type) => (
                     <SelectItem key={type} value={type}>
                       {getDocumentTypeLabel(type)}
@@ -141,15 +142,15 @@ export function DocumentList({
             {/* Active Filters Display */}
             {(searchTerm || (documentTypeFilter && documentTypeFilter !== 'all')) && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Active filters:</span>
+                <span>{t('filters.activeFilters')}</span>
                 {searchTerm && (
                   <span className="px-2 py-1 rounded text-sm">
-                    Search: "{searchTerm}"
+                    {t('filters.searchFilter', { term: searchTerm })}
                   </span>
                 )}
                 {documentTypeFilter && documentTypeFilter !== 'all' && (
                   <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
-                    Type: {getDocumentTypeLabel(documentTypeFilter as DocumentType)}
+                    {t('filters.typeFilter', { type: getDocumentTypeLabel(documentTypeFilter as DocumentType) })}
                   </span>
                 )}
                 <Button
@@ -161,7 +162,7 @@ export function DocumentList({
                   }}
                   className="h-6 px-2 text-xs"
                 >
-                  Clear all
+                  {t('filters.clearAll')}
                 </Button>
               </div>
             )}
@@ -172,16 +173,16 @@ export function DocumentList({
       {/* Document List */}
       <div className="space-y-2 overflow-y-auto flex-1 p-4">
         {loading ? (
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('list.loading')}</p>
         ) : filteredDocuments.length === 0 ? (
           searchTerm ? (
             <div className="text-center py-8">
               <Search className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground mb-1">No documents found matching "{searchTerm}"</p>
-              <p className="text-sm text-muted-foreground">Try searching for a different term</p>
+              <p className="text-muted-foreground mb-1">{t('search.noResultsFor', { term: searchTerm })}</p>
+              <p className="text-sm text-muted-foreground">{t('search.tryDifferent')}</p>
             </div>
           ) : (
-            <p className="text-muted-foreground">No documents found</p>
+            <p className="text-muted-foreground">{t('search.noDocuments')}</p>
           )
         ) : (
           filteredDocuments.map((doc) => (
@@ -200,7 +201,7 @@ export function DocumentList({
                     <h4 className="font-medium text-sm">{doc.documentName}</h4>
                     <p className="text-xs text-muted-foreground font-medium">{getDocumentTypeLabel(doc.documentType as DocumentType)}</p>
                     <p className="text-xs text-muted-foreground">
-                      Updated: {formatDate(doc.updatedAt.toString())}
+                      {t('list.updated', { date: formatDate(doc.updatedAt.toString()) })}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
@@ -213,7 +214,7 @@ export function DocumentList({
                           e.stopPropagation()
                           onEditDocument(doc)
                         }}
-                        title="Edit Document"
+                        title={t('actions.edit')}
                       >
                         <Edit className="h-3 w-3" />
                       </Button>
@@ -224,7 +225,7 @@ export function DocumentList({
                           e.stopPropagation()
                           onDeleteDocument(doc)
                         }}
-                        title="Delete Document"
+                        title={t('actions.delete')}
                       >
                         <Trash2 className="h-3 w-3 text-red-600 hover:text-red-700" />
                       </Button>
@@ -238,7 +239,7 @@ export function DocumentList({
                           e.stopPropagation()
                           onDownloadDocument(doc)
                         }}
-                        title="Download document as Markdown"
+                        title={t('actions.download')}
                         className="text-blue-600 hover:text-blue-700"
                       >
                         <Download className="h-3 w-3" />

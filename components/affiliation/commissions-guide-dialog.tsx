@@ -5,8 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DollarSign, Calendar, Users, CheckCircle2, AlertCircle } from 'lucide-react'
 import { SUBSCRIPTION_PLAN_DETAIL } from '@/lib/types/subscription-types'
+import { useTranslations } from '@/lib/translations/context'
 
 export function CommissionsGuideDialog() {
+  const t = useTranslations('affiliation')
+  
   const subscriptionLimits = Object.values(SUBSCRIPTION_PLAN_DETAIL).map((plan) => ({
     plan: plan.name,
     limit: plan.commissionLimit,
@@ -18,17 +21,17 @@ export function CommissionsGuideDialog() {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <DollarSign className="h-4 w-4" />
-          Commissions Guide
+          {t('commissionsGuide.buttonLabel')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            Commissions Guide
+            {t('commissionsGuide.title')}
           </DialogTitle>
           <DialogDescription>
-            Understanding how affiliate commissions work, payment schedules, and subscription limits
+            {t('commissionsGuide.description')}
           </DialogDescription>
         </DialogHeader>
         
@@ -37,7 +40,7 @@ export function CommissionsGuideDialog() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
-              Payment Processing
+              {t('commissionsGuide.paymentProcessing')}
             </h3>
             
             <div className="grid gap-4 md:grid-cols-1">
@@ -46,9 +49,9 @@ export function CommissionsGuideDialog() {
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="font-medium">Monthly Payment Schedule</p>
+                      <p className="font-medium">{t('commissionsGuide.monthlyPaymentTitle')}</p>
                       <p className="text-sm text-muted-foreground">
-                        Commission payments are processed automatically on the 1st of each month for the previous month's earnings.
+                        {t('commissionsGuide.monthlyPaymentDescription')}
                       </p>
                     </div>
                   </div>
@@ -56,9 +59,9 @@ export function CommissionsGuideDialog() {
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="font-medium">Active Subscription Required</p>
+                      <p className="font-medium">{t('commissionsGuide.activeSubscriptionTitle')}</p>
                       <p className="text-sm text-muted-foreground">
-                        You must maintain an active subscription to receive commission payments. Suspended or canceled subscriptions will pause commission payouts.
+                        {t('commissionsGuide.activeSubscriptionDescription')}
                       </p>
                     </div>
                   </div>
@@ -66,9 +69,9 @@ export function CommissionsGuideDialog() {
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
                     <div>
-                      <p className="font-medium">Valid Payment Method Required</p>
+                      <p className="font-medium">{t('commissionsGuide.validPaymentTitle')}</p>
                       <p className="text-sm text-muted-foreground">
-                        Only affiliated users with valid Stripe subscriptions and payment methods are included in commission calculations.
+                        {t('commissionsGuide.validPaymentDescription')}
                       </p>
                     </div>
                   </div>
@@ -81,11 +84,11 @@ export function CommissionsGuideDialog() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              Commission Calculation Limits
+              {t('commissionsGuide.calculationLimits')}
             </h3>
             
             <p className="text-sm text-muted-foreground mb-4">
-              Your subscription plan determines how many users from your referral network can be included in commission calculations.
+              {t('commissionsGuide.calculationLimitsDescription')}
             </p>
 
             {/* Desktop Table View */}
@@ -93,9 +96,9 @@ export function CommissionsGuideDialog() {
               <table className="w-full border-collapse border rounded-lg">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left p-4 font-semibold">Subscription Plan</th>
-                    <th className="text-left p-4 font-semibold">Commission Calculation Limit</th>
-                    <th className="text-left p-4 font-semibold">Description</th>
+                    <th className="text-left p-4 font-semibold">{t('commissionsGuide.subscriptionPlan')}</th>
+                    <th className="text-left p-4 font-semibold">{t('commissionsGuide.commissionLimit')}</th>
+                    <th className="text-left p-4 font-semibold">{t('commissionsGuide.description')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -108,12 +111,12 @@ export function CommissionsGuideDialog() {
                       </td>
                       <td className="p-4">
                         <div className="font-medium">
-                          {item.limit} users
+                          {t('commissionsGuide.usersCount', { count: item.limit })}
                         </div>
                       </td>
                       <td className="p-4">
                         <div className="text-sm text-muted-foreground">
-                          Commissions calculated from your top {item.limit} performing referrals
+                          {t('commissionsGuide.topPerformingReferrals', { count: item.limit })}
                         </div>
                       </td>
                     </tr>
@@ -131,11 +134,11 @@ export function CommissionsGuideDialog() {
                       {item.plan}
                     </Badge>
                     <div className="font-medium text-sm">
-                      {item.limit} users
+                      {t('commissionsGuide.usersCount', { count: item.limit })}
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Commissions calculated from your top {item.limit} performing referrals
+                    {t('commissionsGuide.topPerformingReferrals', { count: item.limit })}
                   </p>
                 </div>
               ))}
@@ -147,12 +150,12 @@ export function CommissionsGuideDialog() {
             <div className="flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
               <div>
-                <h4 className="font-medium text-amber-800 mb-1">Important Notes</h4>
+                <h4 className="font-medium text-amber-800 mb-1">{t('commissionsGuide.importantNotesTitle')}</h4>
                 <ul className="text-sm text-amber-700 space-y-1">
-                  <li>• Commission rates depend on your affiliation status level</li>
-                  <li>• Payments are processed via Stripe to your registered payment method</li>
-                  <li>• Commission calculations exclude trial users and inactive subscriptions</li>
-                  <li>• Upgrade your subscription to increase your earning potential</li>
+                  <li>• {t('commissionsGuide.note1')}</li>
+                  <li>• {t('commissionsGuide.note2')}</li>
+                  <li>• {t('commissionsGuide.note3')}</li>
+                  <li>• {t('commissionsGuide.note4')}</li>
                 </ul>
               </div>
             </div>

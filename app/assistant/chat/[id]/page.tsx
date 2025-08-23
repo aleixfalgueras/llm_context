@@ -4,6 +4,7 @@ import {Navbar} from '@/components/global/navbar'
 import {getClients} from '@/app/actions/client-action'
 import {getChats, getChatWithMessagesById} from '@/app/actions/chat-action'
 import {Role} from '@prisma/client'
+import {getTranslations} from '@/lib/translations'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
@@ -14,6 +15,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
 
   // Get current user data from Clerk
   const user = await currentUser()
+  const t = await getTranslations('assistant')
 
   // Get the specific chat and verify ownership, all user's chats, and clients in parallel
   const [chat, chats, clients] = await Promise.all([
@@ -39,7 +41,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
           chats={chats}
           clients={clients}
           userImageUrl={user?.imageUrl}
-          userName={user?.firstName || 'User'}
+          userName={user?.firstName || t('userFallback')}
           lastUsedModel={lastUsedModel}
         />
       </div>
