@@ -126,6 +126,7 @@ model UserSubscription {
   updatedAt            DateTime           @updatedAt
   canceledAt           DateTime?
   tokenLimit           Int                @default(100000)
+  customTokenLimit     Int?               // Custom token limit override for specific users
 
   @@index([currentPeriodEnd])
   @@map("user_subscriptions")
