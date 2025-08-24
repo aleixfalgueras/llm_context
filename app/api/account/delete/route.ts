@@ -1,13 +1,55 @@
-import { clerkClient } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
-import { withdrawAllConsent, extractClientInfo } from '@/lib/utils/consent'
-import { withEnhancedApi, parseJsonBody, apiSuccess } from '@/lib/api/api-middleware'
-import { ApiErrors } from '@/lib/api/api-error-handler'
-import { cancelSubscriptionImmediately } from '@/lib/stripe/stripe-subscription'
-import { stripe } from '@/lib/stripe/stripe'
-import { SubscriptionUsageOperations } from '@/database'
-import { DELETE_CONFIRMATION_TEXT } from '@/lib/types/account-types'
+import {clerkClient} from '@clerk/nextjs/server'
+import {prisma} from '@/lib/prisma'
+import {extractClientInfo, withdrawAllConsent} from '@/lib/utils/consent'
+import {apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
+import {ApiErrors} from '@/lib/api/api-error-handler'
+import {cancelSubscriptionImmediately} from '@/lib/stripe/stripe-subscription'
+import {stripe} from '@/lib/stripe/stripe'
+import {SubscriptionUsageOperations} from '@/database'
+import {DELETE_CONFIRMATION_TEXT} from '@/lib/types/account-types'
 
+/**
+ * Account Deletion Endpoint
+ * 
+ * **Process Overview:**
+ * The deletion process consists of 6 main steps executed in sequence to ensure
+ * data integrity and proper cleanup across all systems.
+ * 
+ * Step 1: Validation & Consent Withdrawal
+ * - Validates user-provided confirmation text matches required phrase
+ * - Extracts client information (IP, user agent) for audit trail
+ * - Withdraws all user consent records with proper documentation
+ * - Performed outside transaction to avoid timeout issues
+ * 
+ * Step 2: Data Inventory & Audit Preparation
+ * - Counts all user data across the platform for audit purposes
+ * - Includes: clients, documents, chats, messages, prompts, feedback, affiliations
+ * - Captures subscription details and Stripe customer information
+ *
+ * Step 3: Core Data Deletion (Transactional)
+ * - Creates audit trail record before deletion begins
+ * - Deletes user data in dependency order to respect foreign key constraints
+ * - Handles affiliation hierarchy (orphans child affiliations instead of deleting)
+ * - Add "deleted_user" to the userId from the UserSubscription table
+ * - Updates audit record with actual deletion counts
+ * - Uses extended timeout transaction to handle large data sets
+ * 
+ * Step 4: Completion Audit Logging
+ * - Creates final audit log entry confirming deletion completion
+ * - Records deletion request ID for traceability
+ * - Performed outside transaction for reliability
+ * 
+ * Step 5: Stripe Cleanup
+ * - Cancels active subscription immediately with proper reason code
+ * - Handles errors gracefully - deletion continues even if Stripe operations fail
+ * - Records success/failure status for each Stripe operation
+ * 
+ * Step 6: External Service Cleanup
+ * - Removes user from Clerk authentication service
+ * - Handles errors gracefully - process continues even if external cleanup fails
+ * - Logs any failures for manual review
+ *
+ */
 export const POST = withEnhancedApi(async ({ userId, req }) => {
   const { confirmationText, reason = 'user_request' } = await parseJsonBody(req)
 
@@ -142,6 +184,15 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
       where: { userId }
     })
 
+    // Anonymize UserSubscription records by prefixing userId
+    const anonymizedSubscriptions = await tx.userSubscription.updateMany({
+      where: { userId },
+      data: { 
+        userId: `deleted_user_${userId}`,
+        updatedAt: new Date()
+      }
+    })
+
     // Update deletion request with actual deletion counts
     await tx.accountDeletionRequest.update({
       where: { id: deletionRequest.id },
@@ -158,7 +209,8 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
             feedbacks: deletedFeedbacks.count,
             userConsent: deletedUserConsent.count,
             affiliations: deletedAffiliations.count,
-            affiliationChildrenOrphaned: deletedAffiliationChildren.count
+            affiliationChildrenOrphaned: deletedAffiliationChildren.count,
+            subscriptionsAnonymized: anonymizedSubscriptions.count
           },
           ipAddress: clientIP,
           userAgent,
@@ -179,7 +231,8 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
         feedbacks: deletedFeedbacks.count,
         userConsent: deletedUserConsent.count,
         affiliations: deletedAffiliations.count,
-        affiliationChildrenOrphaned: deletedAffiliationChildren.count
+        affiliationChildrenOrphaned: deletedAffiliationChildren.count,
+        subscriptionsAnonymized: anonymizedSubscriptions.count
       }
     }
   }, {
@@ -200,12 +253,10 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     }
   })
 
-  // 5. Handle Stripe subscription and customer cleanup
+  // 5. Handle Stripe subscription cleanup
   let stripeCleanupResults = {
     subscriptionCancelled: false,
-    customerDeleted: false,
-    subscriptionError: null as string | null,
-    customerError: null as string | null
+    subscriptionError: null as string | null
   }
 
   if (userSubscription?.stripeSubscriptionId) {
@@ -224,18 +275,6 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     }
   }
 
-  if (userSubscription?.stripeCustomerId) {
-    try {
-      await stripe.customers.del(userSubscription.stripeCustomerId)
-      stripeCleanupResults.customerDeleted = true
-    } catch (customerError) {
-      stripeCleanupResults.customerError = customerError instanceof Error
-        ? customerError.message
-        : 'Unknown customer deletion error'
-      console.error('Failed to delete Stripe customer:', customerError)
-      // Continue with deletion even if customer deletion fails
-    }
-  }
 
   // 6. Delete from Clerk (external service) - outside transaction
   try {
@@ -254,10 +293,8 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     stripeCleanup: {
       hadSubscription: !!userSubscription?.stripeSubscriptionId,
       subscriptionCancelled: stripeCleanupResults.subscriptionCancelled,
-      customerDeleted: stripeCleanupResults.customerDeleted,
       errors: {
-        subscription: stripeCleanupResults.subscriptionError,
-        customer: stripeCleanupResults.customerError
+        subscription: stripeCleanupResults.subscriptionError
       }
     }
   })
