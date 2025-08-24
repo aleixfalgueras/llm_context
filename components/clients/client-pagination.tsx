@@ -3,6 +3,7 @@
 import {Button} from '@/components/ui/button'
 import {ChevronLeft, ChevronRight} from 'lucide-react'
 import {PaginationInfo} from '@/lib/types/client-list-types'
+import {useTranslations} from '@/lib/translations/context'
 
 interface ClientPaginationProps {
   paginationInfo: PaginationInfo
@@ -10,6 +11,7 @@ interface ClientPaginationProps {
 }
 
 export function ClientPagination({ paginationInfo, onPageChange }: ClientPaginationProps) {
+  const t = useTranslations('clients')
   const { 
     currentPage, 
     totalPages, 
@@ -56,7 +58,7 @@ export function ClientPagination({ paginationInfo, onPageChange }: ClientPaginat
           variant="outline"
           size="sm"
         >
-          Previous
+          {t('previous')}
         </Button>
         <Button
           onClick={() => onPageChange(currentPage + 1)}
@@ -64,7 +66,7 @@ export function ClientPagination({ paginationInfo, onPageChange }: ClientPaginat
           variant="outline"
           size="sm"
         >
-          Next
+          {t('next')}
         </Button>
       </div>
 
@@ -72,13 +74,13 @@ export function ClientPagination({ paginationInfo, onPageChange }: ClientPaginat
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700 dark:text-gray-300">
-            Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-            <span className="font-medium">{Math.min(endIndex, totalItems)}</span> of{' '}
-            <span className="font-medium">{totalItems}</span> clients
+            {t('showing')} <span className="font-medium">{startIndex + 1}</span> {t('to')}{' '}
+            <span className="font-medium">{Math.min(endIndex, totalItems)}</span> {t('of')}{' '}
+            <span className="font-medium">{totalItems}</span> {t('clients')}
           </p>
         </div>
         <div>
-          <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+          <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label={t('ui.accessibility.pagination')}>
             <Button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}

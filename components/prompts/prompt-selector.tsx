@@ -1,6 +1,7 @@
 'use client'
 
 import {useEffect, useState} from 'react'
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Badge} from '@/components/ui/badge'
@@ -18,6 +19,7 @@ interface PromptSelectorProps {
 }
 
 export function PromptSelector({ onPromptSelect, className }: PromptSelectorProps) {
+  const t = useTranslations('prompts')
   const [open, setOpen] = useState(false)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [loading, setLoading] = useState(false)
@@ -81,7 +83,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
           className={cn("justify-between", className)}
         >
           <FileText className="w-4 h-4 mr-2" />
-          Use Prompt ✨
+          {t('selector.usePrompt')}
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </PopoverTrigger>
@@ -95,7 +97,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
           <div className="flex items-center space-x-2">
             <Search className="w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search prompts..."
+              placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="flex-1"
@@ -107,7 +109,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
               <SelectContent>
                 {PROMPT_CATEGORIES.map((category) => (
                   <SelectItem key={category.value} value={category.value}>
-                    {category.label}
+                    {category.value === 'all' ? t('filters.allCategories') : t(`categories.${category.value}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -118,11 +120,11 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
         <div className="overflow-y-auto max-h-[calc(50vh-150px)] pointer-events-auto">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">
-              Loading prompts...
+              {t('selector.loading')}
             </div>
           ) : filteredPrompts.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              {searchTerm ? 'No prompts match your search.' : 'No prompts available.'}
+              {searchTerm ? t('selector.noSearchResults') : t('selector.noPrompts')}
             </div>
           ) : (
             <div className="p-2">
@@ -133,7 +135,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
                       <div className="mb-3">
                         <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
                           <TrendingUp className="w-3 h-3" />
-                          Most Used
+                          {t('selector.sections.mostUsed')}
                         </div>
                         {popularPrompts.map((prompt) => (
                           <PromptItem
@@ -149,7 +151,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
                       <div className="mb-3">
                         <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground">
                           <Star className="w-3 h-3" />
-                          Recent
+                          {t('selector.sections.recent')}
                         </div>
                         {recentPrompts.map((prompt) => (
                           <PromptItem
@@ -168,7 +170,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
                   <div className="mb-4">
                     <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground mb-2 capitalize">
                       <FileText className="w-3 h-3" />
-                      {searchTerm ? 'Search Results' : `${selectedCategory} Prompts`}
+                      {searchTerm ? t('selector.sections.searchResults') : t('selector.sections.categoryPrompts', { category: t(`categories.${selectedCategory}`) })}
                     </div>
                     {filteredPrompts.map((prompt) => (
                       <PromptItem
@@ -185,7 +187,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
                   <div>
                     <div className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-muted-foreground mb-2">
                       <FileText className="w-3 h-3" />
-                      All Prompts
+                      {t('selector.sections.allPrompts')}
                     </div>
                     {filteredPrompts.map((prompt) => (
                       <PromptItem
@@ -210,6 +212,8 @@ interface PromptItemProps {
 }
 
 function PromptItem({ prompt, onSelect }: PromptItemProps) {
+  const t = useTranslations('prompts')
+  
   return (
     <div
       className="flex items-start gap-3 p-2 rounded-md hover:bg-muted cursor-pointer group"
@@ -220,7 +224,7 @@ function PromptItem({ prompt, onSelect }: PromptItemProps) {
         <div className="flex items-center gap-2">
           <p className="font-medium text-sm truncate">{prompt.name}</p>
           <Badge variant="secondary" className="text-xs capitalize">
-            {prompt.category}
+            {t(`categories.${prompt.category}`)}
           </Badge>
           {prompt.usageCount > 0 && (
             <span className="text-xs text-muted-foreground">

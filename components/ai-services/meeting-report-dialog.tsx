@@ -11,6 +11,7 @@ import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-servic
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import type {Client} from '@prisma/client'
 import {getDefaultModel} from '@/lib/models-config'
+import {useTranslations} from '@/lib/translations/context'
 
 interface MeetingReportDialogProps {
   open: boolean
@@ -34,6 +35,7 @@ export function MeetingReportDialog({
   clients, 
   onDocumentCreated 
 }: MeetingReportDialogProps) {
+  const t = useTranslations('aiServices')
   const { toast } = useToast()
   const [formData, setFormData] = useState<MeetingFormData>({
     clientId: '',
@@ -78,8 +80,8 @@ export function MeetingReportDialog({
     const allowedTypes = ['text/plain', 'application/txt', 'text/txt']
     if (!allowedTypes.includes(file.type) && !file.name.endsWith('.txt')) {
       toast({
-        title: 'Invalid File Type',
-        description: 'Please upload a .txt file',
+        title: t('meetingReport.fileUpload.invalidType'),
+        description: t('meetingReport.fileUpload.invalidTypeDescription'),
         variant: 'destructive'
       })
       return
@@ -89,8 +91,8 @@ export function MeetingReportDialog({
     const maxSize = 5 * 1024 * 1024
     if (file.size > maxSize) {
       toast({
-        title: 'File Too Large',
-        description: 'File size must be less than 5MB',
+        title: t('meetingReport.fileUpload.fileTooLarge'),
+        description: t('meetingReport.fileUpload.fileTooLargeDescription'),
         variant: 'destructive'
       })
       return
@@ -102,8 +104,8 @@ export function MeetingReportDialog({
       updateFormData({ meetingTranscription: text })
     } catch (error) {
       toast({
-        title: 'Upload Failed',
-        description: 'Failed to read the file. Please try again.',
+        title: t('meetingReport.fileUpload.uploadFailed'),
+        description: t('meetingReport.fileUpload.uploadFailedDescription'),
         variant: 'destructive'
       })
     } finally {
@@ -115,8 +117,8 @@ export function MeetingReportDialog({
 
   // Configuration for the base dialog
   const config: BaseAIServiceDialogConfig<MeetingFormData> = {
-    title: 'Generate Meeting Report',
-    description: 'Transform your meeting notes into a professional report',
+    title: t('meetingReport.title'),
+    description: t('meetingReport.description'),
     icon: Calendar,
     themeColor: 'purple',
     
@@ -138,23 +140,23 @@ export function MeetingReportDialog({
     
     validateGeneration: (data: MeetingFormData): ValidationResult => {
       if (!data.clientId) {
-        return { isValid: false, message: 'Please select a client' }
+        return { isValid: false, message: t('meetingReport.validation.selectClient') }
       }
       if (!data.meetingDate) {
-        return { isValid: false, message: 'Please select a meeting date' }
+        return { isValid: false, message: t('meetingReport.validation.selectDate') }
       }
       if (!data.meetingTranscription.trim()) {
-        return { isValid: false, message: 'Please provide meeting transcription' }
+        return { isValid: false, message: t('meetingReport.validation.provideTranscription') }
       }
       return { isValid: true }
     },
     
     validateSave: (data: MeetingFormData, content: string): ValidationResult => {
       if (!content.trim()) {
-        return { isValid: false, message: 'Please provide report content before saving' }
+        return { isValid: false, message: t('meetingReport.validation.generateContent') }
       }
       if (!data.documentName.trim()) {
-        return { isValid: false, message: 'Please provide a document name' }
+        return { isValid: false, message: t('meetingReport.validation.documentName') }
       }
       return { isValid: true }
     },
@@ -164,7 +166,7 @@ export function MeetingReportDialog({
         const meetingDateFormatted = new Date(data.meetingDate).toISOString().split('T')[0]
         return `${client.name} Meeting Report - ${meetingDateFormatted}`
       }
-      return 'Meeting Report'
+      return t('meetingReport.defaultNames.meetingReport')
     },
     
     getDocumentNameField: (data: MeetingFormData) => data.documentName,
@@ -175,7 +177,7 @@ export function MeetingReportDialog({
     }),
     
     getSuccessMessage: (client?: Client) => 
-      client ? `📝 Generating meeting report for ${client.name}` : 'Generating meeting report...'
+      client ? t('meetingReport.success.generatingForClient', { clientName: client.name }) : t('meetingReport.success.generating')
   }
 
   // Handle client selection
@@ -188,20 +190,20 @@ export function MeetingReportDialog({
     <>
       {/* Meeting Date */}
       <div className="space-y-2">
-        <Label htmlFor="meeting-date">Meeting Date *</Label>
+        <Label htmlFor="meeting-date">{t('meetingReport.form.meetingDate')} *</Label>
         <DatePicker
           value={formData.meetingDate}
           onChange={(date: string) => {
             updateFormData({ meetingDate: date })
           }}
-          placeholder="Select meeting date"
+          placeholder={t('meetingReport.form.meetingDatePlaceholder')}
         />
       </div>
 
       {/* Meeting Transcription */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="meeting-transcription">Meeting Transcription *</Label>
+          <Label htmlFor="meeting-transcription">{t('meetingReport.form.transcription')} *</Label>
           <div className="flex items-center gap-2">
             <label className="cursor-pointer">
               <input
@@ -222,12 +224,12 @@ export function MeetingReportDialog({
                   {isUploadingFile ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Uploading...
+                      {t('meetingReport.fileUpload.uploading')}
                     </>
                   ) : (
                     <>
                       <Upload className="h-4 w-4 mr-1" />
-                      Upload .txt
+                      {t('meetingReport.form.uploadFile')}
                     </>
                   )}
                 </span>
@@ -239,22 +241,22 @@ export function MeetingReportDialog({
           id="meeting-transcription"
           value={formData.meetingTranscription}
           onChange={(e) => updateFormData({ meetingTranscription: e.target.value })}
-          placeholder="Paste your meeting transcription here, or upload a .txt file..."
+          placeholder={t('meetingReport.form.transcriptionPlaceholder')}
           className="min-h-[150px]"
         />
         <p className="text-sm text-muted-foreground">
-          Provide the raw meeting notes or transcription. This will be transformed into a professional report.
+          {t('meetingReport.form.transcriptionHelp')}
         </p>
       </div>
 
       {/* Additional Information */}
       <div className="space-y-2">
-        <Label htmlFor="additional-info">Additional Instructions (Optional)</Label>
+        <Label htmlFor="additional-info">{t('meetingReport.form.additionalInfo')} (Optional)</Label>
         <Textarea
           id="additional-info"
           value={formData.additionalInfo}
           onChange={(e) => updateFormData({ additionalInfo: e.target.value })}
-          placeholder="Any additional context or specific requirements for the report... Per example: Add a sentiment analysis section"
+          placeholder={t('meetingReport.form.additionalInfoPlaceholder')}
           className="min-h-[80px]"
         />
       </div>

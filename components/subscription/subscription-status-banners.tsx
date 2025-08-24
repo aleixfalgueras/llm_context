@@ -1,3 +1,6 @@
+'use client'
+
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 
 interface SubscriptionStatusBannersProps {
@@ -29,6 +32,7 @@ export function SubscriptionStatusBanners({
   onRetryPayment,
   retryPaymentLoading
 }: SubscriptionStatusBannersProps) {
+  const t = useTranslations('subscription')
   return (
     <>
       {/* Free Trial Banner */}
@@ -36,11 +40,11 @@ export function SubscriptionStatusBanners({
         <div className="mt-8 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
             <span className="text-[18px]">
-              Free Trial Active (Apprentice Plan) - {getRemainingTrialDays()} days remaining
+              {t('statusBanners.freeTrial.active', { days: getRemainingTrialDays() })}
             </span>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Trial expires on {currentPeriodEnd}
+            {t('statusBanners.freeTrial.expires', { date: currentPeriodEnd })}
           </p>
         </div>
       )}
@@ -50,11 +54,11 @@ export function SubscriptionStatusBanners({
         <div className="mt-8 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-700">
             <span className="text-[18px]">
-              Active Subscription (Cancelled) - {getRemainingActiveDays()} days remaining
+              {t('statusBanners.activeCancelled.status', { days: getRemainingActiveDays() })}
             </span>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Your subscription will be cancelled on {currentPeriodEnd}
+            {t('statusBanners.activeCancelled.willBeCancelled', { date: currentPeriodEnd })}
           </p>
         </div>
       )}
@@ -64,11 +68,11 @@ export function SubscriptionStatusBanners({
         <div className="mt-8 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 border border-orange-200 dark:border-orange-700">
             <span className="text-[18px]">
-              Active Subscription (Downgrading) - {getRemainingDowngradeDays()} days until downgrade to {capitalizePlanName(pendingPlanChange)}
+              {t('statusBanners.pendingDowngrade.status', { days: getRemainingDowngradeDays(), plan: capitalizePlanName(pendingPlanChange) })}
             </span>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Your subscription will be downgraded on {currentPeriodEnd}
+            {t('statusBanners.pendingDowngrade.willBeDowngraded', { date: currentPeriodEnd })}
           </p>
         </div>
       )}
@@ -78,11 +82,11 @@ export function SubscriptionStatusBanners({
         <div className="mt-8 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border border-red-200 dark:border-red-700">
             <span className="text-[18px]">
-              ⚠️ Payment Required - Subscription Suspended
+              {t('statusBanners.paymentRequired.status')}
             </span>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-4">
-            Your subscription payment failed. Please update your payment method or retry payment to restore access.
+            {t('statusBanners.paymentRequired.message')}
           </p>
           {onRetryPayment && (
             <Button
@@ -91,7 +95,7 @@ export function SubscriptionStatusBanners({
               variant="blue"
               className="px-6 py-2"
             >
-              {retryPaymentLoading ? 'Processing Payment...' : 'Pay Now to Restore Access'}
+              {retryPaymentLoading ? t('statusBanners.paymentRequired.processingPayment') : t('statusBanners.paymentRequired.retryButton')}
             </Button>
           )}
         </div>

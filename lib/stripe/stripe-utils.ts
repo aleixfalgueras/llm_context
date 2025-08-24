@@ -50,7 +50,10 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
       },
     })
 
-    await SubscriptionService.updateSubscription(userId, { stripeCustomerId: customer.id })
+    await SubscriptionService.updateSubscription(userId, { 
+      stripeCustomerId: customer.id,
+      email 
+    })
 
     logger.info('Created new Stripe customer', { userId, metadata: { customerId: customer.id } })
     return customer

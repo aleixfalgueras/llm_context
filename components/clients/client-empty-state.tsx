@@ -3,6 +3,7 @@
 import {Button} from '@/components/ui/button'
 import {Card, CardContent} from '@/components/ui/card'
 import {User} from 'lucide-react'
+import {useTranslations} from '@/lib/translations/context'
 
 interface ClientEmptyStateProps {
   searchTerm: string
@@ -10,6 +11,8 @@ interface ClientEmptyStateProps {
 }
 
 export function ClientEmptyState({ searchTerm, onAddClient }: ClientEmptyStateProps) {
+  const t = useTranslations('clients')
+  
   return (
     <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10">
       <CardContent className="flex flex-col items-center justify-center py-12">
@@ -17,12 +20,12 @@ export function ClientEmptyState({ searchTerm, onAddClient }: ClientEmptyStatePr
           <User className="h-8 w-8 text-blue-600 dark:text-blue-400" />
         </div>
         <h3 className="text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">
-          {searchTerm ? 'No clients found' : 'No clients yet'}
+          {searchTerm ? t('noClientsFound') : t('noClientsYet')}
         </h3>
         <p className="text-gray-900 dark:text-gray-100 text-center max-w-md">
           {searchTerm 
-            ? 'Try adjusting your search terms'
-            : 'Start by adding your first client to begin creating marketing content'
+            ? t('tryAdjustingSearch')
+            : t('startByAdding')
           }
         </p>
         {!searchTerm && (
@@ -30,9 +33,9 @@ export function ClientEmptyState({ searchTerm, onAddClient }: ClientEmptyStatePr
             onClick={onAddClient} 
             className="mt-4"
             variant="blue"
-            title="Add your first client"
+            title={t('addFirstClient')}
           >
-            Add Your First Client
+            {t('addFirstClient')}
           </Button>
         )}
       </CardContent>

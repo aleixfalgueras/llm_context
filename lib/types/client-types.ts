@@ -33,21 +33,6 @@ export const CLIENT_FIELD_LABELS = {
   updatedAt: 'Updated At'
 } as const
 
-export const CLIENT_FIELD_PLACEHOLDERS = {
-  id: 'Client ID',
-  name: 'Enter client name',
-  email: 'Enter email address',
-  phone: 'Enter phone number',
-  country: 'Select country',
-  generalContext: 'Add general context about this client...',
-  specificContext1: 'Add specific context...',
-  specificContext2: 'Add specific context...',
-  specificContext3: 'Add specific context...',
-  documentsLanguage: 'Select language',
-  createdAt: 'Creation date',
-  updatedAt: 'Last updated'
-} as const
-
 export const CLIENT_CONTEXT_FIELDS = {
   country: CLIENT_FIELD_LABELS.country,
   generalContext: CLIENT_FIELD_LABELS.generalContext,

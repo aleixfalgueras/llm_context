@@ -8,8 +8,10 @@ import {Textarea} from '@/components/ui/textarea'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {FeedbackType} from '@/lib/types/enums'
 import {useFeedbackForm} from '@/hooks/use-feedback-form'
+import {useTranslations} from '@/lib/translations/context'
 
 export function FeedbackForm() {
+  const t = useTranslations('feedback')
   const {
     // Form state
     formData,
@@ -71,9 +73,9 @@ export function FeedbackForm() {
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">
-              {formData.type === FeedbackType.FEATURE ? 'Feature Title' : 
-               formData.type === FeedbackType.BUG ? 'Bug Title' : 
-               'Feedback Title'} *
+              {formData.type === FeedbackType.FEATURE ? t('titles.feature') : 
+               formData.type === FeedbackType.BUG ? t('titles.bug') : 
+               t('titles.general')} *
             </Label>
             <Input
               id="title"
@@ -81,8 +83,8 @@ export function FeedbackForm() {
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder={
                 formData.type === FeedbackType.FEATURE ? 'Brief, descriptive title for your feature request' :
-                formData.type === FeedbackType.BUG ? 'Brief description of the bug or issue' :
-                'Brief title for your feedback'
+                formData.type === FeedbackType.BUG ? t('placeholders.bugTitle') :
+                t('placeholders.generalTitle')
               }
               className={errors.title ? 'border-red-500' : ''}
               required
@@ -95,9 +97,9 @@ export function FeedbackForm() {
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">
-              {formData.type === FeedbackType.FEATURE ? 'Feature Description' : 
-               formData.type === FeedbackType.BUG ? 'Bug Description' : 
-               'Feedback Description'} *
+              {formData.type === FeedbackType.FEATURE ? t('descriptions.feature') : 
+               formData.type === FeedbackType.BUG ? t('descriptions.bug') : 
+               t('descriptions.general')} *
             </Label>
             <Textarea
               id="description"
@@ -106,7 +108,7 @@ export function FeedbackForm() {
               placeholder={
                 formData.type === FeedbackType.FEATURE ? 'What should it do? How should it work?' :
                 formData.type === FeedbackType.BUG ? 'What happened? What did you expect to happen?' :
-                'Please provide details about your feedback'
+                t('placeholders.description')
               }
               className={errors.description ? 'border-red-500' : ''}
               rows={5}
@@ -176,9 +178,9 @@ export function FeedbackForm() {
             disabled={isSubmitting || !formData.type || !formData.title || !formData.description || !formData.priority}
           >
             {isSubmitting ? 'Submitting...' : 
-             formData.type === FeedbackType.FEATURE ? 'Submit Feature Request' :
-             formData.type === FeedbackType.BUG ? 'Submit Bug Report' :
-             'Submit Feedback'}
+             formData.type === FeedbackType.FEATURE ? t('submit.feature') :
+             formData.type === FeedbackType.BUG ? t('submit.bug') :
+             t('submit.general')}
           </Button>
         </form>
       </CardContent>

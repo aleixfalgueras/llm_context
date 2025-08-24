@@ -1,0 +1,1095 @@
+{
+  "app": {
+    "title": "MIA - Millennials Influencers Assistant",
+    "description": "AI-powered marketing content generation platform",
+    "copyright": "2025 MIA. AI-powered marketing content generation platform."
+  },
+  "navigation": {
+    "clients": "Clients",
+    "prompts": "Prompts",
+    "assistant": "AI Assistant",
+    "aiServices": "AI Services",
+    "affiliation": "Affiliation",
+    "feedback": "Feedback",
+    "admin": "Admin",
+    "subscription": "Subscription",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "menu": "Menu",
+    "signIn": "Sign in"
+  },
+  "landing": {
+    "hero": {
+      "tagline": "Create personalized marketing content with an AI that understands your clients' business context.",
+      "cta": "Get Started"
+    },
+    "features": {
+      "title": "Advanced AI Marketing Platform",
+      "clientIntelligence": {
+        "title": "Client Business Intelligence",
+        "description": "Store industry insights, business goals, target audiences, and competitive landscape for each client"
+      },
+      "campaignStrategy": {
+        "title": "Campaign Strategy AI",
+        "description": "Generate marketing strategies, campaign ideas, and tactical plans using deep client context"
+      },
+      "contentCreation": {
+        "title": "Branded Content Creation",
+        "description": "Create on-brand content that speaks to your client's audience using their voice and messaging"
+      },
+      "clientReporting": {
+        "title": "Client Reporting",
+        "description": "Generate comprehensive client reports and campaign summaries with full business context"
+      }
+    },
+    "security": {
+      "badge": "Enterprise-grade privacy and security"
+    },
+    "models": {
+      "title": "Dual Premium AI Models Available",
+      "description": "All subscription tiers include both Google Gemini 2.0 and OpenAI GPT-4.1 through our unified model system.",
+      "gemini": {
+        "title": "Google Gemini 2.0",
+        "context": "1M Context Length",
+        "description": "Latest Google AI with enhanced reasoning, multimodal capabilities, and superior performance for complex marketing strategies."
+      },
+      "gpt": {
+        "title": "OpenAI GPT-4.1",
+        "context": "200K Context Length",
+        "description": "Efficient OpenAI model perfect for creative campaign content, strategic planning, and versatile marketing copy."
+      },
+      "switch": "Switch between models seamlessly"
+    },
+    "howItWorks": {
+      "title": "From Client Onboarding to Campaign Success",
+      "step1": {
+        "title": "Capture Client Intelligence",
+        "description": "Store each client's industry, target market, brand voice, competitive landscape, and business objectives in one organized system."
+      },
+      "step2": {
+        "title": "AI-Powered Marketing",
+        "description": "Generate campaign strategies, content, and marketing materials that are perfectly tailored to each client's unique business context and goals."
+      },
+      "step3": {
+        "title": "Deliver Results",
+        "description": "Present campaigns that truly understand your client's market, speak to their audience, and align with their business objectives."
+      }
+    },
+    "stats": {
+      "targeted": {
+        "title": "Targeted",
+        "subtitle": "Campaign Creation",
+        "description": "Based on real client data"
+      },
+      "scalable": {
+        "title": "Scalable",
+        "subtitle": "Client Management",
+        "description": "Handle more clients efficiently"
+      },
+      "strategic": {
+        "title": "Strategic",
+        "subtitle": "Marketing Intelligence",
+        "description": "Data-driven decisions"
+      },
+      "professional": {
+        "title": "Professional",
+        "subtitle": "Client Deliverables",
+        "description": "Impress every client"
+      }
+    },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "description": "Choose the plan that fits your marketing needs. All plans include access to both Google Gemini 2.0 and OpenAI GPT-4.1.",
+      "perMonth": "/month"
+    },
+    "cta": {
+      "title": "MIA is invite-only",
+      "description": "Connect with a current member to receive your personal invitation and join our selective community of marketing professionals.",
+      "businessInquiries": "Business inquiries:"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "Manage your client profiles and track their marketing projects",
+    "searchPlaceholder": "Search clients by name or email...",
+    "addClient": "Add Client",
+    "addFirstClient": "Add Your First Client",
+    "noClientsFound": "No clients found",
+    "noClientsYet": "No clients yet",
+    "tryAdjustingSearch": "Try adjusting your search terms",
+    "startByAdding": "Start by adding your first client to begin managing their marketing content.",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "clients": "clients",
+    "previous": "Previous",
+    "next": "Next",
+    "form": {
+      "personalInformation": "Personal Information",
+      "documentsLanguage": "Documents Language",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "namePlaceholder": "Client's full name",
+      "emailPlaceholder": "client@example.com",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "countryPlaceholder": "e.g., United States, Canada, UK",
+      "nameHelp": "Enter the client's full name",
+      "emailHelp": "Client's email address for communications",
+      "phoneHelp": "Include country code for international numbers",
+      "countryHelp": "Client's primary business location",
+      "createClient": "Create Client",
+      "updateClient": "Update Client",
+      "privacyMessage": "This information is never shared with anyone and is kept strictly confidential.",
+      "generalContextLabel": "General Context",
+      "specificContext1Label": "Specific Context 1",
+      "specificContext2Label": "Specific Context 2",
+      "specificContext3Label": "Specific Context 3",
+      "generalContextPlaceholder": "Any general context about the client...",
+      "specificContext1Placeholder": "Specific context 1 about the client...",
+      "specificContext2Placeholder": "Specific context 2 about the client...",
+      "specificContext3Placeholder": "Specific context 3 about the client...",
+      "languageSelectPlaceholder": "Select language for generated documents",
+      "languageTooltip": "This language will be used when generating marketing content and reports in the AI Services page for this client.",
+      "viewClient": "View Client",
+      "editClient": "Edit Client",
+      "addNewClient": "Add New Client",
+      "required": "*"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "documents": "Documents",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDocuments": "View Documents",
+      "viewClient": "View Client",
+      "editClient": "Edit Client",
+      "deleteClient": "Delete Client"
+    },
+    "delete": {
+      "title": "Delete Client",
+      "message": "Are you sure you want to delete {{name}}? This action cannot be undone."
+    },
+    "sort": {
+      "byDate": "Sort by creation date",
+      "byName": "Sort by name"
+    },
+    "view": {
+      "grid": "Grid view",
+      "table": "Table view"
+    },
+    "documents": {
+      "title": "Documents for {{clientName}}",
+      "description": "View, edit, and manage documents for this client",
+      "createDocument": "Create Document",
+      "saveDocument": "Save Document"
+    },
+    "ui": {
+      "accessibility": {
+        "pagination": "Pagination"
+      }
+    }
+  },
+  "prompts": {
+    "title": "Prompt Management",
+    "description": "Create, edit, and organize your AI prompts for better conversations.",
+    "examplePrompts": "Example Prompts",
+    "myPrompts": "My Prompts",
+    "newPrompt": "New Prompt",
+    "searchPlaceholder": "Search prompts...",
+    "hideInactive": "Hide Inactive",
+    "showAll": "Show All",
+    "hideTemplates": "Hide Templates",
+    "showTemplates": "Show Templates",
+    "templatesDescription": "Professional prompt templates to get you started. Click any template to create your own customized version.",
+    "used": "Used {{count}}x",
+    "noUsage": "No usage yet",
+    "categoriesTitle": "Categories",
+    "stats": {
+      "totalPrompts": "Total Prompts",
+      "mostUsed": "Most Used",
+      "activeCount": "{{count}} active",
+      "noUsageYet": "No usage yet"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "e.g., Generate Marketing Strategy Report",
+      "category": "Category",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of what this prompt does",
+      "content": "Prompt Content",
+      "contentPlaceholder": "Enter your prompt template here. You can use variables like {{client_name}}, {{industry}}, etc.",
+      "required": "*",
+      "prompt": "Prompt"
+    },
+    "actions": {
+      "edit": "Edit",
+      "newPrompt": "New Prompt",
+      "update": "Update",
+      "createFromTemplate": "Create from Template",
+      "create": "Create",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "delete": "Delete"
+    },
+    "card": {
+      "usedCount": "Used {{count}}x"
+    },
+    "active": "active",
+    "dialog": {
+      "viewTitle": "View Prompt",
+      "editTitle": "Edit Prompt",
+      "createTitle": "Create New Prompt",
+      "createPrompt": "Create New Prompt",
+      "createFromTemplate": "Create Prompt from Template",
+      "createFromTemplateTitle": "Create Prompt from Template",
+      "name": "Name",
+      "category": "Category",
+      "description": "Description",
+      "promptContent": "Prompt Content",
+      "namePlaceholder": "e.g., Generate Marketing Strategy Report",
+      "descriptionPlaceholder": "Brief description of what this prompt does",
+      "contentPlaceholder": "Enter your prompt template here. You can use variables like {{client_name}}, {{industry}}, etc.",
+      "isActive": "Active",
+      "create": "Create Prompt",
+      "update": "Update Prompt",
+      "createFromTemplateButton": "Create from Template"
+    },
+    "categories": {
+      "general": "General",
+      "marketing": "Marketing",
+      "content": "Content",
+      "analysis": "Analysis"
+    },
+    "filters": {
+      "allCategories": "All Categories",
+      "sort": {
+        "usage": "Most Used",
+        "recent": "Recently Updated",
+        "name": "Name A-Z",
+        "created": "Recently Created"
+      }
+    },
+    "delete": {
+      "title": "Delete Prompt",
+      "message": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameMinLength": "Name must be at least 3 characters",
+      "nameMaxLength": "Name must be less than 100 characters",
+      "contentRequired": "Prompt content is required",
+      "contentMinLength": "Prompt content must be at least 10 characters",
+      "descriptionMaxLength": "Description must be less than 500 characters",
+      "error": "Validation Error"
+    },
+    "selector": {
+      "usePrompt": "Use Prompt",
+      "loading": "Loading prompts...",
+      "noSearchResults": "No prompts found matching your search",
+      "noPrompts": "No prompts available",
+      "sections": {
+        "mostUsed": "Most Used",
+        "recent": "Recent",
+        "searchResults": "Search Results",
+        "categoryPrompts": "{{category}} Prompts",
+        "allPrompts": "All Prompts"
+      }
+    },
+    "emptyState": {
+      "noPromptsFound": "No prompts found",
+      "tryAdjustingFilters": "Try adjusting your search terms or filters",
+      "getStartedMessage": "Create your first prompt to get started with AI assistance",
+      "clearFilters": "Clear Filters",
+      "createFirstPrompt": "Create First Prompt"
+    },
+    "messages": {
+      "promptUpdated": "Prompt Updated",
+      "promptCreatedFromTemplate": "Prompt Created from Template",
+      "promptCreated": "Prompt Created",
+      "promptUpdatedDesc": "\"{{name}}\" has been updated successfully",
+      "promptCreatedDesc": "\"{{name}}\" has been created successfully"
+    },
+    "errors": {
+      "failedToSave": "Failed to save prompt"
+    },
+    "template": {
+      "label": "Template",
+      "useTemplate": "Use Template"
+    }
+  },
+  "assistant": {
+    "title": "AI Chat Assistant",
+    "chats": "Chats",
+    "deleteAllChats": "Delete All Chats",
+    "clickToConfirm": "Click to Confirm",
+    "getStarted": "Get Started",
+    "editTitle": "Edit title",
+    "privacyProtected": "Privacy Protected",
+    "startChatting": "Start chatting immediately or select a client for personalized context ➡️",
+    "privacyDescription": "We only share selected client information (country, general context) with AI - no names, emails, or phone numbers are included in the context.",
+    "newChat": "New Chat",
+    "starting": "Starting...",
+    "exportNotAvailableDescription": "No messages to export",
+    "viewDocument": "View Document",
+    "exportFailed": "Export failed",
+    "at": "at",
+    "inputPlaceholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
+    "typing": "Typing...",
+    "chatExportedDescription": "Chat '{{chatTitle}}' has been exported successfully",
+    "startNewConversation": "Start a new conversation",
+    "noChatsYet": "No chats yet",
+    "startConversation": "Start a conversation",
+    "startConversationSubtext": "Type a message below to begin",
+    "user": "User",
+    "newChatTitle": "New Chat",
+    "userFallback": "User",
+    "errors": {
+      "chatContainerError": "Chat container error",
+      "chatPageError": "Chat error occurred - please try refreshing"
+    },
+    "mobile": {
+      "chatsHeader": "Chats",
+      "clientInfoHeader": "Client Info"
+    },
+    "chat": {
+      "placeholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
+      "exportChat": "Export Chat",
+      "exporting": "Exporting...",
+      "exportNotAvailable": "Export Not Available",
+      "noMessagesToExport": "No messages to export",
+      "chatExported": "Chat Exported",
+      "exportSuccess": "Chat has been exported as {{filename}}",
+      "client": "Client",
+      "email": "Email",
+      "country": "Country",
+      "type": "Type",
+      "generalChat": "General Chat",
+      "exportDate": "Export Date",
+      "you": "You",
+      "aiAssistant": "AI Assistant"
+    },
+    "clientContextSidebar": {
+      "creatingChat": "Creating Chat...",
+      "settingUpConversation": "Setting up your conversation",
+      "clientInformation": "Client Information",
+      "selectClient": "Select Client",
+      "chooseClient": "Choose a client",
+      "searchClients": "Search clients...",
+      "noClientsFound": "No clients found",
+      "aiContextSelection": "AI Context Selection",
+      "contextSelectionDescription": "Choose which client information to share with the AI assistant",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "newChat": "New Chat",
+      "switchClient": "Switch client",
+      "aiContextUsed": "AI Context Used",
+      "noneSelected": "None selected",
+      "contextSetFirstMessageOnly": "Context is set with the first message and cannot be changed later",
+      "noClientSelected": "No client selected for this conversation",
+      "tips": "Tips",
+      "tipNewChatForTopics": "Start a new chat for different topics",
+      "tipLongerConversations": "Clear context allows for longer conversations",
+      "tipBePoliteRespectful": "Be clear and specific in your questions"
+    }
+  },
+  "subscription": {
+    "title": "Subscription",
+    "perMonth": "/month",
+    "processing": "Processing...",
+    "canceling": "Canceling...",
+    "planCard": {
+      "perMonth": "/month",
+      "processing": "Processing...",
+      "canceling": "Canceling...",
+      "subscribeTo": "Subscribe to {{planName}}",
+      "cancelDowngrade": "Cancel Downgrade",
+      "currentPlan": "Current Plan",
+      "downgradeTo": "Downgrade to {{planName}}",
+      "upgradeTo": "Upgrade to {{planName}}"
+    },
+    "upgradeDialog": {
+      "title": {
+        "scheduleDowngrade": "Schedule Downgrade",
+        "confirmUpgrade": "Confirm Upgrade"
+      },
+      "description": {
+        "downgrade": "Review and confirm your plan downgrade details.",
+        "upgrade": "Review and confirm your plan upgrade details."
+      },
+      "loading": {
+        "preview": "Loading preview...",
+        "processing": "Processing..."
+      },
+      "errors": {
+        "loadPreviewFailed": "Failed to load upgrade preview"
+      },
+      "planComparison": {
+        "currentPlan": "Current Plan",
+        "newPlan": "New Plan",
+        "pricePerMonth": "{{price}}€/month"
+      },
+      "badges": {
+        "downgrade": "Downgrade",
+        "upgrade": "Upgrade",
+        "firstSubscription": "First Subscription"
+      },
+      "features": {
+        "whatYouGetWith": "What you get with {{planName}}"
+      },
+      "billing": {
+        "title": "Billing Information",
+        "information": "Billing Information",
+        "downgradeTo": "Downgrade to {{planName}}",
+        "upgradeTo": "Upgrade to {{planName}}",
+        "downgradeNote": "Changes will take effect at the end of your current billing period",
+        "upgradeNote": "You'll be charged the prorated amount immediately",
+        "changesEffective": "Changes effective {{date}}",
+        "nextBilling": "Next billing date: {{date}}",
+        "newMonthlyCharge": "New monthly charge",
+        "monthlyCharge": "Monthly charge",
+        "planChangeNote": "Plan changes will be processed immediately",
+        "stripeRedirectNote": "You'll be redirected to Stripe to complete payment"
+      },
+      "firstSubscription": {
+        "planTitle": "Subscribe to {{planName}}",
+        "perMonth": "/month"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "scheduleDowngrade": "Schedule Downgrade",
+        "confirmUpgrade": "Confirm Upgrade",
+        "startSubscription": "Start Subscription"
+      }
+    },
+    "statusBanners": {
+      "freeTrial": {
+        "active": "Free Trial Active (Apprentice Plan) - {{days}} days remaining",
+        "expires": "Trial expires on {{date}}"
+      },
+      "activeCancelled": {
+        "status": "Active Subscription (Cancelled) - {{days}} days remaining",
+        "willBeCancelled": "Your subscription will be cancelled on {{date}}"
+      },
+      "pendingDowngrade": {
+        "status": "Active Subscription (Downgrading) - {{days}} days until downgrade to {{plan}}",
+        "willBeDowngraded": "Your subscription will be downgraded on {{date}}"
+      },
+      "paymentRequired": {
+        "status": "⚠️ Payment Required - Subscription Suspended",
+        "message": "Your subscription payment failed. Please update your payment method or retry payment to restore access.",
+        "retryButton": "Pay Now to Restore Access",
+        "processingPayment": "Processing Payment..."
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "changeAnytime": {
+        "question": "Can I change plans anytime?",
+        "answer": "Yes! You can upgrade or downgrade your subscription at any time. Changes take effect immediately for upgrades, and at the end of the current billing period for downgrades."
+      },
+      "exceedLimits": {
+        "question": "What happens if I exceed my limits?",
+        "answer": "If you reach your plan's usage limits, you'll be notified and can either wait until the next billing cycle or upgrade to a higher plan for continued access."
+      },
+      "dataSecure": {
+        "question": "Is my data secure?",
+        "answer": "Absolutely. We use enterprise-grade encryption for all data storage and transmission. Your client information and generated content are private and never shared with third parties."
+      }
+    }
+  },
+  "affiliation": {
+    "title": "Affiliation Network",
+    "description": "Manage your affiliation network and track your referrals",
+    "generateLinkTitle": "Generate Your Referral Link",
+    "yourCode": "Your Affiliation Code",
+    "parentAffiliation": "Parent Affiliation",
+    "status": "Status",
+    "yourReferralLink": "Your Referral Link",
+    "yourNetwork": "Your Affiliation Network",
+    "generateLinkDescription": "Enter an email to generate a unique referral link. This link will allow new users to sign up under your affiliation.",
+    "emailPlaceholder": "friend@example.com",
+    "generateLinkButton": "Generate Link",
+    "linkGenerated": "Referral link generated and sent!",
+    "linkSent": "We've sent the invitation to {{email}} with your unique referral link.",
+    "copyLink": "Copy Link",
+    "anonymousUser": "Anonymous",
+    "setup": {
+      "title": "Generate Your Referral Link",
+      "description": "It looks like you signed up before our referral system was launched. Generate your code now!",
+      "alert": "To generate your affiliation code, you need to provide a parent affiliation code from someone who referred you to join our network.",
+      "parentCodeLabel": "Parent Affiliation Code",
+      "parentCodePlaceholder": "e.g. ABC123",
+      "parentCodeHelp": "Ask the person who introduced you to the platform for their affiliation code.",
+      "generateButton": "Generate My Referral Link",
+      "required": "Parent affiliation code is required"
+    },
+    "referralLink": {
+      "description": "Share this link with others to grow your network",
+      "autoDescription": "When someone signs up using this link, they'll automatically be added to your network."
+    },
+    "network": {
+      "description": "View your referral tree and track your network growth. Green icons indicate users with active subscriptions, red icons show users without active subscriptions.",
+      "empty": "You don't have any referrals yet. Share your referral link with others to grow your network."
+    },
+    "none": "None",
+    "tooltipStatus": "Only users with a valid Stripe subscription are considered for status calculation.",
+    "toast": {
+      "success": "Success",
+      "codeCreated": "Your affiliation code {{code}} has been created",
+      "copied": "Copied",
+      "linkCopied": "Referral link copied to clipboard",
+      "codeCopied": "Affiliation code copied to clipboard"
+    },
+    "statusGuide": {
+      "buttonLabel": "Status Guide",
+      "title": "Affiliation Status Guide",
+      "description": "Complete overview of all affiliation statuses, their requirements, and benefits",
+      "status": "Status",
+      "requirements": "Requirements",
+      "benefitsCommissions": "Benefits & Commissions",
+      "current": "(Current)",
+      "requirementsLabel": "Requirements:",
+      "benefitsCommissionsLabel": "Benefits & Commissions:",
+      "noteLabel": "Note:",
+      "noteText": "Status upgrades are automatic based on your network size and referral achievements. Your current status is highlighted above."
+    },
+    "commissionsGuide": {
+      "title": "Commissions Guide",
+      "buttonLabel": "Commissions Guide",
+      "description": "Understanding how affiliate commissions work, payment schedules, and subscription limits",
+      "paymentProcessing": "Payment Processing",
+      "monthlyPaymentTitle": "Monthly Payment Schedule",
+      "monthlyPaymentDescription": "Commission payments are processed automatically on the 1st of each month for the previous month's earnings.",
+      "activeSubscriptionTitle": "Active Subscription Required",
+      "activeSubscriptionDescription": "You must maintain an active subscription to receive commission payments. Suspended or canceled subscriptions will pause commission payouts.",
+      "validPaymentTitle": "Valid Payment Method Required",
+      "validPaymentDescription": "Only affiliated users with valid Stripe subscriptions and payment methods are included in commission calculations.",
+      "calculationLimits": "Commission Calculation Limits",
+      "calculationLimitsDescription": "Your subscription plan determines how many users from your referral network can be included in commission calculations.",
+      "subscriptionPlan": "Subscription Plan",
+      "commissionLimit": "Commission Calculation Limit",
+      "description": "Description",
+      "usersCount": "{{count}} users",
+      "topPerformingReferrals": "Commissions calculated from your top {{count}} performing referrals",
+      "importantNotesTitle": "Important Notes",
+      "note1": "Commission rates depend on your affiliation status level",
+      "note2": "Payments are processed via Stripe to your registered payment method",
+      "note3": "Commission calculations exclude trial users and inactive subscriptions",
+      "note4": "Upgrade your subscription to increase your earning potential",
+      "paymentRules": "Commissions are automatically processed and paid out monthly via the payment method associated with your account.",
+      "importantNotes": "Important: Commissions are only calculated up to the 4th generation to maintain system sustainability."
+    },
+    "tree": {
+      "copySuccessTitle": "Copied!",
+      "copySuccessMessage": "Affiliation code {{code}} copied to clipboard",
+      "removeConfirmation": "Are you sure you want to remove this user from your network? This action cannot be undone.",
+      "removeSuccessTitle": "User Removed",
+      "errorTitle": "Error",
+      "removeErrorMessage": "Failed to remove user from network. Please try again.",
+      "removeFromNetworkTooltip": "Remove from network",
+      "youLabel": "You",
+      "userLabel": "User {{id}}",
+      "referralsCount": "{{count}} referrals ({{activeCount}} active)",
+      "referralsCountSimple": "{{count}} referrals",
+      "shownCount": "Showing {{count}}",
+      "joinedDate": "Joined {{date}}",
+      "filtersTitle": "Filters",
+      "clearFilters": "Clear filters",
+      "subscriptionStatusLabel": "Subscription Status",
+      "allUsersOption": "All users",
+      "activeSubscriptionsOption": "Active subscriptions",
+      "inactiveSubscriptionsOption": "Inactive subscriptions",
+      "affiliationStatusLabel": "Affiliation Status",
+      "allStatusOption": "All status",
+      "showingCount": "Showing {{showing}} of {{total}} referrals",
+      "activeOnlyBadge": "Active only",
+      "inactiveOnlyBadge": "Inactive only"
+    },
+    "errors": {
+      "parentCodeRequired": "Parent affiliation code is required",
+      "removeFromNetworkFailed": "Failed to remove affiliation from network"
+    }
+  },
+  "feedback": {
+    "title": "Share Your Feedback",
+    "description": "Help us improve MIA by sharing your thoughts, reporting issues, or suggesting new features.",
+    "type": "Feedback Type",
+    "typeFeature": "Feature Request",
+    "typeBug": "Bug Report",
+    "typeGeneral": "General Feedback",
+    "subject": "Subject",
+    "titles": {
+      "feature": "Feature Request Title",
+      "bug": "Bug Report Title",
+      "general": "Feedback Title"
+    },
+    "descriptions": {
+      "feature": "Feature Description",
+      "bug": "Bug Description",
+      "general": "Feedback Description"
+    },
+    "placeholders": {
+      "bugTitle": "Brief description of the bug",
+      "generalTitle": "Brief summary of your feedback",
+      "description": "Provide detailed feedback..."
+    },
+    "subjectPlaceholder": {
+      "feature": "e.g., Add bulk client import feature",
+      "bug": "e.g., Export function not working",
+      "general": "e.g., Great experience with the AI assistant"
+    },
+    "message": "Message",
+    "messagePlaceholder": {
+      "feature": "Describe the feature you'd like to see and how it would help your workflow...",
+      "bug": "Please describe what happened, what you expected, and steps to reproduce the issue...",
+      "general": "Share your thoughts, suggestions, or experience..."
+    },
+    "submit": {
+      "feature": "Submit Feature Request",
+      "bug": "Submit Bug Report",
+      "general": "Submit Feedback"
+    },
+    "submitFeature": "Submit Feature Request",
+    "submitBug": "Submit Bug Report",
+    "submitGeneral": "Submit Feedback",
+    "submitting": "Submitting..."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "edit": "Edit",
+    "save": "Save",
+    "close": "Close",
+    "generating": "Generating...",
+    "saving": "Saving...",
+    "creating": "Creating...",
+    "preview": "Preview",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "submit": "Submit",
+    "reset": "Reset",
+    "clear": "Clear",
+    "select": "Select",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "apply": "Apply",
+    "actions": "Actions",
+    "options": "Options",
+    "settings": "Settings",
+    "preferences": "Preferences",
+    "help": "Help",
+    "about": "About",
+    "version": "Version",
+    "documentation": "Documentation",
+    "support": "Support",
+    "contactUs": "Contact Us",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "Copyright",
+    "allRightsReserved": "All rights reserved",
+    "poweredBy": "Powered by"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be no more than {{max}} characters",
+    "minValue": "Must be at least {{min}}",
+    "maxValue": "Must be no more than {{max}}",
+    "invalidUrl": "Please enter a valid URL",
+    "invalidDate": "Please enter a valid date",
+    "invalidNumber": "Please enter a valid number",
+    "passwordMismatch": "Passwords do not match",
+    "weakPassword": "Password is too weak",
+    "duplicateEntry": "This value already exists",
+    "invalidFormat": "Invalid format",
+    "fileTooBig": "File size must be less than {{size}}",
+    "unsupportedFileType": "Unsupported file type",
+    "somethingWentWrong": "Something went wrong",
+    "tryAgain": "Please try again"
+  },
+  "errors": {
+    "subscription": {
+      "expired": "Subscription Expired",
+      "expiredMessage": "Your subscription has expired. Please renew to continue using this feature.",
+      "limitExceeded": "Usage Limit Exceeded",
+      "limitExceededMessage": "You've reached your plan's usage limit. Upgrade for continued access.",
+      "modelAccessDenied": "Model Access Denied",
+      "modelAccessDeniedMessage": "Your current plan doesn't include access to this AI model.",
+      "notFound": "No Subscription Found",
+      "notFoundMessage": "No active subscription found. Please subscribe to continue.",
+      "storageLimitExceeded": "Storage Limit Exceeded",
+      "storageLimitExceededMessage": "You've reached your storage limit. Please upgrade your plan or delete some documents."
+    },
+    "generic": {
+      "title": "Error",
+      "message": "An unexpected error occurred. Please try again.",
+      "somethingWentWrong": "Something went wrong",
+      "unexpectedError": "An unexpected error occurred. This might be a temporary issue.",
+      "technicalDetails": "Technical details",
+      "reloadPage": "Reload Page",
+      "notFound": "Not Found",
+      "notFoundMessage": "The requested resource was not found.",
+      "unauthorized": "Unauthorized",
+      "unauthorizedMessage": "You don't have permission to access this resource.",
+      "forbidden": "Forbidden",
+      "forbiddenMessage": "Access to this resource is forbidden.",
+      "serverError": "Server Error",
+      "serverErrorMessage": "A server error occurred. Please try again later.",
+      "networkError": "Network Error",
+      "networkErrorMessage": "Please check your internet connection and try again."
+    },
+    "api": {
+      "deleteAccount": "Failed to delete account",
+      "deleteAccountConfirmation": "Please type \"DELETE MY ACCOUNT\" to confirm deletion"
+    },
+    "admin": {
+      "clearCaches": "Failed to clear caches",
+      "updateFeedback": "Failed to update feedback status"
+    }
+  },
+  "aiServices": {
+    "title": "AI Services",
+    "description": "Leverage AI to create personalized marketing content for your clients",
+    "configureServices": "Configure Services",
+    "serviceVisibilitySettings": "Service Visibility Settings",
+    "getStarted": "Get Started",
+    "emptyState": {
+      "title": "No services visible",
+      "description": "All AI services are currently hidden. Use the \"Configure Services\" button above to enable the services you want to use."
+    },
+    "services": {
+      "meetingReport": {
+        "title": "Meeting Report",
+        "description": "Generate comprehensive meeting reports with actionable steps from client meeting transcriptions.",
+        "features": {
+          "transcription": "Transcription analysis",
+          "insights": "Actionable insights",
+          "summaries": "Professional summaries"
+        }
+      },
+      "customDocument": {
+        "title": "Document Generator",
+        "description": "Generate custom marketing documents using your own prompts and the client's language",
+        "features": {
+          "prompts": "Custom prompts",
+          "variables": "Variable replacement",
+          "formatting": "Professional formatting"
+        }
+      },
+      "podcastCreator": {
+        "title": "Podcast Creator",
+        "description": "Generate engaging podcasts with AI-powered Veo3 technology",
+        "features": {
+          "veo3": "AI-powered Veo3 integration",
+          "automated": "Automated podcast generation",
+          "quality": "Professional audio quality"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "step1": {
+        "title": "Select Client",
+        "description": "Choose which client you want to create marketing content for"
+      },
+      "step2": {
+        "title": "AI Generation",
+        "description": "AI creates personalized marketing content using client context"
+      },
+      "step3": {
+        "title": "Review & Save",
+        "description": "Edit the content and save it to your client's documents"
+      }
+    },
+    "meetingReport": {
+      "title": "Generate Meeting Report",
+      "description": "Transform your meeting notes into a professional report",
+      "validation": {
+        "selectClient": "Please select a client",
+        "selectDate": "Please select a meeting date",
+        "provideTranscription": "Please provide meeting transcription",
+        "generateContent": "Please provide report content before saving",
+        "documentName": "Please provide a document name"
+      },
+      "defaultNames": {
+        "meetingReport": "Meeting Report"
+      },
+      "success": {
+        "generating": "Generating meeting report...",
+        "generatingForClient": "📝 Generating meeting report for {clientName}"
+      },
+      "fileUpload": {
+        "invalidType": "Invalid File Type",
+        "invalidTypeDescription": "Please upload a .txt file",
+        "fileTooLarge": "File Too Large", 
+        "fileTooLargeDescription": "File size must be less than 5MB",
+        "uploadFailed": "Upload Failed",
+        "uploadFailedDescription": "Failed to read the file. Please try again.",
+        "uploading": "Uploading..."
+      },
+      "form": {
+        "meetingDate": "Meeting Date",
+        "meetingDatePlaceholder": "Select meeting date",
+        "transcription": "Meeting Transcription",
+        "transcriptionPlaceholder": "Paste your meeting transcription here, or upload a .txt file...",
+        "transcriptionHelp": "Provide the raw meeting notes or transcription. This will be transformed into a professional report.",
+        "additionalInfo": "Additional Information",
+        "additionalInfoPlaceholder": "Any additional context or specific requirements for the report... Per example: Add a sentiment analysis section",
+        "uploadFile": "Upload .txt file"
+      }
+    },
+    "documentGenerator": {
+      "title": "Document Generator",
+      "description": "Generate professional documents using your custom prompts with client-specific information.",
+      "validation": {
+        "selectClient": "Please select a client",
+        "documentTitle": "Please provide a document title",
+        "promptContent": "Please provide prompt instructions",
+        "generateContent": "Please generate content before saving"
+      },
+      "defaultNames": {
+        "customDocument": "Custom Document",
+        "customPrompt": "Custom Prompt"
+      },
+      "success": {
+        "generating": "Generating document...",
+        "generatingForClient": "📄 Generating document for {clientName}"
+      },
+      "clientContext": {
+        "title": "Client Context",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All"
+      },
+      "promptContent": {
+        "title": "Prompt Content",
+        "placeholder": "Select a prompt from above or write your custom instructions here..."
+      }
+    },
+    "common": {
+      "validationError": "Validation Error",
+      "generationFailed": "Generation failed",
+      "documentSaved": "Document Saved 📄",
+      "documentSavedDescription": "\"{{documentName}}\" has been saved successfully.",
+      "viewDocument": "📄 View Document",
+      "saveFailed": "Save Failed",
+      "saveFailedDescription": "Failed to save document",
+      "selectClient": "Select Client",
+      "clientPlaceholder": "Choose a client...",
+      "documentName": "Document Name",
+      "documentNamePlaceholder": "Enter document name...",
+      "generatedContent": "Generated Content",
+      "contentPlaceholder": "Generated content will appear here...",
+      "generate": "Generate",
+      "regenerate": "Regenerate",
+      "saveDocument": "Save Document",
+      "generating": "Generating...",
+      "saving": "Saving..."
+    }
+  },
+  "documents": {
+    "title": "Documents", 
+    "search": {
+      "placeholder": "Search documents by name or type...",
+      "allTypes": "All types"
+    },
+    "actions": {
+      "createNew": "Create New",
+      "deleteAll": "Delete All",
+      "deleteAllConfirm": "Click to Confirm",
+      "edit": "Edit Document", 
+      "delete": "Delete Document",
+      "download": "Download document as Markdown"
+    },
+    "time": {
+      "justNow": "Just now"
+    },
+    "empty": {
+      "title": "No Documents",
+      "description": "Create your first document to get started",
+      "cta": "Create Document"
+    },
+    "form": {
+      "documentName": "Document Name",
+      "documentNamePlaceholder": "Enter document name",
+      "documentType": "Document Type",
+      "documentTypePlaceholder": "Select document type",
+      "documentContent": "Document Content",
+      "documentContentPlaceholder": "Enter document content...",
+      "create": "Create",
+      "creating": "Creating...",
+      "title": "Create New Document",
+      "documentNameLabel": "Document Name *",
+      "documentTypeLabel": "Document Type *",
+      "contentLabel": "Content *",
+      "markdownHelp": "You can use Markdown formatting for rich text content.",
+      "contentPlaceholderEditor": "Enter your document content here using Markdown..."
+    },
+    "preview": {
+      "closePreview": "Close Preview",
+      "noContent": "*No content to preview*"
+    },
+    "viewer": {
+      "selectDocument": "Select a document to view its content",
+      "loadingContent": "Loading document content..."
+    },
+    "list": {
+      "title": "Documents ({{count}})",
+      "loading": "Loading...",
+      "updated": "Updated: {{date}}"
+    },
+    "filters": {
+      "filterByType": "Filter by type:",
+      "activeFilters": "Active filters:",
+      "searchFilter": "Search: \"{{term}}\"",
+      "typeFilter": "Type: {{type}}",
+      "clearAll": "Clear all"
+    },
+    "search": {
+      "noResultsFor": "No documents found matching \"{{term}}\"",
+      "tryDifferent": "Try searching for a different term",
+      "noDocuments": "No documents found"
+    },
+    "time": {
+      "justNow": "Just now",
+      "hoursAgo": "{{count}} hours ago",
+      "daysAgo": "{{count}} days ago"
+    },
+    "actions": {
+      "createNew": "Create New",
+      "deleteAll": "Delete All",
+      "deleteAllConfirm": "Click to Confirm",
+      "edit": "Edit Document", 
+      "delete": "Delete Document",
+      "download": "Download document as Markdown",
+      "createDocument": "Create Document"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "description": "System overview and metrics for LLM Context platform",
+      "buttons": {
+        "clearCaches": "Clear caches",
+        "clearingCaches": "Clearing caches...",
+        "clearFilters": "Clear Filters"
+      },
+      "metrics": {
+        "totalUsers": "Total Users",
+        "totalClients": "Total Clients", 
+        "totalDocuments": "Total Documents",
+        "chatConversations": "Chat Conversations",
+        "monthlyUsage": "Monthly Usage",
+        "subscriptionPlans": "Subscription Plans",
+        "feedbackAndPrompts": "Feedback & Prompts",
+        "tokens": "Tokens:",
+        "totalFeedback": "Total Feedback:",
+        "customPrompts": "Custom Prompts:",
+        "messagesTotal": "messages total",
+        "inLast30Days": "in last 30 days",
+        "acrossAllUsers": "Across all users",
+        "unlimitedForAllPlans": "Unlimited for all plans"
+      },
+      "feedbackManagement": {
+        "title": "Feedback Management",
+        "description": "Filter and manage user feedback",
+        "showingCount": "shown",
+        "noMatches": "No feedback matches the selected filters",
+        "updating": "Updating..."
+      },
+      "filters": {
+        "state": "Filter by State",
+        "type": "Filter by Type", 
+        "priority": "Filter by Priority",
+        "options": {
+          "allStates": "All States",
+          "allTypes": "All Types", 
+          "allPriorities": "All Priorities",
+          "active": "Active",
+          "pending": "Pending",
+          "inProgress": "In Progress",
+          "completed": "Completed",
+          "falseAlarm": "False Alarm",
+          "featureRequest": "Feature Request",
+          "bugReport": "Bug Report",
+          "generalFeedback": "General Feedback",
+          "highPriority": "High Priority",
+          "mediumPriority": "Medium Priority",
+          "lowPriority": "Low Priority"
+        }
+      },
+      "success": {
+        "cachesCleared": "All caches cleared successfully"
+      },
+      "anonymous": "Anonymous"
+    }
+  },
+  "ui": {
+    "combobox": {
+      "client": {
+        "placeholder": "Choose a client",
+        "empty": "No clients available"
+      },
+      "document": {
+        "empty": "No documents available"
+      }
+    },
+    "dialog": {
+      "confirm": "Confirm",
+      "untitled": "Untitled Document"
+    },
+    "placeholders": {
+      "documentName": "Document name",
+      "pickDate": "Pick a date",
+      "deleteAccount": "DELETE MY ACCOUNT"
+    },
+    "accessibility": {
+      "pagination": "Pagination"
+    },
+    "deleteAccount": {
+      "confirmInstruction": "Type exactly \"DELETE MY ACCOUNT\" (in English) to confirm:",
+      "confirmationText": "DELETE MY ACCOUNT"
+    }
+  },
+  "language": {
+    "english": "English",
+    "spanish": "Spanish",
+    "french": "French",
+    "german": "German",
+    "italian": "Italian",
+    "portuguese": "Portuguese",
+    "dutch": "Dutch",
+    "russian": "Russian",
+    "chinese": "Chinese",
+    "japanese": "Japanese",
+    "korean": "Korean",
+    "arabic": "Arabic"
+  }
+}

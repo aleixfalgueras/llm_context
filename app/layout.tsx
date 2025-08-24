@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/global/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ConsentManager } from "@/components/ui/consent-manager"
+import { TranslationProvider } from "@/lib/translations/context"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -44,13 +45,15 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
         >
-          <ThemeProvider>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-              <ConsentManager />
-            </TooltipProvider>
-          </ThemeProvider>
+          <TranslationProvider>
+            <ThemeProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+                <ConsentManager />
+              </TooltipProvider>
+            </ThemeProvider>
+          </TranslationProvider>
         </body>
       </html>
     </ClerkProvider>

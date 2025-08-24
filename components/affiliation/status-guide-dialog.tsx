@@ -10,12 +10,14 @@ import {
   AffiliationStatusConditions, 
   AffiliationStatusComissions 
 } from '@/lib/types/affiliation-types'
+import { useTranslations } from '@/lib/translations/context'
 
 interface StatusGuideDialogProps {
   currentStatus: AffiliationStatus
 }
 
 export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
+  const t = useTranslations('affiliation')
   const allStatuses = Object.values(AffiliationStatus)
 
   return (
@@ -23,14 +25,14 @@ export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Info className="h-4 w-4" />
-          Status Guide
+          {t('statusGuide.buttonLabel')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Affiliation Status Guide</DialogTitle>
+          <DialogTitle>{t('statusGuide.title')}</DialogTitle>
           <DialogDescription>
-            Complete overview of all affiliation statuses, their requirements, and benefits
+            {t('statusGuide.description')}
           </DialogDescription>
         </DialogHeader>
         
@@ -40,9 +42,9 @@ export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-4 font-semibold">Status</th>
-                  <th className="text-left p-4 font-semibold">Requirements</th>
-                  <th className="text-left p-4 font-semibold">Benefits & Commissions</th>
+                  <th className="text-left p-4 font-semibold">{t('statusGuide.status')}</th>
+                  <th className="text-left p-4 font-semibold">{t('statusGuide.requirements')}</th>
+                  <th className="text-left p-4 font-semibold">{t('statusGuide.benefitsCommissions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -62,7 +64,7 @@ export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
                           {AffiliationStatusEmoji[status]}
                         </Badge>
                         {status === currentStatus && (
-                          <span className="text-xs text-primary font-medium">(Current)</span>
+                          <span className="text-xs text-primary font-medium">{t('statusGuide.current')}</span>
                         )}
                       </div>
                     </td>
@@ -99,20 +101,20 @@ export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
                     {AffiliationStatusEmoji[status]}
                   </Badge>
                   {status === currentStatus && (
-                    <span className="text-xs text-primary font-medium">(Current)</span>
+                    <span className="text-xs text-primary font-medium">{t('statusGuide.current')}</span>
                   )}
                 </div>
                 
                 <div className="space-y-2">
                   <div>
-                    <h4 className="text-sm font-semibold text-foreground mb-1">Requirements:</h4>
+                    <h4 className="text-sm font-semibold text-foreground mb-1">{t('statusGuide.requirementsLabel')}</h4>
                     <p className="text-sm text-muted-foreground">
                       {AffiliationStatusConditions[status]}
                     </p>
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-semibold text-foreground mb-1">Benefits & Commissions:</h4>
+                    <h4 className="text-sm font-semibold text-foreground mb-1">{t('statusGuide.benefitsCommissionsLabel')}</h4>
                     <p className="text-sm text-muted-foreground">
                       {AffiliationStatusComissions[status]}
                     </p>
@@ -125,8 +127,7 @@ export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
 
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <p className="text-sm text-muted-foreground">
-            <strong>Note:</strong> Status upgrades are automatic based on your network size and referral achievements. 
-            Your current status is highlighted above.
+            <strong>{t('statusGuide.noteLabel')}</strong> {t('statusGuide.noteText')}
           </p>
         </div>
       </DialogContent>

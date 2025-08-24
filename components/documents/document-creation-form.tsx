@@ -9,6 +9,7 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {Eye, Plus, X} from 'lucide-react'
 import {ALL_DOCUMENT_TYPES, type DocumentType, getDocumentTypeLabel} from '@/lib/types/document-types'
+import {useTranslations} from '@/lib/translations/context'
 
 interface DocumentCreationFormProps {
   documentName: string
@@ -39,6 +40,8 @@ export function DocumentCreationForm({
   onCancel,
   onPreview
 }: DocumentCreationFormProps) {
+  const t = useTranslations('documents')
+  const tCommon = useTranslations('common')
   if (!isCreating) {
     return null
   }
@@ -48,16 +51,16 @@ export function DocumentCreationForm({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Plus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          Create New Document
+          {t('form.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Document Name */}
         <div className="space-y-2">
-          <Label htmlFor="newDocName">Document Name *</Label>
+          <Label htmlFor="newDocName">{t('form.documentNameLabel')}</Label>
           <Input
             id="newDocName"
-            placeholder="Enter document name"
+            placeholder={t("form.documentNamePlaceholder")}
             value={documentName}
             onChange={(e) => onNameChange(e.target.value)}
           />
@@ -66,10 +69,10 @@ export function DocumentCreationForm({
         {/* Document Type */}
         {!hideDocumentType && (
           <div className="space-y-2">
-            <Label htmlFor="newDocType">Document Type *</Label>
+            <Label htmlFor="newDocType">{t('form.documentTypeLabel')}</Label>
             <Select value={documentType} onValueChange={onTypeChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select document type" />
+                <SelectValue placeholder={t("form.documentTypePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {ALL_DOCUMENT_TYPES.map((type: DocumentType) => (
@@ -85,16 +88,16 @@ export function DocumentCreationForm({
 
         {/* Document Content */}
         <div className="space-y-2">
-          <Label htmlFor="newDocContent">Content *</Label>
+          <Label htmlFor="newDocContent">{t('form.contentLabel')}</Label>
           <Textarea
             id="newDocContent"
-            placeholder="Enter document content..."
+            placeholder={t("form.documentContentPlaceholder")}
             value={documentContent}
             onChange={(e) => onContentChange(e.target.value)}
             className="min-h-[150px] text-sm"
           />
           <p className="text-xs text-muted-foreground">
-            You can use Markdown formatting for rich text content.
+            {t('form.markdownHelp')}
           </p>
         </div>
 
@@ -102,7 +105,7 @@ export function DocumentCreationForm({
         <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={onCancel}>
             <X className="h-4 w-4 mr-1" />
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button
             variant="outline"
@@ -110,7 +113,7 @@ export function DocumentCreationForm({
             disabled={!documentName.trim() || !documentContent.trim()}
           >
             <Eye className="h-4 w-4 mr-1" />
-            Preview
+            {tCommon('preview')}
           </Button>
           <Button
             onClick={onCreate}
@@ -118,11 +121,11 @@ export function DocumentCreationForm({
             disabled={!documentName.trim() || !documentContent.trim() || (!hideDocumentType && !documentType) || isCreatingDocument}
           >
             {isCreatingDocument ? (
-              <LoadingSpinner size="sm" text="Creating..." className="text-white" />
+              <LoadingSpinner size="sm" text={tCommon('creating')} className="text-white" />
             ) : (
               <>
                 <Plus className="h-4 w-4 mr-1" />
-                Create Document
+                {t('actions.createDocument')}
               </>
             )}
           </Button>
