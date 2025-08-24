@@ -11,6 +11,53 @@ import {getStorageLimitForPlan} from '@/lib/types/storage-types'
 export class SubscriptionUsageService {
 
   /**
+   * Create default usage record for new users.
+   * Used proactively during user signup to ensure usage record exists for current billing period.
+   * 
+   * @param userId - The user ID to create usage record for
+   * @returns Promise<UserUsage> - The created usage record with zero tokens
+   * @throws Error if creation fails or subscription doesn't exist
+   */
+  static async createDefaultUsage(userId: string): Promise<UserUsage> {
+    try {
+      logger.info('Creating default usage record for new user', { userId });
+      
+      // Get the subscription to retrieve billing period dates
+      const subscription = await SubscriptionService.getUserSubscription(userId);
+      
+      if (!subscription.currentPeriodStart || !subscription.currentPeriodEnd) {
+        throw new Error('Subscription missing billing period dates');
+      }
+      
+      // Create usage record with zero tokens for the current billing period
+      const usage = await SubscriptionUsageOperations.upsertUsage(
+        userId,
+        subscription.currentPeriodStart,
+        subscription.currentPeriodEnd,
+        { tokensUsed: 0 }
+      );
+      
+      // Cache the newly created usage record
+      const cacheKey = `${userId}_${subscription.currentPeriodStart.toISOString()}_${subscription.currentPeriodEnd.toISOString()}`;
+      await cacheUsage(cacheKey, usage);
+      
+      logger.info('Successfully created default usage record', {
+        userId,
+        metadata: {
+          billingPeriodStart: subscription.currentPeriodStart.toISOString(),
+          billingPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+          tokensUsed: 0
+        }
+      });
+      
+      return usage;
+    } catch (error) {
+      logger.error('Error creating default usage record', error as Error, { userId });
+      throw error;
+    }
+  }
+
+  /**
    * Get the current billing period dates from a user's subscription.
    * 
    * @param userId - The user ID to get billing period for

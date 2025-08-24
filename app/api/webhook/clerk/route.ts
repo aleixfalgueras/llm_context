@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { AffiliationService } from '@/services/affiliation-service'
+import { SubscriptionService } from '@/services/subscription/subscription-service'
+import { SubscriptionUsageService } from '@/services/subscription/subscription-usage-service'
 import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
@@ -53,6 +55,7 @@ export async function POST(req: NextRequest) {
     try {
       // Extract referral code from unsafe metadata if it exists
       const referralCode = unsafe_metadata?.referralCode as string | undefined
+      let affiliationCode: string | undefined
       
       // Only create affiliations for users who signed up with a referral code
       if (referralCode) {
@@ -75,28 +78,62 @@ export async function POST(req: NextRequest) {
           publicName
         )
         
+        affiliationCode = result.affiliationCode
         logger.info(`Webhook: Created affiliation for new user ${id} - code: ${result.affiliationCode}, parent: ${referralCode}, isNew: ${result.isNew}`)
-        
-        return NextResponse.json({ 
-          success: true, 
-          affiliationCode: result.affiliationCode 
-        })
       } else {
         // User signed up without referral code - no affiliation created
         // They can manually create one later if they choose to join a network
         logger.info(`Webhook: User ${id} signed up without referral code - no affiliation created`)
+      }
+      
+      // Create default subscription and usage records for the new user
+      try {
+        // Create subscription first
+        const subscription = await SubscriptionService.createDefaultSubscription(id)
+        logger.info(`Webhook: Created default subscription for user ${id}`, {
+          metadata: {
+            plan: subscription.plan,
+            periodEnd: subscription.currentPeriodEnd?.toISOString()
+          }
+        })
+        
+        // Then create usage record for the current billing period
+        const usage = await SubscriptionUsageService.createDefaultUsage(id)
+        logger.info(`Webhook: Created default usage record for user ${id}`, {
+          metadata: {
+            billingPeriodStart: usage.billingPeriodStart.toISOString(),
+            billingPeriodEnd: usage.billingPeriodEnd.toISOString()
+          }
+        })
         
         return NextResponse.json({ 
           success: true, 
-          message: 'User created without referral - no affiliation created'
+          affiliationCode,
+          subscription: {
+            plan: subscription.plan,
+            status: subscription.status
+          },
+          usage: {
+            tokensUsed: usage.tokensUsed
+          }
+        })
+      } catch (subscriptionError) {
+        // Log the error but don't fail the webhook
+        logger.error(`Webhook: Failed to create subscription/usage for user ${id}`, subscriptionError as Error)
+        
+        // Still return success to prevent webhook retry loops
+        return NextResponse.json({ 
+          success: true, 
+          affiliationCode,
+          warning: 'Subscription/usage creation failed but user was created successfully'
         })
       }
     } catch (error) {
-      logger.error(`Webhook: Failed to create affiliation for user ${id}`, error as Error)
+      logger.error(`Webhook: Failed to process user creation for ${id}`, error as Error)
       // Return success to prevent webhook retry, but log the error
       return NextResponse.json({ 
         success: true, 
-        error: 'Failed to create affiliation' 
+        error: 'Failed to process user creation' 
       })
     }
   }

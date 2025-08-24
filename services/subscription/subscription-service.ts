@@ -12,6 +12,40 @@ import {isDowngrade} from "@/lib/utils/subscription-client-utils";
 export class SubscriptionService {
 
   /**
+   * Create default apprentice subscription for new users.
+   * Used proactively during user signup to ensure subscription exists.
+   * 
+   * @param userId - The user ID to create subscription for
+   * @returns Promise<UserSubscription> - The created subscription record
+   * @throws Error if creation fails
+   */
+  static async createDefaultSubscription(userId: string): Promise<UserSubscription> {
+    try {
+      logger.info('Creating default apprentice subscription for new user', { userId });
+      
+      // Create the subscription using the existing database operation
+      const subscription = await SubscriptionUsageOperations.createDefaultApprenticeSubscription(userId);
+      
+      // Cache the newly created subscription
+      await cacheSubscription(userId, subscription);
+      
+      logger.info('Successfully created default subscription', {
+        userId,
+        metadata: {
+          plan: subscription.plan,
+          periodStart: subscription.currentPeriodStart?.toISOString(),
+          periodEnd: subscription.currentPeriodEnd?.toISOString()
+        }
+      });
+      
+      return subscription;
+    } catch (error) {
+      logger.error('Error creating default subscription', error as Error, { userId });
+      throw error;
+    }
+  }
+
+  /**
    * Get or create user subscription with intelligent caching and auto-creation.
    * Creates a default basic subscription if none exists for the user.
    *
