@@ -6,7 +6,7 @@ import { ApiErrors } from '@/lib/api/api-error-handler'
 import { cancelSubscriptionImmediately } from '@/lib/stripe/stripe-subscription'
 import { stripe } from '@/lib/stripe/stripe'
 import { SubscriptionUsageOperations } from '@/database'
-import { DELETE_CONFIRMATION_TEXT } from '@/lib/constants/account-types'
+import { DELETE_CONFIRMATION_TEXT } from '@/lib/types/account-types'
 
 export const POST = withEnhancedApi(async ({ userId, req }) => {
   const { confirmationText, reason = 'user_request' } = await parseJsonBody(req)

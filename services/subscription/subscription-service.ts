@@ -16,15 +16,29 @@ export class SubscriptionService {
    * Used proactively during user signup to ensure subscription exists.
    * 
    * @param userId - The user ID to create subscription for
+   * @param email - Optional email address to store with subscription
    * @returns Promise<UserSubscription> - The created subscription record
    * @throws Error if creation fails
    */
-  static async createDefaultSubscription(userId: string): Promise<UserSubscription> {
+  static async createDefaultSubscription(userId: string, email?: string): Promise<UserSubscription> {
     try {
-      logger.info('Creating default apprentice subscription for new user', { userId });
+      logger.info('Creating default apprentice subscription for new user', { userId, metadata: { email } });
+      
+      // If email not provided, try to fetch from Clerk
+      let userEmail = email;
+      if (!userEmail) {
+        try {
+          const client = await clerkClient()
+          const user = await client.users.getUser(userId)
+          userEmail = user.emailAddresses[0]?.emailAddress
+        } catch (clerkError) {
+          logger.warn('Failed to fetch email from Clerk for new subscription', { userId });
+          // Continue without email rather than failing subscription creation
+        }
+      }
       
       // Create the subscription using the existing database operation
-      const subscription = await SubscriptionUsageOperations.createDefaultApprenticeSubscription(userId);
+      const subscription = await SubscriptionUsageOperations.createDefaultApprenticeSubscription(userId, userEmail);
       
       // Cache the newly created subscription
       await cacheSubscription(userId, subscription);
@@ -32,6 +46,7 @@ export class SubscriptionService {
       logger.info('Successfully created default subscription', {
         userId,
         metadata: {
+          email: userEmail,
           plan: subscription.plan,
           periodStart: subscription.currentPeriodStart?.toISOString(),
           periodEnd: subscription.currentPeriodEnd?.toISOString()
@@ -80,7 +95,16 @@ export class SubscriptionService {
       // Create default apprentice subscription if none exists using upsert to prevent race conditions
       if (!subscription) {
         logger.info('Creating new user subscription', { userId, metadata: { plan: SubscriptionPlan.apprentice } });
-        subscription = await SubscriptionUsageOperations.createDefaultApprenticeSubscription(userId)
+        // Try to fetch email from Clerk for lazy creation
+        let email: string | undefined;
+        try {
+          const client = await clerkClient()
+          const user = await client.users.getUser(userId)
+          email = user.emailAddresses[0]?.emailAddress
+        } catch (clerkError) {
+          logger.warn('Failed to fetch email from Clerk for lazy subscription creation', { userId });
+        }
+        subscription = await SubscriptionUsageOperations.createDefaultApprenticeSubscription(userId, email)
       }
 
       // Cache the result

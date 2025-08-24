@@ -88,10 +88,16 @@ export async function POST(req: NextRequest) {
       
       // Create default subscription and usage records for the new user
       try {
-        // Create subscription first
-        const subscription = await SubscriptionService.createDefaultSubscription(id)
+        // Extract email from event data
+        const userEmail = email_addresses && email_addresses.length > 0 
+          ? email_addresses[0].email_address 
+          : undefined;
+        
+        // Create subscription first, passing the email
+        const subscription = await SubscriptionService.createDefaultSubscription(id, userEmail)
         logger.info(`Webhook: Created default subscription for user ${id}`, {
           metadata: {
+            email: userEmail,
             plan: subscription.plan,
             periodEnd: subscription.currentPeriodEnd?.toISOString()
           }
