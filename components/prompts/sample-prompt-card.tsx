@@ -1,5 +1,6 @@
 'use client'
 
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Badge} from '@/components/ui/badge'
@@ -15,6 +16,8 @@ interface SamplePromptCardProps {
 
 
 export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
+  const t = useTranslations('prompts')
+  
   return (
     <Card className="h-[240px] hover:shadow-lg transition-all duration-200 flex flex-col">
       <CardHeader className="pb-3 flex-1 flex flex-col">
@@ -41,7 +44,7 @@ export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
             {prompt.category}
           </Badge>
           <Badge variant="outline" className="text-xs">
-            Template
+            {t('template.label')}
           </Badge>
         </div>
       </CardHeader>
@@ -63,7 +66,7 @@ export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
             trigger={
               <Button size="sm" className="flex-1 bg-amber-600 hover:bg-amber-700">
                 <Copy className="h-3 w-3 mr-1" />
-                Use Template
+                {t('template.useTemplate')}
               </Button>
             }
           />

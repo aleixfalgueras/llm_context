@@ -8,7 +8,8 @@ import {
   getPlanIconType,
   getPlanNameColor
 } from '@/lib/utils/subscription-client-utils'
-import {SubscriptionPlan} from "@prisma/client";
+import {SubscriptionPlan} from "@prisma/client"
+import {useTranslations} from '@/lib/translations/context'
 
 interface PlanCardProps {
   planId: string
@@ -47,6 +48,7 @@ export function PlanCard({
   isPastDueOrUnpaid,
   onPlanAction
 }: PlanCardProps) {
+  const t = useTranslations('subscription')
   const getPlanIcon = (planId: string) => {
     const iconType = getPlanIconType(planId)
     switch (iconType) {
@@ -74,7 +76,7 @@ export function PlanCard({
         <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{plan.description}</CardDescription>
         <div className="mt-4 pt-4 pb-2 flex items-end justify-center min-h-[4rem]">
           <span className="text-4xl font-bold leading-none">{plan.price}€</span>
-          {plan.price > 0 && <span className="text-gray-500 mb-1">/month</span>}
+          {plan.price > 0 && <span className="text-gray-500 mb-1">{t('planCard.perMonth')}</span>}
         </div>
       </CardHeader>
       
@@ -98,11 +100,11 @@ export function PlanCard({
           )}`}
         >
           {upgradeLoading === plan.id ? (
-            <LoadingSpinner text="Processing..." />
+            <LoadingSpinner text={t('planCard.processing')} />
           ) : cancelDowngradeLoading && isPendingDowngrade && isPendingPlanChange ? (
-            <LoadingSpinner text="Canceling..." />
+            <LoadingSpinner text={t('planCard.canceling')} />
           ) : (
-            getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired)
+            getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired, t)
           )}
         </Button>
       </CardContent>

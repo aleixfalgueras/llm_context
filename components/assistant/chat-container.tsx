@@ -1,6 +1,7 @@
 'use client'
 
 import {memo, useEffect} from 'react'
+import {useTranslations} from '@/lib/translations/context'
 import {useChat} from '@/hooks/use-chat'
 import {ChatMessages} from '@/components/assistant/chat-messages'
 import {ChatInput} from '@/components/assistant/chat-input'
@@ -28,6 +29,7 @@ interface ChatContainerProps {
 }
 
 function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel, newChatParams }: ChatContainerProps) {
+  const t = useTranslations('assistant')
   const { messages, isLoading, isStreaming, sendMessage, stopGeneration, setOnTitleUpdate } = useChat(chatId, initialMessages, newChatParams)
   
   // Set up title update callback
@@ -40,7 +42,7 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
   return (
     <ErrorBoundary 
       onError={(error, errorInfo) => {
-        console.error('Chat container error:', error, errorInfo)
+        console.error(t('errors.chatContainerError'), error, errorInfo)
       }}
     >
       {/* Messages Area */}

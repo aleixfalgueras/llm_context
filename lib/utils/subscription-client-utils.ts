@@ -54,29 +54,59 @@ export function getButtonText(
   isPendingDowngrade: boolean, 
   isPendingPlanChange: boolean,
   isCurrentPlan: boolean,
-  isExpired?: boolean
+  isExpired?: boolean,
+  t?: (key: string, params?: any) => string
 ) {
+  // If translations are not available, fall back to English
+  if (!t) {
+    // Free mode users and expired subscription users see "Subscribe to..." for all plans
+    if (isFreeMode || isExpired) {
+      return `Subscribe to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
+    }
+    
+    // Check if this plan is the target of a pending downgrade
+    if (isPendingDowngrade && isPendingPlanChange) {
+      return 'Cancel Downgrade'
+    }
+    
+    // Check if this is the current plan (for paid users)
+    if (isCurrentPlan) {
+      return 'Current Plan'
+    }
+    
+    // Check if this is a downgrade
+    if (isDowngrade(currentPlan, planId as SubscriptionPlan)) {
+      return `Downgrade to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
+    }
+    
+    // For upgrades
+    return `Upgrade to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
+  }
+
+  // Use translations when available
+  const planName = SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]
+  
   // Free mode users and expired subscription users see "Subscribe to..." for all plans
   if (isFreeMode || isExpired) {
-    return `Subscribe to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
+    return t('planCard.subscribeTo', { planName })
   }
   
   // Check if this plan is the target of a pending downgrade
   if (isPendingDowngrade && isPendingPlanChange) {
-    return 'Cancel Downgrade'
+    return t('planCard.cancelDowngrade')
   }
   
   // Check if this is the current plan (for paid users)
   if (isCurrentPlan) {
-    return 'Current Plan'
+    return t('planCard.currentPlan')
   }
   
   // Check if this is a downgrade
   if (isDowngrade(currentPlan, planId as SubscriptionPlan)) {
-    return `Downgrade to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
+    return t('planCard.downgradeTo', { planName })
   }
   
   // For upgrades
-  return `Upgrade to ${SUBSCRIPTION_PLAN_NAMES[planId as keyof typeof SUBSCRIPTION_PLAN_NAMES]}`
+  return t('planCard.upgradeTo', { planName })
 }
 

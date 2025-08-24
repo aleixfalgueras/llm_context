@@ -11,7 +11,7 @@ export interface UsageInfo {
 // Import Client interface from Prisma
 import type { Client } from '@prisma/client'
 export type { Client } from '@prisma/client'
-export { CLIENT_FIELD_LABELS, CLIENT_FIELD_PLACEHOLDERS } from './client-types'
+export { CLIENT_FIELD_LABELS } from './client-types'
 
 export interface LanguageInfo {
   value: string

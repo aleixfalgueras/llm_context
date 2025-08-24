@@ -5,6 +5,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Loader2, User} from 'lucide-react'
 import {memo, useEffect, useMemo, useRef} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
+import {useTranslations} from '@/lib/translations/context'
 
 import {MessageWithStreaming} from "@/lib/types/message-types";
 import {Role} from '@prisma/client'
@@ -16,6 +17,7 @@ interface ChatMessagesProps {
 }
 
 function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessagesProps) {
+  const t = useTranslations('assistant')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isInitialLoad = useRef(true)
 
@@ -44,8 +46,8 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
             <div className="w-12 h-12 mx-auto mb-4 opacity-50 flex items-center justify-center text-4xl">
               🤖
             </div>
-            <p className="text-lg">Start a conversation</p>
-            <p className="text-sm">Send a message to begin chatting with your AI assistant.</p>
+            <p className="text-lg">{t('startConversation')}</p>
+            <p className="text-sm">{t('startConversationSubtext')}</p>
           </div>
         ) : (
           messages.map((message: MessageWithStreaming) => (
@@ -53,7 +55,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
               <Avatar className="w-8 h-8">
                 {message.role === Role.USER ? (
                   <>
-                    {userImageUrl && <AvatarImage src={userImageUrl} alt={userName || 'User'} />}
+                    {userImageUrl && <AvatarImage src={userImageUrl} alt={userName || t('user')} />}
                     <AvatarFallback>
                       <User className="w-4 h-4" />
                     </AvatarFallback>
@@ -71,7 +73,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
               <div className={`space-y-1 max-w-[70%] ${message.role === Role.USER ? 'ml-auto' : ''}`}>
                 <div className={`flex items-center gap-2 ${message.role === Role.USER ? 'flex-row-reverse' : ''}`}>
                   <span className="font-medium text-sm">
-                    {message.role === Role.USER ? (userName || 'You') : 'AI Assistant'}
+                    {message.role === Role.USER ? (userName || t('chat.you')) : t('chat.aiAssistant')}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(message.createdAt).toLocaleTimeString()}
@@ -79,7 +81,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
                   {message.isStreaming && (
                     <span className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-1">
                       <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></span>
-                      Typing...
+                      {t('typing')}
                     </span>
                   )}
                 </div>

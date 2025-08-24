@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { ToastVariant } from '@/lib/types/enums'
 import {SubscriptionPlan} from "@prisma/client";
 import { handleClientApiError } from '@/lib/api/api-toast'
+import { useTranslations } from '@/lib/translations/context'
 
 interface UpgradePreview {
   currentPlan: SubscriptionPlan
@@ -49,6 +50,7 @@ export function UpgradeDowngradeDialog({
   const [preview, setPreview] = useState<UpgradePreview | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const { toast } = useToast()
+  const t = useTranslations('subscription')
 
   // Load pricing preview when dialog opens (only for existing subscriptions)
   React.useEffect(() => {
@@ -67,7 +69,7 @@ export function UpgradeDowngradeDialog({
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load upgrade preview' }))
+        const errorData = await response.json().catch(() => ({ error: t('upgradeDialog.errors.loadPreviewFailed') }))
         throw new Error(errorData.error)
       }
 
@@ -75,8 +77,8 @@ export function UpgradeDowngradeDialog({
       setPreview(data)
     } catch (error) {
       console.error('Error loading upgrade preview:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load upgrade preview'
-      handleClientApiError(errorMessage, 'Failed to load upgrade preview')
+      const errorMessage = error instanceof Error ? error.message : t('upgradeDialog.errors.loadPreviewFailed')
+      handleClientApiError(errorMessage, t('upgradeDialog.errors.loadPreviewFailed'))
       onClose()
     } finally {
       setPreviewLoading(false)
@@ -101,12 +103,12 @@ export function UpgradeDowngradeDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCardIcon className="h-5 w-5" />
-            {isDowngrade ? 'Schedule Subscription Downgrade' : 'Confirm Subscription Upgrade'}
+            {isDowngrade ? t('upgradeDialog.title.scheduleDowngrade') : t('upgradeDialog.title.confirmUpgrade')}
           </DialogTitle>
           <DialogDescription>
             {isDowngrade 
-              ? 'Review the details of your subscription downgrade. Changes will take effect at the end of your current billing period.'
-              : 'Review the details of your subscription upgrade before proceeding.'
+              ? t('upgradeDialog.description.downgrade')
+              : t('upgradeDialog.description.upgrade')
             }
           </DialogDescription>
         </DialogHeader>
@@ -116,7 +118,7 @@ export function UpgradeDowngradeDialog({
           <div className="flex items-center justify-center py-8">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <span>Loading upgrade preview...</span>
+              <span>{t('upgradeDialog.loading.preview')}</span>
             </div>
           </div>
         ) : hasActiveSubscription && preview && currentPlanConfig ? (
@@ -124,24 +126,24 @@ export function UpgradeDowngradeDialog({
             {/* Plan Comparison */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Current Plan</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('upgradeDialog.planComparison.currentPlan')}</div>
                 <div className="p-4 border rounded-lg bg-muted/50">
                   <div className="font-semibold">{currentPlanConfig.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {preview.currentPrice}€/month
+                    {t('upgradeDialog.planComparison.pricePerMonth', { price: preview.currentPrice })}
                   </div>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">New Plan</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('upgradeDialog.planComparison.newPlan')}</div>
                 <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                   <div className="font-semibold flex items-center gap-2">
                     {targetPlanConfig.name}
-                    <Badge variant="secondary">{isDowngrade ? 'Downgrade' : 'Upgrade'}</Badge>
+                    <Badge variant="secondary">{isDowngrade ? t('upgradeDialog.badges.downgrade') : t('upgradeDialog.badges.upgrade')}</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {preview.newPrice}€/month
+                    {t('upgradeDialog.planComparison.pricePerMonth', { price: preview.newPrice })}
                   </div>
                 </div>
               </div>
@@ -149,7 +151,7 @@ export function UpgradeDowngradeDialog({
 
             {/* Feature Comparison */}
             <div className="space-y-3">
-              <div className="text-sm font-medium">What you'll get with {targetPlanConfig.name}:</div>
+              <div className="text-sm font-medium">{t('upgradeDialog.features.whatYouGetWith', { planName: targetPlanConfig.name })}</div>
               <div className="grid grid-cols-1 gap-2">
                 {targetPlanConfig.features_list.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
@@ -164,11 +166,14 @@ export function UpgradeDowngradeDialog({
 
             {/* Simplified Billing Summary */}
             <div className="space-y-3">
-              <div className="text-sm font-medium">Billing Summary</div>
+              <div className="text-sm font-medium">{t('upgradeDialog.billing.title')}</div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm">
-                    {isDowngrade ? `Downgrade to ${targetPlanConfig.name}:` : `Upgrade to ${targetPlanConfig.name}:`}
+                    {isDowngrade 
+                      ? t('upgradeDialog.billing.downgradeTo', { planName: targetPlanConfig.name })
+                      : t('upgradeDialog.billing.upgradeTo', { planName: targetPlanConfig.name })
+                    }
                   </span>
                   <span className="font-semibold text-lg">
                     {preview.newPrice}€
@@ -176,16 +181,16 @@ export function UpgradeDowngradeDialog({
                 </div>
                 <div className="text-xs text-muted-foreground mb-2">
                   {isDowngrade 
-                    ? 'You\'ll be charged the new plan price starting from your next billing cycle. You\'ll keep your current plan benefits until then.'
-                    : 'You\'ll be charged the full monthly price for the new plan.'
+                    ? t('upgradeDialog.billing.downgradeNote')
+                    : t('upgradeDialog.billing.upgradeNote')
                   }
                 </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <CalendarIcon className="h-3 w-3" />
                   <span>
                     {isDowngrade 
-                      ? `Changes take effect: ${formatDate(preview.nextBillingDate)}`
-                      : `Next billing: ${formatDate(preview.nextBillingDate)}`
+                      ? t('upgradeDialog.billing.changesEffective', { date: formatDate(preview.nextBillingDate) })
+                      : t('upgradeDialog.billing.nextBilling', { date: formatDate(preview.nextBillingDate) })
                     }
                   </span>
                 </div>
@@ -197,18 +202,18 @@ export function UpgradeDowngradeDialog({
             {/* First Subscription - Simple Confirmation */}
             <div className="text-center">
               <div className="p-6 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                <div className="font-semibold text-lg mb-2">{targetPlanConfig.name} Plan</div>
+                <div className="font-semibold text-lg mb-2">{t('upgradeDialog.firstSubscription.planTitle', { planName: targetPlanConfig.name })}</div>
                 <div className="text-3xl font-bold mb-2">
                   {targetPlanConfig.price}€
-                  <span className="text-lg font-normal text-muted-foreground">/month</span>
+                  <span className="text-lg font-normal text-muted-foreground">{t('upgradeDialog.firstSubscription.perMonth')}</span>
                 </div>
-                <Badge variant="secondary" className="mb-4">First Subscription</Badge>
+                <Badge variant="secondary" className="mb-4">{t('upgradeDialog.badges.firstSubscription')}</Badge>
               </div>
             </div>
 
             {/* Feature List */}
             <div className="space-y-3">
-              <div className="text-sm font-medium">What you'll get with {targetPlanConfig.name}:</div>
+              <div className="text-sm font-medium">{t('upgradeDialog.features.whatYouGetWith', { planName: targetPlanConfig.name })}</div>
               <div className="grid grid-cols-1 gap-2">
                 {targetPlanConfig.features_list.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
@@ -223,18 +228,18 @@ export function UpgradeDowngradeDialog({
 
             {/* Simple Billing Info */}
             <div className="space-y-3">
-              <div className="text-sm font-medium">Billing Information</div>
+              <div className="text-sm font-medium">{t('upgradeDialog.billing.information')}</div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm">
-                    {isDowngrade ? 'New monthly charge:' : 'Monthly charge:'}
+                    {isDowngrade ? t('upgradeDialog.billing.newMonthlyCharge') : t('upgradeDialog.billing.monthlyCharge')}
                   </span>
                   <span className="font-semibold">{targetPlanConfig.price}€</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {isDowngrade 
-                    ? 'Your plan will change at the end of your current billing period. No immediate payment required.'
-                    : 'You\'ll be redirected to Stripe for secure payment processing.'
+                    ? t('upgradeDialog.billing.planChangeNote')
+                    : t('upgradeDialog.billing.stripeRedirectNote')
                   }
                 </div>
               </div>
@@ -245,7 +250,7 @@ export function UpgradeDowngradeDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={isLoading}>
-            Cancel
+            {t('upgradeDialog.buttons.cancel')}
           </Button>
           <Button 
             onClick={onConfirm} 
@@ -255,12 +260,18 @@ export function UpgradeDowngradeDialog({
             {isLoading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Processing...
+                {t('upgradeDialog.loading.processing')}
               </>
             ) : (
               <>
                 <ArrowRightIcon className="h-4 w-4" />
-                {isDowngrade ? 'Schedule Downgrade' : (hasActiveSubscription ? 'Confirm Upgrade' : 'Start Subscription')}
+                {isDowngrade 
+                  ? t('upgradeDialog.buttons.scheduleDowngrade')
+                  : (hasActiveSubscription 
+                      ? t('upgradeDialog.buttons.confirmUpgrade') 
+                      : t('upgradeDialog.buttons.startSubscription')
+                    )
+                }
               </>
             )}
           </Button>

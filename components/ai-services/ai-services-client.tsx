@@ -10,12 +10,14 @@ import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-d
 import { ClientDocuments } from '@/components/clients/client-documents'
 import { ServiceStatus } from '@/lib/types/enums'
 import { useLocalStorage } from '@/hooks/use-local-storage'
+import { useTranslations } from '@/lib/translations/context'
 
 interface AIServicesClientProps {
   clients: any[]
 }
 
 export function AIServicesClient({ clients }: AIServicesClientProps) {
+  const t = useTranslations('aiServices')
   const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
   const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
@@ -53,30 +55,42 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const services = [
     {
       id: 'meeting-report',
-      title: 'Meeting Report',
-      description: 'Generate comprehensive meeting reports with actionable steps from client meeting transcriptions.',
+      title: t('services.meetingReport.title'),
+      description: t('services.meetingReport.description'),
       icon: <MessageSquare className="h-8 w-8" />,
-      features: ['Transcription analysis', 'Actionable insights', 'Professional summaries'],
+      features: [
+        t('services.meetingReport.features.transcription'),
+        t('services.meetingReport.features.insights'),
+        t('services.meetingReport.features.summaries')
+      ],
       status: ServiceStatus.AVAILABLE,
       onClick: () => setIsMeetingReportDialogOpen(true),
       iconColorClass: 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400'
     },
     {
       id: 'custom-document',
-      title: 'Document Generator',
-      description: 'Generate custom marketing documents using your own prompts and the client\'s language',
+      title: t('services.customDocument.title'),
+      description: t('services.customDocument.description'),
       icon: <FileText className="h-8 w-8" />,
-      features: ['Custom prompts', 'Variable replacement', 'Professional formatting'],
+      features: [
+        t('services.customDocument.features.prompts'),
+        t('services.customDocument.features.variables'),
+        t('services.customDocument.features.formatting')
+      ],
       status: ServiceStatus.AVAILABLE,
       onClick: () => setIsCustomDocumentDialogOpen(true),
       iconColorClass: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
     },
     {
       id: 'podcast-creator',
-      title: 'Podcast Creator',
-      description: 'Generate engaging podcasts with AI-powered Veo3 technology',
+      title: t('services.podcastCreator.title'),
+      description: t('services.podcastCreator.description'),
       icon: <Mic className="h-8 w-8" />,
-      features: ['AI-powered Veo3 integration', 'Automated podcast generation', 'Professional audio quality'],
+      features: [
+        t('services.podcastCreator.features.veo3'),
+        t('services.podcastCreator.features.automated'),
+        t('services.podcastCreator.features.quality')
+      ],
       status: ServiceStatus.COMING_SOON,
       onClick: undefined,
       iconColorClass: 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
@@ -94,7 +108,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <Zap className="h-8 w-8 text-blue-600" />
-              <h1 className="text-3xl font-bold">AI Services</h1>
+              <h1 className="text-3xl font-bold">{t('title')}</h1>
             </div>
             <div className="flex items-center gap-3">
               <Button
@@ -103,13 +117,13 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                 className="flex items-center gap-2"
               >
                 <Settings className="h-4 w-4" />
-                Configure Services
+                {t('configureServices')}
                 {isConfigOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
             </div>
           </div>
           <p className="text-lg text-muted-foreground">
-            Leverage AI to create personalized marketing content for your clients
+            {t('description')}
           </p>
         </div>
 
@@ -119,7 +133,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
             <CardHeader>
               <CardTitle className="text-blue-900 dark:text-blue-100 flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                Service Visibility Settings
+                {t('serviceVisibilitySettings')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -149,16 +163,16 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                 <Zap className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">
-                No services visible
+                {t('emptyState.title')}
               </h3>
               <p className="text-blue-700 dark:text-blue-300 text-center max-w-md mb-4">
-                All AI services are currently hidden. Use the "Configure Services" button above to enable the services you want to use.
+                {t('emptyState.description')}
               </p>
               <Button
                 onClick={() => setIsConfigOpen(true)}
                 variant="blue"
               >
-                Configure Services
+                {t('configureServices')}
               </Button>
             </CardContent>
           </Card>
@@ -213,7 +227,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                       }`}
                       onClick={service.onClick}
                     >
-                      Get Started
+                      {t('getStarted')}
                     </Button>
                   )}
                 </CardContent>
@@ -226,7 +240,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         {filteredServices.length > 0 && (
           <Card className="mt-8 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
             <CardHeader>
-              <CardTitle className="text-blue-900 dark:text-blue-100">How it works</CardTitle>
+              <CardTitle className="text-blue-900 dark:text-blue-100">{t('howItWorks.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -234,22 +248,22 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                   <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
                     1
                   </div>
-                  <h3 className="font-medium text-blue-900 dark:text-blue-100">Select Client</h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">Choose which client you want to create marketing content for</p>
+                  <h3 className="font-medium text-blue-900 dark:text-blue-100">{t('howItWorks.step1.title')}</h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">{t('howItWorks.step1.description')}</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
                     2
                   </div>
-                  <h3 className="font-medium text-blue-900 dark:text-blue-100">AI Generation</h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">AI creates personalized marketing content using client context</p>
+                  <h3 className="font-medium text-blue-900 dark:text-blue-100">{t('howItWorks.step2.title')}</h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">{t('howItWorks.step2.description')}</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
                     3
                   </div>
-                  <h3 className="font-medium text-blue-900 dark:text-blue-100">Review & Save</h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">Edit the content and save it to your client's documents</p>
+                  <h3 className="font-medium text-blue-900 dark:text-blue-100">{t('howItWorks.step3.title')}</h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">{t('howItWorks.step3.description')}</p>
                 </div>
               </div>
             </CardContent>

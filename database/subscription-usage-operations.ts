@@ -64,7 +64,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
   /**
    * Create default apprentice subscription for new users
    */
-  static async createDefaultApprenticeSubscription(userId: string): Promise<UserSubscription> {
+  static async createDefaultApprenticeSubscription(userId: string, email?: string): Promise<UserSubscription> {
     try {
       const now = new Date()
       const periodEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days
@@ -73,6 +73,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
         userId,
         {}, // Don't update if exists
         {
+          email,
           plan: SubscriptionPlan.apprentice,
           status: SubscriptionStatus.active,
           currentPeriodStart: now,

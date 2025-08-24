@@ -1,6 +1,7 @@
 'use client'
 
 import {useState} from 'react'
+import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {ArrowDownAZ, Calendar, Grid, List, Plus, Search, User} from 'lucide-react'
@@ -24,6 +25,7 @@ interface ClientsListProps {
 }
 
 export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, onRefresh, onViewDocuments }: ClientsListProps) {
+  const t = useTranslations('clients')
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const {
@@ -77,10 +79,10 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
         <div>
           <div className="flex items-center gap-3 mb-2">
             <User className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-3xl font-bold">Clients</h1>
+            <h1 className="text-3xl font-bold">{t('title')}</h1>
           </div>
           <p className="text-muted-foreground">
-            Manage your client profiles and track their marketing projects
+            {t('description')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -91,7 +93,7 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
               size="sm"
               onClick={() => setSortMode(ClientSortMode.CREATED)}
               className="px-3 py-1.5 h-auto"
-              title="Sort by creation date"
+              title={t('sort.byDate')}
             >
               <Calendar className="h-4 w-4" />
             </Button>
@@ -100,7 +102,7 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
               size="sm"
               onClick={() => setSortMode(ClientSortMode.NAME)}
               className="px-3 py-1.5 h-auto"
-              title="Sort by name"
+              title={t('sort.byName')}
             >
               <ArrowDownAZ className="h-4 w-4" />
             </Button>
@@ -112,6 +114,7 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
               size="sm"
               onClick={() => setViewMode(ViewMode.GRID)}
               className="px-3 py-1.5 h-auto"
+              title={t('view.grid')}
             >
               <Grid className="h-4 w-4" />
             </Button>
@@ -120,6 +123,7 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
               size="sm"
               onClick={() => setViewMode(ViewMode.TABLE)}
               className="px-3 py-1.5 h-auto"
+              title={t('view.table')}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -132,7 +136,7 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            placeholder="Search clients by name or email..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -140,11 +144,11 @@ export function ClientsList({ clients, onEditClient, onViewClient, onAddClient, 
         </div>
         <Button 
           onClick={onAddClient} 
-          title="Add a new client"
+          title={t('addClient')}
           variant="blue"
         >
           <Plus className="h-4 w-4" />
-          Add Client
+          {t('addClient')}
         </Button>
       </div>
 

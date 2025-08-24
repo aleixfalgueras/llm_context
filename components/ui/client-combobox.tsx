@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import type { Client } from "@prisma/client"
+import {useTranslations} from '@/lib/translations/context'
 
 type ClientBasic = Pick<Client, 'id' | 'name' | 'email'>
 
@@ -37,19 +38,21 @@ export function ClientCombobox({
   clients,
   value,
   onValueChange,
-  placeholder = "Choose a client",
+  placeholder,
   searchPlaceholder = "Search clients...",
   emptyMessage = "No clients found.",
   disabled = false
 }: ClientComboboxProps) {
+  const t = useTranslations()
+  const defaultPlaceholder = placeholder || t("ui.combobox.client.placeholder")
   const [open, setOpen] = React.useState(false)
 
   const selectedClient = clients.find((client) => client.id === value)
 
   const getPlaceholderText = () => {
-    if (clients.length === 0) return "No clients available"
+    if (clients.length === 0) return t("ui.combobox.client.empty")
     if (selectedClient) return selectedClient.name
-    return placeholder
+    return defaultPlaceholder
   }
 
   return (

@@ -111,6 +111,7 @@ model Prompt {
 model UserSubscription {
   id                   String             @id @default(cuid())
   userId               String             @unique
+  email                String?
   plan                 SubscriptionPlan   @default(apprentice)
   status               SubscriptionStatus @default(active)
   stripeCustomerId     String?
