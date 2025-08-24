@@ -275,6 +275,43 @@ export class SubscriptionService {
   }
 
   /**
+   * Set custom token limit for a specific user.
+   * This overrides the default plan token limit.
+   * 
+   * @param userId - The user ID to set custom limit for
+   * @param customTokenLimit - Custom token limit (null to remove override)
+   * @returns Promise<UserSubscription> - Updated subscription
+   */
+  static async setCustomTokenLimit(userId: string, customTokenLimit: number | null): Promise<UserSubscription> {
+    try {
+      logger.info('Setting custom token limit', { 
+        userId, 
+        metadata: { customTokenLimit } 
+      });
+      
+      const updatedSubscription = await this.updateSubscription(userId, { 
+        customTokenLimit 
+      });
+      
+      // Invalidate cache to ensure fresh data
+      await invalidateAllUserCaches(userId);
+      
+      logger.info('Custom token limit set successfully', {
+        userId,
+        metadata: {
+          customTokenLimit,
+          effectiveLimit: customTokenLimit ?? updatedSubscription.tokenLimit
+        }
+      });
+      
+      return updatedSubscription;
+    } catch (error) {
+      logger.error('Error setting custom token limit', error as Error, { userId });
+      throw error;
+    }
+  }
+
+  /**
    * Cancel pending subscription downgrade through proper business logic
    */
   static async cancelDowngrade(userId: string): Promise<{
