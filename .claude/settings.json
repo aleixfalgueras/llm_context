@@ -16,6 +16,7 @@
       "WebFetch(domain:ui.shadcn.com)",
       "WebFetch(domain:www.prisma.io)",
       "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:clerk.com)",
       "Bash(npm install:*)",
       "Bash(npx tsx:*)",
       "Bash(cat:*)",

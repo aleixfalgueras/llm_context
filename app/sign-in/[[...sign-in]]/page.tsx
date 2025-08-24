@@ -7,6 +7,8 @@ export default function Page() {
       <SignIn 
         signUpUrl="/sign-up"
         forceRedirectUrl="/"
+        withSignUp={false}
+        transferable={false}
         appearance={{
           elements: {
             footerActionLink: "hidden"
