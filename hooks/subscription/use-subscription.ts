@@ -23,6 +23,7 @@ const defaultSubscriptionWithValidation: SubscriptionWithValidation = {
   pendingPlanChange: null,
   stripeScheduleId: null,
   tokenLimit: 0,
+  customTokenLimit: null,
   isActive: true
 }
 

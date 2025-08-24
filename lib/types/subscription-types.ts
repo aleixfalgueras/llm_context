@@ -88,10 +88,12 @@ export enum ModelTier {
   JEDI = 'jedi'
 }
 
-export type SubscriptionWithValidation = UserSubscription & { isActive: boolean }
+export type SubscriptionWithValidation = UserSubscription & {
+  isActive: boolean // Computed field: SubscriptionService.isSubscriptionActive()
+  effectiveTokenLimit?: number // Computed field: customTokenLimit ?? tokenLimit
+}
 
 // Type aliases for convenience (can be used where string types are still needed)
-// TODO: Check and probably remove that
 export type SubscriptionPlanType = `${SubscriptionPlan}`
 export type ModelTierType = `${ModelTier}`
 export type SubscriptionStatusType = `${SubscriptionStatus}`

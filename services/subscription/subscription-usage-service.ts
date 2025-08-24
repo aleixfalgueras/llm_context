@@ -309,7 +309,8 @@ export class SubscriptionUsageService {
         throw new Error(SubscriptionErrorCode.SUBSCRIPTION_EXPIRED)
       }
 
-      const tokenLimit = subscriptionUsage.subscription.tokenLimit;
+      // Use customTokenLimit if set, otherwise use plan's default tokenLimit
+      const tokenLimit = subscriptionUsage.subscription.customTokenLimit ?? subscriptionUsage.subscription.tokenLimit;
       const tokensUsed = subscriptionUsage.usage.tokensUsed;
 
       return tokensUsed < tokenLimit
