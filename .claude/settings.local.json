@@ -23,7 +23,8 @@
       "Bash(mkdir:*)",
       "Bash(sed:*)",
       "Bash(cp:*)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:clerk.com)"
     ],
     "deny": []
   }
