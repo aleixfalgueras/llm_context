@@ -21,7 +21,7 @@ import {useSubscriptionActions} from '@/hooks/subscription/use-subscription-acti
 import {useSubscriptionRefresh} from '@/hooks/subscription/use-subscription-refresh'
 import {useToast} from '@/hooks/use-toast'
 import {SubscriptionPlan} from "@prisma/client";
-import {DELETE_CONFIRMATION_TEXT} from '@/lib/constants/account-types'
+import {DELETE_CONFIRMATION_TEXT} from '@/lib/types/account-types'
 
 import {isDowngrade as checkIsDowngrade} from "@/lib/utils/subscription-client-utils";
 
