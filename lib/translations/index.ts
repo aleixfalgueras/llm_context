@@ -48,3 +48,19 @@ export function interpolate(text: string, params?: Record<string, any>): string 
   
   return result
 }
+
+// Server-side translation function for use in server actions
+export async function getTranslations(namespace?: string): Promise<TranslationFunction> {
+   // For now, always use default locale on server
+  const currentMessages = messages[defaultLocale]
+  
+  return (key: string, params?: Record<string, any>) => {
+    // If namespace is provided, prepend it to the key
+    const fullKey = namespace ? 
+      (key.startsWith(namespace + '.') ? key : `${namespace}.${key}`) : 
+      key
+    
+    const translation = getNestedTranslation(currentMessages, fullKey, key)
+    return interpolate(translation, params)
+  }
+}
