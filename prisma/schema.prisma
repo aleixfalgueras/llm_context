@@ -27,13 +27,13 @@ model Message {
   content      String
   role         Role
   model        String?
-  tokensUsed   Int      @default(0)
-  inputTokens  Int      @default(0)
-  outputTokens Int      @default(0)
+  cost_usd     Float    @default(0)
+  generation_id String?
   chatId       String
   createdAt    DateTime @default(now())
   chat         Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
+  @@index([generation_id])
   @@map("messages")
 }
 
@@ -125,8 +125,8 @@ model UserSubscription {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   canceledAt           DateTime?
-  tokenLimit           Int                @default(100000)
-  customTokenLimit     Int?               // Custom token limit override for specific users
+  spending_limit_usd   Float              @default(5.00)
+  custom_spending_limit_usd Float?        // Custom spending limit override for specific users
 
   @@index([currentPeriodEnd])
   @@map("user_subscriptions")
@@ -137,13 +137,14 @@ model UserUsage {
   userId             String
   billingPeriodStart DateTime
   billingPeriodEnd   DateTime
-  tokensUsed         Int      @default(0)
+  cost_usd           Float    @default(0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@unique([userId, billingPeriodStart, billingPeriodEnd])
   @@index([userId])
   @@index([billingPeriodStart, billingPeriodEnd])
+  @@index([cost_usd])
   @@map("user_usage")
 }
 

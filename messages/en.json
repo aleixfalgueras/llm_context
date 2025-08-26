@@ -1009,7 +1009,7 @@
         "monthlyUsage": "Monthly Usage",
         "subscriptionPlans": "Subscription Plans",
         "feedbackAndPrompts": "Feedback & Prompts",
-        "tokens": "Tokens:",
+        "totalSpending": "Total Spending",
         "totalFeedback": "Total Feedback:",
         "customPrompts": "Custom Prompts:",
         "messagesTotal": "messages total",

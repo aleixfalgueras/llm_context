@@ -31,6 +31,6 @@ export const POST = withEnhancedApi(
     context: 'Generate Meeting Report',
     allowedMethods: ['POST'],
     expectedContentType: 'application/json',
-    requireToken: true
+    requireUsageCheck: true
   }
 ) 

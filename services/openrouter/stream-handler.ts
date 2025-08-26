@@ -2,7 +2,7 @@
  * OpenRouter streaming response handler
  */
 
-import { logger } from '../../lib/logger'
+import { logger } from '@/lib/logger'
 
 import {StreamChunk} from "@/lib/types/openrouter-types";
 
@@ -11,8 +11,8 @@ import {StreamChunk} from "@/lib/types/openrouter-types";
  */
 export async function* processOpenRouterStream(stream: AsyncIterable<any>): AsyncGenerator<StreamChunk, void, unknown> {
   let totalContent = ''
-  let finalUsage: StreamChunk['usage'] | undefined
   let generationId: string | undefined
+  let directCost: number | undefined
   
   try {
     for await (const chunk of stream) {
@@ -22,13 +22,10 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
           generationId = chunk.id
         }
         
-        // Check every chunk for usage data
-        if (chunk.usage) {
-          finalUsage = {
-            promptTokens: chunk.usage.prompt_tokens || 0,
-            completionTokens: chunk.usage.completion_tokens || 0,
-            totalTokens: chunk.usage.total_tokens || 0
-          }
+        // Check for direct cost in chunk.usage (final chunk from OpenRouter)
+        if (chunk.usage?.cost !== undefined) {
+          directCost = chunk.usage.cost
+          logger.debug('Direct cost extracted from stream chunk')
         }
         
         const choice = chunk.choices?.[0]
@@ -56,11 +53,10 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
           yield {
             content: '',
             isComplete: true,
-            usage: finalUsage,
-            generationId: generationId
+            generationId: generationId,
+            cost_usd: directCost
           }
-          
-          
+
           return
         }
       } catch (chunkError) {
@@ -79,18 +75,14 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
  */
 export async function streamToString(
   stream: AsyncIterable<any>
-): Promise<{ content: string; usage?: StreamChunk['usage'] }> {
+): Promise<{ content: string }> {
   let content = ''
-  let usage: StreamChunk['usage'] | undefined
   
   for await (const chunk of processOpenRouterStream(stream)) {
     if (chunk.content) {
       content += chunk.content
     }
-    if (chunk.isComplete && chunk.usage) {
-      usage = chunk.usage
-    }
   }
   
-  return { content, usage }
+  return { content }
 }
