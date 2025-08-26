@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
             status: subscription.status
           },
           usage: {
-            tokensUsed: usage.tokensUsed
+            cost_usd: usage.cost_usd
           }
         })
       } catch (subscriptionError) {

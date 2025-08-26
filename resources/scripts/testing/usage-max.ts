@@ -58,7 +58,7 @@ async function getUserSubscription(userId: string) {
         status: 'active',
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
-        tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].tokenLimit,
+        spending_limit_usd: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd,
       }
     })
     
@@ -88,20 +88,20 @@ async function updateUserUsageToMax(userId: string, subscription: any) {
     }
   })
   
-  // Determine target token usage based on plan
-  let targetTokens: number
+  // Determine target cost usage based on plan
+  let targetCost: number
   
   if (subscription.plan === SubscriptionPlan.jedi) {
-    // For jedi plan, use high but finite value
-    targetTokens = 4000000  // Jedi plan limit
+    // For jedi plan, use the spending limit
+    targetCost = 5.00  // Jedi plan limit in USD
   } else {
     // For other plans, use plan limits
-    targetTokens = plan.tokenLimit
+    targetCost = plan.spending_limit_usd
   }
   
-  // Set token usage to maximum
-  console.log(`📊 Setting TOKENS to maximum:`)
-  console.log(`   Tokens: ${targetTokens.toLocaleString()} (at limit)`)
+  // Set cost usage to maximum
+  console.log(`📊 Setting COST to maximum:`)
+  console.log(`   Cost: $${targetCost.toFixed(2)} (at limit)`)
   
   // Upsert the usage record for the current billing period
   const updatedUsage = await prisma.userUsage.upsert({
@@ -113,14 +113,14 @@ async function updateUserUsageToMax(userId: string, subscription: any) {
       }
     },
     update: {
-      tokensUsed: targetTokens,
+      cost_usd: targetCost,
       updatedAt: new Date()
     },
     create: {
       userId,
       billingPeriodStart,
       billingPeriodEnd,
-      tokensUsed: targetTokens,
+      cost_usd: targetCost,
     }
   })
   
@@ -151,10 +151,10 @@ async function main() {
     console.log(`   User ID: ${userId}`)
     console.log(`   Plan: ${subscription.plan}`)
     console.log(`   Billing Period: ${updatedUsage.billingPeriodStart.toISOString()} to ${updatedUsage.billingPeriodEnd.toISOString()}`)
-    console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
+    console.log(`   Cost USD: $${updatedUsage.cost_usd.toFixed(2)}`)
     
     console.log('\n🧪 Testing Tips:')
-    console.log('   • Try creating content that uses many tokens - it should be blocked by token limit')
+    console.log('   • Try creating content - it should be blocked by spending limit')
     console.log('   • Check the usage info API to see limit warnings')
     console.log('   • Test the subscription upgrade flow')
     console.log('   • Use /api/subscription/usage-info to verify limits')

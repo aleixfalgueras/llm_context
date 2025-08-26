@@ -22,8 +22,8 @@ const defaultSubscriptionWithValidation: SubscriptionWithValidation = {
   cancelAtPeriodEnd: false,
   pendingPlanChange: null,
   stripeScheduleId: null,
-  tokenLimit: 0,
-  customTokenLimit: null,
+  spending_limit_usd: 5.00,
+  custom_spending_limit_usd: null,
   isActive: true
 }
 

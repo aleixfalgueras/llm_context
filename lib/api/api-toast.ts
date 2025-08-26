@@ -26,7 +26,7 @@ export const errorToasts = {
   usageLimitExceeded: () =>
     toast({
       title: 'Usage Limit Exceeded',
-      description: 'You have reached your tokens usage limit. Please upgrade your plan to continue.',
+      description: 'You have reached your usage limit. Please upgrade your plan to continue.',
       variant: ToastVariant.DESTRUCTIVE,
       duration: 10000
     }),

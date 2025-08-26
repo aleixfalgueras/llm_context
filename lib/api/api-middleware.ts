@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server'
 import {auth} from '@clerk/nextjs/server'
 import {ApiErrors, handleApiError} from './api-error-handler'
 import {logger} from '../logger'
-import {checkTokenUsage} from './api-validation'
+import {checkUsageLimit} from './api-validation'
 
 /**
  * Request context passed to API handlers:
@@ -30,8 +30,8 @@ export type EnhancedApiHandler<T = any> = (
 export interface EnhancedApiConfig {
   /** Whether authentication is required (default: true) */
   requireAuth?: boolean
-  /** Whether token usage validation is required (default: false) */
-  requireToken?: boolean
+  /** Whether usage limit validation is required (default: false) */
+  requireUsageCheck?: boolean
   /** Context string for error logging */
   context?: string
   /** Method validation */
@@ -50,7 +50,7 @@ export function withEnhancedApi<T = any>(
 ) {
   const {
     requireAuth = true,
-    requireToken = false,
+    requireUsageCheck = false,
     context = 'API operation',
     allowedMethods,
     expectedContentType
@@ -84,9 +84,9 @@ export function withEnhancedApi<T = any>(
         }
         userId = authUserId
         
-        // Token usage validation if required
-        if (requireToken) {
-          await checkTokenUsage(userId)
+        // Usage limit validation if required
+        if (requireUsageCheck) {
+          await checkUsageLimit(userId)
         }
       }
 

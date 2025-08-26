@@ -56,14 +56,14 @@ async function resetUserUsage(userId: string) {
       }
     },
     update: {
-      tokensUsed: 0,
+      cost_usd: 0,
       updatedAt: now
     },
     create: {
       userId,
       billingPeriodStart,
       billingPeriodEnd,
-      tokensUsed: 0,
+      cost_usd: 0,
     }
   })
   
@@ -86,7 +86,7 @@ async function main() {
     console.log('\n📋 Final Usage Summary:')
     console.log(`   User ID: ${userId}`)
     console.log(`   Billing Period: ${updatedUsage.billingPeriodStart.toISOString()} to ${updatedUsage.billingPeriodEnd.toISOString()}`)
-    console.log(`   Tokens Used: ${updatedUsage.tokensUsed.toLocaleString()}`)
+    console.log(`   Cost USD: $${updatedUsage.cost_usd.toFixed(2)}`)
 
   } catch (error) {
     console.error('\n💥 Error during reset process:', error)
