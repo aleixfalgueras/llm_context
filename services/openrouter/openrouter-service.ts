@@ -26,8 +26,8 @@ export class OpenRouterService {
       apiKey: process.env.OPENROUTER_API_KEY,
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
-        "HTTP-Referer": process.env.SITE_URL || "http://localhost:3000",
-        "X-Title": process.env.SITE_NAME || "LLM Context App",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+        "X-Title": "MIA App",
       },
     })
   }
