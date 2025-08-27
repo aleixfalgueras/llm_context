@@ -122,7 +122,7 @@ export function DocumentViewer({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         {isEditing ? (
           <div className="h-full flex flex-col">
             <div className="flex-1 p-4">
@@ -135,7 +135,7 @@ export function DocumentViewer({
             </div>
           </div>
         ) : (
-          <div className="h-full overflow-y-auto">
+          <div className="h-full overflow-auto">
             {loadingContent ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
