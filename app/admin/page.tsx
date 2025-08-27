@@ -12,37 +12,14 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
     // Get comprehensive system statistics using admin client with direct connection
     const [
       totalUsers,
-      totalClients,
-      totalDocuments,
-      totalChats,
-      totalMessages,
-      totalFeedback,
-      totalPrompts,
       recentFeedback,
       userSubscriptions,
-      monthlyUsage,
-      recentUsers
+      historicalUsage,
+      recentUsers,
+      allSubscriptions
     ] = await Promise.all([
     // User counts
     adminPrisma.userSubscription.count(),
-    
-    // Client counts
-    adminPrisma.client.count(),
-    
-    // Document counts
-    adminPrisma.document.count(),
-    
-    // Chat counts
-    adminPrisma.chat.count(),
-    
-    // Message counts
-    adminPrisma.message.count(),
-    
-    // Feedback counts
-    adminPrisma.feedback.count(),
-    
-    // Prompt counts
-    adminPrisma.prompt.count(),
     
     // All feedback for admin filtering
     adminPrisma.feedback.findMany({
@@ -66,13 +43,15 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
       _count: true
     }),
     
-    // Current billing period usage data
+    // Get usage data for the last 12 months
     adminPrisma.userUsage.findMany({
       where: {
-        billingPeriodStart: { lte: new Date() },
-        billingPeriodEnd: { gte: new Date() }
+        billingPeriodStart: {
+          gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) // Last 12 months
+        }
       },
       select: {
+        billingPeriodStart: true,
         cost_usd: true
       }
     }),
@@ -84,29 +63,86 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
           gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
         }
       }
+    }),
+    
+    // Get all subscriptions to calculate max possible usage
+    adminPrisma.userSubscription.findMany({
+      select: {
+        createdAt: true,
+        canceledAt: true,
+        currentPeriodStart: true,
+        currentPeriodEnd: true,
+        spending_limit_usd: true,
+        custom_spending_limit_usd: true,
+        status: true
+      }
     })
   ])
 
-  // Calculate current billing period totals
-  const monthlyStats = monthlyUsage.reduce(
-    (acc, usage) => ({
-      totalSpending: acc.totalSpending + usage.cost_usd
-    }),
-    { totalSpending: 0 }
-  )
+  // Process historical usage data into monthly buckets
+  const monthlySpendingMap = new Map<string, number>()
+  const monthlyMaxPossibleMap = new Map<string, number>()
+  
+  // Initialize last 12 months with 0 values
+  const now = new Date()
+  const monthKeys: string[] = []
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    monthKeys.push(monthKey)
+    monthlySpendingMap.set(monthKey, 0)
+    monthlyMaxPossibleMap.set(monthKey, 0)
+  }
+  
+  // Aggregate spending by month
+  historicalUsage.forEach(usage => {
+    const date = new Date(usage.billingPeriodStart)
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    const currentTotal = monthlySpendingMap.get(monthKey) || 0
+    monthlySpendingMap.set(monthKey, currentTotal + usage.cost_usd)
+  })
+  
+  // Calculate max possible usage for each month
+  monthKeys.forEach(monthKey => {
+    const [year, month] = monthKey.split('-')
+    const monthStart = new Date(parseInt(year), parseInt(month) - 1, 1)
+    const monthEnd = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59)
+    
+    // Count active subscriptions for this month
+    let maxPossible = 0
+    allSubscriptions.forEach(sub => {
+      const subStart = new Date(sub.createdAt)
+      const subEnd = sub.canceledAt ? new Date(sub.canceledAt) : new Date()
+      
+      // Check if subscription was active during this month
+      if (subStart <= monthEnd && subEnd >= monthStart) {
+        // Use custom limit if available, otherwise use default
+        const limit = sub.custom_spending_limit_usd ?? sub.spending_limit_usd
+        maxPossible += limit
+      }
+    })
+    
+    monthlyMaxPossibleMap.set(monthKey, maxPossible)
+  })
+  
+  // Convert to array format for chart
+  const monthlySpendingHistory = monthKeys.map(monthKey => {
+    const [year, month] = monthKey.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1)
+    const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    return { 
+      month: monthName, 
+      spending: monthlySpendingMap.get(monthKey) || 0,
+      maxPossible: monthlyMaxPossibleMap.get(monthKey) || 0
+    }
+  })
 
     return {
       totalUsers,
-      totalClients,
-      totalDocuments,
-      totalChats,
-      totalMessages,
-      totalPrompts,
-      totalFeedback,
       recentUsers,
       allFeedback: recentFeedback,
       userSubscriptions,
-      monthlyStats
+      monthlySpendingHistory
     }
   } catch (error: any) {
     console.error('Admin dashboard database error:', error)

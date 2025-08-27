@@ -18,16 +18,10 @@ export interface FeedbackItem {
 
 export interface AdminDashboardData {
   totalUsers: number
-  totalClients: number
-  totalDocuments: number
-  totalChats: number
-  totalMessages: number
-  totalPrompts: number
-  totalFeedback: number
   recentUsers: number
   allFeedback: FeedbackItem[]
   userSubscriptions: Array<{ plan: string; _count: number }>
-  monthlyStats: { totalSpending: number }
+  monthlySpendingHistory: Array<{ month: string; spending: number; maxPossible: number }>
 }
 
 export interface AdminDashboardClientProps {
