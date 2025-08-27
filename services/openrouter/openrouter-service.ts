@@ -1,7 +1,3 @@
-/**
- * OpenRouter service - handles API communication, usage tracking, and stream processing
- */
-
 import OpenAI from 'openai'
 import {processOpenRouterStream} from './stream-handler'
 import {logger} from '@/lib/logger'
@@ -100,10 +96,8 @@ export class OpenRouterService {
   async createCompletion(
     options: OpenRouterCompletionOptions,
     usageOptions?: UsageTrackingOptions
-  ): Promise<{ content: string }> {
+  ): Promise<{ content: string, cost_usd?: number }> {
     const finalOptions = this.applyDefaults(options)
-    
-    // Ensure model is provided
     if (!finalOptions.model) {
       throw new Error('Model is required for completion')
     }
@@ -116,15 +110,26 @@ export class OpenRouterService {
       })
       
       const content = completion.choices[0]?.message?.content || ''
+      let trackedCost: number | null = null
       
       // Track cost if we have usage options
       if (usageOptions) {
-        // For non-streaming, we need to get the generation ID from response
-        // OpenRouter might provide it in a header or we need to extract it
-        logger.warn('Non-streaming completion - cost tracking may not be available without generation ID');
+        // Create a StreamChunk-like object to reuse handleUsageTracking logic
+        const finalChunk: StreamChunk = {
+          content: '',
+          isComplete: true,
+          generationId: completion.id,
+          cost_usd: (completion as any).usage?.cost
+        }
+        
+        // Use the existing handleUsageTracking method to avoid code duplication
+        trackedCost = await this.handleUsageTracking(finalChunk, usageOptions)
       }
       
-      return { content }
+      return { 
+        content, 
+        cost_usd: trackedCost ?? undefined 
+      }
     } catch (error) {
       logger.error('OpenRouter completion error', error instanceof Error ? error : new Error(String(error)))
       throw error
