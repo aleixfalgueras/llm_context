@@ -22,14 +22,14 @@ export async function checkAuth(): Promise<string> {
 }
 
 /**
- * Validates user hasn't exceeded monthly token limits before AI operations.
+ * Validates user hasn't exceeded monthly spending limits before AI operations.
  * 
  * @param userId The authenticated user ID
  * @returns Promise<void> Resolves silently if validation passes
  * @throws Error With status 402 (subscription expired) or 429 (quota exceeded)
  */
-export async function checkTokenUsage(userId: string): Promise<void> {
-  const validationResult = await SubscriptionUsageService.isTokenUsageAllowed(userId);
+export async function checkUsageLimit(userId: string): Promise<void> {
+  const validationResult = await SubscriptionUsageService.isUsageAllowed(userId);
 
   if (!validationResult) {
     throw new Error(SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED);

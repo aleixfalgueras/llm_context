@@ -35,6 +35,6 @@ export const POST = withEnhancedApi(
     context: 'Generate Custom Document',
     allowedMethods: ['POST'],
     expectedContentType: 'application/json',
-    requireToken: true
+    requireUsageCheck: true
   }
 ) 

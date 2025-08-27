@@ -4,7 +4,6 @@ interface LogContext {
   chatId?: string;
   operation?: string;
   duration?: number;
-  tokensUsed?: number;
   model?: string;
   metadata?: Record<string, any>;
 }
@@ -250,16 +249,6 @@ class Logger {
     this.error(`💥 DB Error: ${colors.red}${operation}${colors.reset} on ${colors.magenta}${table}${colors.reset}`, error, context);
   }
 
-  // User action logging
-  userAction(action: string, context?: LogContext): void {
-    this.info(`👤 User Action: ${colors.bright}${action}${colors.reset}`, context);
-  }
-
-  // AI service logging
-  aiRequest(model: string, tokensUsed?: number, context?: LogContext): void {
-    const tokensStr = tokensUsed ? ` (${colors.cyan}${tokensUsed} tokens${colors.reset})` : '';
-    this.info(`🤖 AI Request: ${colors.magenta}${model}${colors.reset}${tokensStr}`, { ...context, tokensUsed });
-  }
 }
 
 export const logger = new Logger();

@@ -6,6 +6,7 @@ import {Textarea} from '@/components/ui/textarea'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
+import {UsageIndicator} from '@/components/subscription/usage-indicator'
 import {useToast} from '@/hooks/use-toast'
 import {Message, Prompt, Role} from '@prisma/client'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
@@ -259,7 +260,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
 
   return (
     <div className="space-y-2">
-      {/* Prompt Selector, Model Selector and Export Button */}
+      {/* Prompt Selector, Model Selector, Usage Indicator and Export Button */}
       <div className="flex justify-between items-center gap-2 flex-wrap">
         <div className="flex gap-2">
           <PromptSelector onPromptSelect={handlePromptSelect} />
@@ -268,6 +269,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
             onModelSelect={setSelectedModel}
             userTier={getTierFromPlan(subscription.plan)}
           />
+          {/* <UsageIndicator /> */}
         </div>
         <div className="flex gap-2">
           {/* Export Chat Button - show if there are messages and client data */}
