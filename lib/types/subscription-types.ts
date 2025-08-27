@@ -22,7 +22,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.apprentice],
     price: 20,
     currency: 'EUR',
-    tokenLimit: 15000000,
+    spending_limit_usd: 5.8, // 5€
     commissionLimit: 100,
     description: 'Perfect for individuals starting their journey',
     features_list: [
@@ -36,7 +36,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.knight],
     price: 50,
     currency: 'EUR',
-    tokenLimit: 15000000,
+    spending_limit_usd: 14.5, // 12.5€
     commissionLimit: 500,
     description: 'For SMEs and content creators',
     features_list: [
@@ -51,7 +51,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.master],
     price: 200,
     currency: 'EUR',
-    tokenLimit: 15000000,
+    spending_limit_usd: 58, // 50€
     commissionLimit: 5000,
     description: 'For startups and influencers scaling their impact',
     features_list: [
@@ -67,7 +67,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.jedi],
     price: 500,
     currency: 'EUR',
-    tokenLimit: 15000000,
+    spending_limit_usd: 145, // 125€
     commissionLimit: 50000,
     description: 'For corporate leaders and CEOs driving innovation',
     features_list: [
@@ -90,7 +90,6 @@ export enum ModelTier {
 
 export type SubscriptionWithValidation = UserSubscription & {
   isActive: boolean // Computed field: SubscriptionService.isSubscriptionActive()
-  effectiveTokenLimit?: number // Computed field: customTokenLimit ?? tokenLimit
 }
 
 // Type aliases for convenience (can be used where string types are still needed)

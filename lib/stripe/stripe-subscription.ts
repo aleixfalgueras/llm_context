@@ -206,7 +206,7 @@ export async function synchronizeSubscriptionWithStripe(
 
     // Update plan limits if plan changed
     if (planLimits) {
-      updateData.tokenLimit = planLimits.tokenLimit
+      updateData.spending_limit_usd = planLimits.spending_limit_usd
     }
 
     const updatedSubscription = await SubscriptionService.updateSubscription(subscription.userId, updateData)
@@ -220,7 +220,7 @@ export async function synchronizeSubscriptionWithStripe(
         subscriptionIdChanged: subscription.stripeSubscriptionId !== updatedSubscription.stripeSubscriptionId,
         plan: updatedSubscription.plan,
         status: updatedSubscription.status,
-        tokenLimit: updatedSubscription.tokenLimit,
+        spending_limit_usd: updatedSubscription.spending_limit_usd,
         planLimitsUpdated: !!planLimits,
         canceledAtChanged: subscription.canceledAt !== updatedSubscription.canceledAt,
         previousCanceledAt: subscription.canceledAt,

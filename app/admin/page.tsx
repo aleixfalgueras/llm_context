@@ -73,7 +73,7 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
         billingPeriodEnd: { gte: new Date() }
       },
       select: {
-        tokensUsed: true
+        cost_usd: true
       }
     }),
     
@@ -90,9 +90,9 @@ async function getAdminDashboardData(): Promise<AdminDashboardData> {
   // Calculate current billing period totals
   const monthlyStats = monthlyUsage.reduce(
     (acc, usage) => ({
-      tokens: acc.tokens + usage.tokensUsed
+      totalSpending: acc.totalSpending + usage.cost_usd
     }),
-    { tokens: 0 }
+    { totalSpending: 0 }
   )
 
     return {

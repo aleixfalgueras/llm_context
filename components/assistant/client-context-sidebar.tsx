@@ -182,85 +182,81 @@ export function ClientContextSidebar({
                 </div>
               )}
 
-              {selectedClient && (
-                <>
-                  {/* Client Context Selection - Only shown before chat creation */}
-                  {onClientContextChange && (
-                    <div className="space-y-3">
-                      <Label className="text-base font-medium">{t('clientContextSidebar.aiContextSelection')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('clientContextSidebar.contextSelectionDescription')}
-                      </p>
-                      <div className="grid grid-cols-1 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                        {Object.entries(CLIENT_CONTEXT_FIELDS).map(([fieldKey, fieldLabel]) => {
-                          const typedFieldKey = fieldKey as keyof ClientContextSelection;
-                          const hasFieldData = selectedClient?.[typedFieldKey];
-                          
-                          if (!hasFieldData) return null;
-                          
-                          const displayLabel = fieldKey === 'country' 
-                            ? `${fieldLabel} (${selectedClient.country})`
-                            : fieldLabel;
-                            
-                          return (
-                            <div key={fieldKey} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`context-${fieldKey.replace(/([A-Z])/g, '-$1').toLowerCase()}`}
-                                checked={clientContext[typedFieldKey]}
-                                onChange={(e) => onClientContextChange({
-                                  ...clientContext,
-                                  [typedFieldKey]: e.target.checked
-                                })}
-                                label={displayLabel}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onClientContextChange({
-                            country: !!selectedClient?.country,
-                            generalContext: !!selectedClient?.generalContext,
-                            specificContext1: !!selectedClient?.specificContext1,
-                            specificContext2: !!selectedClient?.specificContext2,
-                            specificContext3: !!selectedClient?.specificContext3
-                          })}
-                        >
-                          {t('clientContextSidebar.selectAll')}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onClientContextChange({
-                            country: false,
-                            generalContext: false,
-                            specificContext1: false,
-                            specificContext2: false,
-                            specificContext3: false
-                          })}
-                        >
-                          {t('clientContextSidebar.deselectAll')}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* New Chat Button */}
-                  <Button 
-                    onClick={handleCreateChat}
-                    disabled={isCreatingChat}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {isCreatingChat ? t('clientContextSidebar.creatingChat') : t('clientContextSidebar.newChat')}
-                  </Button>
-                </>
+              {/* Client Context Selection - Only shown when client is selected and before chat creation */}
+              {selectedClient && onClientContextChange && (
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">{t('clientContextSidebar.aiContextSelection')}</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t('clientContextSidebar.contextSelectionDescription')}
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    {Object.entries(CLIENT_CONTEXT_FIELDS).map(([fieldKey, fieldLabel]) => {
+                      const typedFieldKey = fieldKey as keyof ClientContextSelection;
+                      const hasFieldData = selectedClient?.[typedFieldKey];
+                      
+                      if (!hasFieldData) return null;
+                      
+                      const displayLabel = fieldKey === 'country' 
+                        ? `${fieldLabel} (${selectedClient.country})`
+                        : fieldLabel;
+                        
+                      return (
+                        <div key={fieldKey} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`context-${fieldKey.replace(/([A-Z])/g, '-$1').toLowerCase()}`}
+                            checked={clientContext[typedFieldKey]}
+                            onChange={(e) => onClientContextChange({
+                              ...clientContext,
+                              [typedFieldKey]: e.target.checked
+                            })}
+                            label={displayLabel}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onClientContextChange({
+                        country: !!selectedClient?.country,
+                        generalContext: !!selectedClient?.generalContext,
+                        specificContext1: !!selectedClient?.specificContext1,
+                        specificContext2: !!selectedClient?.specificContext2,
+                        specificContext3: !!selectedClient?.specificContext3
+                      })}
+                    >
+                      {t('clientContextSidebar.selectAll')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onClientContextChange({
+                        country: false,
+                        generalContext: false,
+                        specificContext1: false,
+                        specificContext2: false,
+                        specificContext3: false
+                      })}
+                    >
+                      {t('clientContextSidebar.deselectAll')}
+                    </Button>
+                  </div>
+                </div>
               )}
+
+              {/* New Chat Button - Always visible but disabled when no client selected */}
+              <Button 
+                onClick={handleCreateChat}
+                disabled={!selectedClientId || isCreatingChat}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {isCreatingChat ? t('clientContextSidebar.creatingChat') : t('clientContextSidebar.newChat')}
+              </Button>
             </div>
           ) : hasActiveChat ? (
             // Show selected client information when chat has started

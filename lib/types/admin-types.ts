@@ -27,7 +27,7 @@ export interface AdminDashboardData {
   recentUsers: number
   allFeedback: FeedbackItem[]
   userSubscriptions: Array<{ plan: string; _count: number }>
-  monthlyStats: { tokens: number }
+  monthlyStats: { totalSpending: number }
 }
 
 export interface AdminDashboardClientProps {

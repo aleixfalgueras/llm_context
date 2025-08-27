@@ -263,8 +263,8 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm">{t('dashboard.metrics.tokens')}</span>
-                  <span className="font-medium">{data.monthlyStats.tokens.toLocaleString()}</span>
+                  <span className="text-sm">{t('dashboard.metrics.totalSpending')}</span>
+                  <span className="font-medium">${data.monthlyStats.totalSpending.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>

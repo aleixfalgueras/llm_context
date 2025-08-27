@@ -15,7 +15,7 @@ export class SubscriptionUsageService {
    * Used proactively during user signup to ensure usage record exists for current billing period.
    * 
    * @param userId - The user ID to create usage record for
-   * @returns Promise<UserUsage> - The created usage record with zero tokens
+   * @returns Promise<UserUsage> - The created usage record with zero cost
    * @throws Error if creation fails or subscription doesn't exist
    */
   static async createDefaultUsage(userId: string): Promise<UserUsage> {
@@ -29,12 +29,12 @@ export class SubscriptionUsageService {
         throw new Error('Subscription missing billing period dates');
       }
       
-      // Create usage record with zero tokens for the current billing period
+      // Create usage record with zero cost for the current billing period
       const usage = await SubscriptionUsageOperations.upsertUsage(
         userId,
         subscription.currentPeriodStart,
         subscription.currentPeriodEnd,
-        { tokensUsed: 0 }
+        { cost_usd: 0 }
       );
       
       // Cache the newly created usage record
@@ -46,7 +46,7 @@ export class SubscriptionUsageService {
         metadata: {
           billingPeriodStart: subscription.currentPeriodStart.toISOString(),
           billingPeriodEnd: subscription.currentPeriodEnd.toISOString(),
-          tokensUsed: 0
+          cost_usd: 0
         }
       });
       
@@ -295,13 +295,13 @@ export class SubscriptionUsageService {
   }
 
   /**
-   * Check token usage limits before AI requests to enforce subscription quotas.
+   * Check usage limits before AI requests to enforce subscription quotas.
 
-   * @param userId - The user ID to check token usage limits for
+   * @param userId - The user ID to check usage limits for
    * @returns Promise<boolean>
    **
    */
-  static async isTokenUsageAllowed(userId: string): Promise<boolean> {
+  static async isUsageAllowed(userId: string): Promise<boolean> {
     try {
       const subscriptionUsage = await this.getUserSubscriptionUsage(userId);
 
@@ -309,39 +309,36 @@ export class SubscriptionUsageService {
         throw new Error(SubscriptionErrorCode.SUBSCRIPTION_EXPIRED)
       }
 
-      // Use customTokenLimit if set, otherwise use plan's default tokenLimit
-      const tokenLimit = subscriptionUsage.subscription.customTokenLimit ?? subscriptionUsage.subscription.tokenLimit;
-      const tokensUsed = subscriptionUsage.usage.tokensUsed;
+      // Use custom_spending_limit_usd if set, otherwise use plan's default spending_limit_usd
+      const spendingLimit = subscriptionUsage.subscription.custom_spending_limit_usd ?? subscriptionUsage.subscription.spending_limit_usd;
+      const currentSpending = subscriptionUsage.usage.cost_usd;
 
-      return tokensUsed < tokenLimit
+      return currentSpending < spendingLimit
 
     } catch (error) {
-      logger.error('Error checking token usage limit', error as Error, { userId });
+      logger.error('Error checking usage limit', error as Error, { userId });
       throw error
     }
 
   }
 
   /**
-   * Track usage after successful API completion by updating billing period usage records.
+   * Track cost after successful API completion by updating billing period usage records.
    *
-   * This function increments the user's token usage for the current billing period and
+   * This function increments the user's cost for the current billing period and
    * invalidates the cache to ensure fresh data on subsequent requests. It uses upsert to
    * handle cases where the billing period usage record doesn't exist yet.
    *
    * @param userId - The user ID to track usage for
-   * @param metadata - Optional metadata object containing usage details
-   * @param metadata.tokensUsed - Number of tokens consumed in this operation
-   * @param metadata.model - AI model used (for logging purposes)
-   * @param metadata.[key] - Additional metadata fields for logging
-   *
+   * @param costUsd - Cost in USD for this operation
+
    * @returns Promise<void> - Does not return a value
    *
    * @throws Never throws - All errors are caught and logged to prevent breaking main functionality
    *
    * **Behavior:**
    * - Creates new billing period usage record if none exists for current period
-   * - Increments existing token usage atomically using Prisma increment
+   * - Increments existing cost atomically using Prisma increment
    * - Invalidates usage cache after successful update
    * - Logs all operations for monitoring and debugging
    * - Gracefully handles errors without throwing to avoid breaking API calls
@@ -350,43 +347,30 @@ export class SubscriptionUsageService {
    * Should be called after successful AI API completions to maintain accurate usage tracking.
    * Non-blocking operation that won't affect user experience if it fails.
    */
-  static async trackUsage(
-    userId: string,
-    metadata?: {
-      tokensUsed?: number
-      model?: string
-      [key: string]: any
-    }
-  ): Promise<void> {
+  static async trackCost(userId: string, costUsd: number): Promise<void> {
     try {
-      // Get current billing period
-      const { periodStart, periodEnd } = await this.getCurrentBillingPeriod(userId);
-
-      if (metadata?.tokensUsed) {
-        const result = await SubscriptionUsageOperations.incrementUsage(
-          userId,
-          periodStart,
-          periodEnd,
-          metadata.tokensUsed
-        );
-
-        logger.debug('Updated tokensUsed for billing period', {
-          userId,
-          tokensUsed: result.tokensUsed,
-          metadata: {
-            billingPeriodStart: periodStart.toISOString(),
-            billingPeriodEnd: periodEnd.toISOString()
-          }
-        });
-
-        // Invalidate usage cache after update
-        const cacheKey = `${userId}_${periodStart.toISOString()}_${periodEnd.toISOString()}`
-        await invalidateUsageCache(cacheKey)
+      // Skip if cost is zero or negative
+      if (costUsd <= 0) {
+        return;
       }
+
+      const { periodStart, periodEnd } = await this.getCurrentBillingPeriod(userId);
+      await SubscriptionUsageOperations.incrementCost(
+        userId,
+        periodStart,
+        periodEnd,
+        costUsd
+      );
+      logger.debug(`Updated +${costUsd} for ${userId} in billing period ${periodStart.toISOString()} - ${periodEnd.toISOString()}`);
+
+      // Invalidate usage cache after update
+      const cacheKey = `${userId}_${periodStart.toISOString()}_${periodEnd.toISOString()}`
+      await invalidateUsageCache(cacheKey)
+
     } catch (error) {
-      logger.error('Error tracking usage', error as Error, { userId });
-      // Don't throw error as this shouldn't break the main functionality
+      logger.error(`Error tracking cost ${costUsd} for userId ${userId}`, error as Error);
     }
+
   }
 
 }

@@ -275,38 +275,38 @@ export class SubscriptionService {
   }
 
   /**
-   * Set custom token limit for a specific user.
-   * This overrides the default plan token limit.
+   * Set custom spending limit for a specific user.
+   * This overrides the default plan spending limit.
    * 
    * @param userId - The user ID to set custom limit for
-   * @param customTokenLimit - Custom token limit (null to remove override)
+   * @param customSpendingLimitUsd - Custom spending limit in USD (null to remove override)
    * @returns Promise<UserSubscription> - Updated subscription
    */
-  static async setCustomTokenLimit(userId: string, customTokenLimit: number | null): Promise<UserSubscription> {
+  static async setCustomSpendingLimit(userId: string, customSpendingLimitUsd: number | null): Promise<UserSubscription> {
     try {
-      logger.info('Setting custom token limit', { 
+      logger.info('Setting custom spending limit', { 
         userId, 
-        metadata: { customTokenLimit } 
+        metadata: { customSpendingLimitUsd } 
       });
       
       const updatedSubscription = await this.updateSubscription(userId, { 
-        customTokenLimit 
+        custom_spending_limit_usd: customSpendingLimitUsd 
       });
       
       // Invalidate cache to ensure fresh data
       await invalidateAllUserCaches(userId);
       
-      logger.info('Custom token limit set successfully', {
+      logger.info('Custom spending limit set successfully', {
         userId,
         metadata: {
-          customTokenLimit,
-          effectiveLimit: customTokenLimit ?? updatedSubscription.tokenLimit
+          custom_spending_limit_usd: customSpendingLimitUsd,
+          effectiveLimit: customSpendingLimitUsd ?? updatedSubscription.spending_limit_usd
         }
       });
       
       return updatedSubscription;
     } catch (error) {
-      logger.error('Error setting custom token limit', error as Error, { userId });
+      logger.error('Error setting custom spending limit', error as Error, { userId });
       throw error;
     }
   }

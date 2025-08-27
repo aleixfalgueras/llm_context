@@ -45,23 +45,4 @@ export class MessageService {
     }
   }
 
-  /**
-   * Update message token information with ownership verification
-   */
-  static async updateMessageTokens(messageId: string, userId: string, tokenData: {
-    inputTokens?: number,
-    tokensUsed?: number,
-    outputTokens?: number
-  }): Promise<DbOperationResult<Message>> {
-    try {
-      return await MessageOperations.updateMessageTokens(messageId, userId, tokenData);
-
-    } catch (error) {
-      logger.error('Error updating message tokens', error as Error, { userId, metadata: { messageId } });
-      return {
-        success: false as const,
-        error: 'Failed to update message tokens'
-      }
-    }
-  }
 }

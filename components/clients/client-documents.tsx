@@ -109,7 +109,7 @@ export function ClientDocuments({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex h-[80vh] gap-0">
+        <div className="flex h-[80vh] gap-0 overflow-hidden">
           {/* Document List */}
           <DocumentList
             documents={documentState.documents}
@@ -126,7 +126,7 @@ export function ClientDocuments({
           />
 
           {/* Document Content */}
-          <div className={`flex-1 flex flex-col ${documentState.isCreating ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+          <div className={`flex-1 flex flex-col ${documentState.isCreating ? 'overflow-y-auto' : 'overflow-auto'}`}>
             {documentState.isCreating ? (
               <div className="p-4">
                 <DocumentCreationForm

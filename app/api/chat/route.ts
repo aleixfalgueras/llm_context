@@ -49,11 +49,11 @@ import {Role} from '@prisma/client';
  * - Streaming errors are caught and sent as error events
  * - Client disconnects during streaming save partial messages
  *
- * Token Usage:
- * - Input tokens tracked on user messages
- * - Output tokens tracked on assistant messages  
- * - Fallback to OpenRouter generation stats if usage data missing
- * - Rough estimation (4 chars/token) as final fallback
+ * Cost Tracking:
+ * - Cost fetched once by OpenRouter service via generation stats API
+ * - Returned in final stream chunk to avoid duplicate API calls
+ * - Stored with each assistant message for historical tracking
+ * - User billing period totals tracked separately via SubscriptionUsageService
  */
 export const POST = withEnhancedApi(
   async ({userId, req}: ApiContext) => {
@@ -62,8 +62,6 @@ export const POST = withEnhancedApi(
     // Parse request body
     const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
     chatId = requestChatId;
-
-    // Use the model from the request, with fallback to centralized default
     const selectedModel = model || getDefaultModel()
 
     // Validate model access based on user's subscription tier
@@ -72,10 +70,10 @@ export const POST = withEnhancedApi(
       throw new Error(SubscriptionErrorCode.MODEL_ACCESS_DENIED)
     }
 
-    // LAZY CHAT CREATION: If no chatId provided, create a new chat first
     let chat: any = null;
     let client: any = null;
 
+    // LAZY CHAT CREATION: If no chatId provided, create a new chat first
     if (!chatId) {
       const newChatResult = await ChatService.createNewChat(userId, clientId || null, contextFields || [])
       
@@ -100,33 +98,28 @@ export const POST = withEnhancedApi(
     // Prepare chat data for AI processing
     const lastMessage = messages[messages.length - 1]
     const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content)
-    
     if (!prepareChatForAIResult.success) {
       throw new Error('Failed to prepare chat for AI processing')
     }
-
     const { aiMessages, client: chatClient, isFirstUserMessage } = prepareChatForAIResult.data
     
-    // Use the client from the preparation if we don't have one yet (for existing chats)
+    // Use the client from the preparation if we don't have one yet (for existing chats with client associated)
     if (!client) {
       client = chatClient
     }
 
-    // Save the user message to the database (tokens will be updated after AI response)
+    // Save the user message to the database
     const userMessageResult = await MessageService.createMessage({
       content: lastMessage.content,
       role: Role.USER,
       model: selectedModel,
-      tokensUsed: 0,
-      inputTokens: 0,
-      outputTokens: 0,
+      cost_usd: 0,
       chat: { connect: { id: chatId } }
     }, userId)
     
     if (!userMessageResult.success) {
       throw new Error(userMessageResult.error || 'Failed to save user message' )
     }
-    const userMessage = userMessageResult.data
 
     // If this is the first user message, update the chat title only if it's still the default
     const titleUpdateResult = await ChatService.updateChatTitleForFirstMessage(
@@ -137,8 +130,8 @@ export const POST = withEnhancedApi(
       chat.title,
       lastMessage.content
     )
-
     if (titleUpdateResult.success && titleUpdateResult.data.updated) {
+
       // Revalidate the chat page to show the updated title
       revalidatePath(`/assistant/chat/${chatId}`)
     }
@@ -146,10 +139,6 @@ export const POST = withEnhancedApi(
     // Create a streaming response
     const stream = new ReadableStream({
       async start(controller) {
-        const encoder = new TextEncoder()
-        let fullContent = ''
-        let completionStream: any = null
-
         // Helper function to safely enqueue data
         const safeEnqueue = (data: Uint8Array) => {
           try {
@@ -161,6 +150,10 @@ export const POST = withEnhancedApi(
           }
         }
 
+        const encoder = new TextEncoder()
+        let fullContent = ''
+        let completionStream: any = null
+
         try {
           completionStream = openRouterService.createStreamingCompletion(
             {model: selectedModel, messages: aiMessages},
@@ -169,73 +162,23 @@ export const POST = withEnhancedApi(
 
           for await (const chunk of completionStream) {
             if (chunk.isComplete) {
-              // Final chunk - save the complete message to database
-              let finalUsage = chunk.usage;
+              // Final chunk - use cost from chunk (already fetched by OpenRouter service)
+              const cost_usd = chunk.cost_usd || 0;
+              const generationId = chunk.generationId;
 
-              // Fallback: Query generation stats if usage data is missing
-              if (!finalUsage && chunk.generationId) {
-                try {
-                  // Add a small delay - generation stats might not be immediately available
-                  await new Promise(resolve => setTimeout(resolve, 1000));
-                  const stats = await openRouterService.getGenerationStats(chunk.generationId);
-
-                  if (stats.data && (stats.data.tokens_prompt || stats.data.tokens_completion)) {
-                    finalUsage = {
-                      promptTokens: stats.data.tokens_prompt || 0,
-                      completionTokens: stats.data.tokens_completion || 0,
-                      totalTokens: (stats.data.tokens_prompt || 0) + (stats.data.tokens_completion || 0)
-                    };
-                  } else {
-                    console.log('Generation stats available but no token data:', stats);
-                  }
-                } catch (error) {
-                  console.error('Failed to get generation stats:', error);
-
-                  // If generation stats fail, provide a rough estimate based on content length
-                  // This is a very rough estimate: ~4 characters per token for English text
-                  const estimatedCompletionTokens = Math.ceil(fullContent.length / 4);
-                  const estimatedPromptTokens = Math.ceil(JSON.stringify(aiMessages).length / 4);
-
-                  finalUsage = {
-                    promptTokens: estimatedPromptTokens,
-                    completionTokens: estimatedCompletionTokens,
-                    totalTokens: estimatedPromptTokens + estimatedCompletionTokens
-                  };
-
-                  console.log('Using estimated token counts:', finalUsage);
-                }
-              }
-
-              // Update user message with input tokens
-              const tokenUpdateResult = await MessageService.updateMessageTokens(
-                userMessage.id,
-                userId,
-                {
-                  inputTokens: finalUsage?.promptTokens || 0,
-                  tokensUsed: finalUsage?.promptTokens || 0
-                }
-              )
-              
-              if (!tokenUpdateResult.success) {
-                logger.error(
-                  'Failed to update user message tokens',
-                  new Error(tokenUpdateResult.error),
-                  { userId, chatId, metadata: {messageId: userMessage.id }})
-              }
-
-              // Save the assistant's response to the database
+              // Save the assistant's response to the database with cost
               const assistantMessageResult = await MessageService.createMessage({
                 content: fullContent,
                 role: Role.ASSISTANT,
                 model: selectedModel,
-                tokensUsed: finalUsage?.completionTokens || 0,
-                inputTokens: 0, // inputTokens for assistant message
-                outputTokens: finalUsage?.completionTokens || 0,
+                cost_usd: cost_usd,
+                generation_id: generationId,
                 chat: { connect: { id: chatId } }
               }, userId)
               
               if (!assistantMessageResult.success) {
-                logger.error('Failed to save assistant message', new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
+                logger.error('Failed to save assistant message',
+                  new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
               }
 
               // Send completion signal
@@ -274,18 +217,16 @@ export const POST = withEnhancedApi(
                     content: fullContent,
                     role: Role.ASSISTANT,
                     model: selectedModel,
-                    tokensUsed: 0, // 0 tokens for partial message
-                    inputTokens: 0,
-                    outputTokens: 0,
+                    cost_usd: 0, // 0 cost for partial message
                     chat: { connect: { id: chatId } }
                   }, userId)
                   if (partialMessageResult.success) {
                     logger.info('Partial assistant message saved', {userId, chatId});
                   } else {
-                    logger.error('Failed to save partial assistant message', new Error(partialMessageResult.error || 'Unknown error'), { userId, chatId })
+                    logger.error('Failed to save partial assistant message',
+                      new Error(partialMessageResult.error || 'Unknown error'), { userId, chatId })
                   }
                 }
-
                 return
               }
             }
@@ -337,5 +278,5 @@ export const POST = withEnhancedApi(
     context: 'Chat API',
     allowedMethods: ['POST'],
     expectedContentType: 'application/json',
-    requireToken: true
+    requireUsageCheck: true
   })

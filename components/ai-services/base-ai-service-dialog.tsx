@@ -392,7 +392,7 @@ export function BaseAIServiceDialog<TFormData = any>({
                       {isEditMode ? (
                         <>
                           <Eye className="h-4 w-4 mr-1" />
-                          {t('common.preview')}
+                          {tCommon('common.preview')}
                         </>
                       ) : (
                         <>

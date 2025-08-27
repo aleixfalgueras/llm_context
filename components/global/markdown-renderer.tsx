@@ -11,7 +11,7 @@ interface MarkdownRendererProps {
 
 export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   return (
-    <div className={`prose max-w-none dark:prose-invert ${className}`}>
+    <div className={`prose max-w-full dark:prose-invert ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -43,8 +43,8 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           ),
           // Custom styling for tables
           table: ({ children }) => (
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-border">
+            <div className="overflow-x-auto max-w-full">
+              <table className="border-collapse border border-border">
                 {children}
               </table>
             </div>

@@ -78,7 +78,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
           status: SubscriptionStatus.active,
           currentPeriodStart: now,
           currentPeriodEnd: periodEnd,
-          tokenLimit: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].tokenLimit,
+          spending_limit_usd: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd,
           cancelAtPeriodEnd: false,
           pendingPlanChange: null,
         }
@@ -157,7 +157,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
     userId: string,
     billingPeriodStart: Date,
     billingPeriodEnd: Date,
-    updateData: Partial<Pick<UserUsage, 'tokensUsed'>> = {}
+    updateData: Partial<Pick<UserUsage, 'cost_usd'>> = {}
   ): Promise<UserUsage> {
     try {
       return await prisma.userUsage.upsert({
@@ -173,7 +173,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
           userId,
           billingPeriodStart,
           billingPeriodEnd,
-          tokensUsed: 0,
+          cost_usd: 0,
           ...updateData
         }
       })
@@ -190,13 +190,13 @@ export class SubscriptionUsageOperations extends BaseOperations {
   }
 
   /**
-   * Increment usage tokens atomically
+   * Increment usage cost atomically
    */
-  static async incrementUsage(
+  static async incrementCost(
     userId: string,
     billingPeriodStart: Date,
     billingPeriodEnd: Date,
-    tokensToAdd: number
+    costToAdd: number
   ): Promise<UserUsage> {
     try {
       return await prisma.userUsage.upsert({
@@ -211,17 +211,17 @@ export class SubscriptionUsageOperations extends BaseOperations {
           userId,
           billingPeriodStart,
           billingPeriodEnd,
-          tokensUsed: tokensToAdd
+          cost_usd: costToAdd
         },
         update: {
-          tokensUsed: { increment: tokensToAdd }
+          cost_usd: { increment: costToAdd }
         }
       })
     } catch (error) {
-      logger.error('Failed to increment usage', error as Error, { 
+      logger.error('Failed to increment cost', error as Error, { 
         userId,
         metadata: {
-          tokensToAdd,
+          costToAdd,
           billingPeriodStart: billingPeriodStart.toISOString(),
           billingPeriodEnd: billingPeriodEnd.toISOString()
         }
