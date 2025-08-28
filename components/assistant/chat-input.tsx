@@ -269,7 +269,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
             onModelSelect={setSelectedModel}
             userTier={getTierFromPlan(subscription.plan)}
           />
-          {/* <UsageIndicator /> */}
+          <UsageIndicator />
         </div>
         <div className="flex gap-2">
           {/* Export Chat Button - show if there are messages and client data */}
