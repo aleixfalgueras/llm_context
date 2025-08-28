@@ -75,18 +75,18 @@ model Document {
 }
 
 model Feedback {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   userId           String
   userEmail        String?
   userName         String?
-  type             String
+  type             FeedbackType
   title            String
   description      String
-  priority         String
-  state            String   @default("PENDING")
+  priority         FeedbackPriority
+  state            FeedbackState    @default(PENDING)
   useCase          String?
   stepsToReproduce String?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime         @default(now())
 
   @@index([userId])
   @@map("feedbacks")
@@ -264,4 +264,23 @@ enum AffiliationStatus {
   InfinityStars
   Alpha
   Omega
+}
+
+enum FeedbackType {
+  feature
+  bug
+  complaint
+}
+
+enum FeedbackPriority {
+  low
+  medium
+  high
+}
+
+enum FeedbackState {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FALSE_ALARM
 }

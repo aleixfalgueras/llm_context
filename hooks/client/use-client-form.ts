@@ -6,7 +6,7 @@ import { createClient, updateClient } from '@/app/actions/client-action'
 import { Prisma } from '@prisma/client'
 import { validateClientForm } from '@/lib/utils/validation'
 import { capitalizeName } from '@/lib/utils/general'
-import { getLanguageOptions } from '@/lib/types/enums'
+import { getLanguageOptions } from '@/lib/enums'
 import React from "react";
 
 interface UseClientFormProps {

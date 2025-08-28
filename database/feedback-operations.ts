@@ -2,7 +2,8 @@ import {prisma} from '@/lib/prisma'
 import {BaseOperations} from './base-operations'
 import {DbOperationConfig, DbOperationResult, PaginationConfig} from "@/lib/types/database-types"
 import {Feedback, Prisma} from '@prisma/client'
-import {FeedbackState} from '@/lib/types/enums'
+
+import {FeedbackState} from "@/lib/types/feedback-types";
 
 export class FeedbackOperations extends BaseOperations {
 

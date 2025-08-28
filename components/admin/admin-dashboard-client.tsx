@@ -19,12 +19,13 @@ import {
   Users,
   XCircle
 } from 'lucide-react'
-import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/lib/types/enums'
+import {BadgeVariant} from '@/lib/enums'
 import {AdminDashboardClientProps, FeedbackItem} from '@/lib/types/admin-types'
 import { useToast } from '@/hooks/use-toast'
 import { handleClientApiError } from '@/lib/api/api-toast'
 import {useTranslations} from '@/lib/translations/context'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import {FeedbackState, FeedbackType, Priority} from "@/lib/types/feedback-types";
 
 export default function AdminDashboardClient({ data }: AdminDashboardClientProps) {
   const t = useTranslations('admin')
@@ -345,9 +346,9 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('dashboard.filters.options.allTypes')}</SelectItem>
-                  <SelectItem value={FeedbackType.FEATURE}>{t('dashboard.filters.options.featureRequest')}</SelectItem>
-                  <SelectItem value={FeedbackType.BUG}>{t('dashboard.filters.options.bugReport')}</SelectItem>
-                  <SelectItem value={FeedbackType.COMPLAINT}>{t('dashboard.filters.options.generalFeedback')}</SelectItem>
+                  <SelectItem value={FeedbackType.feature}>{t('dashboard.filters.options.featureRequest')}</SelectItem>
+                  <SelectItem value={FeedbackType.bug}>{t('dashboard.filters.options.bugReport')}</SelectItem>
+                  <SelectItem value={FeedbackType.complaint}>{t('dashboard.filters.options.generalFeedback')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -357,9 +358,9 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('dashboard.filters.options.allPriorities')}</SelectItem>
-                  <SelectItem value={Priority.HIGH}>{t('dashboard.filters.options.highPriority')}</SelectItem>
-                  <SelectItem value={Priority.MEDIUM}>{t('dashboard.filters.options.mediumPriority')}</SelectItem>
-                  <SelectItem value={Priority.LOW}>{t('dashboard.filters.options.lowPriority')}</SelectItem>
+                  <SelectItem value={Priority.high}>{t('dashboard.filters.options.highPriority')}</SelectItem>
+                  <SelectItem value={Priority.medium}>{t('dashboard.filters.options.mediumPriority')}</SelectItem>
+                  <SelectItem value={Priority.low}>{t('dashboard.filters.options.lowPriority')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -388,14 +389,14 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                           {feedback.state.replace('_', ' ')}
                         </Badge>
                         <Badge variant={
-                          feedback.type === FeedbackType.BUG ? BadgeVariant.DESTRUCTIVE : 
-                          feedback.type === FeedbackType.FEATURE ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
+                          feedback.type === FeedbackType.bug ? BadgeVariant.DESTRUCTIVE : 
+                          feedback.type === FeedbackType.feature ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.type}
                         </Badge>
                         <Badge variant={
-                          feedback.priority === Priority.HIGH ? BadgeVariant.DESTRUCTIVE :
-                          feedback.priority === Priority.MEDIUM ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
+                          feedback.priority === Priority.high ? BadgeVariant.DESTRUCTIVE :
+                          feedback.priority === Priority.medium ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.priority}
                         </Badge>
@@ -408,9 +409,9 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                     </div>
                     <div className="ml-4 flex flex-col items-end gap-2 min-w-[140px]">
                       <div className="flex items-center gap-1">
-                        {feedback.type === FeedbackType.BUG && <AlertTriangle className="h-4 w-4 text-orange-500" />}
-                        {feedback.type === FeedbackType.FEATURE && <TrendingUp className="h-4 w-4 text-blue-500" />}
-                        {feedback.type === FeedbackType.COMPLAINT && <XCircle className="h-4 w-4 text-red-500" />}
+                        {feedback.type === FeedbackType.bug && <AlertTriangle className="h-4 w-4 text-orange-500" />}
+                        {feedback.type === FeedbackType.feature && <TrendingUp className="h-4 w-4 text-blue-500" />}
+                        {feedback.type === FeedbackType.complaint && <XCircle className="h-4 w-4 text-red-500" />}
                       </div>
                       
                       <div className="relative">

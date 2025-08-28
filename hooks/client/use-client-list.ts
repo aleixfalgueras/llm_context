@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast'
 import { deleteClient as deleteClientAction } from '@/app/actions/client-action'
 import type { Client } from '@prisma/client'
 import type { PaginationInfo, LanguageInfo } from '@/lib/types/client-list-types'
-import { ClientSortMode } from '@/lib/types/enums'
+import { ClientSortMode } from '@/lib/enums'
 
 type ViewMode = 'grid' | 'table'
 

@@ -2,27 +2,28 @@ import {currentUser} from '@clerk/nextjs/server'
 import {FeedbackOperations} from '@/database/feedback-operations'
 import {logger} from '@/lib/logger'
 import {Feedback, Prisma} from '@prisma/client'
+
+import {unwrapResult} from '@/database/base-operations'
 import {
   FeedbackState,
+  FeedbackSubmissionData,
+  FeedbackSubmissionResult,
   FeedbackType,
-  isValidFeedbackState,
-  isValidFeedbackType,
-  isValidPriority
-} from '@/lib/types/enums'
-import {unwrapResult} from '@/database/base-operations'
+  Priority
+} from "@/lib/types/feedback-types";
 
-interface FeedbackSubmissionData {
-  type: string
-  title: string
-  description: string
-  priority: string
-  useCase?: string
-  stepsToReproduce?: string
+// VALIDATION HELPERS
+
+export function isValidFeedbackType(type: string): type is FeedbackType {
+  return Object.values(FeedbackType).includes(type as FeedbackType)
 }
 
-interface FeedbackSubmissionResult {
-  feedbackId: string
-  message: string
+export function isValidPriority(priority: string): priority is Priority {
+  return Object.values(Priority).includes(priority as Priority)
+}
+
+export function isValidFeedbackState(state: string): state is FeedbackState {
+  return Object.values(FeedbackState).includes(state as FeedbackState)
 }
 
 export class FeedbackService {
@@ -72,8 +73,8 @@ export class FeedbackService {
     const feedback = unwrapResult(result)
 
     // Generate appropriate message
-    const feedbackTypeLabel = type === FeedbackType.FEATURE ? 'feature request' : 
-                             type === FeedbackType.BUG ? 'bug report' : 'feedback'
+    const feedbackTypeLabel = type === FeedbackType.feature ? 'feature request' : 
+                             type === FeedbackType.bug ? 'bug report' : 'feedback'
 
     logger.info(`Feedback id ${feedback.id} submitted successfully`)
 
