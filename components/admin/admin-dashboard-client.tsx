@@ -166,38 +166,38 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-        <div className="mb-8 flex justify-between items-start">
-          <Button
-            variant="outline"
-            onClick={handleClearCaches}
-            disabled={clearingCaches}
-            className="flex items-center gap-2"
-          >
-            {clearingCaches ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t('dashboard.buttons.clearingCaches')}
-              </>
-            ) : (
-              <>
-                <RotateCcw className="h-4 w-4" />
-                {t('dashboard.buttons.clearCaches')}
-              </>
-            )}
-          </Button>
-        </div>
-
         <Tabs defaultValue="stats" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="stats" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Stats
-            </TabsTrigger>
-            <TabsTrigger value="feedback" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Feedback
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex justify-between items-center mb-6">
+            <TabsList className="grid max-w-md grid-cols-2">
+              <TabsTrigger value="stats" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Stats
+              </TabsTrigger>
+              <TabsTrigger value="feedback" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Feedback
+              </TabsTrigger>
+            </TabsList>
+            
+            <Button
+              variant="outline"
+              onClick={handleClearCaches}
+              disabled={clearingCaches}
+              className="flex items-center gap-2"
+            >
+              {clearingCaches ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('dashboard.buttons.clearingCaches')}
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="h-4 w-4" />
+                  {t('dashboard.buttons.clearCaches')}
+                </>
+              )}
+            </Button>
+          </div>
 
           <TabsContent value="stats" className="mt-6">
 
