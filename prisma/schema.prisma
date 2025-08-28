@@ -48,7 +48,7 @@ model Client {
   specificContext1  String?
   specificContext2  String?
   specificContext3  String?
-  documentsLanguage String     @default("english")
+  documentsLanguage String     @default("en")
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
   chats             Chat[]
