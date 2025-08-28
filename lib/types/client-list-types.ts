@@ -9,15 +9,10 @@ export interface UsageInfo {
 }
 
 // Import Client interface from Prisma
-import type { Client } from '@prisma/client'
+import type {Client} from '@prisma/client'
+
 export type { Client } from '@prisma/client'
 export { CLIENT_FIELD_LABELS } from './client-types'
-
-export interface LanguageInfo {
-  value: string
-  label: string
-  flag: string
-}
 
 export interface ClientActionHandlers {
   onEditClient: (client: Client) => void

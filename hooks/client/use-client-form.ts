@@ -6,8 +6,8 @@ import { createClient, updateClient } from '@/app/actions/client-action'
 import { Prisma } from '@prisma/client'
 import { validateClientForm } from '@/lib/utils/validation'
 import { capitalizeName } from '@/lib/utils/general'
-import { getLanguageOptions } from '@/lib/enums'
 import React from "react";
+import {getLanguageOptions} from "@/lib/utils/client-language";
 
 interface UseClientFormProps {
   client?: any
@@ -81,7 +81,7 @@ function convertFormDataToPrismaFormat(formData: ClientFormData): Omit<Prisma.Cl
     specificContext1: formData.specificContext1 || null,
     specificContext2: formData.specificContext2 || null,
     specificContext3: formData.specificContext3 || null,
-    documentsLanguage: formData.documentsLanguage || 'english',
+    documentsLanguage: formData.documentsLanguage || 'en',
   }
 }
 
@@ -97,7 +97,7 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     specificContext1: client?.specificContext1 ?? '',
     specificContext2: client?.specificContext2 ?? '',
     specificContext3: client?.specificContext3 ?? '',
-    documentsLanguage: client?.documentsLanguage || 'english'
+    documentsLanguage: client?.documentsLanguage || 'en'
   }
 
   const {
