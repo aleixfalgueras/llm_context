@@ -1,4 +1,4 @@
-import { Language, LANGUAGE_INFO } from '@/lib/types/enums'
+import { Language, LANGUAGE_INFO } from '@/lib/enums'
 
 // Helper function to get language instruction for AI providers
 export function getLanguageInstruction(language: string): string {
