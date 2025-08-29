@@ -5,9 +5,10 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
-import {Edit2, Loader2, Search, Settings, X} from 'lucide-react'
+import {Edit2, Loader2, RotateCcw, Search, Settings, X} from 'lucide-react'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {BadgeVariant} from '@/lib/enums'
-import {UserSubscription} from '@prisma/client'
+import {UserSubscription, SubscriptionPlan} from '@prisma/client'
 import {useToast} from '@/hooks/use-toast'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {useTranslations} from '@/lib/translations/context'
@@ -19,6 +20,7 @@ export default function AdminCustomizationTab() {
   const [users, setUsers] = useState<UserSubscription[]>([])
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
   const [userSearchQuery, setUserSearchQuery] = useState<string>('')
+  const [planFilter, setPlanFilter] = useState<string>('all')
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [newSpendingLimit, setNewSpendingLimit] = useState<string>('')
   const [updatingSpendingLimit, setUpdatingSpendingLimit] = useState<boolean>(false)
@@ -113,14 +115,48 @@ export default function AdminCustomizationTab() {
   }
 
   const filteredUsers = useMemo(() => {
-    if (!userSearchQuery) return users
+    let result = users
     
-    const query = userSearchQuery.toLowerCase()
-    return users.filter(user => 
-      user.email?.toLowerCase().includes(query) || 
-      user.userId.toLowerCase().includes(query)
-    )
-  }, [users, userSearchQuery])
+    // Apply search filter if query exists
+    if (userSearchQuery) {
+      const query = userSearchQuery.toLowerCase()
+      result = result.filter(user => 
+        user.email?.toLowerCase().includes(query) || 
+        user.userId.toLowerCase().includes(query)
+      )
+    }
+    
+    // Apply plan filter if not "all"
+    if (planFilter !== 'all') {
+      result = result.filter(user => user.plan === planFilter)
+    }
+    
+    // Sort by status alphabetically, then by custom spending limit presence
+    return result.sort((a, b) => {
+      // First sort by status alphabetically (active will come before other statuses)
+      const statusCompare = a.status.localeCompare(b.status)
+      if (statusCompare !== 0) {
+        return statusCompare
+      }
+      
+      // Within same status, sort by custom spending limit presence (defined first)
+      const aHasCustom = a.custom_spending_limit_usd !== null
+      const bHasCustom = b.custom_spending_limit_usd !== null
+      
+      if (aHasCustom && !bHasCustom) return -1
+      if (!aHasCustom && bHasCustom) return 1
+      
+      // If both have same custom limit status, maintain original order
+      return 0
+    })
+  }, [users, userSearchQuery, planFilter])
+
+  const clearFilters = () => {
+    setUserSearchQuery('')
+    setPlanFilter('all')
+  }
+
+  const hasActiveFilters = userSearchQuery.length > 0 || planFilter !== 'all'
 
   return (
     <Card>
@@ -141,16 +177,42 @@ export default function AdminCustomizationTab() {
               {t('dashboard.customization.spendingLimits.description')}
             </p>
             
-            {/* Search Bar */}
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={t('dashboard.customization.spendingLimits.searchPlaceholder')}
-                value={userSearchQuery}
-                onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            {/* Search and Filter Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={t('dashboard.customization.spendingLimits.searchPlaceholder')}
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <Select value={planFilter} onValueChange={setPlanFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filter by Plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Plans</SelectItem>
+                  <SelectItem value={SubscriptionPlan.apprentice}>Apprentice</SelectItem>
+                  <SelectItem value={SubscriptionPlan.knight}>Knight</SelectItem>
+                  <SelectItem value={SubscriptionPlan.master}>Master</SelectItem>
+                  <SelectItem value={SubscriptionPlan.jedi}>Jedi</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  onClick={clearFilters}
+                  className="w-full sm:w-auto flex items-center gap-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Clear Filters
+                </Button>
+              )}
             </div>
 
             {/* Users Table */}

@@ -363,6 +363,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
     currentPeriodEnd: Date | null
     status: SubscriptionStatus
     plan: SubscriptionPlan
+    stripeSubscriptionId: string | null
   }>> {
     try {
       return await prisma.userSubscription.findMany({
@@ -372,7 +373,8 @@ export class SubscriptionUsageOperations extends BaseOperations {
           currentPeriodStart: true,
           currentPeriodEnd: true,
           status: true,
-          plan: true
+          plan: true,
+          stripeSubscriptionId: true
         }
       })
     } catch (error) {

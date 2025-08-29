@@ -38,67 +38,67 @@ export function ClientTableView({
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <div className="border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-full">
-          <thead className="bg-gray-50 dark:bg-gray-800">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[150px]">
+              <th className="text-left p-3 font-medium min-w-[150px]">
                 {t('table.name')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[180px] hidden sm:table-cell">
+              <th className="text-left p-3 font-medium min-w-[180px] hidden sm:table-cell">
                 {t('table.email')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[140px] hidden sm:table-cell">
+              <th className="text-left p-3 font-medium min-w-[140px] hidden sm:table-cell">
                 {t('table.phone')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[100px] hidden md:table-cell">
+              <th className="text-left p-3 font-medium min-w-[100px] hidden md:table-cell">
                 {t('table.country')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[130px] hidden lg:table-cell">
+              <th className="text-left p-3 font-medium min-w-[130px] hidden lg:table-cell">
                 {t('table.documents')}
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[120px] sticky right-0 bg-gray-50 dark:bg-gray-800">
+              <th className="text-left p-3 font-medium min-w-[120px] sticky right-0 bg-muted">
                 {t('table.actions')}
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody>
             {clients.map((client) => {
               const languageInfo = getLanguageInfo(client.documentsLanguage || 'en')
               return (
                 <tr 
                   key={client.id} 
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className="border-t hover:bg-muted/50 transition-colors cursor-pointer"
                   onClick={() => onViewClient(client)}
                 >
-                  <td className="px-4 py-4">
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <td className="p-3">
+                    <div className="font-medium">
                       {client.name}
                     </div>
                   </td>
-                  <td className="px-4 py-4 hidden sm:table-cell">
-                    <div className="text-sm text-gray-900 dark:text-gray-100">
+                  <td className="p-3 hidden sm:table-cell">
+                    <div>
                       {client.email || '-'}
                     </div>
                   </td>
-                  <td className="px-4 py-4 hidden sm:table-cell">
-                    <div className="text-sm text-gray-900 dark:text-gray-100">
+                  <td className="p-3 hidden sm:table-cell">
+                    <div>
                       {client.phone || '-'}
                     </div>
                   </td>
-                  <td className="px-4 py-4 hidden md:table-cell">
-                    <div className="text-sm text-gray-900 dark:text-gray-100">
+                  <td className="p-3 hidden md:table-cell">
+                    <div>
                       {client.country || '-'}
                     </div>
                   </td>
-                  <td className="px-4 py-4 hidden lg:table-cell">
-                    <div className="text-sm text-gray-900 dark:text-gray-100 flex items-center gap-1">
+                  <td className="p-3 hidden lg:table-cell">
+                    <div className="flex items-center gap-1">
                       <span>{languageInfo.flag}</span>
                       <span>{languageInfo.label}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-right sticky right-0 bg-white dark:bg-gray-900">
+                  <td className="p-3 sticky right-0 bg-background">
                     <div className="flex justify-end gap-1">
                       <Button
                         variant="ghost"
