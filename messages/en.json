@@ -1051,7 +1051,8 @@
       },
       "tabs": {
         "stats": "Stats",
-        "feedback": "Feedback"
+        "feedback": "Feedback",
+        "customization": "Customization"
       },
       "descriptions": {
         "monthlyUsageDescription": "Total spending vs maximum capacity across all users for the last 12 months",
@@ -1082,7 +1083,41 @@
         "master": "Master:",
         "jedi": "Jedi:"
       },
-      "anonymous": "Anonymous"
+      "anonymous": "Anonymous",
+      "customization": {
+        "title": "User Customization",
+        "description": "Manage custom settings for individual users",
+        "spendingLimits": {
+          "title": "Custom Spending Limits",
+          "description": "Override default spending limits for specific users",
+          "searchPlaceholder": "Search by email or user ID...",
+          "userColumn": "User",
+          "planColumn": "Plan",
+          "statusColumn": "Status",
+          "defaultLimitColumn": "Default Limit",
+          "customLimitColumn": "Custom Limit",
+          "actionsColumn": "Actions",
+          "setCustomLimit": "Set Custom Limit",
+          "updateLimit": "Update Limit",
+          "removeLimit": "Remove Custom",
+          "noUsers": "No users found",
+          "loadingUsers": "Loading users...",
+          "newLimitPlaceholder": "Enter new limit ($)",
+          "confirmUpdate": "Update",
+          "cancelUpdate": "Cancel",
+          "updating": "Updating...",
+          "notSet": "Not Set",
+          "success": {
+            "limitUpdated": "Spending limit updated successfully",
+            "limitRemoved": "Custom spending limit removed"
+          },
+          "errors": {
+            "fetchUsers": "Failed to fetch users",
+            "updateLimit": "Failed to update spending limit",
+            "invalidAmount": "Please enter a valid amount"
+          }
+        }
+      }
     }
   },
   "ui": {

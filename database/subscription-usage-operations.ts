@@ -231,6 +231,33 @@ export class SubscriptionUsageOperations extends BaseOperations {
   }
 
   /**
+   * Get all users subscription information for admin customization
+   */
+  static async getAllUserSubscriptions(): Promise<UserSubscription[]> {
+    return prisma.userSubscription.findMany({
+      orderBy: {createdAt: 'desc'}
+    });
+  }
+
+  /**
+   * Update custom spending limit for a specific user
+   */
+  static async updateCustomSpendingLimit(
+    userId: string,
+    customSpendingLimit: number | null
+  ): Promise<UserSubscription> {
+    try {
+      return await prisma.userSubscription.update({
+        where: { userId },
+        data: { custom_spending_limit_usd: customSpendingLimit }
+      })
+    } catch (error) {
+      logger.error('Failed to update custom spending limit', error as Error, { userId })
+      throw error
+    }
+  }
+
+  /**
    * Admin-specific: Get dashboard statistics
    * Returns total users, recent users, and subscription counts by plan
    */

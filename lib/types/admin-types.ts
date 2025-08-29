@@ -35,6 +35,8 @@ export interface AdminDashboardData {
   }>
 }
 
-export interface AdminDashboardClientProps {
-  data: AdminDashboardData
+export interface UpdateSpendingLimitResponse {
+  success: boolean
+  message: string
+  updatedLimit?: number | null
 }
