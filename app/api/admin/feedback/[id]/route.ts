@@ -5,9 +5,7 @@ import {
   parseJsonBody,
   ApiContext 
 } from '@/lib/api/api-middleware'
-import { FeedbackService } from '@/services/feedback-service'
-
-const ADMIN_EMAIL = 'feina.aleix@gmail.com'
+import { AdminService } from '@/services/admin-service'
 
 export const PATCH = withEnhancedApi(
   async ({ userId, req, params }: ApiContext) => {
@@ -17,13 +15,12 @@ export const PATCH = withEnhancedApi(
       throw new Error('Feedback ID is required')
     }
 
-    // Get current user and check admin permissions
+    // Get current user's email for admin check
     const user = await currentUser()
     const userEmail = user?.emailAddresses[0]?.emailAddress
 
-    // Admin authentication check
-    if (userEmail !== ADMIN_EMAIL) {
-      throw new Error('Unauthorized: Admin access required')
+    if (!userEmail) {
+      throw new Error('Unauthorized: Could not verify user')
     }
 
     const body = await parseJsonBody(req)
@@ -34,7 +31,8 @@ export const PATCH = withEnhancedApi(
       throw new Error('State is required')
     }
 
-    const result = await FeedbackService.updateFeedbackState(feedbackId, state, userEmail!)
+    // Use AdminService to update feedback state (includes admin check)
+    const result = await AdminService.updateFeedbackState(feedbackId, state, userEmail)
 
     return apiSuccess(result)
   },

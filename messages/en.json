@@ -1007,6 +1007,7 @@
         "totalDocuments": "Total Documents",
         "chatConversations": "Chat Conversations",
         "monthlyUsage": "Monthly Usage",
+        "monthlySubscriptions": "Monthly Subscriptions", 
         "subscriptionPlans": "Subscription Plans",
         "feedbackAndPrompts": "Feedback & Prompts",
         "totalSpending": "Total Spending",
@@ -1048,7 +1049,75 @@
       "success": {
         "cachesCleared": "All caches cleared successfully"
       },
-      "anonymous": "Anonymous"
+      "tabs": {
+        "stats": "Stats",
+        "feedback": "Feedback",
+        "customization": "Customization"
+      },
+      "descriptions": {
+        "monthlyUsageDescription": "Total spending vs maximum capacity across all users for the last 12 months",
+        "monthlySubscriptionsDescription": "Total users vs active users with subscription breakdown for the last 12 months"
+      },
+      "spending": {
+        "tooltip": {
+          "actualSpending": "Actual Spending",
+          "maxCapacity": "Max Capacity"
+        },
+        "legend": {
+          "actualSpending": "Actual Spending", 
+          "maximumCapacity": "Maximum Capacity"
+        }
+      },
+      "tooltip": {
+        "users": "Users:",
+        "activeUsers": "Active users:",
+        "activeSubscriptions": "Active subscriptions:"
+      },
+      "legend": {
+        "totalUsers": "Total Users",
+        "activeUsers": "Active Users"
+      },
+      "plans": {
+        "apprentice": "Apprentice:",
+        "knight": "Knight:",
+        "master": "Master:",
+        "jedi": "Jedi:"
+      },
+      "anonymous": "Anonymous",
+      "customization": {
+        "title": "User Customization",
+        "description": "Manage custom settings for individual users",
+        "spendingLimits": {
+          "title": "Custom Spending Limits",
+          "description": "Override default spending limits for specific users",
+          "searchPlaceholder": "Search by email or user ID...",
+          "userColumn": "User",
+          "planColumn": "Plan",
+          "statusColumn": "Status",
+          "defaultLimitColumn": "Default Limit",
+          "customLimitColumn": "Custom Limit",
+          "actionsColumn": "Actions",
+          "setCustomLimit": "Set Custom Limit",
+          "updateLimit": "Update Limit",
+          "removeLimit": "Remove Custom",
+          "noUsers": "No users found",
+          "loadingUsers": "Loading users...",
+          "newLimitPlaceholder": "Enter new limit ($)",
+          "confirmUpdate": "Update",
+          "cancelUpdate": "Cancel",
+          "updating": "Updating...",
+          "notSet": "Not Set",
+          "success": {
+            "limitUpdated": "Spending limit updated successfully",
+            "limitRemoved": "Custom spending limit removed"
+          },
+          "errors": {
+            "fetchUsers": "Failed to fetch users",
+            "updateLimit": "Failed to update spending limit",
+            "invalidAmount": "Please enter a valid amount"
+          }
+        }
+      }
     }
   },
   "ui": {
