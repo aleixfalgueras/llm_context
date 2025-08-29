@@ -4,8 +4,9 @@ import {useState} from 'react'
 import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Edit, FileText, Trash2} from 'lucide-react'
-import {Client, ClientActionHandlers, LanguageInfo} from '@/lib/types/client-list-types'
+import {Client, ClientActionHandlers} from '@/lib/types/client-list-types'
 import {DeleteClientDialog} from './delete-client-dialog'
+import {LanguageInfo} from "@/lib/utils/client-language";
 
 interface ClientTableViewProps {
   clients: Client[]
@@ -64,7 +65,7 @@ export function ClientTableView({
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             {clients.map((client) => {
-              const languageInfo = getLanguageInfo(client.documentsLanguage || 'english')
+              const languageInfo = getLanguageInfo(client.documentsLanguage || 'en')
               return (
                 <tr 
                   key={client.id} 

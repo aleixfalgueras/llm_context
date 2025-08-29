@@ -151,7 +151,7 @@
       "specificContext2Placeholder": "Specific context 2 about the client...",
       "specificContext3Placeholder": "Specific context 3 about the client...",
       "languageSelectPlaceholder": "Select language for generated documents",
-      "languageTooltip": "This language will be used when generating marketing content and reports in the AI Services page for this client.",
+      "languageTooltip": "This language will be used when generating documents with the Document Generator service from the AI Services page.",
       "viewClient": "View Client",
       "editClient": "Edit Client",
       "addNewClient": "Add New Client",
@@ -1086,10 +1086,6 @@
     "italian": "Italian",
     "portuguese": "Portuguese",
     "dutch": "Dutch",
-    "russian": "Russian",
-    "chinese": "Chinese",
-    "japanese": "Japanese",
-    "korean": "Korean",
-    "arabic": "Arabic"
+    "russian": "Russian"
   }
 }

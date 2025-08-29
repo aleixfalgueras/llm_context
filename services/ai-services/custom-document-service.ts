@@ -1,7 +1,7 @@
 import {buildClientContextSection, replaceClientContextVariables} from '@/services/client/client-context-service'
 import {openRouterService} from '@/services/openrouter'
 import {DEFAULT_MODEL, getDefaultTemperature} from '@/lib/models-config'
-import {getLanguageInstruction, getLanguageRequirementSection} from '@/lib/utils/language'
+import {getLanguageInfo} from '@/lib/utils/client-language'
 import {logger} from '@/lib/logger'
 import {ClientService} from '@/services/client/client-service'
 import {DocumentService} from '@/services/document-service'
@@ -16,6 +16,16 @@ import {
 import {unwrapResult} from '@/database/base-operations'
 
 export class CustomDocumentService {
+
+  static getLanguageRequirementSection(targetLanguageCode: string): string {
+    const language = getLanguageInfo(targetLanguageCode)
+
+    const languageGuidance = 'Use appropriate professional terminology for this language\n- Consider cultural communication styles appropriate for this language/culture\n- Maintain professional language suitable for business documents\n- Adapt formatting and structure conventions appropriate for this language/culture'
+
+    return `LANGUAGE REQUIREMENT:
+- Generate the entire document in ${language.label}
+- ${languageGuidance}`
+  }
 
   /**
    * Generate a custom document using AI
@@ -132,8 +142,8 @@ export class CustomDocumentService {
     // Replace client variables in prompt
     const processedPrompt = replaceClientContextVariables(prompt, client)
 
-    // Get language instruction from client's documentsLanguage preference
-    const targetLanguage = getLanguageInstruction(client.documentsLanguage || 'english')
+    // Get language code from client's documentsLanguage preference
+    const targetLanguage = client.documentsLanguage || 'en'
 
     // Build client context section if fields are selected
     const clientContextSection = buildClientContextSection(client, selectedContextFields)
@@ -155,11 +165,11 @@ ${additionalInstructions}`
     // Add language requirements
     completePrompt += `
 
-${getLanguageRequirementSection(targetLanguage, 'custom-document')}
+${this.getLanguageRequirementSection(targetLanguage)}
 
 Please generate a professional, well-structured document based on the above prompt and client information. 
 
-IMPORTANT: Generate the entire document in ${targetLanguage}, maintaining professional language and cultural appropriateness for this language.`
+IMPORTANT: Generate the entire document in ${getLanguageInfo(targetLanguage).nativeLabel}, maintaining professional language and cultural appropriateness for this language.`
 
     return {
       completePrompt,

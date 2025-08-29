@@ -5,11 +5,7 @@ import {
   parseJsonBody,
   ApiContext 
 } from '@/lib/api/api-middleware'
-import { prisma } from '@/lib/prisma'
-import { 
-  FeedbackState,
-  isValidFeedbackState 
-} from '@/lib/types/enums'
+import { FeedbackService } from '@/services/feedback-service'
 
 const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 
@@ -38,42 +34,9 @@ export const PATCH = withEnhancedApi(
       throw new Error('State is required')
     }
 
-    // Validate feedback state
-    if (!isValidFeedbackState(state)) {
-      throw new Error('Invalid feedback state')
-    }
+    const result = await FeedbackService.updateFeedbackState(feedbackId, state, userEmail!)
 
-    // Check if feedback exists
-    const existingFeedback = await prisma.feedback.findUnique({
-      where: { id: feedbackId }
-    })
-
-    if (!existingFeedback) {
-      throw new Error('Feedback not found')
-    }
-
-    // Update feedback state
-    const updatedFeedback = await prisma.feedback.update({
-      where: { id: feedbackId },
-      data: { state },
-      select: {
-        id: true,
-        state: true,
-        title: true,
-        type: true,
-        priority: true,
-        userEmail: true,
-        userName: true
-      }
-    })
-
-    // Log admin action (optional - could be expanded to audit log)
-    console.log(`Admin ${userEmail} updated feedback ${feedbackId} state to ${state}`)
-
-    return apiSuccess({ 
-      feedback: updatedFeedback,
-      message: `Feedback status updated to ${state.replace('_', ' ').toLowerCase()}`
-    })
+    return apiSuccess(result)
   },
   {
     context: 'Update Feedback Status (Admin)',
