@@ -175,18 +175,18 @@ export default function AdminDashboardStats({ data }: AdminDashboardStatsProps) 
                 <Line 
                   type="monotone" 
                   dataKey="totalUsers" 
-                  stroke="hsl(217, 91%, 60%)" 
+                  stroke="hsl(142, 71%, 45%)" 
                   strokeWidth={2}
-                  dot={{ fill: 'hsl(217, 91%, 60%)', strokeWidth: 2, r: 4 }}
+                  dot={{ fill: 'hsl(142, 71%, 45%)', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6 }}
                   name="totalUsers"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="activeUsers" 
-                  stroke="hsl(142, 71%, 45%)" 
+                  stroke="hsl(217, 91%, 60%)" 
                   strokeWidth={2}
-                  dot={{ fill: 'hsl(142, 71%, 45%)', strokeWidth: 2, r: 4 }}
+                  dot={{ fill: 'hsl(217, 91%, 60%)', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6 }}
                   name="activeUsers"
                 />
@@ -195,11 +195,11 @@ export default function AdminDashboardStats({ data }: AdminDashboardStatsProps) 
           </div>
           <div className="flex justify-center gap-6 mt-4">
             <div className="flex items-center gap-2">
-              <div className="h-3 w-8 bg-blue-500 rounded" />
+              <div className="h-3 w-8 bg-green-600 rounded" />
               <span className="text-sm text-muted-foreground">{t('admin.dashboard.legend.totalUsers')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-8 bg-green-600 rounded" />
+              <div className="h-3 w-8 bg-blue-500 rounded" />
               <span className="text-sm text-muted-foreground">{t('admin.dashboard.legend.activeUsers')}</span>
             </div>
           </div>

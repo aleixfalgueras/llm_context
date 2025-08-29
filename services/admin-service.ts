@@ -7,7 +7,7 @@ import {FeedbackOperations} from '@/database/feedback-operations'
 import {SubscriptionUsageOperations} from '@/database/subscription-usage-operations'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
 
-const ADMIN_EMAIL = 'feina.aleix@gmail.com'
+const ADMIN_EMAILS = ['feina.aleix@gmail.com', 'a.nelson@dreamotion.io']
 
 export class AdminService {
   
@@ -15,7 +15,7 @@ export class AdminService {
     try {
       const user = await currentUser()
       const userEmail = user?.emailAddresses[0]?.emailAddress
-      return userEmail === ADMIN_EMAIL
+      return userEmail ? ADMIN_EMAILS.includes(userEmail) : false
     } catch (error) {
       logger.error('Error checking admin status', error as Error, { userId })
       return false
@@ -219,7 +219,7 @@ export class AdminService {
     const userEmail = user?.emailAddresses[0]?.emailAddress
 
     // Check if user is admin
-    if (userEmail !== ADMIN_EMAIL) {
+    if (!userEmail || !ADMIN_EMAILS.includes(userEmail)) {
       logger.warn('Non-admin user attempted to clear caches', { userId, metadata: { userEmail } })
       throw new Error('Forbidden - Admin access required')
     }
@@ -249,7 +249,7 @@ export class AdminService {
     adminEmail: string
   ): Promise<{ success: boolean; message: string }> {
     // Validate that this is being called by an admin
-    if (adminEmail !== ADMIN_EMAIL) {
+    if (!ADMIN_EMAILS.includes(adminEmail)) {
       throw new Error('Unauthorized: Admin access required')
     }
 
