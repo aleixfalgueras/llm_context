@@ -22,8 +22,21 @@ export interface AdminDashboardData {
   allFeedback: FeedbackItem[]
   userSubscriptions: Array<{ plan: string; _count: number }>
   monthlySpendingHistory: Array<{ month: string; spending: number; maxPossible: number }>
+  monthlySubscriptionHistory: Array<{
+    month: string
+    totalUsers: number
+    activeUsers: number
+    subscriptionBreakdown: {
+      apprentice: number
+      knight: number
+      master: number
+      jedi: number
+    }
+  }>
 }
 
-export interface AdminDashboardClientProps {
-  data: AdminDashboardData
+export interface UpdateSpendingLimitResponse {
+  success: boolean
+  message: string
+  updatedLimit?: number | null
 }

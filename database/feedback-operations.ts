@@ -99,4 +99,38 @@ export class FeedbackOperations extends BaseOperations {
       return { success: false, error: `${context}: ${errorMessage}` }
     }
   }
+
+  /**
+   * Admin-specific: Find all feedback for admin dashboard
+   * No userId restriction - admin sees all feedback
+   */
+  static async findAllFeedbackForAdmin(
+    config: DbOperationConfig = {}
+  ): Promise<DbOperationResult<Feedback[]>> {
+    try {
+      const feedbacks = await prisma.feedback.findMany({
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          type: true,
+          title: true,
+          priority: true,
+          state: true,
+          userEmail: true,
+          userName: true,
+          description: true,
+          createdAt: true,
+          userId: true,
+          useCase: true,
+          stepsToReproduce: true
+        }
+      })
+
+      return { success: true, data: feedbacks as Feedback[] }
+    } catch (error) {
+      const context = config.context || 'Admin: Find all feedback'
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      return { success: false, error: `${context}: ${errorMessage}` }
+    }
+  }
 }
