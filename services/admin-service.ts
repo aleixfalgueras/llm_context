@@ -114,6 +114,7 @@ export class AdminService {
         totalUsers: Set<string>
         activeUsers: Set<string>
         planCounts: Map<SubscriptionPlan, number>
+        apprenticeFreeCount: number
       }>()
       
       // Initialize maps for last 12 months
@@ -126,7 +127,8 @@ export class AdminService {
             [SubscriptionPlan.knight, 0],
             [SubscriptionPlan.master, 0],
             [SubscriptionPlan.jedi, 0]
-          ])
+          ]),
+          apprenticeFreeCount: 0
         })
       })
       
@@ -154,9 +156,13 @@ export class AdminService {
             if (isStatusActive && isNotExpired && notCanceledInMonth) {
               monthData.activeUsers.add(`user_${index}`)
               
-              // Count by plan type
-              const currentCount = monthData.planCounts.get(sub.plan) || 0
-              monthData.planCounts.set(sub.plan, currentCount + 1)
+              // Count by plan type, separating free vs paid apprentice
+              if (sub.plan === SubscriptionPlan.apprentice && !sub.stripeSubscriptionId) {
+                monthData.apprenticeFreeCount += 1
+              } else {
+                const currentCount = monthData.planCounts.get(sub.plan) || 0
+                monthData.planCounts.set(sub.plan, currentCount + 1)
+              }
             }
           }
         })
@@ -175,6 +181,7 @@ export class AdminService {
           activeUsers: monthData.activeUsers.size,
           subscriptionBreakdown: {
             apprentice: monthData.planCounts.get(SubscriptionPlan.apprentice) || 0,
+            apprenticeFree: monthData.apprenticeFreeCount,
             knight: monthData.planCounts.get(SubscriptionPlan.knight) || 0,
             master: monthData.planCounts.get(SubscriptionPlan.master) || 0,
             jedi: monthData.planCounts.get(SubscriptionPlan.jedi) || 0
