@@ -28,6 +28,7 @@ export interface AdminDashboardData {
     activeUsers: number
     subscriptionBreakdown: {
       apprentice: number
+      apprenticeFree: number
       knight: number
       master: number
       jedi: number
