@@ -113,13 +113,35 @@ export default function AdminCustomizationTab() {
   }
 
   const filteredUsers = useMemo(() => {
-    if (!userSearchQuery) return users
+    let result = users
     
-    const query = userSearchQuery.toLowerCase()
-    return users.filter(user => 
-      user.email?.toLowerCase().includes(query) || 
-      user.userId.toLowerCase().includes(query)
-    )
+    // Apply search filter if query exists
+    if (userSearchQuery) {
+      const query = userSearchQuery.toLowerCase()
+      result = result.filter(user => 
+        user.email?.toLowerCase().includes(query) || 
+        user.userId.toLowerCase().includes(query)
+      )
+    }
+    
+    // Sort by status alphabetically, then by custom spending limit presence
+    return result.sort((a, b) => {
+      // First sort by status alphabetically (active will come before other statuses)
+      const statusCompare = a.status.localeCompare(b.status)
+      if (statusCompare !== 0) {
+        return statusCompare
+      }
+      
+      // Within same status, sort by custom spending limit presence (defined first)
+      const aHasCustom = a.custom_spending_limit_usd !== null
+      const bHasCustom = b.custom_spending_limit_usd !== null
+      
+      if (aHasCustom && !bHasCustom) return -1
+      if (!aHasCustom && bHasCustom) return 1
+      
+      // If both have same custom limit status, maintain original order
+      return 0
+    })
   }, [users, userSearchQuery])
 
   return (
