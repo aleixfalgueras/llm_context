@@ -141,7 +141,14 @@ export default function AdminDashboardStats({ data }: AdminDashboardStatsProps) 
                                   <p className="text-xs text-muted-foreground mb-1">{t('admin.dashboard.tooltip.activeSubscriptions')}</p>
                                   <p className="flex justify-between gap-4">
                                     <span className="text-xs">{t('admin.dashboard.plans.apprentice')}</span>
-                                    <span className="font-medium text-xs">{dataPoint.subscriptionBreakdown.apprentice}</span>
+                                    <span className="font-medium text-xs">
+                                      {dataPoint.subscriptionBreakdown.apprentice}
+                                      {dataPoint.subscriptionBreakdown.apprenticeFree > 0 && (
+                                        <span className="text-muted-foreground ml-1">
+                                          ({dataPoint.subscriptionBreakdown.apprenticeFree} free)
+                                        </span>
+                                      )}
+                                    </span>
                                   </p>
                                   <p className="flex justify-between gap-4">
                                     <span className="text-xs">{t('admin.dashboard.plans.knight')}</span>
