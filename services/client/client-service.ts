@@ -64,7 +64,7 @@ export class ClientService {
       // Prepare client data with defaults and trim context fields
       const clientData = prepareClientData({
         ...data,
-        documentsLanguage: data.documentsLanguage || 'english',
+        documentsLanguage: data.documentsLanguage || 'en',
       })
 
       const result = await ClientOperations.createClient(userId, clientData)
@@ -104,7 +104,7 @@ export class ClientService {
       // Prepare client data with defaults and trim context fields
       const clientData = prepareClientData({
         ...data,
-        documentsLanguage: data.documentsLanguage || 'english',
+        documentsLanguage: data.documentsLanguage || 'en',
       })
 
       const result = await ClientOperations.updateUserClient(clientId, userId, clientData)

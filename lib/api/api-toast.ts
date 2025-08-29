@@ -4,7 +4,7 @@
  */
 
 import {toast} from '@/hooks/use-toast'
-import {ToastVariant} from '@/lib/types/enums'
+import {ToastVariant} from '@/lib/enums'
 import {SubscriptionErrorCode} from '@/services/error-codes'
 
 

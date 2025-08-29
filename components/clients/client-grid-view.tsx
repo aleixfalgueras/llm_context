@@ -5,8 +5,9 @@ import {useTranslations} from '@/lib/translations/context'
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Edit, FileText, Trash2} from 'lucide-react'
-import {Client, ClientActionHandlers, LanguageInfo} from '@/lib/types/client-list-types'
+import {Client, ClientActionHandlers} from '@/lib/types/client-list-types'
 import {DeleteClientDialog} from './delete-client-dialog'
+import {LanguageInfo} from "@/lib/utils/client-language";
 
 interface ClientGridViewProps {
   clients: Client[]
@@ -40,7 +41,7 @@ export function ClientGridView({
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {clients.map((client) => {
-        const languageInfo = getLanguageInfo(client.documentsLanguage || 'english')
+        const languageInfo = getLanguageInfo(client.documentsLanguage || 'en')
         return (
           <Card 
             key={client.id} 

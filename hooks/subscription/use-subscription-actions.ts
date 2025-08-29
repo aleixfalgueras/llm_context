@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {useToast} from '@/hooks/use-toast'
-import {ToastVariant} from '@/lib/types/enums'
+import {ToastVariant} from '@/lib/enums'
 import {SubscriptionPlan} from "@prisma/client";
 import {handleClientApiError} from '@/lib/api/api-toast'
 

@@ -1,5 +1,5 @@
 import {prisma} from '../prisma'
-import {ConsentAction, ConsentType} from '@/lib/types/enums'
+import {ConsentAction, ConsentType} from '@/lib/enums'
 import {NextRequest} from "next/server";
 
 // Current policy versions - update these when you change Terms/Privacy Policy

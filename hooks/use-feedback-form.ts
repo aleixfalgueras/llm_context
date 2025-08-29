@@ -1,16 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormState } from './use-form-state'
-import { useToast } from '@/hooks/use-toast'
-import { 
-  ToastVariant,
-  FEEDBACK_TYPE_LABELS,
-  FEEDBACK_TYPE_DESCRIPTIONS,
-  PRIORITY_LABELS,
-  FEEDBACK_TYPE_VALUES,
-  PRIORITY_VALUES
-} from '@/lib/types/enums'
+import {useState} from 'react'
+import {useFormState} from './use-form-state'
+import {useToast} from '@/hooks/use-toast'
+import {useTranslations} from '@/lib/translations/context'
+import {ToastVariant} from '@/lib/enums'
+import {FEEDBACK_TYPE_VALUES, PRIORITY_VALUES, FeedbackType, Priority} from "@/lib/types/feedback-types";
 
 interface FeedbackFormData {
   type: string
@@ -41,29 +36,32 @@ interface UseFeedbackFormReturn {
   priorities: Array<{ value: string; label: string }>
 }
 
-const validationRules: Partial<Record<keyof FeedbackFormData, (value: any) => string | null>> = {
+const getValidationRules = (tValidation: (key: string, params?: Record<string, any>) => string): Partial<Record<keyof FeedbackFormData, (value: any) => string | null>> => ({
   type: (value: string) => {
-    if (!value?.trim()) return 'Feedback type is required'
+    if (!value?.trim()) return tValidation('required')
     return null
   },
   title: (value: string) => {
-    if (!value?.trim()) return 'Title is required'
-    if (value.trim().length < 5) return 'Title must be at least 5 characters'
+    if (!value?.trim()) return tValidation('required')
+    if (value.trim().length < 5) return tValidation('minLength', { min: 5 })
     return null
   },
   description: (value: string) => {
-    if (!value?.trim()) return 'Description is required'
-    if (value.trim().length < 10) return 'Description must be at least 10 characters'
+    if (!value?.trim()) return tValidation('required')
+    if (value.trim().length < 10) return tValidation('minLength', { min: 10 })
     return null
   },
   priority: (value: string) => {
-    if (!value?.trim()) return 'Priority is required'
+    if (!value?.trim()) return tValidation('required')
     return null
   },
-}
+})
 
 export function useFeedbackForm(): UseFeedbackFormReturn {
   const { toast } = useToast()
+  const t = useTranslations('feedback')
+  const tValidation = useTranslations('validation')
+  const tCommon = useTranslations('common')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const initialData: FeedbackFormData = {
@@ -75,6 +73,8 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
     stepsToReproduce: ''
   }
 
+  const validationRules = getValidationRules(tValidation)
+  
   const {
     formData,
     errors,
@@ -90,13 +90,13 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
 
   const feedbackTypes = FEEDBACK_TYPE_VALUES.map(type => ({
     value: type,
-    label: FEEDBACK_TYPE_LABELS[type],
-    description: FEEDBACK_TYPE_DESCRIPTIONS[type]
+    label: type === FeedbackType.feature ? t('typeFeature') : type === FeedbackType.bug ? t('typeBug') : t('typeGeneral'),
+    description: type === FeedbackType.feature ? 'Suggest a new feature or improvement' : type === FeedbackType.bug ? 'Report a problem or error' : 'Share your thoughts or concerns'
   }))
 
   const priorities = PRIORITY_VALUES.map(priority => ({
     value: priority,
-    label: PRIORITY_LABELS[priority]
+    label: priority === Priority.low ? 'Low Priority - Minor issue' : priority === Priority.medium ? 'Medium Priority - Moderate impact' : 'High Priority - Major issue'
   }))
 
   const updateField = (field: keyof FeedbackFormData, value: string) => {
@@ -108,7 +108,7 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
     
     if (!validateForm()) {
       toast({
-        title: 'Validation Error',
+        title: tValidation('error'),
         description: 'Please fix the errors in the form before submitting.',
         variant: ToastVariant.DESTRUCTIVE,
       })
@@ -129,15 +129,15 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
       const result = await response.json()
 
       if (response.ok) {
-        const typeLabel = feedbackTypes.find(t => t.value === formData.type)?.label || 'Feedback'
+        const typeLabel = feedbackTypes.find(type => type.value === formData.type)?.label || t('title')
         toast({
-          title: `${typeLabel} Submitted`,
+          title: `${typeLabel} ${t('submitting').replace('...', '')}`,
           description: 'Thank you for your feedback! We\'ll review it carefully.',
         })
         resetForm()
       } else {
         toast({
-          title: 'Error',
+          title: tCommon('error'),
           description: result.error || 'Failed to submit feedback',
           variant: ToastVariant.DESTRUCTIVE,
         })
@@ -145,7 +145,7 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
     } catch (error) {
       console.error('Error submitting feedback:', error)
       toast({
-        title: 'Error',
+        title: tCommon('error'),
         description: 'An unexpected error occurred. Please try again.',
         variant: ToastVariant.DESTRUCTIVE,
       })

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
-import { useLocalStorage } from '../use-local-storage'
-import { useToast } from '@/hooks/use-toast'
-import { deleteClient as deleteClientAction } from '@/app/actions/client-action'
-import type { Client } from '@prisma/client'
-import type { PaginationInfo, LanguageInfo } from '@/lib/types/client-list-types'
-import { ClientSortMode } from '@/lib/types/enums'
+import {useCallback, useMemo, useState} from 'react'
+import {useLocalStorage} from '../use-local-storage'
+import {useToast} from '@/hooks/use-toast'
+import {deleteClient as deleteClientAction} from '@/app/actions/client-action'
+import type {Client} from '@prisma/client'
+import type {PaginationInfo} from '@/lib/types/client-list-types'
+import {ClientSortMode} from '@/lib/enums'
+import {getLanguageInfo, LanguageInfo} from "@/lib/utils/client-language";
 
 type ViewMode = 'grid' | 'table'
 
@@ -34,18 +35,7 @@ interface UseClientListReturn {
   getLanguageInfo: (language: string) => LanguageInfo
 }
 
-const LANGUAGE_INFO: Record<string, LanguageInfo> = {
-  'es': { value: 'es', label: 'Spanish', flag: '🇪🇸' },
-  'en': { value: 'en', label: 'English', flag: '🇺🇸' },
-  'ca': { value: 'ca', label: 'Catalan', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
-  'fr': { value: 'fr', label: 'French', flag: '🇫🇷' },
-  'de': { value: 'de', label: 'German', flag: '🇩🇪' },
-  'it': { value: 'it', label: 'Italian', flag: '🇮🇹' },
-  'pt': { value: 'pt', label: 'Portuguese', flag: '🇵🇹' },
-  'nl': { value: 'nl', label: 'Dutch', flag: '🇳🇱' },
-}
-
-export function useClientList({ 
+export function useClientList({
   clients, 
   itemsPerPage = 12 
 }: UseClientListProps): UseClientListReturn {
@@ -145,8 +135,8 @@ export function useClientList({
     }
   }, [toast])
 
-  const getLanguageInfo = useCallback((language: string): LanguageInfo => {
-    return LANGUAGE_INFO[language?.toLowerCase()] || { value: language || 'unknown', label: language || 'Unknown', flag: '🌐' }
+  const getLanguageInfoCallback = useCallback((language: string): LanguageInfo => {
+    return getLanguageInfo(language)
   }, [])
 
   return {
@@ -165,6 +155,6 @@ export function useClientList({
     setSortMode,
     setCurrentPage,
     deleteClient,
-    getLanguageInfo,
+    getLanguageInfo: getLanguageInfoCallback,
   }
 }

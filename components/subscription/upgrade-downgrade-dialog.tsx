@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { CheckIcon, ArrowRightIcon, CreditCardIcon, CalendarIcon } from 'lucide-react'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import { useToast } from '@/hooks/use-toast'
-import { ToastVariant } from '@/lib/types/enums'
+import { ToastVariant } from '@/lib/enums'
 import {SubscriptionPlan} from "@prisma/client";
 import { handleClientApiError } from '@/lib/api/api-toast'
 import { useTranslations } from '@/lib/translations/context'

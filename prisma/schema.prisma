@@ -23,15 +23,15 @@ model Chat {
 }
 
 model Message {
-  id           String   @id @default(cuid())
-  content      String
-  role         Role
-  model        String?
-  cost_usd     Float    @default(0)
+  id            String   @id @default(cuid())
+  content       String
+  role          Role
+  model         String?
+  cost_usd      Float    @default(0)
   generation_id String?
-  chatId       String
-  createdAt    DateTime @default(now())
-  chat         Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId        String
+  createdAt     DateTime @default(now())
+  chat          Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   @@index([generation_id])
   @@map("messages")
@@ -48,7 +48,7 @@ model Client {
   specificContext1  String?
   specificContext2  String?
   specificContext3  String?
-  documentsLanguage String     @default("english")
+  documentsLanguage String     @default("en")
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
   chats             Chat[]
@@ -75,18 +75,18 @@ model Document {
 }
 
 model Feedback {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   userId           String
   userEmail        String?
   userName         String?
-  type             String
+  type             FeedbackType
   title            String
   description      String
-  priority         String
-  state            String   @default("PENDING")
+  priority         FeedbackPriority
+  state            FeedbackState    @default(PENDING)
   useCase          String?
   stepsToReproduce String?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime         @default(now())
 
   @@index([userId])
   @@map("feedbacks")
@@ -109,24 +109,24 @@ model Prompt {
 }
 
 model UserSubscription {
-  id                   String             @id @default(cuid())
-  userId               String             @unique
-  email                String?
-  plan                 SubscriptionPlan   @default(apprentice)
-  status               SubscriptionStatus @default(active)
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  stripePriceId        String?
-  currentPeriodStart   DateTime           @default(now())
-  currentPeriodEnd     DateTime           @default(now())
-  cancelAtPeriodEnd    Boolean            @default(false)
-  pendingPlanChange    String?
-  stripeScheduleId     String?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  canceledAt           DateTime?
-  spending_limit_usd   Float              @default(5.00)
-  custom_spending_limit_usd Float?        // Custom spending limit override for specific users
+  id                        String             @id @default(cuid())
+  userId                    String             @unique
+  email                     String?
+  plan                      SubscriptionPlan   @default(apprentice)
+  status                    SubscriptionStatus @default(active)
+  stripeCustomerId          String?
+  stripeSubscriptionId      String?
+  stripePriceId             String?
+  currentPeriodStart        DateTime           @default(now())
+  currentPeriodEnd          DateTime           @default(now())
+  cancelAtPeriodEnd         Boolean            @default(false)
+  pendingPlanChange         String?
+  stripeScheduleId          String?
+  createdAt                 DateTime           @default(now())
+  updatedAt                 DateTime           @updatedAt
+  canceledAt                DateTime?
+  spending_limit_usd        Float              @default(5.8)
+  custom_spending_limit_usd Float? // Custom spending limit override for specific users
 
   @@index([currentPeriodEnd])
   @@map("user_subscriptions")
@@ -201,11 +201,11 @@ model WebhookEvent {
 }
 
 model AccountDeletionRequest {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
   requestData Json?
   reason      String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 
   @@index([userId])
   @@map("account_deletion_requests")
@@ -264,4 +264,23 @@ enum AffiliationStatus {
   InfinityStars
   Alpha
   Omega
+}
+
+enum FeedbackType {
+  feature
+  bug
+  complaint
+}
+
+enum FeedbackPriority {
+  low
+  medium
+  high
+}
+
+enum FeedbackState {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FALSE_ALARM
 }

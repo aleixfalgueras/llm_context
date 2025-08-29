@@ -5,8 +5,10 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
+import {Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import {
   AlertTriangle,
+  BarChart3,
   DollarSign,
   FileText,
   Filter,
@@ -17,11 +19,13 @@ import {
   Users,
   XCircle
 } from 'lucide-react'
-import {BadgeVariant, FeedbackState, FeedbackType, Priority} from '@/lib/types/enums'
+import {BadgeVariant} from '@/lib/enums'
 import {AdminDashboardClientProps, FeedbackItem} from '@/lib/types/admin-types'
 import { useToast } from '@/hooks/use-toast'
 import { handleClientApiError } from '@/lib/api/api-toast'
 import {useTranslations} from '@/lib/translations/context'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import {FeedbackState, FeedbackType, Priority} from "@/lib/types/feedback-types";
 
 export default function AdminDashboardClient({ data }: AdminDashboardClientProps) {
   const t = useTranslations('admin')
@@ -151,14 +155,6 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
     })
   }, [feedbackData, typeFilter, priorityFilter, stateFilter])
 
-  const getBadgeVariant = (type: string, priority: string, state: string): BadgeVariant => {
-    if (type === FeedbackType.BUG) return BadgeVariant.DESTRUCTIVE
-    if (priority === Priority.HIGH) return BadgeVariant.DESTRUCTIVE
-    if (state === FeedbackState.COMPLETED) return BadgeVariant.SECONDARY
-    if (state === FeedbackState.IN_PROGRESS) return BadgeVariant.DEFAULT
-    return BadgeVariant.OUTLINE
-  }
-
   const getStateBadgeVariant = (state: string): BadgeVariant => {
     switch (state) {
       case FeedbackState.COMPLETED: return BadgeVariant.SECONDARY
@@ -171,35 +167,43 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              {t('dashboard.description')}
-            </p>
+        <Tabs defaultValue="stats" className="w-full">
+          <div className="flex justify-between items-center mb-6">
+            <TabsList className="grid max-w-md grid-cols-2">
+              <TabsTrigger value="stats" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Stats
+              </TabsTrigger>
+              <TabsTrigger value="feedback" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Feedback
+              </TabsTrigger>
+            </TabsList>
+            
+            <Button
+              variant="outline"
+              onClick={handleClearCaches}
+              disabled={clearingCaches}
+              className="flex items-center gap-2"
+            >
+              {clearingCaches ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('dashboard.buttons.clearingCaches')}
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="h-4 w-4" />
+                  {t('dashboard.buttons.clearCaches')}
+                </>
+              )}
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleClearCaches}
-            disabled={clearingCaches}
-            className="flex items-center gap-2"
-          >
-            {clearingCaches ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t('dashboard.buttons.clearingCaches')}
-              </>
-            ) : (
-              <>
-                <RotateCcw className="h-4 w-4" />
-                {t('dashboard.buttons.clearCaches')}
-              </>
-            )}
-          </Button>
-        </div>
 
-        {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <TabsContent value="stats" className="mt-6">
+
+            {/* Key Metrics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('dashboard.metrics.totalUsers')}</CardTitle>
@@ -210,63 +214,6 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
               <p className="text-xs text-muted-foreground">
                 +{data.recentUsers} {t('dashboard.metrics.inLast30Days')}
               </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('dashboard.metrics.totalClients')}</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.totalClients}</div>
-              <p className="text-xs text-muted-foreground">
-                {t('dashboard.metrics.acrossAllUsers')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('dashboard.metrics.totalDocuments')}</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.totalDocuments}</div>
-              <p className="text-xs text-muted-foreground">
-                {t('dashboard.metrics.unlimitedForAllPlans')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('dashboard.metrics.chatConversations')}</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.totalChats}</div>
-              <p className="text-xs text-muted-foreground">
-                {data.totalMessages} {t('dashboard.metrics.messagesTotal')}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Additional Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('dashboard.metrics.monthlyUsage')}</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">{t('dashboard.metrics.totalSpending')}</span>
-                  <span className="font-medium">${data.monthlyStats.totalSpending.toFixed(2)}</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
@@ -286,29 +233,87 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
               </div>
             </CardContent>
           </Card>
+            </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('dashboard.metrics.feedbackAndPrompts')}</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">{t('dashboard.metrics.totalFeedback')}</span>
-                  <span className="font-medium">{data.totalFeedback}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">{t('dashboard.metrics.customPrompts')}</span>
-                  <span className="font-medium">{data.totalPrompts}</span>
-                </div>
+            {/* Monthly Spending Graph */}
+            <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+              <TrendingUp className="h-5 w-5" />
+              {t('dashboard.metrics.monthlyUsage')}
+            </CardTitle>
+            <CardDescription>
+              Total spending vs maximum capacity across all users for the last 12 months
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={data.monthlySpendingHistory}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 25 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="month" 
+                    className="text-xs"
+                    tick={{ fill: 'currentColor' }}
+                  />
+                  <YAxis 
+                    className="text-xs"
+                    tick={{ fill: 'currentColor' }}
+                    tickFormatter={(value) => `$${value.toFixed(0)}`}
+                  />
+                  <Tooltip 
+                    formatter={(value: number, name: string) => [
+                      `$${value.toFixed(2)}`, 
+                      name === 'spending' ? 'Actual Spending' : 'Max Capacity'
+                    ]}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '6px'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="spending" 
+                    stroke="hsl(217, 91%, 60%)" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(217, 91%, 60%)', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6 }}
+                    name="spending"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="maxPossible" 
+                    stroke="hsl(142, 71%, 45%)" 
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={{ fill: 'hsl(142, 71%, 45%)', strokeWidth: 2, r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name="maxPossible"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center gap-6 mt-4">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-8 bg-blue-500 rounded" />
+                <span className="text-sm text-muted-foreground">Actual Spending</span>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-8 bg-green-600 rounded border-2 border-dashed border-green-600 bg-opacity-50" />
+                <span className="text-sm text-muted-foreground">Maximum Capacity</span>
+              </div>
+            </div>
             </CardContent>
           </Card>
-        </div>
+          </TabsContent>
 
-        {/* Feedback Management */}
-        <Card>
+          <TabsContent value="feedback" className="mt-6">
+            {/* Feedback Management */}
+            <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <Filter className="h-5 w-5" />
@@ -341,9 +346,9 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('dashboard.filters.options.allTypes')}</SelectItem>
-                  <SelectItem value={FeedbackType.FEATURE}>{t('dashboard.filters.options.featureRequest')}</SelectItem>
-                  <SelectItem value={FeedbackType.BUG}>{t('dashboard.filters.options.bugReport')}</SelectItem>
-                  <SelectItem value={FeedbackType.COMPLAINT}>{t('dashboard.filters.options.generalFeedback')}</SelectItem>
+                  <SelectItem value={FeedbackType.feature}>{t('dashboard.filters.options.featureRequest')}</SelectItem>
+                  <SelectItem value={FeedbackType.bug}>{t('dashboard.filters.options.bugReport')}</SelectItem>
+                  <SelectItem value={FeedbackType.complaint}>{t('dashboard.filters.options.generalFeedback')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -353,9 +358,9 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('dashboard.filters.options.allPriorities')}</SelectItem>
-                  <SelectItem value={Priority.HIGH}>{t('dashboard.filters.options.highPriority')}</SelectItem>
-                  <SelectItem value={Priority.MEDIUM}>{t('dashboard.filters.options.mediumPriority')}</SelectItem>
-                  <SelectItem value={Priority.LOW}>{t('dashboard.filters.options.lowPriority')}</SelectItem>
+                  <SelectItem value={Priority.high}>{t('dashboard.filters.options.highPriority')}</SelectItem>
+                  <SelectItem value={Priority.medium}>{t('dashboard.filters.options.mediumPriority')}</SelectItem>
+                  <SelectItem value={Priority.low}>{t('dashboard.filters.options.lowPriority')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -384,14 +389,14 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                           {feedback.state.replace('_', ' ')}
                         </Badge>
                         <Badge variant={
-                          feedback.type === FeedbackType.BUG ? BadgeVariant.DESTRUCTIVE : 
-                          feedback.type === FeedbackType.FEATURE ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
+                          feedback.type === FeedbackType.bug ? BadgeVariant.DESTRUCTIVE : 
+                          feedback.type === FeedbackType.feature ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.type}
                         </Badge>
                         <Badge variant={
-                          feedback.priority === Priority.HIGH ? BadgeVariant.DESTRUCTIVE :
-                          feedback.priority === Priority.MEDIUM ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
+                          feedback.priority === Priority.high ? BadgeVariant.DESTRUCTIVE :
+                          feedback.priority === Priority.medium ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY
                         }>
                           {feedback.priority}
                         </Badge>
@@ -404,9 +409,9 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                     </div>
                     <div className="ml-4 flex flex-col items-end gap-2 min-w-[140px]">
                       <div className="flex items-center gap-1">
-                        {feedback.type === FeedbackType.BUG && <AlertTriangle className="h-4 w-4 text-orange-500" />}
-                        {feedback.type === FeedbackType.FEATURE && <TrendingUp className="h-4 w-4 text-blue-500" />}
-                        {feedback.type === FeedbackType.COMPLAINT && <XCircle className="h-4 w-4 text-red-500" />}
+                        {feedback.type === FeedbackType.bug && <AlertTriangle className="h-4 w-4 text-orange-500" />}
+                        {feedback.type === FeedbackType.feature && <TrendingUp className="h-4 w-4 text-blue-500" />}
+                        {feedback.type === FeedbackType.complaint && <XCircle className="h-4 w-4 text-red-500" />}
                       </div>
                       
                       <div className="relative">
@@ -437,8 +442,10 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
                 ))
               )}
             </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          </TabsContent>
+        </Tabs>
     </div>
   )
 }
