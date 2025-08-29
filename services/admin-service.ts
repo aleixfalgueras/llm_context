@@ -1,11 +1,11 @@
 import {currentUser} from '@clerk/nextjs/server'
 import {logger} from '@/lib/logger'
-import {AdminDashboardData, FeedbackItem} from '@/lib/types/admin-types'
+import {AdminDashboardData, FeedbackItem, UpdateSpendingLimitResponse} from '@/lib/types/admin-types'
 import {clearAllCaches} from '@/services/subscription/subscription-cache'
 import {FeedbackService, isValidFeedbackState} from '@/services/feedback-service'
 import {FeedbackOperations} from '@/database/feedback-operations'
 import {SubscriptionUsageOperations} from '@/database/subscription-usage-operations'
-import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
 
 const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 
@@ -258,6 +258,65 @@ export class AdminService {
     return {
       success: true,
       message: result.message
+    }
+  }
+
+  /**
+   * Get all user subscriptions information
+   */
+  static async getUserSubscriptions(adminUserId: string): Promise<UserSubscription[]> {
+    const isAdmin = await this.isAdminUser(adminUserId)
+    if (!isAdmin) {
+      throw new Error('Unauthorized: Admin access required')
+    }
+
+    try {
+      return await SubscriptionUsageOperations.getAllUserSubscriptions()
+    } catch (error) {
+      logger.error('Failed to fetch users with subscriptions', error as Error)
+      throw new Error('Failed to fetch users')
+    }
+  }
+
+  /**
+   * Update a user's custom spending limit
+   */
+  static async updateUserCustomSpendingLimit(
+    adminUserId: string,
+    targetUserId: string,
+    customSpendingLimit: number | null
+  ): Promise<UpdateSpendingLimitResponse> {
+    const isAdmin = await this.isAdminUser(adminUserId)
+    if (!isAdmin) {
+      throw new Error('Unauthorized: Admin access required')
+    }
+
+    // Validate spending limit if provided
+    if (customSpendingLimit !== null) {
+      if (customSpendingLimit < 0) {
+        throw new Error('Spending limit cannot be negative')
+      }
+      if (customSpendingLimit > 10000) {
+        throw new Error('Spending limit cannot exceed $10,000')
+      }
+    }
+
+    try {
+      const updatedSubscription = await SubscriptionUsageOperations.updateCustomSpendingLimit(
+        targetUserId,
+        customSpendingLimit
+      )
+
+      return {
+        success: true,
+        message: customSpendingLimit === null 
+          ? 'Custom spending limit removed successfully'
+          : `Custom spending limit set to $${customSpendingLimit}`,
+        updatedLimit: updatedSubscription.custom_spending_limit_usd
+      }
+    } catch (error) {
+      logger.error(`Failed to update user ${targetUserId} custom spending limit`, error as Error)
+      throw new Error('Failed to update spending limit')
     }
   }
 
