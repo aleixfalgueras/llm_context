@@ -8,7 +8,7 @@ import {BaseOperations} from './base-operations'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription, UserUsage} from "@prisma/client";
 
-// TODO: Use base-operations methods
+
 export class SubscriptionUsageOperations extends BaseOperations {
   /**
    * Find user subscription by userId
@@ -226,6 +226,130 @@ export class SubscriptionUsageOperations extends BaseOperations {
           billingPeriodEnd: billingPeriodEnd.toISOString()
         }
       })
+      throw error
+    }
+  }
+
+  /**
+   * Admin-specific: Get dashboard statistics
+   * Returns total users, recent users, and subscription counts by plan
+   */
+  static async getAdminDashboardStats(): Promise<{
+    totalUsers: number
+    recentUsers: number
+    subscriptionsByPlan: Array<{ plan: SubscriptionPlan; _count: number }>
+  }> {
+    try {
+      const [totalUsers, recentUsers, subscriptionsByPlan] = await Promise.all([
+        // Total user count
+        prisma.userSubscription.count(),
+        
+        // Recent users (last 30 days)
+        prisma.userSubscription.count({
+          where: {
+            createdAt: {
+              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            }
+          }
+        }),
+        
+        // Subscription counts by plan
+        prisma.userSubscription.groupBy({
+          by: ['plan'],
+          _count: true
+        })
+      ])
+
+      return {
+        totalUsers,
+        recentUsers,
+        subscriptionsByPlan
+      }
+    } catch (error) {
+      logger.error('Failed to get admin dashboard stats', error as Error)
+      throw error
+    }
+  }
+
+  /**
+   * Admin-specific: Get historical usage data for specified months
+   */
+  static async getHistoricalUsage(months: number): Promise<UserUsage[]> {
+    try {
+      return await prisma.userUsage.findMany({
+        where: {
+          billingPeriodStart: {
+            gte: new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000)
+          }
+        },
+        select: {
+          billingPeriodStart: true,
+          cost_usd: true,
+          userId: true,
+          billingPeriodEnd: true
+        }
+      }) as UserUsage[]
+    } catch (error) {
+      logger.error('Failed to get historical usage', error as Error, { metadata: { months } })
+      throw error
+    }
+  }
+
+  /**
+   * Admin-specific: Get all subscriptions for capacity calculations
+   */
+  static async getAllSubscriptionsForCapacityCalc(): Promise<Array<{
+    createdAt: Date
+    canceledAt: Date | null
+    currentPeriodStart: Date | null
+    currentPeriodEnd: Date | null
+    spending_limit_usd: number
+    custom_spending_limit_usd: number | null
+    status: SubscriptionStatus
+  }>> {
+    try {
+      return await prisma.userSubscription.findMany({
+        select: {
+          createdAt: true,
+          canceledAt: true,
+          currentPeriodStart: true,
+          currentPeriodEnd: true,
+          spending_limit_usd: true,
+          custom_spending_limit_usd: true,
+          status: true
+        }
+      })
+    } catch (error) {
+      logger.error('Failed to get subscriptions for capacity calc', error as Error)
+      throw error
+    }
+  }
+
+  /**
+   * Admin-specific: Get all subscriptions for monthly subscription history
+   * Returns data needed to calculate total and active users per month
+   */
+  static async getMonthlySubscriptionHistory(): Promise<Array<{
+    createdAt: Date
+    canceledAt: Date | null
+    currentPeriodStart: Date | null
+    currentPeriodEnd: Date | null
+    status: SubscriptionStatus
+    plan: SubscriptionPlan
+  }>> {
+    try {
+      return await prisma.userSubscription.findMany({
+        select: {
+          createdAt: true,
+          canceledAt: true,
+          currentPeriodStart: true,
+          currentPeriodEnd: true,
+          status: true,
+          plan: true
+        }
+      })
+    } catch (error) {
+      logger.error('Failed to get monthly subscription history', error as Error)
       throw error
     }
   }

@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 import { logger } from '@/lib/logger'
-import { clearAllCaches } from '@/services/subscription/subscription-cache'
+import { AdminService } from '@/services/admin-service'
 
 // Force dynamic rendering since we use auth() which accesses headers
 export const dynamic = 'force-dynamic'
-
-const ADMIN_EMAIL = 'feina.aleix@gmail.com'
 
 export async function POST() {
   try {
@@ -19,38 +17,22 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get current user to check email
-    const user = await currentUser()
-    const userEmail = user?.emailAddresses[0]?.emailAddress
-
-    // Check if user is admin
-    if (userEmail !== ADMIN_EMAIL) {
-      logger.warn('Non-admin user attempted to clear caches', { userId, metadata: { userEmail } })
-      logger.apiResponse('POST', '/api/admin/clear-caches', 403)
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
-    }
-
-    // Clear all server-side caches
-    logger.info('Admin clearing all server-side caches', { userId, metadata: { userEmail } })
+    // Use AdminService to clear caches (includes admin check)
+    const result = await AdminService.clearAllServerCaches(userId)
     
-    await clearAllCaches()
-    
-    logger.info('All server-side caches cleared successfully', { userId, metadata: { userEmail } })
     logger.apiResponse('POST', '/api/admin/clear-caches', 200)
     
-    return NextResponse.json({ 
-      success: true, 
-      message: 'All caches cleared successfully',
-      clearedCaches: [
-        'subscription cache',
-        'usage cache', 
-        'storage cache',
-        'client count cache'
-      ]
-    })
+    return NextResponse.json(result)
 
   } catch (error) {
     logger.error('Error clearing caches', error as Error)
+    
+    // Check if it's a forbidden error
+    if (error instanceof Error && error.message.includes('Forbidden')) {
+      logger.apiResponse('POST', '/api/admin/clear-caches', 403)
+      return NextResponse.json({ error: error.message }, { status: 403 })
+    }
+    
     logger.apiResponse('POST', '/api/admin/clear-caches', 500)
     return NextResponse.json(
       { error: 'Internal server error' },
