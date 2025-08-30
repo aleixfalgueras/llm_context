@@ -195,6 +195,27 @@
       }
     }
   },
+  "clientContext": {
+    "header": "CLIENT CONTEXT:",
+    "fields": {
+      "country": "Country",
+      "generalContext": "General Context",
+      "specificContext1": "Specific Context 1",
+      "specificContext2": "Specific Context 2",
+      "specificContext3": "Specific Context 3"
+    },
+    "descriptions": {
+      "country": "Client's country or location",
+      "generalContext": "General information about the client",
+      "specificContext1": "First specific context field",
+      "specificContext2": "Second specific context field",
+      "specificContext3": "Third specific context field"
+    },
+    "tooltip": {
+      "title": "Available Variables:",
+      "info": "Variables will be automatically replaced with actual client data when used."
+    }
+  },
   "prompts": {
     "title": "Prompt Management",
     "description": "Create, edit, and organize your AI prompts for better conversations.",

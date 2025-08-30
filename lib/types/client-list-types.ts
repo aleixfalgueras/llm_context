@@ -12,7 +12,6 @@ export interface UsageInfo {
 import type {Client} from '@prisma/client'
 
 export type { Client } from '@prisma/client'
-export { CLIENT_FIELD_LABELS } from './client-types'
 
 export interface ClientActionHandlers {
   onEditClient: (client: Client) => void

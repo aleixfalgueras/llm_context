@@ -195,6 +195,27 @@
       }
     }
   },
+  "clientContext": {
+    "header": "CONTEXTE CLIENT: ",
+    "fields": {
+      "country": "Pays",
+      "generalContext": "Contexte Général",
+      "specificContext1": "Contexte Spécifique 1",
+      "specificContext2": "Contexte Spécifique 2",
+      "specificContext3": "Contexte Spécifique 3"
+    },
+    "descriptions": {
+      "country": "Pays ou localisation du client",
+      "generalContext": "Informations générales sur le client",
+      "specificContext1": "Premier champ de contexte spécifique",
+      "specificContext2": "Deuxième champ de contexte spécifique",
+      "specificContext3": "Troisième champ de contexte spécifique"
+    },
+    "tooltip": {
+      "title": "Variables Disponibles:",
+      "info": "Les variables seront automatiquement remplacées par les données réelles du client lors de leur utilisation."
+    }
+  },
   "prompts": {
     "title": "Gestion des Prompts",
     "description": "Créez, modifiez et organisez vos prompts IA pour de meilleures conversations.",
