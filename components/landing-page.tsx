@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import {Button} from '@/components/ui/button'
+import {AnimatedLogo} from '@/components/ui/animated-logo'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
 import {getPlanNameColor} from '@/lib/utils/subscription-client-utils'
@@ -48,14 +49,15 @@ export function LandingPage() {
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="text-center mb-16">
-          {/* Logo - Centered */}
+          {/* Logo - Centered with Animation */}
           <div className="mb-8 flex justify-center">
-            <Image 
+            <AnimatedLogo
               src="/mia_logo.svg" 
               alt="MIA - Millennials Influencers Assistant" 
               width={350}
               height={350}
               className="max-w-xs md:max-w-sm"
+              delay={50}
             />
           </div>
           
