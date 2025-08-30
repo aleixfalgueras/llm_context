@@ -501,6 +501,13 @@
         "question": "Is my data secure?",
         "answer": "Absolutely. We use enterprise-grade encryption for all data storage and transmission. Your client information and generated content are private and never shared with third parties."
       }
+    },
+    "usageIndicator": {
+      "tooltipMessage": "This percentage ({{percentage}}%) represents how much of your subscription usage has been consumed.",
+      "usageUnavailable": "Usage unavailable",
+      "errorLoadingUsage": "Failed to load usage information",
+      "limitReached": "You've reached your spending limit. Messages may be blocked.",
+      "approachingLimit": "You're approaching your spending limit."
     }
   },
   "affiliation": {
@@ -1087,13 +1094,14 @@
       "customization": {
         "title": "User Customization",
         "description": "Manage custom settings for individual users",
-        "spendingLimits": {
-          "title": "Custom Spending Limits",
-          "description": "Override default spending limits for specific users",
+        "subscriptionUsage": {
+          "title": "User Subscription and Usage",
+          "description": "Override default spending limits for specific users. Remember that limits and usage information is in US Dollars.",
           "searchPlaceholder": "Search by email or user ID...",
           "userColumn": "User",
           "planColumn": "Plan",
           "statusColumn": "Status",
+          "usageColumn": "Usage",
           "defaultLimitColumn": "Default Limit",
           "customLimitColumn": "Custom Limit",
           "actionsColumn": "Actions",
