@@ -63,7 +63,7 @@ export function Navbar() {
               </Link>
               
               {/* Mobile menu button */}
-              <div className="sm:hidden">
+              <div className="lg:hidden">
                 <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -124,7 +124,7 @@ export function Navbar() {
               </div>
               
               {/* Desktop Navigation links */}
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
@@ -156,7 +156,7 @@ export function Navbar() {
                 <DropdownMenu>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <DropdownMenuTrigger className="hidden sm:inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors">
+                      <DropdownMenuTrigger className="hidden lg:inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors">
                         <Menu className="h-4 w-4" />
                         <span className="sr-only">Open menu</span>
                       </DropdownMenuTrigger>
