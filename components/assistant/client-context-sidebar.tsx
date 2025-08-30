@@ -1,6 +1,6 @@
 'use client'
 
-import {useEffect, useRef, useState} from 'react'
+import {useEffect, useMemo, useRef, useState} from 'react'
 import {GripVertical, Lightbulb, MessageSquare, Plus, User} from 'lucide-react'
 import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
@@ -8,10 +8,10 @@ import {Checkbox} from '@/components/ui/checkbox'
 import {Label} from '@/components/ui/label'
 import {ClientCombobox} from '@/components/ui/client-combobox'
 import {
-  CLIENT_CONTEXT_FIELDS,
   ClientContextSelection,
   DEFAULT_CLIENT_CONTEXT
 } from '@/lib/types/client-types'
+import { getClientContextFields } from '@/lib/utils/client-context-utils'
 import {useRouter} from 'next/navigation'
 import {Client} from '@prisma/client'
 import {useTranslations} from '@/lib/translations/context'
@@ -39,7 +39,9 @@ export function ClientContextSidebar({
   isMobile = false
 }: ClientContextSidebarProps) {
   const t = useTranslations('assistant')
+  const tContext = useTranslations('clientContext')
   const router = useRouter()
+  const contextFields = useMemo(() => getClientContextFields(tContext), [tContext])
   const [sidebarWidth, setSidebarWidth] = useState(300)
   const [isResizing, setIsResizing] = useState(false)
   const [isCreatingChat, setIsCreatingChat] = useState(false)
@@ -95,7 +97,7 @@ export function ClientContextSidebar({
           if (!value) return false
           
           // Only include fields where the client actually has data
-          if (!(key in CLIENT_CONTEXT_FIELDS)) return false
+          if (!(key in contextFields)) return false
           return selectedClient?.[key as keyof typeof selectedClient]
         })
         .map(([key]) => key)
@@ -190,7 +192,7 @@ export function ClientContextSidebar({
                     {t('clientContextSidebar.contextSelectionDescription')}
                   </p>
                   <div className="grid grid-cols-1 gap-3 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                    {Object.entries(CLIENT_CONTEXT_FIELDS).map(([fieldKey, fieldLabel]) => {
+                    {Object.entries(contextFields).map(([fieldKey, fieldLabel]) => {
                       const typedFieldKey = fieldKey as keyof ClientContextSelection;
                       const hasFieldData = selectedClient?.[typedFieldKey];
                       
@@ -306,7 +308,7 @@ export function ClientContextSidebar({
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border text-xs">
                     {chatContextFields && chatContextFields.length > 0 ? (
                       chatContextFields.map(field => {
-                        return CLIENT_CONTEXT_FIELDS[field as keyof typeof CLIENT_CONTEXT_FIELDS] || field
+                        return contextFields[field as keyof typeof contextFields] || field
                       }).join(', ')
                     ) : t('clientContextSidebar.noneSelected')}
                   </div>
