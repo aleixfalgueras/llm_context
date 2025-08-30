@@ -121,3 +121,12 @@
         @apply italic;
     }
 }
+
+/* 3D rotation support for flip-in animation */
+.rotateY-0 {
+    transform: rotateY(0deg);
+}
+
+.rotateY-90 {
+    transform: rotateY(90deg);
+}
