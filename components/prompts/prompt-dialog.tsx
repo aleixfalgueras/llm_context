@@ -271,7 +271,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="content">{t('form.content')} {!viewMode && t('form.required')}</Label>
-              {!viewMode && <ClientContextVariablesTooltip />}
+              <ClientContextVariablesTooltip />
             </div>
             {viewMode ? (
               <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[200px] max-h-[300px] overflow-y-auto">
