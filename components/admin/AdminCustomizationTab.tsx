@@ -12,12 +12,37 @@ import {UserSubscription, SubscriptionPlan} from '@prisma/client'
 import {useToast} from '@/hooks/use-toast'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {useTranslations} from '@/lib/translations/context'
+import {SubscriptionWithUsage} from "@/lib/types/subscription-types";
+
+// Component to display usage with color coding
+function UsageDisplay({ currentUsage, limit }: { currentUsage: number; limit: number }) {
+  const percentage = limit > 0 ? (currentUsage / limit) * 100 : 0
+  
+  // Determine color based on usage percentage
+  let colorClass = 'text-green-600 dark:text-green-400' // < 80%
+  if (percentage >= 90) {
+    colorClass = 'text-red-600 dark:text-red-400'
+  } else if (percentage >= 80) {
+    colorClass = 'text-yellow-600 dark:text-yellow-400'
+  }
+  
+  return (
+    <div className="flex items-center gap-2">
+      <span className={colorClass}>
+        ${currentUsage.toFixed(2)} / ${limit.toFixed(2)}
+      </span>
+      <span className="text-muted-foreground">
+        ({percentage.toFixed(0)}%)
+      </span>
+    </div>
+  )
+}
 
 export default function AdminCustomizationTab() {
   const t = useTranslations('admin')
   const { toast } = useToast()
   
-  const [users, setUsers] = useState<UserSubscription[]>([])
+  const [users, setUsers] = useState<Array<SubscriptionWithUsage>>([])
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
   const [userSearchQuery, setUserSearchQuery] = useState<string>('')
   const [planFilter, setPlanFilter] = useState<string>('all')
@@ -37,7 +62,7 @@ export default function AdminCustomizationTab() {
         })
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: t('dashboard.customization.spendingLimits.errors.fetchUsers') }))
+          const errorData = await response.json().catch(() => ({ error: t('dashboard.customization.subscriptionUsage.errors.fetchUsers') }))
           throw new Error(errorData.error)
         }
 
@@ -45,8 +70,8 @@ export default function AdminCustomizationTab() {
         setUsers(result.users || [])
       } catch (error) {
         console.error('Error fetching users:', error)
-        const errorMessage = error instanceof Error ? error.message : t('dashboard.customization.spendingLimits.errors.fetchUsers')
-        handleClientApiError(errorMessage, t('dashboard.customization.spendingLimits.errors.fetchUsers'))
+        const errorMessage = error instanceof Error ? error.message : t('dashboard.customization.subscriptionUsage.errors.fetchUsers')
+        handleClientApiError(errorMessage, t('dashboard.customization.subscriptionUsage.errors.fetchUsers'))
       } finally {
         setLoadingUsers(false)
       }
@@ -63,7 +88,7 @@ export default function AdminCustomizationTab() {
       if (!removeLimit && (isNaN(customSpendingLimit!) || customSpendingLimit! < 0)) {
         toast({
           title: 'Error',
-          description: t('dashboard.customization.spendingLimits.errors.invalidAmount'),
+          description: t('dashboard.customization.subscriptionUsage.errors.invalidAmount'),
           variant: 'destructive'
         })
         return
@@ -81,7 +106,7 @@ export default function AdminCustomizationTab() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: t('dashboard.customization.spendingLimits.errors.updateLimit') }))
+        const errorData = await response.json().catch(() => ({ error: t('dashboard.customization.subscriptionUsage.errors.updateLimit') }))
         throw new Error(errorData.error)
       }
 
@@ -98,8 +123,8 @@ export default function AdminCustomizationTab() {
       toast({
         title: 'Success',
         description: removeLimit 
-          ? t('dashboard.customization.spendingLimits.success.limitRemoved')
-          : t('dashboard.customization.spendingLimits.success.limitUpdated')
+          ? t('dashboard.customization.subscriptionUsage.success.limitRemoved')
+          : t('dashboard.customization.subscriptionUsage.success.limitUpdated')
       })
 
       setEditingUserId(null)
@@ -107,8 +132,8 @@ export default function AdminCustomizationTab() {
 
     } catch (error) {
       console.error('Error updating spending limit:', error)
-      const errorMessage = error instanceof Error ? error.message : t('dashboard.customization.spendingLimits.errors.updateLimit')
-      handleClientApiError(errorMessage, t('dashboard.customization.spendingLimits.errors.updateLimit'))
+      const errorMessage = error instanceof Error ? error.message : t('dashboard.customization.subscriptionUsage.errors.updateLimit')
+      handleClientApiError(errorMessage, t('dashboard.customization.subscriptionUsage.errors.updateLimit'))
     } finally {
       setUpdatingSpendingLimit(false)
     }
@@ -172,9 +197,9 @@ export default function AdminCustomizationTab() {
       <CardContent>
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium mb-2">{t('dashboard.customization.spendingLimits.title')}</h3>
+            <h3 className="text-lg font-medium mb-2">{t('dashboard.customization.subscriptionUsage.title')}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {t('dashboard.customization.spendingLimits.description')}
+              {t('dashboard.customization.subscriptionUsage.description')}
             </p>
             
             {/* Search and Filter Controls */}
@@ -183,7 +208,7 @@ export default function AdminCustomizationTab() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder={t('dashboard.customization.spendingLimits.searchPlaceholder')}
+                  placeholder={t('dashboard.customization.subscriptionUsage.searchPlaceholder')}
                   value={userSearchQuery}
                   onChange={(e) => setUserSearchQuery(e.target.value)}
                   className="pl-10"
@@ -220,28 +245,29 @@ export default function AdminCustomizationTab() {
               <table className="w-full">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 font-medium">{t('dashboard.customization.spendingLimits.userColumn')}</th>
-                    <th className="text-left p-3 font-medium">{t('dashboard.customization.spendingLimits.planColumn')}</th>
-                    <th className="text-left p-3 font-medium">{t('dashboard.customization.spendingLimits.statusColumn')}</th>
-                    <th className="text-left p-3 font-medium">{t('dashboard.customization.spendingLimits.defaultLimitColumn')}</th>
-                    <th className="text-left p-3 font-medium">{t('dashboard.customization.spendingLimits.customLimitColumn')}</th>
-                    <th className="text-left p-3 font-medium">{t('dashboard.customization.spendingLimits.actionsColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.userColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.planColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.statusColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.usageColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.defaultLimitColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.customLimitColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.actionsColumn')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingUsers ? (
                     <tr>
-                      <td colSpan={6} className="text-center p-8">
+                      <td colSpan={7} className="text-center p-8">
                         <div className="flex items-center justify-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          {t('dashboard.customization.spendingLimits.loadingUsers')}
+                          {t('dashboard.customization.subscriptionUsage.loadingUsers')}
                         </div>
                       </td>
                     </tr>
                   ) : filteredUsers.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center p-8 text-muted-foreground">
-                        {t('dashboard.customization.spendingLimits.noUsers')}
+                        {t('dashboard.customization.subscriptionUsage.noUsers')}
                       </td>
                     </tr>
                   ) : (
@@ -266,6 +292,16 @@ export default function AdminCustomizationTab() {
                           </Badge>
                         </td>
                         <td className="p-3">
+                          {user.currentUsage !== undefined ? (
+                            <UsageDisplay 
+                              currentUsage={user.currentUsage} 
+                              limit={user.custom_spending_limit_usd ?? user.spending_limit_usd}
+                            />
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="p-3">
                           ${user.spending_limit_usd.toFixed(2)}
                         </td>
                         <td className="p-3">
@@ -275,7 +311,7 @@ export default function AdminCustomizationTab() {
                                 type="number"
                                 value={newSpendingLimit}
                                 onChange={(e) => setNewSpendingLimit(e.target.value)}
-                                placeholder={t('dashboard.customization.spendingLimits.newLimitPlaceholder')}
+                                placeholder={t('dashboard.customization.subscriptionUsage.newLimitPlaceholder')}
                                 className="w-32"
                                 step="0.01"
                                 min="0"
@@ -286,7 +322,7 @@ export default function AdminCustomizationTab() {
                             <div className="font-medium">
                               {user.custom_spending_limit_usd !== null 
                                 ? `$${user.custom_spending_limit_usd.toFixed(2)}`
-                                : <span className="text-muted-foreground">{t('dashboard.customization.spendingLimits.notSet')}</span>
+                                : <span className="text-muted-foreground">{t('dashboard.customization.subscriptionUsage.notSet')}</span>
                               }
                             </div>
                           )}
@@ -302,7 +338,7 @@ export default function AdminCustomizationTab() {
                                 {updatingSpendingLimit ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
-                                  t('dashboard.customization.spendingLimits.confirmUpdate')
+                                  t('dashboard.customization.subscriptionUsage.confirmUpdate')
                                 )}
                               </Button>
                               {user.custom_spending_limit_usd !== null && (
@@ -312,7 +348,7 @@ export default function AdminCustomizationTab() {
                                   onClick={() => handleUpdateSpendingLimit(user.userId, true)}
                                   disabled={updatingSpendingLimit}
                                 >
-                                  {t('dashboard.customization.spendingLimits.removeLimit')}
+                                  {t('dashboard.customization.subscriptionUsage.removeLimit')}
                                 </Button>
                               )}
                               <Button
@@ -338,8 +374,8 @@ export default function AdminCustomizationTab() {
                             >
                               <Edit2 className="h-4 w-4 mr-1" />
                               {user.custom_spending_limit_usd !== null 
-                                ? t('dashboard.customization.spendingLimits.updateLimit')
-                                : t('dashboard.customization.spendingLimits.setCustomLimit')
+                                ? t('dashboard.customization.subscriptionUsage.updateLimit')
+                                : t('dashboard.customization.subscriptionUsage.setCustomLimit')
                               }
                             </Button>
                           )}

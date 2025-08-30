@@ -5,7 +5,7 @@
 import {prisma} from '@/lib/prisma'
 import {logger} from '@/lib/logger'
 import {BaseOperations} from './base-operations'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionWithUsage} from '@/lib/types/subscription-types'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription, UserUsage} from "@prisma/client";
 
 
@@ -237,6 +237,50 @@ export class SubscriptionUsageOperations extends BaseOperations {
     return prisma.userSubscription.findMany({
       orderBy: {createdAt: 'desc'}
     });
+  }
+
+  /**
+   * Get all user subscriptions with their current billing period usage
+   */
+  static async getAllUserSubscriptionsWithUsage(): Promise<Array<SubscriptionWithUsage>> {
+    try {
+      // Get all subscriptions
+      const subscriptions = await prisma.userSubscription.findMany({
+        orderBy: {createdAt: 'desc'}
+      });
+
+      // For each subscription, get the current billing period usage
+      return await Promise.all(
+        subscriptions.map(async (subscription) => {
+          try {
+            // Find usage for current billing period
+            const usage = await prisma.userUsage.findUnique({
+              where: {
+                userId_billingPeriodStart_billingPeriodEnd: {
+                  userId: subscription.userId,
+                  billingPeriodStart: subscription.currentPeriodStart,
+                  billingPeriodEnd: subscription.currentPeriodEnd
+                }
+              }
+            });
+
+            return {
+              ...subscription,
+              currentUsage: usage?.cost_usd || 0
+            };
+          } catch (error) {
+            logger.warn('Failed to get usage for user');
+            return {
+              ...subscription,
+              currentUsage: 0
+            };
+          }
+        })
+      );
+    } catch (error) {
+      logger.error('Failed to get subscriptions with usage', error as Error);
+      throw error;
+    }
   }
 
   /**
