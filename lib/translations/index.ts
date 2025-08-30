@@ -1,16 +1,18 @@
 // Translation system configuration and type definitions
 import enMessages from '@/messages/en.json'
+import frMessages from '@/messages/fr.json'
 
 
-export type Locale = 'en'
+export type Locale = 'en' | 'fr'
 export const defaultLocale: Locale = 'en'
-export const locales: Locale[] = ['en']
+export const locales: Locale[] = ['en', 'fr']
 
 export type Messages = typeof enMessages
 
 // Map of locale to messages
 export const messages: Record<Locale, Messages> = {
   en: enMessages,
+  fr: frMessages,
 }
 
 // Helper function to get nested translation value

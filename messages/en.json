@@ -925,7 +925,10 @@
     "title": "Documents", 
     "search": {
       "placeholder": "Search documents by name or type...",
-      "allTypes": "All types"
+      "allTypes": "All types",
+      "noResultsFor": "No documents found matching \"{{term}}\"",
+      "tryDifferent": "Try searching for a different term",
+      "noDocuments": "No documents found"
     },
     "actions": {
       "createNew": "Create New",
@@ -978,11 +981,6 @@
       "searchFilter": "Search: \"{{term}}\"",
       "typeFilter": "Type: {{type}}",
       "clearAll": "Clear all"
-    },
-    "search": {
-      "noResultsFor": "No documents found matching \"{{term}}\"",
-      "tryDifferent": "Try searching for a different term",
-      "noDocuments": "No documents found"
     },
     "time": {
       "justNow": "Just now",

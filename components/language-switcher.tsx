@@ -20,9 +20,9 @@ export function LanguageSwitcher() {
   // Map of locale codes to display names
   const localeNames: Record<Locale, string> = {
     en: t('english'),
+    fr: t('french'),
     // Future locales can be added here
     // es: t('spanish'),
-    // fr: t('french'),
     // de: t('german'),
   }
 
