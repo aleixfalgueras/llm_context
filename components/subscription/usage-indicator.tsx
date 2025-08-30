@@ -11,9 +11,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { DollarSign, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils/general'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslations } from '@/lib/translations/context'
 
 export function UsageIndicator() {
   const { usageInfo, isLoading, error } = useUsageInfo()
+  const t = useTranslations('subscription.usageIndicator')
 
   if (isLoading) {
     return (
@@ -30,11 +32,11 @@ export function UsageIndicator() {
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-800">
               <AlertCircle className="w-4 h-4 text-red-500" />
-              <span className="text-xs text-red-600 dark:text-red-400">Usage unavailable</span>
+              <span className="text-xs text-red-600 dark:text-red-400">{t('usageUnavailable')}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p className="text-sm">{error || 'Failed to load usage information'}</p>
+            <p className="text-sm">{error || t('errorLoadingUsage')}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -84,31 +86,17 @@ export function UsageIndicator() {
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
           <div className="space-y-2">
-            <p className="font-medium">Usage Details</p>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Used:</span>
-                <span className="font-medium">{usageDisplay.used}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Limit:</span>
-                <span className="font-medium">{usageDisplay.limit}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Remaining:</span>
-                <span className={cn("font-medium", usageDisplay.color)}>
-                  {usageDisplay.remaining}
-                </span>
-              </div>
-            </div>
+            <p className="text-sm">
+              {t('tooltipMessage', { percentage: usageDisplay.percentage })}
+            </p>
             {isAtLimit && (
               <p className="text-xs text-red-600 dark:text-red-400 mt-2">
-                You've reached your spending limit. Messages may be blocked.
+                {t('limitReached')}
               </p>
             )}
             {isNearLimit && !isAtLimit && (
               <p className="text-xs text-orange-600 dark:text-orange-400 mt-2">
-                You're approaching your spending limit.
+                {t('approachingLimit')}
               </p>
             )}
           </div>
