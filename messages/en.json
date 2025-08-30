@@ -1094,13 +1094,14 @@
       "customization": {
         "title": "User Customization",
         "description": "Manage custom settings for individual users",
-        "spendingLimits": {
-          "title": "Custom Spending Limits",
-          "description": "Override default spending limits for specific users",
+        "subscriptionUsage": {
+          "title": "User Subscription and Usage",
+          "description": "Override default spending limits for specific users. Remember that limits and usage information is in US Dollars.",
           "searchPlaceholder": "Search by email or user ID...",
           "userColumn": "User",
           "planColumn": "Plan",
           "statusColumn": "Status",
+          "usageColumn": "Usage",
           "defaultLimitColumn": "Default Limit",
           "customLimitColumn": "Custom Limit",
           "actionsColumn": "Actions",

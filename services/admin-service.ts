@@ -6,6 +6,7 @@ import {FeedbackService, isValidFeedbackState} from '@/services/feedback-service
 import {FeedbackOperations} from '@/database/feedback-operations'
 import {SubscriptionUsageOperations} from '@/database/subscription-usage-operations'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
+import {SubscriptionWithUsage} from "@/lib/types/subscription-types";
 
 const ADMIN_EMAILS = ['feina.aleix@gmail.com', 'a.nelson@dreamotion.io']
 
@@ -271,14 +272,14 @@ export class AdminService {
   /**
    * Get all user subscriptions information
    */
-  static async getUserSubscriptions(adminUserId: string): Promise<UserSubscription[]> {
+  static async getUserSubscriptions(adminUserId: string): Promise<Array<SubscriptionWithUsage>> {
     const isAdmin = await this.isAdminUser(adminUserId)
     if (!isAdmin) {
       throw new Error('Unauthorized: Admin access required')
     }
 
     try {
-      return await SubscriptionUsageOperations.getAllUserSubscriptions()
+      return await SubscriptionUsageOperations.getAllUserSubscriptionsWithUsage()
     } catch (error) {
       logger.error('Failed to fetch users with subscriptions', error as Error)
       throw new Error('Failed to fetch users')

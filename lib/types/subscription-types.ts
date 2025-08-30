@@ -92,6 +92,8 @@ export type SubscriptionWithValidation = UserSubscription & {
   isActive: boolean // Computed field: SubscriptionService.isSubscriptionActive()
 }
 
+export type SubscriptionWithUsage = UserSubscription & { currentUsage?: number }
+
 // Type aliases for convenience (can be used where string types are still needed)
 export type SubscriptionPlanType = `${SubscriptionPlan}`
 export type ModelTierType = `${ModelTier}`
