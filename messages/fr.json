@@ -195,27 +195,6 @@
       }
     }
   },
-  "clientContext": {
-    "header": "CONTEXTE CLIENT: ",
-    "fields": {
-      "country": "Pays",
-      "generalContext": "Contexte Général",
-      "specificContext1": "Contexte Spécifique 1",
-      "specificContext2": "Contexte Spécifique 2",
-      "specificContext3": "Contexte Spécifique 3"
-    },
-    "descriptions": {
-      "country": "Pays ou localisation du client",
-      "generalContext": "Informations générales sur le client",
-      "specificContext1": "Premier champ de contexte spécifique",
-      "specificContext2": "Deuxième champ de contexte spécifique",
-      "specificContext3": "Troisième champ de contexte spécifique"
-    },
-    "tooltip": {
-      "title": "Variables Disponibles:",
-      "info": "Les variables seront automatiquement remplacées par les données réelles du client lors de leur utilisation."
-    }
-  },
   "prompts": {
     "title": "Gestion des Prompts",
     "description": "Créez, modifiez et organisez vos prompts IA pour de meilleures conversations.",
@@ -345,7 +324,7 @@
     }
   },
   "assistant": {
-    "title": "Assistant de Chat IA",
+    "title": "Assistant IA",
     "chats": "Discussions",
     "deleteAllChats": "Supprimer Toutes les Discussions",
     "clickToConfirm": "Cliquer pour Confirmer",
@@ -590,7 +569,7 @@
     "commissionsGuide": {
       "title": "Guide des Commissions",
       "buttonLabel": "Guide des Commissions",
-      "description": "Comprendre le fonctionnement des commissions d'affiliation, les calendriers de paiement et les limites d'abonnement",
+      "dialogDescription": "Comprendre le fonctionnement des commissions d'affiliation, les calendriers de paiement et les limites d'abonnement",
       "paymentProcessing": "Traitement des Paiements",
       "monthlyPaymentTitle": "Calendrier de Paiement Mensuel",
       "monthlyPaymentDescription": "Les paiements de commissions sont traités automatiquement le 1er de chaque mois pour les gains du mois précédent.",
@@ -872,7 +851,7 @@
       },
       "success": {
         "generating": "Génération du rapport de réunion...",
-        "generatingForClient": "📝 Génération du rapport de réunion pour {clientName}"
+        "generatingForClient": "📝 Génération du rapport de réunion pour {{clientName}}"
       },
       "fileUpload": {
         "invalidType": "Type de Fichier Invalide",
@@ -909,7 +888,7 @@
       },
       "success": {
         "generating": "Génération du document...",
-        "generatingForClient": "📄 Génération du document pour {clientName}"
+        "generatingForClient": "📄 Génération du document pour {{clientName}}"
       },
       "clientContext": {
         "title": "Contexte Client",
@@ -950,17 +929,6 @@
       "noResultsFor": "Aucun document trouvé correspondant à \"{{term}}\"",
       "tryDifferent": "Essayez de rechercher un terme différent",
       "noDocuments": "Aucun document trouvé"
-    },
-    "actions": {
-      "createNew": "Créer Nouveau",
-      "deleteAll": "Tout Supprimer",
-      "deleteAllConfirm": "Cliquer pour Confirmer",
-      "edit": "Modifier le Document", 
-      "delete": "Supprimer le Document",
-      "download": "Télécharger le document en Markdown"
-    },
-    "time": {
-      "justNow": "Juste maintenant"
     },
     "empty": {
       "title": "Aucun Document",
@@ -1183,5 +1151,59 @@
     "portuguese": "Portugais",
     "dutch": "Néerlandais",
     "russian": "Russe"
+  },
+  "clientContext": {
+    "header": "CONTEXTE CLIENT: ",
+    "fields": {
+      "country": "Pays",
+      "generalContext": "Contexte Général",
+      "specificContext1": "Contexte Spécifique 1",
+      "specificContext2": "Contexte Spécifique 2",
+      "specificContext3": "Contexte Spécifique 3"
+    },
+    "descriptions": {
+      "country": "Pays ou localisation du client",
+      "generalContext": "Informations générales sur le client",
+      "specificContext1": "Premier champ de contexte spécifique",
+      "specificContext2": "Deuxième champ de contexte spécifique",
+      "specificContext3": "Troisième champ de contexte spécifique"
+    },
+    "tooltip": {
+      "title": "Variables Disponibles:",
+      "info": "Les variables seront automatiquement remplacées par les données réelles du client lors de leur utilisation."
+    }
+  },
+  "aiPrompts": {
+    "chat": {
+      "generalAssistant": "Vous êtes un assistant IA utile, inoffensif et honnête.\n\nINSTRUCTIONS:\n- Fournir des réponses précises, réfléchies et nuancées\n- Être utile avec une large gamme de sujets et de questions\n- Prendre en charge diverses tâches, notamment:\n  • Répondre aux questions et fournir des explications\n  • Écriture créative et remue-méninges\n  • Analyse et résolution de problèmes\n  • Support d'apprentissage et éducatif\n  • Assistance technique et aide au codage\n  • Conversation générale et discussion\n  • Recherche et synthèse d'informations\n- Être conversationnel et engageant tout en maintenant la précision\n- Admettre quand vous êtes incertain ou ne savez pas quelque chose\n- Fournir des perspectives équilibrées lorsque c'est approprié\n- Respecter la vie privée de l'utilisateur et maintenir des limites éthiques\n\nRépondez naturellement et de manière conversationnelle tout en étant utile et informatif.",
+      "marketingAssistant": "Vous êtes un assistant IA professionnel aidant un prestataire de services marketing avec son entreprise.",
+      "withContext": "Vous avez accès aux informations client suivantes et devez les utiliser pour fournir des conseils et des réponses personnalisés et pertinents.",
+      "instructions": {
+        "withContext": "Utilisez ces informations client pour personnaliser vos réponses lorsque c'est pertinent",
+        "referenceContext": "Référencez leurs circonstances spécifiques lorsque cela ajoute de la valeur à votre réponse",
+        "general": "Fournir des conseils commerciaux généraux utiles",
+        "keepBroad": "Gardez les réponses largement applicables mais exploitables"
+      },
+      "professionalContext": "Soyez professionnel, compétent et solidaire\n- Aidez avec tous les aspects des opérations commerciales marketing:\n  • Stratégie et planification\n  • Gestion des clients\n  • Création de contenu\n  • Campagnes et analyse\n  • Opérations et flux de travail\n  • Insights de l'industrie\n  • Résolution de problèmes et optimisation\n- Fournir des conseils pratiques et exploitables adaptés aux professionnels du marketing\n- Maintenir la confidentialité et le professionnalisme à tout moment\n\nRépondez naturellement et de manière conversationnelle tout en gardant ce contexte à l'esprit."
+    },
+    "documents": {
+      "generation": {
+        "instructions": "Veuillez générer un document professionnel et bien structuré basé sur l'invite et les informations client ci-dessus.",
+        "outputFormat": "FORMAT DE SORTIE:\n- Commencez directement par le titre et le contenu du document\n- N'incluez PAS de texte d'introduction comme \"Voici votre document\" ou des préambules similaires\n- Produisez le document immédiatement, en commençant par son titre",
+        "languageRequirements": "EXIGENCES LINGUISTIQUES IMPORTANTES:\n- **Générez l'intégralité du document en {{language}}**\n- Utilisez la terminologie professionnelle appropriée pour cette langue\n- Adaptez les conventions de formatage et de structure et les styles de communication culturels appropriés pour cette langue/culture"
+      },
+      "additionalInstructions": "INSTRUCTIONS SUPPLÉMENTAIRES:"
+    },
+    "meetingReport": {
+      "systemPrompt": "Vous êtes un assistant IA professionnel aidant un professionnel du marketing à générer un rapport de réunion complet avec des étapes exploitables. Concentrez-vous sur la documentation de ce qui s'est passé pendant la réunion et la création d'étapes suivantes claires.",
+      "clientInfo": "CLIENT: {{clientName}}",
+      "meetingInfo": "INFORMATIONS SUR LA RÉUNION:\n- Date de la réunion: {{meetingDate}}\n- Transcription de la réunion:",
+      "additionalInfo": "INFORMATIONS SUPPLÉMENTAIRES:",
+      "instructions": "INSTRUCTIONS:\n- Créez un rapport de réunion complet basé sur la transcription fournie\n- Concentrez-vous sur la documentation du contenu de la réunion de manière objective et professionnelle\n- Structurez le rapport dans un format clair et professionnel avec les sections suivantes:\n  1. Résumé de la réunion\n  2. Points de discussion clés\n  3. Résultats et décisions\n  4. Actions à entreprendre et prochaines étapes\n  5. Exigences de suivi\n- Incluez des étapes spécifiques et exploitables avec des délais clairs lorsque c'est applicable\n- Basez les recommandations uniquement sur ce qui a été discuté lors de la réunion",
+      "additionalAttention": "- Portez une attention particulière aux informations supplémentaires fournies ci-dessus",
+      "deliveryFormat": "- N'incluez PAS de clauses de non-responsabilité ou de contenu lié au fournisseur d'IA\n- Fournissez UNIQUEMENT le contenu du rapport de réunion dans un format prêt à être livré\n- Rendez les actions spécifiques, mesurables et réalisables\n- Concentrez-vous sur les prochaines étapes pratiques qui peuvent être mises en œuvre immédiatement",
+      "languageInstruction": "- Générez la réponse en {{language}} avec un langage clair et professionnel",
+      "userPrompt": "Veuillez créer un rapport de réunion détaillé basé sur la transcription fournie. Concentrez-vous sur la création d'informations exploitables et d'étapes suivantes claires pour ce client."
+    }
   }
 }

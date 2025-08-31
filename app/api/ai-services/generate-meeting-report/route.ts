@@ -9,7 +9,7 @@ import {
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
     // Parse request body
-    const { clientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL } = await parseJsonBody(req)
+    const { clientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL, locale } = await parseJsonBody(req)
 
     // Validate required fields
     if (!clientId || !meetingTranscription || !meetingDate) {
@@ -22,7 +22,8 @@ export const POST = withEnhancedApi(
       meetingTranscription,
       meetingDate,
       additionalInfo,
-      model: selectedModel
+      model: selectedModel,
+      locale
     })
 
     return Response.json(data)

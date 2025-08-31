@@ -11,7 +11,7 @@ import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-servic
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import type {Client} from '@prisma/client'
 import {getDefaultModel} from '@/lib/models-config'
-import {useTranslations} from '@/lib/translations/context'
+import {useTranslations, useLocale} from '@/lib/translations/context'
 
 interface MeetingReportDialogProps {
   open: boolean
@@ -36,6 +36,7 @@ export function MeetingReportDialog({
   onDocumentCreated 
 }: MeetingReportDialogProps) {
   const t = useTranslations('aiServices')
+  const locale = useLocale()
   const { toast } = useToast()
   const [formData, setFormData] = useState<MeetingFormData>({
     clientId: '',
@@ -127,7 +128,8 @@ export function MeetingReportDialog({
     
     buildGeneratePayload: (data: MeetingFormData) => ({
       ...data,
-      model: getDefaultModel()
+      model: getDefaultModel(),
+      locale: locale
     }),
     
     buildSavePayload: (data: MeetingFormData, content: string) => ({

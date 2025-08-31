@@ -52,9 +52,10 @@ export function interpolate(text: string, params?: Record<string, any>): string 
 }
 
 // Server-side translation function for use in server actions
-export async function getTranslations(namespace?: string): Promise<TranslationFunction> {
-   // For now, always use default locale on server
-  const currentMessages = messages[defaultLocale]
+export async function getTranslations(namespace?: string, locale?: Locale): Promise<TranslationFunction> {
+  // Use provided locale or fall back to default
+  const currentLocale = locale || defaultLocale
+  const currentMessages = messages[currentLocale]
   
   return (key: string, params?: Record<string, any>) => {
     // If namespace is provided, prepend it to the key
