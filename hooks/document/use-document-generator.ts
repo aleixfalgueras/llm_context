@@ -8,6 +8,7 @@ import type {Client, Prompt} from '@prisma/client'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types"
 import {getPrompts} from '@/app/actions/prompt-action'
+import {useLocale} from '@/lib/translations/context'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
@@ -54,6 +55,7 @@ export function useDocumentGenerator({
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
   const [promptName, setPromptName] = useState('')
   const { toast } = useToast()
+  const locale = useLocale()
 
   // Load prompts and reset form when dialog opens
   useEffect(() => {
@@ -130,7 +132,8 @@ export function useDocumentGenerator({
           selectedContextFields: Object.entries(clientContext)
             .filter(([, value]) => value)
             .map(([key]) => key),
-          model: getDefaultModel()
+          model: getDefaultModel(),
+          locale: locale
         }),
       })
 

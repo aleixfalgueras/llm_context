@@ -11,6 +11,8 @@ import {
   MeetingReportSaveRequest
 } from '@/lib/types/ai-service-types'
 import {unwrapResult} from '@/database/base-operations'
+import {getTranslations, Locale} from '@/lib/translations'
+
 
 export class MeetingReportService {
   /**
@@ -18,14 +20,15 @@ export class MeetingReportService {
    */
   static async generateReport(
     userId: string,
-    request: MeetingReportGenerationRequest
+    request: MeetingReportGenerationRequest & { locale?: Locale }
   ): Promise<MeetingReportGenerationResponse> {
     const {
       clientId,
       meetingTranscription,
       meetingDate,
       additionalInfo,
-      model: selectedModel = DEFAULT_MODEL
+      model: selectedModel = DEFAULT_MODEL,
+      locale = 'en'
     } = request
 
     // Validate client access
@@ -38,12 +41,17 @@ export class MeetingReportService {
     }
 
     // Build the meeting report prompt
-    const meetingReportPrompt = this.buildMeetingReportPrompt({
+    const meetingReportPrompt = await this.buildMeetingReportPrompt({
       clientName: client.name,
       meetingDate,
       meetingTranscription,
-      additionalInfo
+      additionalInfo,
+      locale
     })
+    
+    // Get translated user prompt
+    const t = await getTranslations('aiPrompts', locale)
+    const userPrompt = t('meetingReport.userPrompt')
 
     // Generate the report using OpenRouter
     const completion = await openRouterService.createCompletion(
@@ -56,7 +64,7 @@ export class MeetingReportService {
           },
           {
             role: 'user',
-            content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client.`
+            content: userPrompt
           }
         ],
         temperature: 0.7,
@@ -103,47 +111,43 @@ export class MeetingReportService {
   }
 
   /**
-   * Build the meeting report prompt (always in English)
+   * Build the meeting report prompt with localized text
    */
-  private static buildMeetingReportPrompt({
+  private static async buildMeetingReportPrompt({
     clientName,
     meetingDate,
     meetingTranscription,
-    additionalInfo
+    additionalInfo,
+    locale = 'en'
   }: {
     clientName: string
     meetingDate: string
     meetingTranscription: string
     additionalInfo?: string
-  }): string {
-    return `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
+    locale?: Locale
+  }): Promise<string> {
+    const t = await getTranslations('aiPrompts', locale)
 
-CLIENT: ${clientName}
+    const systemPrompt = t('meetingReport.systemPrompt')
+    const clientInfo = t('meetingReport.clientInfo', { clientName })
+    const meetingInfo = t('meetingReport.meetingInfo', { meetingDate })
+    const additionalInfoLabel = t('meetingReport.additionalInfo')
+    const instructions = t('meetingReport.instructions')
+    const additionalAttention = additionalInfo ? t('meetingReport.additionalAttention') : ''
+    const deliveryFormat = t('meetingReport.deliveryFormat')
 
-MEETING INFORMATION:
-- Meeting Date: ${meetingDate}
-- Meeting Transcription:
+    return `${systemPrompt}
+
+${clientInfo}
+
+${meetingInfo}
 ${meetingTranscription}${additionalInfo ? `
 
-ADDITIONAL INFORMATION:
+${additionalInfoLabel}
 ${additionalInfo}` : ''}
 
-INSTRUCTIONS:
-- Create a comprehensive meeting report based on the transcription provided
-- Focus on documenting the meeting content objectively and professionally
-- Structure the report in a clear, professional format with the following sections:
-  1. Meeting Summary
-  2. Key Discussion Points
-  3. Outcomes & Decisions
-  4. Action Items & Next Steps
-  5. Follow-up Requirements
-- Include specific, actionable steps with clear timelines where applicable
-- Base recommendations solely on what was discussed in the meeting${additionalInfo ? `
-- Pay special attention to the additional information provided above` : ''}
-- DO NOT include any disclaimers or AI provider-related content
-- Provide ONLY the meeting report content in a delivery-ready format
-- Make the action items specific, measurable, and achievable
-- Focus on practical next steps that can be implemented immediately
-- Generate the response in English with clear, professional language`
+${instructions}${additionalAttention ? `
+${additionalAttention}` : ''}
+${deliveryFormat}`
   }
 }

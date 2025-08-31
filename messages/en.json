@@ -195,27 +195,6 @@
       }
     }
   },
-  "clientContext": {
-    "header": "CLIENT CONTEXT:",
-    "fields": {
-      "country": "Country",
-      "generalContext": "General Context",
-      "specificContext1": "Specific Context 1",
-      "specificContext2": "Specific Context 2",
-      "specificContext3": "Specific Context 3"
-    },
-    "descriptions": {
-      "country": "Client's country or location",
-      "generalContext": "General information about the client",
-      "specificContext1": "First specific context field",
-      "specificContext2": "Second specific context field",
-      "specificContext3": "Third specific context field"
-    },
-    "tooltip": {
-      "title": "Available Variables:",
-      "info": "Variables will be automatically replaced with actual client data when used."
-    }
-  },
   "prompts": {
     "title": "Prompt Management",
     "description": "Create, edit, and organize your AI prompts for better conversations.",
@@ -590,7 +569,7 @@
     "commissionsGuide": {
       "title": "Commissions Guide",
       "buttonLabel": "Commissions Guide",
-      "description": "Understanding how affiliate commissions work, payment schedules, and subscription limits",
+      "dialogDescription": "Understanding how affiliate commissions work, payment schedules, and subscription limits",
       "paymentProcessing": "Payment Processing",
       "monthlyPaymentTitle": "Monthly Payment Schedule",
       "monthlyPaymentDescription": "Commission payments are processed automatically on the 1st of each month for the previous month's earnings.",
@@ -872,7 +851,7 @@
       },
       "success": {
         "generating": "Generating meeting report...",
-        "generatingForClient": "📝 Generating meeting report for {clientName}"
+        "generatingForClient": "📝 Generating meeting report for {{clientName}}"
       },
       "fileUpload": {
         "invalidType": "Invalid File Type",
@@ -909,7 +888,7 @@
       },
       "success": {
         "generating": "Generating document...",
-        "generatingForClient": "📄 Generating document for {clientName}"
+        "generatingForClient": "📄 Generating document for {{clientName}}"
       },
       "clientContext": {
         "title": "Client Context",
@@ -950,17 +929,6 @@
       "noResultsFor": "No documents found matching \"{{term}}\"",
       "tryDifferent": "Try searching for a different term",
       "noDocuments": "No documents found"
-    },
-    "actions": {
-      "createNew": "Create New",
-      "deleteAll": "Delete All",
-      "deleteAllConfirm": "Click to Confirm",
-      "edit": "Edit Document", 
-      "delete": "Delete Document",
-      "download": "Download document as Markdown"
-    },
-    "time": {
-      "justNow": "Just now"
     },
     "empty": {
       "title": "No Documents",
@@ -1183,5 +1151,58 @@
     "portuguese": "Portuguese",
     "dutch": "Dutch",
     "russian": "Russian"
+  },
+  "clientContext": {
+    "header": "CLIENT CONTEXT:",
+    "fields": {
+      "country": "Country",
+      "generalContext": "General Context",
+      "specificContext1": "Specific Context 1",
+      "specificContext2": "Specific Context 2",
+      "specificContext3": "Specific Context 3"
+    },
+    "descriptions": {
+      "country": "Client's country or location",
+      "generalContext": "General information about the client",
+      "specificContext1": "First specific context field",
+      "specificContext2": "Second specific context field",
+      "specificContext3": "Third specific context field"
+    },
+    "tooltip": {
+      "title": "Available Variables:",
+      "info": "Variables will be automatically replaced with actual client data when used."
+    }
+  },
+  "aiPrompts": {
+    "chat": {
+      "generalAssistant": "You are a helpful, harmless, and honest AI assistant.\n\nINSTRUCTIONS:\n- Provide accurate, thoughtful, and nuanced responses\n- Be helpful with a wide range of topics and questions\n- Support various tasks including but not limited to:\n  • Answering questions and providing explanations\n  • Creative writing and brainstorming\n  • Analysis and problem-solving\n  • Learning and educational support\n  • Technical assistance and coding help\n  • General conversation and discussion\n  • Research and information synthesis\n- Be conversational and engaging while maintaining accuracy\n- Admit when you're uncertain or don't know something\n- Provide balanced perspectives when appropriate\n- Respect user privacy and maintain ethical boundaries\n\nRespond naturally and conversationally while being helpful and informative.",
+      "marketingAssistant": "You are a professional AI assistant helping a marketing service provider with their business.",
+      "withContext": "You have access to the following client information and should use it to provide personalized, relevant advice and responses.",
+      "instructions": {
+        "withContext": "Use this client information to personalize your responses when relevant",
+        "referenceContext": "Reference their specific circumstances when it adds value to your response",
+        "general": "Provide helpful general business advice",
+        "keepBroad": "Keep responses broadly applicable but actionable"
+      },
+      "professionalContext": "Be professional, knowledgeable, and supportive\n- Help with any aspect of marketing business operations:\n  • Strategy and planning\n  • Client management\n  • Content creation\n  • Campaigns and analysis\n  • Operations and workflows\n  • Industry insights\n  • Problem-solving and optimization\n- Provide practical, actionable advice tailored to marketing professionals\n- Maintain confidentiality and professionalism at all times\n\nRespond naturally and conversationally while keeping this context in mind."
+    },
+    "documents": {
+      "generation": {
+        "instructions": "Please generate a professional, well-structured document based on the above prompt and client information.",
+        "outputFormat": "OUTPUT FORMAT:\n- Start directly with the document title and content\n- Do NOT include any introductory text like \"Here is your document\" or similar preambles\n- Output the document immediately, beginning with its title",
+        "languageRequirements": "IMPORTANT LANGUAGE REQUIREMENTS:\n- **Generate the entire document in {{language}}**\n- Use appropriate professional terminology for this language\n- Adapt formatting and structure conventions and cultural communication styles appropriate for this language/culture"
+      },
+      "additionalInstructions": "ADDITIONAL INSTRUCTIONS:"
+    },
+    "meetingReport": {
+      "systemPrompt": "You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.",
+      "clientInfo": "CLIENT: {{clientName}}",
+      "meetingInfo": "MEETING INFORMATION:\n- Meeting Date: {{meetingDate}}\n- Meeting Transcription:",
+      "additionalInfo": "ADDITIONAL INFORMATION:",
+      "instructions": "INSTRUCTIONS:\n- Create a comprehensive meeting report based on the transcription provided\n- Focus on documenting the meeting content objectively and professionally\n- Structure the report in a clear, professional format with the following sections:\n  1. Meeting Summary\n  2. Key Discussion Points\n  3. Outcomes & Decisions\n  4. Action Items & Next Steps\n  5. Follow-up Requirements\n- Include specific, actionable steps with clear timelines where applicable\n- Base recommendations solely on what was discussed in the meeting",
+      "additionalAttention": "- Pay special attention to the additional information provided above",
+      "deliveryFormat": "- DO NOT include any disclaimers or AI provider-related content\n- Provide ONLY the meeting report content in a delivery-ready format\n- Make the action items specific, measurable, and achievable\n- Focus on practical next steps that can be implemented immediately",
+      "userPrompt": "Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client."
+    }
   }
 }
