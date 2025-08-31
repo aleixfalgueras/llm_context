@@ -11,7 +11,8 @@ export const POST = withEnhancedApi(
       documentTitle,
       additionalInstructions,
       selectedContextFields = [],
-      model: selectedModel = DEFAULT_MODEL
+      model: selectedModel = DEFAULT_MODEL,
+      locale
     } = await parseJsonBody(req)
 
     // Validate required fields
@@ -26,7 +27,8 @@ export const POST = withEnhancedApi(
       documentTitle,
       additionalInstructions,
       selectedContextFields,
-      model: selectedModel
+      model: selectedModel,
+      locale
     })
 
     return Response.json(data)

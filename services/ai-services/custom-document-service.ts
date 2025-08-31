@@ -14,7 +14,8 @@ import {
   ProcessedPromptData
 } from '@/lib/types/ai-service-types'
 import {unwrapResult} from '@/database/base-operations'
-import {getTranslations} from '@/lib/translations'
+import {getTranslations, Locale} from '@/lib/translations'
+
 
 export class CustomDocumentService {
   /**
@@ -22,7 +23,7 @@ export class CustomDocumentService {
    */
   static async generateDocument(
     userId: string,
-    request: CustomDocumentGenerationRequest
+    request: CustomDocumentGenerationRequest & { locale?: Locale }
   ): Promise<CustomDocumentGenerationResponse> {
     const {
       clientId,
@@ -30,7 +31,8 @@ export class CustomDocumentService {
       documentTitle,
       additionalInstructions,
       selectedContextFields = [],
-      model: selectedModel = DEFAULT_MODEL
+      model: selectedModel = DEFAULT_MODEL,
+      locale = 'en'
     } = request
 
     // Validate client access
@@ -42,7 +44,8 @@ export class CustomDocumentService {
       prompt: customPrompt,
       client,
       selectedContextFields,
-      additionalInstructions
+      additionalInstructions,
+      locale
     })
 
     // Create generation context for logging
@@ -122,19 +125,22 @@ export class CustomDocumentService {
     prompt,
     client,
     selectedContextFields,
-    additionalInstructions
+    additionalInstructions,
+    locale = 'en'
   }: {
     prompt: string
     client: any
     selectedContextFields: string[]
     additionalInstructions?: string
+    locale?: Locale
   }): Promise<ProcessedPromptData> {
     // Replace client variables in prompt
     const processedPrompt = replaceClientContextVariables(prompt, client)
 
     // Build client context section if fields are selected
-    const t = await getTranslations('clientContext')
-    const clientContextSection = buildClientContextSection(client, selectedContextFields, t)
+    const tContext = await getTranslations('clientContext', locale)
+    const tPrompts = await getTranslations('aiPrompts', locale)
+    const clientContextSection = buildClientContextSection(client, selectedContextFields, tContext)
 
     // Create the complete prompt with client context section
     let completePrompt = processedPrompt
@@ -146,9 +152,10 @@ export class CustomDocumentService {
     }
 
     if (additionalInstructions) {
+      const additionalInstructionsLabel = tPrompts('documents.additionalInstructions')
       completePrompt += `
 
-ADDITIONAL INSTRUCTIONS:
+${additionalInstructionsLabel}
 ${additionalInstructions}`
     }
 
@@ -156,19 +163,18 @@ ${additionalInstructions}`
     const targetLanguage = client.documentsLanguage || 'en'
     const language = getLanguageInfo(targetLanguage)
 
+    // Use translated document generation instructions
+    const instructions = tPrompts('documents.generation.instructions')
+    const outputFormat = tPrompts('documents.generation.outputFormat')
+    const languageRequirements = tPrompts('documents.generation.languageRequirements', { language: language.nativeLabel })
+
     completePrompt += `
 ---
-Please generate a professional, well-structured document based on the above prompt and client information.
+${instructions}
 
-OUTPUT FORMAT:
-- Start directly with the document title and content
-- Do NOT include any introductory text like "Here is your document" or similar preambles
-- Output the document immediately, beginning with its title
+${outputFormat}
 
-IMPORTANT LANGUAGE REQUIREMENTS:
-- **Generate the entire document in ${language.label}**
-- Use appropriate professional terminology for this language
-- Adapt formatting and structure conventions and cultural communication styles appropriate for this language/culture`
+${languageRequirements}`
 
     return {
       completePrompt,

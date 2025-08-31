@@ -63,7 +63,7 @@ export function buildClientContextSection(
     return ''
   }
 
-  let contextSection = `\n\n${t('clientContext.header')}`
+  let contextSection = `${t('clientContext.header')}`
   
   // Collect all selected context parts (excluding country)
   const contextParts = validContextFields

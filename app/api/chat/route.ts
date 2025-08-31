@@ -60,9 +60,10 @@ export const POST = withEnhancedApi(
     let chatId: string = '';
 
     // Parse request body
-    const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
+    const {messages, chatId: requestChatId, model, clientId, contextFields, locale} = await parseJsonBody(req)
     chatId = requestChatId;
     const selectedModel = model || getDefaultModel()
+    const userLocale = locale || 'en'
 
     // Validate model access based on user's subscription tier
     const modelAccessResult = await checkModelAccess(userId, selectedModel)
@@ -97,7 +98,7 @@ export const POST = withEnhancedApi(
 
     // Prepare chat data for AI processing
     const lastMessage = messages[messages.length - 1]
-    const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content)
+    const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content, userLocale)
     if (!prepareChatForAIResult.success) {
       throw new Error('Failed to prepare chat for AI processing')
     }
