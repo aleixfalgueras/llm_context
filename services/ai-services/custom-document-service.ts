@@ -27,7 +27,7 @@ export class CustomDocumentService {
   ): Promise<CustomDocumentGenerationResponse> {
     const {
       clientId,
-      customPrompt,
+      prompt,
       documentTitle,
       additionalInstructions,
       selectedContextFields = [],
@@ -41,7 +41,7 @@ export class CustomDocumentService {
 
     // Process the prompt with client context
     const processedData = await this.processPromptWithContext({
-      prompt: customPrompt,
+      prompt,
       client,
       selectedContextFields,
       additionalInstructions,
@@ -134,8 +134,8 @@ export class CustomDocumentService {
     additionalInstructions?: string
     locale?: Locale
   }): Promise<ProcessedPromptData> {
-    // Replace client variables in prompt
-    const processedPrompt = replaceClientContextVariables(prompt, client)
+    // Replace client variables in prompt and trim
+    const processedPrompt = replaceClientContextVariables(prompt.trim(), client)
 
     // Build client context section if fields are selected
     const tContext = await getTranslations('clientContext', locale)

@@ -12,8 +12,6 @@ import {useLocale} from '@/lib/translations/context'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
-  clients: Client[]
-  onDocumentCreated?: (clientId: string, documentId: string) => void
 }
 
 interface UseDocumentGeneratorReturn {
@@ -41,11 +39,7 @@ interface UseDocumentGeneratorReturn {
   deselectAllContext: () => void
 }
 
-export function useDocumentGenerator({
-  isOpen,
-  clients,
-  onDocumentCreated,
-}: UseDocumentGeneratorProps): UseDocumentGeneratorReturn {
+export function useDocumentGenerator({isOpen}: UseDocumentGeneratorProps): UseDocumentGeneratorReturn {
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [documentTitle, setDocumentTitle] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<string>('')
@@ -152,7 +146,6 @@ export function useDocumentGenerator({
       throw error
     }
   }
-
 
   const resetForm = () => {
     setSelectedClient('')

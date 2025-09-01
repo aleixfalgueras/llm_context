@@ -23,7 +23,7 @@ export const POST = withEnhancedApi(
     // Use the Custom Document Service
     const data = await CustomDocumentService.generateDocument(userId, {
       clientId,
-      customPrompt,
+      prompt: customPrompt,
       documentTitle,
       additionalInstructions,
       selectedContextFields,

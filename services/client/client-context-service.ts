@@ -74,8 +74,9 @@ export function buildClientContextSection(
   // Build the context line based on whether country is selected
   const hasCountry = validContextFields.includes('country')
   if (hasCountry) {
-    // Country selected: "Country: [country] [other contexts...]"
-    contextSection += `\n${contextFields.country}: ${client.country}`
+    // Country selected: "This client is from [country]. [other contexts...]"
+    const countryContext = t('clientContext.countryContext')
+    contextSection += `\n${countryContext} ${client.country}.`
     if (contextParts.length > 0) {
       contextSection += ` ${contextParts.join(' ')}`
     }

@@ -17,7 +17,7 @@ import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {getDefaultModel} from '@/lib/models-config'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
-import {useTranslations} from '@/lib/translations/context'
+import {useTranslations, useLocale} from '@/lib/translations/context'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
@@ -42,6 +42,7 @@ export function CustomDocumentGeneratorDialog({
 }: CustomDocumentGeneratorDialogProps) {
   const t = useTranslations('aiServices')
   const tContext = useTranslations('clientContext')
+  const locale = useLocale()
   const {
     // State from hook
     selectedClient,
@@ -64,11 +65,7 @@ export function CustomDocumentGeneratorDialog({
     resetForm,
     selectAllContext,
     deselectAllContext,
-  } = useDocumentGenerator({
-    isOpen,
-    clients,
-    onDocumentCreated,
-  })
+  } = useDocumentGenerator({isOpen})
 
   // Convert hook state to form data format for base component
   const formData: CustomDocumentFormData = {
@@ -136,7 +133,8 @@ export function CustomDocumentGeneratorDialog({
         selectedContextFields: Object.entries(formData.clientContext)
           .filter(([, value]) => value)
           .map(([key]) => key),
-        model: getDefaultModel()
+        model: getDefaultModel(),
+        locale: locale
       }
     },
     
