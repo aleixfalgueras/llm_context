@@ -28,7 +28,8 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     features_list: [
       '🤖 Access to MIA AI platform',
       '👥 Discount on access to local meetups about AI Education & Defi',
-      '💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace'
+      '💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace',
+      '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)'
     ]
   },
   [SubscriptionPlan.knight]: {
@@ -40,9 +41,9 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     commissionLimit: 500,
     description: 'For SMEs and content creators',
     features_list: [
-      '🤖 Access to MIA AI platform',
+      '🤖 Access to MIA AI platform + x2.5 usage',
       '👥 Discount on access to local meetups about AI Education & Defi',
-      '💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace',
+      '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
       '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)'
     ]
   },
@@ -55,11 +56,12 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     commissionLimit: 5000,
     description: 'For startups and influencers scaling their impact',
     features_list: [
-      '🤖 Access to MIA AI platform',
+      '🤖 Access to MIA AI platform + x10 usage',
       '👥 Discount on access to local meetups about AI Education, Defi & Influencers',
       '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
       '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)',
-      '🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)'
+      '🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)',
+      '🌐 Free professional website hosting & showcase platform with e-commerce capabilities',
     ]
   },
   [SubscriptionPlan.jedi]: {
@@ -71,11 +73,12 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     commissionLimit: 50000,
     description: 'For corporate leaders and CEOs driving innovation',
     features_list: [
-      '🤖 Access to MIA AI platform',
+      '🤖 Access to MIA AI platform + x25 usage',
       '👥 Discount on access to local meetups about AI Education, Defi & Influencers',
       '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
       '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)',
       '🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)',
+      '🌐 Free professional website hosting & showcase platform with e-commerce capabilities',
       '📞 60 minutes private call per month to discuss personal branding and business scaling'
     ]
   }
