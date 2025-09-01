@@ -1213,7 +1213,8 @@
       "generation": {
         "instructions": "Veuillez générer un document professionnel et bien structuré basé sur l'invite et les informations client ci-dessus.",
         "outputFormat": "FORMAT DE SORTIE:\n- Commencez directement par le titre et le contenu du document\n- N'incluez PAS de texte d'introduction comme \"Voici votre document\" ou des préambules similaires\n- Produisez le document immédiatement, en commençant par son titre",
-        "languageRequirements": "EXIGENCES LINGUISTIQUES IMPORTANTES:\n- **Générez l'intégralité du document en {{language}}**\n- Utilisez la terminologie professionnelle appropriée pour cette langue\n- Adaptez les conventions de formatage et de structure et les styles de communication culturels appropriés pour cette langue/culture"
+        "languageRequirements": "EXIGENCES LINGUISTIQUES IMPORTANTES:\n- **Générez l'intégralité du document en {{languageName}}**\n- Utilisez la terminologie professionnelle appropriée pour {{languageName}} langue\n- Adaptez les conventions de formatage et de structure et les styles de communication culturels appropriés pour {{languageName}} langue/culture",
+        "rememberLanguage": "N'OUBLIEZ PAS, TRÈS IMPORTANT: utilisez {{languageName}} pour générer l'intégralité de la sortie du document."
       },
       "additionalInstructions": "INSTRUCTIONS SUPPLÉMENTAIRES:"
     },
@@ -1225,7 +1226,6 @@
       "instructions": "INSTRUCTIONS:\n- Créez un rapport de réunion complet basé sur la transcription fournie\n- Concentrez-vous sur la documentation du contenu de la réunion de manière objective et professionnelle\n- Structurez le rapport dans un format clair et professionnel avec les sections suivantes:\n  1. Résumé de la réunion\n  2. Points de discussion clés\n  3. Résultats et décisions\n  4. Actions à entreprendre et prochaines étapes\n  5. Exigences de suivi\n- Incluez des étapes spécifiques et exploitables avec des délais clairs lorsque c'est applicable\n- Basez les recommandations uniquement sur ce qui a été discuté lors de la réunion",
       "additionalAttention": "- Portez une attention particulière aux informations supplémentaires fournies ci-dessus",
       "deliveryFormat": "- N'incluez PAS de clauses de non-responsabilité ou de contenu lié au fournisseur d'IA\n- Fournissez UNIQUEMENT le contenu du rapport de réunion dans un format prêt à être livré\n- Rendez les actions spécifiques, mesurables et réalisables\n- Concentrez-vous sur les prochaines étapes pratiques qui peuvent être mises en œuvre immédiatement",
-      "languageInstruction": "- Générez la réponse en {{language}} avec un langage clair et professionnel",
       "userPrompt": "Veuillez créer un rapport de réunion détaillé basé sur la transcription fournie. Concentrez-vous sur la création d'informations exploitables et d'étapes suivantes claires pour ce client."
     }
   },

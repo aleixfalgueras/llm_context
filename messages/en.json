@@ -1213,7 +1213,8 @@
       "generation": {
         "instructions": "Please generate a professional, well-structured document based on the above prompt and client information.",
         "outputFormat": "OUTPUT FORMAT:\n- Start directly with the document title and content\n- Do NOT include any introductory text like \"Here is your document\" or similar preambles\n- Output the document immediately, beginning with its title",
-        "languageRequirements": "IMPORTANT LANGUAGE REQUIREMENTS:\n- **Generate the entire document in {{language}}**\n- Use appropriate professional terminology for this language\n- Adapt formatting and structure conventions and cultural communication styles appropriate for this language/culture"
+        "languageRequirements": "IMPORTANT LANGUAGE REQUIREMENTS:\n- **Generate the entire document in {{languageName}}**\n- Use appropriate professional terminology for {{languageName}} language\n- Adapt formatting and structure conventions and cultural communication styles appropriate for {{languageName}} language/culture",
+        "rememberLanguage": "REMEMBER, VERY IMPORTANT: Use {{languageName}} to generate the entire document output."
       },
       "additionalInstructions": "ADDITIONAL INSTRUCTIONS:"
     },
