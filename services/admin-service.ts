@@ -6,9 +6,8 @@ import {FeedbackService, isValidFeedbackState} from '@/services/feedback-service
 import {FeedbackOperations} from '@/database/feedback-operations'
 import {SubscriptionUsageOperations} from '@/database/subscription-usage-operations'
 import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
-import {SubscriptionWithUsage} from "@/lib/types/subscription-types";
-
-const ADMIN_EMAILS = ['feina.aleix@gmail.com', 'a.nelson@dreamotion.io']
+import {SubscriptionWithUsage} from "@/lib/types/subscription-types"
+import {ADMIN_EMAILS} from '@/lib/config'
 
 export class AdminService {
   
