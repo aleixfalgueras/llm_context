@@ -1,7 +1,6 @@
 import {buildClientContextSection, replaceClientContextVariables} from '@/services/client/client-context-service'
 import {openRouterService} from '@/services/openrouter'
 import {DEFAULT_MODEL, getDefaultTemperature} from '@/lib/models-config'
-import {getLanguageInfo} from '@/lib/utils/client-language'
 import {logger} from '@/lib/logger'
 import {ClientService} from '@/services/client/client-service'
 import {DocumentService} from '@/services/document-service'
@@ -161,12 +160,14 @@ ${additionalInstructions}`
 
     // Add language requirements
     const targetLanguage = client.documentsLanguage || 'en'
-    const language = getLanguageInfo(targetLanguage)
+    
+    // Get the language name from translations
+    const languageName = tPrompts(`languages.${targetLanguage}`)
 
     // Use translated document generation instructions
     const instructions = tPrompts('documents.generation.instructions')
     const outputFormat = tPrompts('documents.generation.outputFormat')
-    const languageRequirements = tPrompts('documents.generation.languageRequirements', { language: language.nativeLabel })
+    const languageRequirements = tPrompts('documents.generation.languageRequirements', { language: languageName })
 
     completePrompt += `
 ---

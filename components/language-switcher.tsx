@@ -15,15 +15,12 @@ import { Globe, Check } from 'lucide-react'
 export function LanguageSwitcher() {
   const locale = useLocale()
   const setLocale = useSetLocale()
-  const t = useTranslations('language')
+  const t = useTranslations('languages')
 
   // Map of locale codes to display names
   const localeNames: Record<Locale, string> = {
-    en: t('english'),
-    fr: t('french'),
-    // Future locales can be added here
-    // es: t('spanish'),
-    // de: t('german'),
+    en: t('en'),
+    fr: t('fr'),
   }
 
   return (
@@ -48,19 +45,6 @@ export function LanguageSwitcher() {
             </div>
           </DropdownMenuItem>
         ))}
-        {/* Placeholder for future languages - commented out for now */}
-        {/* 
-        <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
-          <div className="flex items-center justify-between w-full">
-            <span>Español (Coming Soon)</span>
-          </div>
-        </DropdownMenuItem>
-        <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
-          <div className="flex items-center justify-between w-full">
-            <span>Français (Coming Soon)</span>
-          </div>
-        </DropdownMenuItem>
-        */}
       </DropdownMenuContent>
     </DropdownMenu>
   )

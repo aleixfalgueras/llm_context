@@ -7,7 +7,8 @@ import {deleteClient as deleteClientAction} from '@/app/actions/client-action'
 import type {Client} from '@prisma/client'
 import type {PaginationInfo} from '@/lib/types/client-list-types'
 import {ClientSortMode} from '@/lib/enums'
-import {getLanguageInfo, LanguageInfo} from "@/lib/utils/client-language";
+import {getLanguageInfoClient, LanguageInfo} from "@/lib/utils/client-language";
+import {useLocale} from "@/lib/translations/context";
 
 type ViewMode = 'grid' | 'table'
 
@@ -42,6 +43,7 @@ export function useClientList({
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const { toast } = useToast()
+  const locale = useLocale()
   
   // Persist view mode in localStorage
   const { value: viewMode, setValue: setViewMode } = useLocalStorage<ViewMode>(
@@ -136,7 +138,7 @@ export function useClientList({
   }, [toast])
 
   const getLanguageInfoCallback = useCallback((language: string): LanguageInfo => {
-    return getLanguageInfo(language)
+    return getLanguageInfoClient(language, locale)
   }, [])
 
   return {

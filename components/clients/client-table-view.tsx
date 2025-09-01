@@ -93,9 +93,8 @@ export function ClientTableView({
                     </div>
                   </td>
                   <td className="p-3 hidden lg:table-cell">
-                    <div className="flex items-center gap-1">
-                      <span>{languageInfo.flag}</span>
-                      <span>{languageInfo.label}</span>
+                    <div>
+                      {languageInfo.label}
                     </div>
                   </td>
                   <td className="p-3 sticky right-0 bg-background">

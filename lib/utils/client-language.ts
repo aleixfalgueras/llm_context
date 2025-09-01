@@ -1,42 +1,71 @@
+import { getTranslations, Locale } from '@/lib/translations'
+import { messages } from '@/lib/translations'
 
-export const LANGUAGES = {
-  'en': { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇺🇸' },
-  'es': { code: 'es', label: 'Spanish', nativeLabel: 'Español', flag: '🇪🇸' },
-  'fr': { code: 'fr', label: 'French', nativeLabel: 'Français', flag: '🇫🇷' },
-  'de': { code: 'de', label: 'German', nativeLabel: 'Deutsch', flag: '🇩🇪' },
-  'it': { code: 'it', label: 'Italian', nativeLabel: 'Italiano', flag: '🇮🇹' },
-  'pt': { code: 'pt', label: 'Portuguese', nativeLabel: 'Português', flag: '🇵🇹' },
-  'nl': { code: 'nl', label: 'Dutch', nativeLabel: 'Nederlands', flag: '🇳🇱' },
-  'pl': { code: 'pl', label: 'Polish', nativeLabel: 'Polski', flag: '🇵🇱' },
-  'ru': { code: 'ru', label: 'Russian', nativeLabel: 'Русский', flag: '🇷🇺' },
-  'ca': { code: 'ca', label: 'Catalan', nativeLabel: 'Català', flag: '🏴󠁥󠁳󠁣󠁴󠁿󠁥󠁳󠁣󠁴󠁿' }
-} as const
-export type LanguageCode = keyof typeof LANGUAGES
+// Available language codes
+export const LANGUAGE_CODES = ['en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'pl', 'ru', 'ca'] as const
+export type LanguageCode = typeof LANGUAGE_CODES[number]
 
 export interface LanguageInfo {
   code: string
   label: string
-  nativeLabel: string
-  flag: string
 }
 
 // Helper function to get language options for forms
-export function getLanguageOptions(): Array<{ value: string; label: string; flag: string }> {
-  return Object.entries(LANGUAGES).map(([code, info]) => ({
+export async function getLanguageOptionsServer(locale: Locale = 'en'): Promise<Array<{ value: string; label: string }>> {
+  const t = await getTranslations('languages', locale)
+  
+  return LANGUAGE_CODES.map(code => ({
     value: code,
-    label: `${info.label} (${info.nativeLabel})`,
-    flag: info.flag
+    label: t(code)
+  }))
+}
+
+// Client-side version for components
+export function getLanguageOptionsClient(locale: Locale = 'en'): Array<{ value: string; label: string }> {
+  const currentMessages = messages[locale]
+  
+  return LANGUAGE_CODES.map(code => ({
+    value: code,
+    label: currentMessages.languages?.[code as keyof typeof currentMessages.languages]
   }))
 }
 
 // Helper function to get language info by code
-export function getLanguageInfo(code: string): LanguageInfo {
+export async function getLanguageInfoServer(code: string, locale: Locale = 'en'): Promise<LanguageInfo> {
+  const t = await getTranslations('languages', locale)
   const normalizedCode = code?.toLowerCase()
-  return LANGUAGES[normalizedCode as LanguageCode] || {
+  
+  // Check if it's a valid language code
+  if (LANGUAGE_CODES.includes(normalizedCode as LanguageCode)) {
+    return {
+      code: normalizedCode,
+      label: t(normalizedCode)
+    }
+  }
+  
+  // Fallback for unknown languages
+  return {
     code: normalizedCode || 'unknown',
-    label: code || 'Unknown',
-    nativeLabel: code || 'Unknown',
-    flag: '🌐'
+    label: code || 'Unknown'
   }
 }
 
+// Client-side version for components
+export function getLanguageInfoClient(code: string, locale: Locale = 'en'): LanguageInfo {
+  const currentMessages = messages[locale]
+  const normalizedCode = code?.toLowerCase()
+  
+  // Check if it's a valid language code
+  if (LANGUAGE_CODES.includes(normalizedCode as LanguageCode)) {
+    return {
+      code: normalizedCode,
+      label: currentMessages.languages?.[normalizedCode as keyof typeof currentMessages.languages] || code
+    }
+  }
+  
+  // Fallback for unknown languages
+  return {
+    code: normalizedCode || 'unknown',
+    label: code || 'Unknown'
+  }
+}

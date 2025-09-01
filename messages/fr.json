@@ -586,8 +586,8 @@
       "codeCopied": "Code d'affiliation copié dans le presse-papiers"
     },
     "statusGuide": {
-      "buttonLabel": "Guide des Statuts",
       "title": "Guide des Statuts d'Affiliation",
+      "buttonLabel": "Guide Statuts",
       "description": "Aperçu complet de tous les statuts d'affiliation, leurs exigences et avantages",
       "status": "Statut",
       "requirements": "Exigences",
@@ -600,7 +600,7 @@
     },
     "commissionsGuide": {
       "title": "Guide des Commissions",
-      "buttonLabel": "Guide des Commissions",
+      "buttonLabel": "Guide Commissions",
       "dialogDescription": "Comprendre le fonctionnement des commissions d'affiliation, les calendriers de paiement et les limites d'abonnement",
       "paymentProcessing": "Traitement des Paiements",
       "monthlyPaymentTitle": "Calendrier de Paiement Mensuel",
@@ -1174,16 +1174,6 @@
       "confirmationText": "DELETE MY ACCOUNT"
     }
   },
-  "language": {
-    "english": "Anglais",
-    "spanish": "Espagnol",
-    "french": "Français",
-    "german": "Allemand",
-    "italian": "Italien",
-    "portuguese": "Portugais",
-    "dutch": "Néerlandais",
-    "russian": "Russe"
-  },
   "clientContext": {
     "header": "CONTEXTE CLIENT:",
     "countryContext": "Ce client est",
@@ -1238,5 +1228,17 @@
       "languageInstruction": "- Générez la réponse en {{language}} avec un langage clair et professionnel",
       "userPrompt": "Veuillez créer un rapport de réunion détaillé basé sur la transcription fournie. Concentrez-vous sur la création d'informations exploitables et d'étapes suivantes claires pour ce client."
     }
+  },
+  "languages": {
+    "en": "Anglais",
+    "es": "Espagnol",
+    "fr": "Français",
+    "de": "Allemand",
+    "it": "Italien",
+    "pt": "Portugais",
+    "nl": "Néerlandais",
+    "pl": "Polonais",
+    "ru": "Russe",
+    "ca": "Catalan"
   }
 }
