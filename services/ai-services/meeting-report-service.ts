@@ -40,18 +40,18 @@ export class MeetingReportService {
       logger.info(`Meeting Report - Additional Instructions provided: ${additionalInfo}`)
     }
 
-    // Build the meeting report prompt
-    const meetingReportPrompt = await this.buildMeetingReportPrompt({
+    // Get translated prompts
+    const t = await getTranslations('aiPrompts', locale)
+    const systemPrompt = t('meetingReport.systemPrompt')
+    
+    // Build the user prompt with task-specific data
+    const userPrompt = await this.buildUserPrompt({
       clientName: client.name,
       meetingDate,
       meetingTranscription,
       additionalInfo,
       locale
     })
-    
-    // Get translated user prompt
-    const t = await getTranslations('aiPrompts', locale)
-    const userPrompt = t('meetingReport.userPrompt')
 
     // Generate the report using OpenRouter
     const completion = await openRouterService.createCompletion(
@@ -60,7 +60,7 @@ export class MeetingReportService {
         messages: [
           {
             role: 'system',
-            content: meetingReportPrompt
+            content: systemPrompt
           },
           {
             role: 'user',
@@ -111,9 +111,9 @@ export class MeetingReportService {
   }
 
   /**
-   * Build the meeting report prompt with localized text
+   * Build the user prompt with task-specific data
    */
-  private static async buildMeetingReportPrompt({
+  private static async buildUserPrompt({
     clientName,
     meetingDate,
     meetingTranscription,
@@ -128,26 +128,27 @@ export class MeetingReportService {
   }): Promise<string> {
     const t = await getTranslations('aiPrompts', locale)
 
-    const systemPrompt = t('meetingReport.systemPrompt')
-    const clientInfo = t('meetingReport.clientInfo', { clientName })
-    const meetingInfo = t('meetingReport.meetingInfo', { meetingDate })
-    const additionalInfoLabel = t('meetingReport.additionalInfo')
-    const instructions = t('meetingReport.instructions')
-    const additionalAttention = additionalInfo ? t('meetingReport.additionalAttention') : ''
-    const deliveryFormat = t('meetingReport.deliveryFormat')
-
-    return `${systemPrompt}
-
-${clientInfo}
-
-${meetingInfo}
-${meetingTranscription}${additionalInfo ? `
-
-${additionalInfoLabel}
-${additionalInfo}` : ''}
-
-${instructions}${additionalAttention ? `
-${additionalAttention}` : ''}
-${deliveryFormat}`
+    // Get the user prompt template and replace placeholders
+    let userPrompt = t('meetingReport.userPromptTemplate')
+    
+    // Replace basic placeholders
+    userPrompt = userPrompt.replace('{{clientName}}', clientName)
+    userPrompt = userPrompt.replace('{{meetingDate}}', meetingDate)
+    userPrompt = userPrompt.replace('{{meetingTranscription}}', meetingTranscription)
+    
+    // Handle additional info
+    if (additionalInfo && additionalInfo.trim()) {
+      const additionalInfoSection = t('meetingReport.additionalInfoSection')
+        .replace('{{additionalInfo}}', additionalInfo)
+      userPrompt = userPrompt.replace('{{additionalInfo}}', additionalInfoSection)
+      
+      const additionalAttentionText = t('meetingReport.additionalAttentionText')
+      userPrompt = userPrompt.replace('{{additionalAttention}}', additionalAttentionText)
+    } else {
+      userPrompt = userPrompt.replace('{{additionalInfo}}', '')
+      userPrompt = userPrompt.replace('{{additionalAttention}}', '')
+    }
+    
+    return userPrompt
   }
 }
