@@ -50,6 +50,9 @@ export async function deleteAllChats(currentPath?: string) {
     throw new Error(result.error || 'Failed to delete all chats')
   }
 
+  // Revalidate the assistant page to refresh the chats list
+  revalidatePath('/assistant')
+
   // If user is currently viewing a chat page, redirect to assistant page
   if (currentPath && currentPath.startsWith('/assistant/chat/')) {
     redirect('/assistant')

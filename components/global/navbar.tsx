@@ -13,6 +13,7 @@ import {useMemo, useState} from 'react'
 import {useTranslations} from '@/lib/translations/context'
 import {LanguageSwitcher} from '@/components/language-switcher'
 import {Button} from '@/components/ui/button'
+import {ADMIN_EMAILS} from '@/lib/config'
 
 export function Navbar() {
   const pathname = usePathname()
@@ -21,7 +22,8 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   // Check if current user is admin
-  const isAdmin = user?.emailAddresses[0]?.emailAddress === 'feina.aleix@gmail.com'
+  const userEmail = user?.emailAddresses[0]?.emailAddress
+  const isAdmin = userEmail ? ADMIN_EMAILS.includes(userEmail) : false
 
   const navigation = useMemo(() => [
     { name: t('clients'), href: '/clients', icon: '👥' },
