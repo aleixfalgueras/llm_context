@@ -51,6 +51,7 @@ export function PromptsManagement() {
     // Filter handlers
     filterActionHandlers,
     filteredSamplePrompts,
+    samplePromptsLoading,
   } = usePromptManagement()
 
   const useAsTemplate = () => {
@@ -96,14 +97,21 @@ export function PromptsManagement() {
             {t('templatesDescription')}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {filteredSamplePrompts.map((samplePrompt) => (
-              <SamplePromptCard
-                key={samplePrompt.id}
-                prompt={samplePrompt}
-                onUseAsTemplate={() => useAsTemplate()}
-                onSuccess={fetchPrompts}
-              />
-            ))}
+            {samplePromptsLoading ? (
+              // Loading skeleton for sample prompts
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="h-[240px] bg-gray-100 animate-pulse rounded-lg" />
+              ))
+            ) : (
+              filteredSamplePrompts.map((samplePrompt) => (
+                <SamplePromptCard
+                  key={samplePrompt.id}
+                  prompt={samplePrompt}
+                  onUseAsTemplate={() => useAsTemplate()}
+                  onSuccess={fetchPrompts}
+                />
+              ))
+            )}
           </div>
         </div>
       )}

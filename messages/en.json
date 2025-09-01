@@ -321,6 +321,38 @@
     "template": {
       "label": "Template",
       "useTemplate": "Use Template"
+    },
+    "samplePrompts": {
+      "1": {
+        "name": "Marketing Strategy Report",
+        "description": "Comprehensive marketing strategy with full client context integration",
+        "content": "Please create a comprehensive marketing strategy report with the following structure:\n\nClient Information:\n- Location: {country}\n- Business Context: {general_context}\n- Key Focus Area: {specific_context_1}\n- Additional Considerations: {specific_context_2}\n\nStrategy Recommendations:\nBased on the client's location and business context, provide detailed marketing strategy recommendations that address their specific focus areas and considerations.\n\nImplementation Plan:\nInclude specific next steps and timeline for executing the marketing strategy, taking into account their unique business circumstances and market positioning.\n\nSuccess Metrics:\nDefine key performance indicators that align with their specific business objectives and market requirements."
+      },
+      "2": {
+        "name": "Content Calendar Template",
+        "description": "Detailed content calendar with client-specific customization",
+        "content": "Content Calendar Template\n\nClient Overview:\n- Market Location: {country}\n- Business Context: {general_context}\n- Primary Focus: {specific_context_1}\n- Secondary Objectives: {specific_context_2}\n\nContent Strategy Framework:\n1. Brand Voice & Messaging (tailored to market and business context)\n2. Content Pillars (aligned with primary focus areas)\n3. Platform Strategy (optimized for target market)\n4. Engagement Tactics (considering specific objectives)\n\nMonthly Content Planning:\nPlease provide a detailed content calendar that incorporates the client's specific context and objectives. Include content themes, posting schedules, and engagement strategies that resonate with their target audience and market dynamics.\n\nContent should address their primary focus while supporting secondary objectives throughout the calendar."
+      },
+      "3": {
+        "name": "Client Onboarding Document",
+        "description": "Personalized client welcome and onboarding materials",
+        "content": "Client Onboarding & Welcome Package\n\nWelcome Message:\nCreate a personalized welcome message for our new client, considering their location in {country} and their business context: {general_context}\n\nService Overview:\nProvide a customized overview of our services that specifically addresses:\n- Primary Needs: {specific_context_1}\n- Secondary Requirements: {specific_context_2}\n- Additional Considerations: {specific_context_3}\n\nNext Steps & Timeline:\nOutline a clear onboarding process tailored to their specific requirements and market context.\n\nContact Information:\nInclude relevant team members and communication preferences optimized for their location and business needs.\n\nThis onboarding document should make the client feel understood and confident in our ability to address their unique business requirements."
+      },
+      "4": {
+        "name": "Performance Analysis Report",
+        "description": "Comprehensive performance tracking with contextual insights",
+        "content": "Marketing Performance Report\n\nReport Period: [Current Month/Quarter]\n\nClient Overview:\n- Market: {country}\n- Business Context: {general_context}\n- Key Performance Area: {specific_context_1}\n- Secondary Focus: {specific_context_2}\n\nPerformance Summary:\nAnalyze marketing performance considering the client's specific business context and focus areas:\n\n1. Primary Objective Achievement\n- Progress toward main goals related to: {specific_context_1}\n- Market-specific performance indicators\n- Context-driven success metrics\n\n2. Secondary Objective Performance  \n- Results in: {specific_context_2}\n- Supporting initiative outcomes\n- Cross-objective synergies\n\n3. Market Context Analysis\n- Location-specific performance trends\n- Regional market dynamics impact\n- Cultural/geographic considerations\n\n4. Strategic Recommendations\n- Optimization opportunities aligned with business context\n- Market-specific strategy adjustments\n- Prioritized next steps considering all context factors\n\nPlease provide data-driven insights that connect performance metrics to the client's specific business context and objectives."
+      },
+      "5": {
+        "name": "Competitive Analysis Brief",
+        "description": "Market analysis incorporating client-specific positioning",
+        "content": "Competitive Analysis Report\n\nClient Context:\n- Market Location: {country}\n- Business Overview: {general_context}\n- Competitive Focus: {specific_context_1}\n- Differentiation Strategy: {specific_context_2}\n- Market Positioning: {specific_context_3}\n\nCompetitive Landscape Analysis:\nProvide a comprehensive competitive analysis that considers the client's specific market position and strategic focus areas.\n\n1. Direct Competitors\n- Identify main competitors in {country} market\n- Analyze how they position against client's focus on: {specific_context_1}\n\n2. Competitive Advantages\n- Highlight client's unique positioning in: {specific_context_2}\n- Market opportunities based on: {specific_context_3}\n\n3. Market Gaps & Opportunities\n- Unmet needs in the target market\n- Strategic opportunities aligned with client context\n\n4. Recommendations\n- Positioning strategies that leverage client's specific strengths\n- Market entry or expansion tactics\n- Competitive response strategies\n\nThis analysis should provide actionable insights for strengthening market position."
+      },
+      "6": {
+        "name": "Social Media Campaign Proposal",
+        "description": "Targeted social media strategy with full context integration",
+        "content": "Social Media Campaign Proposal\n\nClient Background:\n- Target Market: {country}\n- Business Context: {general_context}\n- Campaign Objective: {specific_context_1}\n- Brand Focus: {specific_context_2}\n- Special Considerations: {specific_context_3}\n\nCampaign Strategy:\nDevelop a social media campaign that leverages the client's unique positioning and addresses their specific objectives.\n\n1. Platform Selection\n- Optimal platforms for {country} market\n- Alignment with campaign objective: {specific_context_1}\n\n2. Content Strategy\n- Messaging that reflects: {general_context}\n- Content themes highlighting: {specific_context_2}\n- Special considerations for: {specific_context_3}\n\n3. Engagement Tactics\n- Market-appropriate engagement methods\n- Community building strategies\n- User-generated content opportunities\n\n4. Campaign Timeline & Metrics\n- Phased rollout plan\n- Success metrics aligned with objectives\n- Performance monitoring framework\n\nThis campaign should authentically represent the client's brand while achieving their specific marketing objectives."
+      }
     }
   },
   "assistant": {
