@@ -99,7 +99,7 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     specificContext1: client?.specificContext1 ?? '',
     specificContext2: client?.specificContext2 ?? '',
     specificContext3: client?.specificContext3 ?? '',
-    documentsLanguage: client?.documentsLanguage || 'en'
+    documentsLanguage: client?.documentsLanguage || locale
   }
 
   const {
