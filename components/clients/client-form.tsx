@@ -178,10 +178,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
                 (() => {
                   const lang = languages.find(l => l.value === formData.documentsLanguage)
                   return lang ? (
-                    <span className="flex items-center gap-2 text-sm">
-                      <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
-                    </span>
+                    <span className="text-sm">{lang.label}</span>
                   ) : <span className="text-sm">-</span>
                 })()
               ) : <span className="text-sm">-</span>}
@@ -197,10 +194,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
               <SelectContent>
                 {languages.map((lang) => (
                   <SelectItem key={lang.value} value={lang.value}>
-                    <span className="flex items-center gap-2">
-                      <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
-                    </span>
+                    {lang.label}
                   </SelectItem>
                 ))}
               </SelectContent>

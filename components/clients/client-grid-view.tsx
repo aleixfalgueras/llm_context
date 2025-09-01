@@ -113,10 +113,7 @@ export function ClientGridView({
 
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('table.documents')}:</span>
-                  <span className="flex items-center gap-1">
-                    <span>{languageInfo.flag}</span>
-                    <span>{languageInfo.label}</span>
-                  </span>
+                  <span>{languageInfo.label}</span>
                 </div>
               </div>
             </CardContent>
