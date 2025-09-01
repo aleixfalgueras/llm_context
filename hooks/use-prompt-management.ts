@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { getSamplePromptsByCategory } from '@/lib/sample-prompts'
+import { useLocale } from '@/lib/translations/context'
 import { Prompt } from '@prisma/client'
-import { 
-  PromptStats, 
-  PromptFilters, 
-  PromptFilterActionHandlers
+import {
+  PromptStats,
+  PromptFilters,
+  PromptFilterActionHandlers, SamplePrompt
 } from '@/lib/types/prompt-types'
 import { handleClientApiError } from '@/lib/api/api-toast'
 import { getPrompts, deletePrompt as deletePromptAction, updatePrompt } from '@/app/actions/prompt-action'
@@ -46,12 +47,15 @@ interface UsePromptManagementReturn {
   
   // Filter handlers
   filterActionHandlers: PromptFilterActionHandlers
-  filteredSamplePrompts: any[]
+  filteredSamplePrompts: SamplePrompt[]
+  samplePromptsLoading: boolean
 }
 
 export function usePromptManagement(): UsePromptManagementReturn {
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [loading, setLoading] = useState(true)
+  const [filteredSamplePrompts, setFilteredSamplePrompts] = useState<SamplePrompt[]>([])
+  const [samplePromptsLoading, setSamplePromptsLoading] = useState(true)
   const [filters, setFilters] = useState<PromptFilters>({
     searchTerm: '',
     selectedCategory: 'all',
@@ -67,6 +71,7 @@ export function usePromptManagement(): UsePromptManagementReturn {
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null)
   const [deletingPrompt, setDeletingPrompt] = useState<Prompt | null>(null)
   const { toast } = useToast()
+  const locale = useLocale()
 
   const fetchPrompts = async () => {
     setLoading(true)
@@ -88,6 +93,18 @@ export function usePromptManagement(): UsePromptManagementReturn {
     }
   }
 
+  const fetchSamplePrompts = async () => {
+    setSamplePromptsLoading(true)
+    try {
+      const samplePrompts = await getSamplePromptsByCategory(filters.selectedCategory, locale)
+      setFilteredSamplePrompts(samplePrompts)
+    } catch (error) {
+      console.error('Error fetching sample prompts:', error)
+    } finally {
+      setSamplePromptsLoading(false)
+    }
+  }
+
   // Load showTemplates preference from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('showTemplates')
@@ -100,6 +117,11 @@ export function usePromptManagement(): UsePromptManagementReturn {
   useEffect(() => {
     void fetchPrompts()
   }, [filters.selectedCategory, filters.showInactive])
+
+  // Fetch sample prompts when category or locale changes
+  useEffect(() => {
+    void fetchSamplePrompts()
+  }, [filters.selectedCategory, locale])
 
   const filteredAndSortedPrompts = (Array.isArray(prompts) ? prompts : [])
     .filter((prompt) => {
@@ -204,8 +226,6 @@ export function usePromptManagement(): UsePromptManagementReturn {
     onToggleTemplates: toggleTemplates
   }
 
-  const filteredSamplePrompts = getSamplePromptsByCategory(filters.selectedCategory)
-
   return {
     // State
     prompts,
@@ -240,5 +260,6 @@ export function usePromptManagement(): UsePromptManagementReturn {
     // Filter handlers
     filterActionHandlers,
     filteredSamplePrompts,
+    samplePromptsLoading,
   }
 }

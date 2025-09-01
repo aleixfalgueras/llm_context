@@ -1,4 +1,4 @@
-import { Prompt } from '@prisma/client'
+import {Prompt} from '@prisma/client'
 
 export type PromptInput = Omit<Prompt, 'userId' | 'createdAt' | 'updatedAt'>
 
@@ -37,4 +37,8 @@ export const PROMPT_SORT_OPTIONS = [
   { value: 'recent', label: 'Recently Updated' },
   { value: 'name', label: 'Name A-Z' },
   { value: 'created', label: 'Recently Created' },
-] 
+]
+
+export type SamplePrompt = Omit<Prompt, 'userId' | 'createdAt' | 'updatedAt'> & {
+  isSample: true
+}

@@ -289,7 +289,7 @@
       "error": "Erreur de Validation"
     },
     "selector": {
-      "usePrompt": "Utiliser le Prompt",
+      "usePrompt": "Utiliser Prompt",
       "loading": "Chargement des prompts...",
       "noSearchResults": "Aucun prompt trouvé correspondant à votre recherche",
       "noPrompts": "Aucun prompt disponible",
@@ -321,6 +321,38 @@
     "template": {
       "label": "Template",
       "useTemplate": "Utiliser le Template"
+    },
+    "samplePrompts": {
+      "1": {
+        "name": "Rapport de Stratégie Marketing",
+        "description": "Stratégie marketing complète avec intégration totale du contexte client",
+        "content": "Veuillez créer un rapport de stratégie marketing complet avec la structure suivante :\n\nInformations Client :\n- Localisation : {country}\n- Contexte Commercial : {general_context}\n- Domaine de Focus Principal : {specific_context_1}\n- Considérations Additionnelles : {specific_context_2}\n\nRecommandations Stratégiques :\nBasé sur la localisation du client et son contexte commercial, fournissez des recommandations stratégiques marketing détaillées qui adressent leurs domaines de focus spécifiques et considérations.\n\nPlan de Mise en Œuvre :\nIncluez des étapes spécifiques suivantes et un calendrier pour exécuter la stratégie marketing, en tenant compte de leurs circonstances commerciales uniques et positionnement marché.\n\nMétriques de Succès :\nDéfinissez des indicateurs de performance clés qui s'alignent avec leurs objectifs commerciaux spécifiques et exigences du marché."
+      },
+      "2": {
+        "name": "Modèle de Calendrier de Contenu",
+        "description": "Calendrier de contenu détaillé avec personnalisation spécifique au client",
+        "content": "Modèle de Calendrier de Contenu\n\nAperçu Client :\n- Localisation Marché : {country}\n- Contexte Commercial : {general_context}\n- Focus Principal : {specific_context_1}\n- Objectifs Secondaires : {specific_context_2}\n\nCadre de Stratégie de Contenu :\n1. Voix de Marque & Messagerie (adaptée au marché et contexte commercial)\n2. Piliers de Contenu (alignés avec les domaines de focus principaux)\n3. Stratégie de Plateforme (optimisée pour le marché cible)\n4. Tactiques d'Engagement (considérant les objectifs spécifiques)\n\nPlanification de Contenu Mensuel :\nVeuillez fournir un calendrier de contenu détaillé qui incorpore le contexte spécifique et les objectifs du client. Incluez des thèmes de contenu, horaires de publication, et stratégies d'engagement qui résonnent avec leur audience cible et dynamiques du marché.\n\nLe contenu devrait adresser leur focus principal tout en supportant les objectifs secondaires tout au long du calendrier."
+      },
+      "3": {
+        "name": "Document d'Intégration Client",
+        "description": "Matériaux d'accueil et d'intégration client personnalisés",
+        "content": "Package d'Intégration & Accueil Client\n\nMessage de Bienvenue :\nCréez un message de bienvenue personnalisé pour notre nouveau client, considérant leur localisation en {country} et leur contexte commercial : {general_context}\n\nAperçu des Services :\nFournissez un aperçu personnalisé de nos services qui adresse spécifiquement :\n- Besoins Principaux : {specific_context_1}\n- Exigences Secondaires : {specific_context_2}\n- Considérations Additionnelles : {specific_context_3}\n\nÉtapes Suivantes & Calendrier :\nDécrivez un processus d'intégration clair adapté à leurs exigences spécifiques et contexte marché.\n\nInformations de Contact :\nIncluez les membres d'équipe pertinents et préférences de communication optimisées pour leur localisation et besoins commerciaux.\n\nCe document d'intégration devrait faire sentir au client qu'il est compris et confiant en notre capacité à adresser ses exigences commerciales uniques."
+      },
+      "4": {
+        "name": "Rapport d'Analyse de Performance",
+        "description": "Suivi de performance complet avec insights contextuels",
+        "content": "Rapport de Performance Marketing\n\nPériode de Rapport : [Mois/Trimestre Actuel]\n\nAperçu Client :\n- Marché : {country}\n- Contexte Commercial : {general_context}\n- Domaine de Performance Clé : {specific_context_1}\n- Focus Secondaire : {specific_context_2}\n\nRésumé de Performance :\nAnalysez la performance marketing considérant le contexte commercial spécifique et domaines de focus du client :\n\n1. Réalisation d'Objectif Principal\n- Progrès vers les objectifs principaux liés à : {specific_context_1}\n- Indicateurs de performance spécifiques au marché\n- Métriques de succès orientées contexte\n\n2. Performance d'Objectif Secondaire\n- Résultats en : {specific_context_2}\n- Résultats d'initiatives de support\n- Synergies croisées d'objectifs\n\n3. Analyse de Contexte Marché\n- Tendances de performance spécifiques à la localisation\n- Impact des dynamiques de marché régional\n- Considérations culturelles/géographiques\n\n4. Recommandations Stratégiques\n- Opportunités d'optimisation alignées avec le contexte commercial\n- Ajustements de stratégie spécifiques au marché\n- Étapes suivantes priorisées considérant tous les facteurs de contexte\n\nVeuillez fournir des insights basés sur les données qui connectent les métriques de performance au contexte commercial spécifique et objectifs du client."
+      },
+      "5": {
+        "name": "Brief d'Analyse Concurrentielle",
+        "description": "Analyse de marché incorporant le positionnement spécifique au client",
+        "content": "Rapport d'Analyse Concurrentielle\n\nContexte Client :\n- Localisation Marché : {country}\n- Aperçu Commercial : {general_context}\n- Focus Concurrentiel : {specific_context_1}\n- Stratégie de Différenciation : {specific_context_2}\n- Positionnement Marché : {specific_context_3}\n\nAnalyse du Paysage Concurrentiel :\nFournissez une analyse concurrentielle complète qui considère la position de marché spécifique et domaines de focus stratégiques du client.\n\n1. Concurrents Directs\n- Identifiez les concurrents principaux dans le marché {country}\n- Analysez comment ils se positionnent contre le focus du client sur : {specific_context_1}\n\n2. Avantages Concurrentiels\n- Mettez en évidence le positionnement unique du client en : {specific_context_2}\n- Opportunités de marché basées sur : {specific_context_3}\n\n3. Lacunes & Opportunités du Marché\n- Besoins non satisfaits dans le marché cible\n- Opportunités stratégiques alignées avec le contexte client\n\n4. Recommandations\n- Stratégies de positionnement qui exploitent les forces spécifiques du client\n- Tactiques d'entrée ou d'expansion de marché\n- Stratégies de réponse concurrentielle\n\nCette analyse devrait fournir des insights actionnables pour renforcer la position de marché."
+      },
+      "6": {
+        "name": "Proposition de Campagne Médias Sociaux",
+        "description": "Stratégie de médias sociaux ciblée avec intégration totale du contexte",
+        "content": "Proposition de Campagne Médias Sociaux\n\nContexte Client :\n- Marché Cible : {country}\n- Contexte Commercial : {general_context}\n- Objectif de Campagne : {specific_context_1}\n- Focus de Marque : {specific_context_2}\n- Considérations Spéciales : {specific_context_3}\n\nStratégie de Campagne :\nDéveloppez une campagne de médias sociaux qui exploite le positionnement unique du client et adresse ses objectifs spécifiques.\n\n1. Sélection de Plateforme\n- Plateformes optimales pour le marché {country}\n- Alignement avec l'objectif de campagne : {specific_context_1}\n\n2. Stratégie de Contenu\n- Messagerie qui reflète : {general_context}\n- Thèmes de contenu mettant en évidence : {specific_context_2}\n- Considérations spéciales pour : {specific_context_3}\n\n3. Tactiques d'Engagement\n- Méthodes d'engagement appropriées au marché\n- Stratégies de construction de communauté\n- Opportunités de contenu généré par les utilisateurs\n\n4. Calendrier & Métriques de Campagne\n- Plan de déploiement par phases\n- Métriques de succès alignées avec les objectifs\n- Cadre de surveillance de performance\n\nCette campagne devrait représenter authentiquement la marque du client tout en atteignant leurs objectifs marketing spécifiques."
+      }
     }
   },
   "assistant": {
