@@ -1,6 +1,6 @@
 import {PromptOperations} from '@/database'
 import {logger} from '@/lib/logger'
-import {Prompt} from '@prisma/client'
+import {Prompt, PromptCategory} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 
 export interface PromptListFilters {
@@ -87,7 +87,7 @@ export class PromptService {
       // Set default category if not provided
       const promptData = {
         ...data,
-        category: data.category || 'general'
+        category: data.category || PromptCategory.general
       }
 
       const result = await PromptOperations.createPrompt(userId, promptData)
