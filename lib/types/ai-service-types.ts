@@ -3,7 +3,7 @@ import { Client } from '@prisma/client'
 // Custom Document Generation Types
 export interface CustomDocumentGenerationRequest {
   clientId: string
-  customPrompt: string
+  prompt: string
   documentTitle: string
   additionalInstructions?: string
   selectedContextFields?: string[]
