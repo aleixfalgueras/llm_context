@@ -1174,16 +1174,6 @@
       "confirmationText": "DELETE MY ACCOUNT"
     }
   },
-  "language": {
-    "english": "English",
-    "spanish": "Spanish",
-    "french": "French",
-    "german": "German",
-    "italian": "Italian",
-    "portuguese": "Portuguese",
-    "dutch": "Dutch",
-    "russian": "Russian"
-  },
   "clientContext": {
     "header": "CLIENT CONTEXT:",
     "countryContext": "This client is from",
@@ -1237,5 +1227,17 @@
       "deliveryFormat": "- DO NOT include any disclaimers or AI provider-related content\n- Provide ONLY the meeting report content in a delivery-ready format\n- Make the action items specific, measurable, and achievable\n- Focus on practical next steps that can be implemented immediately",
       "userPrompt": "Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client."
     }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "it": "Italian",
+    "pt": "Portuguese",
+    "nl": "Dutch",
+    "pl": "Polish",
+    "ru": "Russian",
+    "ca": "Catalan"
   }
 }

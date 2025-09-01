@@ -7,7 +7,8 @@ import { Prisma } from '@prisma/client'
 import { validateClientForm } from '@/lib/utils/validation'
 import { capitalizeName } from '@/lib/utils/general'
 import React from "react";
-import {getLanguageOptions} from "@/lib/utils/client-language";
+import {getLanguageOptionsClient} from "@/lib/utils/client-language";
+import {useLocale} from "@/lib/translations/context";
 
 interface UseClientFormProps {
   client?: any
@@ -45,7 +46,7 @@ interface UseClientFormReturn {
   clearError: () => void
   
   // Available options
-  languages: Array<{ value: string; label: string; flag: string }>
+  languages: Array<{ value: string; label: string }>
 }
 
 const validationRules: Partial<Record<keyof ClientFormData, (value: any) => string | null>> = {
@@ -87,6 +88,7 @@ function convertFormDataToPrismaFormat(formData: ClientFormData): Omit<Prisma.Cl
 
 export function useClientForm({ client, onSuccess }: UseClientFormProps): UseClientFormReturn {
   const { isLoading, error, clearError, save, create } = useFormOperations()
+  const locale = useLocale()
 
   const initialData: ClientFormData = {
     name: client?.name || '',
@@ -113,8 +115,8 @@ export function useClientForm({ client, onSuccess }: UseClientFormProps): UseCli
     validationRules,
   })
 
-  // Use centralized language options from enums - single source of truth
-  const languages = getLanguageOptions()
+  // Use centralized language options from translations - single source of truth
+  const languages = getLanguageOptionsClient(locale)
 
   const updateField = (field: keyof ClientFormData, value: string) => {
     updateFormField(field, value)
