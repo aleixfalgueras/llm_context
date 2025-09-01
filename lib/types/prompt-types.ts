@@ -53,10 +53,10 @@ export function getPromptCategoriesWithLabels(t: any, includeAll: boolean = fals
 }
 
 export const PROMPT_SORT_OPTIONS = [
-  { value: 'usage', label: 'Most Used' },
-  { value: 'recent', label: 'Recently Updated' },
-  { value: 'name', label: 'Name A-Z' },
-  { value: 'created', label: 'Recently Created' },
+  'usage',
+  'recent',
+  'name',
+  'created',
 ]
 
 export type SamplePrompt = Omit<Prompt, 'userId' | 'createdAt' | 'updatedAt'> & {

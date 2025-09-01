@@ -41,7 +41,7 @@ export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
         
         <div className="flex items-center gap-2 mt-auto">
           <Badge variant="secondary" className="text-xs capitalize">
-            {prompt.category}
+            {t(`categories.${prompt.category}`)}
           </Badge>
           <Badge variant="outline" className="text-xs">
             {t('template.label')}

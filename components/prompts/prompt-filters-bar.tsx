@@ -63,8 +63,8 @@ export function PromptFiltersBar({ filters, actionHandlers }: PromptFiltersBarPr
         </SelectTrigger>
         <SelectContent>
           {PROMPT_SORT_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {t(`filters.sort.${option.value}`)}
+            <SelectItem key={option} value={option}>
+              {t(`filters.sort.${option}`)}
             </SelectItem>
           ))}
         </SelectContent>
