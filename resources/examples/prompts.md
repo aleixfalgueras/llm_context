@@ -3,7 +3,7 @@
 
 Cursive text indicate dyanmic content generation (not fixed).
 
-## AI Assistant
+## AI Assistant Prompts
 
 ### General Chat - System prompt
 
@@ -51,6 +51,29 @@ INSTRUCTIONS:
 
 Respond naturally and conversationally while keeping this context in mind.
 
-## AI Services
+## AI Services Prompts
+
+### Document Generation Prompt
+
+_Provide selling advice_
+
+CLIENT CONTEXT:
+_This client is from Spain. This client is a company that sells IaaS to small companies. This client sellers are direct, they contact companies employers in person. This client don't like to use Google Ads as an advertise method, they prefer to use Facebook Ads. Client budget for any marketing campaign is 300 dollars_
+---
+Please generate a professional, well-structured document based on the above prompt and client information.
+
+OUTPUT FORMAT:
+- Start directly with the document title and content
+- Do NOT include any introductory text like \"Here is your document\" or similar preambles
+- Output the document immediately, beginning with its title
+
+IMPORTANT LANGUAGE REQUIREMENTS:
+- **Generate the entire document in _Spanish_**
+- Use appropriate professional terminology for _Spanish_ language
+- Adapt formatting and structure conventions and cultural communication styles appropriate for _Spanish_ language/culture
+
+REMEMBER, VERY IMPORTANT: Use _Spanish_ to generate the entire document output.
+
+### Meeting Report
 
 

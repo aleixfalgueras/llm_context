@@ -139,15 +139,16 @@ export class CustomDocumentService {
     // Build client context section if fields are selected
     const tContext = await getTranslations('clientContext', locale)
     const tPrompts = await getTranslations('aiPrompts', locale)
+    const tLanguages = await getTranslations('languages', locale)
     const clientContextSection = buildClientContextSection(client, selectedContextFields, tContext)
 
     // Create the complete prompt with client context section
     let completePrompt = processedPrompt
     if (clientContextSection) {
       completePrompt = `
-      ${processedPrompt}
-      
-      ${clientContextSection}`.trim()
+${processedPrompt}
+
+${clientContextSection}`.trim()
     }
 
     if (additionalInstructions) {
@@ -159,15 +160,14 @@ ${additionalInstructions}`
     }
 
     // Add language requirements
-    const targetLanguage = client.documentsLanguage || 'en'
-    
-    // Get the language name from translations
-    const languageName = tPrompts(`languages.${targetLanguage}`)
+    const targetLanguageCode = client.documentsLanguage || 'en'
+    const languageName = tLanguages(targetLanguageCode)
 
     // Use translated document generation instructions
     const instructions = tPrompts('documents.generation.instructions')
     const outputFormat = tPrompts('documents.generation.outputFormat')
-    const languageRequirements = tPrompts('documents.generation.languageRequirements', { language: languageName })
+    const languageRequirements = tPrompts('documents.generation.languageRequirements', { languageName })
+    const rememberLanguage = tPrompts('documents.generation.rememberLanguage', { languageName })
 
     completePrompt += `
 ---
@@ -175,12 +175,14 @@ ${instructions}
 
 ${outputFormat}
 
-${languageRequirements}`
+${languageRequirements}
+
+${rememberLanguage}`
 
     return {
       completePrompt,
       client,
-      targetLanguage
+      targetLanguage: targetLanguageCode
     }
   }
 
