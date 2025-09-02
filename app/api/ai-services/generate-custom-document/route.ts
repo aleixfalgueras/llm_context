@@ -7,8 +7,8 @@ export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
     // Parse request body
     const { 
-      clientId, 
-      customPrompt,
+      clientId,
+      prompt,
       documentTitle,
       additionalInstructions,
       selectedContextFields = [],
@@ -17,14 +17,14 @@ export const POST = withEnhancedApi(
     const locale = await getLocaleFromCookies()
 
     // Validate required fields
-    if (!clientId || !customPrompt || !documentTitle) {
-      throw new Error('Missing required fields: clientId, documentTitle, and customPrompt are required')
+    if (!clientId || !prompt || !documentTitle) {
+      throw new Error('Missing required fields: clientId, documentTitle, and prompt are required')
     }
 
     // Use the Custom Document Service
     const data = await CustomDocumentService.generateDocument(userId, {
       clientId,
-      prompt: customPrompt,
+      prompt,
       documentTitle,
       additionalInstructions,
       selectedContextFields,
