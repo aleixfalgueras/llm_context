@@ -5,6 +5,7 @@ import {useSearchParams, useRouter} from 'next/navigation'
 import {useToast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/lib/enums'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
+import {useTranslations} from '@/lib/translations/context'
 
 // Helper function to clean up URL parameters
 function cleanupUrlParams(paramNames: string[], router: ReturnType<typeof useRouter>) {
@@ -25,6 +26,7 @@ export function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }:
   const searchParams = useSearchParams()
   const router = useRouter()
   const [refreshingAfterSuccess, setRefreshingAfterSuccess] = useState(false)
+  const t = useTranslations('subscription.urlHandler')
 
   useEffect(() => {
     const isSuccess = searchParams.get('success') === 'true'
@@ -43,8 +45,8 @@ export function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }:
         // Immediate refresh with cache bypass
         subscription.refetch(3, 1000, true).then(() => {
           toast({
-            title: 'Subscription Updated!',
-            description: 'Your subscription has been successfully updated.',
+            title: t('successTitle'),
+            description: t('successDescription'),
             variant: ToastVariant.SUCCESS
           })
         })
@@ -78,8 +80,8 @@ export function SubscriptionUrlHandler({ subscription, toast, setIsRefreshing }:
     
     if (isCanceled) {
       toast({
-        title: 'Payment Canceled',
-        description: 'Your subscription update was canceled.',
+        title: t('canceledTitle'),
+        description: t('canceledDescription'),
         variant: ToastVariant.DEFAULT
       })
       

@@ -228,12 +228,6 @@ INSTRUCTIONS:
       const result = await ChatOperations.updateChatTitleIfDefault(chatId, userId, newTitleTruncated)
 
       if (isSuccess(result) && result.data.updated) {
-        logger.info('Chat title updated', {
-          userId,
-          chatId,
-          metadata: {newTitle}
-        });
-
         return {
           success: true as const,
           data: {newTitle, updated: true}

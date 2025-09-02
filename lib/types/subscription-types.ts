@@ -15,7 +15,16 @@ export const SUBSCRIPTION_PLAN_NAMES = {
   [SubscriptionPlan.jedi]: 'Jedi'
 }
 
+// TODO: Merge with SUBSCRIPTION_PLAN_NAMES
+export enum ModelTier {
+  APPRENTICE = 'apprentice',
+  KNIGHT = 'knight',
+  MASTER = 'master',
+  JEDI = 'jedi'
+}
+
 // Subscription Plans Configuration
+// Note: description and features_list now contain translation keys, not actual text
 export const SUBSCRIPTION_PLAN_DETAIL = {
   [SubscriptionPlan.apprentice]: {
     id: SubscriptionPlan.apprentice,
@@ -24,12 +33,12 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     currency: 'EUR',
     spending_limit_usd: 5.8, // 5€
     commissionLimit: 100,
-    description: 'Perfect for individuals starting their journey',
+    description: 'subscription.plans.apprentice.description',
     features_list: [
-      '🤖 Access to MIA AI platform',
-      '👥 Discount on access to local meetups about AI Education & Defi',
-      '💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace',
-      '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)'
+      'subscription.plans.apprentice.features.0',
+      'subscription.plans.apprentice.features.1',
+      'subscription.plans.apprentice.features.2',
+      'subscription.plans.apprentice.features.3'
     ]
   },
   [SubscriptionPlan.knight]: {
@@ -39,12 +48,12 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     currency: 'EUR',
     spending_limit_usd: 14.5, // 12.5€
     commissionLimit: 500,
-    description: 'For SMEs and content creators',
+    description: 'subscription.plans.knight.description',
     features_list: [
-      '🤖 Access to MIA AI platform + x2.5 usage',
-      '👥 Discount on access to local meetups about AI Education & Defi',
-      '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
-      '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)'
+      'subscription.plans.knight.features.0',
+      'subscription.plans.knight.features.1',
+      'subscription.plans.knight.features.2',
+      'subscription.plans.knight.features.3'
     ]
   },
   [SubscriptionPlan.master]: {
@@ -54,14 +63,14 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     currency: 'EUR',
     spending_limit_usd: 58, // 50€
     commissionLimit: 5000,
-    description: 'For startups and influencers scaling their impact',
+    description: 'subscription.plans.master.description',
     features_list: [
-      '🤖 Access to MIA AI platform + x10 usage',
-      '👥 Discount on access to local meetups about AI Education, Defi & Influencers',
-      '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
-      '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)',
-      '🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)',
-      '🌐 Free professional website hosting & showcase platform with e-commerce capabilities',
+      'subscription.plans.master.features.0',
+      'subscription.plans.master.features.1',
+      'subscription.plans.master.features.2',
+      'subscription.plans.master.features.3',
+      'subscription.plans.master.features.4',
+      'subscription.plans.master.features.5'
     ]
   },
   [SubscriptionPlan.jedi]: {
@@ -71,25 +80,18 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     currency: 'EUR',
     spending_limit_usd: 145, // 125€
     commissionLimit: 50000,
-    description: 'For corporate leaders and CEOs driving innovation',
+    description: 'subscription.plans.jedi.description',
     features_list: [
-      '🤖 Access to MIA AI platform + x25 usage',
-      '👥 Discount on access to local meetups about AI Education, Defi & Influencers',
-      '💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace',
-      '🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)',
-      '🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)',
-      '🌐 Free professional website hosting & showcase platform with e-commerce capabilities',
-      '📞 60 minutes private call per month to discuss personal branding and business scaling'
+      'subscription.plans.jedi.features.0',
+      'subscription.plans.jedi.features.1',
+      'subscription.plans.jedi.features.2',
+      'subscription.plans.jedi.features.3',
+      'subscription.plans.jedi.features.4',
+      'subscription.plans.jedi.features.5',
+      'subscription.plans.jedi.features.6'
     ]
   }
 } as const
-
-export enum ModelTier {
-  APPRENTICE = 'apprentice',
-  KNIGHT = 'knight',
-  MASTER = 'master',
-  JEDI = 'jedi'
-}
 
 export type SubscriptionWithValidation = UserSubscription & {
   isActive: boolean // Computed field: SubscriptionService.isSubscriptionActive()
