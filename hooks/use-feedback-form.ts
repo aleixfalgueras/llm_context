@@ -91,12 +91,12 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
   const feedbackTypes = FEEDBACK_TYPE_VALUES.map(type => ({
     value: type,
     label: type === FeedbackType.feature ? t('typeFeature') : type === FeedbackType.bug ? t('typeBug') : t('typeGeneral'),
-    description: type === FeedbackType.feature ? 'Suggest a new feature or improvement' : type === FeedbackType.bug ? 'Report a problem or error' : 'Share your thoughts or concerns'
+    description: type === FeedbackType.feature ? t('typeDescriptions.feature') : type === FeedbackType.bug ? t('typeDescriptions.bug') : t('typeDescriptions.general')
   }))
 
   const priorities = PRIORITY_VALUES.map(priority => ({
     value: priority,
-    label: priority === Priority.low ? 'Low Priority - Minor issue' : priority === Priority.medium ? 'Medium Priority - Moderate impact' : 'High Priority - Major issue'
+    label: priority === Priority.low ? t('priorityLabels.low') : priority === Priority.medium ? t('priorityLabels.medium') : t('priorityLabels.high')
   }))
 
   const updateField = (field: keyof FeedbackFormData, value: string) => {
@@ -109,7 +109,7 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
     if (!validateForm()) {
       toast({
         title: tValidation('error'),
-        description: 'Please fix the errors in the form before submitting.',
+        description: t('validationFormError'),
         variant: ToastVariant.DESTRUCTIVE,
       })
       return
@@ -132,13 +132,13 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
         const typeLabel = feedbackTypes.find(type => type.value === formData.type)?.label || t('title')
         toast({
           title: `${typeLabel} ${t('submitting').replace('...', '')}`,
-          description: 'Thank you for your feedback! We\'ll review it carefully.',
+          description: t('successMessage'),
         })
         resetForm()
       } else {
         toast({
           title: tCommon('error'),
-          description: result.error || 'Failed to submit feedback',
+          description: result.error || t('errorSubmit'),
           variant: ToastVariant.DESTRUCTIVE,
         })
       }
@@ -146,7 +146,7 @@ export function useFeedbackForm(): UseFeedbackFormReturn {
       console.error('Error submitting feedback:', error)
       toast({
         title: tCommon('error'),
-        description: 'An unexpected error occurred. Please try again.',
+        description: t('errorUnexpected'),
         variant: ToastVariant.DESTRUCTIVE,
       })
     } finally {

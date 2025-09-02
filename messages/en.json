@@ -656,12 +656,21 @@
     }
   },
   "feedback": {
+    "pageTitle": "Provide Feedback",
+    "pageDescription": "Help us improve by sharing your feature requests, reporting bugs, or providing general feedback.",
     "title": "Share Your Feedback",
-    "description": "Help us improve MIA by sharing your thoughts, reporting issues, or suggesting new features.",
+    "description": "Choose the type of feedback you'd like to provide",
     "type": "Feedback Type",
+    "typeRequired": "Feedback Type *",
     "typeFeature": "Feature Request",
     "typeBug": "Bug Report",
     "typeGeneral": "General Feedback",
+    "typeDescriptions": {
+      "feature": "Suggest a new feature or improvement",
+      "bug": "Report a problem or error",
+      "general": "Share your thoughts or concerns"
+    },
+    "typePlaceholder": "What type of feedback are you providing?",
     "subject": "Subject",
     "titles": {
       "feature": "Feature Request Title",
@@ -674,9 +683,14 @@
       "general": "Feedback Description"
     },
     "placeholders": {
+      "featureTitle": "Brief, descriptive title for your feature request",
       "bugTitle": "Brief description of the bug",
       "generalTitle": "Brief summary of your feedback",
-      "description": "Provide detailed feedback..."
+      "featureDescription": "What should it do? How should it work?",
+      "bugDescription": "What happened? What did you expect to happen?",
+      "description": "Provide detailed feedback...",
+      "stepsToReproduce": "Please provide step-by-step instructions to reproduce the bug:\n1. Go to...\n2. Click on...\n3. See error...",
+      "useCase": "Describe when and how you would use this feature. What problem does it solve?"
     },
     "subjectPlaceholder": {
       "feature": "e.g., Add bulk client import feature",
@@ -689,6 +703,19 @@
       "bug": "Please describe what happened, what you expected, and steps to reproduce the issue...",
       "general": "Share your thoughts, suggestions, or experience..."
     },
+    "priority": "Priority Level *",
+    "priorityPlaceholders": {
+      "feature": "How important is this feature to you?",
+      "bug": "How severe is this bug?",
+      "general": "How important is this feedback?"
+    },
+    "priorityLabels": {
+      "low": "Low Priority - Minor issue",
+      "medium": "Medium Priority - Moderate impact",
+      "high": "High Priority - Major issue"
+    },
+    "stepsToReproduce": "Steps to Reproduce",
+    "useCase": "Use Case",
     "submit": {
       "feature": "Submit Feature Request",
       "bug": "Submit Bug Report",
@@ -697,7 +724,11 @@
     "submitFeature": "Submit Feature Request",
     "submitBug": "Submit Bug Report",
     "submitGeneral": "Submit Feedback",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "successMessage": "Thank you for your feedback! We'll review it carefully.",
+    "errorSubmit": "Failed to submit feedback",
+    "errorUnexpected": "An unexpected error occurred. Please try again.",
+    "validationFormError": "Please fix the errors in the form before submitting."
   },
   "common": {
     "loading": "Loading...",
