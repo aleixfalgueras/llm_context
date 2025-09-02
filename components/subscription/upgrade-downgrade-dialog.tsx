@@ -156,7 +156,7 @@ export function UpgradeDowngradeDialog({
                 {targetPlanConfig.features_list.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
                     <CheckIcon className="h-4 w-4 text-green-600" />
-                    <span>{feature}</span>
+                    <span>{t(feature)}</span>
                   </div>
                 ))}
               </div>
@@ -218,7 +218,7 @@ export function UpgradeDowngradeDialog({
                 {targetPlanConfig.features_list.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
                     <CheckIcon className="h-4 w-4 text-green-600" />
-                    <span>{feature}</span>
+                    <span>{t(feature)}</span>
                   </div>
                 ))}
               </div>

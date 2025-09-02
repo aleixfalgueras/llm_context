@@ -257,7 +257,7 @@ export function LandingPage() {
                       {getPlanIcon(planId)}
                     </div>
                     <CardTitle className={`text-xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
-                    <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{plan.description}</CardDescription>
+                    <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{t(plan.description)}</CardDescription>
                     <div className="mt-4 pt-2 pb-2 flex items-end justify-center min-h-[4rem]">
                       <span className="text-3xl font-bold leading-none">{plan.price}€</span>
                       {plan.price > 0 && <span className="text-gray-500 mb-1">{t('landing.pricing.perMonth')}</span>}
@@ -269,7 +269,7 @@ export function LandingPage() {
                       {plan.features_list.map((feature, index) => (
                         <li key={index} className="flex items-center">
                           <CheckIcon className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
+                          <span className="text-sm">{t(feature)}</span>
                         </li>
                       ))}
                     </ul>

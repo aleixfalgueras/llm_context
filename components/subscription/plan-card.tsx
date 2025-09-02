@@ -48,7 +48,8 @@ export function PlanCard({
   isPastDueOrUnpaid,
   onPlanAction
 }: PlanCardProps) {
-  const t = useTranslations('subscription')
+  const t = useTranslations()
+  const tSubscription = useTranslations('subscription')
   const getPlanIcon = (planId: string) => {
     const iconType = getPlanIconType(planId)
     switch (iconType) {
@@ -73,10 +74,10 @@ export function PlanCard({
           {getPlanIcon(planId)}
         </div>
         <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
-        <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{plan.description}</CardDescription>
+        <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{t(plan.description)}</CardDescription>
         <div className="mt-4 pt-4 pb-2 flex items-end justify-center min-h-[4rem]">
           <span className="text-4xl font-bold leading-none">{plan.price}€</span>
-          {plan.price > 0 && <span className="text-gray-500 mb-1">{t('planCard.perMonth')}</span>}
+          {plan.price > 0 && <span className="text-gray-500 mb-1">{tSubscription('planCard.perMonth')}</span>}
         </div>
       </CardHeader>
       
@@ -85,7 +86,7 @@ export function PlanCard({
           {plan.features_list.map((feature, index) => (
             <li key={index} className="flex items-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-              <span className="text-sm">{feature}</span>
+              <span className="text-sm">{t(feature)}</span>
             </li>
           ))}
         </ul>
@@ -100,11 +101,11 @@ export function PlanCard({
           )}`}
         >
           {upgradeLoading === plan.id ? (
-            <LoadingSpinner text={t('planCard.processing')} />
+            <LoadingSpinner text={tSubscription('planCard.processing')} />
           ) : cancelDowngradeLoading && isPendingDowngrade && isPendingPlanChange ? (
-            <LoadingSpinner text={t('planCard.canceling')} />
+            <LoadingSpinner text={tSubscription('planCard.canceling')} />
           ) : (
-            getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired, t)
+            getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired, tSubscription)
           )}
         </Button>
       </CardContent>

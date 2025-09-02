@@ -5,11 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Info } from 'lucide-react'
-import { 
-  AffiliationStatusEmoji, 
-  AffiliationStatusConditions, 
-  AffiliationStatusComissions 
-} from '@/lib/types/affiliation-types'
+import { AffiliationStatusEmoji } from '@/lib/types/affiliation-types'
 import { useTranslations } from '@/lib/translations/context'
 
 interface StatusGuideDialogProps {
@@ -70,12 +66,12 @@ export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
                     </td>
                     <td className="p-4">
                       <div className="text-sm text-muted-foreground">
-                        {AffiliationStatusConditions[status]}
+                        {t(`statusGuide.statuses.${status}.condition`)}
                       </div>
                     </td>
                     <td className="p-4">
                       <div className="text-sm text-muted-foreground">
-                        {AffiliationStatusComissions[status]}
+                        {t(`statusGuide.statuses.${status}.commission`)}
                       </div>
                     </td>
                   </tr>
@@ -109,14 +105,14 @@ export function StatusGuideDialog({ currentStatus }: StatusGuideDialogProps) {
                   <div>
                     <h4 className="text-sm font-semibold text-foreground mb-1">{t('statusGuide.requirementsLabel')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {AffiliationStatusConditions[status]}
+                      {t(`statusGuide.statuses.${status}.condition`)}
                     </p>
                   </div>
                   
                   <div>
                     <h4 className="text-sm font-semibold text-foreground mb-1">{t('statusGuide.benefitsCommissionsLabel')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {AffiliationStatusComissions[status]}
+                      {t(`statusGuide.statuses.${status}.commission`)}
                     </p>
                   </div>
                 </div>

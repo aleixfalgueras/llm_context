@@ -432,9 +432,87 @@
   },
   "subscription": {
     "title": "Subscription",
+    "pageTitle": "Choose Your Plan",
     "perMonth": "/month",
     "processing": "Processing...",
     "canceling": "Canceling...",
+    "manageButtons": {
+      "manage": "Manage Subscription",
+      "reactivate": "Reactivate Subscription",
+      "cancel": "Cancel Subscription",
+      "loading": "Loading..."
+    },
+    "status": {
+      "active": "Active Subscription",
+      "expired": "Expired Subscription",
+      "renews": "Renews",
+      "expiresOn": "Expired"
+    },
+    "deleteAccount": {
+      "buttonLabel": "Delete Account",
+      "dialogTitle": "Delete Account",
+      "warningMessage": "⚠️ This action cannot be undone",
+      "reasonLabel": "Reason for deletion (optional):",
+      "reasons": {
+        "noLongerNeed": "I no longer need the service",
+        "privacyConcerns": "Privacy concerns",
+        "serviceIssues": "Service issues",
+        "other": "Other"
+      },
+      "cancelButton": "Cancel",
+      "deleteButton": "Delete Account",
+      "deleting": "Deleting...",
+      "successMessage": "Account deleted successfully. Deletion ID: {deletionId}"
+    },
+    "urlHandler": {
+      "successTitle": "Subscription Updated!",
+      "successDescription": "Your subscription has been successfully updated.",
+      "canceledTitle": "Payment Canceled",
+      "canceledDescription": "Your subscription update was canceled."
+    },
+    "plans": {
+      "apprentice": {
+        "description": "Perfect for individuals starting their journey",
+        "features": [
+          "🤖 Access to MIA AI platform",
+          "👥 Discount on access to local meetups about AI Education & Defi",
+          "💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "knight": {
+        "description": "For SMEs and content creators",
+        "features": [
+          "🤖 Access to MIA AI platform + x2.5 usage",
+          "👥 Discount on access to local meetups about AI Education & Defi",
+          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "master": {
+        "description": "For startups and influencers scaling their impact",
+        "features": [
+          "🤖 Access to MIA AI platform + x10 usage",
+          "👥 Discount on access to local meetups about AI Education, Defi & Influencers",
+          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Free professional website hosting & showcase platform with e-commerce capabilities"
+        ]
+      },
+      "jedi": {
+        "description": "For corporate leaders and CEOs driving innovation",
+        "features": [
+          "🤖 Access to MIA AI platform + x25 usage",
+          "👥 Discount on access to local meetups about AI Education, Defi & Influencers",
+          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Free professional website hosting & showcase platform with e-commerce capabilities",
+          "📞 60 minutes private call per month to discuss personal branding and business scaling"
+        ]
+      }
+    },
     "planCard": {
       "perMonth": "/month",
       "processing": "Processing...",
@@ -596,7 +674,49 @@
       "requirementsLabel": "Requirements:",
       "benefitsCommissionsLabel": "Benefits & Commissions:",
       "noteLabel": "Note:",
-      "noteText": "Status upgrades are automatic based on your network size and referral achievements. Your current status is highlighted above."
+      "noteText": "Status upgrades are automatic based on your network size and referral achievements. Your current status is highlighted above.",
+      "statuses": {
+        "GenY": {
+          "commission": "10% of user's subscribed plan",
+          "condition": "-"
+        },
+        "Indigo": {
+          "commission": "15% of user's subscribed plan",
+          "condition": "25 users"
+        },
+        "LightWorker": {
+          "commission": "20% of user's subscribed plan & 10% discount on events",
+          "condition": "50 users"
+        },
+        "CristalClub": {
+          "commission": "25% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards",
+          "condition": "100 users & 1 Gen Y user"
+        },
+        "D5Level": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program",
+          "condition": "200 users & 5 Gen Y users"
+        },
+        "Walkin": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist",
+          "condition": "400 users & 10 Gen Y users"
+        },
+        "SevenStars": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 12.5% Bonus Events",
+          "condition": "1000 users & 1 Cristal Club user"
+        },
+        "InfinityStars": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 12.5% Bonus Events &  NFT Leader",
+          "condition": "2000 users & 5 Cristal Club users"
+        },
+        "Alpha": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 15% Bonus Events & NFT Leader",
+          "condition": "4000 users & 10 Cristal Club users"
+        },
+        "Omega": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 15% Bonus Events & NFT Erudith",
+          "condition": "1000 users & 1 Seven Stars user"
+        }
+      }
     },
     "commissionsGuide": {
       "title": "Commissions Guide",

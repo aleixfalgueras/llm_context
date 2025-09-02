@@ -432,9 +432,87 @@
   },
   "subscription": {
     "title": "Abonnement",
+    "pageTitle": "Choisissez Votre Plan",
     "perMonth": "/mois",
     "processing": "Traitement en cours...",
     "canceling": "Annulation en cours...",
+    "manageButtons": {
+      "manage": "Gérer l'Abonnement",
+      "reactivate": "Réactiver l'Abonnement",
+      "cancel": "Annuler l'Abonnement",
+      "loading": "Chargement..."
+    },
+    "status": {
+      "active": "Abonnement Actif",
+      "expired": "Abonnement Expiré",
+      "renews": "Se renouvelle",
+      "expiresOn": "Expiré"
+    },
+    "deleteAccount": {
+      "buttonLabel": "Supprimer le Compte",
+      "dialogTitle": "Supprimer le Compte",
+      "warningMessage": "⚠️ Cette action ne peut pas être annulée",
+      "reasonLabel": "Raison de la suppression (optionnel) :",
+      "reasons": {
+        "noLongerNeed": "Je n'ai plus besoin du service",
+        "privacyConcerns": "Préoccupations de confidentialité",
+        "serviceIssues": "Problèmes de service",
+        "other": "Autre"
+      },
+      "cancelButton": "Annuler",
+      "deleteButton": "Supprimer le Compte",
+      "deleting": "Suppression...",
+      "successMessage": "Compte supprimé avec succès. ID de suppression : {deletionId}"
+    },
+    "urlHandler": {
+      "successTitle": "Abonnement Mis à Jour !",
+      "successDescription": "Votre abonnement a été mis à jour avec succès.",
+      "canceledTitle": "Paiement Annulé",
+      "canceledDescription": "La mise à jour de votre abonnement a été annulée."
+    },
+    "plans": {
+      "apprentice": {
+        "description": "Parfait pour les individus qui commencent leur parcours",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI et DeFi",
+          "💎 Abonnement Ruby gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "knight": {
+        "description": "Pour les PME et créateurs de contenu",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI + utilisation x2.5",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI et DeFi",
+          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "master": {
+        "description": "Pour les startups et influenceurs qui développent leur impact",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI + utilisation x10",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI, DeFi et Influenceurs",
+          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 entrée gratuite au XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Hébergement de site web professionnel gratuit et plateforme vitrine avec capacités e-commerce"
+        ]
+      },
+      "jedi": {
+        "description": "Pour les dirigeants d'entreprise et PDG qui pilotent l'innovation",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI + utilisation x25",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI, DeFi et Influenceurs",
+          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 entrée gratuite au XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Hébergement de site web professionnel gratuit et plateforme vitrine avec capacités e-commerce",
+          "📞 60 minutes d'appel privé par mois pour discuter de l'image de marque personnelle et du développement d'entreprise"
+        ]
+      }
+    },
     "planCard": {
       "perMonth": "/mois",
       "processing": "Traitement en cours...",
@@ -596,7 +674,49 @@
       "requirementsLabel": "Exigences :",
       "benefitsCommissionsLabel": "Avantages et Commissions :",
       "noteLabel": "Note :",
-      "noteText": "Les mises à niveau de statut sont automatiques basées sur la taille de votre réseau et les réalisations de parrainage. Votre statut actuel est mis en surbrillance ci-dessus."
+      "noteText": "Les mises à niveau de statut sont automatiques basées sur la taille de votre réseau et les réalisations de parrainage. Votre statut actuel est mis en surbrillance ci-dessus.",
+      "statuses": {
+        "GenY": {
+          "commission": "10% du plan souscrit de l'utilisateur",
+          "condition": "-"
+        },
+        "Indigo": {
+          "commission": "15% du plan souscrit de l'utilisateur",
+          "condition": "25 utilisateurs"
+        },
+        "LightWorker": {
+          "commission": "20% du plan souscrit de l'utilisateur & 10% de réduction sur les événements",
+          "condition": "50 utilisateurs"
+        },
+        "CristalClub": {
+          "commission": "25% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie",
+          "condition": "100 utilisateurs & 1 utilisateur Gen Y"
+        },
+        "D5Level": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier",
+          "condition": "200 utilisateurs & 5 utilisateurs Gen Y"
+        },
+        "Walkin": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste",
+          "condition": "400 utilisateurs & 10 utilisateurs Gen Y"
+        },
+        "SevenStars": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 12.5% Bonus Événements",
+          "condition": "1000 utilisateurs & 1 utilisateur Cristal Club"
+        },
+        "InfinityStars": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 12.5% Bonus Événements & NFT Leader",
+          "condition": "2000 utilisateurs & 5 utilisateurs Cristal Club"
+        },
+        "Alpha": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 15% Bonus Événements & NFT Leader",
+          "condition": "4000 utilisateurs & 10 utilisateurs Cristal Club"
+        },
+        "Omega": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 15% Bonus Événements & NFT Érudit",
+          "condition": "1000 utilisateurs & 1 utilisateur Seven Stars"
+        }
+      }
     },
     "commissionsGuide": {
       "title": "Guide des Commissions",
