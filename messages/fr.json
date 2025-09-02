@@ -656,12 +656,21 @@
     }
   },
   "feedback": {
+    "pageTitle": "Fournir des Commentaires",
+    "pageDescription": "Aidez-nous à nous améliorer en partageant vos demandes de fonctionnalités, en signalant des bugs ou en fournissant des commentaires généraux.",
     "title": "Partagez vos Commentaires",
-    "description": "Aidez-nous à améliorer MIA en partageant vos réflexions, en signalant des problèmes ou en suggérant de nouvelles fonctionnalités.",
+    "description": "Choisissez le type de commentaire que vous souhaitez fournir",
     "type": "Type de Commentaire",
+    "typeRequired": "Type de Commentaire *",
     "typeFeature": "Demande de Fonctionnalité",
     "typeBug": "Rapport de Bug",
     "typeGeneral": "Commentaire Général",
+    "typeDescriptions": {
+      "feature": "Suggérer une nouvelle fonctionnalité ou amélioration",
+      "bug": "Signaler un problème ou une erreur",
+      "general": "Partager vos réflexions ou préoccupations"
+    },
+    "typePlaceholder": "Quel type de commentaire fournissez-vous ?",
     "subject": "Sujet",
     "titles": {
       "feature": "Titre de la Demande de Fonctionnalité",
@@ -674,9 +683,14 @@
       "general": "Description du Commentaire"
     },
     "placeholders": {
+      "featureTitle": "Titre bref et descriptif pour votre demande de fonctionnalité",
       "bugTitle": "Brève description du bug",
       "generalTitle": "Brève résumé de votre commentaire",
-      "description": "Fournissez un commentaire détaillé..."
+      "featureDescription": "Que devrait-elle faire ? Comment devrait-elle fonctionner ?",
+      "bugDescription": "Qu'est-ce qui s'est passé ? Qu'est-ce que vous attendiez ?",
+      "description": "Fournissez un commentaire détaillé...",
+      "stepsToReproduce": "Veuillez fournir des instructions étape par étape pour reproduire le bug :\n1. Allez à...\n2. Cliquez sur...\n3. Voir l'erreur...",
+      "useCase": "Décrivez quand et comment vous utiliseriez cette fonctionnalité. Quel problème résout-elle ?"
     },
     "subjectPlaceholder": {
       "feature": "ex : Ajouter une fonctionnalité d'import en lot de clients",
@@ -689,6 +703,19 @@
       "bug": "Veuillez décrire ce qui s'est passé, ce que vous attendiez et les étapes pour reproduire le problème...",
       "general": "Partagez vos réflexions, suggestions ou expérience..."
     },
+    "priority": "Niveau de Priorité *",
+    "priorityPlaceholders": {
+      "feature": "À quel point cette fonctionnalité est-elle importante pour vous ?",
+      "bug": "À quel point ce bug est-il grave ?",
+      "general": "À quel point ce commentaire est-il important ?"
+    },
+    "priorityLabels": {
+      "low": "Priorité Basse - Problème mineur",
+      "medium": "Priorité Moyenne - Impact modéré",
+      "high": "Priorité Haute - Problème majeur"
+    },
+    "stepsToReproduce": "Étapes pour Reproduire",
+    "useCase": "Cas d'Usage",
     "submit": {
       "feature": "Soumettre la Demande de Fonctionnalité",
       "bug": "Soumettre le Rapport de Bug",
@@ -697,7 +724,11 @@
     "submitFeature": "Soumettre la Demande de Fonctionnalité",
     "submitBug": "Soumettre le Rapport de Bug",
     "submitGeneral": "Soumettre le Commentaire",
-    "submitting": "Soumission..."
+    "submitting": "Soumission...",
+    "successMessage": "Merci pour vos commentaires ! Nous les examinerons attentivement.",
+    "errorSubmit": "Échec de la soumission des commentaires",
+    "errorUnexpected": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "validationFormError": "Veuillez corriger les erreurs dans le formulaire avant de le soumettre."
   },
   "common": {
     "loading": "Chargement...",

@@ -38,20 +38,20 @@ export function FeedbackForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Share Your Feedback</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          Choose the type of feedback you'd like to provide
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Feedback Type */}
           <div className="space-y-2">
-            <Label htmlFor="type">Feedback Type *</Label>
+            <Label htmlFor="type">{t('typeRequired')}</Label>
             <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
               <SelectTrigger className={errors.type ? 'border-red-500' : ''}>
-                <SelectValue placeholder="What type of feedback are you providing?">
-                  {selectedType ? selectedType.label : "What type of feedback are you providing?"}
+                <SelectValue placeholder={t('typePlaceholder')}>
+                  {selectedType ? selectedType.label : t('typePlaceholder')}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -82,7 +82,7 @@ export function FeedbackForm() {
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder={
-                formData.type === FeedbackType.feature ? 'Brief, descriptive title for your feature request' :
+                formData.type === FeedbackType.feature ? t('placeholders.featureTitle') :
                 formData.type === FeedbackType.bug ? t('placeholders.bugTitle') :
                 t('placeholders.generalTitle')
               }
@@ -106,8 +106,8 @@ export function FeedbackForm() {
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder={
-                formData.type === FeedbackType.feature ? 'What should it do? How should it work?' :
-                formData.type === FeedbackType.bug ? 'What happened? What did you expect to happen?' :
+                formData.type === FeedbackType.feature ? t('placeholders.featureDescription') :
+                formData.type === FeedbackType.bug ? t('placeholders.bugDescription') :
                 t('placeholders.description')
               }
               className={errors.description ? 'border-red-500' : ''}
@@ -121,13 +121,13 @@ export function FeedbackForm() {
 
           {/* Priority */}
           <div className="space-y-2">
-            <Label htmlFor="priority">Priority Level *</Label>
+            <Label htmlFor="priority">{t('priority')}</Label>
             <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
               <SelectTrigger className={errors.priority ? 'border-red-500' : ''}>
                 <SelectValue placeholder={
-                  formData.type === FeedbackType.feature ? 'How important is this feature to you?' :
-                  formData.type === FeedbackType.bug ? 'How severe is this bug?' :
-                  'How important is this feedback?'
+                  formData.type === FeedbackType.feature ? t('priorityPlaceholders.feature') :
+                  formData.type === FeedbackType.bug ? t('priorityPlaceholders.bug') :
+                  t('priorityPlaceholders.general')
                 } />
               </SelectTrigger>
               <SelectContent>
@@ -146,12 +146,12 @@ export function FeedbackForm() {
           {/* Steps to Reproduce (Bug Reports Only) */}
           {formData.type === FeedbackType.bug && (
             <div className="space-y-2">
-              <Label htmlFor="stepsToReproduce">Steps to Reproduce</Label>
+              <Label htmlFor="stepsToReproduce">{t('stepsToReproduce')}</Label>
               <Textarea
                 id="stepsToReproduce"
                 value={formData.stepsToReproduce}
                 onChange={(e) => handleInputChange('stepsToReproduce', e.target.value)}
-                placeholder="Please provide step-by-step instructions to reproduce the bug:&#10;1. Go to...&#10;2. Click on...&#10;3. See error..."
+                placeholder={t('placeholders.stepsToReproduce')}
                 rows={4}
               />
             </div>
@@ -160,12 +160,12 @@ export function FeedbackForm() {
           {/* Use Case (Feature Requests Only) */}
           {formData.type === FeedbackType.feature && (
             <div className="space-y-2">
-              <Label htmlFor="useCase">Use Case</Label>
+              <Label htmlFor="useCase">{t('useCase')}</Label>
               <Textarea
                 id="useCase"
                 value={formData.useCase}
                 onChange={(e) => handleInputChange('useCase', e.target.value)}
-                placeholder="Describe when and how you would use this feature. What problem does it solve?"
+                placeholder={t('placeholders.useCase')}
                 rows={3}
               />
             </div>
@@ -177,7 +177,7 @@ export function FeedbackForm() {
             className="w-full"
             disabled={isSubmitting || !formData.type || !formData.title || !formData.description || !formData.priority}
           >
-            {isSubmitting ? 'Submitting...' : 
+            {isSubmitting ? t('submitting') : 
              formData.type === FeedbackType.feature ? t('submit.feature') :
              formData.type === FeedbackType.bug ? t('submit.bug') :
              t('submit.general')}
