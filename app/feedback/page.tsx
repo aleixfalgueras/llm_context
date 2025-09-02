@@ -1,9 +1,11 @@
 import { Navbar } from '@/components/global/navbar'
 import { FeedbackForm } from '@/components/feedback-form'
 import { getTranslations } from '@/lib/translations'
+import { getLocaleFromCookies } from '@/lib/utils/locale-cookie-server'
 
 export default async function FeedbackPage() {
-  const t = await getTranslations('feedback')
+  const locale = await getLocaleFromCookies()
+  const t = await getTranslations('feedback', locale)
 
   return (
     <div className="min-h-screen bg-background">

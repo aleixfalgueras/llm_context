@@ -5,6 +5,7 @@ import {Navbar} from '@/components/global/navbar'
 import {getClients} from '@/app/actions/client-action'
 import {getChats} from '@/app/actions/chat-action'
 import {getTranslations} from '@/lib/translations'
+import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
 
 interface NewChatPageProps {
   searchParams: Promise<{ clientId?: string; contextFields?: string }>
@@ -15,7 +16,8 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
 
   // Get current user data from Clerk
   const user = await currentUser()
-  const t = await getTranslations('assistant')
+  const locale = await getLocaleFromCookies()
+  const t = await getTranslations('assistant', locale)
 
   // Get all user's chats and clients in parallel
   const [chats, clients] = await Promise.all([

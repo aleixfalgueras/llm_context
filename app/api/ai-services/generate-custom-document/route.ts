@@ -1,6 +1,7 @@
 import { CustomDocumentService } from '@/services/ai-services/custom-document-service'
 import { ApiContext, parseJsonBody, withEnhancedApi } from '@/lib/api/api-middleware'
 import { DEFAULT_MODEL } from '@/lib/models-config'
+import { getLocaleFromCookies } from '@/lib/utils/locale-cookie-server'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
@@ -11,9 +12,9 @@ export const POST = withEnhancedApi(
       documentTitle,
       additionalInstructions,
       selectedContextFields = [],
-      model: selectedModel = DEFAULT_MODEL,
-      locale
+      model: selectedModel = DEFAULT_MODEL
     } = await parseJsonBody(req)
+    const locale = await getLocaleFromCookies()
 
     // Validate required fields
     if (!clientId || !customPrompt || !documentTitle) {

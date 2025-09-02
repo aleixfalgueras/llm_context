@@ -8,6 +8,7 @@ import {checkModelAccess} from "@/lib/api/api-validation";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
 import {Role} from '@prisma/client';
+import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
 
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.
@@ -60,10 +61,10 @@ export const POST = withEnhancedApi(
     let chatId: string = '';
 
     // Parse request body
-    const {messages, chatId: requestChatId, model, clientId, contextFields, locale} = await parseJsonBody(req)
+    const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
     chatId = requestChatId;
     const selectedModel = model || getDefaultModel()
-    const userLocale = locale || 'en'
+    const userLocale = await getLocaleFromCookies()
 
     // Validate model access based on user's subscription tier
     const modelAccessResult = await checkModelAccess(userId, selectedModel)
