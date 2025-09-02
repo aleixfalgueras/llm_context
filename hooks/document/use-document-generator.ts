@@ -126,8 +126,7 @@ export function useDocumentGenerator({isOpen}: UseDocumentGeneratorProps): UseDo
           selectedContextFields: Object.entries(clientContext)
             .filter(([, value]) => value)
             .map(([key]) => key),
-          model: getDefaultModel(),
-          locale: locale
+          model: getDefaultModel()
         }),
       })
 

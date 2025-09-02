@@ -128,8 +128,7 @@ export function MeetingReportDialog({
     
     buildGeneratePayload: (data: MeetingFormData) => ({
       ...data,
-      model: getDefaultModel(),
-      locale: locale
+      model: getDefaultModel()
     }),
     
     buildSavePayload: (data: MeetingFormData, content: string) => ({

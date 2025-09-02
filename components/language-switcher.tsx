@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useLocale, useSetLocale, useTranslations } from '@/lib/translations/context'
 import { locales, type Locale } from '@/lib/translations'
 import {
@@ -16,11 +17,18 @@ export function LanguageSwitcher() {
   const locale = useLocale()
   const setLocale = useSetLocale()
   const t = useTranslations('languages')
+  const router = useRouter()
 
   // Map of locale codes to display names
   const localeNames: Record<Locale, string> = {
     en: t('en'),
     fr: t('fr'),
+  }
+
+  const handleLocaleChange = (newLocale: Locale) => {
+    setLocale(newLocale)
+    // Refresh the router to trigger server component re-rendering
+    router.refresh()
   }
 
   return (
@@ -34,7 +42,7 @@ export function LanguageSwitcher() {
         {locales.map((loc) => (
           <DropdownMenuItem
             key={loc}
-            onClick={() => setLocale(loc)}
+            onClick={() => handleLocaleChange(loc)}
             className="cursor-pointer"
           >
             <div className="flex items-center justify-between w-full">

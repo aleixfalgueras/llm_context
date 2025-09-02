@@ -164,7 +164,6 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
           messages: [{ content }],
           chatId: chatId || undefined, // Send undefined for new chats
           model: selectedModel || DEFAULT_MODEL, // Default to configured default model if no model specified
-          locale: locale, // Send user's current locale
           // Include new chat parameters if this is a new chat
           ...(newChatParams && {
             clientId: newChatParams.clientId,
