@@ -6,18 +6,15 @@ import {Textarea} from '@/components/ui/textarea'
 import {Checkbox} from '@/components/ui/checkbox'
 import {FileText} from 'lucide-react'
 import type {Client, Prompt} from '@prisma/client'
-import {
-  ClientContextSelection,
-  DEFAULT_CLIENT_CONTEXT
-} from '@/lib/types/client-types'
-import { getClientContextFields } from '@/lib/utils/client-context-utils'
+import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from '@/lib/types/client-types'
+import {getClientContextFields} from '@/lib/utils/client-context-utils'
 import {useDocumentGenerator} from '@/hooks/document/use-document-generator'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {getDefaultModel} from '@/lib/models-config'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
-import {useTranslations, useLocale} from '@/lib/translations/context'
+import {useTranslations} from '@/lib/translations/context'
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean
@@ -42,7 +39,6 @@ export function CustomDocumentGeneratorDialog({
 }: CustomDocumentGeneratorDialogProps) {
   const t = useTranslations('aiServices')
   const tContext = useTranslations('clientContext')
-  const locale = useLocale()
   const {
     // State from hook
     selectedClient,
@@ -52,16 +48,12 @@ export function CustomDocumentGeneratorDialog({
     clientContext,
     prompts,
     
-    // Loading states
-    isLoadingPrompts,
-    
     // Actions
     setSelectedClient,
     setDocumentTitle,
     handlePromptChange,
     setPromptContent,
     setClientContext,
-    generateDocument,
     resetForm,
     selectAllContext,
     deselectAllContext,
@@ -129,12 +121,11 @@ export function CustomDocumentGeneratorDialog({
       return {
         clientId: formData.clientId,
         documentTitle: formData.documentTitle,
-        customPrompt: formData.promptContent,
+        prompt: formData.promptContent,
         selectedContextFields: Object.entries(formData.clientContext)
           .filter(([, value]) => value)
           .map(([key]) => key),
-        model: getDefaultModel(),
-        locale: locale
+        model: getDefaultModel()
       }
     },
     

@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { DEFAULT_MODEL } from '@/lib/models-config'
-import { handleClientApiError } from '@/lib/api/api-toast'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {clientLogger, withClientTiming} from '@/lib/client-logger'
+import {DEFAULT_MODEL} from '@/lib/models-config'
+import {handleClientApiError} from '@/lib/api/api-toast'
 import {MessageWithStreaming} from "@/lib/types/message-types"
-import { useLocale } from '@/lib/translations/context';
 
 // Helper function to check if messages are likely duplicates
 function areMessagesSimilar(msg1: MessageWithStreaming, msg2: MessageWithStreaming): boolean {
@@ -55,7 +54,6 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
   const [isLoading, setIsLoading] = useState(false)
   const [onTitleUpdate, setOnTitleUpdate] = useState<((title: string) => void) | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
-  const locale = useLocale()
 
   // Update messages when initialMessages changes (for server-side updates)
   // Use merge strategy to avoid overwriting optimistic updates
