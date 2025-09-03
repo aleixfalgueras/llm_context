@@ -47,15 +47,14 @@
     },
     "models": {
       "title": "Deux Modèles IA Premium Disponibles",
-      "description": "Tous les niveaux d'abonnement incluent à la fois Google Gemini 2.0 et OpenAI GPT-4.1 via notre système de modèles unifié.",
       "gemini": {
-        "title": "Google Gemini 2.0",
+        "title": "Google Gemini",
         "context": "Longueur de contexte 1M",
         "description": "Dernière IA de Google avec raisonnement amélioré, capacités multimodales et performances supérieures pour les stratégies marketing complexes."
       },
       "gpt": {
-        "title": "OpenAI GPT-4.1",
-        "context": "Longueur de contexte 200K",
+        "title": "OpenAI ChatGPT",
+        "context": "Longueur de contexte 1M",
         "description": "Modèle OpenAI efficace parfait pour le contenu de campagne créatif, la planification stratégique et les textes marketing polyvalents."
       },
       "switch": "Basculez entre les modèles de manière transparente"
@@ -405,6 +404,21 @@
       "exportDate": "Date d'Export",
       "you": "Vous",
       "aiAssistant": "Assistant IA"
+    },
+    "modelSelector": {
+      "searchPlaceholder": "Rechercher des modèles...",
+      "noModelsFound": "Aucun modèle trouvé.",
+      "availableModels": "Modèles Disponibles",
+      "models": {
+        "gemini": {
+          "name": "Gemini",
+          "description": "Excelle dans les tâches de traduction, finance et marketing."
+        },
+        "chatgpt": {
+          "name": "ChatGPT",
+          "description": "Idéal pour le contenu de campagne créatif, la planification stratégique et les tâches polyvalentes."
+        }
+      }
     },
     "clientContextSidebar": {
       "creatingChat": "Création de la Discussion...",
@@ -994,6 +1008,15 @@
           "formatting": "Formatage professionnel"
         }
       },
+      "imageCreator": {
+        "title": "Créateur d'Images",
+        "description": "Générez des images de haute qualité à partir de descriptions textuelles avec l'IA",
+        "features": {
+          "aiPowered": "Génération d'images par IA",
+          "promptLibrary": "Support de bibliothèque de prompts",
+          "instantDownload": "Téléchargement instantané"
+        }
+      },
       "podcastCreator": {
         "title": "Créateur de Podcast",
         "description": "Générez des podcasts engageants avec la technologie Veo3 alimentée par l'IA",
@@ -1002,6 +1025,33 @@
           "automated": "Génération de podcast automatisée",
           "quality": "Qualité audio professionnelle"
         }
+      }
+    },
+    "imageCreator": {
+      "title": "Créateur d'Images IA",
+      "description": "Générez des images époustouflantes à partir de descriptions textuelles grâce à l'IA avancée",
+      "promptLabel": "Description de l'image",
+      "promptPlaceholder": "Décrivez l'image que vous souhaitez créer...",
+      "generate": "Générer l'image",
+      "regenerate": "Régénérer l'image",
+      "generatedImage": "Image générée",
+      "generatedImageAlt": "Image générée par IA",
+      "validation": {
+        "promptRequired": "Veuillez fournir une description pour l'image"
+      },
+      "success": {
+        "title": "Image générée !",
+        "description": "Votre image a été créée avec succès"
+      },
+      "error": {
+        "generationFailed": "Échec de la génération de l'image. Veuillez réessayer."
+      },
+      "download": {
+        "button": "Télécharger",
+        "success": "Image téléchargée",
+        "successDescription": "L'image a été enregistrée dans votre dossier de téléchargements",
+        "failed": "Échec du téléchargement",
+        "failedDescription": "Impossible de télécharger l'image. Veuillez réessayer."
       }
     },
     "howItWorks": {

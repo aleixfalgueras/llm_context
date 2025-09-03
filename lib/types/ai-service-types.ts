@@ -1,4 +1,19 @@
-import { Client } from '@prisma/client'
+import {Client} from '@prisma/client'
+
+// Internal Service Types
+export interface ProcessedPromptData {
+  completePrompt: string
+  client: Client
+  targetLanguage: string
+}
+
+export interface DocumentGenerationContext {
+  userId: string
+  clientId: string
+  promptName: string
+  documentTitle: string
+}
+
 
 // Custom Document Generation Types
 export interface CustomDocumentGenerationRequest {
@@ -45,16 +60,13 @@ export interface MeetingReportSaveRequest {
   additionalInfo?: string
 }
 
-// Internal Service Types
-export interface ProcessedPromptData {
-  completePrompt: string
-  client: Client
-  targetLanguage: string
+// Image Generation Types
+export interface ImageGenerationRequest {
+  prompt: string
+  userId: string
 }
 
-export interface DocumentGenerationContext {
-  userId: string
-  clientId: string
-  promptName: string
-  documentTitle: string
+export interface ImageGenerationResponse {
+  imageUrl: string
+  prompt: string
 }
