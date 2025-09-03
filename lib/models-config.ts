@@ -4,7 +4,7 @@ import {SubscriptionPlan} from "@prisma/client";
 export interface AIModel {
   id: string
   name: string
-  description: string
+  description?: string
   provider: 'openai' | 'anthropic' | 'google' | 'meta' | 'other'
   contextLength?: number
   pricing?: { input: number; output: number }
@@ -45,8 +45,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   // Primary Model - Google Gemini 2.0 Flash 001
   {
     id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    name: 'Gemini 2.0 Flash',
-    description: 'Latest Google model with enhanced performance, reasoning, and multimodal capabilities',
+    name: 'Gemini',
     provider: 'google',
     contextLength: 1000000,
     pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
@@ -55,10 +54,9 @@ export const AVAILABLE_MODELS: AIModel[] = [
   // Secondary Model - OpenAI GPT-4.1 Nano
   {
     id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    name: 'GPT-4.1 Nano',
-    description: 'Efficient OpenAI model with excellent performance and reasoning capabilities',
+    name: 'ChatGPT',
     provider: 'openai',
-    contextLength: 200000,
+    contextLength: 1000000,
     pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
     tier: ModelTier.APPRENTICE
   }

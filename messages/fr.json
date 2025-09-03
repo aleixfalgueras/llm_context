@@ -47,15 +47,14 @@
     },
     "models": {
       "title": "Deux Modèles IA Premium Disponibles",
-      "description": "Tous les niveaux d'abonnement incluent à la fois Google Gemini 2.0 et OpenAI GPT-4.1 via notre système de modèles unifié.",
       "gemini": {
-        "title": "Google Gemini 2.0",
+        "title": "Google Gemini",
         "context": "Longueur de contexte 1M",
         "description": "Dernière IA de Google avec raisonnement amélioré, capacités multimodales et performances supérieures pour les stratégies marketing complexes."
       },
       "gpt": {
-        "title": "OpenAI GPT-4.1",
-        "context": "Longueur de contexte 200K",
+        "title": "OpenAI ChatGPT",
+        "context": "Longueur de contexte 1M",
         "description": "Modèle OpenAI efficace parfait pour le contenu de campagne créatif, la planification stratégique et les textes marketing polyvalents."
       },
       "switch": "Basculez entre les modèles de manière transparente"
@@ -405,6 +404,21 @@
       "exportDate": "Date d'Export",
       "you": "Vous",
       "aiAssistant": "Assistant IA"
+    },
+    "modelSelector": {
+      "searchPlaceholder": "Rechercher des modèles...",
+      "noModelsFound": "Aucun modèle trouvé.",
+      "availableModels": "Modèles Disponibles",
+      "models": {
+        "gemini": {
+          "name": "Gemini",
+          "description": "Excelle dans les tâches de traduction, finance et marketing."
+        },
+        "chatgpt": {
+          "name": "ChatGPT",
+          "description": "Idéal pour le contenu de campagne créatif, la planification stratégique et les tâches polyvalentes."
+        }
+      }
     },
     "clientContextSidebar": {
       "creatingChat": "Création de la Discussion...",

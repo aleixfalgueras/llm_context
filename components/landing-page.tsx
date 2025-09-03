@@ -126,9 +126,6 @@ export function LandingPage() {
         <div className="mb-16">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-4">{t('landing.models.title')}</h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              {t('landing.models.description')}
-            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">

@@ -8,6 +8,7 @@ import { ChevronDown, Cpu, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils/general'
 import { AVAILABLE_MODELS } from '@/lib/models-config'
 import { ModelTierType } from '@/lib/types/subscription-types'
+import { useTranslations } from '@/lib/translations/context'
 
 interface ModelSelectorProps {
   selectedModel: string
@@ -18,6 +19,7 @@ interface ModelSelectorProps {
 
 export function ModelSelector({ selectedModel, onModelSelect, className }: ModelSelectorProps) {
   const [open, setOpen] = useState(false)
+  const t = useTranslations('assistant.modelSelector')
 
   const currentModel = AVAILABLE_MODELS.find(model => model.id === selectedModel)
 
@@ -36,15 +38,15 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start">
         <Command>
-          <CommandInput placeholder="Search models..." />
+          <CommandInput placeholder={t('searchPlaceholder')} />
           <CommandList>
-            <CommandEmpty>No models found.</CommandEmpty>
+            <CommandEmpty>{t('noModelsFound')}</CommandEmpty>
             
             {/* Available Models */}
             <CommandGroup heading={
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-green-500" />
-                Available Models
+                {t('availableModels')}
               </div>
             }>
               {AVAILABLE_MODELS.map((model) => (
@@ -63,7 +65,7 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
                   <div className="flex flex-col gap-1 flex-1">
                     <div className="font-medium">{model.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {model.description}
+                      {model.name === 'Gemini' ? t('models.gemini.description') : t('models.chatgpt.description')}
                     </div>
                   </div>
                 </CommandItem>
