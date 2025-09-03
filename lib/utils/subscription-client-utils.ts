@@ -109,4 +109,3 @@ export function getButtonText(
   // For upgrades
   return t('planCard.upgradeTo', { planName })
 }
-
