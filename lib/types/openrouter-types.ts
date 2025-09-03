@@ -8,6 +8,7 @@ export interface OpenRouterCompletionOptions {
   presence_penalty?: number
   frequency_penalty?: number
   usage?: { include: boolean }
+  modalities?: ('text' | 'image')[] // For image generation models
 }
 
 export interface StreamChunk {
@@ -53,4 +54,9 @@ export interface GenerationStats {
     num_media_completion?: number
     num_search_results?: number
   }
+}
+
+export interface ImageGenerationResponse {
+  imageUrl: string
+  cost_usd?: number
 }

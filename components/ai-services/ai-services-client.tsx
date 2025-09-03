@@ -4,13 +4,15 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Mic } from 'lucide-react'
+import { Zap, FileText, MessageSquare, Settings, ChevronDown, ChevronUp, Mic, Image } from 'lucide-react'
 import { MeetingReportDialog } from '@/components/ai-services/meeting-report-dialog'
 import { CustomDocumentGeneratorDialog } from '@/components/ai-services/custom-document-generator-dialog'
+import { ImageCreatorDialog } from '@/components/ai-services/image-creator-dialog'
 import { ClientDocuments } from '@/components/clients/client-documents'
 import { ServiceStatus } from '@/lib/enums'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { useTranslations } from '@/lib/translations/context'
+import { UsageIndicator } from '@/components/subscription/usage-indicator'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -20,6 +22,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const t = useTranslations('aiServices')
   const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
   const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
+  const [isImageCreatorDialogOpen, setIsImageCreatorDialogOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<any>(null)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
@@ -29,6 +32,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
   const defaultVisibility = {
     'meeting-report': true,
     'custom-document': true,
+    'image-creator': true,
     'podcast-creator': true,
   }
 
@@ -82,6 +86,20 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       iconColorClass: 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
     },
     {
+      id: 'image-creator',
+      title: t('services.imageCreator.title'),
+      description: t('services.imageCreator.description'),
+      icon: <Image className="h-8 w-8" />,
+      features: [
+        t('services.imageCreator.features.aiPowered'),
+        t('services.imageCreator.features.promptLibrary'),
+        t('services.imageCreator.features.instantDownload')
+      ],
+      status: ServiceStatus.AVAILABLE,
+      onClick: () => setIsImageCreatorDialogOpen(true),
+      iconColorClass: 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
+    },
+    {
       id: 'podcast-creator',
       title: t('services.podcastCreator.title'),
       description: t('services.podcastCreator.description'),
@@ -93,7 +111,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       ],
       status: ServiceStatus.COMING_SOON,
       onClick: undefined,
-      iconColorClass: 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
+      iconColorClass: 'bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400'
     }
   ]
 
@@ -122,9 +140,12 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               </Button>
             </div>
           </div>
-          <p className="text-lg text-muted-foreground">
-            {t('description')}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-lg text-muted-foreground">
+              {t('description')}
+            </p>
+            <UsageIndicator />
+          </div>
         </div>
 
         {/* Service Configuration Panel */}
@@ -223,6 +244,7 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
                       className={`w-full mt-4 ${
                         service.id === 'meeting-report' ? 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600' :
                         service.id === 'custom-document' ? 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600' :
+                        service.id === 'image-creator' ? 'bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600' :
                         ''
                       }`}
                       onClick={service.onClick}
@@ -285,6 +307,12 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
         onClose={() => setIsCustomDocumentDialogOpen(false)}
         clients={clients}
         onDocumentCreated={handleDocumentCreated}
+      />
+
+      {/* Image Creator Dialog */}
+      <ImageCreatorDialog
+        open={isImageCreatorDialogOpen}
+        onOpenChange={setIsImageCreatorDialogOpen}
       />
 
       {/* Client Documents */}
