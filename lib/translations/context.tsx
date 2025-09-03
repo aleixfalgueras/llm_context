@@ -9,6 +9,7 @@ import {
   interpolate,
   TranslationFunction 
 } from './index'
+import { getLocaleFromDocumentCookies, setDocumentLocaleCookie } from '@/lib/utils/locale-cookie-client'
 
 interface TranslationContextType {
   locale: Locale
@@ -18,13 +19,10 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
 
-
 interface TranslationProviderProps {
   children: ReactNode
   initialLocale?: Locale
 }
-
-const LOCALE_STORAGE_KEY = 'app-locale'
 
 // Translation Provider Component
 export function TranslationProvider({ 
@@ -34,25 +32,17 @@ export function TranslationProvider({
   const [locale, setLocaleState] = useState<Locale>(initialLocale)
 
   useEffect(() => {
-    try {
-      const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY)
-      if (savedLocale && messages[savedLocale as Locale]) {
-        setLocaleState(savedLocale as Locale)
-      }
-    } catch (error) {
-      // Handle localStorage errors gracefully
-      console.warn('Failed to load locale from localStorage:', error)
+    // Load locale from cookie on mount
+    const savedLocale = getLocaleFromDocumentCookies()
+    if (savedLocale && messages[savedLocale]) {
+      setLocaleState(savedLocale)
     }
   }, [])
 
-  // Set locale and save to localStorage
+  // Set locale and save to cookie
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)
-    try {
-      localStorage.setItem(LOCALE_STORAGE_KEY, newLocale)
-    } catch (error) {
-      console.warn('Failed to save locale to localStorage:', error)
-    }
+    setDocumentLocaleCookie(newLocale)
   }, [])
 
   // Translation function

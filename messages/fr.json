@@ -1,0 +1,1392 @@
+{
+  "app": {
+    "title": "MIA - Assistant pour Influenceurs Millennials",
+    "description": "Plateforme de génération de contenu marketing alimentée par l'IA",
+    "copyright": "2025 MIA. Plateforme de génération de contenu marketing alimentée par l'IA."
+  },
+  "navigation": {
+    "clients": "Clients",
+    "prompts": "Prompts",
+    "assistant": "Assistant IA",
+    "aiServices": "Services IA",
+    "affiliation": "Affiliation",
+    "feedback": "Commentaires",
+    "admin": "Admin",
+    "subscription": "Abonnement",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "menu": "Menu",
+    "signIn": "Sign in"
+  },
+  "landing": {
+    "hero": {
+      "tagline": "Créez du contenu marketing personnalisé avec une IA qui comprend le contexte commercial de vos clients.",
+      "cta": "Commencer"
+    },
+    "features": {
+      "title": "Plateforme Marketing IA Avancée",
+      "clientIntelligence": {
+        "title": "Intelligence d'Affaires Client",
+        "description": "Stockez les informations sectorielles, les objectifs commerciaux, les audiences cibles et le paysage concurrentiel pour chaque client"
+      },
+      "campaignStrategy": {
+        "title": "IA de Stratégie de Campagne",
+        "description": "Générez des stratégies marketing, des idées de campagne et des plans tactiques en utilisant le contexte client approfondi"
+      },
+      "contentCreation": {
+        "title": "Création de Contenu de Marque",
+        "description": "Créez du contenu de marque qui parle à l'audience de votre client en utilisant leur voix et leur message"
+      },
+      "clientReporting": {
+        "title": "Rapports Client",
+        "description": "Générez des rapports client complets et des résumés de campagne avec un contexte commercial complet"
+      }
+    },
+    "security": {
+      "badge": "Confidentialité et sécurité de niveau entreprise"
+    },
+    "models": {
+      "title": "Deux Modèles IA Premium Disponibles",
+      "description": "Tous les niveaux d'abonnement incluent à la fois Google Gemini 2.0 et OpenAI GPT-4.1 via notre système de modèles unifié.",
+      "gemini": {
+        "title": "Google Gemini 2.0",
+        "context": "Longueur de contexte 1M",
+        "description": "Dernière IA de Google avec raisonnement amélioré, capacités multimodales et performances supérieures pour les stratégies marketing complexes."
+      },
+      "gpt": {
+        "title": "OpenAI GPT-4.1",
+        "context": "Longueur de contexte 200K",
+        "description": "Modèle OpenAI efficace parfait pour le contenu de campagne créatif, la planification stratégique et les textes marketing polyvalents."
+      },
+      "switch": "Basculez entre les modèles de manière transparente"
+    },
+    "howItWorks": {
+      "title": "De l'Intégration Client au Succès de la Campagne",
+      "step1": {
+        "title": "Capturer l'Intelligence Client",
+        "description": "Stockez l'industrie de chaque client, le marché cible, la voix de marque, le paysage concurrentiel et les objectifs commerciaux dans un système organisé."
+      },
+      "step2": {
+        "title": "Marketing Alimenté par l'IA",
+        "description": "Générez des stratégies de campagne, du contenu et des matériaux marketing parfaitement adaptés au contexte commercial unique et aux objectifs de chaque client."
+      },
+      "step3": {
+        "title": "Livrer des Résultats",
+        "description": "Présentez des campagnes qui comprennent vraiment le marché de votre client, s'adressent à son audience et s'alignent avec ses objectifs commerciaux."
+      }
+    },
+    "stats": {
+      "targeted": {
+        "title": "Ciblé",
+        "subtitle": "Création de Campagne",
+        "description": "Basé sur des données client réelles"
+      },
+      "scalable": {
+        "title": "Évolutif",
+        "subtitle": "Gestion Client",
+        "description": "Gérez plus de clients efficacement"
+      },
+      "strategic": {
+        "title": "Stratégique",
+        "subtitle": "Intelligence Marketing",
+        "description": "Décisions basées sur les données"
+      },
+      "professional": {
+        "title": "Professionnel",
+        "subtitle": "Livrables Client",
+        "description": "Impressionnez chaque client"
+      }
+    },
+    "pricing": {
+      "title": "Tarification Simple et Transparente",
+      "description": "Choisissez l'abonnement qui correspond à vos besoins marketing. Tous les plans incluent l'accès à Google Gemini 2.0 et OpenAI GPT-4.1.",
+      "perMonth": "/mois"
+    },
+    "cta": {
+      "title": "MIA fonctionne sur invitation uniquement",
+      "description": "Connectez-vous avec un membre actuel pour recevoir votre invitation personnelle et rejoindre notre communauté sélective de professionnels du marketing.",
+      "businessInquiries": "Demandes commerciales :"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "Gérez les profils de vos clients et suivez leurs projets marketing",
+    "searchPlaceholder": "Rechercher des clients par nom ou email...",
+    "addClient": "Ajouter un Client",
+    "addFirstClient": "Ajoutez votre Premier Client",
+    "noClientsFound": "Aucun client trouvé",
+    "noClientsYet": "Aucun client pour le moment",
+    "tryAdjustingSearch": "Essayez d'ajuster vos termes de recherche",
+    "startByAdding": "Commencez par ajouter votre premier client pour commencer à gérer leur contenu marketing.",
+    "showing": "Affichage",
+    "to": "à",
+    "of": "de",
+    "clients": "clients",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "form": {
+      "personalInformation": "Informations Personnelles",
+      "documentsLanguage": "Langue des Documents",
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "country": "Pays",
+      "namePlaceholder": "Nom complet du client",
+      "emailPlaceholder": "client@example.com",
+      "phonePlaceholder": "+33 1 23 45 67 89",
+      "countryPlaceholder": "ex: France, Belgique, Suisse",
+      "nameHelp": "Saisissez le nom complet du client",
+      "emailHelp": "Adresse email du client pour les communications",
+      "phoneHelp": "Incluez l'indicatif pays pour les numéros internationaux",
+      "countryHelp": "Lieu principal d'activité du client",
+      "createClient": "Créer le Client",
+      "updateClient": "Mettre à jour le Client",
+      "privacyMessage": "Ces informations ne sont jamais partagées avec qui que ce soit et sont gardées strictement confidentielles.",
+      "generalContextLabel": "Contexte Général",
+      "specificContext1Label": "Contexte Spécifique 1",
+      "specificContext2Label": "Contexte Spécifique 2",
+      "specificContext3Label": "Contexte Spécifique 3",
+      "generalContextPlaceholder": "Tout contexte général sur le client...",
+      "specificContext1Placeholder": "Contexte spécifique 1 sur le client...",
+      "specificContext2Placeholder": "Contexte spécifique 2 sur le client...",
+      "specificContext3Placeholder": "Contexte spécifique 3 sur le client...",
+      "languageSelectPlaceholder": "Sélectionnez la langue pour les documents générés",
+      "languageTooltip": "Cette langue sera utilisée lors de la génération de documents avec le service Générateur de Documents de la page Services IA.",
+      "viewClient": "Voir le Client",
+      "editClient": "Modifier le Client",
+      "addNewClient": "Ajouter un Nouveau Client",
+      "required": "*"
+    },
+    "table": {
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "country": "Pays",
+      "documents": "Documents",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDocuments": "Voir les Documents",
+      "viewClient": "Voir le Client",
+      "editClient": "Modifier le Client",
+      "deleteClient": "Supprimer le Client"
+    },
+    "delete": {
+      "title": "Supprimer le Client",
+      "message": "Êtes-vous sûr de vouloir supprimer {{name}} ? Cette action ne peut pas être annulée."
+    },
+    "sort": {
+      "byDate": "Trier par date de création",
+      "byName": "Trier par nom"
+    },
+    "view": {
+      "grid": "Vue grille",
+      "table": "Vue tableau"
+    },
+    "documents": {
+      "title": "Documents pour {{clientName}}",
+      "description": "Consulter, modifier et gérer les documents de ce client",
+      "createDocument": "Créer un Document",
+      "saveDocument": "Enregistrer le Document"
+    },
+    "ui": {
+      "accessibility": {
+        "pagination": "Pagination"
+      }
+    }
+  },
+  "prompts": {
+    "title": "Gestion des Prompts",
+    "description": "Créez, modifiez et organisez vos prompts IA pour de meilleures conversations.",
+    "examplePrompts": "Prompts d'Exemple",
+    "myPrompts": "Mes Prompts",
+    "newPrompt": "Nouveau Prompt",
+    "searchPlaceholder": "Rechercher des prompts...",
+    "hideInactive": "Masquer les Inactifs",
+    "showAll": "Tout Afficher",
+    "hideTemplates": "Masquer les Templates",
+    "showTemplates": "Afficher les Templates",
+    "templatesDescription": "Templates de prompts professionnels pour bien commencer. Cliquez sur n'importe quel template pour créer votre propre version personnalisée.",
+    "used": "Utilisé {{count}}x",
+    "noUsage": "Pas encore utilisé",
+    "categoriesTitle": "Catégories",
+    "stats": {
+      "totalPrompts": "Total des Prompts",
+      "mostUsed": "Le Plus Utilisé",
+      "activeCount": "{{count}} actifs",
+      "noUsageYet": "Pas encore utilisé"
+    },
+    "form": {
+      "name": "Nom",
+      "namePlaceholder": "ex : Générer un Rapport de Stratégie Marketing",
+      "category": "Catégorie",
+      "description": "Description",
+      "descriptionPlaceholder": "Brève description de ce que fait ce prompt",
+      "content": "Contenu du Prompt",
+      "contentPlaceholder": "Saisissez votre prompt ici. Vous pouvez utiliser des variables comme {{client_name}}, {{industry}}, etc.",
+      "required": "*",
+      "prompt": "Prompt"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "newPrompt": "Nouveau Prompt",
+      "update": "Mettre à jour",
+      "createFromTemplate": "Créer à partir d'un Template",
+      "create": "Créer",
+      "deactivate": "Désactiver",
+      "activate": "Activer",
+      "delete": "Supprimer"
+    },
+    "card": {
+      "usedCount": "Utilisé {{count}}x"
+    },
+    "active": "actif",
+    "dialog": {
+      "viewTitle": "Voir le Prompt",
+      "editTitle": "Modifier le Prompt",
+      "createTitle": "Créer un Nouveau Prompt",
+      "createPrompt": "Créer un Nouveau Prompt",
+      "createFromTemplate": "Créer un Prompt à partir d'un Template",
+      "createFromTemplateTitle": "Créer un Prompt à partir d'un Template",
+      "name": "Nom",
+      "category": "Catégorie",
+      "description": "Description",
+      "promptContent": "Contenu du Prompt",
+      "namePlaceholder": "ex : Générer un Rapport de Stratégie Marketing",
+      "descriptionPlaceholder": "Brève description de ce que fait ce prompt",
+      "contentPlaceholder": "Saisissez votre prompt ici. Vous pouvez utiliser des variables comme {{client_name}}, {{industry}}, etc.",
+      "isActive": "Actif",
+      "create": "Créer le Prompt",
+      "update": "Mettre à jour le Prompt",
+      "createFromTemplateButton": "Créer à partir d'un Template"
+    },
+    "categories": {
+      "general": "Général",
+      "marketing": "Marketing",
+      "content": "Contenu",
+      "analysis": "Analyse"
+    },
+    "filters": {
+      "allCategories": "Toutes les Catégories",
+      "sort": {
+        "usage": "Les Plus Utilisés",
+        "recent": "Récemment Mis à jour",
+        "name": "Nom A-Z",
+        "created": "Récemment Créés"
+      }
+    },
+    "delete": {
+      "title": "Supprimer le Prompt",
+      "message": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ? Cette action ne peut pas être annulée."
+    },
+    "validation": {
+      "nameRequired": "Le nom est obligatoire",
+      "nameMinLength": "Le nom doit comporter au moins 3 caractères",
+      "nameMaxLength": "Le nom doit comporter moins de 100 caractères",
+      "contentRequired": "Le contenu du prompt est obligatoire",
+      "contentMinLength": "Le contenu du prompt doit comporter au moins 10 caractères",
+      "descriptionMaxLength": "La description doit comporter moins de 500 caractères",
+      "error": "Erreur de Validation"
+    },
+    "selector": {
+      "usePrompt": "Utiliser Prompt",
+      "loading": "Chargement des prompts...",
+      "noSearchResults": "Aucun prompt trouvé correspondant à votre recherche",
+      "noPrompts": "Aucun prompt disponible",
+      "sections": {
+        "mostUsed": "Les Plus Utilisés",
+        "recent": "Récents",
+        "searchResults": "Résultats de Recherche",
+        "categoryPrompts": "Prompts {{category}}",
+        "allPrompts": "Tous les Prompts"
+      }
+    },
+    "emptyState": {
+      "noPromptsFound": "Aucun prompt trouvé",
+      "tryAdjustingFilters": "Essayez d'ajuster vos termes de recherche ou filtres",
+      "getStartedMessage": "Créez votre premier prompt pour commencer avec l'assistance IA",
+      "clearFilters": "Effacer les Filtres",
+      "createFirstPrompt": "Créer le Premier Prompt"
+    },
+    "messages": {
+      "promptUpdated": "Prompt Mis à jour",
+      "promptCreatedFromTemplate": "Prompt Créé à partir d'un Template",
+      "promptCreated": "Prompt Créé",
+      "promptUpdatedDesc": "\"{{name}}\" a été mis à jour avec succès",
+      "promptCreatedDesc": "\"{{name}}\" a été créé avec succès"
+    },
+    "errors": {
+      "failedToSave": "Échec de l'enregistrement du prompt"
+    },
+    "template": {
+      "label": "Template",
+      "useTemplate": "Utiliser le Template"
+    },
+    "samplePrompts": {
+      "1": {
+        "name": "Rapport de Stratégie Marketing",
+        "description": "Stratégie marketing complète avec intégration totale du contexte client",
+        "content": "Veuillez créer un rapport de stratégie marketing complet avec la structure suivante :\n\nInformations Client :\n- Localisation : {country}\n- Contexte Commercial : {general_context}\n- Domaine de Focus Principal : {specific_context_1}\n- Considérations Additionnelles : {specific_context_2}\n\nRecommandations Stratégiques :\nBasé sur la localisation du client et son contexte commercial, fournissez des recommandations stratégiques marketing détaillées qui adressent leurs domaines de focus spécifiques et considérations.\n\nPlan de Mise en Œuvre :\nIncluez des étapes spécifiques suivantes et un calendrier pour exécuter la stratégie marketing, en tenant compte de leurs circonstances commerciales uniques et positionnement marché.\n\nMétriques de Succès :\nDéfinissez des indicateurs de performance clés qui s'alignent avec leurs objectifs commerciaux spécifiques et exigences du marché."
+      },
+      "2": {
+        "name": "Modèle de Calendrier de Contenu",
+        "description": "Calendrier de contenu détaillé avec personnalisation spécifique au client",
+        "content": "Modèle de Calendrier de Contenu\n\nAperçu Client :\n- Localisation Marché : {country}\n- Contexte Commercial : {general_context}\n- Focus Principal : {specific_context_1}\n- Objectifs Secondaires : {specific_context_2}\n\nCadre de Stratégie de Contenu :\n1. Voix de Marque & Messagerie (adaptée au marché et contexte commercial)\n2. Piliers de Contenu (alignés avec les domaines de focus principaux)\n3. Stratégie de Plateforme (optimisée pour le marché cible)\n4. Tactiques d'Engagement (considérant les objectifs spécifiques)\n\nPlanification de Contenu Mensuel :\nVeuillez fournir un calendrier de contenu détaillé qui incorpore le contexte spécifique et les objectifs du client. Incluez des thèmes de contenu, horaires de publication, et stratégies d'engagement qui résonnent avec leur audience cible et dynamiques du marché.\n\nLe contenu devrait adresser leur focus principal tout en supportant les objectifs secondaires tout au long du calendrier."
+      },
+      "3": {
+        "name": "Document d'Intégration Client",
+        "description": "Matériaux d'accueil et d'intégration client personnalisés",
+        "content": "Package d'Intégration & Accueil Client\n\nMessage de Bienvenue :\nCréez un message de bienvenue personnalisé pour notre nouveau client, considérant leur localisation en {country} et leur contexte commercial : {general_context}\n\nAperçu des Services :\nFournissez un aperçu personnalisé de nos services qui adresse spécifiquement :\n- Besoins Principaux : {specific_context_1}\n- Exigences Secondaires : {specific_context_2}\n- Considérations Additionnelles : {specific_context_3}\n\nÉtapes Suivantes & Calendrier :\nDécrivez un processus d'intégration clair adapté à leurs exigences spécifiques et contexte marché.\n\nInformations de Contact :\nIncluez les membres d'équipe pertinents et préférences de communication optimisées pour leur localisation et besoins commerciaux.\n\nCe document d'intégration devrait faire sentir au client qu'il est compris et confiant en notre capacité à adresser ses exigences commerciales uniques."
+      },
+      "4": {
+        "name": "Rapport d'Analyse de Performance",
+        "description": "Suivi de performance complet avec insights contextuels",
+        "content": "Rapport de Performance Marketing\n\nPériode de Rapport : [Mois/Trimestre Actuel]\n\nAperçu Client :\n- Marché : {country}\n- Contexte Commercial : {general_context}\n- Domaine de Performance Clé : {specific_context_1}\n- Focus Secondaire : {specific_context_2}\n\nRésumé de Performance :\nAnalysez la performance marketing considérant le contexte commercial spécifique et domaines de focus du client :\n\n1. Réalisation d'Objectif Principal\n- Progrès vers les objectifs principaux liés à : {specific_context_1}\n- Indicateurs de performance spécifiques au marché\n- Métriques de succès orientées contexte\n\n2. Performance d'Objectif Secondaire\n- Résultats en : {specific_context_2}\n- Résultats d'initiatives de support\n- Synergies croisées d'objectifs\n\n3. Analyse de Contexte Marché\n- Tendances de performance spécifiques à la localisation\n- Impact des dynamiques de marché régional\n- Considérations culturelles/géographiques\n\n4. Recommandations Stratégiques\n- Opportunités d'optimisation alignées avec le contexte commercial\n- Ajustements de stratégie spécifiques au marché\n- Étapes suivantes priorisées considérant tous les facteurs de contexte\n\nVeuillez fournir des insights basés sur les données qui connectent les métriques de performance au contexte commercial spécifique et objectifs du client."
+      },
+      "5": {
+        "name": "Brief d'Analyse Concurrentielle",
+        "description": "Analyse de marché incorporant le positionnement spécifique au client",
+        "content": "Rapport d'Analyse Concurrentielle\n\nContexte Client :\n- Localisation Marché : {country}\n- Aperçu Commercial : {general_context}\n- Focus Concurrentiel : {specific_context_1}\n- Stratégie de Différenciation : {specific_context_2}\n- Positionnement Marché : {specific_context_3}\n\nAnalyse du Paysage Concurrentiel :\nFournissez une analyse concurrentielle complète qui considère la position de marché spécifique et domaines de focus stratégiques du client.\n\n1. Concurrents Directs\n- Identifiez les concurrents principaux dans le marché {country}\n- Analysez comment ils se positionnent contre le focus du client sur : {specific_context_1}\n\n2. Avantages Concurrentiels\n- Mettez en évidence le positionnement unique du client en : {specific_context_2}\n- Opportunités de marché basées sur : {specific_context_3}\n\n3. Lacunes & Opportunités du Marché\n- Besoins non satisfaits dans le marché cible\n- Opportunités stratégiques alignées avec le contexte client\n\n4. Recommandations\n- Stratégies de positionnement qui exploitent les forces spécifiques du client\n- Tactiques d'entrée ou d'expansion de marché\n- Stratégies de réponse concurrentielle\n\nCette analyse devrait fournir des insights actionnables pour renforcer la position de marché."
+      },
+      "6": {
+        "name": "Proposition de Campagne Médias Sociaux",
+        "description": "Stratégie de médias sociaux ciblée avec intégration totale du contexte",
+        "content": "Proposition de Campagne Médias Sociaux\n\nContexte Client :\n- Marché Cible : {country}\n- Contexte Commercial : {general_context}\n- Objectif de Campagne : {specific_context_1}\n- Focus de Marque : {specific_context_2}\n- Considérations Spéciales : {specific_context_3}\n\nStratégie de Campagne :\nDéveloppez une campagne de médias sociaux qui exploite le positionnement unique du client et adresse ses objectifs spécifiques.\n\n1. Sélection de Plateforme\n- Plateformes optimales pour le marché {country}\n- Alignement avec l'objectif de campagne : {specific_context_1}\n\n2. Stratégie de Contenu\n- Messagerie qui reflète : {general_context}\n- Thèmes de contenu mettant en évidence : {specific_context_2}\n- Considérations spéciales pour : {specific_context_3}\n\n3. Tactiques d'Engagement\n- Méthodes d'engagement appropriées au marché\n- Stratégies de construction de communauté\n- Opportunités de contenu généré par les utilisateurs\n\n4. Calendrier & Métriques de Campagne\n- Plan de déploiement par phases\n- Métriques de succès alignées avec les objectifs\n- Cadre de surveillance de performance\n\nCette campagne devrait représenter authentiquement la marque du client tout en atteignant leurs objectifs marketing spécifiques."
+      }
+    }
+  },
+  "assistant": {
+    "title": "Assistant IA",
+    "chats": "Discussions",
+    "deleteAllChats": "Supprimer Toutes les Discussions",
+    "clickToConfirm": "Cliquer pour Confirmer",
+    "getStarted": "Commencer",
+    "editTitle": "Modifier le titre",
+    "privacyProtected": "Confidentialité Protégée",
+    "startChatting": "Commencez à discuter immédiatement ou sélectionnez un client pour un contexte personnalisé ➡️",
+    "privacyDescription": "Nous ne partageons que les informations client sélectionnées (pays, contexte général) avec l'IA - aucun nom, email ou numéro de téléphone n'est inclus dans le contexte.",
+    "newChat": "Nouvelle Discussion",
+    "starting": "Démarrage...",
+    "exportNotAvailableDescription": "Aucun message à exporter",
+    "viewDocument": "Voir le Document",
+    "exportFailed": "Échec de l'export",
+    "at": "à",
+    "inputPlaceholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
+    "typing": "Saisie en cours...",
+    "chatExportedDescription": "La discussion '{{chatTitle}}' a été exportée avec succès",
+    "startNewConversation": "Commencer une nouvelle conversation",
+    "noChatsYet": "Aucune discussion pour le moment",
+    "startConversation": "Commencer une conversation",
+    "startConversationSubtext": "Tapez un message ci-dessous pour commencer",
+    "user": "Utilisateur",
+    "newChatTitle": "Nouvelle Discussion",
+    "userFallback": "Utilisateur",
+    "errors": {
+      "chatContainerError": "Erreur du conteneur de discussion",
+      "chatPageError": "Une erreur de discussion s'est produite - veuillez essayer de rafraîchir"
+    },
+    "mobile": {
+      "chatsHeader": "Discussions",
+      "clientInfoHeader": "Infos Client"
+    },
+    "chat": {
+      "placeholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
+      "exportChat": "Exporter la Discussion",
+      "exporting": "Export en cours...",
+      "exportNotAvailable": "Export Non Disponible",
+      "noMessagesToExport": "Aucun message à exporter",
+      "chatExported": "Discussion Exportée",
+      "exportSuccess": "La discussion a été exportée sous {{filename}}",
+      "client": "Client",
+      "email": "Email",
+      "country": "Pays",
+      "type": "Type",
+      "generalChat": "Discussion Générale",
+      "exportDate": "Date d'Export",
+      "you": "Vous",
+      "aiAssistant": "Assistant IA"
+    },
+    "clientContextSidebar": {
+      "creatingChat": "Création de la Discussion...",
+      "settingUpConversation": "Configuration de votre conversation",
+      "clientInformation": "Informations Client",
+      "selectClient": "Sélectionner un Client",
+      "chooseClient": "Choisir un client",
+      "searchClients": "Rechercher des clients...",
+      "noClientsFound": "Aucun client trouvé",
+      "aiContextSelection": "Sélection du Contexte IA",
+      "contextSelectionDescription": "Choisissez quelles informations client partager avec l'assistant IA",
+      "selectAll": "Tout Sélectionner",
+      "deselectAll": "Tout Désélectionner",
+      "newChat": "Nouvelle Discussion",
+      "switchClient": "Changer de client",
+      "aiContextUsed": "Contexte IA Utilisé",
+      "noneSelected": "Aucun sélectionné",
+      "contextSetFirstMessageOnly": "Le contexte est défini avec le premier message et ne peut pas être modifié plus tard",
+      "noClientSelected": "Aucun client sélectionné pour cette conversation",
+      "tips": "Conseils",
+      "tipNewChatForTopics": "Commencez une nouvelle discussion pour différents sujets",
+      "tipLongerConversations": "Un contexte clair permet des conversations plus longues",
+      "tipBePoliteRespectful": "Soyez clair et précis dans vos questions"
+    }
+  },
+  "subscription": {
+    "title": "Abonnement",
+    "pageTitle": "Choisissez Votre Plan",
+    "perMonth": "/mois",
+    "processing": "Traitement en cours...",
+    "canceling": "Annulation en cours...",
+    "manageButtons": {
+      "manage": "Gérer l'Abonnement",
+      "reactivate": "Réactiver l'Abonnement",
+      "cancel": "Annuler l'Abonnement",
+      "loading": "Chargement..."
+    },
+    "status": {
+      "active": "Abonnement Actif",
+      "expired": "Abonnement Expiré",
+      "renews": "Se renouvelle",
+      "expiresOn": "Expiré"
+    },
+    "deleteAccount": {
+      "buttonLabel": "Supprimer le Compte",
+      "dialogTitle": "Supprimer le Compte",
+      "warningMessage": "⚠️ Cette action ne peut pas être annulée",
+      "reasonLabel": "Raison de la suppression (optionnel) :",
+      "reasons": {
+        "noLongerNeed": "Je n'ai plus besoin du service",
+        "privacyConcerns": "Préoccupations de confidentialité",
+        "serviceIssues": "Problèmes de service",
+        "other": "Autre"
+      },
+      "cancelButton": "Annuler",
+      "deleteButton": "Supprimer le Compte",
+      "deleting": "Suppression...",
+      "successMessage": "Compte supprimé avec succès. ID de suppression : {deletionId}"
+    },
+    "urlHandler": {
+      "successTitle": "Abonnement Mis à Jour !",
+      "successDescription": "Votre abonnement a été mis à jour avec succès.",
+      "canceledTitle": "Paiement Annulé",
+      "canceledDescription": "La mise à jour de votre abonnement a été annulée."
+    },
+    "plans": {
+      "apprentice": {
+        "description": "Parfait pour les individus qui commencent leur parcours",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI et DeFi",
+          "💎 Abonnement Ruby gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "knight": {
+        "description": "Pour les PME et créateurs de contenu",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI + utilisation x2.5",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI et DeFi",
+          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "master": {
+        "description": "Pour les startups et influenceurs qui développent leur impact",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI + utilisation x10",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI, DeFi et Influenceurs",
+          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 entrée gratuite au XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Hébergement de site web professionnel gratuit et plateforme vitrine avec capacités e-commerce"
+        ]
+      },
+      "jedi": {
+        "description": "Pour les dirigeants d'entreprise et PDG qui pilotent l'innovation",
+        "features": [
+          "🤖 Accès à la plateforme MIA AI + utilisation x25",
+          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI, DeFi et Influenceurs",
+          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
+          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 entrée gratuite au XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Hébergement de site web professionnel gratuit et plateforme vitrine avec capacités e-commerce",
+          "📞 60 minutes d'appel privé par mois pour discuter de l'image de marque personnelle et du développement d'entreprise"
+        ]
+      }
+    },
+    "planCard": {
+      "perMonth": "/mois",
+      "processing": "Traitement en cours...",
+      "canceling": "Annulation en cours...",
+      "subscribeTo": "S'abonner à {{planName}}",
+      "cancelDowngrade": "Annuler la Rétrogradation",
+      "currentPlan": "Plan Actuel",
+      "downgradeTo": "Rétrograder vers {{planName}}",
+      "upgradeTo": "Passer à {{planName}}"
+    },
+    "upgradeDialog": {
+      "title": {
+        "scheduleDowngrade": "Planifier la Rétrogradation",
+        "confirmUpgrade": "Confirmer la Mise à niveau"
+      },
+      "description": {
+        "downgrade": "Examinez et confirmez les détails de votre rétrogradation de plan.",
+        "upgrade": "Examinez et confirmez les détails de votre mise à niveau de plan."
+      },
+      "loading": {
+        "preview": "Chargement de l'aperçu...",
+        "processing": "Traitement en cours..."
+      },
+      "errors": {
+        "loadPreviewFailed": "Échec du chargement de l'aperçu de mise à niveau"
+      },
+      "planComparison": {
+        "currentPlan": "Plan Actuel",
+        "newPlan": "Nouveau Plan",
+        "pricePerMonth": "{{price}}€/mois"
+      },
+      "badges": {
+        "downgrade": "Rétrogradation",
+        "upgrade": "Mise à niveau",
+        "firstSubscription": "Premier Abonnement"
+      },
+      "features": {
+        "whatYouGetWith": "Ce que vous obtenez avec {{planName}}"
+      },
+      "billing": {
+        "title": "Informations de Facturation",
+        "information": "Informations de Facturation",
+        "downgradeTo": "Rétrograder vers {{planName}}",
+        "upgradeTo": "Passer à {{planName}}",
+        "downgradeNote": "Les modifications prendront effet à la fin de votre période de facturation actuelle",
+        "upgradeNote": "Vous serez facturé du montant au prorata immédiatement",
+        "changesEffective": "Modifications effectives le {{date}}",
+        "nextBilling": "Prochaine date de facturation : {{date}}",
+        "newMonthlyCharge": "Nouveau coût mensuel",
+        "monthlyCharge": "Coût mensuel",
+        "planChangeNote": "Les modifications de plan seront traitées immédiatement",
+        "stripeRedirectNote": "Vous serez redirigé vers Stripe pour compléter le paiement"
+      },
+      "firstSubscription": {
+        "planTitle": "S'abonner à {{planName}}",
+        "perMonth": "/mois"
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "scheduleDowngrade": "Planifier la Rétrogradation",
+        "confirmUpgrade": "Confirmer la Mise à niveau",
+        "startSubscription": "Commencer l'Abonnement"
+      }
+    },
+    "statusBanners": {
+      "freeTrial": {
+        "active": "Essai Gratuit Actif (Plan Apprenti) - {{days}} jours restants",
+        "expires": "L'essai expire le {{date}}"
+      },
+      "activeCancelled": {
+        "status": "Abonnement Actif (Annulé) - {{days}} jours restants",
+        "willBeCancelled": "Votre abonnement sera annulé le {{date}}"
+      },
+      "pendingDowngrade": {
+        "status": "Abonnement Actif (Rétrogradation) - {{days}} jours avant rétrogradation vers {{plan}}",
+        "willBeDowngraded": "Votre abonnement sera rétrogradé le {{date}}"
+      },
+      "paymentRequired": {
+        "status": "⚠️ Paiement Requis - Abonnement Suspendu",
+        "message": "Le paiement de votre abonnement a échoué. Veuillez mettre à jour votre méthode de paiement ou réessayer le paiement pour restaurer l'accès.",
+        "retryButton": "Payer Maintenant pour Restaurer l'Accès",
+        "processingPayment": "Traitement du Paiement..."
+      }
+    },
+    "faq": {
+      "title": "Questions Fréquemment Posées",
+      "changeAnytime": {
+        "question": "Puis-je changer de plan à tout moment ?",
+        "answer": "Oui ! Vous pouvez mettre à niveau ou rétrograder votre abonnement à tout moment. Les modifications prennent effet immédiatement pour les mises à niveau, et à la fin de la période de facturation actuelle pour les rétrogradations."
+      },
+      "exceedLimits": {
+        "question": "Que se passe-t-il si je dépasse mes limites ?",
+        "answer": "Si vous atteignez les limites d'utilisation de votre plan, vous serez notifié et pourrez soit attendre le prochain cycle de facturation soit passer à un plan supérieur pour continuer l'accès."
+      },
+      "dataSecure": {
+        "question": "Mes données sont-elles sécurisées ?",
+        "answer": "Absolument. Nous utilisons un chiffrement de niveau entreprise pour tout stockage et transmission de données. Vos informations client et contenu généré sont privés et ne sont jamais partagés avec des tiers."
+      }
+    },
+    "usageIndicator": {
+      "tooltipMessage": "Ce pourcentage ({{percentage}}%) représente la quantité de votre utilisation d'abonnement qui a été consommée.",
+      "usageUnavailable": "Utilisation non disponible",
+      "errorLoadingUsage": "Échec du chargement des informations d'utilisation",
+      "limitReached": "Vous avez atteint votre limite de dépense. Les messages peuvent être bloqués.",
+      "approachingLimit": "Vous approchez de votre limite de dépense."
+    }
+  },
+  "affiliation": {
+    "title": "Réseau d'Affiliation",
+    "description": "Gérez votre réseau d'affiliation et suivez vos parrainages",
+    "generateLinkTitle": "Générer Votre Lien de Parrainage",
+    "yourCode": "Votre Code d'Affiliation",
+    "parentAffiliation": "Affiliation Parente",
+    "status": "Statut",
+    "yourReferralLink": "Votre Lien de Parrainage",
+    "yourNetwork": "Votre Réseau d'Affiliation",
+    "generateLinkDescription": "Saisissez un email pour générer un lien de parrainage unique. Ce lien permettra aux nouveaux utilisateurs de s'inscrire sous votre affiliation.",
+    "emailPlaceholder": "ami@example.com",
+    "generateLinkButton": "Générer le Lien",
+    "linkGenerated": "Lien de parrainage généré et envoyé !",
+    "linkSent": "Nous avons envoyé l'invitation à {{email}} avec votre lien de parrainage unique.",
+    "copyLink": "Copier le Lien",
+    "anonymousUser": "Anonyme",
+    "setup": {
+      "title": "Générer Votre Lien de Parrainage",
+      "description": "Il semble que vous vous soyez inscrit avant le lancement de notre système de parrainage. Générez votre code maintenant !",
+      "alert": "Pour générer votre code d'affiliation, vous devez fournir un code d'affiliation parent de quelqu'un qui vous a parrainé pour rejoindre notre réseau.",
+      "parentCodeLabel": "Code d'Affiliation Parent",
+      "parentCodePlaceholder": "ex : ABC123",
+      "parentCodeHelp": "Demandez à la personne qui vous a présenté la plateforme son code d'affiliation.",
+      "generateButton": "Générer Mon Lien de Parrainage",
+      "required": "Le code d'affiliation parent est requis"
+    },
+    "referralLink": {
+      "description": "Partagez ce lien avec d'autres pour développer votre réseau",
+      "autoDescription": "Quand quelqu'un s'inscrit en utilisant ce lien, il sera automatiquement ajouté à votre réseau."
+    },
+    "network": {
+      "description": "Visualisez votre arbre de parrainage et suivez la croissance de votre réseau. Les icônes vertes indiquent les utilisateurs avec des abonnements actifs, les icônes rouges montrent les utilisateurs sans abonnements actifs.",
+      "empty": "Vous n'avez pas encore de parrainages. Partagez votre lien de parrainage avec d'autres pour développer votre réseau."
+    },
+    "none": "Aucun",
+    "tooltipStatus": "Seuls les utilisateurs avec un abonnement Stripe valide sont pris en compte pour le calcul du statut.",
+    "toast": {
+      "success": "Succès",
+      "codeCreated": "Votre code d'affiliation {{code}} a été créé",
+      "copied": "Copié",
+      "linkCopied": "Lien de parrainage copié dans le presse-papiers",
+      "codeCopied": "Code d'affiliation copié dans le presse-papiers"
+    },
+    "statusGuide": {
+      "title": "Guide des Statuts d'Affiliation",
+      "buttonLabel": "Guide Statuts",
+      "description": "Aperçu complet de tous les statuts d'affiliation, leurs exigences et avantages",
+      "status": "Statut",
+      "requirements": "Exigences",
+      "benefitsCommissions": "Avantages et Commissions",
+      "current": "(Actuel)",
+      "requirementsLabel": "Exigences :",
+      "benefitsCommissionsLabel": "Avantages et Commissions :",
+      "noteLabel": "Note :",
+      "noteText": "Les mises à niveau de statut sont automatiques basées sur la taille de votre réseau et les réalisations de parrainage. Votre statut actuel est mis en surbrillance ci-dessus.",
+      "statuses": {
+        "GenY": {
+          "commission": "10% du plan souscrit de l'utilisateur",
+          "condition": "-"
+        },
+        "Indigo": {
+          "commission": "15% du plan souscrit de l'utilisateur",
+          "condition": "25 utilisateurs"
+        },
+        "LightWorker": {
+          "commission": "20% du plan souscrit de l'utilisateur & 10% de réduction sur les événements",
+          "condition": "50 utilisateurs"
+        },
+        "CristalClub": {
+          "commission": "25% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie",
+          "condition": "100 utilisateurs & 1 utilisateur Gen Y"
+        },
+        "D5Level": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier",
+          "condition": "200 utilisateurs & 5 utilisateurs Gen Y"
+        },
+        "Walkin": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste",
+          "condition": "400 utilisateurs & 10 utilisateurs Gen Y"
+        },
+        "SevenStars": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 12.5% Bonus Événements",
+          "condition": "1000 utilisateurs & 1 utilisateur Cristal Club"
+        },
+        "InfinityStars": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 12.5% Bonus Événements & NFT Leader",
+          "condition": "2000 utilisateurs & 5 utilisateurs Cristal Club"
+        },
+        "Alpha": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 15% Bonus Événements & NFT Leader",
+          "condition": "4000 utilisateurs & 10 utilisateurs Cristal Club"
+        },
+        "Omega": {
+          "commission": "30% du plan souscrit de l'utilisateur & 10% de réduction sur les événements & récompenses d'actifs et de fonds en cryptomonnaie & Programme Conférencier & NFT Altruiste & 15% Bonus Événements & NFT Érudit",
+          "condition": "1000 utilisateurs & 1 utilisateur Seven Stars"
+        }
+      }
+    },
+    "commissionsGuide": {
+      "title": "Guide des Commissions",
+      "buttonLabel": "Guide Commissions",
+      "dialogDescription": "Comprendre le fonctionnement des commissions d'affiliation, les calendriers de paiement et les limites d'abonnement",
+      "paymentProcessing": "Traitement des Paiements",
+      "monthlyPaymentTitle": "Calendrier de Paiement Mensuel",
+      "monthlyPaymentDescription": "Les paiements de commissions sont traités automatiquement le 1er de chaque mois pour les gains du mois précédent.",
+      "activeSubscriptionTitle": "Abonnement Actif Requis",
+      "activeSubscriptionDescription": "Vous devez maintenir un abonnement actif pour recevoir les paiements de commissions. Les abonnements suspendus ou annulés mettront en pause les versements de commissions.",
+      "validPaymentTitle": "Méthode de Paiement Valide Requise",
+      "validPaymentDescription": "Seuls les utilisateurs affiliés avec des abonnements Stripe valides et des méthodes de paiement sont inclus dans les calculs de commissions.",
+      "calculationLimits": "Limites de Calcul des Commissions",
+      "calculationLimitsDescription": "Votre plan d'abonnement détermine combien d'utilisateurs de votre réseau de parrainage peuvent être inclus dans les calculs de commissions.",
+      "subscriptionPlan": "Plan d'Abonnement",
+      "commissionLimit": "Limite de Calcul des Commissions",
+      "description": "Description",
+      "usersCount": "{{count}} utilisateurs",
+      "topPerformingReferrals": "Commissions calculées à partir de vos {{count}} meilleurs parrainages performants",
+      "importantNotesTitle": "Notes Importantes",
+      "note1": "Les taux de commission dépendent de votre niveau de statut d'affiliation",
+      "note2": "Les paiements sont traités via Stripe vers votre méthode de paiement enregistrée",
+      "note3": "Les calculs de commissions excluent les utilisateurs d'essai et les abonnements inactifs",
+      "note4": "Mettez à niveau votre abonnement pour augmenter votre potentiel de gains",
+      "paymentRules": "Les commissions sont automatiquement traitées et versées mensuellement via la méthode de paiement associée à votre compte.",
+      "importantNotes": "Important : Les commissions ne sont calculées que jusqu'à la 4ème génération pour maintenir la durabilité du système."
+    },
+    "tree": {
+      "copySuccessTitle": "Copié !",
+      "copySuccessMessage": "Code d'affiliation {{code}} copié dans le presse-papiers",
+      "removeConfirmation": "Êtes-vous sûr de vouloir retirer cet utilisateur de votre réseau ? Cette action ne peut pas être annulée.",
+      "removeSuccessTitle": "Utilisateur Retiré",
+      "errorTitle": "Erreur",
+      "removeErrorMessage": "Échec de la suppression de l'utilisateur du réseau. Veuillez réessayer.",
+      "removeFromNetworkTooltip": "Retirer du réseau",
+      "youLabel": "Vous",
+      "userLabel": "Utilisateur {{id}}",
+      "referralsCount": "{{count}} parrainages ({{activeCount}} actifs)",
+      "referralsCountSimple": "{{count}} parrainages",
+      "shownCount": "Affichage de {{count}}",
+      "joinedDate": "Rejoint le {{date}}",
+      "filtersTitle": "Filtres",
+      "clearFilters": "Effacer les filtres",
+      "subscriptionStatusLabel": "Statut d'Abonnement",
+      "allUsersOption": "Tous les utilisateurs",
+      "activeSubscriptionsOption": "Abonnements actifs",
+      "inactiveSubscriptionsOption": "Abonnements inactifs",
+      "affiliationStatusLabel": "Statut d'Affiliation",
+      "allStatusOption": "Tous les statuts",
+      "showingCount": "Affichage de {{showing}} sur {{total}} parrainages",
+      "activeOnlyBadge": "Actifs seulement",
+      "inactiveOnlyBadge": "Inactifs seulement"
+    },
+    "errors": {
+      "parentCodeRequired": "Le code d'affiliation parent est requis",
+      "removeFromNetworkFailed": "Échec de la suppression de l'affiliation du réseau"
+    }
+  },
+  "feedback": {
+    "pageTitle": "Fournir des Commentaires",
+    "pageDescription": "Aidez-nous à nous améliorer en partageant vos demandes de fonctionnalités, en signalant des bugs ou en fournissant des commentaires généraux.",
+    "title": "Partagez vos Commentaires",
+    "description": "Choisissez le type de commentaire que vous souhaitez fournir",
+    "type": "Type de Commentaire",
+    "typeRequired": "Type de Commentaire *",
+    "typeFeature": "Demande de Fonctionnalité",
+    "typeBug": "Rapport de Bug",
+    "typeGeneral": "Commentaire Général",
+    "typeDescriptions": {
+      "feature": "Suggérer une nouvelle fonctionnalité ou amélioration",
+      "bug": "Signaler un problème ou une erreur",
+      "general": "Partager vos réflexions ou préoccupations"
+    },
+    "typePlaceholder": "Quel type de commentaire fournissez-vous ?",
+    "subject": "Sujet",
+    "titles": {
+      "feature": "Titre de la Demande de Fonctionnalité",
+      "bug": "Titre du Rapport de Bug",
+      "general": "Titre du Commentaire"
+    },
+    "descriptions": {
+      "feature": "Description de la Fonctionnalité",
+      "bug": "Description du Bug",
+      "general": "Description du Commentaire"
+    },
+    "placeholders": {
+      "featureTitle": "Titre bref et descriptif pour votre demande de fonctionnalité",
+      "bugTitle": "Brève description du bug",
+      "generalTitle": "Brève résumé de votre commentaire",
+      "featureDescription": "Que devrait-elle faire ? Comment devrait-elle fonctionner ?",
+      "bugDescription": "Qu'est-ce qui s'est passé ? Qu'est-ce que vous attendiez ?",
+      "description": "Fournissez un commentaire détaillé...",
+      "stepsToReproduce": "Veuillez fournir des instructions étape par étape pour reproduire le bug :\n1. Allez à...\n2. Cliquez sur...\n3. Voir l'erreur...",
+      "useCase": "Décrivez quand et comment vous utiliseriez cette fonctionnalité. Quel problème résout-elle ?"
+    },
+    "subjectPlaceholder": {
+      "feature": "ex : Ajouter une fonctionnalité d'import en lot de clients",
+      "bug": "ex : Fonction d'export ne fonctionne pas",
+      "general": "ex : Excellente expérience avec l'assistant IA"
+    },
+    "message": "Message",
+    "messagePlaceholder": {
+      "feature": "Décrivez la fonctionnalité que vous aimeriez voir et comment elle aiderait votre flux de travail...",
+      "bug": "Veuillez décrire ce qui s'est passé, ce que vous attendiez et les étapes pour reproduire le problème...",
+      "general": "Partagez vos réflexions, suggestions ou expérience..."
+    },
+    "priority": "Niveau de Priorité *",
+    "priorityPlaceholders": {
+      "feature": "À quel point cette fonctionnalité est-elle importante pour vous ?",
+      "bug": "À quel point ce bug est-il grave ?",
+      "general": "À quel point ce commentaire est-il important ?"
+    },
+    "priorityLabels": {
+      "low": "Priorité Basse - Problème mineur",
+      "medium": "Priorité Moyenne - Impact modéré",
+      "high": "Priorité Haute - Problème majeur"
+    },
+    "stepsToReproduce": "Étapes pour Reproduire",
+    "useCase": "Cas d'Usage",
+    "submit": {
+      "feature": "Soumettre la Demande de Fonctionnalité",
+      "bug": "Soumettre le Rapport de Bug",
+      "general": "Soumettre le Commentaire"
+    },
+    "submitFeature": "Soumettre la Demande de Fonctionnalité",
+    "submitBug": "Soumettre le Rapport de Bug",
+    "submitGeneral": "Soumettre le Commentaire",
+    "submitting": "Soumission...",
+    "successMessage": "Merci pour vos commentaires ! Nous les examinerons attentivement.",
+    "errorSubmit": "Échec de la soumission des commentaires",
+    "errorUnexpected": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "validationFormError": "Veuillez corriger les erreurs dans le formulaire avant de le soumettre."
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Info",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "deleting": "Suppression...",
+    "edit": "Éditer",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "generating": "Génération...",
+    "saving": "Enregistrement...",
+    "creating": "Création...",
+    "preview": "Aperçu",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "export": "Exporter",
+    "import": "Importer",
+    "download": "Télécharger",
+    "upload": "Téléverser",
+    "refresh": "Actualiser",
+    "retry": "Réessayer",
+    "submit": "Soumettre",
+    "reset": "Réinitialiser",
+    "clear": "Effacer",
+    "select": "Sélectionner",
+    "selectAll": "Tout Sélectionner",
+    "deselectAll": "Tout Désélectionner",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "apply": "Appliquer",
+    "actions": "Actions",
+    "options": "Options",
+    "settings": "Paramètres",
+    "preferences": "Préférences",
+    "help": "Aide",
+    "about": "À propos",
+    "version": "Version",
+    "documentation": "Documentation",
+    "support": "Support",
+    "contactUs": "Nous Contacter",
+    "privacyPolicy": "Politique de Confidentialité",
+    "termsOfService": "Conditions d'Utilisation",
+    "copyright": "Droits d'auteur",
+    "allRightsReserved": "Tous droits réservés",
+    "poweredBy": "Propulsé par"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "invalidEmail": "Veuillez saisir une adresse email valide",
+    "invalidPhone": "Veuillez saisir un numéro de téléphone valide",
+    "minLength": "Doit comporter au moins {{min}} caractères",
+    "maxLength": "Ne doit pas dépasser {{max}} caractères",
+    "minValue": "Doit être au moins {{min}}",
+    "maxValue": "Ne doit pas dépasser {{max}}",
+    "invalidUrl": "Veuillez saisir une URL valide",
+    "invalidDate": "Veuillez saisir une date valide",
+    "invalidNumber": "Veuillez saisir un nombre valide",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "weakPassword": "Le mot de passe est trop faible",
+    "duplicateEntry": "Cette valeur existe déjà",
+    "invalidFormat": "Format invalide",
+    "fileTooBig": "La taille du fichier doit être inférieure à {{size}}",
+    "unsupportedFileType": "Type de fichier non supporté",
+    "somethingWentWrong": "Quelque chose s'est mal passé",
+    "tryAgain": "Veuillez réessayer"
+  },
+  "errors": {
+    "subscription": {
+      "expired": "Abonnement Expiré",
+      "expiredMessage": "Votre abonnement a expiré. Veuillez renouveler pour continuer à utiliser cette fonctionnalité.",
+      "limitExceeded": "Limite d'Utilisation Dépassée",
+      "limitExceededMessage": "Vous avez atteint la limite d'utilisation de votre plan. Mettez à niveau pour continuer l'accès.",
+      "modelAccessDenied": "Accès au Modèle Refusé",
+      "modelAccessDeniedMessage": "Votre plan actuel n'inclut pas l'accès à ce modèle IA.",
+      "notFound": "Aucun Abonnement Trouvé",
+      "notFoundMessage": "Aucun abonnement actif trouvé. Veuillez vous abonner pour continuer.",
+      "storageLimitExceeded": "Limite de Stockage Dépassée",
+      "storageLimitExceededMessage": "Vous avez atteint votre limite de stockage. Veuillez mettre à niveau votre plan ou supprimer des documents."
+    },
+    "generic": {
+      "title": "Erreur",
+      "message": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "somethingWentWrong": "Quelque chose s'est mal passé",
+      "unexpectedError": "Une erreur inattendue s'est produite. Cela pourrait être un problème temporaire.",
+      "technicalDetails": "Détails techniques",
+      "reloadPage": "Recharger la Page",
+      "notFound": "Non Trouvé",
+      "notFoundMessage": "La ressource demandée n'a pas été trouvée.",
+      "unauthorized": "Non Autorisé",
+      "unauthorizedMessage": "Vous n'avez pas la permission d'accéder à cette ressource.",
+      "forbidden": "Interdit",
+      "forbiddenMessage": "L'accès à cette ressource est interdit.",
+      "serverError": "Erreur Serveur",
+      "serverErrorMessage": "Une erreur serveur s'est produite. Veuillez réessayer plus tard.",
+      "networkError": "Erreur Réseau",
+      "networkErrorMessage": "Veuillez vérifier votre connexion internet et réessayer."
+    },
+    "api": {
+      "deleteAccount": "Échec de la suppression du compte",
+      "deleteAccountConfirmation": "Veuillez taper \"DELETE MY ACCOUNT\" pour confirmer la suppression"
+    },
+    "admin": {
+      "clearCaches": "Échec de l'effacement des caches",
+      "updateFeedback": "Échec de la mise à jour du statut du commentaire"
+    }
+  },
+  "aiServices": {
+    "title": "Services IA",
+    "description": "Exploitez l'IA pour créer du contenu marketing personnalisé pour vos clients",
+    "configureServices": "Configurer les Services",
+    "serviceVisibilitySettings": "Paramètres de Visibilité des Services",
+    "getStarted": "Commencer",
+    "emptyState": {
+      "title": "Aucun service visible",
+      "description": "Tous les services IA sont actuellement masqués. Utilisez le bouton \"Configurer les Services\" ci-dessus pour activer les services que vous voulez utiliser."
+    },
+    "services": {
+      "meetingReport": {
+        "title": "Rapport de Réunion",
+        "description": "Générez des rapports de réunion complets avec des étapes actionables à partir des transcriptions de réunions clients.",
+        "features": {
+          "transcription": "Analyse de transcription",
+          "insights": "Insights actionnables",
+          "summaries": "Résumés professionnels"
+        }
+      },
+      "customDocument": {
+        "title": "Générateur de Documents",
+        "description": "Générez des documents marketing personnalisés en utilisant vos propres prompts et la langue du client",
+        "features": {
+          "prompts": "Prompts personnalisés",
+          "variables": "Remplacement de variables",
+          "formatting": "Formatage professionnel"
+        }
+      },
+      "podcastCreator": {
+        "title": "Créateur de Podcast",
+        "description": "Générez des podcasts engageants avec la technologie Veo3 alimentée par l'IA",
+        "features": {
+          "veo3": "Intégration Veo3 alimentée par l'IA",
+          "automated": "Génération de podcast automatisée",
+          "quality": "Qualité audio professionnelle"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Comment ça fonctionne",
+      "step1": {
+        "title": "Sélectionner le Client",
+        "description": "Choisissez pour quel client vous voulez créer du contenu marketing"
+      },
+      "step2": {
+        "title": "Génération IA",
+        "description": "L'IA crée du contenu marketing personnalisé en utilisant le contexte client"
+      },
+      "step3": {
+        "title": "Revoir et Enregistrer",
+        "description": "Modifiez le contenu et enregistrez-le dans les documents de votre client"
+      }
+    },
+    "meetingReport": {
+      "title": "Générer un Rapport de Réunion",
+      "description": "Transformez vos notes de réunion en un rapport professionnel",
+      "validation": {
+        "selectClient": "Veuillez sélectionner un client",
+        "selectDate": "Veuillez sélectionner une date de réunion",
+        "provideTranscription": "Veuillez fournir la transcription de la réunion",
+        "generateContent": "Veuillez fournir le contenu du rapport avant d'enregistrer",
+        "documentName": "Veuillez fournir un nom de document"
+      },
+      "defaultNames": {
+        "meetingReport": "Rapport de Réunion"
+      },
+      "success": {
+        "generating": "Génération du rapport de réunion...",
+        "generatingForClient": "📝 Génération du rapport de réunion pour {{clientName}}"
+      },
+      "fileUpload": {
+        "invalidType": "Type de Fichier Invalide",
+        "invalidTypeDescription": "Veuillez télécharger un fichier .txt",
+        "fileTooLarge": "Fichier Trop Volumineux", 
+        "fileTooLargeDescription": "La taille du fichier doit être inférieure à 5MB",
+        "uploadFailed": "Échec du Téléchargement",
+        "uploadFailedDescription": "Échec de la lecture du fichier. Veuillez réessayer.",
+        "uploading": "Téléchargement..."
+      },
+      "form": {
+        "meetingDate": "Date de la Réunion",
+        "meetingDatePlaceholder": "Sélectionner la date de réunion",
+        "transcription": "Transcription de la Réunion",
+        "transcriptionPlaceholder": "Collez votre transcription de réunion ici, ou téléchargez un fichier .txt...",
+        "transcriptionHelp": "Fournissez les notes de réunion brutes ou la transcription. Cela sera transformé en un rapport professionnel.",
+        "additionalInfo": "Informations Supplémentaires",
+        "additionalInfoPlaceholder": "Tout contexte supplémentaire ou exigences spécifiques pour le rapport... Par exemple : Ajouter une section d'analyse de sentiment",
+        "uploadFile": "Télécharger un fichier .txt"
+      }
+    },
+    "documentGenerator": {
+      "title": "Générateur de Documents",
+      "description": "Générez des documents professionnels en utilisant vos prompts personnalisés avec des informations spécifiques au client.",
+      "validation": {
+        "selectClient": "Veuillez sélectionner un client",
+        "documentTitle": "Veuillez fournir un titre de document",
+        "promptContent": "Veuillez fournir des instructions de prompt",
+        "generateContent": "Veuillez générer du contenu avant d'enregistrer"
+      },
+      "defaultNames": {
+        "customDocument": "Document Personnalisé",
+        "customPrompt": "Prompt Personnalisé"
+      },
+      "success": {
+        "generating": "Génération du document...",
+        "generatingForClient": "📄 Génération du document pour {{clientName}}"
+      },
+      "clientContext": {
+        "title": "Contexte Client",
+        "selectAll": "Tout Sélectionner",
+        "deselectAll": "Tout Désélectionner"
+      },
+      "promptContent": {
+        "title": "Contenu du Prompt",
+        "placeholder": "Sélectionnez un prompt ci-dessus ou écrivez vos instructions personnalisées ici..."
+      }
+    },
+    "common": {
+      "validationError": "Erreur de Validation",
+      "generationFailed": "Échec de la génération",
+      "documentSaved": "Document Enregistré 📄",
+      "documentSavedDescription": "\"{{documentName}}\" a été enregistré avec succès.",
+      "viewDocument": "📄 Voir le Document",
+      "saveFailed": "Échec de l'Enregistrement",
+      "saveFailedDescription": "Échec de l'enregistrement du document",
+      "selectClient": "Sélectionner un Client",
+      "clientPlaceholder": "Choisir un client...",
+      "documentName": "Nom du Document",
+      "documentNamePlaceholder": "Saisir le nom du document...",
+      "generatedContent": "Contenu Généré",
+      "contentPlaceholder": "Le contenu généré apparaîtra ici...",
+      "generate": "Générer",
+      "regenerate": "Regénérer",
+      "saveDocument": "Enregistrer le Document",
+      "generating": "Génération...",
+      "saving": "Enregistrement..."
+    }
+  },
+  "documents": {
+    "title": "Documents", 
+    "search": {
+      "placeholder": "Rechercher des documents par nom ou type...",
+      "allTypes": "Tous les types",
+      "noResultsFor": "Aucun document trouvé correspondant à \"{{term}}\"",
+      "tryDifferent": "Essayez de rechercher un terme différent",
+      "noDocuments": "Aucun document trouvé"
+    },
+    "empty": {
+      "title": "Aucun Document",
+      "description": "Créez votre premier document pour commencer",
+      "cta": "Créer un Document"
+    },
+    "form": {
+      "documentName": "Nom du Document",
+      "documentNamePlaceholder": "Saisir le nom du document",
+      "documentType": "Type de Document",
+      "documentTypePlaceholder": "Sélectionner le type de document",
+      "documentContent": "Contenu du Document",
+      "documentContentPlaceholder": "Saisir le contenu du document...",
+      "create": "Créer",
+      "creating": "Création...",
+      "title": "Créer un Nouveau Document",
+      "documentNameLabel": "Nom du Document *",
+      "documentTypeLabel": "Type de Document *",
+      "contentLabel": "Contenu *",
+      "markdownHelp": "Vous pouvez utiliser le formatage Markdown pour un contenu riche en texte.",
+      "contentPlaceholderEditor": "Saisissez le contenu de votre document ici en utilisant Markdown..."
+    },
+    "preview": {
+      "closePreview": "Fermer l'Aperçu",
+      "noContent": "*Aucun contenu à prévisualiser*"
+    },
+    "viewer": {
+      "selectDocument": "Sélectionnez un document pour voir son contenu",
+      "loadingContent": "Chargement du contenu du document..."
+    },
+    "list": {
+      "title": "Documents ({{count}})",
+      "loading": "Chargement...",
+      "updated": "Mis à jour : {{date}}"
+    },
+    "filters": {
+      "filterByType": "Filtrer par type :",
+      "activeFilters": "Filtres actifs :",
+      "searchFilter": "Recherche : \"{{term}}\"",
+      "typeFilter": "Type : {{type}}",
+      "clearAll": "Tout effacer"
+    },
+    "time": {
+      "justNow": "Juste maintenant",
+      "hoursAgo": "Il y a {{count}} heures",
+      "daysAgo": "Il y a {{count}} jours"
+    },
+    "actions": {
+      "createNew": "Créer Nouveau",
+      "deleteAll": "Tout Supprimer",
+      "deleteAllConfirm": "Cliquer pour Confirmer",
+      "edit": "Modifier le Document", 
+      "delete": "Supprimer le Document",
+      "download": "Télécharger le document en Markdown",
+      "createDocument": "Créer un Document"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Tableau de Bord Admin",
+      "description": "Vue d'ensemble du système et métriques pour la plateforme LLM Context",
+      "buttons": {
+        "clearCaches": "Vider les caches",
+        "clearingCaches": "Vidage des caches...",
+        "clearFilters": "Effacer les Filtres"
+      },
+      "metrics": {
+        "totalUsers": "Utilisateurs Totaux",
+        "totalClients": "Clients Totaux", 
+        "totalDocuments": "Documents Totaux",
+        "chatConversations": "Conversations de Chat",
+        "monthlyUsage": "Utilisation Mensuelle",
+        "monthlySubscriptions": "Abonnements Mensuels", 
+        "subscriptionPlans": "Plans d'Abonnement",
+        "feedbackAndPrompts": "Commentaires et Prompts",
+        "totalSpending": "Dépenses Totales",
+        "totalFeedback": "Commentaires Totaux :",
+        "customPrompts": "Prompts Personnalisés :",
+        "messagesTotal": "messages au total",
+        "inLast30Days": "dans les 30 derniers jours",
+        "acrossAllUsers": "Sur tous les utilisateurs",
+        "unlimitedForAllPlans": "Illimité pour tous les plans"
+      },
+      "feedbackManagement": {
+        "title": "Gestion des Commentaires",
+        "description": "Filtrer et gérer les commentaires utilisateur",
+        "showingCount": "affichés",
+        "noMatches": "Aucun commentaire ne correspond aux filtres sélectionnés",
+        "updating": "Mise à jour..."
+      },
+      "filters": {
+        "state": "Filtrer par État",
+        "type": "Filtrer par Type", 
+        "priority": "Filtrer par Priorité",
+        "options": {
+          "allStates": "Tous les États",
+          "allTypes": "Tous les Types", 
+          "allPriorities": "Toutes les Priorités",
+          "active": "Actif",
+          "pending": "En Attente",
+          "inProgress": "En Cours",
+          "completed": "Terminé",
+          "falseAlarm": "Fausse Alerte",
+          "featureRequest": "Demande de Fonctionnalité",
+          "bugReport": "Rapport de Bug",
+          "generalFeedback": "Commentaire Général",
+          "highPriority": "Haute Priorité",
+          "mediumPriority": "Priorité Moyenne",
+          "lowPriority": "Basse Priorité"
+        }
+      },
+      "success": {
+        "cachesCleared": "Tous les caches ont été vidés avec succès"
+      },
+      "tabs": {
+        "stats": "Statistiques",
+        "feedback": "Commentaires",
+        "customization": "Personnalisation"
+      },
+      "descriptions": {
+        "monthlyUsageDescription": "Dépenses totales vs capacité maximale sur tous les utilisateurs pour les 12 derniers mois",
+        "monthlySubscriptionsDescription": "Utilisateurs totaux vs utilisateurs actifs avec ventilation des abonnements pour les 12 derniers mois"
+      },
+      "spending": {
+        "tooltip": {
+          "actualSpending": "Dépenses Réelles",
+          "maxCapacity": "Capacité Max"
+        },
+        "legend": {
+          "actualSpending": "Dépenses Réelles", 
+          "maximumCapacity": "Capacité Maximale"
+        }
+      },
+      "tooltip": {
+        "users": "Utilisateurs :",
+        "activeUsers": "Utilisateurs actifs :",
+        "activeSubscriptions": "Abonnements actifs :"
+      },
+      "legend": {
+        "totalUsers": "Utilisateurs Totaux",
+        "activeUsers": "Utilisateurs Actifs"
+      },
+      "plans": {
+        "apprentice": "Apprenti :",
+        "knight": "Chevalier :",
+        "master": "Maître :",
+        "jedi": "Jedi :"
+      },
+      "anonymous": "Anonyme",
+      "customization": {
+        "title": "Personnalisation Utilisateur",
+        "description": "Gérer les paramètres personnalisés pour les utilisateurs individuels",
+        "subscriptionUsage": {
+          "title": "Abonnement et Utilisation Utilisateur",
+          "description": "Remplacer les limites de dépense par défaut pour des utilisateurs spécifiques. Rappelez-vous que les limites et informations d'utilisation sont en dollars américains.",
+          "searchPlaceholder": "Rechercher par email ou ID utilisateur...",
+          "userColumn": "Utilisateur",
+          "planColumn": "Plan",
+          "statusColumn": "Statut",
+          "stripeColumn": "Stripe",
+          "usageColumn": "Utilisation",
+          "defaultLimitColumn": "Limite Par Défaut",
+          "customLimitColumn": "Limite Personnalisée",
+          "actionsColumn": "Actions",
+          "setCustomLimit": "Définir Limite Personnalisée",
+          "updateLimit": "Mettre à jour la Limite",
+          "removeLimit": "Supprimer Personnalisée",
+          "noUsers": "Aucun utilisateur trouvé",
+          "loadingUsers": "Chargement des utilisateurs...",
+          "newLimitPlaceholder": "Saisir nouvelle limite ($)",
+          "confirmUpdate": "Mettre à jour",
+          "cancelUpdate": "Annuler",
+          "updating": "Mise à jour...",
+          "notSet": "Non Défini",
+          "success": {
+            "limitUpdated": "Limite de dépense mise à jour avec succès",
+            "limitRemoved": "Limite de dépense personnalisée supprimée"
+          },
+          "errors": {
+            "fetchUsers": "Échec de la récupération des utilisateurs",
+            "updateLimit": "Échec de la mise à jour de la limite de dépense",
+            "invalidAmount": "Veuillez saisir un montant valide"
+          }
+        }
+      }
+    }
+  },
+  "ui": {
+    "combobox": {
+      "client": {
+        "placeholder": "Choisir un client",
+        "empty": "Aucun client disponible"
+      },
+      "document": {
+        "empty": "Aucun document disponible"
+      }
+    },
+    "dialog": {
+      "confirm": "Confirmer",
+      "untitled": "Document Sans Titre"
+    },
+    "placeholders": {
+      "documentName": "Nom du document",
+      "pickDate": "Choisir une date",
+      "deleteAccount": "DELETE MY ACCOUNT"
+    },
+    "accessibility": {
+      "pagination": "Pagination"
+    },
+    "deleteAccount": {
+      "confirmInstruction": "Tapez exactement \"DELETE MY ACCOUNT\" (en anglais) pour confirmer :",
+      "confirmationText": "DELETE MY ACCOUNT"
+    }
+  },
+  "clientContext": {
+    "header": "CONTEXTE CLIENT:",
+    "countryContext": "Ce client est",
+    "fields": {
+      "country": "Pays",
+      "generalContext": "Contexte Général",
+      "specificContext1": "Contexte Spécifique 1",
+      "specificContext2": "Contexte Spécifique 2",
+      "specificContext3": "Contexte Spécifique 3"
+    },
+    "descriptions": {
+      "country": "Pays ou localisation du client",
+      "generalContext": "Informations générales sur le client",
+      "specificContext1": "Premier champ de contexte spécifique",
+      "specificContext2": "Deuxième champ de contexte spécifique",
+      "specificContext3": "Troisième champ de contexte spécifique"
+    },
+    "tooltip": {
+      "title": "Variables Disponibles:",
+      "info": "Les variables seront automatiquement remplacées par les données réelles du client lors de leur utilisation."
+    }
+  },
+  "aiPrompts": {
+    "chat": {
+      "generalAssistant": "Vous êtes un assistant IA utile, inoffensif et honnête.\n\nINSTRUCTIONS:\n- Fournir des réponses précises, réfléchies et nuancées\n- Être utile avec une large gamme de sujets et de questions\n- Prendre en charge diverses tâches, notamment:\n  • Répondre aux questions et fournir des explications\n  • Écriture créative et remue-méninges\n  • Analyse et résolution de problèmes\n  • Support d'apprentissage et éducatif\n  • Assistance technique et aide au codage\n  • Conversation générale et discussion\n  • Recherche et synthèse d'informations\n- Être conversationnel et engageant tout en maintenant la précision\n- Admettre quand vous êtes incertain ou ne savez pas quelque chose\n- Fournir des perspectives équilibrées lorsque c'est approprié\n- Respecter la vie privée de l'utilisateur et maintenir des limites éthiques\n\nRépondez naturellement et de manière conversationnelle tout en étant utile et informatif.",
+      "marketingAssistant": "Vous êtes un assistant IA professionnel aidant un prestataire de services marketing avec son entreprise.",
+      "withContext": "Vous avez accès aux informations client suivantes et devez les utiliser pour fournir des conseils et des réponses personnalisés et pertinents.",
+      "instructions": {
+        "withContext": "Utilisez ces informations client pour personnaliser vos réponses lorsque c'est pertinent",
+        "referenceContext": "Référencez leurs circonstances spécifiques lorsque cela ajoute de la valeur à votre réponse",
+        "general": "Fournir des conseils commerciaux généraux utiles",
+        "keepBroad": "Gardez les réponses largement applicables mais exploitables"
+      },
+      "professionalContext": "Soyez professionnel, compétent et solidaire\n- Aidez avec tous les aspects des opérations commerciales marketing:\n  • Stratégie et planification\n  • Gestion des clients\n  • Création de contenu\n  • Campagnes et analyse\n  • Opérations et flux de travail\n  • Insights de l'industrie\n  • Résolution de problèmes et optimisation\n- Fournir des conseils pratiques et exploitables adaptés aux professionnels du marketing\n- Maintenir la confidentialité et le professionnalisme à tout moment\n\nRépondez naturellement et de manière conversationnelle tout en gardant ce contexte à l'esprit."
+    },
+    "documents": {
+      "generation": {
+        "instructions": "Veuillez générer un document professionnel et bien structuré basé sur l'invite et les informations client ci-dessus.",
+        "outputFormat": "FORMAT DE SORTIE:\n- Commencez directement par le titre et le contenu du document\n- N'incluez PAS de texte d'introduction comme \"Voici votre document\" ou des préambules similaires\n- Produisez le document immédiatement, en commençant par son titre",
+        "languageRequirements": "EXIGENCES LINGUISTIQUES IMPORTANTES:\n- **Générez l'intégralité du document en {{languageName}}**\n- Utilisez la terminologie professionnelle appropriée pour {{languageName}} langue\n- Adaptez les conventions de formatage et de structure et les styles de communication culturels appropriés pour {{languageName}} langue/culture",
+        "rememberLanguage": "N'OUBLIEZ PAS, TRÈS IMPORTANT: utilisez {{languageName}} pour générer l'intégralité de la sortie du document."
+      },
+      "additionalInstructions": "INSTRUCTIONS SUPPLÉMENTAIRES:"
+    },
+    "meetingReport": {
+      "systemPrompt": "Vous êtes un assistant IA professionnel spécialisé dans la création de rapports de réunion complets pour les professionnels du marketing. Votre rôle est d'analyser les transcriptions de réunions et de produire des rapports bien structurés et exploitables qui se concentrent sur les résultats clés et les prochaines étapes. Vous fournissez une documentation objective et professionnelle sans clauses de non-responsabilité ou contenu lié à l'IA.",
+      "userPromptTemplate": "Veuillez créer un rapport de réunion détaillé pour la réunion client suivante:\n\nCLIENT: {{clientName}}\n\nINFORMATIONS SUR LA RÉUNION:\n- Date de la réunion: {{meetingDate}}\n- Transcription de la réunion:\n{{meetingTranscription}}\n\nEXIGENCES:\n- Créez un rapport de réunion complet avec la structure suivante:\n  1. Résumé de la réunion\n  2. Points de discussion clés\n  3. Résultats et décisions\n  4. Actions à entreprendre et prochaines étapes\n  5. Exigences de suivi\n\n- Concentrez-vous sur la documentation du contenu de la réunion de manière objective et professionnelle\n- Incluez des étapes spécifiques et exploitables avec des délais clairs lorsque c'est applicable\n- Rendez les actions spécifiques, mesurables et réalisables\n- Basez toutes les recommandations uniquement sur ce qui a été discuté lors de la réunion\n- Concentrez-vous sur les prochaines étapes pratiques qui peuvent être mises en œuvre immédiatement\n\n**IMPORTANT: Fournissez UNIQUEMENT le contenu du rapport de réunion dans un format prêt à être livré**{{additionalInfo}}{{additionalAttention}}",
+      "additionalInfoSection": "\n\nINFORMATIONS SUPPLÉMENTAIRES:\n{{additionalInfo}}",
+      "additionalAttentionText": "\n---\nPortez une attention particulière aux informations supplémentaires fournies ci-dessus"
+    }
+  },
+  "languages": {
+    "en": "Anglais",
+    "es": "Espagnol",
+    "fr": "Français",
+    "de": "Allemand",
+    "it": "Italien",
+    "pt": "Portugais",
+    "nl": "Néerlandais",
+    "pl": "Polonais",
+    "ru": "Russe",
+    "ca": "Catalan"
+  }
+}

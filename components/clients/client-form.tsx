@@ -7,7 +7,6 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Label} from '@/components/ui/label'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
-import {CLIENT_FIELD_LABELS} from '@/lib/types/client-types'
 import {Globe, HelpCircle, Shield} from 'lucide-react'
 import {useClientForm} from '@/hooks/client/use-client-form'
 import {useTranslations} from '@/lib/translations/context'
@@ -179,10 +178,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
                 (() => {
                   const lang = languages.find(l => l.value === formData.documentsLanguage)
                   return lang ? (
-                    <span className="flex items-center gap-2 text-sm">
-                      <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
-                    </span>
+                    <span className="text-sm">{lang.label}</span>
                   ) : <span className="text-sm">-</span>
                 })()
               ) : <span className="text-sm">-</span>}
@@ -198,10 +194,7 @@ export function ClientForm({ client, onSuccess, onCancel, hideTitle, viewMode = 
               <SelectContent>
                 {languages.map((lang) => (
                   <SelectItem key={lang.value} value={lang.value}>
-                    <span className="flex items-center gap-2">
-                      <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
-                    </span>
+                    {lang.label}
                   </SelectItem>
                 ))}
               </SelectContent>

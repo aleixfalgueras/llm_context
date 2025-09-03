@@ -7,6 +7,8 @@ import {Chat, Client, Message, Role} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 import {AIMessageRole} from '@/lib/types/openrouter-types'
 import {ChatWithMessages} from "@/lib/types/chat-types";
+import {getTranslations, TranslationFunction, Locale} from '@/lib/translations'
+
 
 export class ChatService {
   /**
@@ -31,66 +33,39 @@ export class ChatService {
   }
 
   /**
-   * Build system prompt with optional client context
+   * Build system prompt: general-purpose AI assistant or marketing assistant with optional client context
    */
-  static buildSystemPrompt(client: any | null, selectedContextFields: string[]): string {
-    // Handle case where there's no client - act as a general-purpose assistant
+  static buildSystemPrompt(client: any | null, selectedContextFields: string[], tContext: TranslationFunction, tPrompts: TranslationFunction): string {
     if (!client) {
-      return `You are a helpful, harmless, and honest AI assistant.
-
-INSTRUCTIONS:
-	- Provide accurate, thoughtful, and nuanced responses
-	- Be helpful with a wide range of topics and questions
-	- Support various tasks including but not limited to:
-		• Answering questions and providing explanations
-		• Creative writing and brainstorming
-		• Analysis and problem-solving
-		• Learning and educational support
-		• Technical assistance and coding help
-		• General conversation and discussion
-		• Research and information synthesis
-	- Be conversational and engaging while maintaining accuracy
-	- Admit when you're uncertain or don't know something
-	- Provide balanced perspectives when appropriate
-	- Respect user privacy and maintain ethical boundaries
-
-Respond naturally and conversationally while being helpful and informative.`
+      // general-purpose assistant
+      return tPrompts('chat.generalAssistant')
     }
+
+    const hasContextData = hasClientContext(selectedContextFields, tContext)
+
+    // marketing assistant with optional client context
+    const marketingAssistant = tPrompts('chat.marketingAssistant')
+    const withContextOrEmpty = hasContextData ? ` ${tPrompts('chat.withContext')}` : ''
+    const contextSection = buildClientContextSection(client, selectedContextFields, tContext)
     
-    // Original client-based system prompt
-    const clientContextSection = buildClientContextSection(client, selectedContextFields)
-    const hasContextData = hasClientContext(selectedContextFields)
+    const instructions = hasContextData ? 
+      tPrompts('chat.instructions.withContext') : tPrompts('chat.instructions.general')
+    
+    const referenceInstruction = hasContextData ?
+      tPrompts('chat.instructions.referenceContext') : tPrompts('chat.instructions.keepBroad')
+    
+    const professionalContext = tPrompts('chat.professionalContext')
 
-    return `You are a professional AI assistant helping a marketing service provider with their business.${
-      hasContextData 
-        ? ' You have access to the following client information and should use it to provide personalized, relevant advice and responses.' 
-        : ''
-    }${clientContextSection}
+    return `
+${marketingAssistant}${withContextOrEmpty}
+
+${contextSection}
 
 INSTRUCTIONS:
-	- ${
-      hasContextData 
-        ? 'Use this client information to personalize your responses when relevant' 
-        : 'Provide helpful general business advice'
-    }
-	- ${
-      hasContextData 
-        ? 'Reference their specific circumstances when it adds value to your response' 
-        : 'Keep responses broadly applicable but actionable'
-    }
-	- Be professional, knowledgeable, and supportive
-	- Help with any aspect of marketing business operations: 
-		• Strategy and planning
-		• Client management
-		• Content creation
-		• Campaigns and analysis
-		• Operations and workflows
-		• Industry insights
-		• Problem-solving and optimization
-	- Provide practical, actionable advice tailored to marketing professionals
-	- Maintain confidentiality and professionalism at all times
-
-Respond naturally and conversationally while keeping this context in mind.`
+- ${instructions}
+- ${referenceInstruction}
+- ${professionalContext}
+`.trim()
   }
 
   /**
@@ -149,9 +124,10 @@ Respond naturally and conversationally while keeping this context in mind.`
    * @param chat - Chat object with messages and optional client context
    * @param userId - User ID for ownership verification
    * @param newMessageContent - New message content to add
+   * @param locale - User's selected locale for prompts
    * @returns Formatted messages array with system prompt and optional client context
    */
-  static async prepareChatForAI(chat: any, userId: string, newMessageContent: string): Promise<DbOperationResult<{
+  static async prepareChatForAI(chat: any, userId: string, newMessageContent: string, locale: Locale = 'en'): Promise<DbOperationResult<{
     aiMessages: Array<{ role: AIMessageRole, content: string }>,
     client: Client | null,
     isFirstUserMessage: boolean,
@@ -183,17 +159,18 @@ Respond naturally and conversationally while keeping this context in mind.`
 
     // Build system prompt with or without client context
     const selectedContextFields = chat.contextFields || []
-    const systemPrompt = this.buildSystemPrompt(client, selectedContextFields)
+    const tContext = await getTranslations('clientContext', locale)
+    const tPrompts = await getTranslations('aiPrompts', locale)
+    const systemPrompt = this.buildSystemPrompt(client, selectedContextFields, tContext, tPrompts)
 
-    logger.info('System prompt created for chat', {
+    logger.info(`System prompt created for chat`, {
       userId,
       chatId: chat.id,
       clientId: chat.clientId || undefined,
       metadata: {
         systemPrompt,
-        promptLength: systemPrompt.length,
         hasClient: !!client,
-        hasClientContext: hasClientContext(selectedContextFields),
+        hasClientContext: hasClientContext(selectedContextFields, tContext),
         contextFields: selectedContextFields,
         clientName: client?.name || 'N/A',
         isFirstMessage: isFirstUserMessage
@@ -251,12 +228,6 @@ Respond naturally and conversationally while keeping this context in mind.`
       const result = await ChatOperations.updateChatTitleIfDefault(chatId, userId, newTitleTruncated)
 
       if (isSuccess(result) && result.data.updated) {
-        logger.info('Chat title updated', {
-          userId,
-          chatId,
-          metadata: {newTitle}
-        });
-
         return {
           success: true as const,
           data: {newTitle, updated: true}

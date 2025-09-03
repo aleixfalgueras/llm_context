@@ -93,16 +93,16 @@ model Feedback {
 }
 
 model Prompt {
-  id          String   @id @default(cuid())
+  id          String          @id @default(cuid())
   userId      String
   name        String
   description String?
   content     String
-  category    String   @default("general")
-  isActive    Boolean  @default(true)
-  usageCount  Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  category    PromptCategory  @default(general)
+  isActive    Boolean         @default(true)
+  usageCount  Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@index([userId])
   @@map("prompts")
@@ -283,4 +283,11 @@ enum FeedbackState {
   IN_PROGRESS
   COMPLETED
   FALSE_ALARM
+}
+
+enum PromptCategory {
+  general
+  marketing
+  content
+  analysis
 }

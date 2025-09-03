@@ -14,8 +14,8 @@ import {useToast} from '@/hooks/use-toast'
 import {useFormState} from '@/hooks/use-form-state'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {validatePromptForm} from '@/lib/utils/validation'
-import {PromptInput} from '@/lib/types/prompt-types'
-import {Prompt} from "@prisma/client"
+import {PromptInput, getPromptCategoriesWithLabels} from '@/lib/types/prompt-types'
+import {Prompt, PromptCategory} from "@prisma/client"
 import {createPrompt, updatePrompt} from '@/app/actions/prompt-action'
 
 interface PromptDialogProps {
@@ -28,12 +28,6 @@ interface PromptDialogProps {
   viewMode?: boolean
 }
 
-const getCategoriesWithLabels = (t: any) => [
-  { value: 'general', label: t('categories.general') },
-  { value: 'marketing', label: t('categories.marketing') },
-  { value: 'content', label: t('categories.content') },
-  { value: 'analysis', label: t('categories.analysis') },
-]
 
 interface PromptFormData {
   name: string
@@ -78,7 +72,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
     name: prompt?.name || '',
     description: prompt?.description || '',
     content: prompt?.content || '',
-    category: prompt?.category || 'general',
+    category: prompt?.category || PromptCategory.general,
   }
   
   const {
@@ -105,7 +99,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
         name: prompt.name || '',
         description: prompt.description || '',
         content: prompt.content || '',
-        category: prompt.category || 'general',
+        category: prompt.category || PromptCategory.general,
       })
     }
   }, [prompt, setFormData])
@@ -235,7 +229,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {getCategoriesWithLabels(t).map((category) => (
+                    {getPromptCategoriesWithLabels(t).map((category) => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}
                       </SelectItem>
@@ -271,7 +265,7 @@ export function PromptDialog({ prompt, trigger, onSuccess, isTemplate = false, o
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="content">{t('form.content')} {!viewMode && t('form.required')}</Label>
-              {!viewMode && <ClientContextVariablesTooltip />}
+              <ClientContextVariablesTooltip />
             </div>
             {viewMode ? (
               <div className="p-3 bg-gray-50 dark:bg-gray-800 border rounded-md min-h-[200px] max-h-[300px] overflow-y-auto">

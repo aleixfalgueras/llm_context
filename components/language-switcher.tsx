@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useLocale, useSetLocale, useTranslations } from '@/lib/translations/context'
 import { locales, type Locale } from '@/lib/translations'
 import {
@@ -15,15 +16,19 @@ import { Globe, Check } from 'lucide-react'
 export function LanguageSwitcher() {
   const locale = useLocale()
   const setLocale = useSetLocale()
-  const t = useTranslations('language')
+  const t = useTranslations('languages')
+  const router = useRouter()
 
   // Map of locale codes to display names
   const localeNames: Record<Locale, string> = {
-    en: t('english'),
-    // Future locales can be added here
-    // es: t('spanish'),
-    // fr: t('french'),
-    // de: t('german'),
+    en: t('en'),
+    fr: t('fr'),
+  }
+
+  const handleLocaleChange = (newLocale: Locale) => {
+    setLocale(newLocale)
+    // Refresh the router to trigger server component re-rendering
+    router.refresh()
   }
 
   return (
@@ -37,7 +42,7 @@ export function LanguageSwitcher() {
         {locales.map((loc) => (
           <DropdownMenuItem
             key={loc}
-            onClick={() => setLocale(loc)}
+            onClick={() => handleLocaleChange(loc)}
             className="cursor-pointer"
           >
             <div className="flex items-center justify-between w-full">
@@ -48,19 +53,6 @@ export function LanguageSwitcher() {
             </div>
           </DropdownMenuItem>
         ))}
-        {/* Placeholder for future languages - commented out for now */}
-        {/* 
-        <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
-          <div className="flex items-center justify-between w-full">
-            <span>Español (Coming Soon)</span>
-          </div>
-        </DropdownMenuItem>
-        <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
-          <div className="flex items-center justify-between w-full">
-            <span>Français (Coming Soon)</span>
-          </div>
-        </DropdownMenuItem>
-        */}
       </DropdownMenuContent>
     </DropdownMenu>
   )

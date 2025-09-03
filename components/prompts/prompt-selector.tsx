@@ -11,7 +11,7 @@ import {ChevronDown, FileText, Search, Star, TrendingUp} from 'lucide-react'
 import {cn} from '@/lib/utils/general'
 import {Prompt} from "@prisma/client"
 import {getPrompts, trackPromptUsage} from '@/app/actions/prompt-action'
-import {PROMPT_CATEGORIES} from '@/lib/types/prompt-types'
+import {getPromptCategoriesWithLabels} from '@/lib/types/prompt-types'
 
 interface PromptSelectorProps {
   onPromptSelect: (prompt: Prompt) => void
@@ -107,9 +107,9 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PROMPT_CATEGORIES.map((category) => (
+                {getPromptCategoriesWithLabels(t, true).map((category) => (
                   <SelectItem key={category.value} value={category.value}>
-                    {category.value === 'all' ? t('filters.allCategories') : t(`categories.${category.value}`)}
+                    {category.label}
                   </SelectItem>
                 ))}
               </SelectContent>
