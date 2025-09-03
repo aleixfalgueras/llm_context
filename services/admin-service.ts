@@ -5,7 +5,7 @@ import {clearAllCaches} from '@/services/subscription/subscription-cache'
 import {FeedbackService, isValidFeedbackState} from '@/services/feedback-service'
 import {FeedbackOperations} from '@/database/feedback-operations'
 import {SubscriptionUsageOperations} from '@/database/subscription-usage-operations'
-import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 import {SubscriptionWithUsage} from "@/lib/types/subscription-types"
 import {ADMIN_EMAILS} from '@/lib/config'
 
