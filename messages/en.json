@@ -47,15 +47,14 @@
     },
     "models": {
       "title": "Dual Premium AI Models Available",
-      "description": "All subscription tiers include both Google Gemini 2.0 and OpenAI GPT-4.1 through our unified model system.",
       "gemini": {
-        "title": "Google Gemini 2.0",
+        "title": "Google Gemini",
         "context": "1M Context Length",
         "description": "Latest Google AI with enhanced reasoning, multimodal capabilities, and superior performance for complex marketing strategies."
       },
       "gpt": {
-        "title": "OpenAI GPT-4.1",
-        "context": "200K Context Length",
+        "title": "OpenAI ChatGPT",
+        "context": "1M Context Length",
         "description": "Efficient OpenAI model perfect for creative campaign content, strategic planning, and versatile marketing copy."
       },
       "switch": "Switch between models seamlessly"
@@ -405,6 +404,21 @@
       "exportDate": "Export Date",
       "you": "You",
       "aiAssistant": "AI Assistant"
+    },
+    "modelSelector": {
+      "searchPlaceholder": "Search models...",
+      "noModelsFound": "No models found.",
+      "availableModels": "Available Models",
+      "models": {
+        "gemini": {
+          "name": "Gemini",
+          "description": "Excels in translation, finance, and marketing tasks."
+        },
+        "chatgpt": {
+          "name": "ChatGPT",
+          "description": "Perfect for creative campaign content, strategic planning, and versatile tasks."
+        }
+      }
     },
     "clientContextSidebar": {
       "creatingChat": "Creating Chat...",
