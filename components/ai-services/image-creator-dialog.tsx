@@ -6,7 +6,7 @@ import {Button} from '@/components/ui/button'
 import {Textarea} from '@/components/ui/textarea'
 import {Label} from '@/components/ui/label'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
-import {Image, Download, X} from 'lucide-react'
+import {Image, Download, X, RefreshCw} from 'lucide-react'
 import {useToast} from '@/hooks/use-toast'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import type {Prompt} from '@prisma/client'
@@ -56,11 +56,6 @@ export function ImageCreatorDialog({
 
       const data = await response.json()
       setGeneratedImageUrl(data.imageUrl)
-
-      toast({
-        title: t('imageCreator.success.title'),
-        description: t('imageCreator.success.description')
-      })
 
     } catch (error) {
       console.error('Image generation error:', error)
@@ -154,17 +149,7 @@ export function ImageCreatorDialog({
           {/* Generated Image Display */}
           {generatedImageUrl && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>{t('imageCreator.generatedImage')}</Label>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  {t('imageCreator.download.button')}
-                </Button>
-              </div>
+              <Label>{t('imageCreator.generatedImage')}</Label>
               <div className="border rounded-lg overflow-hidden">
                 <img
                   src={generatedImageUrl}
@@ -182,20 +167,44 @@ export function ImageCreatorDialog({
             {tCommon('cancel')}
           </Button>
 
-          <Button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg transition-all"
-          >
-            {isGenerating ? (
-              <LoadingSpinner size="sm" text={t('common.generating')} className="text-white" />
-            ) : (
-              <>
-                <Image className="h-4 w-4 mr-2" />
-                {generatedImageUrl ? t('imageCreator.regenerate') : t('imageCreator.generate')}
-              </>
-            )}
-          </Button>
+          {!generatedImageUrl ? (
+            <Button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg transition-all"
+            >
+              {isGenerating ? (
+                <LoadingSpinner size="sm" text={t('common.generating')} className="text-white" />
+              ) : (
+                <>
+                  <Image className="h-4 w-4 mr-2" />
+                  {t('imageCreator.generate')}
+                </>
+              )}
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleGenerate}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <LoadingSpinner size="sm" text="" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                )}
+                {t('imageCreator.regenerate')}
+              </Button>
+              <Button
+                onClick={handleDownload}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg transition-all"
+              >
+                <Download className="h-4 w-4 mr-1" />
+                {t('imageCreator.download.button')}
+              </Button>
+            </div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
