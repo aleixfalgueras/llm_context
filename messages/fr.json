@@ -1271,6 +1271,7 @@
           "userColumn": "Utilisateur",
           "planColumn": "Plan",
           "statusColumn": "Statut",
+          "stripeColumn": "Stripe",
           "usageColumn": "Utilisation",
           "defaultLimitColumn": "Limite Par Défaut",
           "customLimitColumn": "Limite Personnalisée",

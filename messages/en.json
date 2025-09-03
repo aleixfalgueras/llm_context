@@ -1271,6 +1271,7 @@
           "userColumn": "User",
           "planColumn": "Plan",
           "statusColumn": "Status",
+          "stripeColumn": "Stripe",
           "usageColumn": "Usage",
           "defaultLimitColumn": "Default Limit",
           "customLimitColumn": "Custom Limit",
