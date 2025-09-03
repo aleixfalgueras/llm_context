@@ -12,6 +12,7 @@ import { ClientDocuments } from '@/components/clients/client-documents'
 import { ServiceStatus } from '@/lib/enums'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { useTranslations } from '@/lib/translations/context'
+import { UsageIndicator } from '@/components/subscription/usage-indicator'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -139,9 +140,12 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
               </Button>
             </div>
           </div>
-          <p className="text-lg text-muted-foreground">
-            {t('description')}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-lg text-muted-foreground">
+              {t('description')}
+            </p>
+            <UsageIndicator />
+          </div>
         </div>
 
         {/* Service Configuration Panel */}
