@@ -6,11 +6,8 @@ import {Textarea} from '@/components/ui/textarea'
 import {Checkbox} from '@/components/ui/checkbox'
 import {FileText} from 'lucide-react'
 import type {Client, Prompt} from '@prisma/client'
-import {
-  CLIENT_CONTEXT_FIELDS, 
-  ClientContextSelection,
-  DEFAULT_CLIENT_CONTEXT
-} from '@/lib/types/client-types'
+import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from '@/lib/types/client-types'
+import {getClientContextFields} from '@/lib/utils/client-context-utils'
 import {useDocumentGenerator} from '@/hooks/document/use-document-generator'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
@@ -41,6 +38,7 @@ export function CustomDocumentGeneratorDialog({
   onDocumentCreated,
 }: CustomDocumentGeneratorDialogProps) {
   const t = useTranslations('aiServices')
+  const tContext = useTranslations('clientContext')
   const {
     // State from hook
     selectedClient,
@@ -50,24 +48,16 @@ export function CustomDocumentGeneratorDialog({
     clientContext,
     prompts,
     
-    // Loading states
-    isLoadingPrompts,
-    
     // Actions
     setSelectedClient,
     setDocumentTitle,
     handlePromptChange,
     setPromptContent,
     setClientContext,
-    generateDocument,
     resetForm,
     selectAllContext,
     deselectAllContext,
-  } = useDocumentGenerator({
-    isOpen,
-    clients,
-    onDocumentCreated,
-  })
+  } = useDocumentGenerator({isOpen})
 
   // Convert hook state to form data format for base component
   const formData: CustomDocumentFormData = {
@@ -131,7 +121,7 @@ export function CustomDocumentGeneratorDialog({
       return {
         clientId: formData.clientId,
         documentTitle: formData.documentTitle,
-        customPrompt: formData.promptContent,
+        prompt: formData.promptContent,
         selectedContextFields: Object.entries(formData.clientContext)
           .filter(([, value]) => value)
           .map(([key]) => key),
@@ -207,7 +197,7 @@ export function CustomDocumentGeneratorDialog({
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(CLIENT_CONTEXT_FIELDS).map(([key, label]) => {
+          {Object.entries(getClientContextFields(tContext)).map(([key, label]) => {
             const fieldValue = selectedClientData[key as keyof Client]
             const hasValue = fieldValue && String(fieldValue).trim() !== ''
             

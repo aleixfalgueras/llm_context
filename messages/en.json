@@ -321,6 +321,38 @@
     "template": {
       "label": "Template",
       "useTemplate": "Use Template"
+    },
+    "samplePrompts": {
+      "1": {
+        "name": "Marketing Strategy Report",
+        "description": "Comprehensive marketing strategy with full client context integration",
+        "content": "Please create a comprehensive marketing strategy report with the following structure:\n\nClient Information:\n- Location: {country}\n- Business Context: {general_context}\n- Key Focus Area: {specific_context_1}\n- Additional Considerations: {specific_context_2}\n\nStrategy Recommendations:\nBased on the client's location and business context, provide detailed marketing strategy recommendations that address their specific focus areas and considerations.\n\nImplementation Plan:\nInclude specific next steps and timeline for executing the marketing strategy, taking into account their unique business circumstances and market positioning.\n\nSuccess Metrics:\nDefine key performance indicators that align with their specific business objectives and market requirements."
+      },
+      "2": {
+        "name": "Content Calendar Template",
+        "description": "Detailed content calendar with client-specific customization",
+        "content": "Content Calendar Template\n\nClient Overview:\n- Market Location: {country}\n- Business Context: {general_context}\n- Primary Focus: {specific_context_1}\n- Secondary Objectives: {specific_context_2}\n\nContent Strategy Framework:\n1. Brand Voice & Messaging (tailored to market and business context)\n2. Content Pillars (aligned with primary focus areas)\n3. Platform Strategy (optimized for target market)\n4. Engagement Tactics (considering specific objectives)\n\nMonthly Content Planning:\nPlease provide a detailed content calendar that incorporates the client's specific context and objectives. Include content themes, posting schedules, and engagement strategies that resonate with their target audience and market dynamics.\n\nContent should address their primary focus while supporting secondary objectives throughout the calendar."
+      },
+      "3": {
+        "name": "Client Onboarding Document",
+        "description": "Personalized client welcome and onboarding materials",
+        "content": "Client Onboarding & Welcome Package\n\nWelcome Message:\nCreate a personalized welcome message for our new client, considering their location in {country} and their business context: {general_context}\n\nService Overview:\nProvide a customized overview of our services that specifically addresses:\n- Primary Needs: {specific_context_1}\n- Secondary Requirements: {specific_context_2}\n- Additional Considerations: {specific_context_3}\n\nNext Steps & Timeline:\nOutline a clear onboarding process tailored to their specific requirements and market context.\n\nContact Information:\nInclude relevant team members and communication preferences optimized for their location and business needs.\n\nThis onboarding document should make the client feel understood and confident in our ability to address their unique business requirements."
+      },
+      "4": {
+        "name": "Performance Analysis Report",
+        "description": "Comprehensive performance tracking with contextual insights",
+        "content": "Marketing Performance Report\n\nReport Period: [Current Month/Quarter]\n\nClient Overview:\n- Market: {country}\n- Business Context: {general_context}\n- Key Performance Area: {specific_context_1}\n- Secondary Focus: {specific_context_2}\n\nPerformance Summary:\nAnalyze marketing performance considering the client's specific business context and focus areas:\n\n1. Primary Objective Achievement\n- Progress toward main goals related to: {specific_context_1}\n- Market-specific performance indicators\n- Context-driven success metrics\n\n2. Secondary Objective Performance  \n- Results in: {specific_context_2}\n- Supporting initiative outcomes\n- Cross-objective synergies\n\n3. Market Context Analysis\n- Location-specific performance trends\n- Regional market dynamics impact\n- Cultural/geographic considerations\n\n4. Strategic Recommendations\n- Optimization opportunities aligned with business context\n- Market-specific strategy adjustments\n- Prioritized next steps considering all context factors\n\nPlease provide data-driven insights that connect performance metrics to the client's specific business context and objectives."
+      },
+      "5": {
+        "name": "Competitive Analysis Brief",
+        "description": "Market analysis incorporating client-specific positioning",
+        "content": "Competitive Analysis Report\n\nClient Context:\n- Market Location: {country}\n- Business Overview: {general_context}\n- Competitive Focus: {specific_context_1}\n- Differentiation Strategy: {specific_context_2}\n- Market Positioning: {specific_context_3}\n\nCompetitive Landscape Analysis:\nProvide a comprehensive competitive analysis that considers the client's specific market position and strategic focus areas.\n\n1. Direct Competitors\n- Identify main competitors in {country} market\n- Analyze how they position against client's focus on: {specific_context_1}\n\n2. Competitive Advantages\n- Highlight client's unique positioning in: {specific_context_2}\n- Market opportunities based on: {specific_context_3}\n\n3. Market Gaps & Opportunities\n- Unmet needs in the target market\n- Strategic opportunities aligned with client context\n\n4. Recommendations\n- Positioning strategies that leverage client's specific strengths\n- Market entry or expansion tactics\n- Competitive response strategies\n\nThis analysis should provide actionable insights for strengthening market position."
+      },
+      "6": {
+        "name": "Social Media Campaign Proposal",
+        "description": "Targeted social media strategy with full context integration",
+        "content": "Social Media Campaign Proposal\n\nClient Background:\n- Target Market: {country}\n- Business Context: {general_context}\n- Campaign Objective: {specific_context_1}\n- Brand Focus: {specific_context_2}\n- Special Considerations: {specific_context_3}\n\nCampaign Strategy:\nDevelop a social media campaign that leverages the client's unique positioning and addresses their specific objectives.\n\n1. Platform Selection\n- Optimal platforms for {country} market\n- Alignment with campaign objective: {specific_context_1}\n\n2. Content Strategy\n- Messaging that reflects: {general_context}\n- Content themes highlighting: {specific_context_2}\n- Special considerations for: {specific_context_3}\n\n3. Engagement Tactics\n- Market-appropriate engagement methods\n- Community building strategies\n- User-generated content opportunities\n\n4. Campaign Timeline & Metrics\n- Phased rollout plan\n- Success metrics aligned with objectives\n- Performance monitoring framework\n\nThis campaign should authentically represent the client's brand while achieving their specific marketing objectives."
+      }
     }
   },
   "assistant": {
@@ -400,9 +432,87 @@
   },
   "subscription": {
     "title": "Subscription",
+    "pageTitle": "Choose Your Plan",
     "perMonth": "/month",
     "processing": "Processing...",
     "canceling": "Canceling...",
+    "manageButtons": {
+      "manage": "Manage Subscription",
+      "reactivate": "Reactivate Subscription",
+      "cancel": "Cancel Subscription",
+      "loading": "Loading..."
+    },
+    "status": {
+      "active": "Active Subscription",
+      "expired": "Expired Subscription",
+      "renews": "Renews",
+      "expiresOn": "Expired"
+    },
+    "deleteAccount": {
+      "buttonLabel": "Delete Account",
+      "dialogTitle": "Delete Account",
+      "warningMessage": "⚠️ This action cannot be undone",
+      "reasonLabel": "Reason for deletion (optional):",
+      "reasons": {
+        "noLongerNeed": "I no longer need the service",
+        "privacyConcerns": "Privacy concerns",
+        "serviceIssues": "Service issues",
+        "other": "Other"
+      },
+      "cancelButton": "Cancel",
+      "deleteButton": "Delete Account",
+      "deleting": "Deleting...",
+      "successMessage": "Account deleted successfully. Deletion ID: {deletionId}"
+    },
+    "urlHandler": {
+      "successTitle": "Subscription Updated!",
+      "successDescription": "Your subscription has been successfully updated.",
+      "canceledTitle": "Payment Canceled",
+      "canceledDescription": "Your subscription update was canceled."
+    },
+    "plans": {
+      "apprentice": {
+        "description": "Perfect for individuals starting their journey",
+        "features": [
+          "🤖 Access to MIA AI platform",
+          "👥 Discount on access to local meetups about AI Education & Defi",
+          "💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "knight": {
+        "description": "For SMEs and content creators",
+        "features": [
+          "🤖 Access to MIA AI platform + x2.5 usage",
+          "👥 Discount on access to local meetups about AI Education & Defi",
+          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
+        ]
+      },
+      "master": {
+        "description": "For startups and influencers scaling their impact",
+        "features": [
+          "🤖 Access to MIA AI platform + x10 usage",
+          "👥 Discount on access to local meetups about AI Education, Defi & Influencers",
+          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Free professional website hosting & showcase platform with e-commerce capabilities"
+        ]
+      },
+      "jedi": {
+        "description": "For corporate leaders and CEOs driving innovation",
+        "features": [
+          "🤖 Access to MIA AI platform + x25 usage",
+          "👥 Discount on access to local meetups about AI Education, Defi & Influencers",
+          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
+          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
+          "🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
+          "🌐 Free professional website hosting & showcase platform with e-commerce capabilities",
+          "📞 60 minutes private call per month to discuss personal branding and business scaling"
+        ]
+      }
+    },
     "planCard": {
       "perMonth": "/month",
       "processing": "Processing...",
@@ -564,12 +674,54 @@
       "requirementsLabel": "Requirements:",
       "benefitsCommissionsLabel": "Benefits & Commissions:",
       "noteLabel": "Note:",
-      "noteText": "Status upgrades are automatic based on your network size and referral achievements. Your current status is highlighted above."
+      "noteText": "Status upgrades are automatic based on your network size and referral achievements. Your current status is highlighted above.",
+      "statuses": {
+        "GenY": {
+          "commission": "10% of user's subscribed plan",
+          "condition": "-"
+        },
+        "Indigo": {
+          "commission": "15% of user's subscribed plan",
+          "condition": "25 users"
+        },
+        "LightWorker": {
+          "commission": "20% of user's subscribed plan & 10% discount on events",
+          "condition": "50 users"
+        },
+        "CristalClub": {
+          "commission": "25% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards",
+          "condition": "100 users & 1 Gen Y user"
+        },
+        "D5Level": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program",
+          "condition": "200 users & 5 Gen Y users"
+        },
+        "Walkin": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist",
+          "condition": "400 users & 10 Gen Y users"
+        },
+        "SevenStars": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 12.5% Bonus Events",
+          "condition": "1000 users & 1 Cristal Club user"
+        },
+        "InfinityStars": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 12.5% Bonus Events &  NFT Leader",
+          "condition": "2000 users & 5 Cristal Club users"
+        },
+        "Alpha": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 15% Bonus Events & NFT Leader",
+          "condition": "4000 users & 10 Cristal Club users"
+        },
+        "Omega": {
+          "commission": "30% of user's subscribed plan & 10% discount on events & cryptocurrency asset and fund rewards & Speaker Program & NFT Altruist & 15% Bonus Events & NFT Erudith",
+          "condition": "1000 users & 1 Seven Stars user"
+        }
+      }
     },
     "commissionsGuide": {
       "title": "Commissions Guide",
       "buttonLabel": "Commissions Guide",
-      "description": "Understanding how affiliate commissions work, payment schedules, and subscription limits",
+      "dialogDescription": "Understanding how affiliate commissions work, payment schedules, and subscription limits",
       "paymentProcessing": "Payment Processing",
       "monthlyPaymentTitle": "Monthly Payment Schedule",
       "monthlyPaymentDescription": "Commission payments are processed automatically on the 1st of each month for the previous month's earnings.",
@@ -624,12 +776,21 @@
     }
   },
   "feedback": {
+    "pageTitle": "Provide Feedback",
+    "pageDescription": "Help us improve by sharing your feature requests, reporting bugs, or providing general feedback.",
     "title": "Share Your Feedback",
-    "description": "Help us improve MIA by sharing your thoughts, reporting issues, or suggesting new features.",
+    "description": "Choose the type of feedback you'd like to provide",
     "type": "Feedback Type",
+    "typeRequired": "Feedback Type *",
     "typeFeature": "Feature Request",
     "typeBug": "Bug Report",
     "typeGeneral": "General Feedback",
+    "typeDescriptions": {
+      "feature": "Suggest a new feature or improvement",
+      "bug": "Report a problem or error",
+      "general": "Share your thoughts or concerns"
+    },
+    "typePlaceholder": "What type of feedback are you providing?",
     "subject": "Subject",
     "titles": {
       "feature": "Feature Request Title",
@@ -642,9 +803,14 @@
       "general": "Feedback Description"
     },
     "placeholders": {
+      "featureTitle": "Brief, descriptive title for your feature request",
       "bugTitle": "Brief description of the bug",
       "generalTitle": "Brief summary of your feedback",
-      "description": "Provide detailed feedback..."
+      "featureDescription": "What should it do? How should it work?",
+      "bugDescription": "What happened? What did you expect to happen?",
+      "description": "Provide detailed feedback...",
+      "stepsToReproduce": "Please provide step-by-step instructions to reproduce the bug:\n1. Go to...\n2. Click on...\n3. See error...",
+      "useCase": "Describe when and how you would use this feature. What problem does it solve?"
     },
     "subjectPlaceholder": {
       "feature": "e.g., Add bulk client import feature",
@@ -657,6 +823,19 @@
       "bug": "Please describe what happened, what you expected, and steps to reproduce the issue...",
       "general": "Share your thoughts, suggestions, or experience..."
     },
+    "priority": "Priority Level *",
+    "priorityPlaceholders": {
+      "feature": "How important is this feature to you?",
+      "bug": "How severe is this bug?",
+      "general": "How important is this feedback?"
+    },
+    "priorityLabels": {
+      "low": "Low Priority - Minor issue",
+      "medium": "Medium Priority - Moderate impact",
+      "high": "High Priority - Major issue"
+    },
+    "stepsToReproduce": "Steps to Reproduce",
+    "useCase": "Use Case",
     "submit": {
       "feature": "Submit Feature Request",
       "bug": "Submit Bug Report",
@@ -665,7 +844,11 @@
     "submitFeature": "Submit Feature Request",
     "submitBug": "Submit Bug Report",
     "submitGeneral": "Submit Feedback",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "successMessage": "Thank you for your feedback! We'll review it carefully.",
+    "errorSubmit": "Failed to submit feedback",
+    "errorUnexpected": "An unexpected error occurred. Please try again.",
+    "validationFormError": "Please fix the errors in the form before submitting."
   },
   "common": {
     "loading": "Loading...",
@@ -851,7 +1034,7 @@
       },
       "success": {
         "generating": "Generating meeting report...",
-        "generatingForClient": "📝 Generating meeting report for {clientName}"
+        "generatingForClient": "📝 Generating meeting report for {{clientName}}"
       },
       "fileUpload": {
         "invalidType": "Invalid File Type",
@@ -888,7 +1071,7 @@
       },
       "success": {
         "generating": "Generating document...",
-        "generatingForClient": "📄 Generating document for {clientName}"
+        "generatingForClient": "📄 Generating document for {{clientName}}"
       },
       "clientContext": {
         "title": "Client Context",
@@ -925,18 +1108,10 @@
     "title": "Documents", 
     "search": {
       "placeholder": "Search documents by name or type...",
-      "allTypes": "All types"
-    },
-    "actions": {
-      "createNew": "Create New",
-      "deleteAll": "Delete All",
-      "deleteAllConfirm": "Click to Confirm",
-      "edit": "Edit Document", 
-      "delete": "Delete Document",
-      "download": "Download document as Markdown"
-    },
-    "time": {
-      "justNow": "Just now"
+      "allTypes": "All types",
+      "noResultsFor": "No documents found matching \"{{term}}\"",
+      "tryDifferent": "Try searching for a different term",
+      "noDocuments": "No documents found"
     },
     "empty": {
       "title": "No Documents",
@@ -978,11 +1153,6 @@
       "searchFilter": "Search: \"{{term}}\"",
       "typeFilter": "Type: {{type}}",
       "clearAll": "Clear all"
-    },
-    "search": {
-      "noResultsFor": "No documents found matching \"{{term}}\"",
-      "tryDifferent": "Try searching for a different term",
-      "noDocuments": "No documents found"
     },
     "time": {
       "justNow": "Just now",
@@ -1101,6 +1271,7 @@
           "userColumn": "User",
           "planColumn": "Plan",
           "statusColumn": "Status",
+          "stripeColumn": "Stripe",
           "usageColumn": "Usage",
           "defaultLimitColumn": "Default Limit",
           "customLimitColumn": "Custom Limit",
@@ -1155,14 +1326,67 @@
       "confirmationText": "DELETE MY ACCOUNT"
     }
   },
-  "language": {
-    "english": "English",
-    "spanish": "Spanish",
-    "french": "French",
-    "german": "German",
-    "italian": "Italian",
-    "portuguese": "Portuguese",
-    "dutch": "Dutch",
-    "russian": "Russian"
+  "clientContext": {
+    "header": "CLIENT CONTEXT:",
+    "countryContext": "This client is from",
+    "fields": {
+      "country": "Country",
+      "generalContext": "General Context",
+      "specificContext1": "Specific Context 1",
+      "specificContext2": "Specific Context 2",
+      "specificContext3": "Specific Context 3"
+    },
+    "descriptions": {
+      "country": "Client's country or location",
+      "generalContext": "General information about the client",
+      "specificContext1": "First specific context field",
+      "specificContext2": "Second specific context field",
+      "specificContext3": "Third specific context field"
+    },
+    "tooltip": {
+      "title": "Available Variables:",
+      "info": "Variables will be automatically replaced with actual client data when used."
+    }
+  },
+  "aiPrompts": {
+    "chat": {
+      "generalAssistant": "You are a helpful, harmless, and honest AI assistant.\n\nINSTRUCTIONS:\n- Provide accurate, thoughtful, and nuanced responses\n- Be helpful with a wide range of topics and questions\n- Support various tasks including but not limited to:\n  • Answering questions and providing explanations\n  • Creative writing and brainstorming\n  • Analysis and problem-solving\n  • Learning and educational support\n  • Technical assistance and coding help\n  • General conversation and discussion\n  • Research and information synthesis\n- Be conversational and engaging while maintaining accuracy\n- Admit when you're uncertain or don't know something\n- Provide balanced perspectives when appropriate\n- Respect user privacy and maintain ethical boundaries\n\nRespond naturally and conversationally while being helpful and informative.",
+      "marketingAssistant": "You are a professional AI assistant helping a marketing service provider with their business.",
+      "withContext": "You have access to the following client information and should use it to provide personalized, relevant advice and responses.",
+      "instructions": {
+        "withContext": "Use this client information to personalize your responses when relevant",
+        "referenceContext": "Reference their specific circumstances when it adds value to your response",
+        "general": "Provide helpful general business advice",
+        "keepBroad": "Keep responses broadly applicable but actionable"
+      },
+      "professionalContext": "Be professional, knowledgeable, and supportive\n- Help with any aspect of marketing business operations:\n  • Strategy and planning\n  • Client management\n  • Content creation\n  • Campaigns and analysis\n  • Operations and workflows\n  • Industry insights\n  • Problem-solving and optimization\n- Provide practical, actionable advice tailored to marketing professionals\n- Maintain confidentiality and professionalism at all times\n\nRespond naturally and conversationally while keeping this context in mind."
+    },
+    "documents": {
+      "generation": {
+        "instructions": "Please generate a professional, well-structured document based on the above prompt and client information.",
+        "outputFormat": "OUTPUT FORMAT:\n- Start directly with the document title and content\n- Do NOT include any introductory text like \"Here is your document\" or similar preambles\n- Output the document immediately, beginning with its title",
+        "languageRequirements": "IMPORTANT LANGUAGE REQUIREMENTS:\n- **Generate the entire document in {{languageName}}**\n- Use appropriate professional terminology for {{languageName}} language\n- Adapt formatting and structure conventions and cultural communication styles appropriate for {{languageName}} language/culture",
+        "rememberLanguage": "REMEMBER, VERY IMPORTANT: Use {{languageName}} to generate the entire document output."
+      },
+      "additionalInstructions": "ADDITIONAL INSTRUCTIONS:"
+    },
+    "meetingReport": {
+      "systemPrompt": "You are a professional AI assistant specializing in creating comprehensive meeting reports for marketing professionals. Your role is to analyze meeting transcriptions and produce well-structured, actionable reports that focus on key outcomes and next steps. You provide objective, professional documentation without disclaimers or AI-related content.",
+      "userPromptTemplate": "Please create a detailed meeting report for the following client meeting:\n\nCLIENT: {{clientName}}\n\nMEETING INFORMATION:\n- Meeting Date: {{meetingDate}}\n- Meeting Transcription:\n{{meetingTranscription}}\n\nREQUIREMENTS:\n- Create a comprehensive meeting report with the following structure:\n  1. Meeting Summary\n  2. Key Discussion Points\n  3. Outcomes & Decisions\n  4. Action Items & Next Steps\n  5. Follow-up Requirements\n\n- Focus on documenting the meeting content objectively and professionally\n- Include specific, actionable steps with clear timelines where applicable\n- Make action items specific, measurable, and achievable\n- Base all recommendations solely on what was discussed in the meeting\n- Focus on practical next steps that can be implemented immediately\n\n**IMPORTANT: Provide ONLY the meeting report content in a delivery-ready format**{{additionalInfo}}{{additionalAttention}}",
+      "additionalInfoSection": "\n\nADDITIONAL INFORMATION:\n{{additionalInfo}}",
+      "additionalAttentionText": "\n---\nPay special attention to the additional information provided above"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "it": "Italian",
+    "pt": "Portuguese",
+    "nl": "Dutch",
+    "pl": "Polish",
+    "ru": "Russian",
+    "ca": "Catalan"
   }
 }

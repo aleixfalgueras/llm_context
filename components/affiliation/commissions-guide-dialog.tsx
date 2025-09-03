@@ -31,7 +31,7 @@ export function CommissionsGuideDialog() {
             {t('commissionsGuide.title')}
           </DialogTitle>
           <DialogDescription>
-            {t('commissionsGuide.description')}
+            {t('commissionsGuide.dialogDescription')}
           </DialogDescription>
         </DialogHeader>
         

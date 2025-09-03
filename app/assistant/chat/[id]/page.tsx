@@ -5,6 +5,7 @@ import {getClients} from '@/app/actions/client-action'
 import {getChats, getChatWithMessagesById} from '@/app/actions/chat-action'
 import {Role} from '@prisma/client'
 import {getTranslations} from '@/lib/translations'
+import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
 
 interface ChatPageProps {
   params: Promise<{ id: string }>
@@ -15,7 +16,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
 
   // Get current user data from Clerk
   const user = await currentUser()
-  const t = await getTranslations('assistant')
+  const locale = await getLocaleFromCookies()
+  const t = await getTranslations('assistant', locale)
 
   // Get the specific chat and verify ownership, all user's chats, and clients in parallel
   const [chat, chats, clients] = await Promise.all([

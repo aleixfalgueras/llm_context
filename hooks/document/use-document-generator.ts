@@ -2,17 +2,13 @@
 
 import {useEffect, useState} from 'react'
 import {useToast} from '@/hooks/use-toast'
-import {getDefaultModel} from '@/lib/models-config'
-import {clientLogger} from '@/lib/client-logger'
-import type {Client, Prompt} from '@prisma/client'
+import type {Prompt} from '@prisma/client'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {ClientContextSelection, DEFAULT_CLIENT_CONTEXT} from "@/lib/types/client-types"
 import {getPrompts} from '@/app/actions/prompt-action'
 
 interface UseDocumentGeneratorProps {
   isOpen: boolean
-  clients: Client[]
-  onDocumentCreated?: (clientId: string, documentId: string) => void
 }
 
 interface UseDocumentGeneratorReturn {
@@ -24,27 +20,19 @@ interface UseDocumentGeneratorReturn {
   clientContext: ClientContextSelection
   prompts: Prompt[]
   promptName: string
-  
-  // Loading states
-  isLoadingPrompts: boolean
-  
+
   // Actions
   setSelectedClient: (id: string) => void
   setDocumentTitle: (title: string) => void
   handlePromptChange: (promptId: string) => void
   setPromptContent: (content: string) => void
   setClientContext: (context: ClientContextSelection) => void
-  generateDocument: () => Promise<string>
   resetForm: () => void
   selectAllContext: () => void
   deselectAllContext: () => void
 }
 
-export function useDocumentGenerator({
-  isOpen,
-  clients,
-  onDocumentCreated,
-}: UseDocumentGeneratorProps): UseDocumentGeneratorReturn {
+export function useDocumentGenerator({isOpen}: UseDocumentGeneratorProps): UseDocumentGeneratorReturn {
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [documentTitle, setDocumentTitle] = useState('')
   const [selectedPrompt, setSelectedPrompt] = useState<string>('')
@@ -102,55 +90,6 @@ export function useDocumentGenerator({
     }
   }
 
-  const generateDocument = async (): Promise<string> => {
-    if (!selectedClient || !documentTitle || !promptContent.trim()) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please select a client, enter a document title, and provide prompt instructions.',
-        variant: 'destructive',
-      })
-      throw new Error('Missing required fields')
-    }
-
-    try {
-      clientLogger.apiCall('POST', '/api/ai-services/generate-custom-document', {
-        clientId: selectedClient,
-        component: 'CustomDocumentGeneratorDialog'
-      });
-
-      const response = await fetch('/api/ai-services/generate-custom-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientId: selectedClient,
-          documentTitle: documentTitle,
-          customPrompt: promptContent,
-          selectedContextFields: Object.entries(clientContext)
-            .filter(([, value]) => value)
-            .map(([key]) => key),
-          model: getDefaultModel()
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to generate document' }))
-        throw new Error(errorData.error)
-      }
-
-      const data = await response.json()
-      setPromptName(data.promptName || prompts.find(p => p.id === selectedPrompt)?.name || 'Custom Prompt')
-      return data.content
-    } catch (error) {
-      console.error('Error generating document:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate document'
-      handleClientApiError(errorMessage, 'Failed to generate document')
-      throw error
-    }
-  }
-
-
   const resetForm = () => {
     setSelectedClient('')
     setDocumentTitle('')
@@ -190,16 +129,12 @@ export function useDocumentGenerator({
     prompts,
     promptName,
     
-    // Loading states
-    isLoadingPrompts,
-    
     // Actions
     setSelectedClient,
     setDocumentTitle,
     handlePromptChange,
     setPromptContent,
     setClientContext,
-    generateDocument,
     resetForm,
     selectAllContext,
     deselectAllContext,

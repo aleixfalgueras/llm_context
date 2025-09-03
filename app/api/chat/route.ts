@@ -8,6 +8,7 @@ import {checkModelAccess} from "@/lib/api/api-validation";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
 import {Role} from '@prisma/client';
+import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
 
 /**
  * Chat API endpoint that handles AI chat interactions with streaming responses.
@@ -63,6 +64,7 @@ export const POST = withEnhancedApi(
     const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
     chatId = requestChatId;
     const selectedModel = model || getDefaultModel()
+    const userLocale = await getLocaleFromCookies()
 
     // Validate model access based on user's subscription tier
     const modelAccessResult = await checkModelAccess(userId, selectedModel)
@@ -97,7 +99,7 @@ export const POST = withEnhancedApi(
 
     // Prepare chat data for AI processing
     const lastMessage = messages[messages.length - 1]
-    const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content)
+    const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content, userLocale)
     if (!prepareChatForAIResult.success) {
       throw new Error('Failed to prepare chat for AI processing')
     }

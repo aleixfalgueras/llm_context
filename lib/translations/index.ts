@@ -1,16 +1,18 @@
 // Translation system configuration and type definitions
 import enMessages from '@/messages/en.json'
+import frMessages from '@/messages/fr.json'
 
 
-export type Locale = 'en'
+export type Locale = 'en' | 'fr'
 export const defaultLocale: Locale = 'en'
-export const locales: Locale[] = ['en']
+export const locales: Locale[] = ['en', 'fr']
 
 export type Messages = typeof enMessages
 
 // Map of locale to messages
 export const messages: Record<Locale, Messages> = {
   en: enMessages,
+  fr: frMessages,
 }
 
 // Helper function to get nested translation value
@@ -50,9 +52,10 @@ export function interpolate(text: string, params?: Record<string, any>): string 
 }
 
 // Server-side translation function for use in server actions
-export async function getTranslations(namespace?: string): Promise<TranslationFunction> {
-   // For now, always use default locale on server
-  const currentMessages = messages[defaultLocale]
+export async function getTranslations(namespace?: string, locale?: Locale): Promise<TranslationFunction> {
+  // Use provided locale or fall back to default
+  const currentLocale = locale || defaultLocale
+  const currentMessages = messages[currentLocale]
   
   return (key: string, params?: Record<string, any>) => {
     // If namespace is provided, prepend it to the key

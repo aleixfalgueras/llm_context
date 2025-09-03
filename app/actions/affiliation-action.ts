@@ -7,6 +7,7 @@ import { Affiliation } from '@prisma/client'
 import { AffiliationWithValid } from '@/lib/types/affiliation-types'
 import { currentUser } from '@clerk/nextjs/server'
 import { getTranslations } from '@/lib/translations'
+import { getLocaleFromCookies } from '@/lib/utils/locale-cookie-server'
 
 export async function getUserAffiliation(): Promise<Affiliation | null> {
   const userId = await checkAuth()
@@ -22,7 +23,8 @@ export async function getUserAffiliation(): Promise<Affiliation | null> {
 // for users that didn't use any referral link - now requires parent code
 export async function createUserAffiliation(parentAffiliationCode: string): Promise<{ affiliationCode: string; isNew: boolean }> {
   const userId = await checkAuth()
-  const t = await getTranslations('affiliation.errors')
+  const locale = await getLocaleFromCookies()
+  const t = await getTranslations('affiliation.errors', locale)
   
   if (!parentAffiliationCode || !parentAffiliationCode.trim()) {
     throw new Error(t('parentCodeRequired'))
@@ -30,7 +32,7 @@ export async function createUserAffiliation(parentAffiliationCode: string): Prom
   
   // Get current user information for public name
   const user = await currentUser()
-  const tAffiliation = await getTranslations('affiliation')
+  const tAffiliation = await getTranslations('affiliation', locale)
   let publicName: string
   if (user?.firstName && user?.lastName) {
     publicName = `${user.firstName} ${user.lastName}`
@@ -92,7 +94,8 @@ export async function getAffiliationChildren(): Promise<{ children: AffiliationW
 
 export async function unlinkChildAffiliation(childAffiliationCode: string): Promise<{ success: boolean; message: string }> {
   const userId = await checkAuth()
-  const t = await getTranslations('affiliation.errors')
+  const locale = await getLocaleFromCookies()
+  const t = await getTranslations('affiliation.errors', locale)
   
   try {
     const result = await AffiliationService.unlinkChildAffiliation(userId, childAffiliationCode)

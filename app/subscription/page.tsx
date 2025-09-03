@@ -27,6 +27,7 @@ import {isDowngrade as checkIsDowngrade} from "@/lib/utils/subscription-client-u
 
 export default function SubscriptionPage() {
   const t = useTranslations()
+  const tSub = useTranslations('subscription')
   const {
     subscription,
     isFreeMode,
@@ -93,7 +94,7 @@ export default function SubscriptionPage() {
       const result = await response.json()
       
       // Show success message and redirect to home page
-      alert(`Account deleted successfully. Deletion ID: ${result.deletionId}`)
+      alert(tSub('deleteAccount.successMessage').replace('{deletionId}', result.deletionId))
       
       // Clear form and close dialog
       setShowDeleteConfirm(false)
@@ -114,21 +115,21 @@ export default function SubscriptionPage() {
   const getManageButtonText = () => {
     // For free mode users, always show "Manage Subscription"
     if (isFreeMode()) {
-      return 'Manage Subscription'
+      return tSub('manageButtons.manage')
     }
 
     // For active subscriptions
     if (subscription.isActive) {
       // If marked for cancellation, show reactivate option
       if (subscription.cancelAtPeriodEnd) {
-        return 'Reactivate Subscription'
+        return tSub('manageButtons.reactivate')
       }
       // If active and not marked for cancellation, show cancel option
-      return 'Cancel Subscription'
+      return tSub('manageButtons.cancel')
     }
 
     // For all other cases (expired, inactive, etc.)
-    return 'Manage Subscription'
+    return tSub('manageButtons.manage')
   }
 
   return (
@@ -143,7 +144,7 @@ export default function SubscriptionPage() {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <h1 className="text-4xl font-bold text-center">Choose Your Plan</h1>
+        <h1 className="text-4xl font-bold text-center">{tSub('pageTitle')}</h1>
 
         {/* Main Layout: Delete Account Button | Status Banners | Manage Subscription Button */}
         <div className="text-center mb-8 ml-10">
@@ -157,7 +158,7 @@ export default function SubscriptionPage() {
                 disabled={isDeleting}
               >
                 <Trash2 className="h-4 w-4" />
-                Delete Account
+                {tSub('deleteAccount.buttonLabel')}
               </Button>
             </div>
 
@@ -187,8 +188,8 @@ export default function SubscriptionPage() {
                       : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                   }`}>
                     <span className="text-[18px]">
-                      {subscription.isActive ? 'Active Subscription' : 'Expired Subscription'} -
-                      {subscription.isActive ? ' Renews' : ' Expired'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB')}
+                      {subscription.isActive ? tSub('status.active') : tSub('status.expired')} -
+                      {subscription.isActive ? ` ${tSub('status.renews')}` : ` ${tSub('status.expiresOn')}`} on {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB')}
                     </span>
                   </div>
                 </div>
@@ -204,7 +205,7 @@ export default function SubscriptionPage() {
                 className="inline-flex items-center gap-2"
               >
                 <SettingsIcon className="h-4 w-4" />
-                {portalLoading ? 'Loading...' : getManageButtonText()}
+                {portalLoading ? tSub('manageButtons.loading') : getManageButtonText()}
               </Button>
             </div>
           </div>
@@ -251,12 +252,12 @@ export default function SubscriptionPage() {
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle >Delete Account</DialogTitle>
+            <DialogTitle >{tSub('deleteAccount.dialogTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="rounded-lg">
               <p className="text-sm font-medium mb-2">
-                ⚠️ This action cannot be undone
+                {tSub('deleteAccount.warningMessage')}
               </p>
             </div>
             
@@ -274,7 +275,7 @@ export default function SubscriptionPage() {
             
             <div className="space-y-2">
               <Label htmlFor="deletionReason">
-                Reason for deletion (optional):
+                {tSub('deleteAccount.reasonLabel')}
               </Label>
               <select
                 id="deletionReason"
@@ -282,10 +283,10 @@ export default function SubscriptionPage() {
                 onChange={(e) => setDeletionReason(e.target.value)}
                 className="w-full p-2 border rounded-md"
               >
-                <option value="user_request">I no longer need the service</option>
-                <option value="privacy_concerns">Privacy concerns</option>
-                <option value="service_issues">Service issues</option>
-                <option value="other">Other</option>
+                <option value="user_request">{tSub('deleteAccount.reasons.noLongerNeed')}</option>
+                <option value="privacy_concerns">{tSub('deleteAccount.reasons.privacyConcerns')}</option>
+                <option value="service_issues">{tSub('deleteAccount.reasons.serviceIssues')}</option>
+                <option value="other">{tSub('deleteAccount.reasons.other')}</option>
               </select>
             </div>
             
@@ -299,7 +300,7 @@ export default function SubscriptionPage() {
                 className="flex-1"
                 disabled={isDeleting}
               >
-                Cancel
+                {tSub('deleteAccount.cancelButton')}
               </Button>
               <Button 
                 variant="destructive" 
@@ -307,7 +308,7 @@ export default function SubscriptionPage() {
                 disabled={confirmationText !== DELETE_CONFIRMATION_TEXT || isDeleting}
                 className="flex-1"
               >
-                {isDeleting ? 'Deleting...' : 'Delete Account'}
+                {isDeleting ? tSub('deleteAccount.deleting') : tSub('deleteAccount.deleteButton')}
               </Button>
             </div>
           </div>

@@ -5,11 +5,11 @@ import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Badge} from '@/components/ui/badge'
 import {Copy, Lightbulb} from 'lucide-react'
-import {samplePrompts} from '@/lib/sample-prompts'
 import {PromptDialog} from '@/components/prompts/prompt-dialog'
+import {SamplePrompt} from "@/lib/types/prompt-types";
 
 interface SamplePromptCardProps {
-  prompt: typeof samplePrompts[0]
+  prompt: SamplePrompt
   onUseAsTemplate: () => void
   onSuccess: () => void
 }
@@ -41,7 +41,7 @@ export function SamplePromptCard({ prompt, onSuccess }: SamplePromptCardProps) {
         
         <div className="flex items-center gap-2 mt-auto">
           <Badge variant="secondary" className="text-xs capitalize">
-            {prompt.category}
+            {t(`categories.${prompt.category}`)}
           </Badge>
           <Badge variant="outline" className="text-xs">
             {t('template.label')}

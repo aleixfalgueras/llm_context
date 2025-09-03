@@ -5,14 +5,31 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
-import {Edit2, Loader2, RotateCcw, Search, Settings, X} from 'lucide-react'
+import {Check, Edit2, Loader2, RotateCcw, Search, Settings, X} from 'lucide-react'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {BadgeVariant} from '@/lib/enums'
-import {UserSubscription, SubscriptionPlan} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 import {useToast} from '@/hooks/use-toast'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {useTranslations} from '@/lib/translations/context'
 import {SubscriptionWithUsage} from "@/lib/types/subscription-types";
+
+/**
+ * Check if a subscription is active (admin-specific helper)
+ * Used to determine if the Stripe checkbox should be checked
+ * 
+ * @param subscription - The subscription object to check
+ * @returns boolean - true if subscription is active and not expired
+ */
+function isSubscriptionActive(subscription: any): boolean {
+  if (!subscription) return false
+  
+  const now = new Date()
+  const isStatusActive = subscription.status === SubscriptionStatus.active
+  const isNotExpired = subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd) > now
+  
+  return Boolean(isStatusActive && isNotExpired)
+}
 
 // Component to display usage with color coding
 function UsageDisplay({ currentUsage, limit }: { currentUsage: number; limit: number }) {
@@ -248,6 +265,7 @@ export default function AdminCustomizationTab() {
                     <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.userColumn')}</th>
                     <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.planColumn')}</th>
                     <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.statusColumn')}</th>
+                    <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.stripeColumn')}</th>
                     <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.usageColumn')}</th>
                     <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.defaultLimitColumn')}</th>
                     <th className="text-left p-3 font-medium">{t('dashboard.customization.subscriptionUsage.customLimitColumn')}</th>
@@ -257,7 +275,7 @@ export default function AdminCustomizationTab() {
                 <tbody>
                   {loadingUsers ? (
                     <tr>
-                      <td colSpan={7} className="text-center p-8">
+                      <td colSpan={8} className="text-center p-8">
                         <div className="flex items-center justify-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           {t('dashboard.customization.subscriptionUsage.loadingUsers')}
@@ -266,7 +284,7 @@ export default function AdminCustomizationTab() {
                     </tr>
                   ) : filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center p-8 text-muted-foreground">
+                      <td colSpan={8} className="text-center p-8 text-muted-foreground">
                         {t('dashboard.customization.subscriptionUsage.noUsers')}
                       </td>
                     </tr>
@@ -290,6 +308,17 @@ export default function AdminCustomizationTab() {
                           <Badge variant={user.status === 'active' ? BadgeVariant.DEFAULT : BadgeVariant.SECONDARY}>
                             {user.status}
                           </Badge>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex items-center justify-center">
+                            {user.stripeSubscriptionId && isSubscriptionActive(user) ? (
+                              <div className="h-5 w-5 rounded border-2 border-primary bg-primary flex items-center justify-center">
+                                <Check className="h-3 w-3 text-primary-foreground" />
+                              </div>
+                            ) : (
+                              <div className="h-5 w-5 rounded border-2 border-muted-foreground" />
+                            )}
+                          </div>
                         </td>
                         <td className="p-3">
                           {user.currentUsage !== undefined ? (

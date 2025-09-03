@@ -12,7 +12,7 @@ import { createUserAffiliation } from '@/app/actions/affiliation-action'
 import { Affiliation } from '@prisma/client'
 import { Copy, Link, AlertCircle, HelpCircle, Share2, UserPlus } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { AffiliationStatusEmoji, AffiliationStatusComissions, AffiliationWithValid } from '@/lib/types/affiliation-types'
+import { AffiliationStatusEmoji, AffiliationWithValid } from '@/lib/types/affiliation-types'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { StatusGuideDialog } from '@/components/affiliation/status-guide-dialog'
 import { CommissionsGuideDialog } from '@/components/affiliation/commissions-guide-dialog'
@@ -25,6 +25,7 @@ interface AffiliationClientProps {
 
 export function AffiliationClient({ userAffiliation, affiliationChildren }: AffiliationClientProps) {
   const t = useTranslations('affiliation')
+  const tCommon = useTranslations('common')
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [parentCode, setParentCode] = useState('')
@@ -122,7 +123,7 @@ export function AffiliationClient({ userAffiliation, affiliationChildren }: Affi
               className="w-full"
               size="lg"
             >
-              {isCreating ? t('common.generating') : t('setup.generateButton')}
+              {isCreating ? tCommon('generating') : t('setup.generateButton')}
             </Button>
           </CardContent>
         </Card>

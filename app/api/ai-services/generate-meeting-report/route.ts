@@ -5,11 +5,13 @@ import {
   parseJsonBody,
   ApiContext 
 } from '@/lib/api/api-middleware'
+import { getLocaleFromCookies } from '@/lib/utils/locale-cookie-server'
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
     // Parse request body
     const { clientId, meetingTranscription, meetingDate, additionalInfo, model: selectedModel = DEFAULT_MODEL } = await parseJsonBody(req)
+    const locale = await getLocaleFromCookies()
 
     // Validate required fields
     if (!clientId || !meetingTranscription || !meetingDate) {
@@ -22,7 +24,8 @@ export const POST = withEnhancedApi(
       meetingTranscription,
       meetingDate,
       additionalInfo,
-      model: selectedModel
+      model: selectedModel,
+      locale
     })
 
     return Response.json(data)

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { clientLogger, withClientTiming } from '@/lib/client-logger'
-import { DEFAULT_MODEL } from '@/lib/models-config'
-import { handleClientApiError } from '@/lib/api/api-toast'
-import {MessageWithStreaming} from "@/lib/types/message-types";
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {clientLogger, withClientTiming} from '@/lib/client-logger'
+import {DEFAULT_MODEL} from '@/lib/models-config'
+import {handleClientApiError} from '@/lib/api/api-toast'
+import {MessageWithStreaming} from "@/lib/types/message-types"
 
 // Helper function to check if messages are likely duplicates
 function areMessagesSimilar(msg1: MessageWithStreaming, msg2: MessageWithStreaming): boolean {

@@ -11,6 +11,8 @@ import {
   MeetingReportSaveRequest
 } from '@/lib/types/ai-service-types'
 import {unwrapResult} from '@/database/base-operations'
+import {getTranslations, Locale} from '@/lib/translations'
+
 
 export class MeetingReportService {
   /**
@@ -18,14 +20,15 @@ export class MeetingReportService {
    */
   static async generateReport(
     userId: string,
-    request: MeetingReportGenerationRequest
+    request: MeetingReportGenerationRequest & { locale?: Locale }
   ): Promise<MeetingReportGenerationResponse> {
     const {
       clientId,
       meetingTranscription,
       meetingDate,
       additionalInfo,
-      model: selectedModel = DEFAULT_MODEL
+      model: selectedModel = DEFAULT_MODEL,
+      locale = 'en'
     } = request
 
     // Validate client access
@@ -37,12 +40,17 @@ export class MeetingReportService {
       logger.info(`Meeting Report - Additional Instructions provided: ${additionalInfo}`)
     }
 
-    // Build the meeting report prompt
-    const meetingReportPrompt = this.buildMeetingReportPrompt({
+    // Get translated prompts
+    const t = await getTranslations('aiPrompts', locale)
+    const systemPrompt = t('meetingReport.systemPrompt')
+    
+    // Build the user prompt with task-specific data
+    const userPrompt = await this.buildUserPrompt({
       clientName: client.name,
       meetingDate,
       meetingTranscription,
-      additionalInfo
+      additionalInfo,
+      locale
     })
 
     // Generate the report using OpenRouter
@@ -52,11 +60,11 @@ export class MeetingReportService {
         messages: [
           {
             role: 'system',
-            content: meetingReportPrompt
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: `Please create a detailed meeting report based on the transcription provided. Focus on creating actionable insights and clear next steps for this client.`
+            content: userPrompt
           }
         ],
         temperature: 0.7,
@@ -103,47 +111,44 @@ export class MeetingReportService {
   }
 
   /**
-   * Build the meeting report prompt (always in English)
+   * Build the user prompt with task-specific data
    */
-  private static buildMeetingReportPrompt({
+  private static async buildUserPrompt({
     clientName,
     meetingDate,
     meetingTranscription,
-    additionalInfo
+    additionalInfo,
+    locale = 'en'
   }: {
     clientName: string
     meetingDate: string
     meetingTranscription: string
     additionalInfo?: string
-  }): string {
-    return `You are a professional AI assistant helping a marketing professional generate a comprehensive meeting report with actionable steps. Focus on documenting what happened during the meeting and creating clear next steps.
+    locale?: Locale
+  }): Promise<string> {
+    const t = await getTranslations('aiPrompts', locale)
 
-CLIENT: ${clientName}
-
-MEETING INFORMATION:
-- Meeting Date: ${meetingDate}
-- Meeting Transcription:
-${meetingTranscription}${additionalInfo ? `
-
-ADDITIONAL INFORMATION:
-${additionalInfo}` : ''}
-
-INSTRUCTIONS:
-- Create a comprehensive meeting report based on the transcription provided
-- Focus on documenting the meeting content objectively and professionally
-- Structure the report in a clear, professional format with the following sections:
-  1. Meeting Summary
-  2. Key Discussion Points
-  3. Outcomes & Decisions
-  4. Action Items & Next Steps
-  5. Follow-up Requirements
-- Include specific, actionable steps with clear timelines where applicable
-- Base recommendations solely on what was discussed in the meeting${additionalInfo ? `
-- Pay special attention to the additional information provided above` : ''}
-- DO NOT include any disclaimers or AI provider-related content
-- Provide ONLY the meeting report content in a delivery-ready format
-- Make the action items specific, measurable, and achievable
-- Focus on practical next steps that can be implemented immediately
-- Generate the response in English with clear, professional language`
+    // Get the user prompt template and replace placeholders
+    let userPrompt = t('meetingReport.userPromptTemplate')
+    
+    // Replace basic placeholders
+    userPrompt = userPrompt.replace('{{clientName}}', clientName)
+    userPrompt = userPrompt.replace('{{meetingDate}}', meetingDate)
+    userPrompt = userPrompt.replace('{{meetingTranscription}}', meetingTranscription)
+    
+    // Handle additional info
+    if (additionalInfo && additionalInfo.trim()) {
+      const additionalInfoSection = t('meetingReport.additionalInfoSection')
+        .replace('{{additionalInfo}}', additionalInfo)
+      userPrompt = userPrompt.replace('{{additionalInfo}}', additionalInfoSection)
+      
+      const additionalAttentionText = t('meetingReport.additionalAttentionText')
+      userPrompt = userPrompt.replace('{{additionalAttention}}', additionalAttentionText)
+    } else {
+      userPrompt = userPrompt.replace('{{additionalInfo}}', '')
+      userPrompt = userPrompt.replace('{{additionalAttention}}', '')
+    }
+    
+    return userPrompt
   }
 }
