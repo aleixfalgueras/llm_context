@@ -994,6 +994,15 @@
           "formatting": "Professional formatting"
         }
       },
+      "imageCreator": {
+        "title": "Image Creator",
+        "description": "Generate high-quality images using AI from text prompts",
+        "features": {
+          "aiPowered": "AI-powered image generation",
+          "promptLibrary": "Prompt library support",
+          "instantDownload": "Instant download"
+        }
+      },
       "podcastCreator": {
         "title": "Podcast Creator",
         "description": "Generate engaging podcasts with AI-powered Veo3 technology",
@@ -1002,6 +1011,33 @@
           "automated": "Automated podcast generation",
           "quality": "Professional audio quality"
         }
+      }
+    },
+    "imageCreator": {
+      "title": "AI Image Creator",
+      "description": "Generate stunning images from text descriptions using advanced AI",
+      "promptLabel": "Image Description",
+      "promptPlaceholder": "Describe the image you want to create...",
+      "generate": "Generate Image",
+      "regenerate": "Regenerate Image",
+      "generatedImage": "Generated Image",
+      "generatedImageAlt": "AI Generated Image",
+      "validation": {
+        "promptRequired": "Please provide a description for the image"
+      },
+      "success": {
+        "title": "Image Generated!",
+        "description": "Your image has been successfully created"
+      },
+      "error": {
+        "generationFailed": "Failed to generate image. Please try again."
+      },
+      "download": {
+        "button": "Download",
+        "success": "Image Downloaded",
+        "successDescription": "The image has been saved to your downloads folder",
+        "failed": "Download Failed",
+        "failedDescription": "Could not download the image. Please try again."
       }
     },
     "howItWorks": {

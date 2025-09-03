@@ -994,6 +994,15 @@
           "formatting": "Formatage professionnel"
         }
       },
+      "imageCreator": {
+        "title": "Créateur d'Images",
+        "description": "Générez des images de haute qualité à partir de descriptions textuelles avec l'IA",
+        "features": {
+          "aiPowered": "Génération d'images par IA",
+          "promptLibrary": "Support de bibliothèque de prompts",
+          "instantDownload": "Téléchargement instantané"
+        }
+      },
       "podcastCreator": {
         "title": "Créateur de Podcast",
         "description": "Générez des podcasts engageants avec la technologie Veo3 alimentée par l'IA",
@@ -1002,6 +1011,33 @@
           "automated": "Génération de podcast automatisée",
           "quality": "Qualité audio professionnelle"
         }
+      }
+    },
+    "imageCreator": {
+      "title": "Créateur d'Images IA",
+      "description": "Générez des images époustouflantes à partir de descriptions textuelles grâce à l'IA avancée",
+      "promptLabel": "Description de l'image",
+      "promptPlaceholder": "Décrivez l'image que vous souhaitez créer...",
+      "generate": "Générer l'image",
+      "regenerate": "Régénérer l'image",
+      "generatedImage": "Image générée",
+      "generatedImageAlt": "Image générée par IA",
+      "validation": {
+        "promptRequired": "Veuillez fournir une description pour l'image"
+      },
+      "success": {
+        "title": "Image générée !",
+        "description": "Votre image a été créée avec succès"
+      },
+      "error": {
+        "generationFailed": "Échec de la génération de l'image. Veuillez réessayer."
+      },
+      "download": {
+        "button": "Télécharger",
+        "success": "Image téléchargée",
+        "successDescription": "L'image a été enregistrée dans votre dossier de téléchargements",
+        "failed": "Échec du téléchargement",
+        "failedDescription": "Impossible de télécharger l'image. Veuillez réessayer."
       }
     },
     "howItWorks": {
