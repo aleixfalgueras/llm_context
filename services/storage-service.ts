@@ -13,14 +13,13 @@ export class StorageService {
     userId: string,
     clientId: string | null,
     documentId: string,
-    fileName: string,
     content: string,
     mimeType: string = 'text/plain'
   ): Promise<{ path: string; url?: string }> {
     try {
       const filePath = clientId 
-        ? `${userId}/${clientId}/${documentId}_${fileName}`
-        : `${userId}/${documentId}_${fileName}`
+        ? `${userId}/${clientId}/${documentId}.md`
+        : `${userId}/${documentId}.md`
       const contentBuffer = Buffer.from(content, 'utf-8')
 
       const { data, error } = await supabaseServer.storage

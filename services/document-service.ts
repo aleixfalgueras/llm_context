@@ -191,14 +191,12 @@ export class DocumentService {
     }
 
     // Store content in Supabase using the generated document ID
-    const fileName = `${finalDocumentName}.md`
     let finalDocument: Document
     try {
       const storageResult = await StorageService.storeDocumentInStorage(
         userId,
         clientId,
         documentId,
-        fileName,
         content,
         'text/markdown'
       )
