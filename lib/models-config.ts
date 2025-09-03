@@ -1,4 +1,4 @@
-import { ModelTier, ModelTierType, SubscriptionPlanType } from '@/lib/types/subscription-types'
+import {ModelTier, ModelTierType, SubscriptionPlanType} from '@/lib/types/subscription-types'
 import {SubscriptionPlan} from "@prisma/client";
 
 export interface AIModel {
@@ -18,6 +18,8 @@ export const MODEL_IDS = {
   // Secondary Model - Same capabilities as Gemini 2.0 Flash
   OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano',
 } as const
+
+export const IMAGE_GENERATION_MODEL_ID = 'google/gemini-2.5-flash-image-preview'
 
 // Model Tiers Configuration - All tiers use both models
 export const MODEL_TIERS = {
@@ -140,4 +142,4 @@ export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
     default:
       return ModelTier.APPRENTICE
   }
-} 
+}
