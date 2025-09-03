@@ -16,7 +16,7 @@ export const MODEL_IDS = {
   // Primary Model - Used for all AI functionalities
   GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
   // Secondary Model - Same capabilities as Gemini 2.0 Flash
-  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano-2025-04-14',
+  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano',
 } as const
 
 // Model Tiers Configuration - All tiers use both models
