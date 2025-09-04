@@ -24,7 +24,8 @@
       "Bash(mkdir:*)",
       "Bash(sed:*)",
       "Bash(cp:*)",
-      "WebSearch"
+      "WebSearch",
+      "Read(/mnt/c/Users/falgu/Downloads/**)"
     ],
     "deny": []
   }
