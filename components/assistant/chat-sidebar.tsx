@@ -85,12 +85,128 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
     }
   }
 
+  // For mobile, return content without wrapper to let parent handle scrolling
+  if (isMobile) {
+    return (
+      <>
+        {/* Delete All Button - No header for mobile */}
+        {chats.length > 0 && (
+          <Button 
+            onClick={handleDeleteAllChats}
+            variant="outline"
+            className={`w-full transition-all duration-200 ${
+              showDeleteAllConfirm 
+                ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 hover:bg-red-200 dark:hover:bg-red-900/50' 
+                : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
+            } shadow-sm mb-4`}
+            size="default"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <LoadingSpinner size="sm" text={tCommon('deleting')} />
+            ) : (
+              <>
+                <TrashIcon className="w-4 h-4 mr-2" />
+                {showDeleteAllConfirm ? t('clickToConfirm') : t('deleteAllChats')}
+              </>
+            )}
+          </Button>
+        )}
+
+        {/* Chat List - No ScrollArea for mobile */}
+        <div className="space-y-2">
+          {chats.length === 0 ? (
+            <div className="text-center text-gray-500 mt-8">
+              <p>{t('noChatsYet')}</p>
+              <p className="text-sm">{t('startNewConversation')}</p>
+            </div>
+          ) : (
+            chats.map((chat) => {
+              const isCurrentChat = currentChatId === chat.id
+              return (
+                <Card 
+                  key={chat.id} 
+                  className={`p-3 transition-all duration-200 overflow-hidden ${
+                    isCurrentChat 
+                      ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 shadow-md ring-2 ring-blue-500/20' 
+                      : 'hover:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-800'
+                  } ${
+                    loadingChatId === chat.id ? 'opacity-70' : ''
+                  }`}
+                >
+                <div className="grid grid-cols-[1fr,auto] items-center gap-2">
+                  <div 
+                    className="min-w-0 overflow-hidden cursor-pointer"
+                    onClick={() => handleChatNavigation(chat.id)}
+                  >
+                    {editingChatId === chat.id ? (
+                      <Input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        onBlur={() => handleEditSave(chat.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleEditSave(chat.id)
+                          } else if (e.key === 'Escape') {
+                            handleEditCancel()
+                          }
+                        }}
+                        className="h-6 px-1 text-sm"
+                        autoFocus
+                      />
+                    ) : loadingChatId === chat.id ? (
+                      <LoadingSpinner 
+                        size="sm" 
+                        text={tCommon('loading')}
+                        className="text-xs text-gray-600 dark:text-gray-400"
+                      />
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h3 className="font-medium text-sm truncate">{chat.title}</h3>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{chat.title}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                  
+                  {editingChatId !== chat.id && loadingChatId !== chat.id && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                          <MoreHorizontal className="w-3 h-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditStart(chat)}>
+                          <Edit2 className="w-3 h-3 mr-2" />
+                          {t('editTitle')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => deleteChat(chat.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="w-3 h-3 mr-2" />
+                          {tCommon('delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              </Card>
+              )
+            })
+          )}
+        </div>
+      </>
+    )
+  }
+
+  // Desktop layout (unchanged)
   return (
-    <div className={`flex flex-col h-full ${
-      isMobile 
-        ? ' w-full' 
-        : 'border-r w-[300px] min-w-[280px] max-w-[350px]'
-    }`}>
+    <div className="flex flex-col h-full border-r w-[300px] min-w-[280px] max-w-[350px]">
       {/* Header */}
       <div className="p-2 sm:p-4">
         <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">
