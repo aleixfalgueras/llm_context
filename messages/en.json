@@ -411,12 +411,13 @@
       "availableModels": "Available Models",
       "models": {
         "gemini": {
-          "name": "Gemini",
-          "description": "Excels in translation, finance, and marketing tasks."
+          "description": "Cost-effective version of Gemini. Excels in translation, finance, and marketing tasks."
         },
         "chatgpt": {
-          "name": "ChatGPT",
-          "description": "Perfect for creative campaign content, strategic planning, and versatile tasks."
+          "description": "Cost-effective version of ChatGPT. Perfect for creative campaign content, strategic planning, and versatile tasks."
+        },
+        "gemini_image": {
+          "description": "Latest Gemini model version for image generation."
         }
       }
     },

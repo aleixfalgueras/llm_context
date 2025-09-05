@@ -65,7 +65,7 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
                   <div className="flex flex-col gap-1 flex-1">
                     <div className="font-medium">{model.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {model.name === 'Gemini' ? t('models.gemini.description') : t('models.chatgpt.description')}
+                      {t(`models.${model.description}.description`)}
                     </div>
                   </div>
                 </CommandItem>
