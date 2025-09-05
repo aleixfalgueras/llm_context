@@ -124,6 +124,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       model: null,
       cost_usd: 0,
       generation_id: null,
+      images: null,
       chatId,
       createdAt: new Date(),
     }
@@ -136,6 +137,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       model: null,
       cost_usd: 0,
       generation_id: null,
+      images: null,
       chatId,
       createdAt: new Date(),
       isStreaming: true,
@@ -189,6 +191,8 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       }
 
       let streamedContent = ''
+      let streamedImages: any[] = []
+      let buffer = '' // Buffer to accumulate incomplete messages
 
       while (true) {
         const { done, value } = await reader.read()
@@ -198,60 +202,99 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
         }
 
         const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split('\n')
+        buffer += chunk
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              
-              if (data.type === 'content') {
-                // Update streaming content
-                streamedContent += data.content
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessage.id 
-                    ? { ...msg, content: streamedContent }
-                    : msg
-                ))
-              } else if (data.type === 'complete') {
-                // Mark as complete and handle title update
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessage.id 
-                    ? { ...msg, isStreaming: false }
-                    : msg
-                ))
-                
-                clientLogger.messageReceived(streamedContent.length, { chatId });
-                
-                // Handle new chat creation - redirect to the new chat URL
-                if (data.chatId && data.chatId !== chatId) {
-                  clientLogger.info('New chat created, redirecting', { 
-                    chatId: data.chatId,
-                    metadata: { 
-                      originalChatId: chatId,
-                      newChatId: data.chatId 
-                    }
-                  });
-                  // Use window.location to redirect to the new chat
-                  window.location.href = `/assistant/chat/${data.chatId}`;
-                  return;
-                }
+        // Process complete SSE messages (ending with double newline)
+        const messages = buffer.split('\n\n')
+        
+        // Keep the last part (potentially incomplete message) in the buffer
+        buffer = messages.pop() || ''
 
-                // Update title if this was the first message
-                if (data.newTitle && onTitleUpdate) {
-                  onTitleUpdate(data.newTitle)
-                  clientLogger.info('Chat title updated', { 
-                    chatId,
-                    metadata: { newTitle: data.newTitle }
-                  });
+        for (const message of messages) {
+          // Skip empty messages
+          if (!message.trim()) continue
+
+          // Extract data lines from the message
+          const lines = message.split('\n')
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const dataStr = line.slice(6)
+                
+                // Skip [DONE] messages
+                if (dataStr === '[DONE]') continue
+                
+                const data = JSON.parse(dataStr)
+                
+                if (data.type === 'content') {
+                  // Update streaming content
+                  streamedContent += data.content
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, content: streamedContent }
+                      : msg
+                  ))
+                } else if (data.type === 'images') {
+                  // Handle streaming images
+                  if (data.images && Array.isArray(data.images)) {
+                    streamedImages.push(...data.images)
+                    setMessages(prev => prev.map(msg => 
+                      msg.id === assistantMessage.id 
+                        ? { ...msg, images: [...streamedImages] }
+                        : msg
+                    ))
+                    clientLogger.info('Images received in stream', { 
+                      chatId,
+                      metadata: { imageCount: data.images.length }
+                    });
+                  }
+                } else if (data.type === 'complete') {
+                  // Mark as complete and handle title update
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, isStreaming: false }
+                      : msg
+                  ))
+                  
+                  clientLogger.messageReceived(streamedContent.length, { chatId });
+                  
+                  // Handle new chat creation - redirect to the new chat URL
+                  if (data.chatId && data.chatId !== chatId) {
+                    clientLogger.info('New chat created, redirecting', { 
+                      chatId: data.chatId,
+                      metadata: { 
+                        originalChatId: chatId,
+                        newChatId: data.chatId 
+                      }
+                    });
+                    // Use window.location to redirect to the new chat
+                    window.location.href = `/assistant/chat/${data.chatId}`;
+                    return;
+                  }
+
+                  // Update title if this was the first message
+                  if (data.newTitle && onTitleUpdate) {
+                    onTitleUpdate(data.newTitle)
+                    clientLogger.info('Chat title updated', { 
+                      chatId,
+                      metadata: { newTitle: data.newTitle }
+                    });
+                  }
+                } else if (data.type === 'error') {
+                  // Handle streaming error
+                  throw new Error(data.error || 'Streaming error occurred')
                 }
-              } else if (data.type === 'error') {
-                // Handle streaming error
-                throw new Error(data.error || 'Streaming error occurred')
+              } catch (parseError) {
+                // Log parsing errors with more detail
+                clientLogger.warn('Failed to parse SSE data', {
+                  chatId,
+                  metadata: { 
+                    error: parseError instanceof Error ? parseError.message : 'Unknown error',
+                    dataPreview: line.slice(6, 100) + '...' 
+                  }
+                })
               }
-            } catch (parseError) {
-              // Skip malformed JSON lines
-              console.warn('Failed to parse streaming data:', line)
             }
           }
         }

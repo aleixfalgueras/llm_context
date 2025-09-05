@@ -4,7 +4,7 @@
 
 import { logger } from '@/lib/logger'
 
-import {StreamChunk} from "@/lib/types/openrouter-types";
+import {StreamChunk, LlmMessageImage} from "@/lib/types/openrouter-types";
 
 /**
  * Process OpenRouter streaming completion
@@ -13,6 +13,7 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
   let totalContent = ''
   let generationId: string | undefined
   let directCost: number | undefined
+  let collectedImages: LlmMessageImage[] = []
   
   try {
     for await (const chunk of stream) {
@@ -37,6 +38,23 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
         const delta = choice.delta
         const content = delta?.content || ''
         
+        // Check for images in delta (for image generation models)
+        if (delta?.images && Array.isArray(delta.images)) {
+          logger.debug('Images detected in stream chunk', {
+            metadata: { imageCount: delta.images.length }
+          })
+          
+          // Collect images for final chunk
+          collectedImages.push(...delta.images)
+          
+          // Yield intermediate chunk with images
+          yield {
+            content: '',
+            isComplete: false,
+            images: delta.images
+          }
+        }
+        
         if (content) {
           totalContent += content
           
@@ -49,12 +67,13 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
         // Check for completion
         if (choice.finish_reason) {
           
-          // Final chunk with completion info
+          // Final chunk with completion info (images already sent during streaming)
           yield {
             content: '',
             isComplete: true,
             generationId: generationId,
-            cost_usd: directCost
+            cost_usd: directCost,
+            // Don't include images here as they were already sent during streaming
           }
 
           return

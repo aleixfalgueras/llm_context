@@ -3,7 +3,7 @@ import {ChatService} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
 import {openRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
-import {getDefaultModel} from '@/lib/models-config'
+import {getDefaultModel, MODEL_IDS} from '@/lib/models-config'
 import {checkModelAccess} from "@/lib/api/api-validation";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
@@ -138,6 +138,11 @@ export const POST = withEnhancedApi(
       revalidatePath(`/assistant/chat/${chatId}`)
     }
 
+    // Check if the model supports image generation and add modalities if needed
+    const modalities = selectedModel === MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE 
+      ? ['image', 'text'] as ('image' | 'text')[] 
+      : undefined
+
     // Create a streaming response
     const stream = new ReadableStream({
       async start(controller) {
@@ -154,27 +159,51 @@ export const POST = withEnhancedApi(
 
         const encoder = new TextEncoder()
         let fullContent = ''
+        let collectedImages: any[] = []
         let completionStream: any = null
 
         try {
           completionStream = openRouterService.createStreamingCompletion(
-            {model: selectedModel, messages: aiMessages},
+            {
+              model: selectedModel, 
+              messages: aiMessages,
+              ...(modalities && { modalities })
+            },
             {userId, resourceId: chatId}
           );
 
           for await (const chunk of completionStream) {
+            // Handle images in the stream
+            if (chunk.images && chunk.images.length > 0) {
+              collectedImages.push(...chunk.images)
+              
+              // Stream image data to client
+              const imageData = {
+                type: 'images',
+                images: chunk.images
+              }
+              
+              if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(imageData)}\n\n`))) {
+                logger.info('Client disconnected during image streaming', {userId, chatId});
+                return
+              }
+            }
+            
             if (chunk.isComplete) {
               // Final chunk - use cost from chunk (already fetched by OpenRouter service)
               const cost_usd = chunk.cost_usd || 0;
               const generationId = chunk.generationId;
+              // Use collected images (chunk.images is not included in final chunk to avoid duplicates)
+              const finalImages = collectedImages;
 
-              // Save the assistant's response to the database with cost
+              // Save the assistant's response to the database with cost and images
               const assistantMessageResult = await MessageService.createMessage({
                 content: fullContent,
                 role: Role.ASSISTANT,
                 model: selectedModel,
                 cost_usd: cost_usd,
                 generation_id: generationId,
+                ...(finalImages.length > 0 && { images: finalImages }),
                 chat: { connect: { id: chatId } }
               }, userId)
               
