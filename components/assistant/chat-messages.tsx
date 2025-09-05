@@ -8,6 +8,7 @@ import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {useTranslations} from '@/lib/translations/context'
 import {MessageWithStreaming} from "@/lib/types/message-types";
 import {Role} from '@prisma/client'
+import {parseMessageImages} from "@/lib/utils/chat-utils";
 
 interface ChatMessagesProps {
   messages: MessageWithStreaming[]
@@ -68,8 +69,30 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
             </p>
           ) : (
             <>
-              <MarkdownRenderer content={message.content} />
-              {message.isStreaming && message.content && (
+              {message.content && <MarkdownRenderer content={message.content} />}
+              
+              {/* Render images if present */}
+              {(() => {
+                const parsedImages = parseMessageImages(message.images)
+                if (!parsedImages || parsedImages.length === 0) return null
+                
+                return (
+                  <div className="mt-4 space-y-4">
+                    {parsedImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={image.image_url.url}
+                          alt={`Generated image ${index + 1}`}
+                          className="w-full max-w-2xl rounded-lg shadow-lg"
+                          style={{ height: 'auto' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+              
+              {message.isStreaming && (message.content || message.images) && (
                 <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
               )}
             </>

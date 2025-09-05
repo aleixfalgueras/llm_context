@@ -8,7 +8,8 @@ import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
 import {UsageIndicator} from '@/components/subscription/usage-indicator'
 import {useToast} from '@/hooks/use-toast'
-import {Message, Prompt, Role} from '@prisma/client'
+import {Prompt, Role} from '@prisma/client'
+import {MessageWithStreaming} from '@/lib/types/message-types'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {clientLogger} from '@/lib/client-logger'
 import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/models-config'
@@ -63,7 +64,7 @@ interface ChatInputProps {
   isStreaming: boolean
   stopGeneration: () => void
   clientData?: any // Optional client context for prompt variable replacement
-  messages?: Message[] // Messages for export functionality
+  messages?: MessageWithStreaming[] // Messages for export functionality
   chatTitle?: string // Chat title for export
   onDocumentCreated?: (clientId: string, documentId: string) => void // Callback for when chat is exported
   lastUsedModel?: string // Last model used in this chat
@@ -212,7 +213,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     }
   }
 
-  const formatChatForExport = (messages: Message[], title: string, clientData: any): string => {
+  const formatChatForExport = (messages: MessageWithStreaming[], title: string, clientData: any): string => {
     const exportDate = new Date().toLocaleDateString()
     const exportTime = new Date().toLocaleTimeString()
     
