@@ -1,66 +1,83 @@
 import {ModelTier, ModelTierType, SubscriptionPlanType} from '@/lib/types/subscription-types'
 import {SubscriptionPlan} from "@prisma/client";
 
+/**
+ * Description contains the json key in the translation files, starting from namespace 'assistant.modelSelector'.
+ *
+ * Pricing:
+ *  - Input and Output is the dollar price per M tokens.
+ *  - Image Input and Output is the dollar price per Kb
+ */
 export interface AIModel {
   id: string
   name: string
-  description?: string
+  description: string
   provider: 'openai' | 'anthropic' | 'google' | 'meta' | 'other'
   contextLength?: number
-  pricing?: { input: number; output: number }
+  pricing?: { input: number; output: number, imageInput?: number, imageOutput?: number }
   tier?: ModelTierType
 }
 
-// Model ID Constants - Available models for all AI functionalities
 export const MODEL_IDS = {
-  // Primary Model - Used for all AI functionalities
   GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
-  // Secondary Model - Same capabilities as Gemini 2.0 Flash
   OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano',
+  GOOGLE_GEMINI_2_5_FLASH_IMAGE: 'google/gemini-2.5-flash-image-preview'
 } as const
 
-export const IMAGE_GENERATION_MODEL_ID = 'google/gemini-2.5-flash-image-preview'
+export const AVAILABLE_MODELS: AIModel[] = [
+  {
+    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    name: 'Gemini 2.0',
+    description: "gemini",
+    provider: 'google',
+    contextLength: 1000000,
+    pricing: { input: 0.1, output: 0.4 },
+    tier: ModelTier.APPRENTICE
+  },
+  {
+    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    name: 'ChatGPT 4.1',
+    description: "chatgpt",
+    provider: 'openai',
+    contextLength: 1000000,
+    pricing: { input: 0.1, output: 0.4 },
+    tier: ModelTier.APPRENTICE
+  },
+  {
+    id: MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE,
+    name: 'Gemini 2.5 Image',
+    description: "gemini_image",
+    provider: 'google',
+    contextLength: 32768,
+    pricing: { input: 0.3, output: 2.5, imageInput: 1.238, imageOutput: 0.03 },
+    tier: ModelTier.APPRENTICE
+  }
+]
 
-// Model Tiers Configuration - All tiers use both models
+export const IMAGE_GENERATION_MODEL_ID = MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
+
 export const MODEL_TIERS = {
   [ModelTier.APPRENTICE]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
   ],
   [ModelTier.KNIGHT]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
   ],
   [ModelTier.MASTER]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
   ],
   [ModelTier.JEDI]: [
     MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
     MODEL_IDS.OPENAI_GPT_4_1_NANO,
+    MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
   ],
 }
-
-export const AVAILABLE_MODELS: AIModel[] = [
-  // Primary Model - Google Gemini 2.0 Flash 001
-  {
-    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    name: 'Gemini',
-    provider: 'google',
-    contextLength: 1000000,
-    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
-    tier: ModelTier.APPRENTICE
-  },
-  // Secondary Model - OpenAI GPT-4.1 Nano
-  {
-    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    name: 'ChatGPT',
-    provider: 'openai',
-    contextLength: 1000000,
-    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
-    tier: ModelTier.APPRENTICE
-  }
-]
 
 // OpenRouter Configuration Constants
 export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH

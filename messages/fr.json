@@ -411,12 +411,13 @@
       "availableModels": "Modèles Disponibles",
       "models": {
         "gemini": {
-          "name": "Gemini",
           "description": "Excelle dans les tâches de traduction, finance et marketing."
         },
         "chatgpt": {
-          "name": "ChatGPT",
           "description": "Idéal pour le contenu de campagne créatif, la planification stratégique et les tâches polyvalentes."
+        },
+        "gemini_image": {
+          "description": "Image generation"
         }
       }
     },
