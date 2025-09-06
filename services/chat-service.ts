@@ -160,6 +160,7 @@ INSTRUCTIONS:
 
       if (parsedImages && parsedImages.length > 0) {
         const messagesContentArray: MessageContent[] = [] // Create content array with text first, then images
+        // console.debug(parsedImages[0].image_url.url.substring(0, 100))
 
         // Add text message content if present
         if (msg.content) {
@@ -189,6 +190,8 @@ INSTRUCTIONS:
       role: 'system',
       content: systemPrompt,
     })
+
+    console.debug(openRouterMessages)
 
     return openRouterMessages
 

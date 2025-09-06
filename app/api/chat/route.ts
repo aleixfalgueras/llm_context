@@ -1,22 +1,27 @@
 import {MessageService} from '@/services/message-service'
 import {ChatService, NEW_CHAT_DEFAULT_TITLE} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
-import {openRouterService} from '@/services/openrouter'
+import {openRouterService, OpenRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
-import {getDefaultModel, MODEL_IDS} from '@/lib/models-config'
+import {getDefaultModel} from '@/lib/models-config'
 import {checkModelAccess} from "@/lib/api/api-validation";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
 import {Role} from '@prisma/client';
 import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
 import {ChatWithMessages} from "@/lib/types/chat-types";
+import {StreamChunk} from "@/lib/types/openrouter-types";
 
 /**
- * Chat API endpoint that handles streaming responses.
- *
- * Manages the complete chat flow including model access validation, chat creation/retrieval,
- * client context integration, and LLM response streaming. Supports both new chat creation
- * and continuation of existing chats with full client context awareness.
+ * Chat API endpoint that handles streaming responses:
+ *  - Parse request parameters
+ *  - Validates model access
+ *  - Create new chat or retrieve existing chat with messages
+ *  - Get chat's client data, if any
+ *  - Saves user message
+ *  - Updates chat title + revalidate if first message
+ *  - Format all messages for OpenRouter request
+ *  - Creates and return StreamingResponse
  *
  * @param context.req.body.messages - Array of chat messages with content and role
  * @param context.req.body.chatId - Optional existing chat ID (creates new chat if not provided)
@@ -26,17 +31,9 @@ import {ChatWithMessages} from "@/lib/types/chat-types";
  *
  * @returns StreamingResponse - Server-sent events stream with data types:
  *   - `content`: Streaming AI response content chunks
+ *   - `image`:
  *   - `complete`: Final completion signal with chatId and optional newTitle
  *   - `error`: Error information with message details
- *
- * Chat Processing:
- * 1. Parse and validate request parameters
- * 2. Create new chat or retrieve existing chat with messages
- * 3. Build client context system prompt from selected fields
- * 4. Process user message and save to database
- * 5. Stream AI response with real-time content delivery
- * 6. Save complete AI response and update token usage
- *
  */
 export const POST = withEnhancedApi(
   async ({userId, req}: ApiContext) => {
@@ -94,15 +91,11 @@ export const POST = withEnhancedApi(
     // Prepare all chat messages for OpenRouter request
     const formattedMessages = await ChatService.formatMessagesForOpenRouterRequest(chat, lastMessageContent, client, userLocale)
 
-    // Check if the model supports image generation and add modalities if needed
-    const modalities = selectedModel === MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE 
-      ? ['image', 'text'] as ('image' | 'text')[] 
-      : undefined
-
     // Create a streaming response
+    const modalities = OpenRouterService.getModelModalities(selectedModel)
     const stream = new ReadableStream({
       async start(controller) {
-        // Helper function to safely enqueue data
+
         const safeEnqueue = (data: Uint8Array) => {
           try {
             controller.enqueue(data)
@@ -116,17 +109,17 @@ export const POST = withEnhancedApi(
         const encoder = new TextEncoder()
         let fullContent = ''
         let collectedImages: any[] = []
-        let completionStream: any = null
+        let completionStream: AsyncGenerator<StreamChunk, void, unknown> | null = null
 
         try {
           completionStream = openRouterService.createStreamingCompletion(
             {
               model: selectedModel, 
               messages: formattedMessages,
-              ...(modalities && { modalities })
+              modalities
             },
             {userId, resourceId: chatId}
-          );
+          )
 
           for await (const chunk of completionStream) {
             // Handle images in the stream
@@ -167,7 +160,7 @@ export const POST = withEnhancedApi(
                 logger.error('Failed to save assistant message', error as Error, { userId, chatId })
               }
 
-              // Send completion signal, include chatId for new chats
+              // Send completion signal, include chatId and newTitle for new chats
               const completionData = {
                 type: 'complete',
                 chatId: chatId,
@@ -200,13 +193,13 @@ export const POST = withEnhancedApi(
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
                   try {
-                    const partialMessage = await MessageService.createMessage({
+                    await MessageService.createMessage({
                       content: fullContent,
                       role: Role.ASSISTANT,
                       model: selectedModel,
                       cost_usd: 0, // 0 cost for partial message
                       chat: { connect: { id: chatId } }
-                    }, userId)
+                    }, userId);
                     logger.info('Partial assistant message saved', {userId, chatId});
                   } catch (error) {
                     logger.error('Failed to save partial assistant message', error as Error, { userId, chatId })
