@@ -1,15 +1,95 @@
 import OpenAI from 'openai'
-import {processOpenRouterStream} from './stream-handler'
 import {logger} from '@/lib/logger'
 import {
   getDefaultFrequencyPenalty,
   getDefaultMaxTokens,
   getDefaultModel,
   getDefaultPresencePenalty,
-  getDefaultTemperature
+  getDefaultTemperature,
+  MODEL_IDS
 } from '@/lib/models-config'
 import {SubscriptionUsageService} from "@/services/subscription/subscription-usage-service"
-import {OpenRouterCompletionOptions, StreamChunk, UsageTrackingOptions, GenerationStats, ImageGenerationResponse} from "@/lib/types/openrouter-types";
+import {
+  GenerationStats,
+  ImageGenerationResponse,
+  OpenRouterCompletionOptions,
+  StreamChunk,
+  UsageTrackingOptions
+} from "@/lib/types/openrouter-types";
+
+/**
+ * Process OpenRouter streaming completion
+ */
+export async function* processOpenRouterStream(stream: AsyncIterable<any>): AsyncGenerator<StreamChunk, void, unknown> {
+  let totalContent = ''
+  let generationId: string | undefined
+  let directCost: number | undefined
+
+  try {
+    for await (const chunk of stream) {
+      try {
+        // Capture generation ID for fallback usage queries
+        if (chunk.id && !generationId) {
+          generationId = chunk.id
+        }
+
+        // Check for direct cost in chunk.usage (final chunk from OpenRouter)
+        if (chunk.usage?.cost !== undefined) {
+          directCost = chunk.usage.cost
+          logger.debug('Direct cost extracted from stream chunk')
+        }
+
+        const choice = chunk.choices?.[0]
+
+        if (!choice) {
+          continue
+        }
+
+        const delta = choice.delta
+        const content = delta?.content || ''
+
+        // Check for images in delta (for image generation models)
+        if (delta?.images && Array.isArray(delta.images)) {
+          logger.debug(`${delta.images.length} images detected in stream chunk`)
+
+          // Yield intermediate chunk with images
+          yield {
+            content: '',
+            isComplete: false,
+            images: delta.images
+          }
+        }
+
+        if (content) {
+          totalContent += content
+
+          yield {
+            content,
+            isComplete: false
+          }
+        }
+
+        // Check for completion
+        if (choice.finish_reason) {
+
+          // Final chunk with completion info (images already sent during streaming)
+          yield {
+            content: '',
+            isComplete: true,
+            generationId: generationId,
+            cost_usd: directCost
+          }
+        }
+      } catch (chunkError) {
+        logger.error('Error processing stream chunk', chunkError instanceof Error ? chunkError : new Error(String(chunkError)))
+        // Continue processing other chunks
+      }
+    }
+  } catch (error) {
+    logger.error('OpenRouter streaming error', error instanceof Error ? error : new Error(String(error)))
+    throw error
+  }
+}
 
 /**
  * OpenRouter service using OpenAI SDK (OpenRouter is OpenAI-compatible)
@@ -26,6 +106,21 @@ export class OpenRouterService {
         "X-Title":  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       },
     })
+  }
+
+  /**
+   * Get the modalities supported by a model (e.g., text, image)
+   * @param modelId - The model identifier
+   * @returns Array of modalities or undefined for text-only models
+   */
+  static getModelModalities(modelId: string): ('text' | 'image')[] | undefined {
+    // Currently only the Gemini 2.5 Flash Image model supports image generation
+    if (modelId === MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE) {
+      return ['image', 'text']
+    }
+    
+    // Return undefined for text-only models (default behavior)
+    return undefined
   }
 
   /**
@@ -179,6 +274,9 @@ export class OpenRouterService {
     }
 
     try {
+      // Get model modalities to ensure the model supports image generation
+      const modalities = OpenRouterService.getModelModalities(model)
+      
       const completion = await this.client.chat.completions.create({
         model,
         messages: [
@@ -188,7 +286,7 @@ export class OpenRouterService {
           },
         ],
         temperature: 0.7, // Good balance for creative image generation
-        modalities: ['image', 'text'] as any, // Enable image generation
+        modalities: modalities as any, // Add modalities if the model supports them
         stream: false
       })
 

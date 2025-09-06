@@ -4,8 +4,9 @@ import {ChatService} from '@/services/chat-service'
 import {DocumentService} from '@/services/document-service'
 import {checkAuth} from '@/lib/api/api-validation'
 import {revalidatePath} from 'next/cache'
-import {redirect, notFound} from 'next/navigation'
-import {Chat, Message, DocumentType} from '@prisma/client'
+import {redirect} from 'next/navigation'
+import {Chat, DocumentType} from '@prisma/client'
+import {ChatWithMessages} from "@/lib/types/chat-types";
 
 export async function getChats(): Promise<Chat[]> {
   const userId = await checkAuth()
@@ -18,15 +19,9 @@ export async function getChats(): Promise<Chat[]> {
   return result.data
 }
 
-export async function getChatWithMessagesById(chatId: string): Promise<Chat & { messages: Message[] }> {
+export async function getChatWithMessagesById(chatId: string): Promise<ChatWithMessages> {
   const userId = await checkAuth()
-  const result = await ChatService.getChatWithMessagesById(chatId, userId)
-
-  if (!result.success) {
-    notFound()
-  }
-
-  return result.data
+  return await ChatService.getChatWithMessagesById(chatId, userId)
 }
 
 export async function deleteChat(chatId: string) {
