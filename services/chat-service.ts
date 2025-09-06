@@ -5,12 +5,16 @@ import {ClientService} from './client/client-service'
 import {logger} from '@/lib/logger'
 import {Chat, Client, Message, Role} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
-import {AIMessageRole} from '@/lib/types/openrouter-types'
+import {MessageContent, OpenRouterMessage} from '@/lib/types/openrouter-types'
 import {ChatWithMessages} from "@/lib/types/chat-types";
-import {getTranslations, TranslationFunction, Locale} from '@/lib/translations'
+import {getTranslations, Locale} from '@/lib/translations'
+import {parseMessageImages} from '@/lib/utils/chat-utils'
 
+
+export const NEW_CHAT_DEFAULT_TITLE = 'New Chat'
 
 export class ChatService {
+
   /**
    * Delete a chat with ownership verification
    */
@@ -34,8 +38,18 @@ export class ChatService {
 
   /**
    * Build system prompt: general-purpose AI assistant or marketing assistant with optional client context
+   * Fetches necessary translations internally based on the provided locale
+   * 
+   * @param client - Client object or null for general-purpose assistant
+   * @param selectedContextFields - Array of client context fields to include
+   * @param locale - User's selected locale for translations
+   * @returns System prompt string with appropriate context and instructions
    */
-  static buildSystemPrompt(client: any | null, selectedContextFields: string[], tContext: TranslationFunction, tPrompts: TranslationFunction): string {
+  static async buildSystemPrompt(client: any | null, selectedContextFields: string[], locale: Locale = 'en'): Promise<string> {
+    // Fetch translations needed for building the system prompt
+    const tContext = await getTranslations('clientContext', locale)
+    const tPrompts = await getTranslations('aiPrompts', locale)
+    
     if (!client) {
       // general-purpose assistant
       return tPrompts('chat.generalAssistant')
@@ -71,174 +85,144 @@ INSTRUCTIONS:
   /**
    * Process new chat creation with optional client
    */
-  static async createNewChat(userId: string, clientId: string | null = null, contextFields: string[] = []): Promise<DbOperationResult<{
-    chat: ChatWithMessages,
-    client: Pick<Client, 'name'> | null
-  }>> {
+  static async createChat(userId: string,
+                          clientId: string | null = null,
+                          contextFields: string[] = []): Promise<ChatWithMessages> {
+
     // All new chats start with a generic title - will be updated when first message is sent
-    const chatTitle = 'New Chat'
-    const result = await ChatOperations.createChat(userId, clientId, chatTitle, contextFields)
+    const result = await ChatOperations.createChat(userId, clientId, NEW_CHAT_DEFAULT_TITLE, contextFields)
 
     if (!isSuccess(result)) {
-      logger.warn('Failed to create chat', {userId, clientId: clientId || undefined});
-      return result
+      logger.error(result.error)
+      throw new Error(result.error)
     }
 
-    const {chat, client} = result.data
+    return result.data
 
-    logger.info('New chat created', {
-      userId,
-      chatId: chat.id,
-      clientId: clientId || undefined,
-      metadata: {title: chat.title, contextFieldCount: contextFields.length, hasClient: !!client}
-    });
-
-    return {
-      success: true as const,
-      data: {chat, client}
-    }
   }
 
   /**
    * Get user chat with messages using chatId
    */
-  static async getChatWithMessagesById(chatId: string, userId: string): Promise<DbOperationResult<Chat & {
-    messages: Message[]
-  }>> {
+  static async getChatWithMessagesById(chatId: string, userId: string): Promise<ChatWithMessages> {
     const result = await ChatOperations.getChatWithMessagesById(chatId, userId)
 
     if (!isSuccess(result)) {
-      logger.warn('Chat not found', {userId, chatId});
-      return result
+      logger.error(result.error);
+      throw new Error(result.error)
     }
 
-    return {
-      success: true as const,
-      data: result.data
-    }
+    return result.data
+
   }
 
   /**
-   * Prepare chat data for AI processing
-   *
-   * @param chat - Chat object with messages and optional client context
-   * @param userId - User ID for ownership verification
-   * @param newMessageContent - New message content to add
-   * @param locale - User's selected locale for prompts
-   * @returns Formatted messages array with system prompt and optional client context
+   * Get client from chat if it has one
+   * 
+   * @param chat - Chat object with optional clientId
+   * @param userId - User ID for authorization
+   * @returns Client object or null if chat has no client or client not found
    */
-  static async prepareChatForAI(chat: any, userId: string, newMessageContent: string, locale: Locale = 'en'): Promise<DbOperationResult<{
-    aiMessages: Array<{ role: AIMessageRole, content: string }>,
-    client: Client | null,
-    isFirstUserMessage: boolean,
-    selectedContextFields: string[]
-  }>> {
-    const existingMessages = chat.messages
-    const isFirstUserMessage = existingMessages.length === 0
-
-    // Format existing messages for AI provider
-    const aiMessages: Array<{
-      role: AIMessageRole,
-      content: string
-    }> = existingMessages.map((msg: any) => ({
-      role: msg.role === Role.USER ? 'user' as const : 'assistant' as const,
-      content: msg.content,
-    }))
-
-    // Get client information for this chat (if it has a client)
-    let client: Client | null = null
-    if (chat.clientId) {
-      const clientResult = await ClientService.getUserClientById(chat.clientId, userId)
-      if (!clientResult.success) {
-        // Log warning but don't fail - chat might not have a client
-        logger.warn('Client not found for chat', {chatId: chat.id, clientId: chat.clientId || undefined})
-      } else {
-        client = clientResult.data
-      }
+  static async getClientFromChat(chat: ChatWithMessages, userId: string): Promise<Client | null> {
+    if (!chat.clientId) {
+      return null
     }
 
-    // Build system prompt with or without client context
-    const selectedContextFields = chat.contextFields || []
-    const tContext = await getTranslations('clientContext', locale)
-    const tPrompts = await getTranslations('aiPrompts', locale)
-    const systemPrompt = this.buildSystemPrompt(client, selectedContextFields, tContext, tPrompts)
+    const clientResult = await ClientService.getUserClientById(chat.clientId, userId)
+    if (!clientResult.success) {
+      // Log warning but don't fail - chat might not have a client
+      logger.warn('Client not found for chat', {chatId: chat.id, clientId: chat.clientId})
+      return null
+    }
 
-    logger.info(`System prompt created for chat`, {
-      userId,
-      chatId: chat.id,
-      clientId: chat.clientId || undefined,
-      metadata: {
-        systemPrompt,
-        hasClient: !!client,
-        hasClientContext: hasClientContext(selectedContextFields, tContext),
-        contextFields: selectedContextFields,
-        clientName: client?.name || 'N/A',
-        isFirstMessage: isFirstUserMessage
+    return clientResult.data
+  }
+
+  /**
+   * Format chat messages (existing, new, and system prompt) for OpenRotuer request
+   *
+   * @param chat - Chat object with messages and optional client context
+   * @param newMessageContent - New message content to add
+   * @param locale - User's selected locale for prompts
+   * @param client - Client object or null if chat has no client
+   * @returns Formatted messages array with system prompt and optional client context
+   */
+  static async formatMessagesForOpenRouterRequest(chat: ChatWithMessages,
+                                                  newMessageContent: string,
+                                                  client: Client | null,
+                                                  locale: Locale = 'en'): Promise<OpenRouterMessage[]> {
+    const existingMessages = chat.messages
+
+    // Format existing messages for OpenRouter, including images if present
+    const openRouterMessages: OpenRouterMessage[] = existingMessages.map((msg: Message) => {
+      const role = msg.role === Role.USER ? 'user' as const : 'assistant' as const
+      const parsedImages = parseMessageImages(msg.images)
+
+      if (parsedImages && parsedImages.length > 0) {
+        const messagesContentArray: MessageContent[] = [] // Create content array with text first, then images
+
+        // Add text message content if present
+        if (msg.content) {
+          messagesContentArray.push({type: 'text', text: msg.content})
+        }
+
+        messagesContentArray.push(...parsedImages) // Add images - they're already in ImageMessageContent format
+
+        return {role, content: messagesContentArray}
+
+      } else {
+        return {role, content: msg.content}
       }
-    });
-
-    // Add system message
-    aiMessages.unshift({
-      role: 'system',
-      content: systemPrompt,
     })
 
     // Add the new user message
-    aiMessages.push({
+    openRouterMessages.push({
       role: 'user' as const,
       content: newMessageContent,
     })
 
-    return {
-      success: true as const,
-      data: {
-        aiMessages,
-        client,
-        isFirstUserMessage,
-        selectedContextFields
-      }
-    }
+    // Build system prompt with or without client, and if with client, with proper client context
+    const systemPrompt = await this.buildSystemPrompt(client, chat.contextFields || [], locale)
+
+    // Add system message
+    openRouterMessages.unshift({
+      role: 'system',
+      content: systemPrompt,
+    })
+
+    return openRouterMessages
+
   }
 
   /**
-   * Update chat title for first message if still default
+   * Update chat title for first message
    */
-  static async updateChatTitleForFirstMessage(
+  static async updateChatTitleWithFirstMessage(
     chatId: string,
     userId: string,
     clientName: string | null,
-    isFirstMessage: boolean,
-    currentTitle: string,
-    firstMessageContent: string): Promise<DbOperationResult<{ newTitle?: string, updated: boolean
-  }>> {
-    if (isFirstMessage || currentTitle === 'New Chat') {
-      let newTitle: string
+    firstMessageContent: string): Promise<string> {
+    let newTitle: string
 
-      // Generate title based on client name (if any) and first message content
-      if (clientName && firstMessageContent) {
-        newTitle = `${clientName} - ${firstMessageContent.replace(/\n+/g, ' ')}`
-      } else if (firstMessageContent) {
-        newTitle = firstMessageContent.replace(/\n+/g, ' ')
-      } else {
-        // fallback case
-        newTitle = `Chat ${new Date().toLocaleDateString()}`
-      }
-
-      const newTitleTruncated = newTitle.length < 70 ? newTitle : `${newTitle.substring(0, 70)}...`
-      const result = await ChatOperations.updateChatTitleIfDefault(chatId, userId, newTitleTruncated)
-
-      if (isSuccess(result) && result.data.updated) {
-        return {
-          success: true as const,
-          data: {newTitle, updated: true}
-        }
-      }
+    // Generate title based on client name (if any) and first message content
+    if (clientName && firstMessageContent) {
+      newTitle = `${clientName} - ${firstMessageContent.replace(/\n+/g, ' ')}`
+    } else if (firstMessageContent) {
+      newTitle = firstMessageContent.replace(/\n+/g, ' ')
+    } else {
+      // fallback case
+      newTitle = `Chat ${new Date().toLocaleDateString()}`
     }
 
-    return {
-      success: true as const,
-      data: {updated: false}
+    const newTitleTruncated = newTitle.length < 70 ? newTitle : `${newTitle.substring(0, 70)}...`
+    const result = await ChatOperations.updateChatTitle(chatId, userId, newTitleTruncated)
+
+    if (!isSuccess(result)) {
+      logger.error(`Failed to update chat title: ${result.error}`)
+      throw new Error(result.error)
     }
+
+    return newTitle
   }
 
   /**

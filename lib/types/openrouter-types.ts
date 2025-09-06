@@ -1,16 +1,28 @@
 export type AIMessageRole = 'system' | 'user' | 'assistant'
 
-// Image type for messages and streaming
-export type LlmMessageImage = {
+export type ImageMessageContent = {
   type: 'image_url'
   image_url: {
     url: string // Base64 data URL
   }
 }
 
+export type TextMessageContent = {
+  type: 'text'
+  text: string
+}
+
+export type MessageContent = TextMessageContent | ImageMessageContent
+
+// Message type that supports both simple string and complex content arrays
+export type OpenRouterMessage = {
+  role: AIMessageRole
+  content: string | MessageContent[]
+}
+
 export interface OpenRouterCompletionOptions {
   model?: string
-  messages: Array<{ role: AIMessageRole, content: string }>
+  messages: OpenRouterMessage[]
   temperature?: number
   max_tokens?: number
   presence_penalty?: number
@@ -24,7 +36,7 @@ export interface StreamChunk {
   isComplete: boolean
   generationId?: string // For fallback usage queries
   cost_usd?: number // Cost in USD, populated when isComplete is true
-  images?: LlmMessageImage[] // Images generated during streaming (for image-capable models)
+  images?: ImageMessageContent[] // Images generated during streaming (for image-capable models)
 }
 
 export interface UsageTrackingOptions {
