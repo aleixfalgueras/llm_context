@@ -4,7 +4,7 @@
 
 import { logger } from '@/lib/logger'
 
-import {StreamChunk, LlmMessageImage} from "@/lib/types/openrouter-types";
+import {StreamChunk, ImageMessageContent} from "@/lib/types/openrouter-types";
 
 /**
  * Process OpenRouter streaming completion
@@ -13,7 +13,7 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
   let totalContent = ''
   let generationId: string | undefined
   let directCost: number | undefined
-  let collectedImages: LlmMessageImage[] = []
+  let collectedImages: ImageMessageContent[] = []
   
   try {
     for await (const chunk of stream) {

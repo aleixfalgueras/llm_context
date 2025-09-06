@@ -61,6 +61,7 @@ export class OpenRouterService {
       const stream = await this.client.chat.completions.create({
         ...finalOptions,
         model: finalOptions.model,
+        messages: finalOptions.messages as any, // Cast to any for complex message types
         stream: true,
         // Cast modalities for OpenRouter-specific support
         ...(finalOptions.modalities && { modalities: finalOptions.modalities as any })
@@ -108,6 +109,7 @@ export class OpenRouterService {
       const completion = await this.client.chat.completions.create({
         ...finalOptions,
         model: finalOptions.model,
+        messages: finalOptions.messages as any, // Cast to any for complex message types
         stream: false,
         // Cast modalities for OpenRouter-specific support
         ...(finalOptions.modalities && { modalities: finalOptions.modalities as any })

@@ -1,6 +1,6 @@
 import {prisma} from '@/lib/prisma'
 import {BaseOperations} from './base-operations'
-import {Chat, Client, Message} from '@prisma/client'
+import {Chat, Message} from '@prisma/client'
 import {DbOperationResult} from '@/lib/types/database-types'
 import {ChatWithMessages} from "@/lib/types/chat-types";
 
@@ -56,24 +56,19 @@ export class ChatOperations extends BaseOperations {
   /**
    * Create a new chat with optional client validation
    */
-  static async createChat(userId: string, clientId: string | null, title: string, contextFields: string[] = []): Promise<DbOperationResult<{
-    chat: ChatWithMessages,
-    client: Pick<Client, 'name'> | null
-  }>> {
+  static async createChat(userId: string, clientId: string | null, title: string, contextFields: string[] = []): Promise<DbOperationResult<ChatWithMessages>> {
     try {
-      let client: Pick<Client, 'name'> | null = null
-      
       // If clientId provided, verify client exists and belongs to user
       if (clientId) {
-        client = await prisma.client.findFirst({
+        const clientExists = await prisma.client.findFirst({
           where: {
             id: clientId,
             userId
           },
-          select: {name: true}
+          select: {id: true}
         })
 
-        if (!client) {
+        if (!clientExists) {
           return {
             success: false as const,
             error: 'Client not found'
@@ -100,7 +95,7 @@ export class ChatOperations extends BaseOperations {
 
       return {
         success: true as const,
-        data: {chat, client}
+        data: chat
       }
     } catch (error) {
       console.error('Error creating chat:', error)
@@ -148,37 +143,6 @@ export class ChatOperations extends BaseOperations {
       return {
         success: false as const,
         error: 'Failed to retrieve chat'
-      }
-    }
-  }
-
-  /**
-   * Update chat title if it matches the default title
-   */
-  static async updateChatTitleIfDefault(chatId: string, userId: string, newTitle: string, defaultTitle: string = 'New Chat'): Promise<DbOperationResult<{
-    updated: boolean
-  }>> {
-    try {
-      const result = await prisma.chat.updateMany({
-        where: {
-          id: chatId,
-          userId,
-          title: defaultTitle
-        },
-        data: {
-          title: newTitle
-        }
-      })
-
-      return {
-        success: true as const,
-        data: {updated: result.count > 0}
-      }
-    } catch (error) {
-      console.error('Error updating chat title:', error)
-      return {
-        success: false as const,
-        error: 'Failed to update chat title'
       }
     }
   }

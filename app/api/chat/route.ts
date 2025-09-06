@@ -1,5 +1,5 @@
 import {MessageService} from '@/services/message-service'
-import {ChatService} from '@/services/chat-service'
+import {ChatService, NEW_CHAT_DEFAULT_TITLE} from '@/services/chat-service'
 import {revalidatePath} from 'next/cache'
 import {openRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
@@ -9,17 +9,15 @@ import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middlewa
 import {SubscriptionErrorCode} from "@/services/error-codes";
 import {Role} from '@prisma/client';
 import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
+import {ChatWithMessages} from "@/lib/types/chat-types";
 
 /**
- * Chat API endpoint that handles AI chat interactions with streaming responses.
+ * Chat API endpoint that handles streaming responses.
  *
  * Manages the complete chat flow including model access validation, chat creation/retrieval,
- * client context integration, and AI response streaming. Supports both new chat creation
+ * client context integration, and LLM response streaming. Supports both new chat creation
  * and continuation of existing chats with full client context awareness.
  *
- * @param context - ApiContext object containing userId and request
- * @param context.userId - Authenticated user ID (provided by withEnhancedApi middleware)
- * @param context.req - NextRequest object containing chat data
  * @param context.req.body.messages - Array of chat messages with content and role
  * @param context.req.body.chatId - Optional existing chat ID (creates new chat if not provided)
  * @param context.req.body.model - AI model to use (defaults to system default if not specified)
@@ -31,11 +29,6 @@ import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
  *   - `complete`: Final completion signal with chatId and optional newTitle
  *   - `error`: Error information with message details
  *
- * Authentication & Validation:
- * 1. Authentication handled by withEnhancedApi middleware
- * 2. Token usage validation and limits checking
- * 3. Model access verification based on subscription tier
- *
  * Chat Processing:
  * 1. Parse and validate request parameters
  * 2. Create new chat or retrieve existing chat with messages
@@ -44,17 +37,6 @@ import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
  * 5. Stream AI response with real-time content delivery
  * 6. Save complete AI response and update token usage
  *
- * Error Handling:
- * - MODEL_ACCESS_DENIED: Subscription tier doesn't allow requested model
- * - Chat creation/retrieval failures return appropriate error messages
- * - Streaming errors are caught and sent as error events
- * - Client disconnects during streaming save partial messages
- *
- * Cost Tracking:
- * - Cost fetched once by OpenRouter service via generation stats API
- * - Returned in final stream chunk to avoid duplicate API calls
- * - Stored with each assistant message for historical tracking
- * - User billing period totals tracked separately via SubscriptionUsageService
  */
 export const POST = withEnhancedApi(
   async ({userId, req}: ApiContext) => {
@@ -72,71 +54,45 @@ export const POST = withEnhancedApi(
       throw new Error(SubscriptionErrorCode.MODEL_ACCESS_DENIED)
     }
 
-    let chat: any = null;
-    let client: any = null;
+    let chat: ChatWithMessages | null;
 
-    // LAZY CHAT CREATION: If no chatId provided, create a new chat first
+    // If it's first message (no chatId), create new chat, else, get chat with existing messages
     if (!chatId) {
-      const newChatResult = await ChatService.createNewChat(userId, clientId || null, contextFields || [])
-      
-      if (!newChatResult.success) {
-        throw new Error(newChatResult.error)
-      }
-
-      chat = newChatResult.data.chat
-      client = newChatResult.data.client
+      chat = await ChatService.createChat(userId, clientId || null, contextFields || [])
       chatId = chat.id
     } else {
-      // Get existing chat
-      const existingChatResult = await ChatService.getChatWithMessagesById(chatId, userId)
-      
-      if (!existingChatResult.success) {
-        throw new Error(existingChatResult.error)
-      }
-
-      chat = existingChatResult.data
+      chat = await ChatService.getChatWithMessagesById(chatId, userId)
     }
 
-    // Prepare chat data for AI processing
-    const lastMessage = messages[messages.length - 1]
-    const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content, userLocale)
-    if (!prepareChatForAIResult.success) {
-      throw new Error('Failed to prepare chat for AI processing')
-    }
-    const { aiMessages, client: chatClient, isFirstUserMessage } = prepareChatForAIResult.data
-    
-    // Use the client from the preparation if we don't have one yet (for existing chats with client associated)
-    if (!client) {
-      client = chatClient
-    }
+    // get chat client data, if any
+    const client = await ChatService.getClientFromChat(chat, userId)
 
     // Save the user message to the database
-    const userMessageResult = await MessageService.createMessage({
-      content: lastMessage.content,
+    const lastMessageContent = messages[messages.length - 1].content
+    await MessageService.createMessage({
+      content: lastMessageContent,
       role: Role.USER,
       model: selectedModel,
       cost_usd: 0,
       chat: { connect: { id: chatId } }
     }, userId)
-    
-    if (!userMessageResult.success) {
-      throw new Error(userMessageResult.error || 'Failed to save user message' )
-    }
 
-    // If this is the first user message, update the chat title only if it's still the default
-    const titleUpdateResult = await ChatService.updateChatTitleForFirstMessage(
-      chatId, 
-      userId, 
-      client?.name || null, 
-      isFirstUserMessage, 
-      chat.title,
-      lastMessage.content
-    )
-    if (titleUpdateResult.success && titleUpdateResult.data.updated) {
-
+    // If this is the first user message or chat title is default value, update chat title
+    let newTitle: string | undefined
+    const isFirstUserMessage = chat.messages.length === 0
+    if (isFirstUserMessage || chat.title === NEW_CHAT_DEFAULT_TITLE) {
+      newTitle = await ChatService.updateChatTitleWithFirstMessage(
+        chatId,
+        userId,
+        client?.name || null,
+        lastMessageContent
+      )
       // Revalidate the chat page to show the updated title
       revalidatePath(`/assistant/chat/${chatId}`)
     }
+
+    // Prepare all chat messages for OpenRouter request
+    const formattedMessages = await ChatService.formatMessagesForOpenRouterRequest(chat, lastMessageContent, client, userLocale)
 
     // Check if the model supports image generation and add modalities if needed
     const modalities = selectedModel === MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE 
@@ -166,7 +122,7 @@ export const POST = withEnhancedApi(
           completionStream = openRouterService.createStreamingCompletion(
             {
               model: selectedModel, 
-              messages: aiMessages,
+              messages: formattedMessages,
               ...(modalities && { modalities })
             },
             {userId, resourceId: chatId}
@@ -197,26 +153,25 @@ export const POST = withEnhancedApi(
               const finalImages = collectedImages;
 
               // Save the assistant's response to the database with cost and images
-              const assistantMessageResult = await MessageService.createMessage({
-                content: fullContent,
-                role: Role.ASSISTANT,
-                model: selectedModel,
-                cost_usd: cost_usd,
-                generation_id: generationId,
-                ...(finalImages.length > 0 && { images: finalImages }),
-                chat: { connect: { id: chatId } }
-              }, userId)
-              
-              if (!assistantMessageResult.success) {
-                logger.error('Failed to save assistant message',
-                  new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
+              try {
+                await MessageService.createMessage({
+                  content: fullContent,
+                  role: Role.ASSISTANT,
+                  model: selectedModel,
+                  cost_usd: cost_usd,
+                  generation_id: generationId,
+                  ...(finalImages.length > 0 && { images: finalImages }),
+                  chat: { connect: { id: chatId } }
+                }, userId);
+              } catch (error) {
+                logger.error('Failed to save assistant message', error as Error, { userId, chatId })
               }
 
-              // Send completion signal
+              // Send completion signal, include chatId for new chats
               const completionData = {
                 type: 'complete',
-                chatId: chatId, // Include chatId for new chats
-                newTitle: titleUpdateResult.success && titleUpdateResult.data.updated ? titleUpdateResult.data.newTitle : undefined
+                chatId: chatId,
+                newTitle: newTitle
               }
 
               if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))) {
@@ -244,18 +199,17 @@ export const POST = withEnhancedApi(
 
                 if (fullContent.trim()) {
                   // Save the partial assistant's response to the database
-                  const partialMessageResult = await MessageService.createMessage({
-                    content: fullContent,
-                    role: Role.ASSISTANT,
-                    model: selectedModel,
-                    cost_usd: 0, // 0 cost for partial message
-                    chat: { connect: { id: chatId } }
-                  }, userId)
-                  if (partialMessageResult.success) {
+                  try {
+                    const partialMessage = await MessageService.createMessage({
+                      content: fullContent,
+                      role: Role.ASSISTANT,
+                      model: selectedModel,
+                      cost_usd: 0, // 0 cost for partial message
+                      chat: { connect: { id: chatId } }
+                    }, userId)
                     logger.info('Partial assistant message saved', {userId, chatId});
-                  } else {
-                    logger.error('Failed to save partial assistant message',
-                      new Error(partialMessageResult.error || 'Unknown error'), { userId, chatId })
+                  } catch (error) {
+                    logger.error('Failed to save partial assistant message', error as Error, { userId, chatId })
                   }
                 }
                 return
