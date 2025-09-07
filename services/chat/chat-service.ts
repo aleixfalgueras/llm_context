@@ -153,15 +153,17 @@ INSTRUCTIONS:
                                                   locale: Locale = 'en'): Promise<OpenRouterMessage[]> {
     const existingMessages = chat.messages
 
-    // Format existing messages for OpenRouter, including images if present
+    // Format existing messages for OpenRouter, text content only
     const openRouterMessages: OpenRouterMessage[] = existingMessages.map((msg: Message) => {
       const role = msg.role === Role.USER ? 'user' as const : 'assistant' as const
+      return {role, content: msg.content}
+
+      /* image messages formatting code - disabled for now
       const parsedImages = parseMessageImages(msg.images)
 
       if (parsedImages && parsedImages.length > 0) {
         const messagesContentArray: MessageContent[] = [] // Create content array with text first, then images
         // console.debug(parsedImages[0].image_url.url.substring(0, 100))
-
         // Add text message content if present
         if (msg.content) {
           messagesContentArray.push({type: 'text', text: msg.content})
@@ -170,10 +172,7 @@ INSTRUCTIONS:
         messagesContentArray.push(...parsedImages) // Add images - they're already in ImageMessageContent format
 
         return {role, content: messagesContentArray}
-
-      } else {
-        return {role, content: msg.content}
-      }
+       */
     })
 
     // Add the new user message
