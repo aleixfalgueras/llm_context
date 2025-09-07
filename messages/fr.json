@@ -7,7 +7,7 @@
   "navigation": {
     "clients": "Clients",
     "prompts": "Prompts",
-    "assistant": "Assistant IA",
+    "assistant": "MIA",
     "aiServices": "Services IA",
     "affiliation": "Affiliation",
     "feedback": "Commentaires",
@@ -403,7 +403,7 @@
       "generalChat": "Discussion Générale",
       "exportDate": "Date d'Export",
       "you": "Vous",
-      "aiAssistant": "Assistant IA"
+      "aiAssistant": "MIA"
     },
     "modelSelector": {
       "searchPlaceholder": "Rechercher des modèles...",
