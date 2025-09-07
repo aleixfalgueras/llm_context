@@ -1,6 +1,6 @@
 'use server'
 
-import {ChatService} from '@/services/chat-service'
+import {ChatService} from '@/services/chat/chat-service'
 import {DocumentService} from '@/services/document-service'
 import {checkAuth} from '@/lib/api/api-validation'
 import {revalidatePath} from 'next/cache'

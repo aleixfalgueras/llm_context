@@ -15,7 +15,9 @@ import {
   OpenRouterCompletionOptions,
   StreamChunk,
   UsageTrackingOptions
-} from "@/lib/types/openrouter-types";
+} from "@/lib/types/openrouter-types"
+import {StreamingProvider} from "@/lib/types/streaming-types"
+import {StreamErrorHandler} from "@/services/chat/stream-error-utils"
 
 /**
  * Process OpenRouter streaming completion
@@ -81,12 +83,21 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
           }
         }
       } catch (chunkError) {
-        logger.error('Error processing stream chunk', chunkError instanceof Error ? chunkError : new Error(String(chunkError)))
+        StreamErrorHandler.logStreamError(chunkError as Error, {
+          phase: 'chunk_processing',
+          metadata: { chunkData: JSON.stringify(chunk).substring(0, 200) }
+        })
         // Continue processing other chunks
       }
     }
   } catch (error) {
-    logger.error('OpenRouter streaming error', error instanceof Error ? error : new Error(String(error)))
+    StreamErrorHandler.logStreamError(error as Error, {
+      phase: 'openrouter_streaming',
+      metadata: { 
+        totalContentLength: totalContent.length,
+        generationId
+      }
+    })
     throw error
   }
 }
@@ -94,7 +105,7 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
 /**
  * OpenRouter service using OpenAI SDK (OpenRouter is OpenAI-compatible)
  */
-export class OpenRouterService {
+export class OpenRouterService implements StreamingProvider {
   private client: OpenAI
 
   constructor() {
@@ -183,7 +194,14 @@ export class OpenRouterService {
         }
       }
     } catch (error) {
-      logger.error('OpenRouter streaming error', error instanceof Error ? error : new Error(String(error)))
+      StreamErrorHandler.logStreamError(error as Error, {
+        userId: usageOptions?.userId,
+        phase: 'streaming_completion',
+        metadata: { 
+          model: finalOptions.model,
+          messageCount: finalOptions.messages.length
+        }
+      })
       throw error
     }
   }
@@ -232,7 +250,14 @@ export class OpenRouterService {
         cost_usd: trackedCost ?? undefined 
       }
     } catch (error) {
-      logger.error('OpenRouter completion error', error instanceof Error ? error : new Error(String(error)))
+      StreamErrorHandler.logStreamError(error as Error, {
+        userId: usageOptions?.userId,
+        phase: 'completion',
+        metadata: { 
+          model: finalOptions.model,
+          messageCount: finalOptions.messages.length
+        }
+      })
       throw error
     }
   }
@@ -338,10 +363,12 @@ export class OpenRouterService {
         cost_usd: trackedCost ?? undefined
       }
     } catch (error) {
-      logger.error('Image generation error', error instanceof Error ? error : new Error(String(error)), {
-        metadata: {
-          userId: usageOptions?.userId,
-          model
+      StreamErrorHandler.logStreamError(error as Error, {
+        userId: usageOptions?.userId,
+        phase: 'image_generation',
+        metadata: { 
+          model,
+          promptLength: prompt.length
         }
       })
       
