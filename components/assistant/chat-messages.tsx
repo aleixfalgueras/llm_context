@@ -3,12 +3,13 @@
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Loader2, User} from 'lucide-react'
-import {memo, useEffect, useRef} from 'react'
+import {memo, useEffect, useRef, useState} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {useTranslations} from '@/lib/translations/context'
 import {MessageWithStreaming} from "@/lib/types/message-types";
 import {Role} from '@prisma/client'
 import {parseMessageImages} from "@/lib/utils/chat-utils";
+import {ImageViewDialog} from '@/components/ui/image-view-dialog'
 
 interface ChatMessagesProps {
   messages: MessageWithStreaming[]
@@ -25,6 +26,7 @@ interface MessageBubbleProps {
 const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubbleProps) => {
   const t = useTranslations('assistant')
   const isUser = message.role === Role.USER
+  const [selectedImage, setSelectedImage] = useState<{url: string, index: number} | null>(null)
   
   return (
     <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -83,8 +85,9 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
                         <img
                           src={image.image_url.url}
                           alt={`Generated image ${index + 1}`}
-                          className="w-full max-w-2xl rounded-lg shadow-lg"
+                          className="w-full max-w-2xl rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02]"
                           style={{ height: 'auto' }}
+                          onClick={() => setSelectedImage({ url: image.image_url.url, index: index + 1 })}
                         />
                       </div>
                     ))}
@@ -99,6 +102,17 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
           )}
         </div>
       </div>
+      
+      {/* Image View Dialog */}
+      {selectedImage && (
+        <ImageViewDialog
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          imageUrl={selectedImage.url}
+          imageAlt={`Generated image`}
+          imageIndex={selectedImage.index}
+        />
+      )}
     </div>
   )
 })
