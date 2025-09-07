@@ -206,7 +206,7 @@ export function ChatSidebar({ chats, currentChatId, hideNewChatButton = false, i
 
   // Desktop layout (unchanged)
   return (
-    <div className="flex flex-col h-full border-r w-[300px] min-w-[280px] max-w-[350px]">
+    <div className="flex flex-col h-full border-r w-[320px] min-w-[280px] max-w-[350px]">
       {/* Header */}
       <div className="p-2 sm:p-4">
         <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-1">

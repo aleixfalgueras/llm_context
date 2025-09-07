@@ -1,17 +1,12 @@
 'use client'
 
-import { useUsageInfo } from '@/hooks/subscription/use-usage-info'
-import { 
-  formatCost, 
-  getUsagePercentage, 
-  getUsageStatusColor,
-  formatUsageDisplay 
-} from '@/lib/utils/cost-formatting'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { DollarSign, AlertCircle } from 'lucide-react'
-import { cn } from '@/lib/utils/general'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useTranslations } from '@/lib/translations/context'
+import {useUsageInfo} from '@/hooks/subscription/use-usage-info'
+import {formatUsageDisplay} from '@/components/subscription/usage-cost-formatting'
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip'
+import {AlertCircle, DollarSign} from 'lucide-react'
+import {cn} from '@/lib/utils/general'
+import {Skeleton} from '@/components/ui/skeleton'
+import {useTranslations} from '@/lib/translations/context'
 
 export function UsageIndicator() {
   const { usageInfo, isLoading, error } = useUsageInfo()
@@ -68,13 +63,7 @@ export function UsageIndicator() {
             <div className="flex items-center gap-2">
               <div className="relative h-2 w-20 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
                 <div
-                  className={cn(
-                    "h-full transition-all duration-300 ease-in-out",
-                    usageDisplay.percentage >= 90 && "bg-red-500",
-                    usageDisplay.percentage >= 75 && usageDisplay.percentage < 90 && "bg-orange-500",
-                    usageDisplay.percentage >= 50 && usageDisplay.percentage < 75 && "bg-yellow-500",
-                    usageDisplay.percentage < 50 && "bg-green-500"
-                  )}
+                  className={cn("h-full transition-all duration-300 ease-in-out", usageDisplay.bgColor)}
                   style={{ width: `${Math.min(usageDisplay.percentage, 100)}%` }}
                 />
               </div>

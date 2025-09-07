@@ -41,20 +41,20 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
           </>
         ) : (
           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-            {message.isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : '🤖'}
+            🤖
           </AvatarFallback>
         )}
       </Avatar>
 
       {/* Message Content */}
-      <div className={`max-w-[70%] space-y-1 ${isUser ? 'order-1' : 'order-2'}`}>
+      <div className={`${isUser ? 'max-w-[70%]' : 'flex-1'} space-y-1 ${isUser ? 'order-1' : 'order-2'}`}>
         {/* Metadata */}
         <div className={`flex items-center gap-2 text-sm ${isUser ? 'justify-end' : 'justify-start'}`}>
           <span className="font-medium">
             {isUser ? (userName || t('chat.you')) : `${t('chat.aiAssistant')}`}
           </span>
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {isUser ? new Date(message.createdAt).toLocaleTimeString() : (message.model ? ` ${message.model} ` : '')}
+            {isUser ? new Date(message.createdAt).toLocaleDateString() : (message.model ? ` ${message.model} ` : '')}
           </span>
           {message.isStreaming && (
             <span className="text-xs text-blue-500 dark:text-blue-400">
@@ -63,8 +63,8 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
           )}
         </div>
 
-        {/* Message Bubble */}
-        <div className={`border rounded-lg p-3`}>
+        {/* Message Content - Bubble only for user messages */}
+        <div className={isUser ? 'border rounded-lg p-3' : 'pr-5'}>
           {isUser ? (
             <p className="whitespace-pre-wrap">
               {message.content}
