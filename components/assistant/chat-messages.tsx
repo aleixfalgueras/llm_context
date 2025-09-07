@@ -51,10 +51,10 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
         {/* Metadata */}
         <div className={`flex items-center gap-2 text-sm ${isUser ? 'justify-end' : 'justify-start'}`}>
           <span className="font-medium">
-            {isUser ? (userName || t('chat.you')) : t('chat.aiAssistant')}
+            {isUser ? (userName || t('chat.you')) : `${t('chat.aiAssistant')}`}
           </span>
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {new Date(message.createdAt).toLocaleTimeString()}
+            {isUser ? new Date(message.createdAt).toLocaleTimeString() : (message.model ? ` ${message.model} ` : '')}
           </span>
           {message.isStreaming && (
             <span className="text-xs text-blue-500 dark:text-blue-400">
