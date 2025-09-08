@@ -40,7 +40,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
 export const adminPrisma = globalForPrisma.adminPrisma ?? new PrismaClient({
   datasources: {
     db: {
-      url: buildConnectionUrl(process.env.DIRECT_URL)
+      url: process.env.DIRECT_URL
     }
   }
 })
