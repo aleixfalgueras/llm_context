@@ -190,7 +190,7 @@ INSTRUCTIONS:
       content: systemPrompt,
     })
 
-    console.debug(openRouterMessages)
+    // console.debug(openRouterMessages)
 
     return openRouterMessages
 
