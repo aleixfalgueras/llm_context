@@ -52,7 +52,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   },
   {
     id: MODEL_IDS.OPENAI_GPT_5_NANO,
-    name: 'ChatGPT 5 Nano',
+    name: 'Chat GPT 5 Nano',
     description: "chatgpt_eco",
     provider: 'openai',
     contextLength: 400000,
@@ -60,7 +60,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   },
   {
     id: MODEL_IDS.OPENAI_GPT_5_CHAT,
-    name: 'ChatGPT 5',
+    name: 'Chat GPT 5',
     description: "chatgpt_pro",
     provider: 'openai',
     contextLength: 128000,
