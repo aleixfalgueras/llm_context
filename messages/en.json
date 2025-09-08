@@ -410,14 +410,23 @@
       "noModelsFound": "No models found.",
       "availableModels": "Available Models",
       "models": {
-        "gemini": {
-          "description": "Cost-effective version of Gemini. Excels in translation, finance, and marketing tasks."
+        "gemini_eco": {
+          "description": "Cost-effective version of Gemini. Great for quick responses and everyday chatting without breaking the budget"
         },
-        "chatgpt": {
-          "description": "Cost-effective version of ChatGPT. Perfect for creative campaign content, strategic planning, and versatile tasks."
+        "gemini_pro": {
+          "description": "The most powerful Gemini model designed for deeper reasoning and more complex conversations, perfect for business or creative tasks"
         },
         "gemini_image": {
-          "description": "Latest Gemini model version for image generation."
+          "description": "Advanced Gemini model with image creation capabilities, making it perfect for both conversation and visual content"
+        },
+        "chatgpt_eco": {
+          "description": "Cost-effective version of ChatGPT. Lightweight, fast, and ideal for casual chats or simple requests"
+        },
+        "chatgpt_pro": {
+          "description": "OpenAI’s flagship model for natural, fluent conversations and versatile problem-solving"
+        },
+        "perplexity": {
+          "description": "A reasoning-focused model that excels at research-style answers, structured thinking, and reliable explanations."
         }
       }
     },
