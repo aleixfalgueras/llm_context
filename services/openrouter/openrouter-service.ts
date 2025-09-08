@@ -1,11 +1,6 @@
 import OpenAI from 'openai'
 import {logger} from '@/lib/logger'
 import {
-  getDefaultFrequencyPenalty,
-  getDefaultMaxTokens,
-  getDefaultModel,
-  getDefaultPresencePenalty,
-  getDefaultTemperature,
   MODEL_IDS
 } from '@/lib/models-config'
 import {SubscriptionUsageService} from "@/services/subscription/subscription-usage-service"
@@ -18,6 +13,12 @@ import {
 } from "@/lib/types/openrouter-types"
 import {StreamingProvider} from "@/lib/types/streaming-types"
 import {StreamErrorHandler} from "@/services/chat/stream-error-utils"
+import {
+  getDefaultFrequencyPenalty,
+  getDefaultMaxTokens, getDefaultModel,
+  getDefaultPresencePenalty,
+  getDefaultTemperature
+} from "@/lib/utils/model-utils";
 
 /**
  * Process OpenRouter streaming completion

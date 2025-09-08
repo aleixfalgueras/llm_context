@@ -12,9 +12,9 @@ import {useDocumentGenerator} from '@/hooks/document/use-document-generator'
 import type {BaseAIServiceDialogConfig, ValidationResult} from './base-ai-service-dialog'
 import {BaseAIServiceDialog} from './base-ai-service-dialog'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
-import {getDefaultModel} from '@/lib/models-config'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
 import {useTranslations} from '@/lib/translations/context'
+import {getDefaultModel} from "@/lib/utils/model-utils";
 
 interface CustomDocumentGeneratorDialogProps {
   isOpen: boolean

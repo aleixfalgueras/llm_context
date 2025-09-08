@@ -2,7 +2,7 @@
 
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {Loader2, User} from 'lucide-react'
+import {User} from 'lucide-react'
 import {memo, useEffect, useRef, useState} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {useTranslations} from '@/lib/translations/context'
@@ -10,6 +10,7 @@ import {MessageWithStreaming} from "@/lib/types/message-types";
 import {Role} from '@prisma/client'
 import {parseMessageImages} from "@/lib/utils/chat-utils";
 import {ImageViewDialog} from '@/components/ui/image-view-dialog'
+import {getModelDisplayName} from '@/lib/utils/model-utils'
 
 interface ChatMessagesProps {
   messages: MessageWithStreaming[]
@@ -54,7 +55,7 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
             {isUser ? (userName || t('chat.you')) : `${t('chat.aiAssistant')}`}
           </span>
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {isUser ? new Date(message.createdAt).toLocaleDateString() : (message.model ? ` ${message.model} ` : '')}
+            {isUser ? new Date(message.createdAt).toLocaleDateString() : (message.model ? ` ${getModelDisplayName(message.model)} ` : '')}
           </span>
           {message.isStreaming && (
             <span className="text-xs text-blue-500 dark:text-blue-400">

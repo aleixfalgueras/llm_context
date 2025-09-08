@@ -1,6 +1,6 @@
 import {buildClientContextSection, replaceClientContextVariables} from '@/services/client/client-context-service'
 import {openRouterService} from '@/services/openrouter'
-import {DEFAULT_MODEL, getDefaultTemperature} from '@/lib/models-config'
+import {DEFAULT_MODEL} from '@/lib/models-config'
 import {logger} from '@/lib/logger'
 import {ClientService} from '@/services/client/client-service'
 import {DocumentService} from '@/services/document-service'
@@ -14,6 +14,7 @@ import {
 } from '@/lib/types/ai-service-types'
 import {unwrapResult} from '@/database/base-operations'
 import {getTranslations, Locale} from '@/lib/translations'
+import {getDefaultTemperature} from "@/lib/utils/model-utils";
 
 
 export class CustomDocumentService {
