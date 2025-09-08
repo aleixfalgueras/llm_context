@@ -408,7 +408,6 @@
     "modelSelector": {
       "searchPlaceholder": "Rechercher des modèles...",
       "noModelsFound": "Aucun modèle trouvé.",
-      "availableModels": "Modèles Disponibles",
       "models": {
         "gemini_eco": {
           "description": "Version économique de Gemini. Idéal pour des réponses rapides et des conversations quotidiennes sans dépasser le budget."

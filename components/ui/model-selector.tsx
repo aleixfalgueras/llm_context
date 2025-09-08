@@ -42,13 +42,8 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
           <CommandList>
             <CommandEmpty>{t('noModelsFound')}</CommandEmpty>
             
-            {/* Available Models */}
-            <CommandGroup heading={
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-green-500" />
-                {t('availableModels')}
-              </div>
-            }>
+            {/* Models */}
+            <CommandGroup>
               {AVAILABLE_MODELS.map((model) => (
                 <CommandItem
                   key={model.id}
