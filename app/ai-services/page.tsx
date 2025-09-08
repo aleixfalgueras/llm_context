@@ -1,5 +1,5 @@
 import { AIServicesClient } from '@/components/ai-services/ai-services-client'
-import { Navbar } from '@/components/global/navbar'
+import { NavbarWrapper } from '@/components/global/navbar-wrapper'
 import { getClients } from '@/app/actions/client-action'
 
 export default async function AIServicesPage() {
@@ -9,7 +9,7 @@ export default async function AIServicesPage() {
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <Navbar />
+      <NavbarWrapper />
       <div className="flex-1 overflow-auto">
         <AIServicesClient clients={clients} />
       </div>

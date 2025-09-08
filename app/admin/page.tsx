@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
-import { Navbar } from '@/components/global/navbar'
+import { NavbarWrapper } from '@/components/global/navbar-wrapper'
 import AdminDashboardClient from '@/components/admin/admin-dashboard-client'
 import { AdminService } from '@/services/admin-service'
 
@@ -21,7 +21,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <Navbar />
+      <NavbarWrapper />
       <div className="flex-1 overflow-auto">
         <AdminDashboardClient data={data} />
       </div>

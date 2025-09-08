@@ -1,5 +1,5 @@
 import { AffiliationClient } from '@/components/affiliation/affiliation-client'
-import { Navbar } from '@/components/global/navbar'
+import { NavbarWrapper } from '@/components/global/navbar-wrapper'
 import { getUserAffiliation, getAffiliationChildren, checkAndUpdateAffiliationStatus } from '@/app/actions/affiliation-action'
 
 export default async function AffiliationPage() {
@@ -19,7 +19,7 @@ export default async function AffiliationPage() {
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <Navbar />
+      <NavbarWrapper />
       <div className="flex-1 overflow-auto">
         <AffiliationClient 
           userAffiliation={affiliation}
