@@ -410,24 +410,25 @@
       "noModelsFound": "Aucun modèle trouvé.",
       "essentialModels": "Essentiel",
       "premiumModels": "Premium",
+      "premiumUsageWarning": "Les modèles premium augmentent leur utilisation plus rapidement",
       "models": {
         "gemini_eco": {
-          "description": "Version économique de Gemini. Idéal pour des réponses rapides et des conversations quotidiennes sans dépasser le budget."
+          "description": "Version économique de Gemini. Idéal pour les réponses rapides et les tâches de marketing."
         },
         "gemini_pro": {
-          "description": "Le modèle Gemini le plus puissant, conçu pour un raisonnement plus approfondi et des conversations complexes, parfait pour les tâches professionnelles ou créatives"
+          "description": "Le modèle Gemini le plus puissant, conçu pour un raisonnement plus approfondi et des conversations complexes, parfait pour les tâches professionnelles ou créatives."
         },
         "gemini_image": {
-          "description": "Modèle avancé de Gemini avec des capacités de création d’images, parfait pour la conversation et le contenu visuel"
+          "description": "Modèle avancé de Gemini avec des capacités de création d’images, parfait pour la conversation et le contenu visuel."
         },
         "chatgpt_eco": {
-          "description": "Version économique de ChatGPT. Léger, rapide et idéal pour des discussions simples ou des demandes basiques"
+          "description": "Version économique de ChatGPT. Léger, rapide et idéal pour des discussions simples ou des demandes basiques."
         },
         "chatgpt_pro": {
-          "description": "Le modèle phare d’OpenAI pour des conversations naturelles, fluides et une résolution polyvalente de problèmes"
+          "description": "Le modèle phare d’OpenAI pour des conversations naturelles, fluides et une résolution polyvalente de problèmes."
         },
         "perplexity": {
-          "description": "Un modèle centré sur le raisonnement qui excelle dans les réponses de type recherche, la pensée structurée et les explications fiables"
+          "description": "Un modèle centré sur le raisonnement qui excelle dans les réponses de type recherche, la pensée structurée et les explications fiables."
         }
       }
     },

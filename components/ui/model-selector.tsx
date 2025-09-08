@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
-import { ChevronDown, Cpu, Sparkles, Zap } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ChevronDown, Cpu, Sparkles, TrendingUp, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils/general'
-import { AVAILABLE_MODELS, isEssentialModel } from '@/lib/models-config'
+import { AVAILABLE_MODELS } from '@/lib/models-config'
 import { ModelTierType } from '@/lib/types/subscription-types'
 import { useTranslations } from '@/lib/translations/context'
+import {isEssentialModel} from "@/lib/utils/model-utils";
 
 interface ModelSelectorProps {
   selectedModel: string
@@ -40,7 +42,7 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="start">
+      <PopoverContent className="w-[390px] p-0" align="start">
         <Command>
           <CommandInput placeholder={t('searchPlaceholder')} />
           <CommandList>
@@ -50,7 +52,7 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
             <CommandGroup heading={
               <div className="flex items-center gap-2">
                 <Zap className="w-3 h-3" />
-                <span>{t('essentialModels')}</span>
+                <span className="text-sm font-semibold">{t('essentialModels')}</span>
               </div>
             }>
               {essentialModels.map((model) => (
@@ -82,9 +84,18 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
             <CommandGroup heading={
               <div className="flex items-center gap-2">
                 <Sparkles className="w-3 h-3" />
-                <span>{t('premiumModels')}</span>
+                <span className="text-sm font-semibold">{t('premiumModels')}</span>
               </div>
             }>
+              {/* Usage Warning for Premium Models */}
+              <div className="px-2 mb-1">
+                <Alert>
+                  <TrendingUp className="h-4 w-4" />
+                  <AlertDescription className="text-xs pt-1">
+                    {t('premiumUsageWarning')}
+                  </AlertDescription>
+                </Alert>
+              </div>
               {premiumModels.map((model) => (
                 <CommandItem
                   key={model.id}

@@ -6,6 +6,7 @@ import {
   DEFAULT_MODEL,
   DEFAULT_PRESENCE_PENALTY,
   DEFAULT_TEMPERATURE,
+  ESSENTIAL_MODEL_IDS,
   MODEL_TIERS
 } from '@/lib/models-config';
 import {ModelTier, ModelTierType, SubscriptionPlanType} from "@/lib/types/subscription-types";
@@ -106,4 +107,8 @@ export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
     default:
       return ModelTier.APPRENTICE
   }
+}
+
+export const isEssentialModel = (modelId: string): boolean => {
+  return (ESSENTIAL_MODEL_IDS as readonly string[]).includes(modelId)
 }
