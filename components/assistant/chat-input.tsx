@@ -12,12 +12,13 @@ import {Prompt, Role} from '@prisma/client'
 import {MessageWithStreaming} from '@/lib/types/message-types'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {clientLogger} from '@/lib/client-logger'
-import {DEFAULT_MODEL, getTierFromPlan} from '@/lib/models-config'
+import {DEFAULT_MODEL} from '@/lib/models-config'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
 import {exportChat} from '@/app/actions/chat-action'
 import {useTranslations} from '@/lib/translations/context'
+import {getTierFromPlan} from "@/lib/utils/model-utils";
 
 // Separate component for just the textarea input to isolate re-renders
 interface TextareaInputProps {

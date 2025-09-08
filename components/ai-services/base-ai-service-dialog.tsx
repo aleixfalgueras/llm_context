@@ -14,11 +14,11 @@ import {useToast} from '@/hooks/use-toast'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {ClientCombobox} from '@/components/ui/client-combobox'
 import {handleClientApiError} from '@/lib/api/api-toast'
-import {getDefaultModel} from '@/lib/models-config'
 import type {Client} from '@prisma/client'
 import {ValidationResult} from '@/lib/types/api-types'
 import {logger} from "@/lib/logger";
 import {useTranslations} from '@/lib/translations/context'
+import {getDefaultModel} from "@/lib/utils/model-utils";
 
 /**
  * Base configuration for AI service dialogs

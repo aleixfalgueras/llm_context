@@ -3,7 +3,6 @@ import {ChatService, NEW_CHAT_DEFAULT_TITLE} from '@/services/chat/chat-service'
 import {revalidatePath} from 'next/cache'
 import {openRouterService, OpenRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
-import {getDefaultModel} from '@/lib/models-config'
 import {checkModelAccess} from "@/lib/api/api-validation";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
@@ -11,6 +10,7 @@ import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
 import {ChatWithMessages} from "@/lib/types/chat-types";
 import {chatStreamingService} from '@/services/chat/chat-streaming-service'
 import {StreamingResponseConfig} from '@/lib/types/streaming-types'
+import {getDefaultModel} from "@/lib/utils/model-utils";
 
 /**
  * Chat API endpoint that handles streaming responses:
