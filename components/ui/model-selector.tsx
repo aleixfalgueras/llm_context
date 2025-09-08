@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { ChevronDown, Cpu, Zap } from 'lucide-react'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
+import { ChevronDown, Cpu, Sparkles, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils/general'
-import { AVAILABLE_MODELS } from '@/lib/models-config'
+import { AVAILABLE_MODELS, isEssentialModel } from '@/lib/models-config'
 import { ModelTierType } from '@/lib/types/subscription-types'
 import { useTranslations } from '@/lib/translations/context'
 
@@ -22,6 +22,10 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
   const t = useTranslations('assistant.modelSelector')
 
   const currentModel = AVAILABLE_MODELS.find(model => model.id === selectedModel)
+  
+  // Separate models into essential and premium categories
+  const essentialModels = AVAILABLE_MODELS.filter(model => isEssentialModel(model.id))
+  const premiumModels = AVAILABLE_MODELS.filter(model => !isEssentialModel(model.id))
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -36,15 +40,52 @@ export function ModelSelector({ selectedModel, onModelSelect, className }: Model
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
+      <PopoverContent className="w-96 p-0" align="start">
         <Command>
           <CommandInput placeholder={t('searchPlaceholder')} />
           <CommandList>
             <CommandEmpty>{t('noModelsFound')}</CommandEmpty>
             
-            {/* Models */}
-            <CommandGroup>
-              {AVAILABLE_MODELS.map((model) => (
+            {/* Essential Models */}
+            <CommandGroup heading={
+              <div className="flex items-center gap-2">
+                <Zap className="w-3 h-3" />
+                <span>{t('essentialModels')}</span>
+              </div>
+            }>
+              {essentialModels.map((model) => (
+                <CommandItem
+                  key={model.id}
+                  value={model.id}
+                  onSelect={() => {
+                    onModelSelect(model.id)
+                    setOpen(false)
+                  }}
+                  className={cn(
+                    "cursor-pointer p-3",
+                    selectedModel === model.id && "bg-blue-50 dark:bg-blue-950/20"
+                  )}
+                >
+                  <div className="flex flex-col gap-1 flex-1">
+                    <div className="font-medium">{model.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {t(`models.${model.description}.description`)}
+                    </div>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+
+            <CommandSeparator className="my-2" />
+            
+            {/* Premium Models */}
+            <CommandGroup heading={
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-3 h-3" />
+                <span>{t('premiumModels')}</span>
+              </div>
+            }>
+              {premiumModels.map((model) => (
                 <CommandItem
                   key={model.id}
                   value={model.id}
