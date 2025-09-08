@@ -17,12 +17,12 @@ import {ADMIN_EMAILS} from '@/lib/config'
 
 export function Navbar() {
   const pathname = usePathname()
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const t = useTranslations('navigation')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
-  // Check if current user is admin
-  const userEmail = user?.emailAddresses[0]?.emailAddress
+  // Check if current user is admin (only after user is loaded)
+  const userEmail = isLoaded ? user?.emailAddresses[0]?.emailAddress : undefined
   const isAdmin = userEmail ? ADMIN_EMAILS.includes(userEmail) : false
 
   const navigation = useMemo(() => [

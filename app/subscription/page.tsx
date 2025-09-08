@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { handleClientApiError } from '@/lib/api/api-toast'
 import { useRouter } from 'next/navigation'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
-import {Navbar} from '@/components/global/navbar'
+import {NavbarWrapper} from '@/components/global/navbar-wrapper'
 import {UpgradeDowngradeDialog} from '@/components/subscription/upgrade-downgrade-dialog'
 import {SubscriptionUrlHandler} from '@/components/subscription/subscription-url-handler'
 import {SubscriptionStatusBanners} from '@/components/subscription/subscription-status-banners'
@@ -141,7 +141,7 @@ export default function SubscriptionPage() {
           setIsRefreshing={setIsRefreshing} 
         />
       </Suspense>
-      <Navbar />
+      <NavbarWrapper />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <h1 className="text-4xl font-bold text-center">{tSub('pageTitle')}</h1>
