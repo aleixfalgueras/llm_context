@@ -17,12 +17,12 @@ import {ADMIN_EMAILS} from '@/lib/config'
 
 export function Navbar() {
   const pathname = usePathname()
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const t = useTranslations('navigation')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
-  // Check if current user is admin
-  const userEmail = user?.emailAddresses[0]?.emailAddress
+
+  // Check if current user is admin (only after user is loaded)
+  const userEmail = isLoaded ? user?.emailAddresses[0]?.emailAddress : undefined
   const isAdmin = userEmail ? ADMIN_EMAILS.includes(userEmail) : false
 
   const navigation = useMemo(() => [
@@ -55,15 +55,15 @@ export function Navbar() {
             <div className="flex items-center space-x-4">
               {/* Logo */}
               <Link href="/" className="flex items-center">
-                <Image 
-                  src="/mia_logo.svg" 
-                  alt="MIA" 
+                <Image
+                  src="/mia_logo.svg"
+                  alt="MIA"
                   width={70}
                   height={70}
                   className="mr-2"
                 />
               </Link>
-              
+
               {/* Mobile menu button */}
               <div className="lg:hidden">
                 <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -80,8 +80,8 @@ export function Navbar() {
                   <DropdownMenuContent align="start" className="w-56">
                     {navigation.map((item) => (
                       <DropdownMenuItem key={item.name} asChild>
-                        <Link 
-                          href={item.href} 
+                        <Link
+                          href={item.href}
                           className={cn(
                             "cursor-pointer flex items-center w-full",
                             isActive(item.href) && "bg-accent"
@@ -95,8 +95,8 @@ export function Navbar() {
                     ))}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link 
-                        href="/subscription" 
+                      <Link
+                        href="/subscription"
                         className="cursor-pointer flex items-center"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -104,8 +104,8 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link 
-                        href="/privacy" 
+                      <Link
+                        href="/privacy"
                         className="cursor-pointer flex items-center"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -113,8 +113,8 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link 
-                        href="/terms" 
+                      <Link
+                        href="/terms"
                         className="cursor-pointer flex items-center"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -124,7 +124,7 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              
+
               {/* Desktop Navigation links */}
               <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
                 {navigation.map((item) => (
@@ -152,7 +152,7 @@ export function Navbar() {
               <LanguageSwitcher />
               <ThemeToggle />
             </div>
-            
+
             <div className="flex items-center space-x-2 pl-4 border-l border-border">
               <TooltipProvider>
                 <DropdownMenu>
@@ -167,7 +167,7 @@ export function Navbar() {
                       <p>{t('menu')}</p>
                     </TooltipContent>
                   </Tooltip>
-                  
+
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
                       <Link href="/subscription" className="cursor-pointer flex items-center">
@@ -187,8 +187,8 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TooltipProvider>
-              
-              <UserButton 
+
+              <UserButton
                 appearance={{
                   elements: {
                     avatarBox: "h-8 w-8 hover:scale-105 transition-transform",
