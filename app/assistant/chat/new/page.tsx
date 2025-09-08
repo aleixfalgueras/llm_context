@@ -1,7 +1,7 @@
 import {currentUser} from '@clerk/nextjs/server'
 import {redirect} from 'next/navigation'
 import {ChatPageClient} from '@/components/assistant/chat-page-client'
-import {NavbarWrapper} from '@/components/global/navbar-wrapper'
+import {Navbar} from '@/components/global/navbar'
 import {getClients} from '@/app/actions/client-action'
 import {getChats} from '@/app/actions/chat-action'
 import {getTranslations} from '@/lib/translations'
@@ -49,7 +49,7 @@ export default async function NewChatPage({ searchParams }: NewChatPageProps) {
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <NavbarWrapper />
+      <Navbar />
       <div className="flex-1 overflow-hidden">
         <ChatPageClient
           chat={newChat}

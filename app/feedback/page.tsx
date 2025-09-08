@@ -1,4 +1,4 @@
-import { NavbarWrapper } from '@/components/global/navbar-wrapper'
+import { Navbar } from '@/components/global/navbar'
 import { FeedbackForm } from '@/components/feedback-form'
 import { getTranslations } from '@/lib/translations'
 import { getLocaleFromCookies } from '@/lib/utils/locale-cookie-server'
@@ -9,7 +9,7 @@ export default async function FeedbackPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavbarWrapper />
+      <Navbar />
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
