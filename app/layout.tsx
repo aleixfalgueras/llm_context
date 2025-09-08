@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
+import type {Metadata} from "next";
 import localFont from "next/font/local";
-import { Poppins } from "next/font/google";
+import {Poppins} from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from '@clerk/nextjs'
-import { Toaster } from "@/components/ui/toaster"
-import { ThemeProvider } from "@/components/global/theme-provider"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { ConsentManager } from "@/components/ui/consent-manager"
-import { TranslationProvider } from "@/lib/translations/context"
+import {ClerkProvider} from '@clerk/nextjs'
+import {Toaster} from "@/components/ui/toaster"
+import {ThemeProvider} from "@/components/global/theme-provider"
+import {TooltipProvider} from "@/components/ui/tooltip"
+import {TranslationProvider} from "@/lib/translations/context"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -50,7 +49,6 @@ export default function RootLayout({
               <TooltipProvider>
                 {children}
                 <Toaster />
-                <ConsentManager />
               </TooltipProvider>
             </ThemeProvider>
           </TranslationProvider>
