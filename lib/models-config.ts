@@ -61,7 +61,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: MODEL_IDS.OPENAI_GPT_5_CHAT,
     name: 'ChatGPT 5',
-    description: "chatgpt_premium",
+    description: "chatgpt_pro",
     provider: 'openai',
     contextLength: 128000,
     pricing: { input: 1.25, output: 10 },
