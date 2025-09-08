@@ -408,6 +408,8 @@
     "modelSelector": {
       "searchPlaceholder": "Search models...",
       "noModelsFound": "No models found.",
+      "essentialModels": "Essential",
+      "premiumModels": "Premium",
       "models": {
         "gemini_eco": {
           "description": "Cost-effective version of Gemini. Great for quick responses and everyday chatting without breaking the budget"

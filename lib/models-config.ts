@@ -76,6 +76,17 @@ export const AVAILABLE_MODELS: AIModel[] = [
   }
 ]
 
+// Essential (budget-friendly) models
+export const ESSENTIAL_MODEL_IDS = [
+  MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+  MODEL_IDS.OPENAI_GPT_5_NANO
+]
+
+// Helper function to check if a model is essential (budget-friendly)
+export const isEssentialModel = (modelId: string): boolean => {
+  return ESSENTIAL_MODEL_IDS.includes(modelId)
+}
+
 export const IMAGE_GENERATION_MODEL_ID = MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
 
 export const MODEL_TIERS = {
