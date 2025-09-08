@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { AssistantLandingClient } from '@/components/assistant/assistant-landing-client'
-import { NavbarWrapper } from '@/components/global/navbar-wrapper'
+import { Navbar } from '@/components/global/navbar'
 import { getClients } from '@/app/actions/client-action'
 import { getChats } from '@/app/actions/chat-action'
 
@@ -15,7 +15,7 @@ export default async function AssistantPage() {
 
   return (
     <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <NavbarWrapper />
+      <Navbar />
       <div className="flex-1 overflow-hidden">
         <AssistantLandingClient chats={chats} clients={clients} />
       </div>
