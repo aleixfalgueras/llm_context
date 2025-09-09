@@ -195,7 +195,18 @@ export class OpenRouterService implements StreamingProvider {
         }
       }
     } catch (error) {
-      StreamErrorHandler.logStreamError(error as Error, {
+      const err = error as Error
+      const classifiedError = StreamErrorHandler.classifyError(err)
+      
+      // Always yield error chunk so user gets proper message
+      yield {
+        content: '',
+        isComplete: false,
+        error: classifiedError.userFriendlyMessage || err.message
+      }
+      
+      // Log the error for debugging
+      StreamErrorHandler.logStreamError(err, {
         userId: usageOptions?.userId,
         phase: 'streaming_completion',
         metadata: { 
@@ -203,7 +214,8 @@ export class OpenRouterService implements StreamingProvider {
           messageCount: finalOptions.messages.length
         }
       })
-      throw error
+      
+      return
     }
   }
 

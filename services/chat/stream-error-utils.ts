@@ -6,6 +6,7 @@ export enum StreamErrorType {
   DATABASE_ERROR = 'DATABASE_ERROR',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
+  INSUFFICIENT_CREDITS_ERROR = 'INSUFFICIENT_CREDITS_ERROR',
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
 
@@ -34,6 +35,17 @@ export class StreamErrorHandler {
         recoverable: false,
         retryable: false,
         userFriendlyMessage: 'Connection was interrupted'
+      }
+    }
+
+    // Insufficient credits error (402)
+    if (lowerMessage.includes('402') || lowerMessage.includes('insufficient credits') || lowerMessage.includes('payment required')) {
+      return {
+        type: StreamErrorType.INSUFFICIENT_CREDITS_ERROR,
+        message: errorMessage,
+        recoverable: false,
+        retryable: false,
+        userFriendlyMessage: 'Insufficient credits. Please add more credits to continue using the service.'
       }
     }
 
@@ -101,6 +113,17 @@ export class StreamErrorHandler {
           userId: context.userId,
           chatId: context.chatId,
           metadata: { 
+            ...context.metadata,
+            phase: context.phase
+          }
+        })
+        break
+
+      case StreamErrorType.INSUFFICIENT_CREDITS_ERROR:
+        logger.error('Insufficient credits error during streaming', errorObj, {
+          userId: context.userId,
+          chatId: context.chatId,
+          metadata: {
             ...context.metadata,
             phase: context.phase
           }
