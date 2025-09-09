@@ -37,6 +37,7 @@ export interface StreamChunk {
   generationId?: string // For fallback usage queries
   cost_usd?: number // Cost in USD, populated when isComplete is true
   images?: ImageMessageContent[] // Images generated during streaming (for image-capable models)
+  error?: string // Error message if stream encounters an error
 }
 
 export interface UsageTrackingOptions {

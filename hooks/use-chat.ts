@@ -18,29 +18,29 @@ function areMessagesSimilar(msg1: MessageWithStreaming, msg2: MessageWithStreami
 // Helper function to merge messages avoiding duplicates
 function mergeMessages(serverMessages: MessageWithStreaming[], currentMessages: MessageWithStreaming[]): MessageWithStreaming[] {
   const mergedMessages = [...serverMessages]
-  
+
   // Add optimistic messages that don't have server equivalents
   for (const currentMsg of currentMessages) {
     // Check if this is an optimistic message (has temporary ID format)
-    const isOptimistic = currentMsg.id.startsWith('temp-user-') || 
-                        currentMsg.id.startsWith('temp-assistant-')
-    
+    const isOptimistic = currentMsg.id.startsWith('temp-user-') ||
+      currentMsg.id.startsWith('temp-assistant-')
+
     if (isOptimistic) {
       // Check if there's already a server message with similar content and timestamp
-      const hasServerEquivalent = serverMessages.some(serverMsg => 
+      const hasServerEquivalent = serverMessages.some(serverMsg =>
         areMessagesSimilar(serverMsg, currentMsg)
       )
-      
+
       // If no server equivalent found, keep the optimistic message
       if (!hasServerEquivalent) {
         mergedMessages.push(currentMsg)
       }
     }
   }
-  
+
   // Sort by creation time to maintain order
   mergedMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-  
+
   return mergedMessages
 }
 
@@ -63,16 +63,16 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       if (currentMessages.length === 0) {
         return initialMessages
       }
-      
+
       // Use helper function to merge messages
       return mergeMessages(initialMessages, currentMessages)
     })
-    
-    clientLogger.info('Chat messages updated with merge strategy', { 
+
+    clientLogger.info('Chat messages updated with merge strategy', {
       chatId,
-      metadata: { 
+      metadata: {
         initialMessageCount: initialMessages.length,
-        currentMessageCount: messages.length 
+        currentMessageCount: messages.length
       }
     });
   }, [initialMessages, chatId])
@@ -89,19 +89,19 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       abortControllerRef.current.abort()
       abortControllerRef.current = null
       setIsLoading(false)
-      
+
       // Mark any streaming message as complete
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map(msg =>
         msg.isStreaming ? { ...msg, isStreaming: false } : msg
       ))
-      
+
       clientLogger.info('Text generation stopped by user', { chatId });
     }
   }, [chatId])
 
   const sendMessage = useCallback(async (content: string, selectedModel?: string) => {
     if (!content.trim() || isLoading) {
-      clientLogger.warn('Message send attempted with empty content or while loading', { 
+      clientLogger.warn('Message send attempted with empty content or while loading', {
         chatId,
         metadata: { hasContent: !!content.trim(), isLoading }
       });
@@ -145,32 +145,32 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
 
     // Immediately add both messages to UI
     setMessages(prev => [...prev, userMessage, assistantMessage])
-    clientLogger.debug('User and initial assistant messages added to UI', { 
+    clientLogger.debug('User and initial assistant messages added to UI', {
       chatId,
       metadata: { userMessageId: userMessage.id, assistantMessageId: assistantMessage.id }
     });
 
     try {
       clientLogger.apiCall('POST', '/api/chat', { chatId });
-      
+
       const response = await withClientTiming(
         'Chat API Request',
         () => fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [{ content }],
-          chatId: chatId || undefined, // Send undefined for new chats
-          model: selectedModel || DEFAULT_MODEL, // Default to configured default model if no model specified
-          // Include new chat parameters if this is a new chat
-          ...(newChatParams && {
-            clientId: newChatParams.clientId,
-            contextFields: newChatParams.contextFields
-          })
-        }),
-        signal: abortControllerRef.current?.signal,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: [{ content }],
+            chatId: chatId || undefined, // Send undefined for new chats
+            model: selectedModel || DEFAULT_MODEL, // Default to configured default model if no model specified
+            // Include new chat parameters if this is a new chat
+            ...(newChatParams && {
+              clientId: newChatParams.clientId,
+              contextFields: newChatParams.contextFields
+            })
+          }),
+          signal: abortControllerRef.current?.signal,
         }),
         { chatId }
       );
@@ -185,7 +185,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       // Handle streaming response
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
-      
+
       if (!reader) {
         throw new Error('No response stream available')
       }
@@ -196,7 +196,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
 
       while (true) {
         const { done, value } = await reader.read()
-        
+
         if (done) {
           break
         }
@@ -206,7 +206,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
 
         // Process complete SSE messages (ending with double newline)
         const messages = buffer.split('\n\n')
-        
+
         // Keep the last part (potentially incomplete message) in the buffer
         buffer = messages.pop() || ''
 
@@ -216,22 +216,22 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
 
           // Extract data lines from the message
           const lines = message.split('\n')
-          
+
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               try {
                 const dataStr = line.slice(6)
-                
+
                 // Skip [DONE] messages
                 if (dataStr === '[DONE]') continue
-                
+
                 const data = JSON.parse(dataStr)
-                
+
                 if (data.type === 'content') {
                   // Update streaming content
                   streamedContent += data.content
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessage.id 
+                  setMessages(prev => prev.map(msg =>
+                    msg.id === assistantMessage.id
                       ? { ...msg, content: streamedContent }
                       : msg
                   ))
@@ -239,33 +239,33 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
                   // Handle streaming images
                   if (data.images && Array.isArray(data.images)) {
                     streamedImages.push(...data.images)
-                    setMessages(prev => prev.map(msg => 
-                      msg.id === assistantMessage.id 
+                    setMessages(prev => prev.map(msg =>
+                      msg.id === assistantMessage.id
                         ? { ...msg, images: [...streamedImages] }
                         : msg
                     ))
-                    clientLogger.info('Images received in stream', { 
+                    clientLogger.info('Images received in stream', {
                       chatId,
                       metadata: { imageCount: data.images.length }
                     });
                   }
                 } else if (data.type === 'complete') {
                   // Mark as complete and handle title update
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessage.id 
+                  setMessages(prev => prev.map(msg =>
+                    msg.id === assistantMessage.id
                       ? { ...msg, isStreaming: false }
                       : msg
                   ))
-                  
+
                   clientLogger.messageReceived(streamedContent.length, { chatId });
-                  
+
                   // Handle new chat creation - redirect to the new chat URL
                   if (data.chatId && data.chatId !== chatId) {
-                    clientLogger.info('New chat created, redirecting', { 
+                    clientLogger.info('New chat created, redirecting', {
                       chatId: data.chatId,
-                      metadata: { 
+                      metadata: {
                         originalChatId: chatId,
-                        newChatId: data.chatId 
+                        newChatId: data.chatId
                       }
                     });
                     // Use window.location to redirect to the new chat
@@ -276,7 +276,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
                   // Update title if this was the first message
                   if (data.newTitle && onTitleUpdate) {
                     onTitleUpdate(data.newTitle)
-                    clientLogger.info('Chat title updated', { 
+                    clientLogger.info('Chat title updated', {
                       chatId,
                       metadata: { newTitle: data.newTitle }
                     });
@@ -289,9 +289,9 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
                 // Log parsing errors with more detail
                 clientLogger.warn('Failed to parse SSE data', {
                   chatId,
-                  metadata: { 
+                  metadata: {
                     error: parseError instanceof Error ? parseError.message : 'Unknown error',
-                    dataPreview: line.slice(6, 100) + '...' 
+                    dataPreview: line.slice(6, 100) + '...'
                   }
                 })
               }
@@ -299,24 +299,24 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
           }
         }
       }
-      
+
     } catch (error) {
       // Don't show error if it was aborted by user
       if (error instanceof Error && error.name === 'AbortError') {
         return // User stopped generation, no need to show error
       }
-      
+
       clientLogger.error('Error sending message', error as Error, { chatId });
-      
+
       // Generic error handling
       const errorMessage = error instanceof Error ? error.message : 'Failed to send message'
       handleClientApiError(errorMessage, 'Failed to send message')
-      
+
       // Remove both user and assistant messages on error
-      setMessages(prev => prev.filter(msg => 
+      setMessages(prev => prev.filter(msg =>
         msg.id !== userMessage.id && msg.id !== assistantMessage.id
       ))
-      clientLogger.debug('Messages removed due to error', { 
+      clientLogger.debug('Messages removed due to error', {
         chatId,
         metadata: { userMessageId: userMessage.id, assistantMessageId: assistantMessage.id }
       });

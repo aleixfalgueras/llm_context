@@ -57,6 +57,20 @@ export class StreamManager {
   private async processStream(streamSource: AsyncGenerator<StreamChunk, void, unknown>): Promise<void> {
     try {
       for await (const chunk of streamSource) {
+        // Check for error in chunk first
+        if (chunk.error) {
+          await this.emitEvent({
+            type: 'error',
+            error: chunk.error,
+            recoverable: false,
+            chatId: this.state.chatId,
+            timestamp: new Date()
+          })
+          
+          this.closeStreamWithError()
+          return
+        }
+        
         // Convert StreamChunk to StreamEvent and handle it
         if (chunk.images && chunk.images.length > 0) {
           await this.emitEvent({
