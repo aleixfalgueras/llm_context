@@ -371,7 +371,7 @@
     "exportFailed": "Export failed",
     "at": "at",
     "inputPlaceholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
-    "typing": "Typing...",
+    "thinking": "Thinking...",
     "chatExportedDescription": "Chat '{{chatTitle}}' has been exported successfully",
     "startNewConversation": "Start a new conversation",
     "noChatsYet": "No chats yet",

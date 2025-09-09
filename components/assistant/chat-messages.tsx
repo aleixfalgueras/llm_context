@@ -59,7 +59,7 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
           </span>
           {message.isStreaming && (
             <span className="text-xs text-blue-500 dark:text-blue-400">
-              {t('typing')}
+              {t('thinking')}
             </span>
           )}
         </div>
