@@ -45,7 +45,7 @@ export class StreamErrorHandler {
         message: errorMessage,
         recoverable: false,
         retryable: false,
-        userFriendlyMessage: 'Insufficient credits. Please add more credits to continue using the service.'
+        userFriendlyMessage: 'The service is currently unavailable, please come back later.'
       }
     }
 
