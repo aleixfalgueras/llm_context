@@ -371,7 +371,7 @@
     "exportFailed": "Échec de l'export",
     "at": "à",
     "inputPlaceholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
-    "typing": "Saisie en cours...",
+    "thinking": "En train de réfléchir...",
     "chatExportedDescription": "La discussion '{{chatTitle}}' a été exportée avec succès",
     "startNewConversation": "Commencer une nouvelle conversation",
     "noChatsYet": "Aucune discussion pour le moment",
