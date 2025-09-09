@@ -40,8 +40,12 @@ export class SubscriptionService {
       // Create the subscription using the existing database operation
       const subscription = await SubscriptionUsageOperations.createDefaultApprenticeSubscription(userId, userEmail);
       
-      // Cache the newly created subscription
-      await cacheSubscription(userId, subscription);
+      // Cache the newly created subscription - fail silently if caching fails
+      try {
+        await cacheSubscription(userId, subscription);
+      } catch (cacheError) {
+        logger.warn('Failed to cache new subscription, continuing without cache', { userId, metadata: { error: (cacheError as Error).message } })
+      }
       
       logger.info('Successfully created default subscription', {
         userId,
@@ -107,8 +111,12 @@ export class SubscriptionService {
         subscription = await SubscriptionUsageOperations.createDefaultApprenticeSubscription(userId, email)
       }
 
-      // Cache the result
-      await cacheSubscription(userId, subscription)
+      // Cache the result - fail silently if caching fails
+      try {
+        await cacheSubscription(userId, subscription)
+      } catch (cacheError) {
+        logger.warn('Failed to cache subscription, continuing without cache', { userId, metadata: { error: (cacheError as Error).message } })
+      }
 
       return subscription
     } catch (error) {
