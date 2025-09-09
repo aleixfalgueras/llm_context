@@ -179,7 +179,15 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Failed to send message' }))
-        throw new Error(errorData.error)
+        
+        // Mark streaming as complete for the assistant message
+        setMessages(prev => prev.map(msg =>
+          msg.id === assistantMessage.id
+            ? { ...msg, isStreaming: false }
+            : msg
+        ))
+
+        handleClientApiError(errorData.error || 'An error occurred during streaming', 'Streaming Error')
       }
 
       // Handle streaming response
@@ -282,8 +290,24 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
                     });
                   }
                 } else if (data.type === 'error') {
-                  // Handle streaming error
-                  throw new Error(data.error || 'Streaming error occurred')
+                  // Handle streaming error - stop streaming and show error
+                  clientLogger.error(`Streaming error received: ${data.error}`);
+                  
+                  // Mark streaming as complete with error (keep existing content)
+                  setMessages(prev => prev.map(msg =>
+                    msg.id === assistantMessage.id
+                      ? { ...msg, isStreaming: false }
+                      : msg
+                  ))
+                  
+                  // Show the error to the user
+                  handleClientApiError(data.error || 'An error occurred during streaming', 'Streaming Error')
+                  
+                  // Clean up and stop processing
+                  setIsLoading(false)
+                  abortControllerRef.current = null
+                  
+                  return // Exit the streaming loop
                 }
               } catch (parseError) {
                 // Log parsing errors with more detail
