@@ -16,6 +16,7 @@ export class StreamManager {
   private readonly state: StreamState
   private config: StreamManagerConfig
   private eventHandlers: Partial<StreamEventHandler> = {}
+  private generationId: string | undefined
 
   constructor(config: StreamManagerConfig) {
     this.config = config
@@ -27,8 +28,11 @@ export class StreamManager {
       isComplete: false,
       hasErrors: false,
       controller: null as any, // Will be set when stream starts
-      encoder: new TextEncoder()
+      encoder: new TextEncoder(),
+      partialMessageSaved: false,
+      clientDisconnected: false
     }
+    this.generationId = undefined
 
     // Set default event handlers (these could be pass as paramters if needed)
     this.eventHandlers = {
@@ -57,6 +61,16 @@ export class StreamManager {
   private async processStream(streamSource: AsyncGenerator<StreamChunk, void, unknown>): Promise<void> {
     try {
       for await (const chunk of streamSource) {
+        // Stop processing if client has disconnected
+        if (this.state.clientDisconnected) {
+          logger.debug('Stopping stream processing due to client disconnection', {
+            userId: this.state.userId,
+            chatId: this.state.chatId
+          })
+          this.closeStream()
+          return
+        }
+        
         // Check for error in chunk first
         if (chunk.error) {
           await this.emitEvent({
@@ -69,6 +83,16 @@ export class StreamManager {
           
           this.closeStreamWithError()
           return
+        }
+        
+        // Capture generation ID if available
+        if (chunk.generationId && !this.generationId) {
+          this.generationId = chunk.generationId
+          logger.debug('Generation ID captured in StreamManager', {
+            userId: this.state.userId,
+            chatId: this.state.chatId,
+            metadata: { generationId: this.generationId }
+          })
         }
         
         // Convert StreamChunk to StreamEvent and handle it
@@ -89,6 +113,11 @@ export class StreamManager {
         }
 
         if (chunk.isComplete) {
+          // Store generation ID if we get it with completion
+          if (chunk.generationId && !this.generationId) {
+            this.generationId = chunk.generationId
+          }
+          
           await this.emitEvent({
             type: 'complete',
             chatId: this.state.chatId,
@@ -177,19 +206,30 @@ export class StreamManager {
     }
 
     if (!this.safeEnqueue(`data: ${JSON.stringify(data)}\n\n`)) {
-      // Client disconnected - save partial message
-      logger.info('Client disconnected during content streaming, saving partial message', {
-        userId: this.state.userId,
-        chatId: this.state.chatId,
-        metadata: { partialLength: this.state.fullContent.length }
-      })
+      // Client disconnected - save partial message only once
+      if (!this.state.partialMessageSaved && this.state.fullContent.trim()) {
+        logger.info('Client disconnected during content streaming, saving partial message', {
+          userId: this.state.userId,
+          chatId: this.state.chatId,
+          metadata: { 
+            partialLength: this.state.fullContent.length,
+            generationId: this.generationId
+          }
+        })
 
-      await StreamingMessageService.savePartialAssistantMessage(
-        this.state.chatId,
-        this.state.userId,
-        this.state.fullContent,
-        this.config.selectedModel
-      )
+        await StreamingMessageService.savePartialAssistantMessage(
+          this.state.chatId,
+          this.state.userId,
+          this.state.fullContent,
+          this.config.selectedModel,
+          this.generationId
+        )
+        
+        this.state.partialMessageSaved = true
+      }
+      
+      // Mark client as disconnected to stop processing
+      this.state.clientDisconnected = true
     }
   }
 
@@ -209,6 +249,9 @@ export class StreamManager {
         userId: this.state.userId,
         chatId: this.state.chatId
       })
+      
+      // Mark client as disconnected to stop processing
+      this.state.clientDisconnected = true
     }
   }
 
@@ -216,36 +259,42 @@ export class StreamManager {
    * Handle completion events
    */
   private async handleCompletionEvent(event: CompletionStreamEvent): Promise<void> {
-    // Save the complete assistant message
-    const saveResult = await StreamingMessageService.saveAssistantMessage(
-      event.chatId,
-      this.state.userId,
-      this.state.fullContent,
-      this.config.selectedModel,
-      event.cost_usd || 0,
-      event.generationId,
-      event.totalImages && event.totalImages.length > 0 ? event.totalImages : undefined
-    )
+    // Don't save complete message if we already saved a partial one
+    if (!this.state.partialMessageSaved) {
+      // Save the complete assistant message
+      const saveResult = await StreamingMessageService.saveAssistantMessage(
+        event.chatId,
+        this.state.userId,
+        this.state.fullContent,
+        this.config.selectedModel,
+        event.cost_usd || 0,
+        event.generationId,
+        event.totalImages && event.totalImages.length > 0 ? event.totalImages : undefined
+      )
 
-    if (!saveResult.success) {
-      logger.error('Failed to save complete assistant message', new Error(saveResult.error), {
-        userId: this.state.userId,
-        chatId: event.chatId
-      })
+      if (!saveResult.success) {
+        logger.error('Failed to save complete assistant message', new Error(saveResult.error), {
+          userId: this.state.userId,
+          chatId: event.chatId
+        })
+      }
     }
 
-    // Send completion signal to client
-    const completionData = {
-      type: 'complete',
-      chatId: event.chatId,
-      newTitle: event.newTitle
-    }
+    // Send completion signal to client if still connected
+    if (!this.state.clientDisconnected) {
+      const completionData = {
+        type: 'complete',
+        chatId: event.chatId,
+        newTitle: event.newTitle
+      }
 
-    if (!this.safeEnqueue(`data: ${JSON.stringify(completionData)}\n\n`)) {
-      logger.info('Client disconnected during completion signal', {
-        userId: this.state.userId,
-        chatId: event.chatId
-      })
+      if (!this.safeEnqueue(`data: ${JSON.stringify(completionData)}\n\n`)) {
+        logger.info('Client disconnected during completion signal', {
+          userId: this.state.userId,
+          chatId: event.chatId
+        })
+        this.state.clientDisconnected = true
+      }
     }
 
     this.state.isComplete = true

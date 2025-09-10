@@ -2,6 +2,8 @@ import {MessageService} from '@/services/chat/message-service'
 import {Role} from '@prisma/client'
 import {ImageMessageContent} from '@/lib/types/openrouter-types'
 import {logger} from '@/lib/logger'
+import {OpenRouterService} from '@/services/openrouter/openrouter-service'
+import {SubscriptionUsageService} from '@/services/subscription/subscription-usage-service'
 
 
 export interface StreamingMessageResult {
@@ -95,25 +97,63 @@ export class StreamingMessageService {
     chatId: string,
     userId: string,
     partialContent: string,
-    model: string
+    model: string,
+    generationId?: string
   ): Promise<StreamingMessageResult> {
     if (!partialContent.trim()) {
       return { success: true }
     }
 
     try {
+      // Fetch actual cost if we have a generation ID
+      let cost_usd = 0
+      if (generationId) {
+        const fetchedCost = await OpenRouterService.fetchGenerationCost(generationId)
+        if (fetchedCost !== null) {
+          cost_usd = fetchedCost
+          
+          // Track the cost for the user's subscription
+          await SubscriptionUsageService.trackCost(userId, cost_usd)
+          
+          logger.info('Fetched actual cost for partial message', {
+            userId,
+            chatId,
+            metadata: {
+              generationId,
+              cost_usd,
+              partialLength: partialContent.length
+            }
+          })
+        } else {
+          logger.warn('Could not fetch cost for partial message', {
+            userId,
+            chatId,
+            metadata: {
+              generationId,
+              partialLength: partialContent.length
+            }
+          })
+        }
+      }
+
       await MessageService.createMessage({
         content: partialContent,
         role: Role.ASSISTANT,
         model,
-        cost_usd: 0, // 0 cost for partial message
+        cost_usd,
+        generation_id: generationId,
+        isPartialMessage: true,
         chat: { connect: { id: chatId } }
       }, userId)
 
-      logger.info('Partial assistant message saved', { 
+      logger.info('Partial assistant message saved', {
         userId, 
         chatId,
-        metadata: { partialLength: partialContent.length }
+        metadata: { 
+          partialLength: partialContent.length,
+          cost_usd,
+          generationId
+        }
       })
 
       return { success: true }
@@ -122,7 +162,10 @@ export class StreamingMessageService {
       logger.error('Failed to save partial assistant message', error as Error, { 
         userId, 
         chatId,
-        metadata: { partialLength: partialContent.length }
+        metadata: { 
+          partialLength: partialContent.length,
+          generationId
+        }
       })
 
       return {

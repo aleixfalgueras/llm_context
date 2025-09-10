@@ -297,7 +297,7 @@ export class OpenRouterService implements StreamingProvider {
   /**
    * Get generation stats by ID for cost tracking
    */
-  async getGenerationStats(generationId: string): Promise<GenerationStats> {    
+  static async getGenerationStats(generationId: string): Promise<GenerationStats> {    
     // Use query parameter instead of path parameter based on OpenRouter docs
     const url = new URL('https://openrouter.ai/api/v1/generation');
     url.searchParams.append('id', generationId);
@@ -411,6 +411,55 @@ export class OpenRouterService implements StreamingProvider {
   }
 
   /**
+   * Fetch cost for a generation using generation stats API
+   * This is a public static method that can be used by other services
+   * @returns The cost in USD if successfully fetched, null otherwise
+   */
+  static async fetchGenerationCost(generationId: string): Promise<number | null> {
+    if (!generationId) {
+      logger.warn('No generation ID provided for cost fetching');
+      return null;
+    }
+
+    try {
+      logger.debug('Fetching cost from generation stats API', {
+        metadata: { generationId }
+      });
+      
+      // Add a small delay - generation stats might not be immediately available
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const stats = await OpenRouterService.getGenerationStats(generationId);
+      
+      if (stats.data && stats.data.total_cost !== undefined) {
+        logger.debug('Successfully fetched cost from generation stats', {
+          metadata: { 
+            generationId, 
+            cost_usd: stats.data.total_cost,
+            source: 'generation_stats_api'
+          }
+        });
+        
+        return stats.data.total_cost;
+      } else {
+        logger.warn('Generation stats available but no cost data', { 
+          metadata: { generationId }
+        });
+        return null;
+      }
+    } catch (error) {
+      logger.error('Failed to fetch cost from generation stats', 
+        error instanceof Error ? error : new Error(String(error)), 
+        { 
+          metadata: { 
+            generationId
+          }
+        }
+      );
+      return null;
+    }
+  }
+
+  /**
    * Handle usage tracking - use direct cost from stream first, fallback to generation stats API
    * @returns The cost in USD if successfully fetched, null otherwise
    */
@@ -427,50 +476,18 @@ export class OpenRouterService implements StreamingProvider {
     }
     
     // Fallback: use generation stats API if direct cost not available
-    if (!finalChunk.generationId) {
-      logger.warn('No direct cost or generation ID available, cannot track cost');
-      return null;
+    const cost = await OpenRouterService.fetchGenerationCost(finalChunk.generationId || '');
+    if (cost !== null) {
+      await SubscriptionUsageService.trackCost(usageOptions.userId, cost);
+      logger.debug('Successfully tracked cost from generation stats fallback', {
+        metadata: { 
+          generationId: finalChunk.generationId, 
+          cost_usd: cost
+        }
+      });
     }
     
-    try {
-      logger.debug('Direct cost not available, falling back to generation stats API', {
-        metadata: { generationId: finalChunk.generationId }
-      });
-      
-      // Add a small delay - generation stats might not be immediately available
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const stats = await this.getGenerationStats(finalChunk.generationId);
-      
-      if (stats.data && stats.data.total_cost !== undefined) {
-        await SubscriptionUsageService.trackCost(usageOptions.userId, stats.data.total_cost);
-        
-        logger.debug('Successfully tracked cost from generation stats fallback', {
-          metadata: { 
-            generationId: finalChunk.generationId, 
-            cost_usd: stats.data.total_cost,
-            source: 'generation_stats_api'
-          }
-        });
-        
-        return stats.data.total_cost;
-      } else {
-        logger.warn('Generation stats available but no cost data', { 
-          metadata: { generationId: finalChunk.generationId }
-        });
-        return null;
-      }
-    } catch (error) {
-      logger.error('Failed to track cost from generation stats fallback', 
-        error instanceof Error ? error : new Error(String(error)), 
-        { 
-          metadata: { 
-            generationId: finalChunk.generationId
-          }
-        }
-      );
-      return null;
-    }
+    return cost;
   }
 
 }

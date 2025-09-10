@@ -9,6 +9,8 @@ export interface StreamState {
   hasErrors: boolean
   controller: ReadableStreamDefaultController<Uint8Array>
   encoder: TextEncoder
+  partialMessageSaved: boolean
+  clientDisconnected: boolean
 }
 
 export interface StreamManagerConfig {
