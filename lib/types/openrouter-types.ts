@@ -21,13 +21,12 @@ export type OpenRouterMessage = {
 }
 
 export interface OpenRouterCompletionOptions {
-  model?: string
+  model: string
   messages: OpenRouterMessage[]
   temperature?: number
   max_tokens?: number
   presence_penalty?: number
   frequency_penalty?: number
-  usage?: { include: boolean }
   modalities?: ('text' | 'image')[] // For image generation models
 }
 

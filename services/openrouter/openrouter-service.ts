@@ -27,6 +27,7 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
   let totalContent = ''
   let generationId: string | undefined
   let directCost: number | undefined
+  let hasFinished = false
 
   try {
     for await (const chunk of stream) {
@@ -36,10 +37,21 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
           generationId = chunk.id
         }
 
-        // Check for direct cost in chunk.usage (final chunk from OpenRouter)
+        // Check for direct cost in chunk.usage (may come before, with, or after finish_reason)
         if (chunk.usage?.cost !== undefined) {
           directCost = chunk.usage.cost
           logger.debug('Direct cost extracted from stream chunk')
+
+          // If we already marked as finished, yield complete chunk with cost and exit
+          if (hasFinished) {
+            yield {
+              content: '',
+              isComplete: true,
+              generationId: generationId,
+              cost_usd: directCost
+            }
+            return
+          }
         }
 
         const choice = chunk.choices?.[0]
@@ -73,22 +85,36 @@ export async function* processOpenRouterStream(stream: AsyncIterable<any>): Asyn
         }
 
         // Check for completion
-        if (choice.finish_reason) {
-
-          // Final chunk with completion info (images already sent during streaming)
-          yield {
-            content: '',
-            isComplete: true,
-            generationId: generationId,
-            cost_usd: directCost
+        if (choice.finish_reason && !hasFinished) {
+          hasFinished = true
+          
+          // If we already have cost, yield completion immediately and exit
+          if (directCost !== undefined) {
+            yield {
+              content: '',
+              isComplete: true,
+              generationId: generationId,
+              cost_usd: directCost
+            }
+            return
           }
+          // Otherwise, wait for potential cost chunk or stream end
         }
       } catch (chunkError) {
         StreamErrorHandler.logStreamError(chunkError as Error, {
           phase: 'chunk_processing',
           metadata: { chunkData: JSON.stringify(chunk).substring(0, 200) }
         })
-        // Continue processing other chunks
+      }
+    }
+    
+    // If stream ended and we finished but haven't yielded completion yet
+    if (hasFinished) {
+      yield {
+        content: '',
+        isComplete: true,
+        generationId: generationId,
+        cost_usd: directCost
       }
     }
   } catch (error) {
@@ -115,7 +141,7 @@ export class OpenRouterService implements StreamingProvider {
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
         "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        "X-Title":  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+        "X-Title": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       },
     })
   }
@@ -145,7 +171,6 @@ export class OpenRouterService implements StreamingProvider {
       max_tokens: options.max_tokens ?? getDefaultMaxTokens(),
       presence_penalty: options.presence_penalty ?? getDefaultPresencePenalty(),
       frequency_penalty: options.frequency_penalty ?? getDefaultFrequencyPenalty(),
-      usage: options.usage ?? { include: true },
       messages: options.messages
     }
   }
@@ -159,21 +184,15 @@ export class OpenRouterService implements StreamingProvider {
   ): AsyncGenerator<StreamChunk, void, unknown> {
     const finalOptions = this.applyDefaults(options)
     
-    // Ensure model is provided
-    if (!finalOptions.model) {
-      throw new Error('Model is required for completion')
-    }
-    
     try {
       const stream = await this.client.chat.completions.create({
         ...finalOptions,
-        model: finalOptions.model,
-        messages: finalOptions.messages as any, // Cast to any for complex message types
+        messages: finalOptions.messages as any,
+        stream_options: {include_usage: true},
         stream: true,
-        // Cast modalities for OpenRouter-specific support
         ...(finalOptions.modalities && { modalities: finalOptions.modalities as any })
       })
-      
+
       let finalChunk: StreamChunk | null = null
       
       for await (const chunk of processOpenRouterStream(stream)) {
@@ -237,9 +256,9 @@ export class OpenRouterService implements StreamingProvider {
         model: finalOptions.model,
         messages: finalOptions.messages as any, // Cast to any for complex message types
         stream: false,
-        // Cast modalities for OpenRouter-specific support
+        usage: { include: true },
         ...(finalOptions.modalities && { modalities: finalOptions.modalities as any })
-      })
+      } as any)
       
       const content = completion.choices[0]?.message?.content || ''
       let trackedCost: number | null = null
@@ -312,7 +331,6 @@ export class OpenRouterService implements StreamingProvider {
     }
 
     try {
-      // Get model modalities to ensure the model supports image generation
       const modalities = OpenRouterService.getModelModalities(model)
       
       const completion = await this.client.chat.completions.create({
@@ -323,10 +341,11 @@ export class OpenRouterService implements StreamingProvider {
             content: prompt.trim(),
           },
         ],
-        temperature: 0.7, // Good balance for creative image generation
-        modalities: modalities as any, // Add modalities if the model supports them
-        stream: false
-      })
+        temperature: 0.7,
+        modalities: modalities as any,
+        stream: false,
+        usage: { include: true }
+      } as any)
 
       // Handle the response according to OpenRouter documentation
       const message = completion.choices[0]?.message
