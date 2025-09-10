@@ -125,6 +125,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       cost_usd: 0,
       generation_id: null,
       images: null,
+      isPartialMessage: false,
       chatId,
       createdAt: new Date(),
     }
@@ -138,6 +139,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       cost_usd: 0,
       generation_id: null,
       images: null,
+      isPartialMessage: false,
       chatId,
       createdAt: new Date(),
       isStreaming: true,

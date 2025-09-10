@@ -23,16 +23,17 @@ model Chat {
 }
 
 model Message {
-  id            String   @id @default(cuid())
-  content       String
-  role          Role
-  model         String?
-  cost_usd      Float    @default(0)
-  generation_id String?
-  images        Json?    // Store array of image URLs (base64 or external URLs)
-  chatId        String
-  createdAt     DateTime @default(now())
-  chat          Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  id               String   @id @default(cuid())
+  content          String
+  role             Role
+  model            String?
+  cost_usd         Float    @default(0)
+  generation_id    String?
+  images           Json?    // Store array of image URLs (base64 or external URLs)
+  isPartialMessage Boolean  @default(false)
+  chatId           String
+  createdAt        DateTime @default(now())
+  chat             Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   @@index([generation_id])
   @@map("messages")
