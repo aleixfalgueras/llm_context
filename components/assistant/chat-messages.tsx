@@ -1,6 +1,5 @@
 'use client'
 
-import {ScrollArea} from '@/components/ui/scroll-area'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {User, ArrowDown} from 'lucide-react'
 import {memo, useEffect, useRef, useState, useCallback} from 'react'
@@ -49,7 +48,7 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
       </Avatar>
 
       {/* Message Content */}
-      <div className={`${isUser ? 'max-w-[70%]' : 'flex-1'} space-y-1 ${isUser ? 'order-1' : 'order-2'}`}>
+      <div className={`${isUser ? 'max-w-[70%]' : 'min-w-0 flex-1'} space-y-1 ${isUser ? 'order-1' : 'order-2'}`}>
         {/* Metadata */}
         <div className={`flex items-center gap-2 text-sm ${isUser ? 'justify-end' : 'justify-start'}`}>
           <span className="font-medium">
@@ -124,49 +123,77 @@ MessageBubble.displayName = 'MessageBubble'
 function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessagesProps) {
   const t = useTranslations('assistant')
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [showScrollButton, setShowScrollButton] = useState(false)
   const [userHasScrolled, setUserHasScrolled] = useState(false)
   const lastMessageCountRef = useRef(messages.length)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  // Handle scroll position detection
+  // Handle scroll position detection with improved threshold
   const handleScroll = useCallback(() => {
-    if (!scrollAreaRef.current) return
+    if (!scrollContainerRef.current || isInitialLoad) return
     
-    const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+    const scrollContainer = scrollContainerRef.current
     if (!scrollContainer) return
     
     const { scrollTop, scrollHeight, clientHeight } = scrollContainer
-    const isAtBottom = scrollHeight - scrollTop - clientHeight < 100
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
+    // More lenient threshold for "at bottom" detection
+    const isAtBottom = distanceFromBottom < 50
     
-    setShowScrollButton(!isAtBottom)
-    setUserHasScrolled(!isAtBottom)
-  }, [])
+    setShowScrollButton(!isAtBottom && distanceFromBottom > 200)
+    // Only mark as "user scrolled" if they're meaningfully away from bottom
+    setUserHasScrolled(distanceFromBottom > 150)
+  }, [isInitialLoad])
 
-  // Scroll to bottom function
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  // Scroll to bottom function with optional instant scroll
+  const scrollToBottom = useCallback((instant = false) => {
+    messagesEndRef.current?.scrollIntoView({ 
+      behavior: instant ? 'instant' : 'smooth',
+      block: 'end'
+    })
     setUserHasScrolled(false)
   }, [])
 
-  // Auto-scroll only for user's own messages (when they send a new message)
+  // Initial scroll to bottom when chat loads with messages
   useEffect(() => {
+    if (isInitialLoad && messages.length > 0) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        scrollToBottom(true) // Instant scroll on initial load
+        setIsInitialLoad(false)
+      })
+    }
+  }, [isInitialLoad, messages.length, scrollToBottom])
+
+  // Auto-scroll for new messages and streaming
+  useEffect(() => {
+    // Skip if initial load
+    if (isInitialLoad) return
+    
     const lastMessage = messages[messages.length - 1]
     const messageCountIncreased = messages.length > lastMessageCountRef.current
+    const isStreaming = lastMessage?.isStreaming
     
-    // Only auto-scroll if:
-    // 1. A new user message was added (not streaming AI response)
-    // 2. User hasn't manually scrolled away
-    if (messageCountIncreased && lastMessage?.role === Role.USER && !userHasScrolled) {
-      scrollToBottom()
+    // Auto-scroll if:
+    // 1. A new user message was added
+    // 2. AI is streaming and user hasn't scrolled away
+    // 3. User hasn't manually scrolled away from bottom
+    if (!userHasScrolled) {
+      if (messageCountIncreased && lastMessage?.role === Role.USER) {
+        scrollToBottom()
+      } else if (isStreaming && lastMessage?.role !== Role.USER) {
+        // Smooth scroll during streaming
+        scrollToBottom()
+      }
     }
     
     lastMessageCountRef.current = messages.length
-  }, [messages, userHasScrolled, scrollToBottom])
+  }, [messages, userHasScrolled, scrollToBottom, isInitialLoad])
 
   // Set up scroll listener
   useEffect(() => {
-    const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    const scrollContainer = scrollContainerRef.current
     if (!scrollContainer) return
     
     scrollContainer.addEventListener('scroll', handleScroll)
@@ -175,7 +202,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
 
   if (messages.length === 0) {
     return (
-      <ScrollArea className="h-full">
+      <div className="h-full overflow-auto no-scrollbar">
         <div className="p-4">
           <div className="text-center text-gray-500 dark:text-gray-400 mt-20">
             <div className="text-4xl mb-4">🤖</div>
@@ -183,13 +210,13 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
             <p className="text-sm">{t('startConversationSubtext')}</p>
           </div>
         </div>
-      </ScrollArea>
+      </div>
     )
   }
 
   return (
     <div className="relative h-full">
-      <ScrollArea ref={scrollAreaRef} className="h-full">
+      <div ref={scrollContainerRef} className="h-full overflow-auto no-scrollbar">
         <div className="p-4 space-y-6">
           {messages.map((message) => (
             <MessageBubble
@@ -201,20 +228,24 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
           ))}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
       
       {/* Scroll to bottom button */}
-      {showScrollButton && (
+      <div 
+        className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 transition-opacity duration-300 ${
+          showScrollButton ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
         <Button
-          onClick={scrollToBottom}
+          onClick={() => scrollToBottom()}
           size="icon"
           variant="outline"
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 rounded-full shadow-lg bg-background/95 backdrop-blur transition-opacity duration-200"
+          className="rounded-full shadow-lg bg-background/95 backdrop-blur"
           aria-label="Scroll to bottom"
         >
           <ArrowDown className="h-4 w-4" />
         </Button>
-      )}
+      </div>
     </div>
   )
 }
