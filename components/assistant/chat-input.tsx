@@ -25,12 +25,13 @@ interface TextareaInputProps {
   onChange: (value: string) => void
   onSubmit: () => void
   isLoading: boolean
+  isStreaming: boolean
   placeholder?: string
   inputRef: React.RefObject<HTMLTextAreaElement>
   autoResize: () => void
 }
 
-const TextareaInput = memo(({ onChange, onSubmit, isLoading, placeholder, inputRef, autoResize }: TextareaInputProps) => {
+const TextareaInput = memo(({ onChange, onSubmit, isLoading, isStreaming, placeholder, inputRef, autoResize }: TextareaInputProps) => {
 
   // Handle input change with auto-resize
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -39,11 +40,11 @@ const TextareaInput = memo(({ onChange, onSubmit, isLoading, placeholder, inputR
   }, [onChange, autoResize])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !isLoading && !isStreaming) {
       e.preventDefault()
       onSubmit()
     }
-  }, [onSubmit])
+  }, [onSubmit, isLoading, isStreaming])
 
   return (
     <Textarea
@@ -52,7 +53,6 @@ const TextareaInput = memo(({ onChange, onSubmit, isLoading, placeholder, inputR
       placeholder={placeholder}
       className="flex-1 min-h-[60px] resize-none"
       style={{ height: '60px' }}
-      disabled={isLoading}
       ref={inputRef}
     />
   )
@@ -114,7 +114,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
 
   const handleSubmit = useCallback(() => {
     const currentInput = inputRef.current?.value || ''
-    if (currentInput.trim() && !isLoading) {
+    if (currentInput.trim() && !isLoading && !isStreaming) {
       clientLogger.userInteraction('Submit message', { 
         chatId,
         component: 'ChatInput',
@@ -129,10 +129,10 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
       clientLogger.warn('Submit attempted with invalid conditions', { 
         chatId,
         component: 'ChatInput',
-        metadata: { hasInput: !!currentInput.trim(), isLoading }
+        metadata: { hasInput: !!currentInput.trim(), isLoading, isStreaming }
       });
     }
-  }, [isLoading, chatId, selectedModel, sendMessage])
+  }, [isLoading, isStreaming, chatId, selectedModel, sendMessage])
 
   const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -252,7 +252,9 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     };
   }, [chatId]);
 
-  const handleStop = useCallback(() => {
+  const handleStop = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     clientLogger.userInteraction('Stop generation', { 
       chatId,
       component: 'ChatInput'
@@ -300,6 +302,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
           onChange={handleInputChange}
           onSubmit={handleSubmit}
           isLoading={isLoading}
+          isStreaming={isStreaming}
           placeholder={t('inputPlaceholder')}
           inputRef={inputRef}
           autoResize={autoResize}
@@ -308,8 +311,9 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
           <Button 
             type="button"
             onClick={handleStop}
-            size="icon" 
-            className="h-[60px] w-[60px] bg-red-500 hover:bg-red-600"
+            size="icon"
+            variant="secondary"
+            className="h-[60px] w-[60px]"
           >
             <Square className="w-4 h-4" />
           </Button>
@@ -318,7 +322,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
             type="submit" 
             size="icon" 
             className="h-[60px] w-[60px]"
-            disabled={isLoading}
+            disabled={isLoading || isStreaming}
           >
             {isLoading ? (
               <LoadingSpinner size="sm" text="" />

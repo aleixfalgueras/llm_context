@@ -117,7 +117,7 @@ export function PromptSelector({ onPromptSelect, className }: PromptSelectorProp
           </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[calc(50vh-150px)] pointer-events-auto">
+        <div className="overflow-y-auto no-scrollbar max-h-[calc(50vh-150px)] pointer-events-auto">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">
               {t('selector.loading')}
@@ -234,7 +234,7 @@ function PromptItem({ prompt, onSelect }: PromptItemProps) {
         </div>
         {prompt.description && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-            {prompt.description.substring(0, 30)}...
+            {prompt.description.substring(0, 50)}...
           </p>
         )}
       </div>
