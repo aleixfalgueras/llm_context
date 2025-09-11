@@ -1,7 +1,7 @@
 'use client'
 
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {User, ArrowDown} from 'lucide-react'
+import {User, ArrowDown, Copy} from 'lucide-react'
 import {memo, useEffect, useRef, useState, useCallback} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {useTranslations} from '@/lib/translations/context'
@@ -11,6 +11,7 @@ import {parseMessageImages} from "@/lib/utils/chat-utils";
 import {ImageViewDialog} from '@/components/ui/image-view-dialog'
 import {getModelDisplayName} from '@/lib/utils/model-utils'
 import {Button} from '@/components/ui/button'
+import {toast} from '@/hooks/use-toast'
 
 interface ChatMessagesProps {
   messages: MessageWithStreaming[]
@@ -28,6 +29,14 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
   const t = useTranslations('assistant')
   const isUser = message.role === Role.USER
   const [selectedImage, setSelectedImage] = useState<{url: string, index: number} | null>(null)
+  
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content)
+    toast({
+      title: t('copied'),
+      description: t('copiedToClipboard'),
+    })
+  }
   
   return (
     <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -102,6 +111,21 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
             </>
           )}
         </div>
+        
+        {/* Action Bar for Assistant Messages */}
+        {!isUser && message.content && (
+          <div className="flex gap-1 mt-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => copyToClipboard(message.content)}
+              className="h-8 w-8"
+              title={t('copyMessage')}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
       
       {/* Image View Dialog */}
