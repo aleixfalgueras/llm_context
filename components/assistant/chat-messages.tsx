@@ -1,14 +1,17 @@
 'use client'
 
-import {ScrollArea} from '@/components/ui/scroll-area'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {Loader2, User} from 'lucide-react'
-import {memo, useEffect, useMemo, useRef} from 'react'
+import {User, ArrowDown, Copy} from 'lucide-react'
+import {memo, useEffect, useRef, useState, useCallback} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {useTranslations} from '@/lib/translations/context'
-
 import {MessageWithStreaming} from "@/lib/types/message-types";
 import {Role} from '@prisma/client'
+import {parseMessageImages} from "@/lib/utils/chat-utils";
+import {ImageViewDialog} from '@/components/ui/image-view-dialog'
+import {getModelDisplayName} from '@/lib/utils/model-utils'
+import {Button} from '@/components/ui/button'
+import {toast} from '@/hooks/use-toast'
 
 interface ChatMessagesProps {
   messages: MessageWithStreaming[]
@@ -16,96 +19,259 @@ interface ChatMessagesProps {
   userName?: string
 }
 
+interface MessageBubbleProps {
+  message: MessageWithStreaming
+  userImageUrl?: string
+  userName?: string
+}
+
+const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubbleProps) => {
+  const t = useTranslations('assistant')
+  const isUser = message.role === Role.USER
+  const [selectedImage, setSelectedImage] = useState<{url: string, index: number} | null>(null)
+  
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content)
+    toast({
+      title: t('copied'),
+      description: t('copiedToClipboard'),
+    })
+  }
+  
+  return (
+    <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
+      {/* Avatar */}
+      <Avatar className={`w-8 h-8 ${isUser ? 'order-2' : 'order-1'}`}>
+        {isUser ? (
+          <>
+            {userImageUrl && <AvatarImage src={userImageUrl} alt={userName || t('user')} />}
+            <AvatarFallback>
+              <User className="w-4 h-4" />
+            </AvatarFallback>
+          </>
+        ) : (
+          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+            🤖
+          </AvatarFallback>
+        )}
+      </Avatar>
+
+      {/* Message Content */}
+      <div className={`${isUser ? 'max-w-[70%]' : 'min-w-0 flex-1'} space-y-1 ${isUser ? 'order-1' : 'order-2'}`}>
+        {/* Metadata */}
+        <div className={`flex items-center gap-2 text-sm ${isUser ? 'justify-end' : 'justify-start'}`}>
+          <span className="font-medium">
+            {isUser ? (userName || t('chat.you')) : `${t('chat.aiAssistant')}`}
+          </span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {isUser ? new Date(message.createdAt).toLocaleDateString() : (message.model ? ` ${getModelDisplayName(message.model)} ` : '')}
+          </span>
+          {message.isStreaming && (
+            <span className="text-xs text-blue-500 dark:text-blue-400">
+              {t('thinking')}
+            </span>
+          )}
+        </div>
+
+        {/* Message Content - Bubble only for user messages */}
+        <div className={isUser ? 'border rounded-lg p-3' : 'pr-5'}>
+          {isUser ? (
+            <p className="whitespace-pre-wrap">
+              {message.content}
+            </p>
+          ) : (
+            <>
+              {message.content && <MarkdownRenderer content={message.content} />}
+              
+              {/* Render images if present */}
+              {(() => {
+                const parsedImages = parseMessageImages(message.images)
+                if (!parsedImages || parsedImages.length === 0) return null
+                
+                return (
+                  <div className="mt-4 space-y-4">
+                    {parsedImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={image.image_url.url}
+                          alt={`Generated image ${index + 1}`}
+                          className="w-full max-w-2xl rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02]"
+                          style={{ height: 'auto' }}
+                          onClick={() => setSelectedImage({ url: image.image_url.url, index: index + 1 })}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+              
+              {message.isStreaming && (message.content || message.images) && (
+                <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
+              )}
+            </>
+          )}
+        </div>
+        
+        {/* Action Bar for Assistant Messages */}
+        {!isUser && message.content && (
+          <div className="flex gap-1 mt-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => copyToClipboard(message.content)}
+              className="h-8 w-8"
+              title={t('copyMessage')}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      {/* Image View Dialog */}
+      {selectedImage && (
+        <ImageViewDialog
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          imageUrl={selectedImage.url}
+          imageAlt={`Generated image`}
+          imageIndex={selectedImage.index}
+        />
+      )}
+    </div>
+  )
+})
+
+MessageBubble.displayName = 'MessageBubble'
+
 function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessagesProps) {
   const t = useTranslations('assistant')
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const isInitialLoad = useRef(true)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [showScrollButton, setShowScrollButton] = useState(false)
+  const [userHasScrolled, setUserHasScrolled] = useState(false)
+  const lastMessageCountRef = useRef(messages.length)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  const scrollToBottom = useMemo(() => (smooth = true) => {
+  // Handle scroll position detection with improved threshold
+  const handleScroll = useCallback(() => {
+    if (!scrollContainerRef.current || isInitialLoad) return
+    
+    const scrollContainer = scrollContainerRef.current
+    if (!scrollContainer) return
+    
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
+    // More lenient threshold for "at bottom" detection
+    const isAtBottom = distanceFromBottom < 50
+    
+    setShowScrollButton(!isAtBottom && distanceFromBottom > 200)
+    // Only mark as "user scrolled" if they're meaningfully away from bottom
+    setUserHasScrolled(distanceFromBottom > 150)
+  }, [isInitialLoad])
+
+  // Scroll to bottom function with optional instant scroll
+  const scrollToBottom = useCallback((instant = false) => {
     messagesEndRef.current?.scrollIntoView({ 
-      behavior: smooth ? 'smooth' : 'instant' 
+      behavior: instant ? 'instant' : 'smooth',
+      block: 'end'
     })
+    setUserHasScrolled(false)
   }, [])
 
+  // Initial scroll to bottom when chat loads with messages
   useEffect(() => {
-    if (isInitialLoad.current) {
-      // Instant scroll on initial load
-      scrollToBottom(false)
-      isInitialLoad.current = false
-    } else {
-      // Smooth scroll for new messages
-      scrollToBottom(true)
+    if (isInitialLoad && messages.length > 0) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        scrollToBottom(true) // Instant scroll on initial load
+        setIsInitialLoad(false)
+      })
     }
-  }, [messages])
+  }, [isInitialLoad, messages.length, scrollToBottom])
 
-  return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-6">
-        {messages.length === 0 ? (
+  // Auto-scroll for new messages and streaming
+  useEffect(() => {
+    // Skip if initial load
+    if (isInitialLoad) return
+    
+    const lastMessage = messages[messages.length - 1]
+    const messageCountIncreased = messages.length > lastMessageCountRef.current
+    const isStreaming = lastMessage?.isStreaming
+    
+    // Auto-scroll if:
+    // 1. A new user message was added
+    // 2. AI is streaming and user hasn't scrolled away
+    // 3. User hasn't manually scrolled away from bottom
+    if (!userHasScrolled) {
+      if (messageCountIncreased && lastMessage?.role === Role.USER) {
+        scrollToBottom()
+      } else if (isStreaming && lastMessage?.role !== Role.USER) {
+        // Smooth scroll during streaming
+        scrollToBottom()
+      }
+    }
+    
+    lastMessageCountRef.current = messages.length
+  }, [messages, userHasScrolled, scrollToBottom, isInitialLoad])
+
+  // Set up scroll listener
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current
+    if (!scrollContainer) return
+    
+    scrollContainer.addEventListener('scroll', handleScroll)
+    return () => scrollContainer.removeEventListener('scroll', handleScroll)
+  }, [handleScroll])
+
+  if (messages.length === 0) {
+    return (
+      <div className="h-full overflow-auto no-scrollbar">
+        <div className="p-4">
           <div className="text-center text-gray-500 dark:text-gray-400 mt-20">
-            <div className="w-12 h-12 mx-auto mb-4 opacity-50 flex items-center justify-center text-4xl">
-              🤖
-            </div>
+            <div className="text-4xl mb-4">🤖</div>
             <p className="text-lg">{t('startConversation')}</p>
             <p className="text-sm">{t('startConversationSubtext')}</p>
           </div>
-        ) : (
-          messages.map((message: MessageWithStreaming) => (
-            <div key={message.id} className={`flex gap-3 ${message.role === Role.USER ? 'flex-row-reverse' : ''}`}>
-              <Avatar className="w-8 h-8">
-                {message.role === Role.USER ? (
-                  <>
-                    {userImageUrl && <AvatarImage src={userImageUrl} alt={userName || t('user')} />}
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
-                    </AvatarFallback>
-                  </>
-                ) : (
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                    {message.isStreaming ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      '🤖'
-                    )}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <div className={`space-y-1 max-w-[70%] ${message.role === Role.USER ? 'ml-auto' : ''}`}>
-                <div className={`flex items-center gap-2 ${message.role === Role.USER ? 'flex-row-reverse' : ''}`}>
-                  <span className="font-medium text-sm">
-                    {message.role === Role.USER ? (userName || t('chat.you')) : t('chat.aiAssistant')}
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(message.createdAt).toLocaleTimeString()}
-                  </span>
-                  {message.isStreaming && (
-                    <span className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></span>
-                      {t('typing')}
-                    </span>
-                  )}
-                </div>
-                {message.role === Role.ASSISTANT ? (
-                  <div className="relative border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-                    <MarkdownRenderer content={message.content} />
-                    {message.isStreaming && message.content && (
-                      <div className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
-                    )}
-                  </div>
-                ) : (
-                  <div className="prose max-w-none dark:prose-invert border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-                    <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message.content}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-        {/* Invisible element to scroll to */}
-        <div ref={messagesEndRef} />
+        </div>
       </div>
-    </ScrollArea>
+    )
+  }
+
+  return (
+    <div className="relative h-full">
+      <div ref={scrollContainerRef} className="h-full overflow-auto no-scrollbar">
+        <div className="p-4 space-y-6">
+          {messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              userImageUrl={userImageUrl}
+              userName={userName}
+            />
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+      
+      {/* Scroll to bottom button */}
+      <div 
+        className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 transition-opacity duration-300 ${
+          showScrollButton ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <Button
+          onClick={() => scrollToBottom()}
+          size="icon"
+          variant="outline"
+          className="rounded-full shadow-lg bg-background/95 backdrop-blur"
+          aria-label="Scroll to bottom"
+        >
+          <ArrowDown className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
   )
 }
 
-export const ChatMessages = memo(ChatMessagesComponent) 
+export const ChatMessages = memo(ChatMessagesComponent)

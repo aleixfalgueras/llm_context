@@ -1,20 +1,138 @@
 import OpenAI from 'openai'
-import {processOpenRouterStream} from './stream-handler'
 import {logger} from '@/lib/logger'
 import {
-  getDefaultFrequencyPenalty,
-  getDefaultMaxTokens,
-  getDefaultModel,
-  getDefaultPresencePenalty,
-  getDefaultTemperature
+  MODEL_IDS
 } from '@/lib/models-config'
 import {SubscriptionUsageService} from "@/services/subscription/subscription-usage-service"
-import {OpenRouterCompletionOptions, StreamChunk, UsageTrackingOptions, GenerationStats, ImageGenerationResponse} from "@/lib/types/openrouter-types";
+import {
+  GenerationStats,
+  ImageGenerationResponse,
+  OpenRouterCompletionOptions,
+  StreamChunk,
+  UsageTrackingOptions
+} from "@/lib/types/openrouter-types"
+import {StreamingProvider} from "@/lib/types/streaming-types"
+import {StreamErrorHandler} from "@/services/chat/stream-error-utils"
+import {
+  getDefaultFrequencyPenalty,
+  getDefaultMaxTokens, getDefaultModel,
+  getDefaultPresencePenalty,
+  getDefaultTemperature
+} from "@/lib/utils/model-utils";
+
+/**
+ * Process OpenRouter streaming completion
+ */
+export async function* processOpenRouterStream(stream: AsyncIterable<any>): AsyncGenerator<StreamChunk, void, unknown> {
+  let totalContent = ''
+  let generationId: string | undefined
+  let directCost: number | undefined
+  let hasFinished = false
+
+  try {
+    for await (const chunk of stream) {
+      try {
+        // Capture generation ID for fallback usage queries
+        if (chunk.id && !generationId) {
+          generationId = chunk.id
+        }
+
+        // Check for direct cost in chunk.usage (may come before, with, or after finish_reason)
+        if (chunk.usage?.cost !== undefined) {
+          directCost = chunk.usage.cost
+          logger.debug('Direct cost extracted from stream chunk')
+
+          // If we already marked as finished, yield complete chunk with cost and exit
+          if (hasFinished) {
+            yield {
+              content: '',
+              isComplete: true,
+              generationId: generationId,
+              cost_usd: directCost
+            }
+            return
+          }
+        }
+
+        const choice = chunk.choices?.[0]
+
+        if (!choice) {
+          continue
+        }
+
+        const delta = choice.delta
+        const content = delta?.content || ''
+
+        // Check for images in delta (for image generation models)
+        if (delta?.images && Array.isArray(delta.images)) {
+          logger.debug(`${delta.images.length} images detected in stream chunk`)
+
+          // Yield intermediate chunk with images
+          yield {
+            content: '',
+            isComplete: false,
+            images: delta.images
+          }
+        }
+
+        if (content) {
+          totalContent += content
+
+          yield {
+            content,
+            isComplete: false
+          }
+        }
+
+        // Check for completion
+        if (choice.finish_reason && !hasFinished) {
+          hasFinished = true
+          
+          // If we already have cost, yield completion immediately and exit
+          if (directCost !== undefined) {
+            yield {
+              content: '',
+              isComplete: true,
+              generationId: generationId,
+              cost_usd: directCost
+            }
+            return
+          }
+          // Otherwise, wait for potential cost chunk or stream end
+        }
+      } catch (chunkError) {
+        StreamErrorHandler.logStreamError(chunkError as Error, {
+          phase: 'chunk_processing',
+          metadata: { chunkData: JSON.stringify(chunk).substring(0, 200) }
+        })
+      }
+    }
+    
+    // If stream ended and we finished but haven't yielded completion yet
+    if (hasFinished) {
+      yield {
+        content: '',
+        isComplete: true,
+        generationId: generationId,
+        cost_usd: directCost
+      }
+    }
+  } catch (error) {
+    StreamErrorHandler.logStreamError(error as Error, {
+      phase: 'openrouter_streaming',
+      metadata: { 
+        totalContentLength: totalContent.length,
+        generationId
+      }
+    })
+    throw error
+  }
+}
 
 /**
  * OpenRouter service using OpenAI SDK (OpenRouter is OpenAI-compatible)
  */
-export class OpenRouterService {
+export class OpenRouterService implements StreamingProvider {
   private client: OpenAI
 
   constructor() {
@@ -23,9 +141,24 @@ export class OpenRouterService {
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
         "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        "X-Title":  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+        "X-Title": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       },
     })
+  }
+
+  /**
+   * Get the modalities supported by a model (e.g., text, image)
+   * @param modelId - The model identifier
+   * @returns Array of modalities or undefined for text-only models
+   */
+  static getModelModalities(modelId: string): ('text' | 'image')[] | undefined {
+    // Currently only the Gemini 2.5 Flash Image model supports image generation
+    if (modelId === MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE) {
+      return ['image', 'text']
+    }
+    
+    // Return undefined for text-only models (default behavior)
+    return undefined
   }
 
   /**
@@ -38,7 +171,6 @@ export class OpenRouterService {
       max_tokens: options.max_tokens ?? getDefaultMaxTokens(),
       presence_penalty: options.presence_penalty ?? getDefaultPresencePenalty(),
       frequency_penalty: options.frequency_penalty ?? getDefaultFrequencyPenalty(),
-      usage: options.usage ?? { include: true },
       messages: options.messages
     }
   }
@@ -52,20 +184,15 @@ export class OpenRouterService {
   ): AsyncGenerator<StreamChunk, void, unknown> {
     const finalOptions = this.applyDefaults(options)
     
-    // Ensure model is provided
-    if (!finalOptions.model) {
-      throw new Error('Model is required for completion')
-    }
-    
     try {
       const stream = await this.client.chat.completions.create({
         ...finalOptions,
-        model: finalOptions.model,
+        messages: finalOptions.messages as any,
+        stream_options: {include_usage: true},
         stream: true,
-        // Cast modalities for OpenRouter-specific support
         ...(finalOptions.modalities && { modalities: finalOptions.modalities as any })
       })
-      
+
       let finalChunk: StreamChunk | null = null
       
       for await (const chunk of processOpenRouterStream(stream)) {
@@ -87,8 +214,27 @@ export class OpenRouterService {
         }
       }
     } catch (error) {
-      logger.error('OpenRouter streaming error', error instanceof Error ? error : new Error(String(error)))
-      throw error
+      const err = error as Error
+      const classifiedError = StreamErrorHandler.classifyError(err)
+      
+      // Always yield error chunk so user gets proper message
+      yield {
+        content: '',
+        isComplete: false,
+        error: classifiedError.userFriendlyMessage || err.message
+      }
+      
+      // Log the error for debugging
+      StreamErrorHandler.logStreamError(err, {
+        userId: usageOptions?.userId,
+        phase: 'streaming_completion',
+        metadata: { 
+          model: finalOptions.model,
+          messageCount: finalOptions.messages.length
+        }
+      })
+      
+      return
     }
   }
 
@@ -108,10 +254,11 @@ export class OpenRouterService {
       const completion = await this.client.chat.completions.create({
         ...finalOptions,
         model: finalOptions.model,
+        messages: finalOptions.messages as any, // Cast to any for complex message types
         stream: false,
-        // Cast modalities for OpenRouter-specific support
+        usage: { include: true },
         ...(finalOptions.modalities && { modalities: finalOptions.modalities as any })
-      })
+      } as any)
       
       const content = completion.choices[0]?.message?.content || ''
       let trackedCost: number | null = null
@@ -135,7 +282,14 @@ export class OpenRouterService {
         cost_usd: trackedCost ?? undefined 
       }
     } catch (error) {
-      logger.error('OpenRouter completion error', error instanceof Error ? error : new Error(String(error)))
+      StreamErrorHandler.logStreamError(error as Error, {
+        userId: usageOptions?.userId,
+        phase: 'completion',
+        metadata: { 
+          model: finalOptions.model,
+          messageCount: finalOptions.messages.length
+        }
+      })
       throw error
     }
   }
@@ -143,7 +297,7 @@ export class OpenRouterService {
   /**
    * Get generation stats by ID for cost tracking
    */
-  async getGenerationStats(generationId: string): Promise<GenerationStats> {    
+  static async getGenerationStats(generationId: string): Promise<GenerationStats> {    
     // Use query parameter instead of path parameter based on OpenRouter docs
     const url = new URL('https://openrouter.ai/api/v1/generation');
     url.searchParams.append('id', generationId);
@@ -177,6 +331,8 @@ export class OpenRouterService {
     }
 
     try {
+      const modalities = OpenRouterService.getModelModalities(model)
+      
       const completion = await this.client.chat.completions.create({
         model,
         messages: [
@@ -185,10 +341,11 @@ export class OpenRouterService {
             content: prompt.trim(),
           },
         ],
-        temperature: 0.7, // Good balance for creative image generation
-        modalities: ['image', 'text'] as any, // Enable image generation
-        stream: false
-      })
+        temperature: 0.7,
+        modalities: modalities as any,
+        stream: false,
+        usage: { include: true }
+      } as any)
 
       // Handle the response according to OpenRouter documentation
       const message = completion.choices[0]?.message
@@ -238,16 +395,67 @@ export class OpenRouterService {
         cost_usd: trackedCost ?? undefined
       }
     } catch (error) {
-      logger.error('Image generation error', error instanceof Error ? error : new Error(String(error)), {
-        metadata: {
-          userId: usageOptions?.userId,
-          model
+      StreamErrorHandler.logStreamError(error as Error, {
+        userId: usageOptions?.userId,
+        phase: 'image_generation',
+        metadata: { 
+          model,
+          promptLength: prompt.length
         }
       })
       
       throw error instanceof Error 
         ? error 
         : new Error('Failed to generate image')
+    }
+  }
+
+  /**
+   * Fetch cost for a generation using generation stats API
+   * This is a public static method that can be used by other services
+   * @returns The cost in USD if successfully fetched, null otherwise
+   */
+  static async fetchGenerationCost(generationId: string): Promise<number | null> {
+    if (!generationId) {
+      logger.warn('No generation ID provided for cost fetching');
+      return null;
+    }
+
+    try {
+      logger.debug('Fetching cost from generation stats API', {
+        metadata: { generationId }
+      });
+      
+      // Add a small delay - generation stats might not be immediately available
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const stats = await OpenRouterService.getGenerationStats(generationId);
+      
+      if (stats.data && stats.data.total_cost !== undefined) {
+        logger.debug('Successfully fetched cost from generation stats', {
+          metadata: { 
+            generationId, 
+            cost_usd: stats.data.total_cost,
+            source: 'generation_stats_api'
+          }
+        });
+        
+        return stats.data.total_cost;
+      } else {
+        logger.warn('Generation stats available but no cost data', { 
+          metadata: { generationId }
+        });
+        return null;
+      }
+    } catch (error) {
+      logger.error('Failed to fetch cost from generation stats', 
+        error instanceof Error ? error : new Error(String(error)), 
+        { 
+          metadata: { 
+            generationId
+          }
+        }
+      );
+      return null;
     }
   }
 
@@ -268,50 +476,18 @@ export class OpenRouterService {
     }
     
     // Fallback: use generation stats API if direct cost not available
-    if (!finalChunk.generationId) {
-      logger.warn('No direct cost or generation ID available, cannot track cost');
-      return null;
+    const cost = await OpenRouterService.fetchGenerationCost(finalChunk.generationId || '');
+    if (cost !== null) {
+      await SubscriptionUsageService.trackCost(usageOptions.userId, cost);
+      logger.debug('Successfully tracked cost from generation stats fallback', {
+        metadata: { 
+          generationId: finalChunk.generationId, 
+          cost_usd: cost
+        }
+      });
     }
     
-    try {
-      logger.debug('Direct cost not available, falling back to generation stats API', {
-        metadata: { generationId: finalChunk.generationId }
-      });
-      
-      // Add a small delay - generation stats might not be immediately available
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const stats = await this.getGenerationStats(finalChunk.generationId);
-      
-      if (stats.data && stats.data.total_cost !== undefined) {
-        await SubscriptionUsageService.trackCost(usageOptions.userId, stats.data.total_cost);
-        
-        logger.debug('Successfully tracked cost from generation stats fallback', {
-          metadata: { 
-            generationId: finalChunk.generationId, 
-            cost_usd: stats.data.total_cost,
-            source: 'generation_stats_api'
-          }
-        });
-        
-        return stats.data.total_cost;
-      } else {
-        logger.warn('Generation stats available but no cost data', { 
-          metadata: { generationId: finalChunk.generationId }
-        });
-        return null;
-      }
-    } catch (error) {
-      logger.error('Failed to track cost from generation stats fallback', 
-        error instanceof Error ? error : new Error(String(error)), 
-        { 
-          metadata: { 
-            generationId: finalChunk.generationId
-          }
-        }
-      );
-      return null;
-    }
+    return cost;
   }
 
 }

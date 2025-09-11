@@ -3,7 +3,8 @@
  */
 
 export { OpenRouterService } from './openrouter-service'
-export { processOpenRouterStream, streamToString } from './stream-handler'
+
+export {processOpenRouterStream} from "@/services/openrouter/openrouter-service";
 
 // Singleton instance for convenience
 import { OpenRouterService } from './openrouter-service'

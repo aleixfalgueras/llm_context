@@ -7,7 +7,7 @@
   "navigation": {
     "clients": "Clients",
     "prompts": "Prompts",
-    "assistant": "Assistant IA",
+    "assistant": "MIA",
     "aiServices": "Services IA",
     "affiliation": "Affiliation",
     "feedback": "Commentaires",
@@ -371,7 +371,7 @@
     "exportFailed": "Échec de l'export",
     "at": "à",
     "inputPlaceholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
-    "typing": "Saisie en cours...",
+    "thinking": "En train de réfléchir...",
     "chatExportedDescription": "La discussion '{{chatTitle}}' a été exportée avec succès",
     "startNewConversation": "Commencer une nouvelle conversation",
     "noChatsYet": "Aucune discussion pour le moment",
@@ -388,6 +388,9 @@
       "chatsHeader": "Discussions",
       "clientInfoHeader": "Infos Client"
     },
+    "copied": "Copié",
+    "copiedToClipboard": "Message copié dans le presse-papiers",
+    "copyMessage": "Copier le message",
     "chat": {
       "placeholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
       "exportChat": "Exporter la Discussion",
@@ -403,20 +406,32 @@
       "generalChat": "Discussion Générale",
       "exportDate": "Date d'Export",
       "you": "Vous",
-      "aiAssistant": "Assistant IA"
+      "aiAssistant": "MIA"
     },
     "modelSelector": {
       "searchPlaceholder": "Rechercher des modèles...",
       "noModelsFound": "Aucun modèle trouvé.",
-      "availableModels": "Modèles Disponibles",
+      "essentialModels": "Essentiel",
+      "premiumModels": "Premium",
+      "premiumUsageWarning": "Les modèles premium augmentent leur utilisation plus rapidement",
       "models": {
-        "gemini": {
-          "name": "Gemini",
-          "description": "Excelle dans les tâches de traduction, finance et marketing."
+        "gemini_eco": {
+          "description": "Version économique de Gemini. Idéal pour les réponses rapides et les tâches de marketing."
         },
-        "chatgpt": {
-          "name": "ChatGPT",
-          "description": "Idéal pour le contenu de campagne créatif, la planification stratégique et les tâches polyvalentes."
+        "gemini_pro": {
+          "description": "Le modèle Gemini le plus puissant, conçu pour un raisonnement plus approfondi et des conversations complexes, parfait pour les tâches professionnelles ou créatives."
+        },
+        "gemini_image": {
+          "description": "Modèle avancé de Gemini avec des capacités de création d’images, parfait pour la conversation et le contenu visuel."
+        },
+        "chatgpt_eco": {
+          "description": "Version économique de ChatGPT. Léger, rapide et idéal pour des discussions simples ou des demandes basiques."
+        },
+        "chatgpt_pro": {
+          "description": "Le modèle phare d’OpenAI pour des conversations naturelles, fluides et une résolution polyvalente de problèmes."
+        },
+        "perplexity": {
+          "description": "Un modèle centré sur le raisonnement qui excelle dans les réponses de type recherche, la pensée structurée et les explications fiables."
         }
       }
     },
@@ -432,7 +447,7 @@
       "contextSelectionDescription": "Choisissez quelles informations client partager avec l'assistant IA",
       "selectAll": "Tout Sélectionner",
       "deselectAll": "Tout Désélectionner",
-      "newChat": "Nouvelle Discussion",
+      "newChat": "Nouvelle Client Discussion",
       "switchClient": "Changer de client",
       "aiContextUsed": "Contexte IA Utilisé",
       "noneSelected": "Aucun sélectionné",

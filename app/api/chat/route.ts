@@ -1,25 +1,28 @@
-import {MessageService} from '@/services/message-service'
-import {ChatService} from '@/services/chat-service'
+import {StreamingMessageService} from '@/services/chat/streaming-message-service'
+import {ChatService, NEW_CHAT_DEFAULT_TITLE} from '@/services/chat/chat-service'
 import {revalidatePath} from 'next/cache'
-import {openRouterService} from '@/services/openrouter'
+import {openRouterService, OpenRouterService} from '@/services/openrouter'
 import {logger} from '@/lib/logger'
-import {getDefaultModel} from '@/lib/models-config'
 import {checkModelAccess} from "@/lib/api/api-validation";
 import {ApiContext, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {SubscriptionErrorCode} from "@/services/error-codes";
-import {Role} from '@prisma/client';
 import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
+import {ChatWithMessages} from "@/lib/types/chat-types";
+import {chatStreamingService} from '@/services/chat/chat-streaming-service'
+import {StreamingResponseConfig} from '@/lib/types/streaming-types'
+import {getDefaultModel} from "@/lib/utils/model-utils";
 
 /**
- * Chat API endpoint that handles AI chat interactions with streaming responses.
+ * Chat API endpoint that handles streaming responses:
+ *  - Parse request parameters
+ *  - Validates model access
+ *  - Create new chat or retrieve existing chat with messages
+ *  - Get chat's client data, if any
+ *  - Saves user message
+ *  - Updates chat title + revalidate if first message
+ *  - Format all messages for OpenRouter request
+ *  - Creates and return StreamingResponse
  *
- * Manages the complete chat flow including model access validation, chat creation/retrieval,
- * client context integration, and AI response streaming. Supports both new chat creation
- * and continuation of existing chats with full client context awareness.
- *
- * @param context - ApiContext object containing userId and request
- * @param context.userId - Authenticated user ID (provided by withEnhancedApi middleware)
- * @param context.req - NextRequest object containing chat data
  * @param context.req.body.messages - Array of chat messages with content and role
  * @param context.req.body.chatId - Optional existing chat ID (creates new chat if not provided)
  * @param context.req.body.model - AI model to use (defaults to system default if not specified)
@@ -28,33 +31,9 @@ import {getLocaleFromCookies} from '@/lib/utils/locale-cookie-server'
  *
  * @returns StreamingResponse - Server-sent events stream with data types:
  *   - `content`: Streaming AI response content chunks
+ *   - `image`:
  *   - `complete`: Final completion signal with chatId and optional newTitle
  *   - `error`: Error information with message details
- *
- * Authentication & Validation:
- * 1. Authentication handled by withEnhancedApi middleware
- * 2. Token usage validation and limits checking
- * 3. Model access verification based on subscription tier
- *
- * Chat Processing:
- * 1. Parse and validate request parameters
- * 2. Create new chat or retrieve existing chat with messages
- * 3. Build client context system prompt from selected fields
- * 4. Process user message and save to database
- * 5. Stream AI response with real-time content delivery
- * 6. Save complete AI response and update token usage
- *
- * Error Handling:
- * - MODEL_ACCESS_DENIED: Subscription tier doesn't allow requested model
- * - Chat creation/retrieval failures return appropriate error messages
- * - Streaming errors are caught and sent as error events
- * - Client disconnects during streaming save partial messages
- *
- * Cost Tracking:
- * - Cost fetched once by OpenRouter service via generation stats API
- * - Returned in final stream chunk to avoid duplicate API calls
- * - Stored with each assistant message for historical tracking
- * - User billing period totals tracked separately via SubscriptionUsageService
  */
 export const POST = withEnhancedApi(
   async ({userId, req}: ApiContext) => {
@@ -72,209 +51,66 @@ export const POST = withEnhancedApi(
       throw new Error(SubscriptionErrorCode.MODEL_ACCESS_DENIED)
     }
 
-    let chat: any = null;
-    let client: any = null;
+    let chat: ChatWithMessages | null;
 
-    // LAZY CHAT CREATION: If no chatId provided, create a new chat first
+    // If it's first message (no chatId), create new chat, else, get chat with existing messages
     if (!chatId) {
-      const newChatResult = await ChatService.createNewChat(userId, clientId || null, contextFields || [])
-      
-      if (!newChatResult.success) {
-        throw new Error(newChatResult.error)
-      }
-
-      chat = newChatResult.data.chat
-      client = newChatResult.data.client
+      chat = await ChatService.createChat(userId, clientId || null, contextFields || [])
       chatId = chat.id
     } else {
-      // Get existing chat
-      const existingChatResult = await ChatService.getChatWithMessagesById(chatId, userId)
-      
-      if (!existingChatResult.success) {
-        throw new Error(existingChatResult.error)
-      }
-
-      chat = existingChatResult.data
+      chat = await ChatService.getChatWithMessagesById(chatId, userId)
     }
 
-    // Prepare chat data for AI processing
-    const lastMessage = messages[messages.length - 1]
-    const prepareChatForAIResult = await ChatService.prepareChatForAI(chat, userId, lastMessage.content, userLocale)
-    if (!prepareChatForAIResult.success) {
-      throw new Error('Failed to prepare chat for AI processing')
-    }
-    const { aiMessages, client: chatClient, isFirstUserMessage } = prepareChatForAIResult.data
-    
-    // Use the client from the preparation if we don't have one yet (for existing chats with client associated)
-    if (!client) {
-      client = chatClient
-    }
+    // get chat client data, if any
+    const client = await ChatService.getClientFromChat(chat, userId)
 
-    // Save the user message to the database
-    const userMessageResult = await MessageService.createMessage({
-      content: lastMessage.content,
-      role: Role.USER,
-      model: selectedModel,
-      cost_usd: 0,
-      chat: { connect: { id: chatId } }
-    }, userId)
-    
-    if (!userMessageResult.success) {
-      throw new Error(userMessageResult.error || 'Failed to save user message' )
-    }
-
-    // If this is the first user message, update the chat title only if it's still the default
-    const titleUpdateResult = await ChatService.updateChatTitleForFirstMessage(
-      chatId, 
-      userId, 
-      client?.name || null, 
-      isFirstUserMessage, 
-      chat.title,
-      lastMessage.content
+    // saves user message to database
+    const lastMessageContent = messages[messages.length - 1].content
+    const userMessageResult = await StreamingMessageService.saveUserMessage(
+      chatId,
+      userId,
+      lastMessageContent,
+      selectedModel
     )
-    if (titleUpdateResult.success && titleUpdateResult.data.updated) {
 
+    if (!userMessageResult.success) {
+      logger.error('Failed to save user message', new Error(userMessageResult.error), { userId, chatId })
+      throw new Error('Failed to save user message')
+    }
+
+    // If this is the first user message or chat title is default value, update chat title
+    let newTitle: string | undefined
+    const isFirstUserMessage = chat.messages.length === 0
+    if (isFirstUserMessage || chat.title === NEW_CHAT_DEFAULT_TITLE) {
+      newTitle = await ChatService.updateChatTitleWithFirstMessage(
+        chatId,
+        userId,
+        client?.name || null,
+        lastMessageContent
+      )
       // Revalidate the chat page to show the updated title
       revalidatePath(`/assistant/chat/${chatId}`)
     }
 
-    // Create a streaming response
-    const stream = new ReadableStream({
-      async start(controller) {
-        // Helper function to safely enqueue data
-        const safeEnqueue = (data: Uint8Array) => {
-          try {
-            controller.enqueue(data)
-            return true
-          } catch (error) {
-            // Controller is closed/aborted - client disconnected
-            return false
-          }
-        }
+    // Prepare all chat messages for OpenRouter request
+    const formattedMessages = await ChatService.formatMessagesForOpenRouterRequest(chat, lastMessageContent, client, userLocale)
 
-        const encoder = new TextEncoder()
-        let fullContent = ''
-        let completionStream: any = null
+    // Create streaming response configuration
+    const streamingConfig: StreamingResponseConfig = {chatId, userId, selectedModel, clientId, newTitle}
 
-        try {
-          completionStream = openRouterService.createStreamingCompletion(
-            {model: selectedModel, messages: aiMessages},
-            {userId, resourceId: chatId}
-          );
-
-          for await (const chunk of completionStream) {
-            if (chunk.isComplete) {
-              // Final chunk - use cost from chunk (already fetched by OpenRouter service)
-              const cost_usd = chunk.cost_usd || 0;
-              const generationId = chunk.generationId;
-
-              // Save the assistant's response to the database with cost
-              const assistantMessageResult = await MessageService.createMessage({
-                content: fullContent,
-                role: Role.ASSISTANT,
-                model: selectedModel,
-                cost_usd: cost_usd,
-                generation_id: generationId,
-                chat: { connect: { id: chatId } }
-              }, userId)
-              
-              if (!assistantMessageResult.success) {
-                logger.error('Failed to save assistant message',
-                  new Error(assistantMessageResult.error || 'Unknown error'), { userId, chatId })
-              }
-
-              // Send completion signal
-              const completionData = {
-                type: 'complete',
-                chatId: chatId, // Include chatId for new chats
-                newTitle: titleUpdateResult.success && titleUpdateResult.data.updated ? titleUpdateResult.data.newTitle : undefined
-              }
-
-              if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(completionData)}\n\n`))) {
-                // Client disconnected during completion, but message is already saved
-                logger.info('Client disconnected during completion signal', {userId, chatId});
-                return
-              }
-
-              controller.close()
-            } else if (chunk.content) {
-              // Stream content chunk
-              fullContent += chunk.content
-              const data = {
-                type: 'content',
-                content: chunk.content
-              }
-
-              if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))) {
-                // Client disconnected during streaming - save partial message
-                logger.info('Client disconnected during streaming, saving partial message', {
-                  userId,
-                  chatId,
-                  metadata: {partialLength: fullContent.length}
-                });
-
-                if (fullContent.trim()) {
-                  // Save the partial assistant's response to the database
-                  const partialMessageResult = await MessageService.createMessage({
-                    content: fullContent,
-                    role: Role.ASSISTANT,
-                    model: selectedModel,
-                    cost_usd: 0, // 0 cost for partial message
-                    chat: { connect: { id: chatId } }
-                  }, userId)
-                  if (partialMessageResult.success) {
-                    logger.info('Partial assistant message saved', {userId, chatId});
-                  } else {
-                    logger.error('Failed to save partial assistant message',
-                      new Error(partialMessageResult.error || 'Unknown error'), { userId, chatId })
-                  }
-                }
-                return
-              }
-            }
-          }
-        } catch (error) {
-          logger.error('Error in streaming chat', error as Error, {chatId});
-
-          // Abort the completion stream if still active
-          try {
-            if (completionStream) {
-              // Try to cancel/abort the stream if possible
-              if (typeof completionStream.return === 'function') {
-                await completionStream.return()
-              }
-            }
-          } catch (streamAbortError) {
-            logger.warn('Failed to abort completion stream', {
-              chatId,
-              metadata: {error: (streamAbortError as Error).message}
-            });
-          }
-
-          const errorData = (error as Error | undefined)?.message ?? 'Internal Server Error'
-
-          if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`))) {
-            // Client disconnected, just log and exit
-            logger.info('Client disconnected during error response', {userId, chatId});
-            return
-          }
-
-          try {
-            controller.close()
-          } catch {
-            // Controller already closed, ignore
-          }
-        }
-      }
-    })
-
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    })
+    // Create streaming response with new abstraction
+    const modalities = OpenRouterService.getModelModalities(selectedModel)
+    return await chatStreamingService.createStreamingResponseWithRetry(
+      streamingConfig,
+      () => openRouterService.createStreamingCompletion(
+        {
+          model: selectedModel, 
+          messages: formattedMessages,
+          modalities
+        },
+        {userId, resourceId: chatId}
+      )
+    )
   },
   {
     context: 'Chat API',
