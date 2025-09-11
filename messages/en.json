@@ -7,7 +7,7 @@
   "navigation": {
     "clients": "Clients",
     "prompts": "Prompts",
-    "assistant": "AI Assistant",
+    "assistant": "MIA",
     "aiServices": "AI Services",
     "affiliation": "Affiliation",
     "feedback": "Feedback",
@@ -371,7 +371,7 @@
     "exportFailed": "Export failed",
     "at": "at",
     "inputPlaceholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
-    "typing": "Typing...",
+    "thinking": "Thinking...",
     "chatExportedDescription": "Chat '{{chatTitle}}' has been exported successfully",
     "startNewConversation": "Start a new conversation",
     "noChatsYet": "No chats yet",
@@ -388,6 +388,9 @@
       "chatsHeader": "Chats",
       "clientInfoHeader": "Client Info"
     },
+    "copied": "Copied",
+    "copiedToClipboard": "Message copied to clipboard",
+    "copyMessage": "Copy message",
     "chat": {
       "placeholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
       "exportChat": "Export Chat",
@@ -403,20 +406,32 @@
       "generalChat": "General Chat",
       "exportDate": "Export Date",
       "you": "You",
-      "aiAssistant": "AI Assistant"
+      "aiAssistant": "MIA"
     },
     "modelSelector": {
       "searchPlaceholder": "Search models...",
       "noModelsFound": "No models found.",
-      "availableModels": "Available Models",
+      "essentialModels": "Essential",
+      "premiumModels": "Premium",
+      "premiumUsageWarning": "Premium models increase usage faster",
       "models": {
-        "gemini": {
-          "name": "Gemini",
-          "description": "Excels in translation, finance, and marketing tasks."
+        "gemini_eco": {
+          "description": "Cost-effective version of Gemini. Great for quick responses and marketing tasks."
         },
-        "chatgpt": {
-          "name": "ChatGPT",
-          "description": "Perfect for creative campaign content, strategic planning, and versatile tasks."
+        "gemini_pro": {
+          "description": "The most powerful Gemini model designed for deeper reasoning and more complex conversations, perfect for business or creative tasks."
+        },
+        "gemini_image": {
+          "description": "Advanced Gemini model with image creation capabilities, making it perfect for both conversation and visual content."
+        },
+        "chatgpt_eco": {
+          "description": "Cost-effective version of ChatGPT. Lightweight, fast, and ideal for casual chats or simple requests."
+        },
+        "chatgpt_pro": {
+          "description": "OpenAI’s flagship model for natural, fluent conversations and versatile problem-solving."
+        },
+        "perplexity": {
+          "description": "A reasoning-focused model that excels at research-style answers, structured thinking, and reliable explanations."
         }
       }
     },
@@ -432,7 +447,7 @@
       "contextSelectionDescription": "Choose which client information to share with the AI assistant",
       "selectAll": "Select All",
       "deselectAll": "Deselect All",
-      "newChat": "New Chat",
+      "newChat": "New Client Chat",
       "switchClient": "Switch client",
       "aiContextUsed": "AI Context Used",
       "noneSelected": "None selected",

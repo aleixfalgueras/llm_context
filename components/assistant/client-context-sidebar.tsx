@@ -42,7 +42,7 @@ export function ClientContextSidebar({
   const tContext = useTranslations('clientContext')
   const router = useRouter()
   const contextFields = useMemo(() => getClientContextFields(tContext), [tContext])
-  const [sidebarWidth, setSidebarWidth] = useState(300)
+  const [sidebarWidth, setSidebarWidth] = useState(320)
   const [isResizing, setIsResizing] = useState(false)
   const [isCreatingChat, setIsCreatingChat] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)

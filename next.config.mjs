@@ -16,6 +16,11 @@ const nextConfig = {
   // Production optimizations
   poweredByHeader: false,
   reactStrictMode: true, // Re-enabled with proper effect protection
+  // Suppress Supabase realtime-js critical dependency warning
+  webpack: (config) => {
+    config.module.exprContextCritical = false;
+    return config;
+  },
 };
 
 export default nextConfig;

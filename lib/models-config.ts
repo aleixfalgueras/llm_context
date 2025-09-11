@@ -1,66 +1,94 @@
-import {ModelTier, ModelTierType, SubscriptionPlanType} from '@/lib/types/subscription-types'
-import {SubscriptionPlan} from "@prisma/client";
+import {ModelTier} from '@/lib/types/subscription-types'
 
+/**
+ * Description contains the json key in the translation files, starting from namespace 'assistant.modelSelector'.
+ *
+ * Pricing:
+ *  - Input and Output is the dollar price per M tokens.
+ *  - Image Input and Output is the dollar price per Kb
+ */
 export interface AIModel {
   id: string
   name: string
-  description?: string
-  provider: 'openai' | 'anthropic' | 'google' | 'meta' | 'other'
+  description: string
+  provider: 'openai' | 'anthropic' | 'google' | 'meta' | 'perplexity'
   contextLength?: number
-  pricing?: { input: number; output: number }
-  tier?: ModelTierType
+  pricing?: { input: number; output: number, imageInput?: number, imageOutput?: number }
 }
 
-// Model ID Constants - Available models for all AI functionalities
 export const MODEL_IDS = {
-  // Primary Model - Used for all AI functionalities
   GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
-  // Secondary Model - Same capabilities as Gemini 2.0 Flash
-  OPENAI_GPT_4_1_NANO: 'openai/gpt-4.1-nano',
+  GOOGLE_GEMINI_2_5_PRO: 'google/gemini-2.5-pro',
+  GOOGLE_GEMINI_2_5_FLASH_IMAGE: 'google/gemini-2.5-flash-image-preview',
+  OPENAI_GPT_5_NANO: 'openai/gpt-5-nano',
+  OPENAI_GPT_5_CHAT: 'openai/gpt-5-chat',
+  PERPLEXITY: 'perplexity/sonar-reasoning'
 } as const
 
-export const IMAGE_GENERATION_MODEL_ID = 'google/gemini-2.5-flash-image-preview'
-
-// Model Tiers Configuration - All tiers use both models
-export const MODEL_TIERS = {
-  [ModelTier.APPRENTICE]: [
-    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    MODEL_IDS.OPENAI_GPT_4_1_NANO,
-  ],
-  [ModelTier.KNIGHT]: [
-    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    MODEL_IDS.OPENAI_GPT_4_1_NANO,
-  ],
-  [ModelTier.MASTER]: [
-    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    MODEL_IDS.OPENAI_GPT_4_1_NANO,
-  ],
-  [ModelTier.JEDI]: [
-    MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    MODEL_IDS.OPENAI_GPT_4_1_NANO,
-  ],
-}
-
 export const AVAILABLE_MODELS: AIModel[] = [
-  // Primary Model - Google Gemini 2.0 Flash 001
   {
     id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-    name: 'Gemini',
+    name: 'Gemini 2.0',
+    description: "gemini_eco",
     provider: 'google',
     contextLength: 1000000,
-    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
-    tier: ModelTier.APPRENTICE
+    pricing: { input: 0.1, output: 0.4 },
   },
-  // Secondary Model - OpenAI GPT-4.1 Nano
   {
-    id: MODEL_IDS.OPENAI_GPT_4_1_NANO,
-    name: 'ChatGPT',
+    id: MODEL_IDS.GOOGLE_GEMINI_2_5_PRO,
+    name: 'Gemini 2.5 PRO',
+    description: "gemini_pro",
+    provider: 'google',
+    contextLength: 1048576,
+    pricing: { input: 1.25, output: 10 },
+  },
+  {
+    id: MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE,
+    name: 'Gemini 2.5 Image',
+    description: "gemini_image",
+    provider: 'google',
+    contextLength: 32768,
+    pricing: { input: 0.3, output: 2.5, imageInput: 1.238, imageOutput: 0.03 },
+  },
+  {
+    id: MODEL_IDS.OPENAI_GPT_5_NANO,
+    name: 'Chat GPT 5 Nano',
+    description: "chatgpt_eco",
     provider: 'openai',
-    contextLength: 1000000,
-    pricing: { input: 0.0001, output: 0.0004 }, // $0.10/M input, $0.40/M output
-    tier: ModelTier.APPRENTICE
+    contextLength: 400000,
+    pricing: { input: 0.05, output: 0.4 },
+  },
+  {
+    id: MODEL_IDS.OPENAI_GPT_5_CHAT,
+    name: 'Chat GPT 5',
+    description: "chatgpt_pro",
+    provider: 'openai',
+    contextLength: 128000,
+    pricing: { input: 1.25, output: 10 },
+  },
+  {
+    id: MODEL_IDS.PERPLEXITY,
+    name: 'Perplexity: Sonar Reasoning',
+    description: "perplexity",
+    provider: 'perplexity',
+    contextLength: 125000,
+    pricing: { input: 1, output: 5 },
   }
 ]
+
+export const ESSENTIAL_MODEL_IDS = [
+  MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+  MODEL_IDS.OPENAI_GPT_5_NANO
+]
+
+export const IMAGE_GENERATION_MODEL_ID = MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
+
+export const MODEL_TIERS = {
+  [ModelTier.APPRENTICE]: Object.values(MODEL_IDS),
+  [ModelTier.KNIGHT]: Object.values(MODEL_IDS),
+  [ModelTier.MASTER]: Object.values(MODEL_IDS),
+  [ModelTier.JEDI]: Object.values(MODEL_IDS),
+}
 
 // OpenRouter Configuration Constants
 export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH
@@ -72,72 +100,3 @@ export const DEFAULT_FREQUENCY_PENALTY = 0.1
 // Large enough to avoid cutting responses, but prevents extremely long outputs
 export const DEFAULT_MAX_TOKENS = 8000
 
-/**
- * Get the default model, with optional environment override
- * Environment variable: OPENROUTER_DEFAULT_MODEL
- */
-export function getDefaultModel(): string {
-  return process.env.OPENROUTER_DEFAULT_MODEL || DEFAULT_MODEL
-}
-
-/**
- * Get the default temperature, with optional environment override
- */
-export function getDefaultTemperature(): number {
-  return parseFloat(process.env.OPENROUTER_TEMPERATURE || DEFAULT_TEMPERATURE.toString())
-}
-
-/**
- * Get the default max tokens - consistent limit across all AI providers
- */
-export function getDefaultMaxTokens(): number {
-  return DEFAULT_MAX_TOKENS
-}
-
-/**
- * Get the default presence penalty, with optional environment override
- */
-export function getDefaultPresencePenalty(): number {
-  return parseFloat(process.env.OPENROUTER_PRESENCE_PENALTY || DEFAULT_PRESENCE_PENALTY.toString())
-}
-
-/**
- * Get the default frequency penalty, with optional environment override
- */
-export function getDefaultFrequencyPenalty(): number {
-  return parseFloat(process.env.OPENROUTER_FREQUENCY_PENALTY || DEFAULT_FREQUENCY_PENALTY.toString())
-}
-
-/**
- * Get models available for a specific subscription tier
- */
-export function getModelsByTier(tier: ModelTierType): AIModel[] {
-  const tierModels = MODEL_TIERS[tier] || []
-  return AVAILABLE_MODELS.filter(model => (tierModels as string[]).includes(model.id))
-}
-
-/**
- * Check if a model is available for a specific subscription tier
- */
-export function isModelAvailableForTier(modelId: string, tier: ModelTierType): boolean {
-  const tierModels = MODEL_TIERS[tier] || []
-  return (tierModels as string[]).includes(modelId)
-}
-
-/**
- * Get subscription tier from plan name
- */
-export function getTierFromPlan(plan: SubscriptionPlanType): ModelTierType {
-  switch (plan) {
-    case SubscriptionPlan.apprentice:
-      return ModelTier.APPRENTICE
-    case SubscriptionPlan.knight:
-      return ModelTier.KNIGHT
-    case SubscriptionPlan.master:
-      return ModelTier.MASTER
-    case SubscriptionPlan.jedi:
-      return ModelTier.JEDI
-    default:
-      return ModelTier.APPRENTICE
-  }
-}

@@ -11,7 +11,7 @@ interface MarkdownRendererProps {
 
 export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   return (
-    <div className={`prose max-w-full dark:prose-invert ${className}`}>
+    <div className={`prose max-w-full dark:prose-invert overflow-x-auto ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
