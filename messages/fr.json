@@ -447,7 +447,7 @@
       "contextSelectionDescription": "Choisissez quelles informations client partager avec l'assistant IA",
       "selectAll": "Tout Sélectionner",
       "deselectAll": "Tout Désélectionner",
-      "newChat": "Nouvelle Discussion",
+      "newChat": "Nouvelle Client Discussion",
       "switchClient": "Changer de client",
       "aiContextUsed": "Contexte IA Utilisé",
       "noneSelected": "Aucun sélectionné",
