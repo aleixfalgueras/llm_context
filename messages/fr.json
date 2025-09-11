@@ -388,6 +388,9 @@
       "chatsHeader": "Discussions",
       "clientInfoHeader": "Infos Client"
     },
+    "copied": "Copié",
+    "copiedToClipboard": "Message copié dans le presse-papiers",
+    "copyMessage": "Copier le message",
     "chat": {
       "placeholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
       "exportChat": "Exporter la Discussion",

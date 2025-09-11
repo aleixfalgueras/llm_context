@@ -388,6 +388,9 @@
       "chatsHeader": "Chats",
       "clientInfoHeader": "Client Info"
     },
+    "copied": "Copied",
+    "copiedToClipboard": "Message copied to clipboard",
+    "copyMessage": "Copy message",
     "chat": {
       "placeholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
       "exportChat": "Export Chat",
