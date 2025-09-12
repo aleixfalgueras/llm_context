@@ -205,9 +205,20 @@ export function UpgradeDowngradeDialog({
               <div className="p-6 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                 <div className="font-semibold text-lg mb-2">{t('upgradeDialog.firstSubscription.planTitle', { planName: targetPlanConfig.name })}</div>
                 <div className="text-3xl font-bold mb-2">
-                  {targetPlanConfig.price}€
-                  <span className="text-lg font-normal text-muted-foreground">{t('upgradeDialog.firstSubscription.perMonth')}</span>
+                  {billingInterval === BillingInterval.annual && targetPlanConfig.priceAnnual
+                    ? targetPlanConfig.priceAnnual
+                    : targetPlanConfig.price}€
+                  <span className="text-lg font-normal text-muted-foreground">
+                    {billingInterval === BillingInterval.annual 
+                      ? t('upgradeDialog.firstSubscription.perYear')
+                      : t('upgradeDialog.firstSubscription.perMonth')}
+                  </span>
                 </div>
+                {billingInterval === BillingInterval.annual && targetPlanConfig.priceAnnual && targetPlanConfig.price > 0 && (
+                  <div className="text-sm text-green-600 dark:text-green-400 mb-2">
+                    {t('upgradeDialog.firstSubscription.savings')} {targetPlanConfig.price * 12 - targetPlanConfig.priceAnnual}€
+                  </div>
+                )}
                 <Badge variant="secondary" className="mb-4">{t('upgradeDialog.badges.firstSubscription')}</Badge>
               </div>
             </div>
@@ -233,9 +244,16 @@ export function UpgradeDowngradeDialog({
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm">
-                    {isDowngrade ? t('upgradeDialog.billing.newMonthlyCharge') : t('upgradeDialog.billing.monthlyCharge')}
+                    {billingInterval === BillingInterval.annual
+                      ? (isDowngrade ? t('upgradeDialog.billing.newAnnualCharge') : t('upgradeDialog.billing.annualCharge'))
+                      : (isDowngrade ? t('upgradeDialog.billing.newMonthlyCharge') : t('upgradeDialog.billing.monthlyCharge'))
+                    }
                   </span>
-                  <span className="font-semibold">{targetPlanConfig.price}€</span>
+                  <span className="font-semibold">
+                    {billingInterval === BillingInterval.annual && targetPlanConfig.priceAnnual
+                      ? targetPlanConfig.priceAnnual
+                      : targetPlanConfig.price}€
+                  </span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {isDowngrade 
