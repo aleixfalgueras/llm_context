@@ -1,10 +1,9 @@
 import {clerkClient} from '@clerk/nextjs/server'
 import {prisma} from '@/lib/prisma'
-import {extractClientInfo, withdrawAllConsent} from '@/lib/utils/consent'
+import {extractClientInfo} from '@/lib/utils/consent'
 import {apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {ApiErrors} from '@/lib/api/api-error-handler'
 import {cancelSubscriptionImmediately} from '@/lib/stripe/stripe-subscription'
-import {stripe} from '@/lib/stripe/stripe'
 import {SubscriptionUsageOperations} from '@/database'
 import {DELETE_CONFIRMATION_TEXT} from '@/lib/types/account-types'
 
@@ -12,39 +11,36 @@ import {DELETE_CONFIRMATION_TEXT} from '@/lib/types/account-types'
  * Account Deletion Endpoint
  * 
  * **Process Overview:**
- * The deletion process consists of 6 main steps executed in sequence to ensure
+ * The deletion process consists of 5 main steps executed in sequence to ensure
  * data integrity and proper cleanup across all systems.
  * 
- * Step 1: Validation & Consent Withdrawal
+ * Step 1: Validation & Data Inventory
  * - Validates user-provided confirmation text matches required phrase
  * - Extracts client information (IP, user agent) for audit trail
- * - Withdraws all user consent records with proper documentation
- * - Performed outside transaction to avoid timeout issues
- * 
- * Step 2: Data Inventory & Audit Preparation
  * - Counts all user data across the platform for audit purposes
- * - Includes: clients, documents, chats, messages, prompts, feedback, affiliations
+ * - Includes: clients, documents, chats, messages, prompts, feedback, affiliations, consent
  * - Captures subscription details and Stripe customer information
  *
- * Step 3: Core Data Deletion (Transactional)
+ * Step 2: Core Data Deletion (Transactional)
  * - Creates audit trail record before deletion begins
  * - Deletes user data in dependency order to respect foreign key constraints
+ * - Deletes user consent records as part of the cleanup
  * - Handles affiliation hierarchy (orphans child affiliations instead of deleting)
- * - Add "deleted_user" to the userId from the UserSubscription table
+ * - Anonymizes UserSubscription by prefixing userId with "deleted_user_"
  * - Updates audit record with actual deletion counts
  * - Uses extended timeout transaction to handle large data sets
  * 
- * Step 4: Completion Audit Logging
+ * Step 3: Completion Audit Logging
  * - Creates final audit log entry confirming deletion completion
  * - Records deletion request ID for traceability
  * - Performed outside transaction for reliability
  * 
- * Step 5: Stripe Cleanup
+ * Step 4: Stripe Cleanup
  * - Cancels active subscription immediately with proper reason code
  * - Handles errors gracefully - deletion continues even if Stripe operations fail
  * - Records success/failure status for each Stripe operation
  * 
- * Step 6: External Service Cleanup
+ * Step 5: External Service Cleanup
  * - Removes user from Clerk authentication service
  * - Handles errors gracefully - process continues even if external cleanup fails
  * - Logs any failures for manual review
@@ -62,13 +58,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
 
   const userSubscription = await SubscriptionUsageOperations.findByUserId(userId)
 
-  // 1. Withdraw all consent first (outside transaction to avoid timeout)
-  await withdrawAllConsent(userId, 'account_deletion', {
-    ipAddress: clientIP,
-    userAgent
-  })
-
-  // 2. Count user data for audit purposes (parallelized)
+  // Step 1: Count user data for audit purposes (parallelized)
   // First get user's affiliation code for child count
   const userAffiliation = await prisma.affiliation.findUnique({
     where: { userId },
@@ -110,7 +100,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     subscriptionStatus: userSubscription?.status || null
   }
 
-  // 3. Start a transaction for core deletion operations with extended timeout
+  // Step 2: Start a transaction for core deletion operations with extended timeout
   const result = await prisma.$transaction(async (tx) => {
 
     // Create deletion request record for audit trail
@@ -239,7 +229,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     timeout: 30000 // 30 second timeout for this specific transaction
   })
 
-  // 4. Create final audit log entry (outside transaction)
+  // Step 3: Create final audit log entry (outside transaction)
   await prisma.consentAuditLog.create({
     data: {
       userId,
@@ -253,7 +243,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
     }
   })
 
-  // 5. Handle Stripe subscription cleanup
+  // Step 4: Handle Stripe subscription cleanup
   let stripeCleanupResults = {
     subscriptionCancelled: false,
     subscriptionError: null as string | null
@@ -276,7 +266,7 @@ export const POST = withEnhancedApi(async ({ userId, req }) => {
   }
 
 
-  // 6. Delete from Clerk (external service) - outside transaction
+  // Step 5: Delete from Clerk (external service) - outside transaction
   try {
     const clerk = await clerkClient()
     await clerk.users.deleteUser(userId)
