@@ -26,7 +26,7 @@
     "features": {
       "title": "Advanced AI Marketing Platform",
       "clientIntelligence": {
-        "title": "Client Business Intelligence",
+        "title": "Client Intelligence",
         "description": "Store industry insights, business goals, target audiences, and competitive landscape for each client"
       },
       "campaignStrategy": {
@@ -34,7 +34,7 @@
         "description": "Generate marketing strategies, campaign ideas, and tactical plans using deep client context"
       },
       "contentCreation": {
-        "title": "Branded Content Creation",
+        "title": "Branded Content",
         "description": "Create on-brand content that speaks to your client's audience using their voice and messaging"
       },
       "clientReporting": {
@@ -46,18 +46,24 @@
       "badge": "Enterprise-grade privacy and security"
     },
     "models": {
-      "title": "Dual Premium AI Models Available",
-      "gemini": {
-        "title": "Google Gemini",
-        "context": "1M Context Length",
-        "description": "Latest Google AI with enhanced reasoning, multimodal capabilities, and superior performance for complex marketing strategies."
+      "title": "Premium AI Models",
+      "latestTechnology": "Latest Technology",
+      "geminiPro": {
+        "name": "Gemini 2.5 PRO",
+        "description": "Google's most powerful model with massive context window and advanced reasoning capabilities for complex tasks."
       },
-      "gpt": {
-        "title": "OpenAI ChatGPT",
-        "context": "1M Context Length",
-        "description": "Efficient OpenAI model perfect for creative campaign content, strategic planning, and versatile marketing copy."
+      "chatgpt5": {
+        "name": "ChatGPT 5",
+        "description": "OpenAI's flagship model delivering natural conversations and creative solutions with exceptional versatility."
       },
-      "switch": "Switch between models seamlessly"
+      "perplexity": {
+        "name": "Perplexity Sonar",
+        "description": "Specialized reasoning model that excels at research, analysis, and providing detailed explanations."
+      },
+      "geminiImage": {
+        "name": "Gemini 2.5 Image",
+        "description": "Advanced multimodal AI for creating stunning visuals and understanding image content seamlessly."
+      }
     },
     "howItWorks": {
       "title": "From Client Onboarding to Campaign Success",

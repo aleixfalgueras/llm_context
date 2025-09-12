@@ -38,7 +38,7 @@
         "description": "Créez du contenu de marque qui parle à l'audience de votre client en utilisant leur voix et leur message"
       },
       "clientReporting": {
-        "title": "Rapports Client",
+        "title": "Rapports d'Activité des Clients",
         "description": "Générez des rapports client complets et des résumés de campagne avec un contexte commercial complet"
       }
     },
@@ -46,18 +46,24 @@
       "badge": "Confidentialité et sécurité de niveau entreprise"
     },
     "models": {
-      "title": "Deux Modèles IA Premium Disponibles",
-      "gemini": {
-        "title": "Google Gemini",
-        "context": "Longueur de contexte 1M",
-        "description": "Dernière IA de Google avec raisonnement amélioré, capacités multimodales et performances supérieures pour les stratégies marketing complexes."
+      "title": "Modèles IA Premium",
+      "latestTechnology": "Dernière Technologie",
+      "geminiPro": {
+        "name": "Gemini 2.5 PRO",
+        "description": "Le modèle le plus puissant de Google avec une fenêtre de contexte massive et des capacités de raisonnement avancées."
       },
-      "gpt": {
-        "title": "OpenAI ChatGPT",
-        "context": "Longueur de contexte 1M",
-        "description": "Modèle OpenAI efficace parfait pour le contenu de campagne créatif, la planification stratégique et les textes marketing polyvalents."
+      "chatgpt5": {
+        "name": "ChatGPT 5",
+        "description": "Le modèle phare d'OpenAI offrant des conversations naturelles et des solutions créatives avec une polyvalence exceptionnelle."
       },
-      "switch": "Basculez entre les modèles de manière transparente"
+      "perplexity": {
+        "name": "Perplexity Sonar",
+        "description": "Modèle de raisonnement spécialisé qui excelle dans la recherche, l'analyse et les explications détaillées."
+      },
+      "geminiImage": {
+        "name": "Gemini 2.5 Image",
+        "description": "IA multimodale avancée pour créer des visuels époustouflants et comprendre le contenu des images de manière transparente."
+      }
     },
     "howItWorks": {
       "title": "De l'Intégration Client au Succès de la Campagne",
