@@ -602,12 +602,16 @@
         "nextBilling": "Next billing date: {{date}}",
         "newMonthlyCharge": "New monthly charge",
         "monthlyCharge": "Monthly charge",
+        "newAnnualCharge": "New annual charge",
+        "annualCharge": "Annual charge",
         "planChangeNote": "Plan changes will be processed immediately",
         "stripeRedirectNote": "You'll be redirected to Stripe to complete payment"
       },
       "firstSubscription": {
         "planTitle": "Subscribe to {{planName}}",
-        "perMonth": "/month"
+        "perMonth": "/month",
+        "perYear": "/year",
+        "savings": "Save"
       },
       "buttons": {
         "cancel": "Cancel",
