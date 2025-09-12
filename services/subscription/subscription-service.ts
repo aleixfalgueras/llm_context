@@ -1,10 +1,10 @@
 import {logger} from '@/lib/logger'
 import {SubscriptionUsageOperations} from '@/database'
 import {cacheSubscription, getCachedSubscription, invalidateAllUserCaches} from '@/services/subscription/subscription-cache'
-import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription, BillingInterval} from '@prisma/client'
 import {SubscriptionWithValidation} from '@/lib/types/subscription-types'
 import {clerkClient} from '@clerk/nextjs/server'
-import {createCheckoutSession, STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
+import {createCheckoutSession, getStripePriceId} from '@/lib/stripe/stripe-utils'
 import {releaseSubscriptionSchedule, scheduleSubscriptionDowngrade} from '@/lib/stripe/stripe-subscription'
 import {isDowngrade} from "@/lib/utils/subscription-client-utils";
 
@@ -202,7 +202,11 @@ export class SubscriptionService {
   /**
    * Create checkout session handling both upgrades and downgrades through proper business logic
    */
-  static async createCheckoutSession(userId: string, planId: SubscriptionPlan): Promise<{
+  static async createCheckoutSession(
+    userId: string, 
+    planId: SubscriptionPlan, 
+    billingInterval: BillingInterval = BillingInterval.monthly
+  ): Promise<{
     isDowngrade: boolean
     message?: string
     effectiveDate?: string
@@ -214,14 +218,25 @@ export class SubscriptionService {
         throw new Error('Invalid plan ID')
       }
 
-      const priceId = STRIPE_PRICE_IDS[planId]
+      const priceId = getStripePriceId(planId, billingInterval)
       if (!priceId) {
-        logger.warn('No price ID found for plan', { metadata: { planId } })
+        logger.warn('No price ID found for plan', { metadata: { planId, billingInterval } })
         throw new Error('Price not found')
       }
 
       // Check if user has existing subscription through service layer
       const existingSubscription = await SubscriptionUsageOperations.findByUserId(userId)
+
+      // Check if user is trying to change billing interval with active subscription
+      if (existingSubscription?.stripeSubscriptionId && 
+          existingSubscription.billingInterval && 
+          existingSubscription.billingInterval !== billingInterval) {
+        
+        logger.error('Billing interval change attempted with active subscription')
+        throw new Error("Cannot change billing interval during an active subscription. " +
+          "Please cancel your current subscription first and then subscribe with your preferred billing interval.")
+
+      }
 
       // If user has active subscription and this is a downgrade, handle downgrade scheduling
       if (existingSubscription?.stripeSubscriptionId && 
@@ -241,7 +256,8 @@ export class SubscriptionService {
           priceId,
           userId,
           existingSubscription.plan as SubscriptionPlan,
-          planId
+          planId,
+          billingInterval
         )
 
         return {
@@ -261,7 +277,7 @@ export class SubscriptionService {
         throw new Error('User email not found')
       }
 
-      const session = await createCheckoutSession(userId, email, priceId, planId)
+      const session = await createCheckoutSession(userId, email, priceId, planId, billingInterval)
 
       // All customers now go through checkout flow (for upgrades/new subscriptions)
       logger.info('Checkout session created successfully', { 

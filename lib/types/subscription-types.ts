@@ -2,7 +2,7 @@
  * Centralized subscription and tier type definitions
  * Use these enums instead of string literals throughout the codebase
  */
-import {SubscriptionPlan, SubscriptionStatus, UserSubscription} from "@prisma/client";
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription, BillingInterval} from "@prisma/client";
 
 // Plan hierarchy for upgrade/downgrade detection
 export const SUBSCRIPTION_PLAN_HIERARCHY = [SubscriptionPlan.apprentice, SubscriptionPlan.knight, SubscriptionPlan.master, SubscriptionPlan.jedi]
@@ -30,6 +30,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     id: SubscriptionPlan.apprentice,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.apprentice],
     price: 20,
+    priceAnnual: 192, // 20 * 12 * 0.8 (20% discount)
     currency: 'EUR',
     spending_limit_usd: 5.8, // 5€
     commissionLimit: 100,
@@ -45,6 +46,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     id: SubscriptionPlan.knight,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.knight],
     price: 50,
+    priceAnnual: 480, // 50 * 12 * 0.8 (20% discount)
     currency: 'EUR',
     spending_limit_usd: 14.5, // 12.5€
     commissionLimit: 500,
@@ -60,6 +62,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     id: SubscriptionPlan.master,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.master],
     price: 200,
+    priceAnnual: 1920, // 200 * 12 * 0.8 (20% discount)
     currency: 'EUR',
     spending_limit_usd: 58, // 50€
     commissionLimit: 5000,
@@ -77,6 +80,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     id: SubscriptionPlan.jedi,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.jedi],
     price: 500,
+    priceAnnual: 4800, // 500 * 12 * 0.8 (20% discount)
     currency: 'EUR',
     spending_limit_usd: 145, // 125€
     commissionLimit: 50000,
@@ -92,6 +96,13 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     ]
   }
 } as const
+
+// Helper function to calculate annual savings
+export function getAnnualSavings(plan: SubscriptionPlan): number {
+  const planDetail = SUBSCRIPTION_PLAN_DETAIL[plan];
+  const monthlyTotal = planDetail.price * 12;
+  return monthlyTotal - planDetail.priceAnnual;
+}
 
 export type SubscriptionWithValidation = UserSubscription & {
   isActive: boolean // Computed field: SubscriptionService.isSubscriptionActive()

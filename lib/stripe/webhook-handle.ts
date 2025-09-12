@@ -269,7 +269,8 @@ export async function handleSubscriptionEvent(subscription: Stripe.Subscription,
       let clearScheduleId = false
 
       if (dbSubscription?.pendingPlanChange && priceId) {
-        const newPlan = getPlanFromPriceId(priceId)
+        const planInfo = getPlanFromPriceId(priceId)
+        const newPlan = planInfo?.plan
 
         // If the new plan matches the pending plan change, clear the pending change
         if (newPlan === dbSubscription.pendingPlanChange) {
@@ -281,6 +282,7 @@ export async function handleSubscriptionEvent(subscription: Stripe.Subscription,
               customerId: subscription.customer,
               previousPendingPlan: dbSubscription.pendingPlanChange,
               newPlan,
+              billingInterval: planInfo?.interval,
               scheduleCompleted: !!dbSubscription.stripeScheduleId
             }
           })
