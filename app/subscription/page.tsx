@@ -1,6 +1,6 @@
 'use client'
 
-import {Suspense, useState} from 'react'
+import {Suspense, useState, useEffect, useRef} from 'react'
 import {Button} from '@/components/ui/button'
 import {SettingsIcon, Trash2} from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -68,6 +68,16 @@ export default function SubscriptionPage() {
   } = useSubscriptionActions({ refreshSubscriptionWithFallback })
 
   const { toast } = useToast()
+  const hasSetInitialInterval = useRef(false)
+
+  // Automatically set billing interval based on user's subscription (only once on load)
+  useEffect(() => {
+    // Only set if we haven't set it before and user has a real subscription
+    if (!hasSetInitialInterval.current && subscription.billingInterval && !isFreeMode()) {
+      setBillingInterval(subscription.billingInterval)
+      hasSetInitialInterval.current = true
+    }
+  }, [subscription.billingInterval, isFreeMode])
 
   const handlePlanActionWrapper = (planId: string) => {
     handlePlanAction(planId, isPendingDowngrade(), isPendingPlanChange(planId), billingInterval)
@@ -263,7 +273,7 @@ export default function SubscriptionPage() {
               plan={plan}
               currentPlan={subscription.plan as SubscriptionPlan}
               currentBillingInterval={subscription.billingInterval}
-              isCurrentPlan={isCurrentPlan(planId)}
+              isCurrentPlan={isCurrentPlan(planId, billingInterval)}
               isFreeMode={isFreeMode()}
               isPendingDowngrade={isPendingDowngrade()}
               isPendingPlanChange={isPendingPlanChange(planId)}

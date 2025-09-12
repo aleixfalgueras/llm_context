@@ -1,5 +1,5 @@
 import {useSubscription} from '@/hooks/subscription/use-subscription'
-import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus, BillingInterval} from '@prisma/client'
 
 export function useSubscriptionStatus() {
   const subscription = useSubscription()
@@ -61,7 +61,7 @@ export function useSubscriptionStatus() {
   }
 
   // Helper function to check if a plan is the current plan
-  const isCurrentPlan = (planId: string) => {
+  const isCurrentPlan = (planId: string, billingInterval?: BillingInterval) => {
     // Free mode users don't have a "current plan" - they're in trial
     if (isFreeMode()) {
       return false
@@ -70,7 +70,16 @@ export function useSubscriptionStatus() {
     if (isExpired()) {
       return false
     }
-    return planId === subscription.plan
+    // Check if plan matches
+    if (planId !== subscription.plan) {
+      return false
+    }
+    // If billingInterval is provided, check if it matches
+    if (billingInterval && subscription.billingInterval) {
+      return billingInterval === subscription.billingInterval
+    }
+    // If no billingInterval provided or subscription doesn't have one, just check plan
+    return true
   }
 
   // Helper function to detect if subscription is past due or unpaid
