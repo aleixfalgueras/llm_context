@@ -99,7 +99,11 @@
     "pricing": {
       "title": "Tarification Simple et Transparente",
       "description": "Choisissez l'abonnement qui correspond à vos besoins marketing. Tous les plans incluent l'accès à Google Gemini 2.0 et OpenAI GPT-4.1.",
-      "perMonth": "/mois"
+      "perMonth": "/mois",
+      "perYear": "/an",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "savings": "Économisez"
     },
     "cta": {
       "title": "MIA fonctionne sur invitation uniquement",

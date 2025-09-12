@@ -21,14 +21,16 @@ import {AnimatedLogo} from '@/components/ui/animated-logo'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
 import {getPlanNameColor} from '@/lib/utils/subscription-client-utils'
-import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
+import {SUBSCRIPTION_PLAN_DETAIL, getAnnualSavings} from '@/lib/types/subscription-types'
 import Link from 'next/link'
-import {SubscriptionPlan} from "@prisma/client";
+import {SubscriptionPlan, BillingInterval} from "@prisma/client";
 import {useTranslations} from '@/lib/translations/context'
 import {LanguageSwitcher} from '@/components/language-switcher'
+import {useState} from 'react'
 
 export function LandingPage() {
   const t = useTranslations()
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>(BillingInterval.monthly)
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -235,6 +237,33 @@ export function LandingPage() {
             </p>
           </div>
           
+          {/* Billing Interval Toggle */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+              <button
+                onClick={() => setBillingInterval(BillingInterval.monthly)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  billingInterval === BillingInterval.monthly
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                }`}
+              >
+                {t('landing.pricing.monthly')}
+              </button>
+              <button
+                onClick={() => setBillingInterval(BillingInterval.annual)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  billingInterval === BillingInterval.annual
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                }`}
+              >
+                {t('landing.pricing.annual')}
+                <span className="ml-1 text-xs text-green-600 dark:text-green-400">-20%</span>
+              </button>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {Object.entries(SUBSCRIPTION_PLAN_DETAIL).map(([planId, plan]) => {
               const getPlanIcon = (planId: string) => {
@@ -255,9 +284,26 @@ export function LandingPage() {
                     </div>
                     <CardTitle className={`text-xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
                     <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{t(plan.description)}</CardDescription>
-                    <div className="mt-4 pt-2 pb-2 flex items-end justify-center min-h-[4rem]">
-                      <span className="text-3xl font-bold leading-none">{plan.price}€</span>
-                      {plan.price > 0 && <span className="text-gray-500 mb-1">{t('landing.pricing.perMonth')}</span>}
+                    <div className="mt-4 pt-2 pb-2 flex flex-col items-center justify-center min-h-[5rem]">
+                      <div className="flex items-end">
+                        <span className="text-3xl font-bold leading-none">
+                          {billingInterval === BillingInterval.annual && plan.priceAnnual 
+                            ? plan.priceAnnual 
+                            : plan.price}€
+                        </span>
+                        {plan.price > 0 && (
+                          <span className="text-gray-500 mb-1">
+                            {billingInterval === BillingInterval.annual 
+                              ? t('landing.pricing.perYear') 
+                              : t('landing.pricing.perMonth')}
+                          </span>
+                        )}
+                      </div>
+                      {billingInterval === BillingInterval.annual && plan.priceAnnual && plan.price > 0 && (
+                        <div className="mt-1 text-sm text-green-600 dark:text-green-400">
+                          {t('landing.pricing.savings')} {getAnnualSavings(planId as SubscriptionPlan)}€
+                        </div>
+                      )}
                     </div>
                   </CardHeader>
                   
@@ -286,7 +332,7 @@ export function LandingPage() {
             </p>
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {t('landing.cta.businessInquiries')} <Link href="mailto:hello@mia-ai.com" className="text-blue-600 dark:text-blue-400 hover:underline">hello@mia-ai.com</Link>
+                {t('landing.cta.businessInquiries')} <Link href="mailto:a.nelson@dreamotion.io" className="text-blue-600 dark:text-blue-400 hover:underline">a.nelson@dreamotion.io</Link>
               </p>
             </div>
           </div>
