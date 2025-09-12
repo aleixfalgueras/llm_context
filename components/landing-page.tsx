@@ -115,55 +115,88 @@ export function LandingPage() {
           </div>
         </div>
         
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
-            <Shield className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              {t('landing.security.badge')}
-            </span>
-          </div>
-        </div>
-        
         {/* AI Models Section */}
         <div className="mb-16">
-          <div className="text-center mb-8">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full text-sm font-semibold mb-4">
+              <Sparkles className="w-4 h-4 mr-2" />
+              {t('landing.models.latestTechnology')}
+            </div>
             <h2 className="text-3xl font-bold mb-4">{t('landing.models.title')}</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-blue-200 dark:hover:border-blue-800">
-              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {/* Gemini 2.5 PRO */}
+            <Card className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2">
+              <div className="absolute top-0 right-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
+                PREMIUM
               </div>
-              <h3 className="text-xl font-semibold mb-2">{t('landing.models.gemini.title')}</h3>
-              <div className="mb-4 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                {t('landing.models.gemini.context')}
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                {t('landing.models.gemini.description')}
-              </p>
+              <CardHeader className="text-center pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle className="text-lg font-bold">{t('landing.models.geminiPro.name')}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('landing.models.geminiPro.description')}
+                </p>
+              </CardContent>
             </Card>
 
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow border-2 hover:border-green-200 dark:hover:border-green-800">
-              <div className="w-20 h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Bot className="w-10 h-10 text-green-600 dark:text-green-400" />
+            {/* ChatGPT 5 */}
+            <Card className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2">
+              <div className="absolute top-0 right-0 bg-gradient-to-br from-green-500 to-green-600 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
+                FLAGSHIP
               </div>
-              <h3 className="text-xl font-semibold mb-2">{t('landing.models.gpt.title')}</h3>
-              <div className="mb-4 text-sm text-green-600 dark:text-green-400 font-medium">
-                {t('landing.models.gpt.context')}
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                {t('landing.models.gpt.description')}
-              </p>
+              <CardHeader className="text-center pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Bot className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+                <CardTitle className="text-lg font-bold">{t('landing.models.chatgpt5.name')}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('landing.models.chatgpt5.description')}
+                </p>
+              </CardContent>
             </Card>
-          </div>
-          
-          <div className="text-center mt-8">
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {t('landing.models.switch')}
-              </span>
-            </div>
+
+            {/* Perplexity Sonar */}
+            <Card className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2">
+              <div className="absolute top-0 right-0 bg-gradient-to-br from-purple-500 to-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
+                REASONING
+              </div>
+              <CardHeader className="text-center pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Target className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                </div>
+                <CardTitle className="text-lg font-bold">{t('landing.models.perplexity.name')}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('landing.models.perplexity.description')}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Gemini 2.5 Image */}
+            <Card className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2">
+              <div className="absolute top-0 right-0 bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
+                VISUAL AI
+              </div>
+              <CardHeader className="text-center pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <PenTool className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                </div>
+                <CardTitle className="text-lg font-bold">{t('landing.models.geminiImage.name')}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('landing.models.geminiImage.description')}
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
         </div>
@@ -203,7 +236,7 @@ export function LandingPage() {
         </div>
 
         {/* Stats Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 mb-16 border shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 mb-10 border shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">{t('landing.stats.targeted.title')}</div>
@@ -225,6 +258,15 @@ export function LandingPage() {
               <div className="text-gray-600 dark:text-gray-400">{t('landing.stats.professional.subtitle')}</div>
               <div className="text-sm text-gray-500">{t('landing.stats.professional.description')}</div>
             </div>
+          </div>
+        </div>
+
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <Shield className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+              {t('landing.security.badge')}
+            </span>
           </div>
         </div>
 
