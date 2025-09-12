@@ -542,13 +542,23 @@
         ]
       }
     },
+    "billing": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "intervalChangeBanner": "To switch between monthly and annual billing, please cancel your current subscription first. Your access will continue until the end of your current billing period."
+    },
     "planCard": {
       "perMonth": "/month",
+      "perYear": "/year",
+      "savings": "Save",
       "processing": "Processing...",
       "canceling": "Canceling...",
       "subscribeTo": "Subscribe to {{planName}}",
       "cancelDowngrade": "Cancel Downgrade",
       "currentPlan": "Current Plan",
+      "unavailable": "Unavailable",
+      "intervalChangeRestricted": "Cancel current subscription to change billing interval",
+      "intervalChangeTooltip": "You cannot change billing interval during an active subscription. Please cancel your current subscription first.",
       "downgradeTo": "Downgrade to {{planName}}",
       "upgradeTo": "Upgrade to {{planName}}"
     },

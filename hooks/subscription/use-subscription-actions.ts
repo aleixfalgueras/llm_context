@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import {useToast} from '@/hooks/use-toast'
 import {ToastVariant} from '@/lib/enums'
-import {SubscriptionPlan} from "@prisma/client";
+import {SubscriptionPlan, BillingInterval} from "@prisma/client";
 import {handleClientApiError} from '@/lib/api/api-toast'
 
 interface UseSubscriptionActionsProps {
@@ -16,23 +16,25 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean
     targetPlan: SubscriptionPlan | null
+    billingInterval?: BillingInterval
   }>({ isOpen: false, targetPlan: null })
   const { toast } = useToast()
 
-  const handleUpgrade = (planId: string) => {
+  const handleUpgrade = (planId: string, billingInterval?: BillingInterval) => {
     // Show confirmation dialog instead of immediately upgrading
     setConfirmationDialog({
       isOpen: true,
-      targetPlan: planId as SubscriptionPlan
+      targetPlan: planId as SubscriptionPlan,
+      billingInterval
     })
   }
 
-  const handlePlanAction = (planId: string, isPendingDowngrade: boolean, isPendingPlanChange: boolean) => {
+  const handlePlanAction = (planId: string, isPendingDowngrade: boolean, isPendingPlanChange: boolean, billingInterval?: BillingInterval) => {
     // Check if this plan is the target of a pending downgrade
     if (isPendingDowngrade && isPendingPlanChange) {
       handleCancelDowngrade()
     } else {
-      handleUpgrade(planId)
+      handleUpgrade(planId, billingInterval)
     }
   }
 
@@ -46,7 +48,7 @@ export function useSubscriptionActions({ refreshSubscriptionWithFallback }: UseS
       const response = await fetch('/api/subscription/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId })
+        body: JSON.stringify({ planId, billingInterval: confirmationDialog.billingInterval })
       })
       
       if (response.ok) {

@@ -6,7 +6,7 @@ import {prisma} from '@/lib/prisma'
 import {logger} from '@/lib/logger'
 import {BaseOperations} from './base-operations'
 import {SUBSCRIPTION_PLAN_DETAIL, SubscriptionWithUsage} from '@/lib/types/subscription-types'
-import {SubscriptionPlan, SubscriptionStatus, UserSubscription, UserUsage} from "@prisma/client";
+import {SubscriptionPlan, SubscriptionStatus, UserSubscription, UserUsage, BillingInterval} from "@prisma/client";
 
 
 export class SubscriptionUsageOperations extends BaseOperations {
@@ -76,6 +76,7 @@ export class SubscriptionUsageOperations extends BaseOperations {
           email,
           plan: SubscriptionPlan.apprentice,
           status: SubscriptionStatus.active,
+          billingInterval: BillingInterval.monthly,
           currentPeriodStart: now,
           currentPeriodEnd: periodEnd,
           spending_limit_usd: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd,

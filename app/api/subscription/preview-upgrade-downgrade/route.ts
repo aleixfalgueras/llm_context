@@ -1,9 +1,9 @@
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
 import {stripe} from '@/lib/stripe/stripe'
-import {STRIPE_PRICE_IDS} from '@/lib/stripe/stripe-utils'
+import {getStripePriceId} from '@/lib/stripe/stripe-utils'
 import {logger} from '@/lib/logger'
 import {SubscriptionUsageOperations} from "@/database";
-import {SubscriptionPlan} from "@prisma/client";
+import {SubscriptionPlan, BillingInterval} from "@prisma/client";
 
 interface UpgradePreviewResponse {
   currentPlan: SubscriptionPlan
@@ -16,7 +16,7 @@ interface UpgradePreviewResponse {
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
-    const { planId } = await parseJsonBody(req)
+    const { planId, billingInterval = BillingInterval.monthly } = await parseJsonBody(req)
 
     if (!planId || !Object.values(SubscriptionPlan).includes(planId)) {
       logger.warn('Invalid plan ID provided for upgrade preview', { metadata: { planId } })
@@ -40,10 +40,10 @@ export const POST = withEnhancedApi(
         'Free trial users should proceed directly to checkout.')
     }
 
-    // Get target price ID
-    const targetPriceId = STRIPE_PRICE_IDS[planId as SubscriptionPlan]
+    // Get target price ID based on billing interval
+    const targetPriceId = getStripePriceId(planId as SubscriptionPlan, billingInterval)
     if (!targetPriceId) {
-      logger.warn('No price ID found for plan in upgrade/downgrade preview', { metadata: { planId } })
+      logger.warn('No price ID found for plan in upgrade/downgrade preview', { metadata: { planId, billingInterval } })
       throw new Error('Price not found')
     }
 

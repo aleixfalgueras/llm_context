@@ -542,13 +542,23 @@
         ]
       }
     },
+    "billing": {
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "intervalChangeBanner": "Pour basculer entre la facturation mensuelle et annuelle, veuillez d'abord annuler votre abonnement actuel. Votre accès continuera jusqu'à la fin de votre période de facturation actuelle."
+    },
     "planCard": {
       "perMonth": "/mois",
+      "perYear": "/an",
+      "savings": "Économisez",
       "processing": "Traitement en cours...",
       "canceling": "Annulation en cours...",
       "subscribeTo": "S'abonner à {{planName}}",
       "cancelDowngrade": "Annuler la Rétrogradation",
       "currentPlan": "Plan Actuel",
+      "unavailable": "Indisponible",
+      "intervalChangeRestricted": "Annulez l'abonnement actuel pour changer l'intervalle de facturation",
+      "intervalChangeTooltip": "Vous ne pouvez pas changer l'intervalle de facturation pendant un abonnement actif. Veuillez d'abord annuler votre abonnement actuel.",
       "downgradeTo": "Rétrograder vers {{planName}}",
       "upgradeTo": "Passer à {{planName}}"
     },

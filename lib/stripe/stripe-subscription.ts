@@ -6,7 +6,7 @@ import {invalidateAllUserCaches} from '@/services/subscription/subscription-cach
 import {SubscriptionUsageOperations} from "@/database";
 import {SubscriptionService} from '@/services/subscription/subscription-service'
 import Stripe from "stripe";
-import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus, BillingInterval} from '@prisma/client'
 
 /**
  * Cancels a Stripe subscription immediately without proration or additional invoicing.
@@ -134,12 +134,15 @@ export async function synchronizeSubscriptionWithStripe(
       return
     }
 
-    const plan = priceId ? getPlanFromPriceId(priceId) : subscription.plan
+    const planInfo = priceId ? getPlanFromPriceId(priceId) : null
+    const plan = planInfo?.plan || subscription.plan
+    const billingInterval = planInfo?.interval || subscription.billingInterval || BillingInterval.monthly
     const stripeSubscriptionStatus = mapStripeStatusToSubscriptionStatus(status)
 
     const updateData: any = {
       stripeSubscriptionId: subscriptionId,
-      plan: plan || subscription.plan,
+      plan: plan,
+      billingInterval: billingInterval,
       status: stripeSubscriptionStatus,
       currentPeriodStart: new Date(currentPeriodStart * 1000),
       currentPeriodEnd: new Date(currentPeriodEnd * 1000),
@@ -261,6 +264,7 @@ export async function synchronizeSubscriptionWithStripe(
  * @param userId - The user ID for database updates and logging
  * @param currentPlan - The current subscription plan
  * @param targetPlan - The target subscription plan for downgrade
+ * @param billingInterval - The billing interval (monthly or annual) for the downgrade
  * @returns Promise<{effectiveDate: Date, message: string}> - Effective date and user message
  * @throws Error if schedule creation or database update fails
  */
@@ -269,7 +273,8 @@ export async function scheduleSubscriptionDowngrade(
   targetPriceId: string,
   userId: string,
   currentPlan: SubscriptionPlan,
-  targetPlan: SubscriptionPlan
+  targetPlan: SubscriptionPlan,
+  billingInterval: BillingInterval = BillingInterval.monthly
 ): Promise<{
   effectiveDate: Date
   message: string
@@ -279,6 +284,7 @@ export async function scheduleSubscriptionDowngrade(
     metadata: {
       currentPlan,
       targetPlan,
+      billingInterval,
       subscriptionId: stripeSubscriptionId
     }
   })

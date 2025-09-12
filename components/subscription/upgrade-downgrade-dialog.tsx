@@ -1,23 +1,22 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, {useState} from 'react'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { CheckIcon, ArrowRightIcon, CreditCardIcon, CalendarIcon } from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {Badge} from '@/components/ui/badge'
+import {ArrowRightIcon, CalendarIcon, CheckIcon, CreditCardIcon} from 'lucide-react'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
-import { useToast } from '@/hooks/use-toast'
-import { ToastVariant } from '@/lib/enums'
-import {SubscriptionPlan} from "@prisma/client";
-import { handleClientApiError } from '@/lib/api/api-toast'
-import { useTranslations } from '@/lib/translations/context'
+import {useToast} from '@/hooks/use-toast'
+import {BillingInterval, SubscriptionPlan} from "@prisma/client";
+import {handleClientApiError} from '@/lib/api/api-toast'
+import {useTranslations} from '@/lib/translations/context'
 
 interface UpgradePreview {
   currentPlan: SubscriptionPlan
@@ -36,6 +35,7 @@ interface UpgradeConfirmationDialogProps {
   isLoading?: boolean
   hasActiveSubscription?: boolean // Whether user has a paid Stripe subscription
   isDowngrade?: boolean // Whether this is a downgrade (scheduled for end of period)
+  billingInterval?: BillingInterval // The billing interval for the upgrade/downgrade
 }
 
 export function UpgradeDowngradeDialog({
@@ -45,7 +45,8 @@ export function UpgradeDowngradeDialog({
   targetPlan,
   isLoading = false,
   hasActiveSubscription = false,
-  isDowngrade = false
+  isDowngrade = false,
+  billingInterval = BillingInterval.monthly
 }: UpgradeConfirmationDialogProps) {
   const [preview, setPreview] = useState<UpgradePreview | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -57,7 +58,7 @@ export function UpgradeDowngradeDialog({
     if (isOpen && hasActiveSubscription && !preview) {
       loadUpgradePreview()
     }
-  }, [isOpen, targetPlan, hasActiveSubscription])
+  }, [isOpen, targetPlan, hasActiveSubscription, billingInterval])
 
   const loadUpgradePreview = async () => {
     setPreviewLoading(true)
@@ -65,7 +66,7 @@ export function UpgradeDowngradeDialog({
       const response = await fetch('/api/subscription/preview-upgrade-downgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: targetPlan })
+        body: JSON.stringify({ planId: targetPlan, billingInterval })
       })
 
       if (!response.ok) {
