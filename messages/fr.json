@@ -602,12 +602,16 @@
         "nextBilling": "Prochaine date de facturation : {{date}}",
         "newMonthlyCharge": "Nouveau coût mensuel",
         "monthlyCharge": "Coût mensuel",
+        "newAnnualCharge": "Nouveau coût annuel",
+        "annualCharge": "Coût annuel",
         "planChangeNote": "Les modifications de plan seront traitées immédiatement",
         "stripeRedirectNote": "Vous serez redirigé vers Stripe pour compléter le paiement"
       },
       "firstSubscription": {
         "planTitle": "S'abonner à {{planName}}",
-        "perMonth": "/mois"
+        "perMonth": "/mois",
+        "perYear": "/an",
+        "savings": "Économisez"
       },
       "buttons": {
         "cancel": "Annuler",
