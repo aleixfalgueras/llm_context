@@ -2,14 +2,10 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Button} from '@/components/ui/button'
 import {CheckIcon, CrownIcon, Shield, StarIcon, ZapIcon} from 'lucide-react'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
-import {
-  getButtonStyles,
-  getButtonText,
-  getPlanIconType,
-  getPlanNameColor
-} from '@/lib/utils/subscription-client-utils'
-import {SubscriptionPlan} from "@prisma/client"
+import {getButtonStyles, getButtonText, getPlanIconType, getPlanNameColor} from '@/lib/utils/subscription-client-utils'
+import {BillingInterval, SubscriptionPlan} from "@prisma/client"
 import {useTranslations} from '@/lib/translations/context'
+import {getAnnualSavings} from '@/lib/types/subscription-types'
 
 interface PlanCardProps {
   planId: string
@@ -18,9 +14,11 @@ interface PlanCardProps {
     name: string
     description: string
     price: number
+    priceAnnual?: number
     features_list: readonly string[]
   }
   currentPlan: SubscriptionPlan
+  currentBillingInterval?: BillingInterval | null
   isCurrentPlan: boolean
   isFreeMode: boolean
   isPendingDowngrade: boolean
@@ -31,12 +29,14 @@ interface PlanCardProps {
   isExpired: boolean
   isPastDueOrUnpaid: boolean
   onPlanAction: (planId: string) => void
+  billingInterval?: BillingInterval
 }
 
 export function PlanCard({
   planId,
   plan,
   currentPlan,
+  currentBillingInterval,
   isCurrentPlan,
   isFreeMode,
   isPendingDowngrade,
@@ -46,10 +46,17 @@ export function PlanCard({
   isActiveCancelled,
   isExpired,
   isPastDueOrUnpaid,
-  onPlanAction
+  onPlanAction,
+  billingInterval = BillingInterval.monthly
 }: PlanCardProps) {
   const t = useTranslations()
   const tSubscription = useTranslations('subscription')
+  
+  // Check if billing interval is changing
+  const isBillingIntervalChanging = currentBillingInterval && 
+    currentBillingInterval !== billingInterval && 
+    !isFreeMode
+  
   const getPlanIcon = (planId: string) => {
     const iconType = getPlanIconType(planId)
     switch (iconType) {
@@ -75,9 +82,26 @@ export function PlanCard({
         </div>
         <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
         <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{t(plan.description)}</CardDescription>
-        <div className="mt-4 pt-4 pb-2 flex items-end justify-center min-h-[4rem]">
-          <span className="text-4xl font-bold leading-none">{plan.price}€</span>
-          {plan.price > 0 && <span className="text-gray-500 mb-1">{tSubscription('planCard.perMonth')}</span>}
+        <div className="mt-4 pt-4 pb-2 flex flex-col items-center justify-center min-h-[4rem]">
+          <div className="flex items-end">
+            <span className="text-4xl font-bold leading-none">
+              {billingInterval === BillingInterval.annual && plan.priceAnnual 
+                ? plan.priceAnnual 
+                : plan.price}€
+            </span>
+            {plan.price > 0 && (
+              <span className="text-gray-500 mb-1">
+                {billingInterval === BillingInterval.annual 
+                  ? tSubscription('planCard.perYear') 
+                  : tSubscription('planCard.perMonth')}
+              </span>
+            )}
+          </div>
+          {billingInterval === BillingInterval.annual && plan.priceAnnual && plan.price > 0 && (
+            <div className="mt-1 text-sm text-green-600 dark:text-green-400">
+              {tSubscription('planCard.savings')} {getAnnualSavings(planId as SubscriptionPlan)}€
+            </div>
+          )}
         </div>
       </CardHeader>
       
@@ -91,19 +115,28 @@ export function PlanCard({
           ))}
         </ul>
         
+        {isBillingIntervalChanging && (
+          <div className="mb-3 p-2 text-xs text-muted-foreground bg-muted rounded-md text-center">
+            {tSubscription('planCard.intervalChangeRestricted')}
+          </div>
+        )}
+        
         <Button 
           onClick={() => onPlanAction(plan.id)}
-          disabled={upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan || (isPendingDowngrade && !isPendingPlanChange) || (isActiveCancelled && !isExpired) || isPastDueOrUnpaid}
+          disabled={isBillingIntervalChanging || upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan || (isPendingDowngrade && !isPendingPlanChange) || (isActiveCancelled && !isExpired) || isPastDueOrUnpaid}
           className={`w-full mt-auto ${getButtonStyles(
             isCurrentPlan,
             isPendingDowngrade,
             isPendingPlanChange
           )}`}
+          title={isBillingIntervalChanging ? tSubscription('planCard.intervalChangeTooltip') : undefined}
         >
           {upgradeLoading === plan.id ? (
             <LoadingSpinner text={tSubscription('planCard.processing')} />
           ) : cancelDowngradeLoading && isPendingDowngrade && isPendingPlanChange ? (
             <LoadingSpinner text={tSubscription('planCard.canceling')} />
+          ) : isBillingIntervalChanging ? (
+            tSubscription('planCard.unavailable')
           ) : (
             getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired, tSubscription)
           )}

@@ -3,14 +3,30 @@ import {logger} from '../logger'
 import {SubscriptionUsageOperations} from '@/database'
 import Stripe from 'stripe'
 import {SubscriptionService} from "@/services/subscription/subscription-service";
-import { SubscriptionPlan } from '@prisma/client';
+import { SubscriptionPlan, BillingInterval } from '@prisma/client';
 
-export const STRIPE_PRICE_IDS = {
+// Monthly price IDs
+export const STRIPE_MONTHLY_PRICE_IDS = {
   [SubscriptionPlan.apprentice]: process.env.STRIPE_APPRENTICE_PRICE_ID || 'price_apprentice_placeholder',
   [SubscriptionPlan.knight]: process.env.STRIPE_KNIGHT_PRICE_ID || 'price_knight_placeholder',
   [SubscriptionPlan.master]: process.env.STRIPE_MASTER_PRICE_ID || 'price_master_placeholder',
   [SubscriptionPlan.jedi]: process.env.STRIPE_JEDI_PRICE_ID || 'price_jedi_placeholder',
 } as const
+
+// Annual price IDs (with 20% discount)
+export const STRIPE_ANNUAL_PRICE_IDS = {
+  [SubscriptionPlan.apprentice]: process.env.STRIPE_APPRENTICE_ANNUAL_PRICE_ID || 'price_apprentice_annual_placeholder',
+  [SubscriptionPlan.knight]: process.env.STRIPE_KNIGHT_ANNUAL_PRICE_ID || 'price_knight_annual_placeholder',
+  [SubscriptionPlan.master]: process.env.STRIPE_MASTER_ANNUAL_PRICE_ID || 'price_master_annual_placeholder',
+  [SubscriptionPlan.jedi]: process.env.STRIPE_JEDI_ANNUAL_PRICE_ID || 'price_jedi_annual_placeholder',
+} as const
+
+// Helper to get the correct price ID based on billing interval
+export function getStripePriceId(plan: SubscriptionPlan, interval: BillingInterval = BillingInterval.monthly): string {
+  return interval === BillingInterval.annual 
+    ? STRIPE_ANNUAL_PRICE_IDS[plan] 
+    : STRIPE_MONTHLY_PRICE_IDS[plan];
+}
 
 /**
  * Creates a new Stripe customer or retrieves an existing one for the given user.
@@ -72,6 +88,7 @@ export async function createOrRetrieveCustomer(userId: string, email: string) {
  * @param email - The email address for the customer
  * @param priceId - The Stripe price ID for the subscription plan
  * @param planId - The subscription plan type being purchased
+ * @param billingInterval - The billing interval (monthly or annual)
  * @returns Promise<{success: boolean, url: string | null}> - Success status and checkout URL
  * @throws Error if checkout session creation fails
  */
@@ -79,7 +96,8 @@ export async function createCheckoutSession(
   userId: string,
   email: string,
   priceId: string,
-  planId: SubscriptionPlan
+  planId: SubscriptionPlan,
+  billingInterval: BillingInterval = BillingInterval.monthly
 ) {
   try {
     const customer = await createOrRetrieveCustomer(userId, email)
@@ -120,6 +138,7 @@ export async function createCheckoutSession(
       metadata: {
         userId,
         planId,
+        billingInterval,
         ...(isUpgrade && existingSubscription?.stripeSubscriptionId && {
           isUpgrade: 'true',
           previousSubscriptionId: existingSubscription.stripeSubscriptionId
@@ -175,17 +194,26 @@ export async function createCustomerPortalSession(userId: string) {
 }
 
 /**
- * Maps a Stripe price ID to the corresponding subscription plan.
- * Used to identify which plan a customer is subscribing to based on the price ID.
+ * Maps a Stripe price ID to the corresponding subscription plan and billing interval.
+ * Used to identify which plan and interval a customer is subscribing to based on the price ID.
  * 
  * @param priceId - The Stripe price ID to look up
- * @returns SubscriptionPlan | null - The corresponding plan or null if not found
+ * @returns {plan: SubscriptionPlan, interval: BillingInterval} | null - The plan and interval or null if not found
  */
-export function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
-  for (const [plan, planPriceId] of Object.entries(STRIPE_PRICE_IDS)) {
+export function getPlanFromPriceId(priceId: string): { plan: SubscriptionPlan; interval: BillingInterval } | null {
+  // Check monthly prices
+  for (const [plan, planPriceId] of Object.entries(STRIPE_MONTHLY_PRICE_IDS)) {
     if (planPriceId === priceId) {
-      return plan as SubscriptionPlan
+      return { plan: plan as SubscriptionPlan, interval: BillingInterval.monthly }
     }
   }
+  
+  // Check annual prices
+  for (const [plan, planPriceId] of Object.entries(STRIPE_ANNUAL_PRICE_IDS)) {
+    if (planPriceId === priceId) {
+      return { plan: plan as SubscriptionPlan, interval: BillingInterval.annual }
+    }
+  }
+  
   return null
 }

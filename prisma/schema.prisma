@@ -116,6 +116,7 @@ model UserSubscription {
   email                     String?
   plan                      SubscriptionPlan   @default(apprentice)
   status                    SubscriptionStatus @default(active)
+  billingInterval           BillingInterval    @default(monthly)
   stripeCustomerId          String?
   stripeSubscriptionId      String?
   stripePriceId             String?
@@ -241,6 +242,11 @@ enum SubscriptionStatus {
   past_due
   incomplete
   unpaid
+}
+
+enum BillingInterval {
+  monthly
+  annual
 }
 
 enum Role {
