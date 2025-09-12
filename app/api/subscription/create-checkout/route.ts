@@ -1,21 +1,17 @@
-import {logger} from '@/lib/logger'
 import {ApiContext, apiSuccess, parseJsonBody, withEnhancedApi} from '@/lib/api/api-middleware'
-import {SubscriptionPlan} from "@prisma/client";
+import {BillingInterval, SubscriptionPlan} from "@prisma/client";
 import {SubscriptionService} from '@/services/subscription/subscription-service'
-
-interface CheckoutResponse {
-  isDowngrade: boolean
-  message?: string
-  effectiveDate?: string
-  url?: string | null
-}
 
 export const POST = withEnhancedApi(
   async ({ userId, req }: ApiContext) => {
-    const { planId } = await parseJsonBody(req)
+    const { planId, billingInterval } = await parseJsonBody(req)
 
     // Delegate all business logic to service layer
-    const response = await SubscriptionService.createCheckoutSession(userId, planId as SubscriptionPlan)
+    const response = await SubscriptionService.createCheckoutSession(
+      userId, 
+      planId as SubscriptionPlan,
+      billingInterval as BillingInterval || BillingInterval.monthly
+    )
     
     return apiSuccess(response)
   },

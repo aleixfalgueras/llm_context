@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from 'react'
 import {SubscriptionWithValidation} from '@/lib/types/subscription-types'
-import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus, BillingInterval} from '@prisma/client'
 
 // Default values for initial state to prevent null pointer errors during prerendering
 const defaultSubscriptionWithValidation: SubscriptionWithValidation = {
@@ -11,6 +11,7 @@ const defaultSubscriptionWithValidation: SubscriptionWithValidation = {
   email: null,
   plan: SubscriptionPlan.apprentice,
   status: SubscriptionStatus.active,
+  billingInterval: BillingInterval.monthly,
   stripeCustomerId: null,
   stripeSubscriptionId: null,
   stripePriceId: null,

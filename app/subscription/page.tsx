@@ -10,6 +10,7 @@ import { handleClientApiError } from '@/lib/api/api-toast'
 import { useRouter } from 'next/navigation'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {Navbar} from '@/components/global/navbar'
+import {BillingInterval} from '@prisma/client'
 import {UpgradeDowngradeDialog} from '@/components/subscription/upgrade-downgrade-dialog'
 import {SubscriptionUrlHandler} from '@/components/subscription/subscription-url-handler'
 import {SubscriptionStatusBanners} from '@/components/subscription/subscription-status-banners'
@@ -28,6 +29,7 @@ import {isDowngrade as checkIsDowngrade} from "@/lib/utils/subscription-client-u
 export default function SubscriptionPage() {
   const t = useTranslations()
   const tSub = useTranslations('subscription')
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>(BillingInterval.monthly)
   const {
     subscription,
     isFreeMode,
@@ -68,7 +70,7 @@ export default function SubscriptionPage() {
   const { toast } = useToast()
 
   const handlePlanActionWrapper = (planId: string) => {
-    handlePlanAction(planId, isPendingDowngrade(), isPendingPlanChange(planId))
+    handlePlanAction(planId, isPendingDowngrade(), isPendingPlanChange(planId), billingInterval)
   }
 
   // Delete account handler
@@ -145,6 +147,47 @@ export default function SubscriptionPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <h1 className="text-4xl font-bold text-center">{tSub('pageTitle')}</h1>
+        
+        {/* Billing Interval Toggle */}
+        <div className="flex flex-col items-center mt-6 mb-4">
+          <div className="inline-flex rounded-lg bg-muted p-1">
+            <button
+              onClick={() => setBillingInterval(BillingInterval.monthly)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                billingInterval === BillingInterval.monthly
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tSub('billing.monthly')}
+            </button>
+            <button
+              onClick={() => setBillingInterval(BillingInterval.annual)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                billingInterval === BillingInterval.annual
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tSub('billing.annual')}
+              <span className="ml-1 text-xs text-green-600 dark:text-green-400">-20%</span>
+            </button>
+          </div>
+          
+          {/* Show banner when billing interval differs from current subscription */}
+          {subscription.billingInterval && 
+           subscription.billingInterval !== billingInterval && 
+           subscription.stripeSubscriptionId &&
+           !isFreeMode() && (
+            <div className="mt-3 max-w-2xl mx-auto">
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <p className="text-sm text-amber-800 dark:text-amber-200 text-center">
+                  {tSub('billing.intervalChangeBanner')}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Main Layout: Delete Account Button | Status Banners | Manage Subscription Button */}
         <div className="text-center mb-8 ml-10">
@@ -219,6 +262,7 @@ export default function SubscriptionPage() {
               planId={planId}
               plan={plan}
               currentPlan={subscription.plan as SubscriptionPlan}
+              currentBillingInterval={subscription.billingInterval}
               isCurrentPlan={isCurrentPlan(planId)}
               isFreeMode={isFreeMode()}
               isPendingDowngrade={isPendingDowngrade()}
@@ -229,6 +273,7 @@ export default function SubscriptionPage() {
               isExpired={isExpired()}
               isPastDueOrUnpaid={isPastDueOrUnpaid()}
               onPlanAction={handlePlanActionWrapper}
+              billingInterval={billingInterval}
             />
           ))}
         </div>
@@ -246,6 +291,7 @@ export default function SubscriptionPage() {
         isLoading={upgradeLoading !== null}
         hasActiveSubscription={!!subscription.stripeSubscriptionId && subscription.isActive && !isExpired()}
         isDowngrade={confirmationDialog.targetPlan ? checkIsDowngrade(subscription.plan as SubscriptionPlan, confirmationDialog.targetPlan) : false}
+        billingInterval={billingInterval}
       />
 
       {/* Account Deletion Confirmation Dialog */}
