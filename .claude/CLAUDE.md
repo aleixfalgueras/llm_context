@@ -49,6 +49,29 @@ Follow strict separation of concerns with these three layers:
 - **Single responsibility**: Each layer handles only its concerns
 - **Type safety**: Use Prisma types throughout, no manual duplicates
 
+### TypeScript Best Practices
+
+#### Type Safety Rules
+- **Always add explicit return types** for:
+    - Public functions (exported functions)
+    - Functions that cross architectural boundaries
+    - Async functions (harder to infer return types)
+    - Complex return types with unions or objects
+- **Prefer `unknown` over `any`** when type is truly unknown
+- **Use type guards** for runtime type checking
+- **Leverage discriminated unions** for state management
+
+#### Naming Conventions
+- **Types/Interfaces**: PascalCase (e.g., `UserProfile`)
+- **Type parameters**: Single uppercase letter or descriptive PascalCase (e.g., `T`, `TResponse`)
+- **Enums**: PascalCase with UPPER_SNAKE_CASE values
+
+#### Import Organization
+1. External dependencies
+2. Internal aliases (`@/...`)
+3. Relative imports (`./...`)
+4. Type imports last (`import type { ... }`)
+
 ## UI Component Guidelines
 - **Always prefer using `shadcn-ui` components when implementing UI.**
 - Only create a custom component from scratch **if**:
