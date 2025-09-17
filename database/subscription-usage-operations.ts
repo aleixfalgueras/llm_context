@@ -64,10 +64,14 @@ export class SubscriptionUsageOperations extends BaseOperations {
   /**
    * Create default apprentice subscription for new users
    */
-  static async createDefaultApprenticeSubscription(userId: string, email?: string): Promise<UserSubscription> {
+  static async createDefaultApprenticeSubscription(userId: string, email?: string, billingInterval: BillingInterval = BillingInterval.monthly): Promise<UserSubscription> {
     try {
       const now = new Date()
       const periodEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days
+
+      // Multiply spending limit by 12 for annual subscriptions
+      const multiplier = billingInterval === BillingInterval.annual ? 12 : 1
+      const spendingLimit = SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd * multiplier
 
       return await this.upsertSubscription(
         userId,
@@ -76,10 +80,10 @@ export class SubscriptionUsageOperations extends BaseOperations {
           email,
           plan: SubscriptionPlan.apprentice,
           status: SubscriptionStatus.active,
-          billingInterval: BillingInterval.monthly,
+          billingInterval: billingInterval,
           currentPeriodStart: now,
           currentPeriodEnd: periodEnd,
-          spending_limit_usd: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd,
+          spending_limit_usd: spendingLimit,
           cancelAtPeriodEnd: false,
           pendingPlanChange: null,
         }

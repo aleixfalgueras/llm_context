@@ -209,7 +209,9 @@ export async function synchronizeSubscriptionWithStripe(
 
     // Update plan limits if plan changed
     if (planLimits) {
-      updateData.spending_limit_usd = planLimits.spending_limit_usd
+      // Multiply spending limit by 12 for annual subscriptions
+      const multiplier = billingInterval === BillingInterval.annual ? 12 : 1
+      updateData.spending_limit_usd = planLimits.spending_limit_usd * multiplier
     }
 
     const updatedSubscription = await SubscriptionService.updateSubscription(subscription.userId, updateData)
