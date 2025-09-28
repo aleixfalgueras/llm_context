@@ -1,8 +1,8 @@
 {
   "app": {
     "title": "MIA - Millennials Influencers Assistant",
-    "description": "AI-powered marketing content generation platform",
-    "copyright": "2025 MIA. AI-powered marketing content generation platform."
+    "description": "AI-powered content generation platform.",
+    "copyright": "2025 MIA. AI-powered content generation platform."
   },
   "navigation": {
     "clients": "Clients",
@@ -20,11 +20,11 @@
   },
   "landing": {
     "hero": {
-      "tagline": "Create personalized marketing content with an AI that understands your clients' business context.",
+      "tagline": "Create personalized content with an AI that understands your clients' business context.",
       "cta": "Get Started"
     },
     "features": {
-      "title": "Advanced AI Marketing Platform",
+      "title": "Advanced AI Content Creation Platform",
       "clientIntelligence": {
         "title": "Client Intelligence",
         "description": "Store industry insights, business goals, target audiences, and competitive landscape for each client"
@@ -72,7 +72,7 @@
         "description": "Store each client's industry, target market, brand voice, competitive landscape, and business objectives in one organized system."
       },
       "step2": {
-        "title": "AI-Powered Marketing",
+        "title": "AI-Powered Content",
         "description": "Generate campaign strategies, content, and marketing materials that are perfectly tailored to each client's unique business context and goals."
       },
       "step3": {
