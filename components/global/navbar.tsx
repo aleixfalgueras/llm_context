@@ -8,6 +8,7 @@ import {ThemeToggle} from '@/components/global/theme-toggle'
 import {cn} from '@/lib/utils/general'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator} from '@/components/ui/dropdown-menu'
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip'
+import {NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink, NavigationMenuTrigger, NavigationMenuContent} from '@/components/ui/navigation-menu'
 import {Menu} from 'lucide-react'
 import {useMemo, useState} from 'react'
 import {useTranslations} from '@/lib/translations/context'
@@ -30,10 +31,11 @@ export function Navbar() {
     { name: t('prompts'), href: '/prompts', icon: '📝' },
     { name: t('assistant'), href: '/assistant', icon: '🤖' },
     { name: t('aiServices'), href: '/ai-services', icon: '⚡' },
-    { name: t('affiliation'), href: '/affiliation', icon: '🔗' },
-    { name: t('feedback'), href: '/feedback', icon: '💬' },
-    ...(isAdmin ? [{ name: t('admin'), href: '/admin', icon: '🛡️' }] : []),
-  ], [isAdmin, t])
+  ], [t])
+
+  const networkSubmenu = useMemo(() => [
+    { name: t('affiliation'), href: '/affiliation' },
+  ], [t])
 
   // Helper function to determine if a nav item is active
   const isActive = (href: string) => {
@@ -46,6 +48,9 @@ export function Navbar() {
     }
     return pathname === href
   }
+
+  // Helper to check if Network dropdown should be active
+  const isNetworkActive = () => pathname.startsWith('/affiliation')
 
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -93,6 +98,21 @@ export function Navbar() {
                         </Link>
                       </DropdownMenuItem>
                     ))}
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/admin"
+                          className={cn(
+                            "cursor-pointer flex items-center w-full",
+                            isActive('/admin') && "bg-accent"
+                          )}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <span className="mr-2">🛡️</span>
+                          <span>{t('admin')}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link
@@ -101,6 +121,15 @@ export function Navbar() {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <span>{t('subscription')}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/feedback"
+                        className="cursor-pointer flex items-center"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span>{t('feedback')}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -126,22 +155,80 @@ export function Navbar() {
               </div>
 
               {/* Desktop Navigation links */}
-              <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors",
-                      isActive(item.href)
-                        ? "border-primary text-foreground"
-                        : "border-transparent text-muted-foreground hover:border-gray-300 hover:text-foreground"
+              <div className="hidden lg:ml-6 lg:flex">
+                <NavigationMenu>
+                  <NavigationMenuList>
+                    {navigation.map((item) => (
+                      <NavigationMenuItem key={item.name}>
+                        <Link href={item.href} legacyBehavior passHref>
+                          <NavigationMenuLink
+                            className={cn(
+                              "ml-2.5 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors h-9",
+                              isActive(item.href)
+                                ? "border-primary text-foreground"
+                                : "border-transparent text-muted-foreground hover:border-gray-300 hover:text-foreground"
+                            )}
+                          >
+                            <span className="mr-2">{item.icon}</span>
+                            {item.name}
+                          </NavigationMenuLink>
+                        </Link>
+                      </NavigationMenuItem>
+                    ))}
+
+                    {/* Network dropdown menu */}
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger
+                        className={cn(
+                          "mt-2.5 ml-2 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors h-9",
+                          isNetworkActive()
+                            ? "border-primary text-foreground"
+                            : "border-transparent text-muted-foreground hover:border-gray-300 hover:text-foreground"
+                        )}
+                      >
+                        <span className="mr-2">🔗</span>
+                        {t('network')}
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="w-48 p-2">
+                          {networkSubmenu.map((item) => (
+                            <li key={item.name}>
+                              <Link href={item.href} legacyBehavior passHref>
+                                <NavigationMenuLink
+                                  className={cn(
+                                    "block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                    isActive(item.href) && "bg-accent"
+                                  )}
+                                >
+                                  {item.name}
+                                </NavigationMenuLink>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+
+                    {/* Admin link */}
+                    {isAdmin && (
+                      <NavigationMenuItem>
+                        <Link href="/admin" legacyBehavior passHref>
+                          <NavigationMenuLink
+                            className={cn(
+                              "ml-2 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors h-9",
+                              isActive('/admin')
+                                ? "border-primary text-foreground"
+                                : "border-transparent text-muted-foreground hover:border-gray-300 hover:text-foreground"
+                            )}
+                          >
+                            <span className="mr-2">🛡️</span>
+                            {t('admin')}
+                          </NavigationMenuLink>
+                        </Link>
+                      </NavigationMenuItem>
                     )}
-                  >
-                    <span className="mr-2">{item.icon}</span>
-                    {item.name}
-                  </Link>
-                ))}
+                  </NavigationMenuList>
+                </NavigationMenu>
               </div>
             </div>
           </div>
@@ -172,6 +259,11 @@ export function Navbar() {
                     <DropdownMenuItem asChild>
                       <Link href="/subscription" className="cursor-pointer flex items-center">
                         <span>{t('subscription')}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/feedback" className="cursor-pointer flex items-center">
+                        <span>{t('feedback')}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
