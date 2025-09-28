@@ -3,15 +3,12 @@ import { logger } from '@/lib/logger'
 
 // Common bot/crawler routes to prevent authentication errors
 const BOT_CRAWLER_ROUTES = [
-  '/robots.txt',
-  '/sitemap.xml',
   '/security.txt',
   '/apple-touch-icon.png',
   '/manifest.json',
   '/browserconfig.xml',
   '/humans.txt',
   '/crossdomain.xml',
-  '/sitemap_index.xml',
   '/favicon.png',
   '/feed.xml',
   '/ads.txt'
