@@ -22,10 +22,11 @@ const isPublicRoute = createRouteMatcher([
   '/privacy',
   '/api/subscription/webhook',
   '/api/webhook/clerk',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/sitemap_index.xml',
   ...BOT_CRAWLER_ROUTES
 ])
-
-// Note: /admin is NOT public - it requires authentication and email verification
 
 export default clerkMiddleware(async (auth, request) => {
   const url = new URL(request.url)
