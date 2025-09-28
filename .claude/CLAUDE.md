@@ -48,6 +48,7 @@ Follow strict separation of concerns with these three layers:
 - **No layer jumping**: Actions/APIs must go through services
 - **Single responsibility**: Each layer handles only its concerns
 - **Type safety**: Use Prisma types throughout, no manual duplicates
+- **Cross-domain operations** must go through service-to-service calls. Each service should only orchestrate its own domain repositories.
 
 ### TypeScript Best Practices
 
