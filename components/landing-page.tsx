@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  ArrowRight,
   BarChart3,
   Bot,
   CheckIcon,
@@ -12,25 +11,33 @@ import {
   Sparkles,
   StarIcon,
   Target,
-  Zap,
   ZapIcon
 } from 'lucide-react'
-import Image from 'next/image'
 import {Button} from '@/components/ui/button'
 import {AnimatedLogo} from '@/components/ui/animated-logo'
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {ThemeToggle} from '@/components/global/theme-toggle'
 import {getPlanNameColor} from '@/lib/utils/subscription-client-utils'
-import {SUBSCRIPTION_PLAN_DETAIL, getAnnualSavings} from '@/lib/types/subscription-types'
+import {getAnnualSavings, SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import Link from 'next/link'
-import {SubscriptionPlan, BillingInterval} from "@prisma/client";
+import {BillingInterval, SubscriptionPlan} from "@prisma/client";
 import {useTranslations} from '@/lib/translations/context'
 import {LanguageSwitcher} from '@/components/language-switcher'
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
+import {useAuth} from '@clerk/nextjs'
+import {useRouter} from 'next/navigation'
 
 export function LandingPage() {
   const t = useTranslations()
   const [billingInterval, setBillingInterval] = useState<BillingInterval>(BillingInterval.monthly)
+  const {isSignedIn, isLoaded} = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/clients')
+    }
+  }, [isLoaded, isSignedIn, router])
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
