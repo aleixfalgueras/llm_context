@@ -27,7 +27,48 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "MIA",
-  description: "AI-powered marketing content generation platform",
+  description: "MIA (Millennials Influencers Assistant) is an AI-powered content platform that helps influencers and content creators generate strategic campaigns, create engaging content, and manage client relationships efficiently.",
+  keywords: ["AI content", "influencer tools", "content creation", "content assistant", "AI content generator", "campaign strategy", "social media content", "influencer content"],
+  authors: [{ name: "MIA Team" }],
+  creator: "MIA",
+  publisher: "MIA",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_GB",
+    url: "https://mia.community/",
+    siteName: "MIA",
+    title: "MIA",
+    description: "Transform your content workflow with AI-powered content generation, strategic campaign planning, and intelligent client management.",
+    images: [
+      {
+        url: "/mia_logo.svg",
+        width: 1200,
+        height: 630,
+        alt: "MIA - Millennials Influencers Assistant",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MIA",
+    description: "AI-powered content platform for influencers and content creators. Generate campaigns, create content, manage clients.",
+    images: ["/mia_logo.svg"],
+  },
+  metadataBase: new URL("https://mia.community/",),
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({
