@@ -69,9 +69,8 @@ export function LandingPage() {
               delay={50}
             />
           </div>
-          
 
-          <p className="text-xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-gray-800 dark:text-gray-300 max-w-xl mx-auto mb-8">
             {t('landing.hero.tagline')}
           </p>
         </div>

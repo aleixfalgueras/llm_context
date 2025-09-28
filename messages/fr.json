@@ -1,8 +1,8 @@
 {
   "app": {
     "title": "MIA - Assistant pour Influenceurs Millennials",
-    "description": "Plateforme de génération de contenu marketing alimentée par l'IA",
-    "copyright": "2025 MIA. Plateforme de génération de contenu marketing alimentée par l'IA."
+    "description": "Plateforme de génération de contenu alimentée par l'IA",
+    "copyright": "2025 MIA. Plateforme de génération de contenu alimentée par l'IA."
   },
   "navigation": {
     "clients": "Clients",
@@ -20,11 +20,11 @@
   },
   "landing": {
     "hero": {
-      "tagline": "Créez du contenu marketing personnalisé avec une IA qui comprend le contexte commercial de vos clients.",
+      "tagline": "Créez du contenu personnalisé avec une IA qui comprend le contexte commercial de vos clients.",
       "cta": "Commencer"
     },
     "features": {
-      "title": "Plateforme Marketing IA Avancée",
+      "title": "Plateforme de Création de Contenu IA Avancée",
       "clientIntelligence": {
         "title": "Intelligence d'Affaires Client",
         "description": "Stockez les informations sectorielles, les objectifs commerciaux, les audiences cibles et le paysage concurrentiel pour chaque client"
@@ -72,7 +72,7 @@
         "description": "Stockez l'industrie de chaque client, le marché cible, la voix de marque, le paysage concurrentiel et les objectifs commerciaux dans un système organisé."
       },
       "step2": {
-        "title": "Marketing Alimenté par l'IA",
+        "title": "Contenu Alimenté par l'IA",
         "description": "Générez des stratégies de campagne, du contenu et des matériaux marketing parfaitement adaptés au contexte commercial unique et aux objectifs de chaque client."
       },
       "step3": {
