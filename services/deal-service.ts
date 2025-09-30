@@ -275,4 +275,52 @@ export class DealService {
       }
     }
   }
+
+  /**
+   * Reject a deal (admin only)
+   */
+  static async rejectDeal(
+    dealId: string
+  ): Promise<DbOperationResult<{ id: string }>> {
+    try {
+      // Rejecting = deleting the deal
+      const result = await DealOperations.deleteDeal(dealId, '') // Empty userId for admin action
+
+      if (!result.success) {
+        logger.error(`Failed to reject deal ${dealId}`, new Error(result.error))
+      }
+
+      return result
+    } catch (error) {
+      logger.error(`Error rejecting deal ${dealId}`, error as Error)
+      return {
+        success: false,
+        error: 'Failed to reject deal'
+      }
+    }
+  }
+
+  /**
+   * Get all deals with filters (admin only)
+   */
+  static async getAllDeals(
+    filters?: DealListFilters
+  ): Promise<Deal[]> {
+    try {
+      const result = await DealOperations.findAllDeals(
+        undefined,
+        filters
+      )
+
+      if (!result.success) {
+        logger.error('Failed to get all deals', new Error(result.error))
+        return []
+      }
+
+      return result.data?.records || []
+    } catch (error) {
+      logger.error('Error getting all deals', error as Error)
+      return []
+    }
+  }
 }
