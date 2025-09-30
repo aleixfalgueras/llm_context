@@ -11,6 +11,7 @@
     "aiServices": "Services IA",
     "network": "Réseau",
     "affiliation": "Affiliation",
+    "deals": "Offres",
     "feedback": "Commentaires",
     "admin": "Admin",
     "subscription": "Abonnement",
@@ -827,6 +828,75 @@
     "errors": {
       "parentCodeRequired": "Le code d'affiliation parent est requis",
       "removeFromNetworkFailed": "Échec de la suppression de l'affiliation du réseau"
+    }
+  },
+  "deals": {
+    "title": "Offres",
+    "description": "Découvrez des offres et promotions exclusives de notre communauté",
+    "myDeals": "Mes Offres",
+    "publicDeals": "Offres Disponibles",
+    "createDeal": "Créer une Offre",
+    "editDeal": "Modifier l'Offre",
+    "deleteDeal": "Supprimer l'Offre",
+    "viewDeal": "Voir l'Offre",
+    "noDealstitle": "Aucune offre pour le moment",
+    "noDealsDescription": "Vous n'avez pas encore créé d'offres. Commencez par créer votre première offre!",
+    "noPublicDealsTitle": "Aucune offre disponible",
+    "noPublicDealsDescription": "Il n'y a aucune offre active pour le moment. Revenez plus tard!",
+    "form": {
+      "title": "Titre",
+      "titlePlaceholder": "Entrez le titre de l'offre",
+      "titleRequired": "Le titre est requis",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrivez votre offre",
+      "descriptionRequired": "La description est requise",
+      "price": "Prix",
+      "pricePlaceholder": "ex. 99$ ou Gratuit",
+      "priceRequired": "Le prix est requis",
+      "externalUrl": "URL Externe",
+      "externalUrlPlaceholder": "https://example.com/offre",
+      "externalUrlRequired": "L'URL externe est requise",
+      "validFrom": "Valide à partir de",
+      "validUntil": "Valide jusqu'au",
+      "isActive": "Active",
+      "isApproved": "Approuvée",
+      "dateRangeError": "La date de début doit être antérieure à la date de fin"
+    },
+    "actions": {
+      "create": "Créer",
+      "update": "Mettre à jour",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "viewExternal": "Voir l'Offre",
+      "edit": "Modifier",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette offre?"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pendingApproval": "En attente d'approbation",
+      "approved": "Approuvée"
+    },
+    "messages": {
+      "createSuccess": "Offre créée avec succès",
+      "createError": "Échec de la création de l'offre",
+      "updateSuccess": "Offre mise à jour avec succès",
+      "updateError": "Échec de la mise à jour de l'offre",
+      "deleteSuccess": "Offre supprimée avec succès",
+      "deleteError": "Échec de la suppression de l'offre",
+      "loadError": "Échec du chargement des offres"
+    },
+    "subscription": {
+      "upgradeTitle": "Mise à niveau pour Créer des Offres",
+      "upgradeDescription": "La création d'offres nécessite un abonnement Chevalier ou supérieur. Améliorez votre plan pour commencer à partager des offres avec la communauté!",
+      "upgradeButton": "Améliorer le Plan",
+      "required": "Abonnement Chevalier ou supérieur requis"
+    },
+    "validation": {
+      "validUntil": "Valide jusqu'au: {{date}}",
+      "validFrom": "Valide à partir de: {{date}}",
+      "expired": "Expiré",
+      "comingSoon": "Bientôt disponible"
     }
   },
   "feedback": {
