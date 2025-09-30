@@ -833,6 +833,7 @@
   "deals": {
     "title": "Deals",
     "description": "Discover exclusive deals and offers from our community",
+    "searchPlaceholder": "Search deals by title or description...",
     "myDeals": "My Deals",
     "publicDeals": "Available Deals",
     "createDeal": "Create Deal",

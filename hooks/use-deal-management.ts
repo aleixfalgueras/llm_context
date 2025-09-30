@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Deal } from '@prisma/client'
 import { DealFormData } from '@/lib/types/deal-types'
 import { createDeal, updateDeal, deleteDeal, getUserDeals } from '@/app/actions/deal-action'
@@ -18,6 +18,7 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
   const [publicDeals, setPublicDeals] = useState<Deal[]>(initialPublicDeals)
   const [userDeals, setUserDeals] = useState<Deal[]>([])
   const [loading, setLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Dialog states
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
@@ -28,6 +29,27 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
   // Operation states
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Filter deals by search term
+  const filteredPublicDeals = useMemo(() => {
+    if (!searchTerm.trim()) return publicDeals
+
+    const searchLower = searchTerm.toLowerCase()
+    return publicDeals.filter(deal =>
+      deal.title.toLowerCase().includes(searchLower) ||
+      deal.description.toLowerCase().includes(searchLower)
+    )
+  }, [publicDeals, searchTerm])
+
+  const filteredUserDeals = useMemo(() => {
+    if (!searchTerm.trim()) return userDeals
+
+    const searchLower = searchTerm.toLowerCase()
+    return userDeals.filter(deal =>
+      deal.title.toLowerCase().includes(searchLower) ||
+      deal.description.toLowerCase().includes(searchLower)
+    )
+  }, [userDeals, searchTerm])
 
   // Fetch user deals
   const fetchUserDeals = async () => {
@@ -140,7 +162,10 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
     // Data
     publicDeals,
     userDeals,
+    filteredPublicDeals,
+    filteredUserDeals,
     loading,
+    searchTerm,
 
     // Dialog states
     isFormDialogOpen,
@@ -153,6 +178,7 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
     isDeleting,
 
     // Actions
+    setSearchTerm,
     handleCreateDeal,
     handleEditDeal,
     handleDeleteDeal,
