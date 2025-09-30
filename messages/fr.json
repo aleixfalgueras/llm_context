@@ -1389,7 +1389,8 @@
       "tabs": {
         "stats": "Statistiques",
         "feedback": "Commentaires",
-        "customization": "Personnalisation"
+        "customization": "Personnalisation",
+        "deals": "Offres"
       },
       "descriptions": {
         "monthlyUsageDescription": "Dépenses totales vs capacité maximale sur tous les utilisateurs pour les 12 derniers mois",
@@ -1455,6 +1456,26 @@
             "updateLimit": "Échec de la mise à jour de la limite de dépense",
             "invalidAmount": "Veuillez saisir un montant valide"
           }
+        }
+      },
+      "deals": {
+        "title": "Gestion des Offres",
+        "description": "Examiner et approuver les soumissions d'offres en attente",
+        "showingCount": "affiché(e)s",
+        "noDeals": "Aucune offre en attente à examiner",
+        "approving": "Approbation...",
+        "rejecting": "Rejet...",
+        "actions": {
+          "approve": "Approuver",
+          "reject": "Rejeter"
+        },
+        "success": {
+          "approved": "Offre approuvée avec succès",
+          "rejected": "Offre rejetée avec succès"
+        },
+        "errors": {
+          "approve": "Échec de l'approbation de l'offre",
+          "reject": "Échec du rejet de l'offre"
         }
       }
     }

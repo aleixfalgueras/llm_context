@@ -8,6 +8,7 @@ import {SubscriptionUsageOperations} from '@/database/subscription-usage-operati
 import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
 import {SubscriptionWithUsage} from "@/lib/types/subscription-types"
 import {ADMIN_EMAILS} from '@/lib/config'
+import {DealService} from '@/services/deal-service'
 
 export class AdminService {
   
@@ -30,22 +31,26 @@ export class AdminService {
         feedbackResult,
         historicalUsage,
         allSubscriptions,
-        subscriptionHistory
+        subscriptionHistory,
+        pendingDeals
       ] = await Promise.all([
         // Get dashboard stats (total users, recent users, subscriptions by plan)
         SubscriptionUsageOperations.getAdminDashboardStats(),
-        
+
         // All feedback for admin filtering
         FeedbackOperations.findAllFeedbackForAdmin(),
-        
+
         // Get usage data for the last 12 months
         SubscriptionUsageOperations.getHistoricalUsage(12),
-        
+
         // Get all subscriptions to calculate max possible usage
         SubscriptionUsageOperations.getAllSubscriptionsForCapacityCalc(),
-        
+
         // Get subscription history for user trends
-        SubscriptionUsageOperations.getMonthlySubscriptionHistory()
+        SubscriptionUsageOperations.getMonthlySubscriptionHistory(),
+
+        // Get pending deals for approval
+        DealService.getAllDeals({ isApproved: false })
       ])
 
       // Extract feedback data from result
@@ -193,6 +198,7 @@ export class AdminService {
         totalUsers: dashboardStats.totalUsers,
         recentUsers: dashboardStats.recentUsers,
         allFeedback: recentFeedback as FeedbackItem[],
+        pendingDeals,
         userSubscriptions: dashboardStats.subscriptionsByPlan,
         monthlySpendingHistory,
         monthlySubscriptionHistory

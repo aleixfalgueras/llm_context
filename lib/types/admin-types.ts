@@ -3,6 +3,8 @@
  * Contains interfaces for feedback management and dashboard data structures
  */
 
+import { Deal } from '@prisma/client'
+
 export interface FeedbackItem {
   id: string
   type: string
@@ -20,6 +22,7 @@ export interface AdminDashboardData {
   totalUsers: number
   recentUsers: number
   allFeedback: FeedbackItem[]
+  pendingDeals: Deal[]
   userSubscriptions: Array<{ plan: string; _count: number }>
   monthlySpendingHistory: Array<{ month: string; spending: number; maxPossible: number }>
   monthlySubscriptionHistory: Array<{
