@@ -35,6 +35,7 @@ export function Navbar() {
 
   const networkSubmenu = useMemo(() => [
     { name: t('affiliation'), href: '/affiliation' },
+    { name: t('deals'), href: '/deals' },
   ], [t])
 
   // Helper function to determine if a nav item is active
@@ -50,7 +51,7 @@ export function Navbar() {
   }
 
   // Helper to check if Network dropdown should be active
-  const isNetworkActive = () => pathname.startsWith('/affiliation')
+  const isNetworkActive = () => pathname.startsWith('/affiliation') || pathname.startsWith('/deals')
 
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
