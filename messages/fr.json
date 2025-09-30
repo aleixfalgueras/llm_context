@@ -833,6 +833,7 @@
   "deals": {
     "title": "Offres",
     "description": "Découvrez des offres et promotions exclusives de notre communauté",
+    "searchPlaceholder": "Rechercher des offres par titre ou description...",
     "myDeals": "Mes Offres",
     "publicDeals": "Offres Disponibles",
     "createDeal": "Créer une Offre",
