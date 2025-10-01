@@ -4,9 +4,10 @@ import { useTranslations } from '@/lib/translations/context'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Edit2, ExternalLink, Trash2 } from 'lucide-react'
+import { Edit2, ExternalLink, Trash2, ImageIcon } from 'lucide-react'
 import { Deal } from '@prisma/client'
 import { format } from 'date-fns'
+import Image from 'next/image'
 
 interface DealCardProps {
   deal: Deal
@@ -27,6 +28,22 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
 
   return (
     <Card className="h-full hover:shadow-lg transition-all duration-200 flex flex-col">
+      {/* Deal Image */}
+      {deal.imageUrl ? (
+        <div className="relative w-full h-48 overflow-hidden rounded-t-lg">
+          <Image
+            src={deal.imageUrl}
+            alt={deal.title}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ) : (
+        <div className="relative w-full h-48 bg-muted flex items-center justify-center rounded-t-lg">
+          <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
+        </div>
+      )}
+
       <CardHeader className="pb-3 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">

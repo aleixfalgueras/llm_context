@@ -236,6 +236,7 @@ model Deal {
   description String    @db.Text
   price       String
   externalUrl String
+  imageUrl    String?
   validFrom   DateTime?
   validUntil  DateTime?
   isActive    Boolean   @default(true)
