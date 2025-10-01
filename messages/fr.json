@@ -906,6 +906,9 @@
       "validFrom": "Valide à partir de: {{date}}",
       "expired": "Expiré",
       "comingSoon": "Bientôt disponible"
+    },
+    "details": {
+      "title": "Détails de l'Offre"
     }
   },
   "feedback": {

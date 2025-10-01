@@ -1,13 +1,15 @@
 'use client'
 
 import { useTranslations } from '@/lib/translations/context'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Edit2, ExternalLink, Trash2, ImageIcon } from 'lucide-react'
 import { Deal } from '@prisma/client'
 import { format } from 'date-fns'
 import Image from 'next/image'
+import { DealDetailsDialog } from './deal-details-dialog'
 
 interface DealCardProps {
   deal: Deal
@@ -18,16 +20,26 @@ interface DealCardProps {
 
 export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardProps) {
   const t = useTranslations('deals')
+  const [showDetails, setShowDetails] = useState(false)
 
   const isExpired = deal.validUntil && new Date(deal.validUntil) < new Date()
   const isComingSoon = deal.validFrom && new Date(deal.validFrom) > new Date()
 
-  const handleExternalClick = () => {
+  const handleExternalClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
     window.open(deal.externalUrl, '_blank', 'noopener,noreferrer')
   }
 
+  const handleCardClick = () => {
+    setShowDetails(true)
+  }
+
   return (
-    <Card className="h-full hover:shadow-lg transition-all duration-200 flex flex-col">
+    <>
+    <Card
+      className="h-full hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Deal Image */}
       {deal.imageUrl ? (
         <div className="relative w-full h-48 overflow-hidden rounded-t-lg">
@@ -50,20 +62,13 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
             <CardTitle className="text-base flex items-center gap-2">
               <span className="truncate">{deal.title}</span>
             </CardTitle>
-            <div className="h-12 flex items-start mt-2">
-              <CardDescription className="text-sm leading-relaxed break-words overflow-hidden">
-                {deal.description.length > 100
-                  ? `${deal.description.substring(0, 100)}...`
-                  : deal.description}
-              </CardDescription>
-            </div>
           </div>
+          <Badge variant="secondary" className="text-xs font-semibold shrink-0">
+            {deal.price}
+          </Badge>
         </div>
 
         <div className="flex items-center gap-2 mt-auto pt-2">
-          <Badge variant="secondary" className="text-xs font-semibold">
-            {deal.price}
-          </Badge>
           {!deal.isApproved && isOwner && (
             <Badge variant="outline" className="text-xs text-amber-600">
               {t('status.pendingApproval')}
@@ -94,7 +99,7 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
       </CardHeader>
 
       <CardContent className="pt-0">
-        <div className="flex items-center justify-between pt-2 border-t">
+        <div className="flex items-center justify-between pt-2">
           <Button
             variant="default"
             size="sm"
@@ -110,7 +115,10 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onEdit?.(deal)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit?.(deal)
+                }}
                 title={t('actions.edit')}
               >
                 <Edit2 className="h-4 w-4" />
@@ -119,7 +127,10 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onDelete?.(deal)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete?.(deal)
+                }}
                 title={t('actions.delete')}
               >
                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -129,5 +140,15 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
         </div>
       </CardContent>
     </Card>
+
+    <DealDetailsDialog
+      deal={deal}
+      open={showDetails}
+      onOpenChange={setShowDetails}
+      isOwner={isOwner}
+      onEdit={onEdit}
+      onDelete={onDelete}
+    />
+    </>
   )
 }
