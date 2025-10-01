@@ -47,7 +47,7 @@ export default async function PublicDealsPage() {
   const tNav = await getTranslations('navigation')
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Simple header with language and theme controls */}
       <div className="flex justify-end items-center p-6">
         <div className="flex items-center gap-4">
