@@ -15,11 +15,12 @@ const BOT_CRAWLER_ROUTES = [
 ]
 
 const isPublicRoute = createRouteMatcher([
-  '/', 
-  '/sign-in(.*)', 
+  '/',
+  '/sign-in(.*)',
   '/sign-up(.*)',
   '/terms',
   '/privacy',
+  '/public-deals',
   '/api/subscription/webhook',
   '/api/webhook/clerk',
   '/robots.txt',
