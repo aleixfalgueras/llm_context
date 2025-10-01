@@ -117,6 +117,11 @@
       "title": "MIA is invite-only",
       "description": "Connect with a current member to receive your personal invitation and join our selective community of marketing professionals.",
       "businessInquiries": "Business inquiries:"
+    },
+    "publicDeals": {
+      "title": "Exclusive Community Deals",
+      "description": "Check exclusive deals from our members, and create your own with Knight or higher subscription plans",
+      "button": "View Deals"
     }
   },
   "clients": {

@@ -117,6 +117,11 @@
       "title": "MIA fonctionne sur invitation uniquement",
       "description": "Connectez-vous avec un membre actuel pour recevoir votre invitation personnelle et rejoindre notre communauté sélective de professionnels du marketing.",
       "businessInquiries": "Demandes commerciales :"
+    },
+    "publicDeals": {
+      "title": "Offres Exclusives de la Communauté",
+      "description": "Découvrez les offres exclusives de nos membres et créez les vôtres avec un abonnement Knight ou supérieur",
+      "button": "Voir les Offres"
     }
   },
   "clients": {

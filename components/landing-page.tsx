@@ -10,6 +10,7 @@ import {
   Shield,
   Sparkles,
   StarIcon,
+  Tag,
   Target,
   ZapIcon
 } from 'lucide-react'
@@ -274,6 +275,38 @@ export function LandingPage() {
               {t('landing.security.badge')}
             </span>
           </div>
+        </div>
+
+        {/* Public Deals Banner */}
+        <div className="mb-16">
+          <Card className="overflow-hidden border-2 border-purple-200 dark:border-purple-800 hover:shadow-xl transition-all duration-300">
+            <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-indigo-900/20 p-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Tag className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                      {t('landing.publicDeals.title')}
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300 max-w-2xl">
+                      {t('landing.publicDeals.description')}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Link href="/public-deals">
+                    {t('landing.publicDeals.button')}
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </Card>
         </div>
 
         {/* Pricing Section */}
