@@ -38,15 +38,35 @@ export async function getDealById(dealId: string): Promise<Deal> {
   return result.data
 }
 
-export async function createDeal(data: DealFormData): Promise<Deal> {
+export async function createDeal(formData: FormData): Promise<Deal> {
   const userId = await checkAuth()
 
+  // Extract form fields
+  const title = formData.get('title') as string
+  const description = formData.get('description') as string
+  const price = formData.get('price') as string
+  const externalUrl = formData.get('externalUrl') as string
+  const validFrom = formData.get('validFrom') as string
+  const validUntil = formData.get('validUntil') as string
+  const isActive = formData.get('isActive') === 'true'
+  const imageFile = formData.get('imageFile') as File | null
+
   // Validate required fields
-  if (!data.title || !data.description || !data.price || !data.externalUrl) {
+  if (!title || !description || !price || !externalUrl) {
     throw new Error('Missing required fields: title, description, price, and externalUrl are required')
   }
 
-  const result = await DealService.createDeal(userId, data)
+  const data: DealFormData = {
+    title,
+    description,
+    price,
+    externalUrl,
+    validFrom: validFrom ? new Date(validFrom) : null,
+    validUntil: validUntil ? new Date(validUntil) : null,
+    isActive
+  }
+
+  const result = await DealService.createDeal(userId, data, imageFile || undefined)
 
   if (!result.success) {
     throw new Error(result.error || 'Failed to create deal')
@@ -56,9 +76,39 @@ export async function createDeal(data: DealFormData): Promise<Deal> {
   return result.data
 }
 
-export async function updateDeal(dealId: string, data: DealFormData): Promise<Deal> {
+export async function updateDeal(dealId: string, formData: FormData): Promise<Deal> {
   const userId = await checkAuth()
-  const result = await DealService.updateDeal(dealId, userId, data)
+
+  // Extract form fields
+  const title = formData.get('title') as string
+  const description = formData.get('description') as string
+  const price = formData.get('price') as string
+  const externalUrl = formData.get('externalUrl') as string
+  const validFrom = formData.get('validFrom') as string
+  const validUntil = formData.get('validUntil') as string
+  const isActive = formData.get('isActive') === 'true'
+  const imageFile = formData.get('imageFile') as File | null
+  const removeImage = formData.get('removeImage') === 'true'
+
+  const data: DealFormData = {
+    title,
+    description,
+    price,
+    externalUrl,
+    validFrom: validFrom ? new Date(validFrom) : null,
+    validUntil: validUntil ? new Date(validUntil) : null,
+    isActive
+  }
+
+  // Handle image update: undefined = no change, null = remove, File = replace
+  let imageUpdate: File | null | undefined = undefined
+  if (removeImage) {
+    imageUpdate = null
+  } else if (imageFile && imageFile.size > 0) {
+    imageUpdate = imageFile
+  }
+
+  const result = await DealService.updateDeal(dealId, userId, data, imageUpdate)
 
   if (!result.success) {
     throw new Error(result.error || 'Failed to update deal')

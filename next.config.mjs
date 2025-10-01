@@ -10,7 +10,7 @@ const nextConfig = {
   },
   // Optimize images
   images: {
-    domains: [],
+    domains: ['ccbapdsiisngnpyqryqg.supabase.co'],
     formats: ['image/webp', 'image/avif'],
   },
   // Production optimizations

@@ -127,7 +127,8 @@ export class DealService {
    */
   static async createDeal(
     userId: string,
-    data: DealFormData
+    data: DealFormData,
+    imageFile?: File
   ): Promise<DbOperationResult<Deal>> {
     try {
       // Check subscription tier
@@ -152,7 +153,7 @@ export class DealService {
         }
       }
 
-      // Create the deal
+      // Create the deal first without image
       const dealData: Omit<Prisma.DealCreateInput, 'userId'> = {
         title: data.title!!,
         description: data.description!!,
@@ -168,6 +169,28 @@ export class DealService {
 
       if (!result.success) {
         logger.error('Failed to create deal', new Error(result.error), { userId })
+        return result as DbOperationResult<Deal>
+      }
+
+      // Upload image if provided
+      if (imageFile && result.data) {
+        try {
+          const { StorageService } = await import('./storage-service')
+          const { url } = await StorageService.uploadDealImage(userId, result.data.id, imageFile)
+
+          // Update deal with image URL
+          const updateResult = await DealOperations.updateDeal(result.data.id, userId, { imageUrl: url })
+
+          if (!updateResult.success) {
+            logger.error('Failed to update deal with image URL', new Error(updateResult.error), { userId })
+            // Don't fail the entire operation, just log the error
+          } else {
+            result.data = updateResult.data!
+          }
+        } catch (imageError) {
+          logger.error('Failed to upload deal image', imageError as Error, { userId })
+          // Don't fail the entire operation, just log the error
+        }
       }
 
       return result as DbOperationResult<Deal>
@@ -186,7 +209,8 @@ export class DealService {
   static async updateDeal(
     dealId: string,
     userId: string,
-    data: DealFormData
+    data: DealFormData,
+    imageFile?: File | null
   ): Promise<DbOperationResult<Deal>> {
     try {
       // Validate dates if both are provided
@@ -202,6 +226,15 @@ export class DealService {
         }
       }
 
+      // Get existing deal to check for old image
+      const existingDeal = await DealOperations.findDealById(dealId, userId)
+      if (!existingDeal.success || !existingDeal.data) {
+        return {
+          success: false,
+          error: 'Deal not found'
+        }
+      }
+
       const updateData: Partial<Prisma.DealUpdateInput> = {}
 
       // Only include fields that are provided
@@ -212,6 +245,35 @@ export class DealService {
       if (data.validFrom !== undefined) updateData.validFrom = data.validFrom
       if (data.validUntil !== undefined) updateData.validUntil = data.validUntil
       if (data.isActive !== undefined) updateData.isActive = data.isActive
+
+      // Handle image update
+      if (imageFile !== undefined) {
+        const { StorageService } = await import('./storage-service')
+
+        // Delete old image if exists
+        if (existingDeal.data.imageUrl) {
+          try {
+            await StorageService.deleteDealImage(existingDeal.data.imageUrl)
+          } catch (deleteError) {
+            logger.error('Failed to delete old deal image', deleteError as Error, { userId })
+            // Continue with update even if deletion fails
+          }
+        }
+
+        // Upload new image if provided (null means remove image)
+        if (imageFile) {
+          try {
+            const { url } = await StorageService.uploadDealImage(userId, dealId, imageFile)
+            updateData.imageUrl = url
+          } catch (uploadError) {
+            logger.error('Failed to upload new deal image', uploadError as Error, { userId })
+            // Don't fail the entire update, just log the error
+          }
+        } else {
+          // null means remove the image
+          updateData.imageUrl = null
+        }
+      }
 
       const result = await DealOperations.updateDeal(dealId, userId, updateData)
 
@@ -237,10 +299,26 @@ export class DealService {
     userId: string
   ): Promise<DbOperationResult<{ id: string }>> {
     try {
+      // Get deal to check for image
+      const existingDeal = await DealOperations.findDealById(dealId, userId)
+
+      // Delete the deal from database first
       const result = await DealOperations.deleteDeal(dealId, userId)
 
       if (!result.success) {
         logger.error(`Failed to delete deal ${dealId}`, new Error(result.error), { userId })
+        return result
+      }
+
+      // Delete image from storage if it exists
+      if (existingDeal.success && existingDeal.data?.imageUrl) {
+        try {
+          const { StorageService } = await import('./storage-service')
+          await StorageService.deleteDealImage(existingDeal.data.imageUrl)
+        } catch (imageError) {
+          logger.error('Failed to delete deal image during deal deletion', imageError as Error, { userId })
+          // Don't fail the operation since the deal is already deleted from DB
+        }
       }
 
       return result
@@ -283,11 +361,26 @@ export class DealService {
     dealId: string
   ): Promise<DbOperationResult<{ id: string }>> {
     try {
+      // Get deal to check for image (admin can access any deal)
+      const existingDeal = await DealOperations.findDealByIdPublic(dealId)
+
       // Rejecting = deleting the deal
       const result = await DealOperations.deleteDeal(dealId, '') // Empty userId for admin action
 
       if (!result.success) {
         logger.error(`Failed to reject deal ${dealId}`, new Error(result.error))
+        return result
+      }
+
+      // Delete image from storage if it exists
+      if (existingDeal.success && existingDeal.data?.imageUrl) {
+        try {
+          const { StorageService } = await import('./storage-service')
+          await StorageService.deleteDealImage(existingDeal.data.imageUrl)
+        } catch (imageError) {
+          logger.error('Failed to delete deal image during rejection', imageError as Error)
+          // Don't fail the operation since the deal is already deleted from DB
+        }
       }
 
       return result

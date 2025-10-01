@@ -223,18 +223,18 @@ export class StorageService {
 
   /**
    * Get current storage usage statistics for a user.
-   * 
+   *
    * Queries the database to calculate total storage usage across all user documents.
    * Aggregates file sizes from the document records and provides breakdown by client.
    * Uses database-stored file sizes for accurate tracking.
-   * 
+   *
    * @param userId - The user ID to calculate storage usage for
    * @returns Promise<StorageUsage> containing total bytes, document count, and usage by client
    * @throws Error if database query fails
    */
   static async getStorageUsage(userId: string): Promise<StorageUsage> {
     const {DocumentService} = await import('./document-service')
-    
+
     try {
       // Get all documents for the user through DocumentService (proper service layer)
       const documents = await DocumentService.getAllUserDocuments(userId)
@@ -246,7 +246,7 @@ export class StorageService {
       for (const doc of documents) {
         const fileSize = doc.fileSize || 0
         totalBytes += fileSize
-        
+
         // Handle documents with or without clientId
         const clientKey = doc.clientId || 'general'
         if (!usageByClient[clientKey]) {
@@ -263,6 +263,83 @@ export class StorageService {
     } catch (error) {
       logger.error('Error calculating storage usage', error as Error, { userId })
       throw error
+    }
+  }
+
+  /**
+   * Upload deal image to Supabase storage
+   */
+  static async uploadDealImage(
+    userId: string,
+    dealId: string,
+    imageFile: File
+  ): Promise<{ path: string; url: string }> {
+    try {
+      // Generate unique file path
+      const fileExtension = imageFile.name.split('.').pop() || 'jpg'
+      const filePath = `${userId}/${dealId}.${fileExtension}`
+
+      // Convert File to Buffer
+      const arrayBuffer = await imageFile.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+
+      // Upload to Supabase storage
+      const { data, error } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_DEALS)
+        .upload(filePath, buffer, {
+          contentType: imageFile.type,
+          upsert: true
+        })
+
+      if (error) {
+        throw new Error(`Storage upload failed: ${error.message}`)
+      }
+
+      // Get public URL
+      const { data: urlData } = supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_DEALS)
+        .getPublicUrl(filePath)
+
+      if (!urlData.publicUrl) {
+        throw new Error('Failed to get public URL for deal image')
+      }
+
+      return {
+        path: data.path,
+        url: urlData.publicUrl
+      }
+    } catch (error) {
+      logger.error('Deal image upload error', error instanceof Error ? error : new Error(String(error)))
+      throw new Error(`Failed to upload deal image: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Delete deal image from Supabase storage
+   */
+  static async deleteDealImage(imageUrl: string): Promise<void> {
+    try {
+      // Extract the file path from the public URL
+      // URL format: https://[project].supabase.co/storage/v1/object/public/deals/userId/dealId.ext
+      const urlParts = imageUrl.split('/storage/v1/object/public/deals/')
+      if (urlParts.length < 2) {
+        throw new Error('Invalid image URL format')
+      }
+
+      const filePath = urlParts[1]
+
+      const { error } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_DEALS)
+        .remove([filePath])
+
+      if (error) {
+        throw new Error(`Storage deletion failed: ${error.message}`)
+      }
+
+      logger.info(`Successfully deleted deal image: ${filePath}`)
+    } catch (error) {
+      logger.error('Deal image deletion error', error instanceof Error ? error : new Error(String(error)))
+      throw new Error(`Failed to delete deal image: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from '@/lib/translations/context'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -16,12 +16,16 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Deal } from '@prisma/client'
 import { DealFormData } from '@/lib/types/deal-types'
+import { X, Upload, Loader2 } from 'lucide-react'
+import Image from 'next/image'
+import { optimizeImage, OptimizationResult } from '@/lib/utils/image-optimization'
+import { formatFileSize } from '@/lib/constants/image-optimization-constants'
 
 interface DealFormDialogProps {
   deal: Deal | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (data: DealFormData) => Promise<void>
+  onSubmit: (formData: FormData) => Promise<void>
   isSaving: boolean
 }
 
@@ -33,6 +37,7 @@ export function DealFormDialog({
   isSaving
 }: DealFormDialogProps) {
   const t = useTranslations('deals')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState<DealFormData>({
     title: '',
     description: '',
@@ -43,6 +48,11 @@ export function DealFormDialog({
     isActive: true
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [removeImage, setRemoveImage] = useState(false)
+  const [isOptimizing, setIsOptimizing] = useState(false)
+  const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null)
 
   // Reset form when dialog opens or deal changes
   useEffect(() => {
@@ -57,6 +67,11 @@ export function DealFormDialog({
           validUntil: deal.validUntil,
           isActive: deal.isActive
         })
+        setImagePreview(deal.imageUrl || null)
+        setImageFile(null)
+        setRemoveImage(false)
+        setIsOptimizing(false)
+        setOptimizationResult(null)
       } else {
         setFormData({
           title: '',
@@ -67,6 +82,11 @@ export function DealFormDialog({
           validUntil: null,
           isActive: true
         })
+        setImagePreview(null)
+        setImageFile(null)
+        setRemoveImage(false)
+        setIsOptimizing(false)
+        setOptimizationResult(null)
       }
       setErrors({})
     }
@@ -102,14 +122,83 @@ export function DealFormDialog({
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      setIsOptimizing(true)
+      setRemoveImage(false)
+
+      // Optimize image before setting it
+      const result = await optimizeImage(file)
+
+      setImageFile(result.optimizedFile)
+      setOptimizationResult(result)
+
+      // Create preview URL from optimized file
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(result.optimizedFile)
+    } catch (error) {
+      console.error('Image optimization error:', error)
+      // Fallback to original file if optimization fails
+      setImageFile(file)
+      setOptimizationResult(null)
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    } finally {
+      setIsOptimizing(false)
+    }
+  }
+
+  const handleRemoveImage = (): void => {
+    setImageFile(null)
+    setImagePreview(deal?.imageUrl || null)
+    setRemoveImage(true)
+    setOptimizationResult(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
 
     if (!validateForm()) {
       return
     }
 
-    await onSubmit(formData)
+    // Create FormData for file upload
+    const submitFormData = new FormData()
+    submitFormData.append('title', formData.title || '')
+    submitFormData.append('description', formData.description || '')
+    submitFormData.append('price', formData.price || '')
+    submitFormData.append('externalUrl', formData.externalUrl || '')
+    submitFormData.append('isActive', formData.isActive ? 'true' : 'false')
+
+    if (formData.validFrom) {
+      submitFormData.append('validFrom', formData.validFrom.toISOString())
+    }
+    if (formData.validUntil) {
+      submitFormData.append('validUntil', formData.validUntil.toISOString())
+    }
+
+    // Handle image
+    if (imageFile) {
+      submitFormData.append('imageFile', imageFile)
+    }
+    if (removeImage) {
+      submitFormData.append('removeImage', 'true')
+    }
+
+    await onSubmit(submitFormData)
   }
 
   const formatDateForInput = (date: Date | string | null | undefined): string => {
@@ -181,6 +270,88 @@ export function DealFormDialog({
               className={errors.externalUrl ? 'border-red-500' : ''}
             />
             {errors.externalUrl && <p className="text-sm text-red-500">{errors.externalUrl}</p>}
+          </div>
+
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="image">
+              {t('form.image')} <span className="text-muted-foreground text-xs">{t('form.imageOptional')}</span>
+            </Label>
+
+            {imagePreview && !removeImage && (
+              <div className="relative w-full h-48 border rounded-md overflow-hidden">
+                <Image
+                  src={imagePreview}
+                  alt={t('form.imagePreview')}
+                  fill
+                  className="object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="absolute top-2 right-2"
+                  onClick={handleRemoveImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Input
+                ref={fileInputRef}
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+                disabled={isOptimizing}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full"
+                disabled={isOptimizing}
+              >
+                {isOptimizing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t('form.imageOptimizing')}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    {imagePreview && !removeImage ? t('form.imageChange') : t('form.imageChoose')}
+                  </>
+                )}
+              </Button>
+              {imagePreview && !removeImage && !isOptimizing && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRemoveImage}
+                >
+                  {t('form.imageRemove')}
+                </Button>
+              )}
+            </div>
+
+            {/* Optimization Result Display */}
+            {optimizationResult && !removeImage && (
+              <div className="text-xs text-muted-foreground">
+                {optimizationResult.skipped ? (
+                  <span>{formatFileSize(optimizationResult.originalSize)} (already optimized)</span>
+                ) : (
+                  <span className="text-green-600 dark:text-green-500">
+                    {t('form.imageOptimized', {
+                      stats: `${formatFileSize(optimizationResult.originalSize)} → ${formatFileSize(optimizationResult.compressedSize)} (-${optimizationResult.compressionPercentage}%)`
+                    })}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Valid From */}

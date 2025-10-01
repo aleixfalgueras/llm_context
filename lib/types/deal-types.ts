@@ -4,6 +4,7 @@ export interface DealFormData {
   description?: string
   price?: string
   externalUrl?: string
+  imageFile?: File | null
   validFrom?: Date | null
   validUntil?: Date | null
   isActive?: boolean

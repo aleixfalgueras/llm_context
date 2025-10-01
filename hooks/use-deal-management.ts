@@ -93,20 +93,20 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
   }
 
   // Submit form (create or update)
-  const handleSubmitDeal = async (data: DealFormData) => {
+  const handleSubmitDeal = async (formData: FormData): Promise<void> => {
     try {
       setIsSaving(true)
 
       if (editingDeal) {
         // Update existing deal
-        await updateDeal(editingDeal.id, data)
+        await updateDeal(editingDeal.id, formData)
         toast({
           title: t('messages.updateSuccess'),
           variant: 'default'
         })
       } else {
         // Create new deal
-        await createDeal(data)
+        await createDeal(formData)
         toast({
           title: t('messages.createSuccess'),
           variant: 'default'
