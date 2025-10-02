@@ -28,6 +28,7 @@ export interface OpenRouterCompletionOptions {
   presence_penalty?: number
   frequency_penalty?: number
   modalities?: ('text' | 'image')[] // For image generation models
+  webSearch?: boolean // Enable web search by appending :online to model name
 }
 
 export interface StreamChunk {

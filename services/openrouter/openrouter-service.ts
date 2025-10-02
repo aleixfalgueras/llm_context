@@ -147,6 +147,25 @@ export class OpenRouterService implements StreamingProvider {
   }
 
   /**
+   * Transform model name to enable web search by appending :online suffix
+   * @param model - The base model identifier
+   * @param webSearch - Whether to enable web search
+   * @returns Model name with :online suffix if web search is enabled
+   */
+  private getModelWithWebSearch(model: string, webSearch?: boolean): string {
+    if (!webSearch) {
+      return model
+    }
+
+    // Don't append :online if it's already there
+    if (model.endsWith(':online')) {
+      return model
+    }
+
+    return `${model}:online`
+  }
+
+  /**
    * Get the modalities supported by a model (e.g., text, image)
    * @param modelId - The model identifier
    * @returns Array of modalities or undefined for text-only models
@@ -183,10 +202,14 @@ export class OpenRouterService implements StreamingProvider {
     usageOptions?: UsageTrackingOptions
   ): AsyncGenerator<StreamChunk, void, unknown> {
     const finalOptions = this.applyDefaults(options)
-    
+
+    // Apply web search transformation to model name
+    const modelWithWebSearch = this.getModelWithWebSearch(finalOptions.model, options.webSearch)
+
     try {
       const stream = await this.client.chat.completions.create({
         ...finalOptions,
+        model: modelWithWebSearch,
         messages: finalOptions.messages as any,
         stream_options: {include_usage: true},
         stream: true,
@@ -249,11 +272,14 @@ export class OpenRouterService implements StreamingProvider {
     if (!finalOptions.model) {
       throw new Error('Model is required for completion')
     }
-    
+
+    // Apply web search transformation to model name
+    const modelWithWebSearch = this.getModelWithWebSearch(finalOptions.model, options.webSearch)
+
     try {
       const completion = await this.client.chat.completions.create({
         ...finalOptions,
-        model: finalOptions.model,
+        model: modelWithWebSearch,
         messages: finalOptions.messages as any, // Cast to any for complex message types
         stream: false,
         usage: { include: true },
