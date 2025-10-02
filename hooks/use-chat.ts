@@ -99,7 +99,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
     }
   }, [chatId])
 
-  const sendMessage = useCallback(async (content: string, selectedModel?: string) => {
+  const sendMessage = useCallback(async (content: string, selectedModel?: string, webSearch?: boolean) => {
     if (!content.trim() || isLoading) {
       clientLogger.warn('Message send attempted with empty content or while loading', {
         chatId,
@@ -166,6 +166,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
             messages: [{ content }],
             chatId: chatId || undefined, // Send undefined for new chats
             model: selectedModel || DEFAULT_MODEL, // Default to configured default model if no model specified
+            webSearch: webSearch || false,
             // Include new chat parameters if this is a new chat
             ...(newChatParams && {
               clientId: newChatParams.clientId,

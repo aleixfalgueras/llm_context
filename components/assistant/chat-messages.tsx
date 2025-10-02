@@ -1,8 +1,8 @@
 'use client'
 
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {User, ArrowDown, Copy} from 'lucide-react'
-import {memo, useEffect, useRef, useState, useCallback} from 'react'
+import {ArrowDown, Copy, Download, User} from 'lucide-react'
+import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {useTranslations} from '@/lib/translations/context'
 import {MessageWithStreaming} from "@/lib/types/message-types";
@@ -12,20 +12,28 @@ import {ImageViewDialog} from '@/components/ui/image-view-dialog'
 import {getModelDisplayName} from '@/lib/utils/model-utils'
 import {Button} from '@/components/ui/button'
 import {toast} from '@/hooks/use-toast'
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip'
 
 interface ChatMessagesProps {
   messages: MessageWithStreaming[]
   userImageUrl?: string
   userName?: string
+  chatTitle?: string
+  clientData?: any
+  onDocumentCreated?: (clientId: string, documentId: string) => void
+  onExportChat?: () => Promise<void>
 }
 
 interface MessageBubbleProps {
   message: MessageWithStreaming
   userImageUrl?: string
   userName?: string
+  isLastAssistantMessage?: boolean
+  onExportChat?: () => Promise<void>
+  isExporting?: boolean
 }
 
-const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubbleProps) => {
+const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMessage, onExportChat, isExporting }: MessageBubbleProps) => {
   const t = useTranslations('assistant')
   const isUser = message.role === Role.USER
   const [selectedImage, setSelectedImage] = useState<{url: string, index: number} | null>(null)
@@ -124,6 +132,32 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
             >
               <Copy className="h-4 w-4" />
             </Button>
+
+            {/* Export Chat Button - only show on last assistant message */}
+            {isLastAssistantMessage && onExportChat && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onExportChat}
+                      disabled={isExporting}
+                      className="h-8 w-8"
+                    >
+                      {isExporting ? (
+                        <Download className="h-4 w-4 animate-pulse" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p className="text-sm">{t('chat.exportChatTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         )}
       </div>
@@ -144,7 +178,7 @@ const MessageBubble = memo(({ message, userImageUrl, userName }: MessageBubblePr
 
 MessageBubble.displayName = 'MessageBubble'
 
-function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessagesProps) {
+function ChatMessagesComponent({ messages, userImageUrl, userName, onExportChat }: ChatMessagesProps) {
   const t = useTranslations('assistant')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -152,6 +186,23 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
   const [userHasScrolled, setUserHasScrolled] = useState(false)
   const lastMessageCountRef = useRef(messages.length)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Find the last assistant message
+  const lastAssistantMessageIndex = messages.map((m, idx) => ({ role: m.role, idx }))
+    .filter(m => m.role === Role.ASSISTANT)
+    .pop()?.idx
+
+  // Wrap export handler to manage loading state
+  const handleExport = useCallback(async () => {
+    if (!onExportChat || isExporting) return
+    setIsExporting(true)
+    try {
+      await onExportChat()
+    } finally {
+      setIsExporting(false)
+    }
+  }, [onExportChat, isExporting])
 
   // Handle scroll position detection with improved threshold
   const handleScroll = useCallback(() => {
@@ -242,12 +293,15 @@ function ChatMessagesComponent({ messages, userImageUrl, userName }: ChatMessage
     <div className="relative h-full">
       <div ref={scrollContainerRef} className="h-full overflow-auto no-scrollbar">
         <div className="p-4 space-y-6">
-          {messages.map((message) => (
+          {messages.map((message, idx) => (
             <MessageBubble
               key={message.id}
               message={message}
               userImageUrl={userImageUrl}
               userName={userName}
+              isLastAssistantMessage={idx === lastAssistantMessageIndex}
+              onExportChat={handleExport}
+              isExporting={isExporting}
             />
           ))}
           <div ref={messagesEndRef} />

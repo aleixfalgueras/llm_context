@@ -389,6 +389,8 @@
     "at": "at",
     "inputPlaceholder": "Type your message... (Press Enter to send, Shift+Enter for new line)",
     "thinking": "Thinking...",
+    "webSearch": "Web Search",
+    "webSearchTooltip": "Enables real-time web search to access current information. Note: Web search increases token usage and costs.",
     "chatExportedDescription": "Chat '{{chatTitle}}' has been exported successfully",
     "startNewConversation": "Start a new conversation",
     "noChatsYet": "No chats yet",
@@ -423,7 +425,8 @@
       "generalChat": "General Chat",
       "exportDate": "Export Date",
       "you": "You",
-      "aiAssistant": "MIA"
+      "aiAssistant": "MIA",
+      "exportChatTooltip": "Creates a document from this conversation and saves it to the client's documents. You can review it in the Clients' Documents section."
     },
     "modelSelector": {
       "searchPlaceholder": "Search models...",
