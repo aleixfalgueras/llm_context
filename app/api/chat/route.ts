@@ -40,7 +40,7 @@ export const POST = withEnhancedApi(
     let chatId: string = '';
 
     // Parse request body
-    const {messages, chatId: requestChatId, model, clientId, contextFields} = await parseJsonBody(req)
+    const {messages, chatId: requestChatId, model, clientId, contextFields, webSearch} = await parseJsonBody(req)
     chatId = requestChatId;
     const selectedModel = model || getDefaultModel()
     const userLocale = await getLocaleFromCookies()
@@ -96,7 +96,7 @@ export const POST = withEnhancedApi(
     const formattedMessages = await ChatService.formatMessagesForOpenRouterRequest(chat, lastMessageContent, client, userLocale)
 
     // Create streaming response configuration
-    const streamingConfig: StreamingResponseConfig = {chatId, userId, selectedModel, clientId, newTitle}
+    const streamingConfig: StreamingResponseConfig = {chatId, userId, selectedModel, clientId, newTitle, webSearch}
 
     // Create streaming response with new abstraction
     const modalities = OpenRouterService.getModelModalities(selectedModel)
@@ -104,9 +104,10 @@ export const POST = withEnhancedApi(
       streamingConfig,
       () => openRouterService.createStreamingCompletion(
         {
-          model: selectedModel, 
+          model: selectedModel,
           messages: formattedMessages,
-          modalities
+          modalities,
+          webSearch
         },
         {userId, resourceId: chatId}
       )

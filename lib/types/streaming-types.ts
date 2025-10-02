@@ -28,6 +28,7 @@ export interface StreamingResponseConfig {
   clientId?: string | null
   newTitle?: string
   headers?: Record<string, string>
+  webSearch?: boolean
 }
 
 export interface StreamingResponse {
