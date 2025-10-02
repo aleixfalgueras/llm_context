@@ -31,9 +31,10 @@ interface MessageBubbleProps {
   isLastAssistantMessage?: boolean
   onExportChat?: () => Promise<void>
   isExporting?: boolean
+  hasClient?: boolean
 }
 
-const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMessage, onExportChat, isExporting }: MessageBubbleProps) => {
+const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMessage, onExportChat, isExporting, hasClient }: MessageBubbleProps) => {
   const t = useTranslations('assistant')
   const isUser = message.role === Role.USER
   const [selectedImage, setSelectedImage] = useState<{url: string, index: number} | null>(null)
@@ -133,8 +134,8 @@ const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMe
               <Copy className="h-4 w-4" />
             </Button>
 
-            {/* Export Chat Button - only show on last assistant message */}
-            {isLastAssistantMessage && onExportChat && (
+            {/* Export Chat Button - only show on last assistant message and if chat has client */}
+            {isLastAssistantMessage && onExportChat && hasClient && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -178,7 +179,7 @@ const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMe
 
 MessageBubble.displayName = 'MessageBubble'
 
-function ChatMessagesComponent({ messages, userImageUrl, userName, onExportChat }: ChatMessagesProps) {
+function ChatMessagesComponent({ messages, userImageUrl, userName, clientData, onExportChat }: ChatMessagesProps) {
   const t = useTranslations('assistant')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -302,6 +303,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName, onExportChat 
               isLastAssistantMessage={idx === lastAssistantMessageIndex}
               onExportChat={handleExport}
               isExporting={isExporting}
+              hasClient={!!clientData}
             />
           ))}
           <div ref={messagesEndRef} />
