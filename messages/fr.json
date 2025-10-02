@@ -389,6 +389,8 @@
     "at": "à",
     "inputPlaceholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
     "thinking": "En train de réfléchir...",
+    "webSearch": "Recherche Web",
+    "webSearchTooltip": "Active la recherche Web en temps réel pour accéder aux informations actuelles. Remarque : La recherche Web augmente l'utilisation de tokens et les coûts.",
     "chatExportedDescription": "La discussion '{{chatTitle}}' a été exportée avec succès",
     "startNewConversation": "Commencer une nouvelle conversation",
     "noChatsYet": "Aucune discussion pour le moment",
@@ -423,7 +425,8 @@
       "generalChat": "Discussion Générale",
       "exportDate": "Date d'Export",
       "you": "Vous",
-      "aiAssistant": "MIA"
+      "aiAssistant": "MIA",
+      "exportChatTooltip": "Crée un document à partir de cette conversation et l'enregistre dans les documents du client. Vous pouvez le consulter dans la section Documents Clients."
     },
     "modelSelector": {
       "searchPlaceholder": "Rechercher des modèles...",

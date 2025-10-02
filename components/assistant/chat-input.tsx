@@ -1,22 +1,21 @@
 'use client'
 
-import {Download, Send, Square} from 'lucide-react'
+import {HelpCircle, Send, Square} from 'lucide-react'
 import {Button} from '@/components/ui/button'
 import {Textarea} from '@/components/ui/textarea'
 import {LoadingSpinner} from '@/components/ui/loading-spinner'
 import {PromptSelector} from '@/components/prompts/prompt-selector'
 import {ModelSelector} from '@/components/ui/model-selector'
 import {UsageIndicator} from '@/components/subscription/usage-indicator'
-import {useToast} from '@/hooks/use-toast'
-import {Prompt, Role} from '@prisma/client'
+import {Checkbox} from '@/components/ui/checkbox'
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip'
+import {Prompt} from '@prisma/client'
 import {MessageWithStreaming} from '@/lib/types/message-types'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {clientLogger} from '@/lib/client-logger'
 import {DEFAULT_MODEL} from '@/lib/models-config'
 import {useSubscription} from "@/hooks/subscription/use-subscription";
-import {handleClientApiError} from '@/lib/api/api-toast'
 import {replaceClientContextVariables} from "@/services/client/client-context-service";
-import {exportChat} from '@/app/actions/chat-action'
 import {useTranslations} from '@/lib/translations/context'
 import {getTierFromPlan} from "@/lib/utils/model-utils";
 
@@ -60,7 +59,7 @@ const TextareaInput = memo(({ onChange, onSubmit, isLoading, isStreaming, placeh
 
 interface ChatInputProps {
   chatId: string
-  sendMessage: (content: string, selectedModel?: string) => Promise<void>
+  sendMessage: (content: string, selectedModel?: string, webSearch?: boolean) => Promise<void>
   isLoading: boolean
   isStreaming: boolean
   stopGeneration: () => void
@@ -74,7 +73,6 @@ interface ChatInputProps {
 function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopGeneration, clientData, messages = [], chatTitle, onDocumentCreated, lastUsedModel }: ChatInputProps) {
   const t = useTranslations('assistant')
   const subscription = useSubscription()
-  const [isExporting, setIsExporting] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Auto-resize textarea function
@@ -101,8 +99,7 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     }
     return lastUsedModel || DEFAULT_MODEL
   })
-  
-  const { toast } = useToast()
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false)
 
   // Handle input change with logging - use ref to avoid re-renders
   const handleInputChange = useCallback((value: string) => {
@@ -115,24 +112,24 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
   const handleSubmit = useCallback(() => {
     const currentInput = inputRef.current?.value || ''
     if (currentInput.trim() && !isLoading && !isStreaming) {
-      clientLogger.userInteraction('Submit message', { 
+      clientLogger.userInteraction('Submit message', {
         chatId,
         component: 'ChatInput',
-        metadata: { messageLength: currentInput.trim().length, model: selectedModel }
+        metadata: { messageLength: currentInput.trim().length, model: selectedModel, webSearch: webSearchEnabled }
       });
-      sendMessage(currentInput, selectedModel)
+      sendMessage(currentInput, selectedModel, webSearchEnabled)
       if (inputRef.current) {
         inputRef.current.value = ''
         inputRef.current.style.height = '60px'
       }
     } else {
-      clientLogger.warn('Submit attempted with invalid conditions', { 
+      clientLogger.warn('Submit attempted with invalid conditions', {
         chatId,
         component: 'ChatInput',
         metadata: { hasInput: !!currentInput.trim(), isLoading, isStreaming }
       });
     }
-  }, [isLoading, isStreaming, chatId, selectedModel, sendMessage])
+  }, [isLoading, isStreaming, chatId, selectedModel, webSearchEnabled, sendMessage])
 
   const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -169,81 +166,6 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
     });
   }, [chatId, clientData, autoResize])
 
-  const handleExportChat = async () => {
-    if (!messages.length || !chatTitle) {
-      toast({
-        title: t('chat.exportNotAvailable'),
-        description: t('exportNotAvailableDescription'),
-        variant: 'destructive',
-      })
-      return
-    }
-
-    setIsExporting(true)
-    try {
-      const chatContent = formatChatForExport(messages, chatTitle, clientData)
-      
-      const result = await exportChat(clientData?.id || null, chatContent, chatTitle)
-      const documentId = result.documentId
-
-      toast({
-        title: t('chat.chatExported'),
-        description: (
-          <div>
-            <p>{t('chatExportedDescription', { chatTitle })}</p>
-            {onDocumentCreated && documentId && clientData?.id && (
-              <button 
-                onClick={() => {
-                  onDocumentCreated(clientData.id, documentId)
-                }}
-                className="text-blue-600 hover:text-blue-800 underline font-medium mt-1 block"
-              >
-                {t('viewDocument')}
-              </button>
-            )}
-          </div>
-        ),
-        duration: 10000,
-      })
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('exportFailed')
-      handleClientApiError(errorMessage, t('exportFailed'))
-    } finally {
-      setIsExporting(false)
-    }
-  }
-
-  const formatChatForExport = (messages: MessageWithStreaming[], title: string, clientData: any): string => {
-    const exportDate = new Date().toLocaleDateString()
-    const exportTime = new Date().toLocaleTimeString()
-    
-    let content = `# ${title}\n\n`
-    
-    // Add client information if available
-    if (clientData) {
-      content += `**${t('chat.client')}:** ${clientData.name}\n\n`
-      if (clientData.email) content += `**${t('chat.email')}:** ${clientData.email}\n\n`
-      if (clientData.country) content += `**${t('chat.country')}:** ${clientData.country}\n\n`
-    } else {
-      content += `**${t('chat.type')}:** ${t('chat.generalChat')}\n\n`
-    }
-    
-    content += `**${t('chat.exportDate')}:** ${exportDate} ${t('at')} ${exportTime}\n\n`
-    content += `---\n\n`
-    
-    messages.forEach((message) => {
-      const timestamp = new Date(message.createdAt).toLocaleString()
-      const role = message.role === Role.USER ? t('chat.you') : t('chat.aiAssistant')
-      
-      content += `## ${role} - ${timestamp}\n\n`
-      content += `${message.content}\n\n`
-      content += `---\n\n`
-    })
-    
-    return content
-  }
-
   // Component lifecycle logging
   useEffect(() => {
     clientLogger.componentMount('ChatInput', { chatId });
@@ -264,36 +186,34 @@ function ChatInputComponent({ chatId, sendMessage, isLoading, isStreaming, stopG
 
   return (
     <div className="space-y-2">
-      {/* Prompt Selector, Model Selector, Usage Indicator and Export Button */}
+      {/* Prompt Selector, Model Selector, Usage Indicator */}
       <div className="flex justify-between items-center gap-2 flex-wrap">
         <div className="flex gap-2">
           <PromptSelector onPromptSelect={handlePromptSelect} />
-          <ModelSelector 
+          <ModelSelector
             selectedModel={selectedModel}
             onModelSelect={setSelectedModel}
             userTier={getTierFromPlan(subscription.plan)}
           />
-          <UsageIndicator />
+          <div className="flex items-center gap-1">
+            <Checkbox
+              checked={webSearchEnabled}
+              onChange={(e) => setWebSearchEnabled(e.target.checked)}
+              label={t('webSearch')}
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-sm">{t('webSearchTooltip')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
-        <div className="flex gap-2">
-          {/* Export Chat Button - show if there are messages and client data */}
-          {messages.length > 0 && clientData && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleExportChat}
-              disabled={isExporting}
-              className="justify-between"
-            >
-              {isExporting ? (
-                <LoadingSpinner size="sm" text="" className="mr-2" />
-              ) : (
-                <Download className="w-4 h-4 mr-2" />
-              )}
-{isExporting ? t('chat.exporting') : t('chat.exportChat')}
-            </Button>
-          )}
-        </div>
+        <UsageIndicator />
       </div>
       
       {/* Chat Input Form */}
