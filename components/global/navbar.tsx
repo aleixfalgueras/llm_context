@@ -54,7 +54,7 @@ export function Navbar() {
   const isNetworkActive = () => pathname.startsWith('/affiliation') || pathname.startsWith('/deals')
 
   return (
-    <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
           <div className="flex items-center">
