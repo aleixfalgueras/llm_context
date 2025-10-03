@@ -386,6 +386,7 @@
     "exportNotAvailableDescription": "Aucun message à exporter",
     "viewDocument": "Voir le Document",
     "exportFailed": "Échec de l'export",
+    "regenerateFailed": "Échec de la régénération",
     "at": "à",
     "inputPlaceholder": "Tapez votre message... (Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)",
     "thinking": "En train de réfléchir...",
@@ -426,7 +427,10 @@
       "exportDate": "Date d'Export",
       "you": "Vous",
       "aiAssistant": "MIA",
-      "exportChatTooltip": "Crée un document à partir de cette conversation et l'enregistre dans les documents du client. Vous pouvez le consulter dans la section Documents Clients."
+      "exportChatTooltip": "Crée un document à partir de cette conversation et l'enregistre dans les documents du client. Vous pouvez le consulter dans la section Documents Clients.",
+      "regenerateTooltip": "Régénérer la dernière réponse de l'IA avec une réponse différente",
+      "regenerating": "Régénération",
+      "regeneratingDescription": "Génération d'une nouvelle réponse..."
     },
     "modelSelector": {
       "searchPlaceholder": "Rechercher des modèles...",

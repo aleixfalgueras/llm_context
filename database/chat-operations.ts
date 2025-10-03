@@ -86,6 +86,9 @@ export class ChatOperations extends BaseOperations {
         },
         include: {
           messages: {
+            where: {
+              isActive: true,
+            },
             orderBy: {
               createdAt: 'asc',
             },
@@ -120,6 +123,9 @@ export class ChatOperations extends BaseOperations {
         },
         include: {
           messages: {
+            where: {
+              isActive: true,
+            },
             orderBy: {
               createdAt: 'asc',
             },

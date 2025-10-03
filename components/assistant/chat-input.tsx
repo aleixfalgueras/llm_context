@@ -59,7 +59,7 @@ const TextareaInput = memo(({ onChange, onSubmit, isLoading, isStreaming, placeh
 
 interface ChatInputProps {
   chatId: string
-  sendMessage: (content: string, selectedModel?: string, webSearch?: boolean) => Promise<void>
+  sendMessage: (content: string, selectedModel?: string, webSearch?: boolean, isRegeneration?: boolean) => Promise<void>
   isLoading: boolean
   isStreaming: boolean
   stopGeneration: () => void

@@ -1,6 +1,7 @@
 import {MessageOperations} from '@/database'
 import {logger} from '@/lib/logger'
 import {Message, Prisma} from '@prisma/client'
+import {DbOperationResult} from '@/lib/types/database-types'
 
 export class MessageService {
   /**
@@ -13,7 +14,7 @@ export class MessageService {
     try {
       // Extract chatId from the data for ownership verification
       const chatId = typeof data.chat === 'object' && 'connect' in data.chat && data.chat.connect
-        ? data.chat.connect.id 
+        ? data.chat.connect.id
         : '';
 
       if (!chatId) {
@@ -29,16 +30,26 @@ export class MessageService {
       }
 
       const result = await MessageOperations.createMessage(data);
-      
+
       if (!result.success) {
         throw new Error(result.error || 'Failed to create message')
       }
-      
+
       return result.data;
     } catch (error) {
       logger.error('Error creating message', error as Error, { userId });
       throw error;
     }
+  }
+
+  /**
+   * Mark a message as inactive with ownership verification
+   */
+  static async markMessageAsInactive(
+    messageId: string,
+    userId: string
+  ): Promise<DbOperationResult<Message>> {
+    return MessageOperations.markMessageAsInactive(messageId, userId)
   }
 
 }

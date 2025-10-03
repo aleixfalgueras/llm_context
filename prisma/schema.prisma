@@ -31,6 +31,7 @@ model Message {
   generation_id    String?
   images           Json?    // Store array of image URLs (base64 or external URLs)
   isPartialMessage Boolean  @default(false)
+  isActive         Boolean  @default(true)
   chatId           String
   createdAt        DateTime @default(now())
   chat             Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)

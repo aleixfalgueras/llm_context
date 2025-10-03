@@ -1,7 +1,7 @@
 'use client'
 
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {ArrowDown, Copy, Download, User} from 'lucide-react'
+import {ArrowDown, Copy, Download, RotateCcw, User} from 'lucide-react'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {MarkdownRenderer} from '@/components/global/markdown-renderer'
 import {useTranslations} from '@/lib/translations/context'
@@ -22,6 +22,7 @@ interface ChatMessagesProps {
   clientData?: any
   onDocumentCreated?: (clientId: string, documentId: string) => void
   onExportChat?: () => Promise<void>
+  onRegenerate?: () => Promise<void>
 }
 
 interface MessageBubbleProps {
@@ -32,9 +33,11 @@ interface MessageBubbleProps {
   onExportChat?: () => Promise<void>
   isExporting?: boolean
   hasClient?: boolean
+  onRegenerate?: () => Promise<void>
+  isRegenerating?: boolean
 }
 
-const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMessage, onExportChat, isExporting, hasClient }: MessageBubbleProps) => {
+const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMessage, onExportChat, isExporting, hasClient, onRegenerate, isRegenerating }: MessageBubbleProps) => {
   const t = useTranslations('assistant')
   const isUser = message.role === Role.USER
   const [selectedImage, setSelectedImage] = useState<{url: string, index: number} | null>(null)
@@ -134,6 +137,32 @@ const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMe
               <Copy className="h-4 w-4" />
             </Button>
 
+            {/* Regenerate Button - only show on last assistant message */}
+            {isLastAssistantMessage && onRegenerate && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onRegenerate}
+                      disabled={isRegenerating}
+                      className="h-8 w-8"
+                    >
+                      {isRegenerating ? (
+                        <RotateCcw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RotateCcw className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p className="text-sm">{t('chat.regenerateTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
             {/* Export Chat Button - only show on last assistant message and if chat has client */}
             {isLastAssistantMessage && onExportChat && hasClient && (
               <TooltipProvider>
@@ -179,7 +208,7 @@ const MessageBubble = memo(({ message, userImageUrl, userName, isLastAssistantMe
 
 MessageBubble.displayName = 'MessageBubble'
 
-function ChatMessagesComponent({ messages, userImageUrl, userName, clientData, onExportChat }: ChatMessagesProps) {
+function ChatMessagesComponent({ messages, userImageUrl, userName, clientData, onExportChat, onRegenerate }: ChatMessagesProps) {
   const t = useTranslations('assistant')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -188,6 +217,7 @@ function ChatMessagesComponent({ messages, userImageUrl, userName, clientData, o
   const lastMessageCountRef = useRef(messages.length)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [isExporting, setIsExporting] = useState(false)
+  const [isRegenerating, setIsRegenerating] = useState(false)
 
   // Find the last assistant message
   const lastAssistantMessageIndex = messages.map((m, idx) => ({ role: m.role, idx }))
@@ -204,6 +234,17 @@ function ChatMessagesComponent({ messages, userImageUrl, userName, clientData, o
       setIsExporting(false)
     }
   }, [onExportChat, isExporting])
+
+  // Wrap regenerate handler to manage loading state
+  const handleRegenerate = useCallback(async () => {
+    if (!onRegenerate || isRegenerating) return
+    setIsRegenerating(true)
+    try {
+      await onRegenerate()
+    } finally {
+      setIsRegenerating(false)
+    }
+  }, [onRegenerate, isRegenerating])
 
   // Handle scroll position detection with improved threshold
   const handleScroll = useCallback(() => {
@@ -304,6 +345,8 @@ function ChatMessagesComponent({ messages, userImageUrl, userName, clientData, o
               onExportChat={handleExport}
               isExporting={isExporting}
               hasClient={!!clientData}
+              onRegenerate={handleRegenerate}
+              isRegenerating={isRegenerating}
             />
           ))}
           <div ref={messagesEndRef} />

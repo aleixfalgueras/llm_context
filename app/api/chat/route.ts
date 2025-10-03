@@ -40,7 +40,7 @@ export const POST = withEnhancedApi(
     let chatId: string = '';
 
     // Parse request body
-    const {messages, chatId: requestChatId, model, clientId, contextFields, webSearch} = await parseJsonBody(req)
+    const {messages, chatId: requestChatId, model, clientId, contextFields, webSearch, isRegeneration} = await parseJsonBody(req)
     chatId = requestChatId;
     const selectedModel = model || getDefaultModel()
     const userLocale = await getLocaleFromCookies()
@@ -64,18 +64,20 @@ export const POST = withEnhancedApi(
     // get chat client data, if any
     const client = await ChatService.getClientFromChat(chat, userId)
 
-    // saves user message to database
+    // saves user message to database (skip if regenerating - message already exists)
     const lastMessageContent = messages[messages.length - 1].content
-    const userMessageResult = await StreamingMessageService.saveUserMessage(
-      chatId,
-      userId,
-      lastMessageContent,
-      selectedModel
-    )
+    if (!isRegeneration) {
+      const userMessageResult = await StreamingMessageService.saveUserMessage(
+        chatId,
+        userId,
+        lastMessageContent,
+        selectedModel
+      )
 
-    if (!userMessageResult.success) {
-      logger.error('Failed to save user message', new Error(userMessageResult.error), { userId, chatId })
-      throw new Error('Failed to save user message')
+      if (!userMessageResult.success) {
+        logger.error('Failed to save user message', new Error(userMessageResult.error), { userId, chatId })
+        throw new Error('Failed to save user message')
+      }
     }
 
     // If this is the first user message or chat title is default value, update chat title

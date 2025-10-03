@@ -1,6 +1,6 @@
 'use client'
 
-import {memo, useCallback, useEffect} from 'react'
+import {memo, useCallback, useEffect, useState} from 'react'
 import {useTranslations} from '@/lib/translations/context'
 import {useChat} from '@/hooks/use-chat'
 import {ChatMessages} from '@/components/assistant/chat-messages'
@@ -8,7 +8,7 @@ import {ChatInput} from '@/components/assistant/chat-input'
 import {ErrorBoundary} from '@/components/global/error-boundary'
 import {Client, Role} from '@prisma/client'
 import {useToast} from '@/hooks/use-toast'
-import {exportChat} from '@/app/actions/chat-action'
+import {exportChat, regenerateMessage} from '@/app/actions/chat-action'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {MessageWithStreaming} from "@/lib/types/message-types";
 
@@ -33,7 +33,7 @@ interface ChatContainerProps {
 function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userName, clientData, onTitleUpdate, chatTitle, onDocumentCreated, lastUsedModel, newChatParams }: ChatContainerProps) {
   const t = useTranslations('assistant')
   const { toast } = useToast()
-  const { messages, isLoading, isStreaming, sendMessage, stopGeneration, setOnTitleUpdate } = useChat(chatId, initialMessages, newChatParams)
+  const { messages, isLoading, isStreaming, sendMessage, stopGeneration, setOnTitleUpdate, regenerateLastMessage } = useChat(chatId, initialMessages, newChatParams)
 
   // Set up title update callback
   useEffect(() => {
@@ -114,6 +114,29 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
     }
   }, [messages, chatTitle, clientData, formatChatForExport, onDocumentCreated, toast, t])
 
+  // Handle regenerate message
+  const handleRegenerate = useCallback(async () => {
+    try {
+      // Find last assistant message to get its model
+      const lastAssistantMessage = [...messages]
+        .reverse()
+        .find(msg => msg.role === Role.ASSISTANT)
+
+      // Call server action to mark message as inactive and get user message content
+      const result = await regenerateMessage(chatId)
+
+      // Regenerate with the same model as the original message
+      await regenerateLastMessage(
+        result.userMessageContent,
+        lastAssistantMessage?.model || undefined,
+        false // TODO: Need to track if web search was used
+      )
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : t('regenerateFailed')
+      handleClientApiError(errorMessage, t('regenerateFailed'))
+    }
+  }, [messages, chatId, regenerateLastMessage, t])
+
   return (
     <ErrorBoundary 
       onError={(error, errorInfo) => {
@@ -131,6 +154,7 @@ function ChatContainerComponent({ chatId, initialMessages, userImageUrl, userNam
             clientData={clientData}
             onDocumentCreated={onDocumentCreated}
             onExportChat={handleExportChat}
+            onRegenerate={handleRegenerate}
           />
         </ErrorBoundary>
       </div>
