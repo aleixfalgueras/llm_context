@@ -5,8 +5,9 @@ import {DocumentService} from '@/services/document-service'
 import {checkAuth} from '@/lib/api/api-validation'
 import {revalidatePath} from 'next/cache'
 import {redirect} from 'next/navigation'
-import {Chat, DocumentType} from '@prisma/client'
-import {ChatWithMessages} from "@/lib/types/chat-types";
+import {Chat, DocumentType, Role} from '@prisma/client'
+import {ChatWithMessages} from "@/lib/types/chat-types"
+import {MessageService} from '@/services/chat/message-service'
 
 export async function getChats(): Promise<Chat[]> {
   const userId = await checkAuth()
@@ -92,5 +93,46 @@ export async function exportChat(clientId: string | null, content: string, chatT
       throw new Error(error.message)
     }
     throw error
+  }
+}
+
+export async function regenerateMessage(chatId: string) {
+  const userId = await checkAuth()
+
+  // Get chat with messages
+  const chat = await ChatService.getChatWithMessagesById(chatId, userId)
+
+  // Find last assistant message
+  const lastAssistantMessage = [...chat.messages]
+    .reverse()
+    .find(msg => msg.role === Role.ASSISTANT)
+
+  if (!lastAssistantMessage) {
+    throw new Error('No assistant message found to regenerate')
+  }
+
+  // Find the user message that prompted this assistant response
+  const lastAssistantIndex = chat.messages.findIndex(msg => msg.id === lastAssistantMessage.id)
+  const previousUserMessage = [...chat.messages.slice(0, lastAssistantIndex)]
+    .reverse()
+    .find(msg => msg.role === Role.USER)
+
+  if (!previousUserMessage) {
+    throw new Error('No user message found before assistant message')
+  }
+
+  // Mark the last assistant message as inactive
+  const result = await MessageService.markMessageAsInactive(lastAssistantMessage.id, userId)
+
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to mark message as inactive')
+  }
+
+  // Revalidate the chat page
+  revalidatePath(`/assistant/chat/${chatId}`)
+
+  // Return the user message content to resend
+  return {
+    userMessageContent: previousUserMessage.content
   }
 }

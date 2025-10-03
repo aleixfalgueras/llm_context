@@ -99,7 +99,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
     }
   }, [chatId])
 
-  const sendMessage = useCallback(async (content: string, selectedModel?: string, webSearch?: boolean) => {
+  const sendMessage = useCallback(async (content: string, selectedModel?: string, webSearch?: boolean, isRegeneration?: boolean) => {
     if (!content.trim() || isLoading) {
       clientLogger.warn('Message send attempted with empty content or while loading', {
         chatId,
@@ -116,20 +116,6 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
 
     setIsLoading(true)
 
-    // Create user message with more unique temporary ID
-    const userMessage: MessageWithStreaming = {
-      id: `temp-user-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-      content,
-      role: 'USER',
-      model: null,
-      cost_usd: 0,
-      generation_id: null,
-      images: null,
-      isPartialMessage: false,
-      chatId,
-      createdAt: new Date(),
-    }
-
     // Create initial assistant message (will be updated as content streams)
     const assistantMessage: MessageWithStreaming = {
       id: `temp-assistant-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
@@ -140,17 +126,48 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       generation_id: null,
       images: null,
       isPartialMessage: false,
+      isActive: true,
       chatId,
       createdAt: new Date(),
       isStreaming: true,
     }
 
-    // Immediately add both messages to UI
-    setMessages(prev => [...prev, userMessage, assistantMessage])
-    clientLogger.debug('User and initial assistant messages added to UI', {
-      chatId,
-      metadata: { userMessageId: userMessage.id, assistantMessageId: assistantMessage.id }
-    });
+    // Track user message ID for error cleanup (undefined for regeneration)
+    let userMessageId: string | undefined
+
+    // For regeneration, don't create a new user message (it already exists)
+    if (isRegeneration) {
+      // Only add assistant message to UI
+      setMessages(prev => [...prev, assistantMessage])
+      clientLogger.debug('Assistant message added to UI for regeneration', {
+        chatId,
+        metadata: { assistantMessageId: assistantMessage.id }
+      });
+    } else {
+      // Create user message with more unique temporary ID
+      const userMessage: MessageWithStreaming = {
+        id: `temp-user-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        content,
+        role: 'USER',
+        model: null,
+        cost_usd: 0,
+        generation_id: null,
+        images: null,
+        isPartialMessage: false,
+        isActive: true,
+        chatId,
+        createdAt: new Date(),
+      }
+
+      userMessageId = userMessage.id
+
+      // Immediately add both messages to UI
+      setMessages(prev => [...prev, userMessage, assistantMessage])
+      clientLogger.debug('User and initial assistant messages added to UI', {
+        chatId,
+        metadata: { userMessageId: userMessage.id, assistantMessageId: assistantMessage.id }
+      });
+    }
 
     try {
       clientLogger.apiCall('POST', '/api/chat', { chatId });
@@ -167,6 +184,7 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
             chatId: chatId || undefined, // Send undefined for new chats
             model: selectedModel || DEFAULT_MODEL, // Default to configured default model if no model specified
             webSearch: webSearch || false,
+            isRegeneration: isRegeneration || false,
             // Include new chat parameters if this is a new chat
             ...(newChatParams && {
               clientId: newChatParams.clientId,
@@ -340,12 +358,13 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
       handleClientApiError(errorMessage, 'Failed to send message')
 
       // Remove both user and assistant messages on error
+      // For regeneration, only remove assistant message (user message wasn't added)
       setMessages(prev => prev.filter(msg =>
-        msg.id !== userMessage.id && msg.id !== assistantMessage.id
+        msg.id !== assistantMessage.id && (userMessageId ? msg.id !== userMessageId : true)
       ))
       clientLogger.debug('Messages removed due to error', {
         chatId,
-        metadata: { userMessageId: userMessage.id, assistantMessageId: assistantMessage.id }
+        metadata: { userMessageId: userMessageId || 'none (regeneration)', assistantMessageId: assistantMessage.id }
       });
     } finally {
       setIsLoading(false)
@@ -357,6 +376,11 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
   // Check if AI is currently streaming
   const isStreaming = useMemo(() => messages.some(message => message.isStreaming), [messages])
 
+  const regenerateLastMessage = useCallback(async (userMessageContent: string, selectedModel?: string, webSearch?: boolean) => {
+    // Resend the user message with isRegeneration flag to prevent duplicate user message
+    await sendMessage(userMessageContent, selectedModel, webSearch, true)
+  }, [sendMessage])
+
   return {
     messages,
     isLoading,
@@ -364,5 +388,6 @@ export function useChat(chatId: string, initialMessages: MessageWithStreaming[] 
     sendMessage,
     stopGeneration,
     setOnTitleUpdate,
+    regenerateLastMessage,
   }
 } 

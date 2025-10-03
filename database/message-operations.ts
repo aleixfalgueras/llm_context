@@ -42,4 +42,49 @@ export class MessageOperations extends BaseOperations {
     )
   }
 
+  /**
+   * Mark a message as inactive (soft delete)
+   */
+  static async markMessageAsInactive(messageId: string, userId: string): Promise<DbOperationResult<Message>> {
+    try {
+      // First verify the message exists and user owns the chat
+      const message = await prisma.message.findUnique({
+        where: { id: messageId },
+        include: { chat: true }
+      })
+
+      if (!message) {
+        return {
+          success: false,
+          error: 'Message not found'
+        }
+      }
+
+      // Verify ownership
+      if (message.chat.userId !== userId) {
+        return {
+          success: false,
+          error: 'Unauthorized: Message does not belong to user'
+        }
+      }
+
+      // Mark as inactive
+      const updatedMessage = await prisma.message.update({
+        where: { id: messageId },
+        data: { isActive: false }
+      })
+
+      return {
+        success: true,
+        data: updatedMessage
+      }
+    } catch (error) {
+      console.error('Error marking message as inactive:', error)
+      return {
+        success: false,
+        error: 'Failed to mark message as inactive'
+      }
+    }
+  }
+
 }
