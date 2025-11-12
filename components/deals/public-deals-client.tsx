@@ -28,23 +28,23 @@ export function PublicDealsClient({ initialPublicDeals }: PublicDealsClientProps
   }, [initialPublicDeals, searchTerm])
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="max-w-7xl mx-auto pt-12 px-6 pb-6 space-y-8">
       {/* Search Bar */}
-      <div className="relative rounded border">
+      <div className="relative rounded">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           placeholder={t('searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-white dark:bg-gray-800"
+          className="pl-10 bg-gray-800/60 border-b-cian"
         />
       </div>
 
       {/* Public Deals Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Tag className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">{t('publicDeals')}</h2>
+          <Tag className="h-5 w-5 text-white" />
+          <h2 className="text-xl text-white font-semibold">{t('publicDeals')}</h2>
           {filteredDeals.length > 0 && (
             <span className="text-sm text-muted-foreground">({filteredDeals.length})</span>
           )}

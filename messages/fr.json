@@ -22,107 +22,70 @@
   },
   "landing": {
     "hero": {
-      "tagline": "Créez du contenu personnalisé avec une IA qui comprend le contexte commercial de vos clients.",
-      "cta": "Commencer"
+      "title": "Rejoignez le premier réseau d'autonomisation et incubateur d'impact social au monde pour les Nomades Numériques, Entrepreneurs et Créateurs de Contenu",
+      "learnMore": "EN SAVOIR PLUS"
     },
-    "features": {
-      "title": "Plateforme de Création de Contenu IA Avancée",
-      "clientIntelligence": {
-        "title": "Intelligence d'Affaires Client",
-        "description": "Stockez les informations sectorielles, les objectifs commerciaux, les audiences cibles et le paysage concurrentiel pour chaque client"
+    "carousel": {
+      "hostingWebsite": "Hébergement & Site Web",
+      "aiAggregator": "Agrégateur IA",
+      "afterworkMeetup": "Événements & Réseautage",
+      "cryptoDex": "Crypto DEX & Tokenisation Immobilière",
+      "readMore": "Lire Plus"
+    }
+  },
+  "ecosystem": {
+    "header": "Bienvenue dans l'Écosystème MIA",
+    "headerPart1": "Bienvenue dans l'",
+    "headerPart2": "Écosystème MIA",
+    "presentationText": "L'infrastructure numérique complète pour les créateurs modernes",
+    "subheader": "Nos Services Intégrés",
+    "subheaderText": "Tout ce dont vous avez besoin pour construire, développer et créer un impact durable sur une plateforme unique",
+    "cards": {
+      "aiAggregator": {
+        "title": "Agrégateur IA",
+        "features": {
+          "contentGeneration": "Génération de Contenu",
+          "marketAnalysis": "Analyse de Marché",
+          "automatedWorkflows": "Flux de Travail Automatisés"
+        }
       },
-      "campaignStrategy": {
-        "title": "IA de Stratégie de Campagne",
-        "description": "Générez des stratégies marketing, des idées de campagne et des plans tactiques en utilisant le contexte client approfondi"
+      "hostingWebsite": {
+        "title": "Hébergement et Site Web",
+        "features": {
+          "globalCdn": "CDN Global",
+          "collaborativeWorkspaces": "Espaces de Travail Collaboratifs",
+          "workFromAnywhere": "Travaillez de N'importe Où"
+        }
       },
-      "contentCreation": {
-        "title": "Création de Contenu de Marque",
-        "description": "Créez du contenu de marque qui parle à l'audience de votre client en utilisant leur voix et leur message"
+      "cryptoDex": {
+        "title": "Crypto DEX & Tokenisation Immobilière",
+        "features": {
+          "tokenLaunchpad": "Plateforme de Lancement de Tokens",
+          "multiChainDex": "DEX Multi-chaînes",
+          "secureTrading": "Trading Sécurisé"
+        }
       },
-      "clientReporting": {
-        "title": "Rapports d'Activité des Clients",
-        "description": "Générez des rapports client complets et des résumés de campagne avec un contexte commercial complet"
+      "globalEvents": {
+        "title": "Événements Mondiaux & Réseautage",
+        "features": {
+          "mastermindGroups": "Groupes Mastermind",
+          "vipNetworking": "Réseautage VIP",
+          "industryEvents": "Événements de l'Industrie"
+        }
       }
-    },
-    "security": {
-      "badge": "Confidentialité et sécurité de niveau entreprise"
-    },
-    "models": {
-      "title": "Modèles IA Premium",
-      "latestTechnology": "Dernière Technologie",
-      "geminiPro": {
-        "name": "Gemini 2.5 PRO",
-        "description": "Le modèle le plus puissant de Google avec une fenêtre de contexte massive et des capacités de raisonnement avancées."
-      },
-      "chatgpt5": {
-        "name": "ChatGPT 5",
-        "description": "Le modèle phare d'OpenAI offrant des conversations naturelles et des solutions créatives avec une polyvalence exceptionnelle."
-      },
-      "perplexity": {
-        "name": "Perplexity Sonar",
-        "description": "Modèle de raisonnement spécialisé qui excelle dans la recherche, l'analyse et les explications détaillées."
-      },
-      "geminiImage": {
-        "name": "Gemini 2.5 Image",
-        "description": "IA multimodale avancée pour créer des visuels époustouflants et comprendre le contenu des images de manière transparente."
-      }
-    },
-    "howItWorks": {
-      "title": "De l'Intégration Client au Succès de la Campagne",
-      "step1": {
-        "title": "Capturer l'Intelligence Client",
-        "description": "Stockez l'industrie de chaque client, le marché cible, la voix de marque, le paysage concurrentiel et les objectifs commerciaux dans un système organisé."
-      },
-      "step2": {
-        "title": "Contenu Alimenté par l'IA",
-        "description": "Générez des stratégies de campagne, du contenu et des matériaux marketing parfaitement adaptés au contexte commercial unique et aux objectifs de chaque client."
-      },
-      "step3": {
-        "title": "Livrer des Résultats",
-        "description": "Présentez des campagnes qui comprennent vraiment le marché de votre client, s'adressent à son audience et s'alignent avec ses objectifs commerciaux."
-      }
-    },
-    "stats": {
-      "targeted": {
-        "title": "Ciblé",
-        "subtitle": "Création de Campagne",
-        "description": "Basé sur des données client réelles"
-      },
-      "scalable": {
-        "title": "Évolutif",
-        "subtitle": "Gestion Client",
-        "description": "Gérez plus de clients efficacement"
-      },
-      "strategic": {
-        "title": "Stratégique",
-        "subtitle": "Intelligence Marketing",
-        "description": "Décisions basées sur les données"
-      },
-      "professional": {
-        "title": "Professionnel",
-        "subtitle": "Livrables Client",
-        "description": "Impressionnez chaque client"
-      }
-    },
-    "pricing": {
-      "title": "Tarification Simple et Transparente",
-      "description": "Choisissez l'abonnement qui correspond à vos besoins marketing. Tous les plans incluent l'accès à Google Gemini 2.0 et OpenAI GPT-4.1.",
-      "perMonth": "/mois",
-      "perYear": "/an",
-      "monthly": "Mensuel",
-      "annual": "Annuel",
-      "savings": "Économisez"
     },
     "cta": {
-      "title": "MIA fonctionne sur invitation uniquement",
-      "description": "Connectez-vous avec un membre actuel pour recevoir votre invitation personnelle et rejoindre notre communauté sélective de professionnels du marketing.",
-      "businessInquiries": "Demandes commerciales :"
-    },
-    "publicDeals": {
-      "title": "Offres Exclusives de la Communauté",
-      "description": "Découvrez les offres exclusives de nos membres et créez les vôtres avec un abonnement Knight ou supérieur",
-      "button": "Voir les Offres"
+      "subheader": "Prêt à Rejoindre Notre Réseau d'Autonomisation ?",
+      "button": "Explorer les Niveaux d'Adhésion"
     }
+  },
+  "awards": {
+    "mia": "MIA",
+    "presents": "P R É S E N T E",
+    "title": "PRIX DE L'INFLUENCEUR",
+    "subtitle": "L'Oscar de l'Impact Social & Créateur de Contenu",
+    "date": "12.12 2026",
+    "comingSoon": "À Venir"
   },
   "clients": {
     "title": "Clients",

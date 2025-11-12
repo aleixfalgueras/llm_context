@@ -56,7 +56,7 @@ export function DealDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-cian">
         <DialogHeader>
           <div className="flex items-start justify-between gap-4 mt-3">
             <div className="flex-1 min-w-0">
@@ -132,7 +132,7 @@ export function DealDetailsDialog({
           <Button
             variant="default"
             onClick={handleExternalClick}
-            className="flex-1"
+            className="flex-1 bg-lavanda text-white"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
             {t('actions.viewExternal')}

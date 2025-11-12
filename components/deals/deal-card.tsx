@@ -37,7 +37,7 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
   return (
     <>
     <Card
-      className="h-full hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer"
+      className="h-full hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer border-cian bg-gray-800/60"
       onClick={handleCardClick}
     >
       {/* Deal Image */}
@@ -104,7 +104,7 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
             variant="default"
             size="sm"
             onClick={handleExternalClick}
-            className="flex-1 mr-2"
+            className="flex-1 mr-2 bg-lavanda text-white"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
             {t('actions.viewExternal')}
