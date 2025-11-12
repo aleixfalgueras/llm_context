@@ -22,107 +22,70 @@
   },
   "landing": {
     "hero": {
-      "tagline": "Create personalized content with an AI that understands your clients' business context.",
-      "cta": "Get Started"
+      "title": "Join the world first empowerment network & social impact incubator for Digital Nomads, Entrepreneurs & Content Creators",
+      "learnMore": "LEARN MORE"
     },
-    "features": {
-      "title": "Advanced AI Content Creation Platform",
-      "clientIntelligence": {
-        "title": "Client Intelligence",
-        "description": "Store industry insights, business goals, target audiences, and competitive landscape for each client"
+    "carousel": {
+      "hostingWebsite": "Hosting & Website",
+      "aiAggregator": "AI Aggregator",
+      "afterworkMeetup": "Global Events & Networking",
+      "cryptoDex": "Crypto DEX & Real Estate Tokenization",
+      "readMore": "Read More"
+    }
+  },
+  "ecosystem": {
+    "header": "Welcome to MIA Ecosystem",
+    "headerPart1": "Welcome to ",
+    "headerPart2": "MIA Ecosystem",
+    "presentationText": "The complete digital infrastructure for modern creators",
+    "subheader": "Our Integrated Services",
+    "subheaderText": "Everything you need to build, scale, and create lasting impact in one seamless platform",
+    "cards": {
+      "aiAggregator": {
+        "title": "AI Aggregator",
+        "features": {
+          "contentGeneration": "Content Generation",
+          "marketAnalysis": "Market Analysis",
+          "automatedWorkflows": "Automated Workflows"
+        }
       },
-      "campaignStrategy": {
-        "title": "Campaign Strategy AI",
-        "description": "Generate marketing strategies, campaign ideas, and tactical plans using deep client context"
+      "hostingWebsite": {
+        "title": "Hosting and Website",
+        "features": {
+          "globalCdn": "Global CDN",
+          "collaborativeWorkspaces": "Collaborative Workspaces",
+          "workFromAnywhere": "Work from Anywhere"
+        }
       },
-      "contentCreation": {
-        "title": "Branded Content",
-        "description": "Create on-brand content that speaks to your client's audience using their voice and messaging"
+      "cryptoDex": {
+        "title": "Crypto DEX & Real Estate Tokenization",
+        "features": {
+          "tokenLaunchpad": "Token Launchpad",
+          "multiChainDex": "Multi-chain DEX",
+          "secureTrading": "Secure Trading"
+        }
       },
-      "clientReporting": {
-        "title": "Client Reporting",
-        "description": "Generate comprehensive client reports and campaign summaries with full business context"
+      "globalEvents": {
+        "title": "Global Events & Networking",
+        "features": {
+          "mastermindGroups": "Mastermind Groups",
+          "vipNetworking": "VIP Networking",
+          "industryEvents": "Industry Events"
+        }
       }
-    },
-    "security": {
-      "badge": "Enterprise-grade privacy and security"
-    },
-    "models": {
-      "title": "Premium AI Models",
-      "latestTechnology": "Latest Technology",
-      "geminiPro": {
-        "name": "Gemini 2.5 PRO",
-        "description": "Google's most powerful model with massive context window and advanced reasoning capabilities for complex tasks."
-      },
-      "chatgpt5": {
-        "name": "ChatGPT 5",
-        "description": "OpenAI's flagship model delivering natural conversations and creative solutions with exceptional versatility."
-      },
-      "perplexity": {
-        "name": "Perplexity Sonar",
-        "description": "Specialized reasoning model that excels at research, analysis, and providing detailed explanations."
-      },
-      "geminiImage": {
-        "name": "Gemini 2.5 Image",
-        "description": "Advanced multimodal AI for creating stunning visuals and understanding image content seamlessly."
-      }
-    },
-    "howItWorks": {
-      "title": "From Client Onboarding to Campaign Success",
-      "step1": {
-        "title": "Capture Client Intelligence",
-        "description": "Store each client's industry, target market, brand voice, competitive landscape, and business objectives in one organized system."
-      },
-      "step2": {
-        "title": "AI-Powered Content",
-        "description": "Generate campaign strategies, content, and marketing materials that are perfectly tailored to each client's unique business context and goals."
-      },
-      "step3": {
-        "title": "Deliver Results",
-        "description": "Present campaigns that truly understand your client's market, speak to their audience, and align with their business objectives."
-      }
-    },
-    "stats": {
-      "targeted": {
-        "title": "Targeted",
-        "subtitle": "Campaign Creation",
-        "description": "Based on real client data"
-      },
-      "scalable": {
-        "title": "Scalable",
-        "subtitle": "Client Management",
-        "description": "Handle more clients efficiently"
-      },
-      "strategic": {
-        "title": "Strategic",
-        "subtitle": "Marketing Intelligence",
-        "description": "Data-driven decisions"
-      },
-      "professional": {
-        "title": "Professional",
-        "subtitle": "Client Deliverables",
-        "description": "Impress every client"
-      }
-    },
-    "pricing": {
-      "title": "Simple, Transparent Pricing",
-      "description": "Choose the plan that fits your marketing needs. All plans include access to both Google Gemini 2.0 and OpenAI GPT-4.1.",
-      "perMonth": "/month",
-      "perYear": "/year",
-      "monthly": "Monthly",
-      "annual": "Annual",
-      "savings": "Save"
     },
     "cta": {
-      "title": "MIA is invite-only",
-      "description": "Connect with a current member to receive your personal invitation and join our selective community of marketing professionals.",
-      "businessInquiries": "Business inquiries:"
-    },
-    "publicDeals": {
-      "title": "Exclusive Community Deals",
-      "description": "Check exclusive deals from our members, and create your own with Knight or higher subscription plans",
-      "button": "View Deals"
+      "subheader": "Ready to Join Our Empowerment Network?",
+      "button": "Explore Membership Tiers"
     }
+  },
+  "awards": {
+    "mia": "MIA",
+    "presents": "P R E S E N T S",
+    "title": "INFLUENCER AWARDS",
+    "subtitle": "The Oscar of Social Impact & Content Creator",
+    "date": "12.12 2026",
+    "comingSoon": "Coming Soon"
   },
   "clients": {
     "title": "Clients",

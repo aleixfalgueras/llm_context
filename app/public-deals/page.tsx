@@ -1,12 +1,8 @@
 import { PublicDealsClient } from '@/components/deals/public-deals-client'
 import { getPublicDeals } from '@/app/actions/deal-action'
-import { ThemeToggle } from '@/components/global/theme-toggle'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { getTranslations } from '@/lib/translations'
-import { Button } from '@/components/ui/button'
-import { auth } from '@clerk/nextjs/server'
-import Image from 'next/image'
-import Link from 'next/link'
+import { LandingNavbar } from '@/components/landing/landing-navbar'
+import { LandingBackground } from '@/components/landing/landing-background'
+import { LandingFooter } from '@/components/landing/landing-footer'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
@@ -42,46 +38,19 @@ export const metadata: Metadata = {
 
 export default async function PublicDealsPage() {
   const publicDeals = await getPublicDeals()
-  const { userId } = await auth()
-  const t = await getTranslations('deals')
-  const tNav = await getTranslations('navigation')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Simple header with language and theme controls */}
-      <div className="flex justify-end items-center p-6">
-        <div className="flex items-center gap-4">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          {!userId && (
-            <Button variant="ghost" asChild>
-              <Link href="/sign-in">{tNav('signIn')}</Link>
-            </Button>
-          )}
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative">
+      <LandingBackground />
 
-      {/* Centered Header with Logo + Deals text */}
-      <div className="text-center mb-8">
-        <div className="flex justify-center items-center gap-4 mb-4">
-          <Link href="/">
-            <Image
-              src="/mia_logo.svg"
-              alt="MIA - Millennials Influencers Assistant"
-              width={180}
-              height={180}
-              className="hover:opacity-90 transition-opacity"
-            />
-          </Link>
-          <h1 className="ml-2 text-5xl font-semibold">{t('title')}</h1>
-        </div>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto px-4">
-          {t('description')}
-        </p>
-      </div>
+      <div className="relative z-10">
+        <LandingNavbar />
 
-      {/* Main content */}
-      <PublicDealsClient initialPublicDeals={publicDeals} />
+        {/* Main content */}
+        <PublicDealsClient initialPublicDeals={publicDeals} />
+
+        <LandingFooter />
+      </div>
     </div>
   )
 }

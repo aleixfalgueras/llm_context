@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+// @ts-ignore
+// @ts-ignore
 const config: Config = {
     darkMode: ["class"],
     content: [
@@ -10,7 +12,7 @@ const config: Config = {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['var(--font-poppins)', 'sans-serif'],
+  			sans: ['"Glacial Indifference"', 'sans-serif'],
   		},
   		fontSize: {
   			'xs': '0.9rem',
@@ -31,6 +33,8 @@ const config: Config = {
   			'wide': '1400px',
   		},
   		colors: {
+  			cian: '#00a4a2',
+  			lavanda: '#bd46bf',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -76,7 +80,10 @@ const config: Config = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+  		backgroundImage: ({ theme }) => ({
+  			'logo-gradient': `linear-gradient(to right, ${theme('colors.lavanda')} 0%, #b851f9 50%, #13cdd7 100%)`,
+  		}),
   	}
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
