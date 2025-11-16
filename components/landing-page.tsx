@@ -75,7 +75,7 @@ export function LandingPage() {
   const visibleCards = getVisibleCards()
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-x-hidden">
       <LandingBackground />
 
       {/* Content Layer */}
@@ -83,7 +83,7 @@ export function LandingPage() {
       <LandingNavbar />
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-6 py-4 lg:py-8 flex-grow">
+      <div className="max-w-7xl mx-auto px-6 py-8 lg:py-10 flex-grow">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center min-h-[75vh]">
           {/* Left Section - 33% */}
           <div className="w-full lg:w-1/3 flex flex-col items-center justify-center text-center">
@@ -102,7 +102,7 @@ export function LandingPage() {
           {/* Right Section - 67% Carousel */}
           <div className="w-full lg:w-2/3 relative">
             {/* Carousel Cards Container */}
-            <div className="flex items-center justify-center gap-4 md:gap-6 relative">
+            <div className="flex items-center justify-center relative">
               {visibleCards.map((card, index) => {
                 const isCenterCard = card.position === 'center'
                 const isLeftCard = card.position === 'left'
@@ -113,11 +113,13 @@ export function LandingPage() {
                     key={`${card.id}-${index}`}
                     className={`
                       relative transition-all duration-500 ease-in-out
+                      w-64 md:w-80 lg:w-96
                       ${isCenterCard
-                        ? 'w-64 md:w-80 lg:w-96 scale-100 opacity-100 z-20'
-                        : 'w-48 md:w-56 lg:w-64 scale-90 opacity-70 z-10'
+                        ? 'scale-100 opacity-100 z-20'
+                        : 'scale-75 opacity-70 z-10'
                       }
-                      ${isLeftCard ? '-rotate-6' : isRightCard ? 'rotate-6' : ''}
+                      ${isLeftCard ? '-translate-x-2.5 md:-translate-x-3.5 lg:-translate-x-[18px] -rotate-6' : ''}
+                      ${isRightCard ? 'translate-x-2.5 md:translate-x-3.5 lg:translate-x-[18px] rotate-6' : ''}
                     `}
                   >
                     {/* Card Container */}
