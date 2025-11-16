@@ -34,7 +34,7 @@ const config: Config = {
   		},
   		colors: {
   			cian: '#00a4a2',
-  			lavanda: '#bd46bf',
+  			lavanda: '#cc57e5',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

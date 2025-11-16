@@ -42,6 +42,11 @@ export function LandingPage() {
   const {isSignedIn, isLoaded} = useAuth()
   const router = useRouter()
 
+  // Mobile carousel state
+  const [mobileIndex, setMobileIndex] = useState(0)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
+
   useEffect(() => {
     if (isLoaded && isSignedIn) {
       router.push('/clients')
@@ -73,6 +78,41 @@ export function LandingPage() {
   }
 
   const visibleCards = getVisibleCards()
+
+  // Mobile carousel handlers
+  const handleMobileNext = () => {
+    setMobileIndex((mobileIndex + 1) % carouselCards.length)
+  }
+
+  const handleMobilePrevious = () => {
+    setMobileIndex((mobileIndex - 1 + carouselCards.length) % carouselCards.length)
+  }
+
+  // Touch handlers for swipe
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(0) // Reset
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe) {
+      handleMobileNext()
+    } else if (isRightSwipe) {
+      handleMobilePrevious()
+    }
+  }
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-x-hidden">
@@ -101,8 +141,8 @@ export function LandingPage() {
 
           {/* Right Section - 67% Carousel */}
           <div className="w-full lg:w-2/3 relative">
-            {/* Carousel Cards Container */}
-            <div className="flex items-center justify-center relative">
+            {/* Desktop Carousel - Hidden on mobile */}
+            <div className="hidden md:flex items-center justify-center relative">
               {visibleCards.map((card, index) => {
                 const isCenterCard = card.position === 'center'
                 const isLeftCard = card.position === 'left'
@@ -181,6 +221,101 @@ export function LandingPage() {
                   </div>
                 )
               })}
+            </div>
+
+            {/* Mobile Carousel - Visible only on mobile */}
+            <div className="block md:hidden">
+              {/* Carousel Container with fixed height */}
+              <div className="relative w-full overflow-hidden">
+                {/* Touch Area */}
+                <div
+                  className="relative"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                >
+                  {/* Cards Track */}
+                  <div className="flex px-4">
+                    {carouselCards.map((card, index) => (
+                      <div
+                        key={card.id}
+                        className={`
+                          w-full flex-shrink-0 transition-transform duration-500 ease-out
+                          ${index === mobileIndex ? 'opacity-100' : 'opacity-0 absolute'}
+                        `}
+                        style={{
+                          transform: index === mobileIndex ? 'translateX(0)' : 'translateX(100%)'
+                        }}
+                      >
+                        {/* Card Container */}
+                        <div className="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl mx-auto max-w-sm">
+                          {/* Card Image */}
+                          <div className="relative h-64 overflow-hidden">
+                            <Image
+                              src={card.image}
+                              alt={t(card.titleKey)}
+                              fill
+                              className="object-cover"
+                              priority={index === mobileIndex}
+                            />
+                          </div>
+
+                          {/* Card Footer */}
+                          <div className="bg-cian p-6 text-center">
+                            <h3 className="text-white font-bold text-lg mb-3">
+                              {t(card.titleKey)}
+                            </h3>
+
+                            {/* Read More Button */}
+                            <Button
+                              onClick={() => router.push('/ecosystem')}
+                              className="bg-lavanda hover:bg-lavanda/90 text-white font-semibold"
+                              size="sm"
+                            >
+                              {t('landing.carousel.readMore')}
+                              <ChevronRight className="ml-1 h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Navigation Arrows */}
+                  <Button
+                    onClick={handleMobilePrevious}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-gray-800/90 hover:bg-gray-700 text-white rounded-full p-2 shadow-xl"
+                    size="icon"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    onClick={handleMobileNext}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-gray-800/90 hover:bg-gray-700 text-white rounded-full p-2 shadow-xl"
+                    size="icon"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                {/* Pagination Dots */}
+                <div className="flex justify-center gap-2 mt-6">
+                  {carouselCards.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setMobileIndex(index)}
+                      className={`
+                        h-2 rounded-full transition-all duration-300
+                        ${index === mobileIndex
+                          ? 'w-8 bg-cian'
+                          : 'w-2 bg-gray-600 hover:bg-gray-500'
+                        }
+                      `}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
