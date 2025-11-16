@@ -27,7 +27,7 @@ export function LandingNavbar() {
                   alt="MIA"
                   width={200}
                   height={200}
-                  className="transition-transform hover:scale-105"
+                  className="w-[100px] h-[100px] md:w-[200px] md:h-[200px] transition-transform hover:scale-105"
                 />
               </Link>
             </div>
@@ -52,7 +52,7 @@ export function LandingNavbar() {
 
               <div className="hidden md:flex items-center gap-4">
                 <LanguageSwitcher />
-                <Button asChild className="bg-lavanda hover:bg-lavanda/90 text-white shadow-md text-base">
+                <Button asChild className="bg-cian hover:bg-cian/90 text-white shadow-md text-base">
                   <Link href="/sign-in">{t('navigation.signIn')}</Link>
                 </Button>
               </div>
@@ -90,7 +90,7 @@ export function LandingNavbar() {
           </div>
           <div className="px-4 py-3 border-t border-gray-700 flex items-center justify-between gap-4">
             <LanguageSwitcher />
-            <Button asChild className="bg-lavanda hover:bg-lavanda/90 text-white shadow-md text-lg">
+            <Button asChild className="bg-cian hover:bg-cian/90 text-white shadow-md text-lg">
               <Link href="/sign-in">{t('navigation.signIn')}</Link>
             </Button>
           </div>
