@@ -1,7 +1,7 @@
 // Configuration for the application
 
 // Admin user emails
-export const ADMIN_EMAILS = ['feina.aleix@gmail.com', 'a.nelson@dreamotion.io']
+export const ADMIN_EMAILS = ['feina.aleix@gmail.com', 'a.nelson@dreamotion.io', 'stolwijkstefan@gmail.com']
 
 // Storage configuration
 export const STORAGE_CONFIG = {
