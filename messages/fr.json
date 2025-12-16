@@ -839,7 +839,7 @@
       "imageRemove": "Supprimer l'Image",
       "imagePreview": "Aperçu de l'Image",
       "imageOptimizing": "Optimisation de l'image...",
-      "imageOptimized": "Optimisé: {stats}",
+      "imageOptimized": "Optimisé: {{stats}}",
       "validFrom": "Valide à partir de",
       "validUntil": "Valide jusqu'au",
       "isActive": "Active",
