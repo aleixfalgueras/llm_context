@@ -245,6 +245,33 @@ export function DealFormDialog({
             {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
           </div>
 
+          {/* Valid From and Valid Until in one row */}
+          <div className="flex gap-4">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="validFrom">{t('form.validFrom')}</Label>
+              <Input
+                id="validFrom"
+                type="date"
+                value={formatDateForInput(formData.validFrom)}
+                onChange={(e) => setFormData({ ...formData, validFrom: e.target.value ? new Date(e.target.value) : null })}
+                className={errors.validFrom ? 'border-red-500' : ''}
+              />
+              {errors.validFrom && <p className="text-sm text-red-500">{errors.validFrom}</p>}
+            </div>
+
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="validUntil">{t('form.validUntil')}</Label>
+              <Input
+                id="validUntil"
+                type="date"
+                value={formatDateForInput(formData.validUntil)}
+                onChange={(e) => setFormData({ ...formData, validUntil: e.target.value ? new Date(e.target.value) : null })}
+                className={errors.validUntil ? 'border-red-500' : ''}
+              />
+              {errors.validUntil && <p className="text-sm text-red-500">{errors.validUntil}</p>}
+            </div>
+          </div>
+
           {/* Price */}
           <div className="space-y-2">
             <Label htmlFor="price">{t('form.price')} *</Label>
@@ -352,32 +379,6 @@ export function DealFormDialog({
                 )}
               </div>
             )}
-          </div>
-
-          {/* Valid From */}
-          <div className="space-y-2">
-            <Label htmlFor="validFrom">{t('form.validFrom')}</Label>
-            <Input
-              id="validFrom"
-              type="date"
-              value={formatDateForInput(formData.validFrom)}
-              onChange={(e) => setFormData({ ...formData, validFrom: e.target.value ? new Date(e.target.value) : null })}
-              className={errors.validFrom ? 'border-red-500' : ''}
-            />
-            {errors.validFrom && <p className="text-sm text-red-500">{errors.validFrom}</p>}
-          </div>
-
-          {/* Valid Until */}
-          <div className="space-y-2">
-            <Label htmlFor="validUntil">{t('form.validUntil')}</Label>
-            <Input
-              id="validUntil"
-              type="date"
-              value={formatDateForInput(formData.validUntil)}
-              onChange={(e) => setFormData({ ...formData, validUntil: e.target.value ? new Date(e.target.value) : null })}
-              className={errors.validUntil ? 'border-red-500' : ''}
-            />
-            {errors.validUntil && <p className="text-sm text-red-500">{errors.validUntil}</p>}
           </div>
 
           <DialogFooter>
