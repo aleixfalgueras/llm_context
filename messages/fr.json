@@ -842,6 +842,9 @@
       "imageOptimized": "Optimisé: {{stats}}",
       "validFrom": "Valide à partir de",
       "validUntil": "Valide jusqu'au",
+      "category": "Catégorie",
+      "categoryPlaceholder": "Sélectionner une catégorie",
+      "categoryRequired": "La catégorie est requise",
       "isActive": "Active",
       "isApproved": "Approuvée",
       "dateRangeError": "La date de début doit être antérieure à la date de fin"
@@ -885,6 +888,19 @@
     "details": {
       "title": "Détails de l'Offre"
     }
+  },
+  "dealCategories": {
+    "CONFERENCE": "Conférence",
+    "ONLINE_COURSE": "Cours en Ligne",
+    "ONLINE_CONSULTANCY": "Consultation en Ligne",
+    "GROUP_COACHING": "Coaching de Groupe",
+    "COLIVING": "Coliving",
+    "COWORKING": "Coworking",
+    "RETREAT": "Retraite",
+    "HOTELS": "Hôtels",
+    "MASTERMIND": "Mastermind",
+    "RESTAURANT": "Restaurant",
+    "TRANSPORTATION": "Transport"
   },
   "feedback": {
     "pageTitle": "Fournir des Commentaires",

@@ -842,6 +842,9 @@
       "imageOptimized": "Optimized: {{stats}}",
       "validFrom": "Valid From",
       "validUntil": "Valid Until",
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "categoryRequired": "Category is required",
       "isActive": "Active",
       "isApproved": "Approved",
       "dateRangeError": "Valid from date must be before valid until date"
@@ -885,6 +888,19 @@
     "details": {
       "title": "Deal Details"
     }
+  },
+  "dealCategories": {
+    "CONFERENCE": "Conference",
+    "ONLINE_COURSE": "Online Course",
+    "ONLINE_CONSULTANCY": "Online Consultancy",
+    "GROUP_COACHING": "Group Coaching",
+    "COLIVING": "Coliving",
+    "COWORKING": "Coworking",
+    "RETREAT": "Retreat",
+    "HOTELS": "Hotels",
+    "MASTERMIND": "Mastermind",
+    "RESTAURANT": "Restaurant",
+    "TRANSPORTATION": "Transportation"
   },
   "feedback": {
     "pageTitle": "Provide Feedback",

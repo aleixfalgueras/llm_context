@@ -46,6 +46,7 @@ export async function createDeal(formData: FormData): Promise<Deal> {
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const price = formData.get('price') as string
+  const category = formData.get('category') as string
   const externalUrl = formData.get('externalUrl') as string
   const validFrom = formData.get('validFrom') as string
   const validUntil = formData.get('validUntil') as string
@@ -53,8 +54,8 @@ export async function createDeal(formData: FormData): Promise<Deal> {
   const imageFile = formData.get('imageFile') as File | null
 
   // Validate required fields
-  if (!title || !description || !price || !externalUrl) {
-    throw new Error('Missing required fields: title, description, price, and externalUrl are required')
+  if (!title || !description || !price || !category || !externalUrl) {
+    throw new Error('Missing required fields: title, description, price, category, and externalUrl are required')
   }
 
   // Validate image file if provided
@@ -69,6 +70,7 @@ export async function createDeal(formData: FormData): Promise<Deal> {
     title,
     description,
     price,
+    category: category as any, // TypeScript will validate this is a valid DealCategory
     externalUrl,
     validFrom: validFrom ? new Date(validFrom) : null,
     validUntil: validUntil ? new Date(validUntil) : null,
@@ -92,6 +94,7 @@ export async function updateDeal(dealId: string, formData: FormData): Promise<De
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const price = formData.get('price') as string
+  const category = formData.get('category') as string
   const externalUrl = formData.get('externalUrl') as string
   const validFrom = formData.get('validFrom') as string
   const validUntil = formData.get('validUntil') as string
@@ -103,6 +106,7 @@ export async function updateDeal(dealId: string, formData: FormData): Promise<De
     title,
     description,
     price,
+    category: category as any, // TypeScript will validate this is a valid DealCategory
     externalUrl,
     validFrom: validFrom ? new Date(validFrom) : null,
     validUntil: validUntil ? new Date(validUntil) : null,

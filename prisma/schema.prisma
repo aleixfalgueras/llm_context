@@ -231,23 +231,38 @@ model Affiliation {
 }
 
 model Deal {
-  id          String    @id @default(cuid())
+  id          String       @id @default(cuid())
   userId      String
   title       String
-  description String    @db.Text
+  description String       @db.Text
   price       String
+  category    DealCategory @default(COLIVING)
   externalUrl String
   imageUrl    String?
   validFrom   DateTime?
   validUntil  DateTime?
-  isActive    Boolean   @default(true)
-  isApproved  Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isActive    Boolean      @default(true)
+  isApproved  Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([userId])
   @@index([isActive, isApproved])
   @@map("deals")
+}
+
+enum DealCategory {
+  CONFERENCE
+  ONLINE_COURSE
+  ONLINE_CONSULTANCY
+  GROUP_COACHING
+  COLIVING
+  COWORKING
+  RETREAT
+  HOTELS
+  MASTERMIND
+  RESTAURANT
+  TRANSPORTATION
 }
 
 enum SubscriptionPlan {

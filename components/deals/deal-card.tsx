@@ -63,9 +63,14 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
               <span className="truncate">{deal.title}</span>
             </CardTitle>
           </div>
-          <Badge variant="secondary" className="text-xs font-semibold shrink-0">
-            {deal.price}
-          </Badge>
+          <div className="flex flex-col gap-1 items-end shrink-0">
+            <Badge variant="outline" className="text-xs">
+              {t(`dealCategories.${deal.category}`)}
+            </Badge>
+            <Badge variant="secondary" className="text-xs font-semibold">
+              {deal.price}
+            </Badge>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 mt-auto pt-2">
