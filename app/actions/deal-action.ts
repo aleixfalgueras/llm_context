@@ -5,6 +5,7 @@ import { DealService } from '@/services/deal-service'
 import { checkAuth } from '@/lib/api/api-validation'
 import { Deal } from '@prisma/client'
 import { DealFormData, DealListFilters } from '@/lib/types/deal-types'
+import { validateImageFile } from '@/lib/utils/validation'
 
 export async function getPublicDeals(filters: DealListFilters = {}): Promise<Deal[]> {
   const result = await DealService.getPublicDeals(filters)
@@ -56,6 +57,14 @@ export async function createDeal(formData: FormData): Promise<Deal> {
     throw new Error('Missing required fields: title, description, price, and externalUrl are required')
   }
 
+  // Validate image file if provided
+  if (imageFile && imageFile.size > 0) {
+    const validation = validateImageFile(imageFile)
+    if (!validation.isValid) {
+      throw new Error(validation.firstError || 'Invalid image file')
+    }
+  }
+
   const data: DealFormData = {
     title,
     description,
@@ -105,6 +114,11 @@ export async function updateDeal(dealId: string, formData: FormData): Promise<De
   if (removeImage) {
     imageUpdate = null
   } else if (imageFile && imageFile.size > 0) {
+    // Validate image file before updating
+    const validation = validateImageFile(imageFile)
+    if (!validation.isValid) {
+      throw new Error(validation.firstError || 'Invalid image file')
+    }
     imageUpdate = imageFile
   }
 

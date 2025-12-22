@@ -192,6 +192,42 @@ export function hasFieldError(
 }
 
 /**
+ * Image file validation constants
+ */
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml'
+] as const
+
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024 // 10MB
+
+/**
+ * Validates an image file for type and size
+ */
+export function validateImageFile(file: File): ValidationResult {
+  const errors: Record<string, string> = {}
+
+  // Validate MIME type
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
+    errors.fileType = 'validation.invalidImageType'
+  }
+
+  // Validate file size
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    const maxSizeMB = MAX_IMAGE_SIZE_BYTES / (1024 * 1024)
+    errors.fileSize = `validation.imageTooLarge`
+  }
+
+  const isValid = Object.keys(errors).length === 0
+  const firstError = isValid ? undefined : Object.values(errors)[0]
+
+  return { isValid, errors, firstError }
+}
+
+/**
  * API validation helpers to eliminate duplicate validation patterns in API routes
  */
 export const apiValidation = {
@@ -204,11 +240,11 @@ export const apiValidation = {
     reportContent?: string | null
   }) => {
     const missing: string[] = []
-    
+
     if (!data.clientId) missing.push('clientId')
     if (!data.meetingDate) missing.push('meetingDate')
     if (!data.reportContent) missing.push('reportContent')
-    
+
     if (missing.length > 0) {
       throw new Error(`Missing required fields: ${missing.join(', ')}`)
     }
@@ -223,11 +259,11 @@ export const apiValidation = {
     chatTitle?: string | null
   }) => {
     const missing: string[] = []
-    
+
     if (!data.clientId) missing.push('clientId')
     if (!data.content) missing.push('content')
     if (!data.chatTitle) missing.push('chatTitle')
-    
+
     if (missing.length > 0) {
       throw new Error(`Missing required fields: ${missing.join(', ')}`)
     }

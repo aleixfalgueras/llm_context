@@ -1033,6 +1033,8 @@
     "invalidFormat": "Format invalide",
     "fileTooBig": "La taille du fichier doit être inférieure à {{size}}",
     "unsupportedFileType": "Type de fichier non supporté",
+    "invalidImageType": "Type d'image invalide. Seuls les formats JPEG, PNG, GIF, WebP et SVG sont autorisés.",
+    "imageTooLarge": "La taille de l'image doit être inférieure à 10 Mo.",
     "somethingWentWrong": "Quelque chose s'est mal passé",
     "tryAgain": "Veuillez réessayer"
   },
