@@ -158,6 +158,7 @@ export class DealService {
         title: data.title!!,
         description: data.description!!,
         price: data.price!!,
+        category: data.category!!,
         externalUrl: data.externalUrl!!,
         validFrom: data.validFrom,
         validUntil: data.validUntil,
@@ -241,6 +242,7 @@ export class DealService {
       if (data.title !== undefined) updateData.title = data.title
       if (data.description !== undefined) updateData.description = data.description
       if (data.price !== undefined) updateData.price = data.price
+      if (data.category !== undefined) updateData.category = data.category
       if (data.externalUrl !== undefined) updateData.externalUrl = data.externalUrl
       if (data.validFrom !== undefined) updateData.validFrom = data.validFrom
       if (data.validUntil !== undefined) updateData.validUntil = data.validUntil

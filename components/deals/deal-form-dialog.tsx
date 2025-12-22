@@ -14,8 +14,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Deal } from '@prisma/client'
-import { DealFormData } from '@/lib/types/deal-types'
+import { DealFormData, getDealCategoriesWithLabels } from '@/lib/types/deal-types'
 import { X, Upload, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { optimizeImage, OptimizationResult } from '@/lib/utils/image-optimization'
@@ -42,6 +49,7 @@ export function DealFormDialog({
     title: '',
     description: '',
     price: '',
+    category: 'COLIVING' as any,
     externalUrl: '',
     validFrom: null,
     validUntil: null,
@@ -62,6 +70,7 @@ export function DealFormDialog({
           title: deal.title,
           description: deal.description,
           price: deal.price,
+          category: deal.category as any,
           externalUrl: deal.externalUrl,
           validFrom: deal.validFrom,
           validUntil: deal.validUntil,
@@ -77,6 +86,7 @@ export function DealFormDialog({
           title: '',
           description: '',
           price: '',
+          category: 'COLIVING' as any,
           externalUrl: '',
           validFrom: null,
           validUntil: null,
@@ -103,6 +113,9 @@ export function DealFormDialog({
     }
     if (!formData.price?.trim()) {
       newErrors.price = t('form.priceRequired')
+    }
+    if (!formData.category) {
+      newErrors.category = t('form.categoryRequired')
     }
     if (!formData.externalUrl?.trim()) {
       newErrors.externalUrl = t('form.externalUrlRequired')
@@ -182,6 +195,7 @@ export function DealFormDialog({
     submitFormData.append('price', formData.price || '')
     submitFormData.append('externalUrl', formData.externalUrl || '')
     submitFormData.append('isActive', formData.isActive ? 'true' : 'false')
+    submitFormData.append('category', formData.category || '')
 
     if (formData.validFrom) {
       submitFormData.append('validFrom', formData.validFrom.toISOString())
@@ -272,17 +286,39 @@ export function DealFormDialog({
             </div>
           </div>
 
-          {/* Price */}
-          <div className="space-y-2">
-            <Label htmlFor="price">{t('form.price')} *</Label>
-            <Input
-              id="price"
-              value={formData.price || ''}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              placeholder={t('form.pricePlaceholder')}
-              className={errors.price ? 'border-red-500' : ''}
-            />
-            {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+          {/* Price and Category */}
+          <div className="flex gap-4">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="price">{t('form.price')} *</Label>
+              <Input
+                id="price"
+                value={formData.price || ''}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                placeholder={t('form.pricePlaceholder')}
+                className={errors.price ? 'border-red-500' : ''}
+              />
+              {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+            </div>
+
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="category">{t('form.category')} *</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData({ ...formData, category: value as any })}
+              >
+                <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                  <SelectValue placeholder={t('form.categoryPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {getDealCategoriesWithLabels(t).map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+            </div>
           </div>
 
           {/* External URL */}
