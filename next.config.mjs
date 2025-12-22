@@ -11,7 +11,7 @@ const nextConfig = {
   // Optimize images
   images: {
     domains: ['ccbapdsiisngnpyqryqg.supabase.co', 'wgeohahwwszibtdtduul.supabase.co'],
-    formats: ['image/webp', 'image/avif'],
+    formats: ['image/webp', 'image/avif'], // output optimization formats!
   },
   // Production optimizations
   poweredByHeader: false,
