@@ -49,10 +49,24 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
             fill
             className="object-cover"
           />
+          {/* Category Badge - Overlaid on Image */}
+          <Badge
+            variant="outline"
+            className="absolute top-2 right-2 text-xs bg-black/60 text-white border-white/20 backdrop-blur-sm"
+          >
+            {t(`dealCategories.${deal.category}`)}
+          </Badge>
         </div>
       ) : (
         <div className="relative w-full h-48 bg-muted flex items-center justify-center rounded-t-lg">
           <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
+          {/* Category Badge - Overlaid on Placeholder */}
+          <Badge
+            variant="outline"
+            className="absolute top-2 right-2 text-xs bg-black/60 text-white border-white/20 backdrop-blur-sm"
+          >
+            {t(`dealCategories.${deal.category}`)}
+          </Badge>
         </div>
       )}
 
@@ -63,14 +77,10 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
               <span className="truncate">{deal.title}</span>
             </CardTitle>
           </div>
-          <div className="flex flex-col gap-1 items-end shrink-0">
-            <Badge variant="outline" className="text-xs">
-              {t(`dealCategories.${deal.category}`)}
-            </Badge>
-            <Badge variant="secondary" className="text-xs font-semibold">
-              {deal.price}
-            </Badge>
-          </div>
+          {/* Only price badge remains here */}
+          <Badge variant="secondary" className="text-xs font-semibold shrink-0">
+            {deal.price}
+          </Badge>
         </div>
 
         <div className="flex items-center gap-2 mt-auto pt-2">

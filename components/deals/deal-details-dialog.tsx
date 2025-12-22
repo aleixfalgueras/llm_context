@@ -65,9 +65,15 @@ export function DealDetailsDialog({
                 {t('details.title')}
               </DialogDescription>
             </div>
-            <Badge variant="secondary" className="text-sm font-semibold shrink-0">
-              {deal.price}
-            </Badge>
+            {/* Category and Price badges stacked vertically */}
+            <div className="flex flex-col gap-2 items-end shrink-0">
+              <Badge variant="outline" className="text-sm">
+                {t(`dealCategories.${deal.category}`)}
+              </Badge>
+              <Badge variant="secondary" className="text-sm font-semibold">
+                {deal.price}
+              </Badge>
+            </div>
           </div>
         </DialogHeader>
 
