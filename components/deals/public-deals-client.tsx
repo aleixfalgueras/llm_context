@@ -1,11 +1,11 @@
 'use client'
 
 import { useTranslations } from '@/lib/translations/context'
-import { Input } from '@/components/ui/input'
-import { Search, Tag } from 'lucide-react'
+import { Tag } from 'lucide-react'
 import { Deal } from '@prisma/client'
 import { DealCard } from './deal-card'
 import { DealEmptyState } from './deal-empty-state'
+import { DealFiltersBar } from './deal-filters-bar'
 import { useState, useMemo } from 'react'
 
 interface PublicDealsClientProps {
@@ -15,30 +15,38 @@ interface PublicDealsClientProps {
 export function PublicDealsClient({ initialPublicDeals }: PublicDealsClientProps): JSX.Element {
   const t = useTranslations('deals')
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
-  // Filter deals by search term (client-side)
+  // Filter deals by search term and category (client-side)
   const filteredDeals = useMemo(() => {
-    if (!searchTerm.trim()) return initialPublicDeals
+    let filtered = initialPublicDeals
 
-    const searchLower = searchTerm.toLowerCase()
-    return initialPublicDeals.filter(deal =>
-      deal.title.toLowerCase().includes(searchLower) ||
-      deal.description.toLowerCase().includes(searchLower)
-    )
-  }, [initialPublicDeals, searchTerm])
+    // Search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(deal =>
+        deal.title.toLowerCase().includes(searchLower) ||
+        deal.description.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Category filter
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(deal => deal.category === selectedCategory)
+    }
+
+    return filtered
+  }, [initialPublicDeals, searchTerm, selectedCategory])
 
   return (
     <div className="max-w-7xl mx-auto pt-12 px-6 pb-6 space-y-8">
-      {/* Search Bar */}
-      <div className="relative rounded">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder={t('searchPlaceholder')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-gray-800/60 border-b-cian"
-        />
-      </div>
+      {/* Filters Bar */}
+      <DealFiltersBar
+        searchTerm={searchTerm}
+        selectedCategory={selectedCategory}
+        onSearchChange={setSearchTerm}
+        onCategoryChange={setSelectedCategory}
+      />
 
       {/* Public Deals Section */}
       <div className="space-y-4">

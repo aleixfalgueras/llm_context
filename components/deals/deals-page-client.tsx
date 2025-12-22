@@ -2,13 +2,13 @@
 
 import { useTranslations } from '@/lib/translations/context'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Plus, Tag, ChevronDown, Search } from 'lucide-react'
+import { Plus, Tag, ChevronDown } from 'lucide-react'
 import { Deal, SubscriptionPlan } from '@prisma/client'
 import { DealCard } from './deal-card'
 import { DealEmptyState } from './deal-empty-state'
 import { DealFormDialog } from './deal-form-dialog'
 import { DeleteDealDialog } from './delete-deal-dialog'
+import { DealFiltersBar } from './deal-filters-bar'
 import { useDealManagement } from '@/hooks/use-deal-management'
 import { useSubscription } from '@/hooks/subscription/use-subscription'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -31,6 +31,7 @@ export function DealsPageClient({ initialPublicDeals }: DealsPageClientProps) {
     filteredUserDeals,
     loading,
     searchTerm,
+    selectedCategory,
     isFormDialogOpen,
     isDeleteDialogOpen,
     editingDeal,
@@ -38,6 +39,7 @@ export function DealsPageClient({ initialPublicDeals }: DealsPageClientProps) {
     isSaving,
     isDeleting,
     setSearchTerm,
+    setSelectedCategory,
     handleCreateDeal,
     handleEditDeal,
     handleDeleteDeal,
@@ -72,16 +74,13 @@ export function DealsPageClient({ initialPublicDeals }: DealsPageClientProps) {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder={t('searchPlaceholder')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      {/* Filters Bar */}
+      <DealFiltersBar
+        searchTerm={searchTerm}
+        selectedCategory={selectedCategory}
+        onSearchChange={setSearchTerm}
+        onCategoryChange={setSelectedCategory}
+      />
 
       {/* Public Deals Section */}
       <div className="space-y-4">

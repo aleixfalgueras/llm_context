@@ -19,6 +19,7 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
   const [userDeals, setUserDeals] = useState<Deal[]>([])
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   // Dialog states
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
@@ -30,26 +31,46 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Filter deals by search term
+  // Filter deals by search term and category
   const filteredPublicDeals = useMemo(() => {
-    if (!searchTerm.trim()) return publicDeals
+    let filtered = publicDeals
 
-    const searchLower = searchTerm.toLowerCase()
-    return publicDeals.filter(deal =>
-      deal.title.toLowerCase().includes(searchLower) ||
-      deal.description.toLowerCase().includes(searchLower)
-    )
-  }, [publicDeals, searchTerm])
+    // Search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(deal =>
+        deal.title.toLowerCase().includes(searchLower) ||
+        deal.description.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Category filter
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(deal => deal.category === selectedCategory)
+    }
+
+    return filtered
+  }, [publicDeals, searchTerm, selectedCategory])
 
   const filteredUserDeals = useMemo(() => {
-    if (!searchTerm.trim()) return userDeals
+    let filtered = userDeals
 
-    const searchLower = searchTerm.toLowerCase()
-    return userDeals.filter(deal =>
-      deal.title.toLowerCase().includes(searchLower) ||
-      deal.description.toLowerCase().includes(searchLower)
-    )
-  }, [userDeals, searchTerm])
+    // Search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(deal =>
+        deal.title.toLowerCase().includes(searchLower) ||
+        deal.description.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Category filter
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(deal => deal.category === selectedCategory)
+    }
+
+    return filtered
+  }, [userDeals, searchTerm, selectedCategory])
 
   // Fetch user deals
   const fetchUserDeals = async () => {
@@ -166,6 +187,7 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
     filteredUserDeals,
     loading,
     searchTerm,
+    selectedCategory,
 
     // Dialog states
     isFormDialogOpen,
@@ -179,6 +201,7 @@ export function useDealManagement({ initialPublicDeals }: UseDealManagementProps
 
     // Actions
     setSearchTerm,
+    setSelectedCategory,
     handleCreateDeal,
     handleEditDeal,
     handleDeleteDeal,
