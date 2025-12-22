@@ -887,20 +887,23 @@
     },
     "details": {
       "title": "Détails de l'Offre"
+    },
+    "filters": {
+      "allCategories": "Toutes les Catégories"
+    },
+    "dealCategories": {
+      "CONFERENCE": "Conférence",
+      "ONLINE_COURSE": "Cours en Ligne",
+      "ONLINE_CONSULTANCY": "Consultation en Ligne",
+      "GROUP_COACHING": "Coaching de Groupe",
+      "COLIVING": "Coliving",
+      "COWORKING": "Coworking",
+      "RETREAT": "Retraite",
+      "HOTELS": "Hôtels",
+      "MASTERMIND": "Mastermind",
+      "RESTAURANT": "Restaurant",
+      "TRANSPORTATION": "Transport"
     }
-  },
-  "dealCategories": {
-    "CONFERENCE": "Conférence",
-    "ONLINE_COURSE": "Cours en Ligne",
-    "ONLINE_CONSULTANCY": "Consultation en Ligne",
-    "GROUP_COACHING": "Coaching de Groupe",
-    "COLIVING": "Coliving",
-    "COWORKING": "Coworking",
-    "RETREAT": "Retraite",
-    "HOTELS": "Hôtels",
-    "MASTERMIND": "Mastermind",
-    "RESTAURANT": "Restaurant",
-    "TRANSPORTATION": "Transport"
   },
   "feedback": {
     "pageTitle": "Fournir des Commentaires",

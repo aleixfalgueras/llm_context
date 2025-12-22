@@ -38,9 +38,18 @@ export const ALL_DEAL_CATEGORIES: DealCategory[] = [
 ]
 
 // Utility function to get categories with labels for selects
-export function getDealCategoriesWithLabels(t: any) {
-  return ALL_DEAL_CATEGORIES.map(category => ({
+export function getDealCategoriesWithLabels(t: any, includeAll: boolean = false) {
+  const categories = ALL_DEAL_CATEGORIES.map(category => ({
     value: category,
     label: t(`dealCategories.${category}`)
   }))
+
+  if (includeAll) {
+    return [
+      { value: 'all', label: t('deals.filters.allCategories') },
+      ...categories
+    ]
+  }
+
+  return categories
 }
