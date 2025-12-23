@@ -39,9 +39,9 @@ export function LandingNavbar() {
                 <Link href="/ecosystem" className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-base font-semibold text-gray-100 hover:border-gray-500 hover:text-gray-100 transition-colors h-9">
                   Ecosystem
                 </Link>
-                <button className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-base font-semibold text-gray-100 hover:border-gray-500 hover:text-gray-100 transition-colors h-9">
+                <Link href="/membership" className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-base font-semibold text-gray-100 hover:border-gray-500 hover:text-gray-100 transition-colors h-9">
                   Membership
-                </button>
+                </Link>
                 <Link href="/public-deals" className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-base font-semibold text-gray-100 hover:border-gray-500 hover:text-gray-100 transition-colors h-9">
                   Promo & Deals
                 </Link>
@@ -78,9 +78,9 @@ export function LandingNavbar() {
             <Link href="/ecosystem" className="block w-full text-left px-3 py-2 rounded-md text-lg font-semibold text-gray-100 hover:text-gray-100 hover:bg-gray-700 transition-colors">
               Ecosystem
             </Link>
-            <button className="block w-full text-left px-3 py-2 rounded-md text-lg font-semibold text-gray-100 hover:text-gray-100 hover:bg-gray-700 transition-colors">
+            <Link href="/membership" className="block w-full text-left px-3 py-2 rounded-md text-lg font-semibold text-gray-100 hover:text-gray-100 hover:bg-gray-700 transition-colors">
               Membership
-            </button>
+            </Link>
             <Link href="/public-deals" className="block w-full text-left px-3 py-2 rounded-md text-lg font-semibold text-gray-100 hover:text-gray-100 hover:bg-gray-700 transition-colors">
               Promo & Deals
             </Link>

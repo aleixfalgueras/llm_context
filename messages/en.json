@@ -449,6 +449,9 @@
   "subscription": {
     "title": "Subscription",
     "pageTitle": "Choose Your Plan",
+    "pageTitlePart1": "Choose Your ",
+    "pageTitlePart2": "Plan",
+    "membershipSubheader": "MIA is invite-only, contact antonin.nelson@gmail.com to receive your personal invitation and join our amazing community.",
     "perMonth": "/month",
     "processing": "Processing...",
     "canceling": "Canceling...",
