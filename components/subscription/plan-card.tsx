@@ -30,6 +30,8 @@ interface PlanCardProps {
   isPastDueOrUnpaid: boolean
   onPlanAction: (planId: string) => void
   billingInterval?: BillingInterval
+  showButton?: boolean
+  className?: string
 }
 
 export function PlanCard({
@@ -47,7 +49,9 @@ export function PlanCard({
   isExpired,
   isPastDueOrUnpaid,
   onPlanAction,
-  billingInterval = BillingInterval.monthly
+  billingInterval = BillingInterval.monthly,
+  showButton = true,
+  className
 }: PlanCardProps) {
   const t = useTranslations()
   const tSubscription = useTranslations('subscription')
@@ -69,12 +73,12 @@ export function PlanCard({
   }
 
   return (
-    <Card 
+    <Card
       className={`relative h-full flex flex-col ${
-        isCurrentPlan 
-          ? 'border-2 border-green-500 shadow-lg bg-green-50 dark:bg-green-900/20' 
+        isCurrentPlan
+          ? 'border-2 border-green-500 shadow-lg bg-green-50 dark:bg-green-900/20'
           : ''
-      }`}
+      } ${className || ''}`}
     >
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
@@ -115,32 +119,36 @@ export function PlanCard({
           ))}
         </ul>
         
-        {isBillingIntervalChanging && (
-          <div className="mb-3 p-2 text-xs text-muted-foreground bg-muted rounded-md text-center">
-            {tSubscription('planCard.intervalChangeRestricted')}
-          </div>
+        {showButton && (
+          <>
+            {isBillingIntervalChanging && (
+              <div className="mb-3 p-2 text-xs text-muted-foreground bg-muted rounded-md text-center">
+                {tSubscription('planCard.intervalChangeRestricted')}
+              </div>
+            )}
+
+            <Button
+              onClick={() => onPlanAction(plan.id)}
+              disabled={isBillingIntervalChanging || upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan || (isPendingDowngrade && !isPendingPlanChange) || (isActiveCancelled && !isExpired) || isPastDueOrUnpaid}
+              className={`w-full mt-auto ${getButtonStyles(
+                isCurrentPlan,
+                isPendingDowngrade,
+                isPendingPlanChange
+              )}`}
+              title={isBillingIntervalChanging ? tSubscription('planCard.intervalChangeTooltip') : undefined}
+            >
+              {upgradeLoading === plan.id ? (
+                <LoadingSpinner text={tSubscription('planCard.processing')} />
+              ) : cancelDowngradeLoading && isPendingDowngrade && isPendingPlanChange ? (
+                <LoadingSpinner text={tSubscription('planCard.canceling')} />
+              ) : isBillingIntervalChanging ? (
+                tSubscription('planCard.unavailable')
+              ) : (
+                getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired, tSubscription)
+              )}
+            </Button>
+          </>
         )}
-        
-        <Button 
-          onClick={() => onPlanAction(plan.id)}
-          disabled={isBillingIntervalChanging || upgradeLoading === plan.id || cancelDowngradeLoading || isCurrentPlan || (isPendingDowngrade && !isPendingPlanChange) || (isActiveCancelled && !isExpired) || isPastDueOrUnpaid}
-          className={`w-full mt-auto ${getButtonStyles(
-            isCurrentPlan,
-            isPendingDowngrade,
-            isPendingPlanChange
-          )}`}
-          title={isBillingIntervalChanging ? tSubscription('planCard.intervalChangeTooltip') : undefined}
-        >
-          {upgradeLoading === plan.id ? (
-            <LoadingSpinner text={tSubscription('planCard.processing')} />
-          ) : cancelDowngradeLoading && isPendingDowngrade && isPendingPlanChange ? (
-            <LoadingSpinner text={tSubscription('planCard.canceling')} />
-          ) : isBillingIntervalChanging ? (
-            tSubscription('planCard.unavailable')
-          ) : (
-            getButtonText(planId, currentPlan, isFreeMode, isPendingDowngrade, isPendingPlanChange, isCurrentPlan, isExpired, tSubscription)
-          )}
-        </Button>
       </CardContent>
     </Card>
   )
