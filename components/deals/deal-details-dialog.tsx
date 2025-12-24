@@ -141,7 +141,7 @@ export function DealDetailsDialog({
             className="flex-1 bg-lavanda text-white"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
-            {t('actions.viewExternal')}
+            {t('actions.checkWebsite')}
           </Button>
 
           {isOwner && (

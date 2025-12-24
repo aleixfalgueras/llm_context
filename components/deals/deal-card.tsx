@@ -25,11 +25,6 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
   const isExpired = deal.validUntil && new Date(deal.validUntil) < new Date()
   const isComingSoon = deal.validFrom && new Date(deal.validFrom) > new Date()
 
-  const handleExternalClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    window.open(deal.externalUrl, '_blank', 'noopener,noreferrer')
-  }
-
   const handleCardClick = () => {
     setShowDetails(true)
   }
@@ -118,10 +113,8 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
           <Button
             variant="default"
             size="sm"
-            onClick={handleExternalClick}
             className="flex-1 mr-2 bg-lavanda text-white"
           >
-            <ExternalLink className="h-4 w-4 mr-2" />
             {t('actions.viewExternal')}
           </Button>
 
