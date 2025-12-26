@@ -45,6 +45,7 @@ export function DealFormDialog({
 }: DealFormDialogProps) {
   const t = useTranslations('deals')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const logoInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState<DealFormData>({
     title: '',
     description: '',
@@ -61,6 +62,12 @@ export function DealFormDialog({
   const [removeImage, setRemoveImage] = useState(false)
   const [isOptimizing, setIsOptimizing] = useState(false)
   const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null)
+  // Logo state
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [removeLogo, setRemoveLogo] = useState(false)
+  const [isOptimizingLogo, setIsOptimizingLogo] = useState(false)
+  const [logoOptimizationResult, setLogoOptimizationResult] = useState<OptimizationResult | null>(null)
 
   // Reset form when dialog opens or deal changes
   useEffect(() => {
@@ -81,6 +88,12 @@ export function DealFormDialog({
         setRemoveImage(false)
         setIsOptimizing(false)
         setOptimizationResult(null)
+        // Logo state
+        setLogoPreview(deal.logoUrl || null)
+        setLogoFile(null)
+        setRemoveLogo(false)
+        setIsOptimizingLogo(false)
+        setLogoOptimizationResult(null)
       } else {
         setFormData({
           title: '',
@@ -97,6 +110,12 @@ export function DealFormDialog({
         setRemoveImage(false)
         setIsOptimizing(false)
         setOptimizationResult(null)
+        // Logo state
+        setLogoPreview(null)
+        setLogoFile(null)
+        setRemoveLogo(false)
+        setIsOptimizingLogo(false)
+        setLogoOptimizationResult(null)
       }
       setErrors({})
     }
@@ -181,6 +200,52 @@ export function DealFormDialog({
     }
   }
 
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      setIsOptimizingLogo(true)
+      setRemoveLogo(false)
+
+      // Optimize logo before setting it
+      const result = await optimizeImage(file)
+
+      setLogoFile(result.optimizedFile)
+      setLogoOptimizationResult(result)
+
+      // Create preview URL from optimized file
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string)
+      }
+      reader.readAsDataURL(result.optimizedFile)
+    } catch (error) {
+      console.error('Logo optimization error:', error)
+      // Fallback to original file if optimization fails
+      setLogoFile(file)
+      setLogoOptimizationResult(null)
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    } finally {
+      setIsOptimizingLogo(false)
+    }
+  }
+
+  const handleRemoveLogo = (): void => {
+    setLogoFile(null)
+    setLogoPreview(deal?.logoUrl || null)
+    setRemoveLogo(true)
+    setLogoOptimizationResult(null)
+    if (logoInputRef.current) {
+      logoInputRef.current.value = ''
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
 
@@ -210,6 +275,14 @@ export function DealFormDialog({
     }
     if (removeImage) {
       submitFormData.append('removeImage', 'true')
+    }
+
+    // Handle logo
+    if (logoFile) {
+      submitFormData.append('logoFile', logoFile)
+    }
+    if (removeLogo) {
+      submitFormData.append('removeLogo', 'true')
     }
 
     await onSubmit(submitFormData)
@@ -410,6 +483,91 @@ export function DealFormDialog({
                   <span className="text-green-600 dark:text-green-500">
                     {t('form.imageOptimized', {
                       stats: `${formatFileSize(optimizationResult.originalSize)} → ${formatFileSize(optimizationResult.compressedSize)} (-${optimizationResult.compressionPercentage}%)`
+                    })}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Logo Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="logo">
+              {t('form.logo')} <span className="text-muted-foreground text-xs">{t('form.logoOptional')}</span>
+            </Label>
+
+            <div className="flex items-center gap-4">
+              {/* Logo Preview */}
+              {logoPreview && !removeLogo && (
+                <div className="relative w-20 h-20 border rounded-lg overflow-hidden shrink-0">
+                  <Image
+                    src={logoPreview}
+                    alt={t('form.logoPreview')}
+                    fill
+                    className="object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 rounded-full"
+                    onClick={handleRemoveLogo}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex-1 flex gap-2">
+                <Input
+                  ref={logoInputRef}
+                  id="logo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  className="hidden"
+                  disabled={isOptimizingLogo}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => logoInputRef.current?.click()}
+                  className="flex-1"
+                  disabled={isOptimizingLogo}
+                >
+                  {isOptimizingLogo ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('form.imageOptimizing')}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      {logoPreview && !removeLogo ? t('form.logoChange') : t('form.logoChoose')}
+                    </>
+                  )}
+                </Button>
+                {logoPreview && !removeLogo && !isOptimizingLogo && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRemoveLogo}
+                  >
+                    {t('form.logoRemove')}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Logo Optimization Result Display */}
+            {logoOptimizationResult && !removeLogo && (
+              <div className="text-xs text-muted-foreground">
+                {logoOptimizationResult.skipped ? (
+                  <span>{formatFileSize(logoOptimizationResult.originalSize)} (already optimized)</span>
+                ) : (
+                  <span className="text-green-600 dark:text-green-500">
+                    {t('form.imageOptimized', {
+                      stats: `${formatFileSize(logoOptimizationResult.originalSize)} → ${formatFileSize(logoOptimizationResult.compressedSize)} (-${logoOptimizationResult.compressionPercentage}%)`
                     })}
                   </span>
                 )}
