@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -59,11 +58,21 @@ export function DealDetailsDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-cian">
         <DialogHeader>
           <div className="flex items-start justify-between gap-4 mt-3">
-            <div className="flex-1 min-w-0">
-              <DialogTitle className="text-xl">{deal.title}</DialogTitle>
-              <DialogDescription className="mt-2">
-                {t('details.title')}
-              </DialogDescription>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {/* Logo */}
+              {deal.logoUrl && (
+                <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0">
+                  <Image
+                    src={deal.logoUrl}
+                    alt={`${deal.title} logo`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-xl">{deal.title}</DialogTitle>
+              </div>
             </div>
             {/* Category and Price badges stacked vertically */}
             <div className="flex flex-col gap-2 items-end shrink-0">

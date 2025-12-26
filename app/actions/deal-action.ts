@@ -52,6 +52,7 @@ export async function createDeal(formData: FormData): Promise<Deal> {
   const validUntil = formData.get('validUntil') as string
   const isActive = formData.get('isActive') === 'true'
   const imageFile = formData.get('imageFile') as File | null
+  const logoFile = formData.get('logoFile') as File | null
 
   // Validate required fields
   if (!title || !description || !price || !category || !externalUrl) {
@@ -66,6 +67,14 @@ export async function createDeal(formData: FormData): Promise<Deal> {
     }
   }
 
+  // Validate logo file if provided
+  if (logoFile && logoFile.size > 0) {
+    const validation = validateImageFile(logoFile)
+    if (!validation.isValid) {
+      throw new Error(validation.firstError || 'Invalid logo file')
+    }
+  }
+
   const data: DealFormData = {
     title,
     description,
@@ -77,7 +86,12 @@ export async function createDeal(formData: FormData): Promise<Deal> {
     isActive
   }
 
-  const result = await DealService.createDeal(userId, data, imageFile || undefined)
+  const result = await DealService.createDeal(
+    userId,
+    data,
+    imageFile && imageFile.size > 0 ? imageFile : undefined,
+    logoFile && logoFile.size > 0 ? logoFile : undefined
+  )
 
   if (!result.success) {
     throw new Error(result.error || 'Failed to create deal')
@@ -101,6 +115,8 @@ export async function updateDeal(dealId: string, formData: FormData): Promise<De
   const isActive = formData.get('isActive') === 'true'
   const imageFile = formData.get('imageFile') as File | null
   const removeImage = formData.get('removeImage') === 'true'
+  const logoFile = formData.get('logoFile') as File | null
+  const removeLogo = formData.get('removeLogo') === 'true'
 
   const data: DealFormData = {
     title,
@@ -126,7 +142,20 @@ export async function updateDeal(dealId: string, formData: FormData): Promise<De
     imageUpdate = imageFile
   }
 
-  const result = await DealService.updateDeal(dealId, userId, data, imageUpdate)
+  // Handle logo update: undefined = no change, null = remove, File = replace
+  let logoUpdate: File | null | undefined = undefined
+  if (removeLogo) {
+    logoUpdate = null
+  } else if (logoFile && logoFile.size > 0) {
+    // Validate logo file before updating
+    const validation = validateImageFile(logoFile)
+    if (!validation.isValid) {
+      throw new Error(validation.firstError || 'Invalid logo file')
+    }
+    logoUpdate = logoFile
+  }
+
+  const result = await DealService.updateDeal(dealId, userId, data, imageUpdate, logoUpdate)
 
   if (!result.success) {
     throw new Error(result.error || 'Failed to update deal')

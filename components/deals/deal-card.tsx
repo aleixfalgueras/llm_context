@@ -44,7 +44,18 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
             fill
             className="object-cover"
           />
-          {/* Category Badge - Overlaid on Image */}
+          {/* Logo - Overlaid on Image (top-left) */}
+          {deal.logoUrl && (
+            <div className="absolute top-2 left-2 w-14 h-14 rounded-lg overflow-hidden border-2 border-white shadow-md">
+              <Image
+                src={deal.logoUrl}
+                alt={`${deal.title} logo`}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
+          {/* Category Badge - Overlaid on Image (top-right) */}
           <Badge
             variant="outline"
             className="absolute top-2 right-2 text-xs bg-black/60 text-white border-white/20 backdrop-blur-sm"
@@ -55,7 +66,18 @@ export function DealCard({ deal, isOwner = false, onEdit, onDelete }: DealCardPr
       ) : (
         <div className="relative w-full h-48 bg-muted flex items-center justify-center rounded-t-lg">
           <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
-          {/* Category Badge - Overlaid on Placeholder */}
+          {/* Logo - Overlaid on Placeholder (top-left) */}
+          {deal.logoUrl && (
+            <div className="absolute top-2 left-2 w-14 h-14 rounded-lg overflow-hidden border-2 border-white shadow-md">
+              <Image
+                src={deal.logoUrl}
+                alt={`${deal.title} logo`}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
+          {/* Category Badge - Overlaid on Placeholder (top-right) */}
           <Badge
             variant="outline"
             className="absolute top-2 right-2 text-xs bg-black/60 text-white border-white/20 backdrop-blur-sm"

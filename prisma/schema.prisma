@@ -239,6 +239,7 @@ model Deal {
   category    DealCategory @default(COLIVING)
   externalUrl String
   imageUrl    String?
+  logoUrl     String?
   validFrom   DateTime?
   validUntil  DateTime?
   isActive    Boolean      @default(true)

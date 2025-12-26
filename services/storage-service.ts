@@ -342,4 +342,81 @@ export class StorageService {
       throw new Error(`Failed to delete deal image: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
+
+  /**
+   * Upload deal logo to Supabase storage
+   */
+  static async uploadDealLogo(
+    userId: string,
+    dealId: string,
+    logoFile: File
+  ): Promise<{ path: string; url: string }> {
+    try {
+      // Generate unique file path with _logo suffix
+      const fileExtension = logoFile.name.split('.').pop() || 'jpg'
+      const filePath = `${userId}/${dealId}_logo.${fileExtension}`
+
+      // Convert File to Buffer
+      const arrayBuffer = await logoFile.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+
+      // Upload to Supabase storage
+      const { data, error } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_DEALS)
+        .upload(filePath, buffer, {
+          contentType: logoFile.type,
+          upsert: true
+        })
+
+      if (error) {
+        throw new Error(`Storage upload failed: ${error.message}`)
+      }
+
+      // Get public URL
+      const { data: urlData } = supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_DEALS)
+        .getPublicUrl(filePath)
+
+      if (!urlData.publicUrl) {
+        throw new Error('Failed to get public URL for deal logo')
+      }
+
+      return {
+        path: data.path,
+        url: urlData.publicUrl
+      }
+    } catch (error) {
+      logger.error('Deal logo upload error', error instanceof Error ? error : new Error(String(error)))
+      throw new Error(`Failed to upload deal logo: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Delete deal logo from Supabase storage
+   */
+  static async deleteDealLogo(logoUrl: string): Promise<void> {
+    try {
+      // Extract the file path from the public URL
+      // URL format: https://[project].supabase.co/storage/v1/object/public/deals/userId/dealId_logo.ext
+      const urlParts = logoUrl.split('/storage/v1/object/public/deals/')
+      if (urlParts.length < 2) {
+        throw new Error('Invalid logo URL format')
+      }
+
+      const filePath = urlParts[1]
+
+      const { error } = await supabaseServer.storage
+        .from(STORAGE_CONFIG.DOCUMENTS_DEALS)
+        .remove([filePath])
+
+      if (error) {
+        throw new Error(`Storage deletion failed: ${error.message}`)
+      }
+
+      logger.info(`Successfully deleted deal logo: ${filePath}`)
+    } catch (error) {
+      logger.error('Deal logo deletion error', error instanceof Error ? error : new Error(String(error)))
+      throw new Error(`Failed to delete deal logo: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
 }
