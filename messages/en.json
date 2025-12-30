@@ -1447,6 +1447,26 @@
             "updateLimit": "Failed to update spending limit",
             "invalidAmount": "Please enter a valid amount"
           }
+        },
+        "grantSubscription": {
+          "title": "Grant Subscription",
+          "description": "Manually grant a subscription plan to a user. This bypasses Stripe and updates the database directly. Current period usage will be reset.",
+          "userLabel": "User",
+          "selectUser": "Select a user...",
+          "searchUser": "Search by email...",
+          "noUserFound": "No user found.",
+          "planLabel": "Plan",
+          "intervalLabel": "Billing Interval",
+          "grantButton": "Grant Subscription",
+          "granting": "Granting...",
+          "success": {
+            "title": "Subscription Granted",
+            "description": "The subscription has been successfully granted to the user"
+          },
+          "errors": {
+            "selectUser": "Please select a user",
+            "grantFailed": "Failed to grant subscription"
+          }
         }
       },
       "deals": {

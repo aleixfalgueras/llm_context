@@ -1,11 +1,11 @@
 import {currentUser} from '@clerk/nextjs/server'
 import {logger} from '@/lib/logger'
-import {AdminDashboardData, FeedbackItem, UpdateSpendingLimitResponse} from '@/lib/types/admin-types'
+import {AdminDashboardData, FeedbackItem, UpdateSpendingLimitResponse, GrantSubscriptionResponse} from '@/lib/types/admin-types'
 import {clearAllCaches} from '@/services/subscription/subscription-cache'
 import {FeedbackService, isValidFeedbackState} from '@/services/feedback-service'
 import {FeedbackOperations} from '@/database/feedback-operations'
 import {SubscriptionUsageOperations} from '@/database/subscription-usage-operations'
-import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus, BillingInterval} from '@prisma/client'
 import {SubscriptionWithUsage} from "@/lib/types/subscription-types"
 import {ADMIN_EMAILS} from '@/lib/config'
 import {DealService} from '@/services/deal-service'
@@ -330,6 +330,64 @@ export class AdminService {
     } catch (error) {
       logger.error(`Failed to update user ${targetUserId} custom spending limit`, error as Error)
       throw new Error('Failed to update spending limit')
+    }
+  }
+
+  /**
+   * Grant a subscription to a user (admin only)
+   * This bypasses Stripe and directly updates the database
+   */
+  static async grantUserSubscription(
+    adminUserId: string,
+    targetUserId: string,
+    plan: SubscriptionPlan,
+    billingInterval: BillingInterval
+  ): Promise<GrantSubscriptionResponse> {
+    const isAdmin = await this.isAdminUser(adminUserId)
+    if (!isAdmin) {
+      throw new Error('Unauthorized: Admin access required')
+    }
+
+    // Validate target user exists
+    const existingSubscription = await SubscriptionUsageOperations.findByUserId(targetUserId)
+    if (!existingSubscription) {
+      throw new Error('User not found: No subscription record exists for this user')
+    }
+
+    try {
+      const updatedSubscription = await SubscriptionUsageOperations.grantSubscription(
+        targetUserId,
+        plan,
+        billingInterval
+      )
+
+      logger.info('Admin granted subscription to user', {
+        userId: adminUserId,
+        metadata: {
+          targetUserId,
+          plan,
+          billingInterval,
+          periodEnd: updatedSubscription.currentPeriodEnd.toISOString()
+        }
+      })
+
+      return {
+        success: true,
+        message: `Successfully granted ${plan} plan (${billingInterval}) to user`,
+        subscription: {
+          plan: updatedSubscription.plan,
+          billingInterval: updatedSubscription.billingInterval,
+          currentPeriodStart: updatedSubscription.currentPeriodStart,
+          currentPeriodEnd: updatedSubscription.currentPeriodEnd,
+          spending_limit_usd: updatedSubscription.spending_limit_usd
+        }
+      }
+    } catch (error) {
+      logger.error('Failed to grant subscription', error as Error, {
+        userId: adminUserId,
+        metadata: { targetUserId, plan, billingInterval }
+      })
+      throw new Error('Failed to grant subscription')
     }
   }
 

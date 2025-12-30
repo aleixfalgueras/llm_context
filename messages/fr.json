@@ -1447,6 +1447,26 @@
             "updateLimit": "Échec de la mise à jour de la limite de dépense",
             "invalidAmount": "Veuillez saisir un montant valide"
           }
+        },
+        "grantSubscription": {
+          "title": "Accorder un Abonnement",
+          "description": "Accorder manuellement un abonnement à un utilisateur. Ceci contourne Stripe et met à jour la base de données directement. L'utilisation de la période en cours sera réinitialisée.",
+          "userLabel": "Utilisateur",
+          "selectUser": "Sélectionner un utilisateur...",
+          "searchUser": "Rechercher par email...",
+          "noUserFound": "Aucun utilisateur trouvé.",
+          "planLabel": "Plan",
+          "intervalLabel": "Intervalle de Facturation",
+          "grantButton": "Accorder l'Abonnement",
+          "granting": "Attribution...",
+          "success": {
+            "title": "Abonnement Accordé",
+            "description": "L'abonnement a été accordé avec succès à l'utilisateur"
+          },
+          "errors": {
+            "selectUser": "Veuillez sélectionner un utilisateur",
+            "grantFailed": "Échec de l'attribution de l'abonnement"
+          }
         }
       },
       "deals": {
