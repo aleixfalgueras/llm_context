@@ -307,6 +307,77 @@ export class SubscriptionUsageOperations extends BaseOperations {
   }
 
   /**
+   * Grant a subscription to a user (admin action)
+   * Updates subscription and deletes current usage in a transaction
+   * Stripe fields are not modified (remain null for granted subscriptions)
+   */
+  static async grantSubscription(
+    userId: string,
+    plan: SubscriptionPlan,
+    billingInterval: BillingInterval
+  ): Promise<UserSubscription> {
+    try {
+      const now = new Date()
+      const periodEnd = billingInterval === BillingInterval.annual
+        ? new Date(now.getFullYear() + 1, now.getMonth(), now.getDate())
+        : new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
+
+      const spendingLimit = SUBSCRIPTION_PLAN_DETAIL[plan].spending_limit_usd
+
+      return await prisma.$transaction(async (tx) => {
+        // Get existing subscription to find current period for usage deletion
+        const existingSub = await tx.userSubscription.findUnique({
+          where: { userId }
+        })
+
+        // Delete current usage if subscription exists
+        if (existingSub) {
+          await tx.userUsage.deleteMany({
+            where: {
+              userId,
+              billingPeriodStart: existingSub.currentPeriodStart,
+              billingPeriodEnd: existingSub.currentPeriodEnd
+            }
+          })
+        }
+
+        // Update/create subscription with new plan (Stripe fields remain unchanged)
+        return await tx.userSubscription.upsert({
+          where: { userId },
+          update: {
+            plan,
+            status: SubscriptionStatus.active,
+            billingInterval,
+            currentPeriodStart: now,
+            currentPeriodEnd: periodEnd,
+            spending_limit_usd: spendingLimit,
+            cancelAtPeriodEnd: false,
+            pendingPlanChange: null,
+            canceledAt: null,
+          },
+          create: {
+            userId,
+            plan,
+            status: SubscriptionStatus.active,
+            billingInterval,
+            currentPeriodStart: now,
+            currentPeriodEnd: periodEnd,
+            spending_limit_usd: spendingLimit,
+            cancelAtPeriodEnd: false,
+            pendingPlanChange: null,
+          }
+        })
+      })
+    } catch (error) {
+      logger.error('Failed to grant subscription', error as Error, {
+        userId,
+        metadata: { plan, billingInterval }
+      })
+      throw error
+    }
+  }
+
+  /**
    * Admin-specific: Get dashboard statistics
    * Returns total users, recent users, and subscription counts by plan
    */

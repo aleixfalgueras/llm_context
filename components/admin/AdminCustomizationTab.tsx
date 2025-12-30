@@ -5,14 +5,17 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Badge} from '@/components/ui/badge'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
-import {Check, Edit2, Loader2, RotateCcw, Search, Settings, X} from 'lucide-react'
+import {Check, ChevronsUpDown, Edit2, Gift, Loader2, RotateCcw, Search, Settings, X} from 'lucide-react'
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
 import {BadgeVariant} from '@/lib/enums'
-import {SubscriptionPlan, SubscriptionStatus} from '@prisma/client'
+import {SubscriptionPlan, SubscriptionStatus, BillingInterval} from '@prisma/client'
 import {useToast} from '@/hooks/use-toast'
 import {handleClientApiError} from '@/lib/api/api-toast'
 import {useTranslations} from '@/lib/translations/context'
-import {SubscriptionWithUsage} from "@/lib/types/subscription-types";
+import {SubscriptionWithUsage, SUBSCRIPTION_PLAN_DETAIL} from "@/lib/types/subscription-types";
+import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
+import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command'
+import {cn} from '@/lib/utils/general'
 
 /**
  * Check if a subscription is active (admin-specific helper)
@@ -66,6 +69,13 @@ export default function AdminCustomizationTab() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [newSpendingLimit, setNewSpendingLimit] = useState<string>('')
   const [updatingSpendingLimit, setUpdatingSpendingLimit] = useState<boolean>(false)
+
+  // Grant subscription state
+  const [grantUserId, setGrantUserId] = useState<string>('')
+  const [grantPlan, setGrantPlan] = useState<SubscriptionPlan>(SubscriptionPlan.knight)
+  const [grantBillingInterval, setGrantBillingInterval] = useState<BillingInterval>(BillingInterval.monthly)
+  const [grantingSubscription, setGrantingSubscription] = useState<boolean>(false)
+  const [grantUserOpen, setGrantUserOpen] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -156,6 +166,72 @@ export default function AdminCustomizationTab() {
     }
   }
 
+  const handleGrantSubscription = async () => {
+    if (!grantUserId) {
+      toast({
+        title: 'Error',
+        description: t('dashboard.customization.grantSubscription.errors.selectUser'),
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setGrantingSubscription(true)
+    try {
+      const response = await fetch('/api/admin/users/grant-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUserId: grantUserId,
+          plan: grantPlan,
+          billingInterval: grantBillingInterval
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          error: t('dashboard.customization.grantSubscription.errors.grantFailed')
+        }))
+        throw new Error(errorData.error)
+      }
+
+      // Update local users list to reflect the change
+      setUsers(prev =>
+        prev.map(user =>
+          user.userId === grantUserId
+            ? {
+                ...user,
+                plan: grantPlan,
+                billingInterval: grantBillingInterval,
+                status: SubscriptionStatus.active,
+                currentUsage: 0,
+                spending_limit_usd: SUBSCRIPTION_PLAN_DETAIL[grantPlan].spending_limit_usd
+              }
+            : user
+        )
+      )
+
+      toast({
+        title: t('dashboard.customization.grantSubscription.success.title'),
+        description: t('dashboard.customization.grantSubscription.success.description')
+      })
+
+      // Reset form
+      setGrantUserId('')
+      setGrantPlan(SubscriptionPlan.knight)
+      setGrantBillingInterval(BillingInterval.monthly)
+
+    } catch (error) {
+      console.error('Error granting subscription:', error)
+      const errorMessage = error instanceof Error
+        ? error.message
+        : t('dashboard.customization.grantSubscription.errors.grantFailed')
+      handleClientApiError(errorMessage, t('dashboard.customization.grantSubscription.errors.grantFailed'))
+    } finally {
+      setGrantingSubscription(false)
+    }
+  }
+
   const filteredUsers = useMemo(() => {
     let result = users
     
@@ -213,6 +289,141 @@ export default function AdminCustomizationTab() {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Grant Subscription Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-medium mb-2">
+              {t('dashboard.customization.grantSubscription.title')}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('dashboard.customization.grantSubscription.description')}
+            </p>
+
+            <div className="border rounded-lg p-4 bg-muted/30">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* User Selection (Combobox) */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t('dashboard.customization.grantSubscription.userLabel')}
+                  </label>
+                  <Popover open={grantUserOpen} onOpenChange={setGrantUserOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={grantUserOpen}
+                        className="w-full justify-between"
+                        disabled={loadingUsers || grantingSubscription}
+                      >
+                        {grantUserId
+                          ? users.find(u => u.userId === grantUserId)?.email || grantUserId
+                          : t('dashboard.customization.grantSubscription.selectUser')}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder={t('dashboard.customization.grantSubscription.searchUser')} />
+                        <CommandList>
+                          <CommandEmpty>{t('dashboard.customization.grantSubscription.noUserFound')}</CommandEmpty>
+                          <CommandGroup>
+                            {users.map((user) => (
+                              <CommandItem
+                                key={user.userId}
+                                value={`${user.email || ''} ${user.userId}`}
+                                onSelect={() => {
+                                  setGrantUserId(user.userId)
+                                  setGrantUserOpen(false)
+                                }}
+                              >
+                                <div className="flex items-center gap-2 flex-1">
+                                  <div className="flex-1 min-w-0">
+                                    <span className="truncate">{user.email || user.userId}</span>
+                                    <Badge variant={BadgeVariant.OUTLINE} className="ml-2 capitalize text-xs">
+                                      {user.plan}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <Check
+                                  className={cn(
+                                    "ml-2 h-4 w-4",
+                                    grantUserId === user.userId ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Plan Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t('dashboard.customization.grantSubscription.planLabel')}
+                  </label>
+                  <Select
+                    value={grantPlan}
+                    onValueChange={(value) => setGrantPlan(value as SubscriptionPlan)}
+                    disabled={grantingSubscription}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={SubscriptionPlan.knight}>Knight</SelectItem>
+                      <SelectItem value={SubscriptionPlan.master}>Master</SelectItem>
+                      <SelectItem value={SubscriptionPlan.jedi}>Jedi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Billing Interval Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t('dashboard.customization.grantSubscription.intervalLabel')}
+                  </label>
+                  <Select
+                    value={grantBillingInterval}
+                    onValueChange={(value) => setGrantBillingInterval(value as BillingInterval)}
+                    disabled={grantingSubscription}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={BillingInterval.monthly}>Monthly</SelectItem>
+                      <SelectItem value={BillingInterval.annual}>Annual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Grant Button */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium invisible">Action</label>
+                  <Button
+                    onClick={handleGrantSubscription}
+                    disabled={!grantUserId || grantingSubscription}
+                    className="w-full"
+                  >
+                    {grantingSubscription ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        {t('dashboard.customization.grantSubscription.granting')}
+                      </>
+                    ) : (
+                      <>
+                        <Gift className="h-4 w-4 mr-2" />
+                        {t('dashboard.customization.grantSubscription.grantButton')}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div>
             <h3 className="text-lg font-medium mb-2">{t('dashboard.customization.subscriptionUsage.title')}</h3>
             <p className="text-sm text-muted-foreground mb-4">

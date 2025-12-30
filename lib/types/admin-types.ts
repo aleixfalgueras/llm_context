@@ -3,7 +3,7 @@
  * Contains interfaces for feedback management and dashboard data structures
  */
 
-import { Deal } from '@prisma/client'
+import { Deal, SubscriptionPlan, BillingInterval } from '@prisma/client'
 
 export interface FeedbackItem {
   id: string
@@ -43,4 +43,16 @@ export interface UpdateSpendingLimitResponse {
   success: boolean
   message: string
   updatedLimit?: number | null
+}
+
+export interface GrantSubscriptionResponse {
+  success: boolean
+  message: string
+  subscription?: {
+    plan: SubscriptionPlan
+    billingInterval: BillingInterval
+    currentPeriodStart: Date
+    currentPeriodEnd: Date
+    spending_limit_usd: number
+  }
 }
