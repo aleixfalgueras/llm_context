@@ -23,6 +23,26 @@ interface AIServicesClientProps {
 export function AIServicesClient({ clients }: AIServicesClientProps) {
   const t = useTranslations('aiServices')
   const { isFreeMode, subscription } = useSubscriptionStatus()
+  const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
+  const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
+  const [isImageCreatorDialogOpen, setIsImageCreatorDialogOpen] = useState(false)
+  const [selectedClient, setSelectedClient] = useState<any>(null)
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
+  const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
+  const [isConfigOpen, setIsConfigOpen] = useState(false)
+
+  // Default visibility - all services visible by default
+  const defaultVisibility = {
+    'meeting-report': true,
+    'custom-document': true,
+    'image-creator': true,
+    'podcast-creator': true,
+  }
+
+  const {
+    value: visibleServices,
+    setValue: setVisibleServices
+  } = useLocalStorage('ai-services-visibility', defaultVisibility)
 
   // Show upgrade prompt for free Apprentice users
   if (!subscription.isLoading && isFreeMode()) {
@@ -33,27 +53,6 @@ export function AIServicesClient({ clients }: AIServicesClientProps) {
       />
     )
   }
-
-  const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
-  const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
-  const [isImageCreatorDialogOpen, setIsImageCreatorDialogOpen] = useState(false)
-  const [selectedClient, setSelectedClient] = useState<any>(null)
-  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
-  const [documentToHighlight, setDocumentToHighlight] = useState<string | null>(null)
-  const [isConfigOpen, setIsConfigOpen] = useState(false)
-  
-  // Default visibility - all services visible by default
-  const defaultVisibility = {
-    'meeting-report': true,
-    'custom-document': true,
-    'image-creator': true,
-    'podcast-creator': true,
-  }
-
-  const { 
-    value: visibleServices, 
-    setValue: setVisibleServices 
-  } = useLocalStorage('ai-services-visibility', defaultVisibility)
 
   // Save service visibility preferences whenever they change
   const handleServiceVisibilityChange = (serviceId: string, visible: boolean) => {

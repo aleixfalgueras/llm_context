@@ -29,6 +29,9 @@ export function AssistantLandingClient({ chats, clients }: AssistantLandingClien
   const tContext = useTranslations('clientContext')
   const contextFields = useMemo(() => getClientContextFields(tContext), [tContext])
   const { isFreeMode, subscription } = useSubscriptionStatus()
+  const [selectedClient, setSelectedClient] = useState<string | null>(null)
+  const [clientContext, setClientContext] = useState<ClientContextSelection>(DEFAULT_CLIENT_CONTEXT)
+  const [isCreatingChat, setIsCreatingChat] = useState(false)
 
   // Show upgrade prompt for free Apprentice users
   if (!subscription.isLoading && isFreeMode()) {
@@ -39,9 +42,6 @@ export function AssistantLandingClient({ chats, clients }: AssistantLandingClien
       />
     )
   }
-  const [selectedClient, setSelectedClient] = useState<string | null>(null)
-  const [clientContext, setClientContext] = useState<ClientContextSelection>(DEFAULT_CLIENT_CONTEXT)
-  const [isCreatingChat, setIsCreatingChat] = useState(false)
 
   const selectedClientObj = clients.find(client => client.id === selectedClient)
 
