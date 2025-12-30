@@ -8,8 +8,13 @@ import { LandingBackground } from '@/components/landing/landing-background'
 import { PlanCard } from '@/components/subscription/plan-card'
 import { SUBSCRIPTION_PLAN_DETAIL } from '@/lib/types/subscription-types'
 import { BillingInterval, SubscriptionPlan } from '@prisma/client'
+import { ResolvedPlanTexts } from '@/lib/utils/subscription-features'
 
-export function MembershipPageClient() {
+interface MembershipPageClientProps {
+  resolvedFeatures: Record<string, ResolvedPlanTexts>
+}
+
+export function MembershipPageClient({ resolvedFeatures }: MembershipPageClientProps) {
   const tSubscription = useTranslations('subscription')
   const [billingInterval, setBillingInterval] = useState<BillingInterval>(BillingInterval.annual)
 
@@ -82,6 +87,8 @@ export function MembershipPageClient() {
                 billingInterval={billingInterval}
                 showButton={false}
                 className="bg-gray-800/60 border-cian hover:shadow-lg hover:shadow-lavanda/20 transition-all duration-300"
+                resolvedFeatures={resolvedFeatures[planId].features}
+                resolvedDescription={resolvedFeatures[planId].description}
               />
             ))}
           </div>

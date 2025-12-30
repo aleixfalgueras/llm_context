@@ -24,7 +24,7 @@ export enum ModelTier {
 }
 
 // Subscription Plans Configuration
-// Note: description and features_list now contain translation keys, not actual text
+// Note: description and features_key contain database keys for dynamic text lookup
 export const SUBSCRIPTION_PLAN_DETAIL = {
   [SubscriptionPlan.apprentice]: {
     id: SubscriptionPlan.apprentice,
@@ -36,12 +36,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     spending_limit_usd: 0, // Free plan - no AI usage allowed
     commissionLimit: 100,
     description: 'subscription.plans.apprentice.description',
-    features_list: [
-      'subscription.plans.apprentice.features.0',
-      'subscription.plans.apprentice.features.1',
-      'subscription.plans.apprentice.features.2',
-      'subscription.plans.apprentice.features.3'
-    ]
+    features_key: 'subscription.plans.apprentice.features'
   },
   [SubscriptionPlan.knight]: {
     id: SubscriptionPlan.knight,
@@ -53,12 +48,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     spending_limit_usd: 14.5, // 12.5€
     commissionLimit: 500,
     description: 'subscription.plans.knight.description',
-    features_list: [
-      'subscription.plans.knight.features.0',
-      'subscription.plans.knight.features.1',
-      'subscription.plans.knight.features.2',
-      'subscription.plans.knight.features.3'
-    ]
+    features_key: 'subscription.plans.knight.features'
   },
   [SubscriptionPlan.master]: {
     id: SubscriptionPlan.master,
@@ -70,14 +60,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     spending_limit_usd: 58, // 50€
     commissionLimit: 5000,
     description: 'subscription.plans.master.description',
-    features_list: [
-      'subscription.plans.master.features.0',
-      'subscription.plans.master.features.1',
-      'subscription.plans.master.features.2',
-      'subscription.plans.master.features.3',
-      'subscription.plans.master.features.4',
-      'subscription.plans.master.features.5'
-    ]
+    features_key: 'subscription.plans.master.features'
   },
   [SubscriptionPlan.jedi]: {
     id: SubscriptionPlan.jedi,
@@ -89,15 +72,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     spending_limit_usd: 145, // 125€
     commissionLimit: 50000,
     description: 'subscription.plans.jedi.description',
-    features_list: [
-      'subscription.plans.jedi.features.0',
-      'subscription.plans.jedi.features.1',
-      'subscription.plans.jedi.features.2',
-      'subscription.plans.jedi.features.3',
-      'subscription.plans.jedi.features.4',
-      'subscription.plans.jedi.features.5',
-      'subscription.plans.jedi.features.6'
-    ]
+    features_key: 'subscription.plans.jedi.features'
   }
 } as const
 
