@@ -336,6 +336,10 @@
   },
   "assistant": {
     "title": "AI Chat Assistant",
+    "upgradeRequired": {
+      "title": "Premium Feature",
+      "description": "The AI Assistant is available to premium subscribers. Upgrade your plan to unlock intelligent conversations and client context features."
+    },
     "chats": "Chats",
     "deleteAllChats": "Delete All Chats",
     "clickToConfirm": "Click to Confirm",
@@ -491,7 +495,7 @@
     },
     "plans": {
       "apprentice": {
-        "description": "Perfect for individuals starting their journey",
+        "description": "Free plan with basic features to get started",
         "features": [
           "🤖 Access to MIA AI platform",
           "👥 Discount on access to local meetups about AI Education & Defi",
@@ -540,6 +544,7 @@
     "planCard": {
       "perMonth": "/month",
       "perYear": "/year",
+      "free": "Free",
       "savings": "Save",
       "processing": "Processing...",
       "canceling": "Canceling...",
@@ -611,6 +616,9 @@
       }
     },
     "statusBanners": {
+      "freePlan": {
+        "active": "Apprentice Plan (Free)"
+      },
       "freeTrial": {
         "active": "Free Trial Active (Apprentice Plan) - {{days}} days remaining",
         "expires": "Trial expires on {{date}}"
@@ -651,6 +659,9 @@
       "errorLoadingUsage": "Failed to load usage information",
       "limitReached": "You've reached your spending limit. Messages may be blocked.",
       "approachingLimit": "You're approaching your spending limit."
+    },
+    "upgradePrompt": {
+      "upgradeButton": "View Plans"
     }
   },
   "affiliation": {
@@ -1110,6 +1121,10 @@
   "aiServices": {
     "title": "AI Services",
     "description": "Leverage AI to create personalized marketing content for your clients",
+    "upgradeRequired": {
+      "title": "Premium Feature",
+      "description": "AI Services are available to premium subscribers. Upgrade your plan to access meeting reports, document generation, and image creation."
+    },
     "configureServices": "Configure Services",
     "serviceVisibilitySettings": "Service Visibility Settings",
     "getStarted": "Get Started",

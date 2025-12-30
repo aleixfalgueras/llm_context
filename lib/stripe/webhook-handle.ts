@@ -1,10 +1,11 @@
 // Handle upgrade process atomically - Single source of truth for upgrades
 import Stripe from "stripe";
 import {logger} from "@/lib/logger";
-import {cancelSubscriptionImmediately, synchronizeSubscriptionWithStripe} from "@/lib/stripe/stripe-subscription";
+import {cancelSubscriptionImmediately, synchronizeSubscriptionWithStripe, resetToFreeApprentice} from "@/lib/stripe/stripe-subscription";
 import {stripe} from "@/lib/stripe/stripe";
 import {prisma} from "@/lib/prisma";
 import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils";
+import {SubscriptionPlan} from "@prisma/client";
 
 /**
  * Validates the state before processing a subscription upgrade to prevent race conditions.
@@ -371,6 +372,30 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
           deletedSubscriptionId: subscription.id,
           currentSubscriptionId: currentSubscription.stripeSubscriptionId,
           customerId: subscription.customer,
+        }
+      })
+      return
+    }
+
+    // Check if this is a downgrade to free Apprentice plan
+    // In that case, reset to free plan instead of marking as canceled
+    if (dbSubscription.pendingPlanChange === SubscriptionPlan.apprentice) {
+      logger.info('Processing downgrade to free Apprentice plan', {
+        metadata: {
+          subscriptionId: subscription.id,
+          customerId: subscription.customer,
+          userId: dbSubscription.userId,
+          previousPlan: dbSubscription.plan,
+        }
+      })
+
+      await resetToFreeApprentice(dbSubscription.userId)
+
+      logger.info('Successfully downgraded to free Apprentice plan', {
+        metadata: {
+          subscriptionId: subscription.id,
+          customerId: subscription.customer,
+          userId: dbSubscription.userId,
         }
       })
       return

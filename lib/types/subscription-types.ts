@@ -29,10 +29,11 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   [SubscriptionPlan.apprentice]: {
     id: SubscriptionPlan.apprentice,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.apprentice],
-    price: 20,
-    priceAnnual: 192, // 20 * 12 * 0.8 (20% discount)
+    price: 0,
+    priceAnnual: 0,
     currency: 'EUR',
-    spending_limit_usd: 5.8, // 5€
+    isFree: true,
+    spending_limit_usd: 0, // Free plan - no AI usage allowed
     commissionLimit: 100,
     description: 'subscription.plans.apprentice.description',
     features_list: [
@@ -48,6 +49,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 50,
     priceAnnual: 480, // 50 * 12 * 0.8 (20% discount)
     currency: 'EUR',
+    isFree: false,
     spending_limit_usd: 14.5, // 12.5€
     commissionLimit: 500,
     description: 'subscription.plans.knight.description',
@@ -64,6 +66,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 200,
     priceAnnual: 1920, // 200 * 12 * 0.8 (20% discount)
     currency: 'EUR',
+    isFree: false,
     spending_limit_usd: 58, // 50€
     commissionLimit: 5000,
     description: 'subscription.plans.master.description',
@@ -82,6 +85,7 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
     price: 500,
     priceAnnual: 4800, // 500 * 12 * 0.8 (20% discount)
     currency: 'EUR',
+    isFree: false,
     spending_limit_usd: 145, // 125€
     commissionLimit: 50000,
     description: 'subscription.plans.jedi.description',

@@ -23,29 +23,25 @@ export function SubscriptionStatusBanners({
   isActiveCancelled,
   isPendingDowngrade,
   isPastDueOrUnpaid,
-  currentPeriodEnd,
-  getRemainingTrialDays,
   getRemainingActiveDays,
   getRemainingDowngradeDays,
   capitalizePlanName,
   pendingPlanChange,
+  currentPeriodEnd,
   onRetryPayment,
   retryPaymentLoading
 }: SubscriptionStatusBannersProps) {
   const t = useTranslations('subscription')
   return (
     <>
-      {/* Free Trial Banner */}
-      {isFreeMode && currentPeriodEnd && (
+      {/* Free Apprentice Plan Banner */}
+      {isFreeMode && (
         <div className="mt-8 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border border-green-200 dark:border-green-700">
             <span className="text-[18px]">
-              {t('statusBanners.freeTrial.active', { days: getRemainingTrialDays() })}
+              {t('statusBanners.freePlan.active')}
             </span>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            {t('statusBanners.freeTrial.expires', { date: currentPeriodEnd })}
-          </p>
         </div>
       )}
       

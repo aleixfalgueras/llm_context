@@ -23,10 +23,10 @@ export const POST = withEnhancedApi(
       return apiSuccess({ url: portalSession.url })
     } catch (error) {
       if (error instanceof Error && error.message.includes('No Stripe customer found')) {
-        logger.info('Customer portal access attempted during free trial period', { 
+        logger.info('Customer portal access attempted by free plan user', {
           userId,
           metadata: {
-            message: 'User has no Stripe customer - expected behavior for free trial users'
+            message: 'User has no Stripe customer - expected behavior for free plan users'
           }
         })
         throw new Error(SubscriptionErrorCode.NO_SUBSCRIPTION_FOUND)

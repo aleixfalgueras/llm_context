@@ -88,20 +88,26 @@ export function PlanCard({
         <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{t(plan.description)}</CardDescription>
         <div className="mt-4 pt-4 pb-2 flex flex-col items-center justify-center min-h-[4rem]">
           <div className="flex items-end">
-            <span className="text-4xl font-bold leading-none">
-              {billingInterval === BillingInterval.annual && plan.priceAnnual 
-                ? plan.priceAnnual 
-                : plan.price}€
-            </span>
-            {plan.price > 0 && (
-              <span className="text-gray-500 mb-1">
-                {billingInterval === BillingInterval.annual 
-                  ? tSubscription('planCard.perYear') 
-                  : tSubscription('planCard.perMonth')}
+            {plan.price === 0 ? (
+              <span className="text-4xl font-bold leading-none text-green-600 dark:text-green-400">
+                {tSubscription('planCard.free')}
               </span>
+            ) : (
+              <>
+                <span className="text-4xl font-bold leading-none">
+                  {billingInterval === BillingInterval.annual && plan.priceAnnual
+                    ? plan.priceAnnual
+                    : plan.price}€
+                </span>
+                <span className="text-gray-500 mb-1">
+                  {billingInterval === BillingInterval.annual
+                    ? tSubscription('planCard.perYear')
+                    : tSubscription('planCard.perMonth')}
+                </span>
+              </>
             )}
           </div>
-          {billingInterval === BillingInterval.annual && plan.priceAnnual && plan.price > 0 && (
+          {billingInterval === BillingInterval.annual && plan.price > 0 && (
             <div className="mt-1 text-sm text-green-600 dark:text-green-400">
               {tSubscription('planCard.savings')} {getAnnualSavings(planId as SubscriptionPlan)}€
             </div>

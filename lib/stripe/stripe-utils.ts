@@ -5,27 +5,29 @@ import Stripe from 'stripe'
 import {SubscriptionService} from "@/services/subscription/subscription-service";
 import { SubscriptionPlan, BillingInterval } from '@prisma/client';
 
-// Monthly price IDs
+// Monthly price IDs (Apprentice is free - no Stripe price)
 export const STRIPE_MONTHLY_PRICE_IDS = {
-  [SubscriptionPlan.apprentice]: process.env.STRIPE_APPRENTICE_PRICE_ID || 'price_apprentice_placeholder',
   [SubscriptionPlan.knight]: process.env.STRIPE_KNIGHT_PRICE_ID || 'price_knight_placeholder',
   [SubscriptionPlan.master]: process.env.STRIPE_MASTER_PRICE_ID || 'price_master_placeholder',
   [SubscriptionPlan.jedi]: process.env.STRIPE_JEDI_PRICE_ID || 'price_jedi_placeholder',
 } as const
 
-// Annual price IDs (with 20% discount)
+// Annual price IDs (with 20% discount) - Apprentice is free, no Stripe price
 export const STRIPE_ANNUAL_PRICE_IDS = {
-  [SubscriptionPlan.apprentice]: process.env.STRIPE_APPRENTICE_ANNUAL_PRICE_ID || 'price_apprentice_annual_placeholder',
   [SubscriptionPlan.knight]: process.env.STRIPE_KNIGHT_ANNUAL_PRICE_ID || 'price_knight_annual_placeholder',
   [SubscriptionPlan.master]: process.env.STRIPE_MASTER_ANNUAL_PRICE_ID || 'price_master_annual_placeholder',
   [SubscriptionPlan.jedi]: process.env.STRIPE_JEDI_ANNUAL_PRICE_ID || 'price_jedi_annual_placeholder',
 } as const
 
 // Helper to get the correct price ID based on billing interval
-export function getStripePriceId(plan: SubscriptionPlan, interval: BillingInterval = BillingInterval.monthly): string {
-  return interval === BillingInterval.annual 
-    ? STRIPE_ANNUAL_PRICE_IDS[plan] 
-    : STRIPE_MONTHLY_PRICE_IDS[plan];
+// Note: Apprentice is free and has no Stripe price - returns undefined for it
+export function getStripePriceId(plan: SubscriptionPlan, interval: BillingInterval = BillingInterval.monthly): string | undefined {
+  if (plan === SubscriptionPlan.apprentice) {
+    return undefined; // Apprentice is free, no Stripe price
+  }
+
+  const priceIds = interval === BillingInterval.annual ? STRIPE_ANNUAL_PRICE_IDS : STRIPE_MONTHLY_PRICE_IDS;
+  return priceIds[plan as keyof typeof priceIds];
 }
 
 /**

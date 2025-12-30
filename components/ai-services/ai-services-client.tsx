@@ -13,6 +13,8 @@ import { ServiceStatus } from '@/lib/enums'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { useTranslations } from '@/lib/translations/context'
 import { UsageIndicator } from '@/components/subscription/usage-indicator'
+import { useSubscriptionStatus } from '@/hooks/subscription/use-subscription-status'
+import { UpgradePrompt } from '@/components/subscription/upgrade-prompt'
 
 interface AIServicesClientProps {
   clients: any[]
@@ -20,6 +22,18 @@ interface AIServicesClientProps {
 
 export function AIServicesClient({ clients }: AIServicesClientProps) {
   const t = useTranslations('aiServices')
+  const { isFreeMode, subscription } = useSubscriptionStatus()
+
+  // Show upgrade prompt for free Apprentice users
+  if (!subscription.isLoading && isFreeMode()) {
+    return (
+      <UpgradePrompt
+        title={t('upgradeRequired.title')}
+        description={t('upgradeRequired.description')}
+      />
+    )
+  }
+
   const [isMeetingReportDialogOpen, setIsMeetingReportDialogOpen] = useState(false)
   const [isCustomDocumentDialogOpen, setIsCustomDocumentDialogOpen] = useState(false)
   const [isImageCreatorDialogOpen, setIsImageCreatorDialogOpen] = useState(false)

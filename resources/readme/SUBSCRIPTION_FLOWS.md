@@ -1,5 +1,14 @@
 # Subscription Flows Documentation
 
+## Plan Structure
+
+- **Apprentice (Free)**: Default plan for all users, never expires, $5.80/month spending limit
+- **Knight**: Paid plan ($50/month)
+- **Master**: Paid plan ($200/month)
+- **Jedi**: Paid plan ($500/month)
+
+**Free Plan Detection**: `plan === 'apprentice' && stripeSubscriptionId === null`
+
 ## Overview: Billing Period Usage Integration
 
 **⚠️ IMPORTANT**: The application uses **billing period-based usage tracking** that aligns with Stripe subscription billing cycles. This means:
@@ -101,6 +110,31 @@
   - Clear pendingPlanChange and stripeScheduleId if match
   - Synchronize subscription (synchronizeSubscriptionWithStripe in stripe-subscription.ts)
   - Mark event as processed (markEventProcessed in webhook-event.ts)
+
+## 3b. Downgrade to Free Apprentice Flow
+
+**User initiates downgrade from paid plan to free Apprentice**
+
+Since Apprentice is free and has no Stripe price, this flow is different from paid plan downgrades:
+
+- API call to create checkout (create-checkout/route.ts)
+- Check existing subscription (SubscriptionOperations.findByUserId)
+- Detect downgrade to Apprentice (targetPlan === SubscriptionPlan.apprentice)
+- Call cancelDowngradeToApprentice (stripe-subscription.ts)
+  - Retrieve subscription to get period end date
+  - Mark subscription for cancellation at period end (cancel_at_period_end: true)
+  - Update database with cancelAtPeriodEnd and pendingPlanChange = 'apprentice'
+  - Invalidate user caches
+- Return success response with effective date
+- **At end of billing period, Stripe subscription is deleted**
+- Stripe webhook: customer.subscription.deleted (webhook/route.ts)
+  - handleSubscriptionDeleted detects pendingPlanChange === 'apprentice'
+  - Call resetToFreeApprentice (stripe-subscription.ts)
+    - Set plan to apprentice, status to active
+    - Clear stripeSubscriptionId, stripePriceId, etc.
+    - Set currentPeriodEnd to far future (2099)
+    - Set spending_limit_usd to Apprentice limit
+  - User is now on free Apprentice plan
 
 ## 4. Cancel Downgrade Flow
 
