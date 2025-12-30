@@ -41,8 +41,8 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   [SubscriptionPlan.knight]: {
     id: SubscriptionPlan.knight,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.knight],
-    price: 50,
-    priceAnnual: 480, // 50 * 12 * 0.8 (20% discount)
+    price: 14.99,
+    priceAnnual: 143.90, // 14.99 * 12 * 0.8 (20% discount)
     currency: 'EUR',
     isFree: false,
     spending_limit_usd: 14.5, // 12.5€
@@ -53,8 +53,8 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   [SubscriptionPlan.master]: {
     id: SubscriptionPlan.master,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.master],
-    price: 200,
-    priceAnnual: 1920, // 200 * 12 * 0.8 (20% discount)
+    price: 49.99,
+    priceAnnual: 479.90, // 49.99 * 12 * 0.8 (20% discount)
     currency: 'EUR',
     isFree: false,
     spending_limit_usd: 58, // 50€
@@ -65,8 +65,8 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
   [SubscriptionPlan.jedi]: {
     id: SubscriptionPlan.jedi,
     name: SUBSCRIPTION_PLAN_NAMES[SubscriptionPlan.jedi],
-    price: 500,
-    priceAnnual: 4800, // 500 * 12 * 0.8 (20% discount)
+    price: 349,
+    priceAnnual: 3350, // ~349 * 12 * 0.8 (20% discount)
     currency: 'EUR',
     isFree: false,
     spending_limit_usd: 145, // 125€
@@ -80,7 +80,8 @@ export const SUBSCRIPTION_PLAN_DETAIL = {
 export function getAnnualSavings(plan: SubscriptionPlan): number {
   const planDetail = SUBSCRIPTION_PLAN_DETAIL[plan];
   const monthlyTotal = planDetail.price * 12;
-  return monthlyTotal - planDetail.priceAnnual;
+  const savings = monthlyTotal - planDetail.priceAnnual;
+  return Math.round(savings * 100) / 100;
 }
 
 export type SubscriptionWithValidation = UserSubscription & {
