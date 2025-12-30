@@ -16,7 +16,7 @@ interface MembershipPageClientProps {
 
 export function MembershipPageClient({ resolvedFeatures }: MembershipPageClientProps) {
   const tSubscription = useTranslations('subscription')
-  const [billingInterval, setBillingInterval] = useState<BillingInterval>(BillingInterval.annual)
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>(BillingInterval.monthly)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative">
