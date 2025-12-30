@@ -493,49 +493,6 @@
       "canceledTitle": "Payment Canceled",
       "canceledDescription": "Your subscription update was canceled."
     },
-    "plans": {
-      "apprentice": {
-        "description": "Free plan with basic features to get started",
-        "features": [
-          "🤖 Access to MIA AI platform",
-          "👥 Discount on access to local meetups about AI Education & Defi",
-          "💎 Free Ruby Subscription Asset Dream & Co NFT Marketplace",
-          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
-        ]
-      },
-      "knight": {
-        "description": "For SMEs and content creators",
-        "features": [
-          "🤖 Access to MIA AI platform + x2.5 usage",
-          "👥 Discount on access to local meetups about AI Education & Defi",
-          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
-          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
-        ]
-      },
-      "master": {
-        "description": "For startups and influencers scaling their impact",
-        "features": [
-          "🤖 Access to MIA AI platform + x10 usage",
-          "👥 Discount on access to local meetups about AI Education, Defi & Influencers",
-          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
-          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
-          "🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
-          "🌐 Free professional website hosting & showcase platform with e-commerce capabilities"
-        ]
-      },
-      "jedi": {
-        "description": "For corporate leaders and CEOs driving innovation",
-        "features": [
-          "🤖 Access to MIA AI platform + x25 usage",
-          "👥 Discount on access to local meetups about AI Education, Defi & Influencers",
-          "💎 Free Emeraud Subscription Asset Dream & Co NFT Marketplace",
-          "🎪 Discount Event (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
-          "🎟️ 1 free entrance to XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
-          "🌐 Free professional website hosting & showcase platform with e-commerce capabilities",
-          "📞 60 minutes private call per month to discuss personal branding and business scaling"
-        ]
-      }
-    },
     "billing": {
       "monthly": "Monthly",
       "annual": "Annual",
@@ -1423,7 +1380,8 @@
         "stats": "Stats",
         "feedback": "Feedback",
         "customization": "Customization",
-        "deals": "Deals"
+        "deals": "Deals",
+        "dynamicText": "Dynamic Text"
       },
       "descriptions": {
         "monthlyUsageDescription": "Total spending vs maximum capacity across all users for the last 12 months",
@@ -1509,6 +1467,21 @@
         "errors": {
           "approve": "Failed to approve deal",
           "reject": "Failed to reject deal"
+        }
+      },
+      "dynamicText": {
+        "title": "Dynamic Text Management",
+        "description": "Edit localized text content displayed throughout the application",
+        "loading": "Loading...",
+        "empty": "No dynamic texts configured. Run the seeding script to populate initial data.",
+        "items": "items",
+        "success": {
+          "title": "Success",
+          "updated": "Text updated successfully"
+        },
+        "errors": {
+          "fetch": "Failed to load dynamic texts",
+          "update": "Failed to update text"
         }
       }
     }

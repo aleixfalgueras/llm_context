@@ -27,7 +27,8 @@
       "WebFetch(domain:clerk.com)",
       "Read(/mnt/c/Users/falgu/Downloads/**)",
       "Skill(double_check)",
-      "Skill(its_working)"
+      "Skill(its_working)",
+      "Bash(npx shadcn@latest add:*)"
     ],
     "deny": []
   }

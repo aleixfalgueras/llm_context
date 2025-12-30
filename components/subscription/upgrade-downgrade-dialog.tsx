@@ -150,19 +150,6 @@ export function UpgradeDowngradeDialog({
               </div>
             </div>
 
-            {/* Feature Comparison */}
-            <div className="space-y-3">
-              <div className="text-sm font-medium">{t('upgradeDialog.features.whatYouGetWith', { planName: targetPlanConfig.name })}</div>
-              <div className="grid grid-cols-1 gap-2">
-                {targetPlanConfig.features_list.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <CheckIcon className="h-4 w-4 text-green-600" />
-                    <span>{t(feature)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             <div className="border-t border-border" />
 
             {/* Simplified Billing Summary */}
@@ -220,19 +207,6 @@ export function UpgradeDowngradeDialog({
                   </div>
                 )}
                 <Badge variant="secondary" className="mb-4">{t('upgradeDialog.badges.firstSubscription')}</Badge>
-              </div>
-            </div>
-
-            {/* Feature List */}
-            <div className="space-y-3">
-              <div className="text-sm font-medium">{t('upgradeDialog.features.whatYouGetWith', { planName: targetPlanConfig.name })}</div>
-              <div className="grid grid-cols-1 gap-2">
-                {targetPlanConfig.features_list.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <CheckIcon className="h-4 w-4 text-green-600" />
-                    <span>{t(feature)}</span>
-                  </div>
-                ))}
               </div>
             </div>
 

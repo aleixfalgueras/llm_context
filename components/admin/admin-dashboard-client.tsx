@@ -5,6 +5,7 @@ import {Button} from '@/components/ui/button'
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
 import {
   BarChart3,
+  CaseSensitive,
   Loader2,
   MessageSquare,
   RotateCcw,
@@ -19,6 +20,7 @@ import AdminDashboardStats from './AdminDashboardStats'
 import AdminFeedbackTab from './AdminFeedbackTab'
 import AdminCustomizationTab from './AdminCustomizationTab'
 import AdminDealsTab from './AdminDealsTab'
+import AdminDynamicTextTab from './AdminDynamicTextTab'
 
 interface AdminDashboardClientProps {
   data: AdminDashboardData
@@ -63,7 +65,7 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
     <div className="max-w-7xl mx-auto p-6">
       <Tabs defaultValue="stats" className="w-full">
         <div className="flex justify-between items-center mb-6">
-          <TabsList className="grid max-w-2xl grid-cols-4">
+          <TabsList className="grid max-w-3xl grid-cols-5">
             <TabsTrigger value="stats" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               {t('admin.dashboard.tabs.stats')}
@@ -75,6 +77,10 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
             <TabsTrigger value="customization" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               {t('admin.dashboard.tabs.customization')}
+            </TabsTrigger>
+            <TabsTrigger value="dynamicText" className="flex items-center gap-2">
+              <CaseSensitive className="h-4 w-4" />
+              {t('admin.dashboard.tabs.dynamicText')}
             </TabsTrigger>
             <TabsTrigger value="deals" className="flex items-center gap-2">
               <Tag className="h-4 w-4" />
@@ -112,6 +118,10 @@ export default function AdminDashboardClient({ data }: AdminDashboardClientProps
 
         <TabsContent value="customization" className="mt-6">
           <AdminCustomizationTab />
+        </TabsContent>
+
+        <TabsContent value="dynamicText" className="mt-6">
+          <AdminDynamicTextTab />
         </TabsContent>
 
         <TabsContent value="deals" className="mt-6">

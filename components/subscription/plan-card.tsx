@@ -15,7 +15,6 @@ interface PlanCardProps {
     description: string
     price: number
     priceAnnual?: number
-    features_list: readonly string[]
   }
   currentPlan: SubscriptionPlan
   currentBillingInterval?: BillingInterval | null
@@ -32,6 +31,8 @@ interface PlanCardProps {
   billingInterval?: BillingInterval
   showButton?: boolean
   className?: string
+  resolvedFeatures?: string[] // Pre-resolved feature strings from database
+  resolvedDescription?: string // Pre-resolved description from database
 }
 
 export function PlanCard({
@@ -51,7 +52,9 @@ export function PlanCard({
   onPlanAction,
   billingInterval = BillingInterval.monthly,
   showButton = true,
-  className
+  className,
+  resolvedFeatures,
+  resolvedDescription
 }: PlanCardProps) {
   const t = useTranslations()
   const tSubscription = useTranslations('subscription')
@@ -85,7 +88,7 @@ export function PlanCard({
           {getPlanIcon(planId)}
         </div>
         <CardTitle className={`text-2xl font-bold ${getPlanNameColor(planId)}`}>{plan.name}</CardTitle>
-        <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{t(plan.description)}</CardDescription>
+        <CardDescription className="text-sm min-h-[3rem] flex items-center justify-center">{resolvedDescription || t(plan.description)}</CardDescription>
         <div className="mt-4 pt-4 pb-2 flex flex-col items-center justify-center min-h-[4rem]">
           <div className="flex items-end">
             {plan.price === 0 ? (
@@ -117,10 +120,10 @@ export function PlanCard({
       
       <CardContent className="flex flex-col flex-grow">
         <ul className="space-y-3 mb-6 flex-grow">
-          {plan.features_list.map((feature, index) => (
+          {(resolvedFeatures || []).map((feature, index) => (
             <li key={index} className="flex items-center">
               <CheckIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-              <span className="text-sm">{t(feature)}</span>
+              <span className="text-sm">{feature}</span>
             </li>
           ))}
         </ul>

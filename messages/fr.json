@@ -493,49 +493,6 @@
       "canceledTitle": "Paiement Annulé",
       "canceledDescription": "La mise à jour de votre abonnement a été annulée."
     },
-    "plans": {
-      "apprentice": {
-        "description": "Plan gratuit avec fonctionnalités de base pour commencer",
-        "features": [
-          "🤖 Accès à la plateforme MIA AI",
-          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI et DeFi",
-          "💎 Abonnement Ruby gratuit Asset Dream & Co NFT Marketplace",
-          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
-        ]
-      },
-      "knight": {
-        "description": "Pour les PME et créateurs de contenu",
-        "features": [
-          "🤖 Accès à la plateforme MIA AI + utilisation x2.5",
-          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI et DeFi",
-          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
-          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)"
-        ]
-      },
-      "master": {
-        "description": "Pour les startups et influenceurs qui développent leur impact",
-        "features": [
-          "🤖 Accès à la plateforme MIA AI + utilisation x10",
-          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI, DeFi et Influenceurs",
-          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
-          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
-          "🎟️ 1 entrée gratuite au XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
-          "🌐 Hébergement de site web professionnel gratuit et plateforme vitrine avec capacités e-commerce"
-        ]
-      },
-      "jedi": {
-        "description": "Pour les dirigeants d'entreprise et PDG qui pilotent l'innovation",
-        "features": [
-          "🤖 Accès à la plateforme MIA AI + utilisation x25",
-          "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI, DeFi et Influenceurs",
-          "💎 Abonnement Émeraude gratuit Asset Dream & Co NFT Marketplace",
-          "🎪 Événement à prix réduit (Bansko Nomad Fest, Paris Blockchain Week, XYZ Forum)",
-          "🎟️ 1 entrée gratuite au XYZ Forum & Snomad Fest Entrepreneur (Snomad Pass Ticket)",
-          "🌐 Hébergement de site web professionnel gratuit et plateforme vitrine avec capacités e-commerce",
-          "📞 60 minutes d'appel privé par mois pour discuter de l'image de marque personnelle et du développement d'entreprise"
-        ]
-      }
-    },
     "billing": {
       "monthly": "Mensuel",
       "annual": "Annuel",
@@ -1423,7 +1380,8 @@
         "stats": "Statistiques",
         "feedback": "Commentaires",
         "customization": "Personnalisation",
-        "deals": "Offres"
+        "deals": "Offres",
+        "dynamicText": "Texte dynamique"
       },
       "descriptions": {
         "monthlyUsageDescription": "Dépenses totales vs capacité maximale sur tous les utilisateurs pour les 12 derniers mois",
@@ -1509,6 +1467,21 @@
         "errors": {
           "approve": "Échec de l'approbation de l'offre",
           "reject": "Échec du rejet de l'offre"
+        }
+      },
+      "dynamicText": {
+        "title": "Gestion du texte dynamique",
+        "description": "Modifier le contenu textuel localisé affiché dans l'application",
+        "loading": "Chargement...",
+        "empty": "Aucun texte dynamique configuré. Exécutez le script de seeding pour remplir les données initiales.",
+        "items": "éléments",
+        "success": {
+          "title": "Succès",
+          "updated": "Texte mis à jour avec succès"
+        },
+        "errors": {
+          "fetch": "Échec du chargement des textes dynamiques",
+          "update": "Échec de la mise à jour du texte"
         }
       }
     }

@@ -336,3 +336,22 @@ enum PromptCategory {
   content
   analysis
 }
+
+enum DynamicTextCategory {
+  subscription_features
+}
+
+model DynamicText {
+  id           String              @id @default(cuid())
+  key          String
+  languageCode String
+  value        String              @db.Text
+  category     DynamicTextCategory
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@unique([key, languageCode])
+  @@index([key])
+  @@index([category])
+  @@map("dynamic_texts")
+}
