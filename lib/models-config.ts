@@ -17,17 +17,17 @@ export interface AIModel {
 }
 
 export const MODEL_IDS = {
-  GOOGLE_GEMINI_2_0_FLASH: 'google/gemini-2.0-flash-001',
-  GOOGLE_GEMINI_2_5_PRO: 'google/gemini-2.5-pro',
-  GOOGLE_GEMINI_2_5_FLASH_IMAGE: 'google/gemini-2.5-flash-image-preview',
-  OPENAI_GPT_5_NANO: 'openai/gpt-5-nano',
-  OPENAI_GPT_5_CHAT: 'openai/gpt-5-chat',
+  GOOGLE_GEMINI_CHEAP: 'google/gemini-2.0-flash-001',
+  GOOGLE_GEMINI_PRO: 'google/gemini-2.5-pro',
+  GOOGLE_GEMINI_IMAGE: 'google/gemini-2.5-flash-image-preview',
+  OPENAI_GPT_CHEAP: 'openai/gpt-5-nano',
+  OPENAI_GPT_PRO: 'openai/gpt-5-chat',
   PERPLEXITY: 'perplexity/sonar-reasoning'
 } as const
 
 export const AVAILABLE_MODELS: AIModel[] = [
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
+    id: MODEL_IDS.GOOGLE_GEMINI_CHEAP,
     name: 'Gemini 2.0',
     description: "gemini_eco",
     provider: 'google',
@@ -35,7 +35,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     pricing: { input: 0.1, output: 0.4 },
   },
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_2_5_PRO,
+    id: MODEL_IDS.GOOGLE_GEMINI_PRO,
     name: 'Gemini 2.5 PRO',
     description: "gemini_pro",
     provider: 'google',
@@ -43,7 +43,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     pricing: { input: 1.25, output: 10 },
   },
   {
-    id: MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE,
+    id: MODEL_IDS.GOOGLE_GEMINI_IMAGE,
     name: 'Gemini 2.5 Image',
     description: "gemini_image",
     provider: 'google',
@@ -51,7 +51,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     pricing: { input: 0.3, output: 2.5, imageInput: 1.238, imageOutput: 0.03 },
   },
   {
-    id: MODEL_IDS.OPENAI_GPT_5_NANO,
+    id: MODEL_IDS.OPENAI_GPT_CHEAP,
     name: 'Chat GPT 5 Nano',
     description: "chatgpt_eco",
     provider: 'openai',
@@ -59,7 +59,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     pricing: { input: 0.05, output: 0.4 },
   },
   {
-    id: MODEL_IDS.OPENAI_GPT_5_CHAT,
+    id: MODEL_IDS.OPENAI_GPT_PRO,
     name: 'Chat GPT 5',
     description: "chatgpt_pro",
     provider: 'openai',
@@ -77,11 +77,11 @@ export const AVAILABLE_MODELS: AIModel[] = [
 ]
 
 export const ESSENTIAL_MODEL_IDS = [
-  MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH,
-  MODEL_IDS.OPENAI_GPT_5_NANO
+  MODEL_IDS.GOOGLE_GEMINI_CHEAP,
+  MODEL_IDS.OPENAI_GPT_CHEAP
 ]
 
-export const IMAGE_GENERATION_MODEL_ID = MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE
+export const IMAGE_GENERATION_MODEL_ID = MODEL_IDS.GOOGLE_GEMINI_IMAGE
 
 export const MODEL_TIERS = {
   [ModelTier.APPRENTICE]: Object.values(MODEL_IDS),
@@ -91,7 +91,7 @@ export const MODEL_TIERS = {
 }
 
 // OpenRouter Configuration Constants
-export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_2_0_FLASH
+export const DEFAULT_MODEL = MODEL_IDS.GOOGLE_GEMINI_CHEAP
 export const DEFAULT_TEMPERATURE = 0.7
 export const DEFAULT_PRESENCE_PENALTY = 0.1
 export const DEFAULT_FREQUENCY_PENALTY = 0.1

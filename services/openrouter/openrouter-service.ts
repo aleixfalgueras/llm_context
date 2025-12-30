@@ -172,7 +172,7 @@ export class OpenRouterService implements StreamingProvider {
    */
   static getModelModalities(modelId: string): ('text' | 'image')[] | undefined {
     // Currently only the Gemini 2.5 Flash Image model supports image generation
-    if (modelId === MODEL_IDS.GOOGLE_GEMINI_2_5_FLASH_IMAGE) {
+    if (modelId === MODEL_IDS.GOOGLE_GEMINI_IMAGE) {
       return ['image', 'text']
     }
     
