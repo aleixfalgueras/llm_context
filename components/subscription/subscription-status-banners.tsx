@@ -36,7 +36,7 @@ export function SubscriptionStatusBanners({
     <>
       {/* Free Apprentice Plan Banner */}
       {isFreeMode && (
-        <div className="mt-8 text-center">
+        <div className="mt-2 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border border-green-200 dark:border-green-700">
             <span className="text-[18px]">
               {t('statusBanners.freePlan.active')}
@@ -47,7 +47,7 @@ export function SubscriptionStatusBanners({
       
       {/* Active Subscription Marked for Cancellation */}
       {isActiveCancelled && currentPeriodEnd && (
-        <div className="mt-8 text-center">
+        <div className="mt-2 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-700">
             <span className="text-[18px]">
               {t('statusBanners.activeCancelled.status', { days: getRemainingActiveDays() })}
@@ -61,7 +61,7 @@ export function SubscriptionStatusBanners({
       
       {/* Active Subscription Marked for Downgrade */}
       {isPendingDowngrade && currentPeriodEnd && (
-        <div className="mt-8 text-center">
+        <div className="mt-2 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 border border-orange-200 dark:border-orange-700">
             <span className="text-[18px]">
               {t('statusBanners.pendingDowngrade.status', { days: getRemainingDowngradeDays(), plan: capitalizePlanName(pendingPlanChange) })}
@@ -75,7 +75,7 @@ export function SubscriptionStatusBanners({
       
       {/* Past Due/Unpaid Subscription Banner */}
       {isPastDueOrUnpaid && (
-        <div className="mt-8 text-center">
+        <div className="mt-2 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border border-red-200 dark:border-red-700">
             <span className="text-[18px]">
               {t('statusBanners.paymentRequired.status')}
