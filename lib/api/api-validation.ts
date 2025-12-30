@@ -4,6 +4,7 @@ import {SubscriptionUsageService} from "@/services/subscription/subscription-usa
 import {SubscriptionService} from "@/services/subscription/subscription-service";
 import {SubscriptionErrorCode} from "@/services/error-codes";
 import {getTierFromPlan, isModelAvailableForTier} from "@/lib/utils/model-utils";
+import {SubscriptionPlan} from "@prisma/client";
 
 /**
  * Validates user authentication via Clerk and returns the user ID.
@@ -23,18 +24,27 @@ export async function checkAuth(): Promise<string> {
 
 /**
  * Validates user hasn't exceeded monthly spending limits before AI operations.
- * 
+ * Also blocks free Apprentice users from AI features.
+ *
  * @param userId The authenticated user ID
  * @returns Promise<void> Resolves silently if validation passes
- * @throws Error With status 402 (subscription expired) or 429 (quota exceeded)
+ * @throws Error With AI_FEATURES_NOT_AVAILABLE for free users, or USAGE_LIMIT_EXCEEDED for quota exceeded
  */
 export async function checkUsageLimit(userId: string): Promise<void> {
+  // Get subscription to check plan and Stripe status
+  const subscription = await SubscriptionService.getUserSubscriptionWithValidation(userId)
+
+  // Block free Apprentice users from AI features
+  if (subscription.plan === SubscriptionPlan.apprentice && !subscription.stripeSubscriptionId) {
+    throw new Error(SubscriptionErrorCode.AI_FEATURES_NOT_AVAILABLE)
+  }
+
+  // Check usage limit for paid users
   const validationResult = await SubscriptionUsageService.isUsageAllowed(userId);
 
   if (!validationResult) {
     throw new Error(SubscriptionErrorCode.USAGE_LIMIT_EXCEEDED);
   }
-
 }
 
 

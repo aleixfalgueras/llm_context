@@ -239,9 +239,9 @@ export class SubscriptionService {
       }
 
       // If user has active subscription and this is a downgrade, handle downgrade scheduling
-      if (existingSubscription?.stripeSubscriptionId && 
+      if (existingSubscription?.stripeSubscriptionId &&
           isDowngrade(existingSubscription.plan as SubscriptionPlan, planId)) {
-        
+
         logger.info('Detected downgrade request, handling downgrade scheduling', {
           userId,
           metadata: {
@@ -249,8 +249,26 @@ export class SubscriptionService {
             targetPlan: planId
           }
         })
-        
-        // Schedule the downgrade using shared utility function
+
+        // Special handling for downgrade to Apprentice (free plan)
+        // Since Apprentice is free, we can't use Stripe subscription schedules
+        // Instead, we cancel the subscription at period end and mark pendingPlanChange
+        if (planId === SubscriptionPlan.apprentice) {
+          const {cancelDowngradeToApprentice} = await import('@/lib/stripe/stripe-subscription')
+          const result = await cancelDowngradeToApprentice(
+            existingSubscription.stripeSubscriptionId,
+            userId,
+            existingSubscription.plan as SubscriptionPlan
+          )
+
+          return {
+            isDowngrade: true,
+            message: result.message,
+            effectiveDate: result.effectiveDate.toISOString()
+          }
+        }
+
+        // Schedule the downgrade using shared utility function (for paid plans)
         const { effectiveDate, message } = await scheduleSubscriptionDowngrade(
           existingSubscription.stripeSubscriptionId,
           priceId,
@@ -265,6 +283,12 @@ export class SubscriptionService {
           message,
           effectiveDate: effectiveDate.toISOString()
         }
+      }
+
+      // Prevent checkout for Apprentice plan (it's free, no checkout needed)
+      if (planId === SubscriptionPlan.apprentice) {
+        logger.warn('Attempted to checkout for free Apprentice plan', { userId })
+        throw new Error('Apprentice plan is free and does not require checkout')
       }
 
       // Get user email from Clerk for upgrades/new subscriptions

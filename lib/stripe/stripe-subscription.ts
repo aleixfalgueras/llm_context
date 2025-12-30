@@ -3,9 +3,8 @@ import {logger} from '../logger'
 import {SUBSCRIPTION_PLAN_DETAIL} from '@/lib/types/subscription-types'
 import {getPlanFromPriceId} from "@/lib/stripe/stripe-utils"
 import {invalidateAllUserCaches} from '@/services/subscription/subscription-cache'
-import {SubscriptionUsageOperations} from "@/database";
-import {SubscriptionService} from '@/services/subscription/subscription-service'
-import Stripe from "stripe";
+import {SubscriptionUsageOperations} from "@/database"
+import Stripe from "stripe"
 import {SubscriptionPlan, SubscriptionStatus, BillingInterval} from '@prisma/client'
 
 /**
@@ -214,7 +213,7 @@ export async function synchronizeSubscriptionWithStripe(
       updateData.spending_limit_usd = planLimits.spending_limit_usd * multiplier
     }
 
-    const updatedSubscription = await SubscriptionService.updateSubscription(subscription.userId, updateData)
+    const updatedSubscription = await SubscriptionUsageOperations.updateSubscription(subscription.userId, updateData)
 
     logger.info('Updated subscription in database', {
       userId: subscription.userId,
@@ -392,8 +391,8 @@ export async function scheduleSubscriptionDowngrade(
     throw error
   }
 
-  // Update database with pending plan change and schedule ID through service layer
-  await SubscriptionService.updateSubscription(userId, {
+  // Update database with pending plan change and schedule ID
+  await SubscriptionUsageOperations.updateSubscription(userId, {
     pendingPlanChange: targetPlan,
     stripeScheduleId: schedule.id
   })
@@ -416,5 +415,118 @@ export async function scheduleSubscriptionDowngrade(
   return {
     effectiveDate,
     message: `Downgrade scheduled successfully. Your plan will change to ${targetPlan} on ${effectiveDate.toLocaleDateString()}.`
+  }
+}
+
+/**
+ * Handle downgrade to Apprentice (free plan).
+ * Since Apprentice is free, we can't use Stripe subscription schedules.
+ * Instead, we mark the subscription for cancellation at period end and set pendingPlanChange.
+ * When the Stripe subscription is deleted, the webhook will reset user to free Apprentice.
+ *
+ * @param stripeSubscriptionId - The Stripe subscription ID to cancel
+ * @param userId - The user ID for database updates
+ * @param currentPlan - The current subscription plan
+ * @returns Promise<{effectiveDate: Date, message: string}> - Effective date and user message
+ */
+export async function cancelDowngradeToApprentice(
+  stripeSubscriptionId: string,
+  userId: string,
+  currentPlan: SubscriptionPlan
+): Promise<{
+  effectiveDate: Date
+  message: string
+}> {
+  try {
+    logger.info('Starting downgrade to free Apprentice plan', {
+      userId,
+      metadata: {
+        currentPlan,
+        targetPlan: SubscriptionPlan.apprentice,
+        subscriptionId: stripeSubscriptionId
+      }
+    })
+
+    // Get the subscription to find period end date
+    const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+    const subscriptionItem = stripeSubscription.items.data[0]
+    const effectiveDate = new Date(subscriptionItem.current_period_end * 1000)
+
+    // Mark subscription for cancellation at period end
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      cancel_at_period_end: true,
+      metadata: {
+        pendingDowngradeToFree: 'true',
+        userId
+      }
+    })
+
+    // Update database with cancellation and pending plan change
+    await SubscriptionUsageOperations.updateSubscription(userId, {
+      cancelAtPeriodEnd: true,
+      pendingPlanChange: SubscriptionPlan.apprentice
+    })
+
+    logger.info('Downgrade to free Apprentice scheduled successfully', {
+      userId,
+      metadata: {
+        currentPlan,
+        targetPlan: SubscriptionPlan.apprentice,
+        subscriptionId: stripeSubscriptionId,
+        effectiveDate: effectiveDate.toISOString()
+      }
+    })
+
+    // Invalidate caches
+    await invalidateAllUserCaches(userId)
+
+    return {
+      effectiveDate,
+      message: `Downgrade to free plan scheduled. Your subscription will end on ${effectiveDate.toLocaleDateString()} and you'll continue with the free Apprentice plan.`
+    }
+  } catch (error) {
+    logger.error('Failed to schedule downgrade to free Apprentice', error as Error, {
+      userId,
+      metadata: {
+        currentPlan,
+        subscriptionId: stripeSubscriptionId
+      }
+    })
+    throw error
+  }
+}
+
+/**
+ * Reset user to free Apprentice plan.
+ * Called when a subscription is deleted and the user was downgrading to free.
+ *
+ * @param userId - The user ID to reset
+ */
+export async function resetToFreeApprentice(userId: string): Promise<void> {
+  try {
+    const now = new Date()
+    const periodEnd = new Date('2099-12-31T23:59:59.999Z')
+
+    await SubscriptionUsageOperations.updateSubscription(userId, {
+      plan: SubscriptionPlan.apprentice,
+      status: SubscriptionStatus.active,
+      stripeSubscriptionId: null,
+      stripePriceId: null,
+      stripeScheduleId: null,
+      cancelAtPeriodEnd: false,
+      pendingPlanChange: null,
+      canceledAt: null,
+      currentPeriodStart: now,
+      currentPeriodEnd: periodEnd,
+      spending_limit_usd: SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd
+    })
+
+    logger.info('Successfully reset user to free Apprentice plan', { userId })
+
+    // Invalidate caches
+    await invalidateAllUserCaches(userId)
+  } catch (error) {
+    logger.error('Failed to reset user to free Apprentice', error as Error, { userId })
+    throw error
   }
 }

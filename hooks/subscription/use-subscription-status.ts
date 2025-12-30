@@ -16,15 +16,15 @@ export function useSubscriptionStatus() {
     return Math.max(0, diffDays)
   }
 
-  // Helper function to detect if user is in free mode
+  // Helper function to detect if user is on free Apprentice plan
   const isFreeMode = () => {
     return subscription.plan === SubscriptionPlan.apprentice && !subscription.stripeSubscriptionId
   }
 
-  // Helper function to calculate remaining trial days
+  // Helper function to calculate remaining trial days (deprecated - free plan never expires)
+  // Kept for backward compatibility, always returns 0
   const getRemainingTrialDays = () => {
-    if (!isFreeMode()) return 0
-    return calculateRemainingDays(subscription.currentPeriodEnd)
+    return 0
   }
 
   // Helper function to detect if subscription is active but marked for cancellation
@@ -62,9 +62,9 @@ export function useSubscriptionStatus() {
 
   // Helper function to check if a plan is the current plan
   const isCurrentPlan = (planId: string, billingInterval?: BillingInterval) => {
-    // Free mode users don't have a "current plan" - they're in trial
-    if (isFreeMode()) {
-      return false
+    // Free mode users on Apprentice plan - show as current
+    if (isFreeMode() && planId === SubscriptionPlan.apprentice) {
+      return true
     }
     // Expired subscriptions don't have a "current plan" - they need to resubscribe
     if (isExpired()) {

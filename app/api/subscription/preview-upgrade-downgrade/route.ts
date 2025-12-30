@@ -28,7 +28,7 @@ export const POST = withEnhancedApi(
 
     if (!existingSubscription?.stripeSubscriptionId) {
       logger.warn('No active subscription found for upgrade/downgrade preview - ' +
-        'user appears to be in free trial', {
+        'user appears to be on free plan', {
         userId,
         metadata: {
           hasSubscriptionRecord: !!existingSubscription,
@@ -37,7 +37,7 @@ export const POST = withEnhancedApi(
       })
       throw new Error('No active Stripe subscription found. ' +
         'This endpoint is for subscription upgrades/downgrade only. ' +
-        'Free trial users should proceed directly to checkout.')
+        'Free plan users should proceed directly to checkout.')
     }
 
     // Get target price ID based on billing interval

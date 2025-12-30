@@ -25,7 +25,9 @@
       "Bash(cp:*)",
       "WebSearch",
       "WebFetch(domain:clerk.com)",
-      "Read(/mnt/c/Users/falgu/Downloads/**)"
+      "Read(/mnt/c/Users/falgu/Downloads/**)",
+      "Skill(double_check)",
+      "Skill(its_working)"
     ],
     "deny": []
   }

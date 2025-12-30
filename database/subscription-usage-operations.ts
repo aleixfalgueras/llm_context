@@ -62,16 +62,16 @@ export class SubscriptionUsageOperations extends BaseOperations {
   }
 
   /**
-   * Create default apprentice subscription for new users
+   * Create default free apprentice subscription for new users
+   * Note: Apprentice is a permanent free plan that never expires
    */
   static async createDefaultApprenticeSubscription(userId: string, email?: string, billingInterval: BillingInterval = BillingInterval.monthly): Promise<UserSubscription> {
     try {
       const now = new Date()
-      const periodEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days
+      // Free plan never expires - set to far future date
+      const periodEnd = new Date('2099-12-31T23:59:59.999Z')
 
-      // Multiply spending limit by 12 for annual subscriptions
-      const multiplier = billingInterval === BillingInterval.annual ? 12 : 1
-      const spendingLimit = SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd * multiplier
+      const spendingLimit = SUBSCRIPTION_PLAN_DETAIL[SubscriptionPlan.apprentice].spending_limit_usd
 
       return await this.upsertSubscription(
         userId,

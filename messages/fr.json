@@ -336,6 +336,10 @@
   },
   "assistant": {
     "title": "Assistant IA",
+    "upgradeRequired": {
+      "title": "Fonctionnalité Premium",
+      "description": "L'assistant IA est disponible pour les abonnés premium. Mettez à niveau votre plan pour débloquer les conversations intelligentes et les fonctionnalités de contexte client."
+    },
     "chats": "Discussions",
     "deleteAllChats": "Supprimer Toutes les Discussions",
     "clickToConfirm": "Cliquer pour Confirmer",
@@ -491,7 +495,7 @@
     },
     "plans": {
       "apprentice": {
-        "description": "Parfait pour les individus qui commencent leur parcours",
+        "description": "Plan gratuit avec fonctionnalités de base pour commencer",
         "features": [
           "🤖 Accès à la plateforme MIA AI",
           "👥 Réduction sur l'accès aux meetups locaux sur l'éducation AI et DeFi",
@@ -540,6 +544,7 @@
     "planCard": {
       "perMonth": "/mois",
       "perYear": "/an",
+      "free": "Gratuit",
       "savings": "Économisez",
       "processing": "Traitement en cours...",
       "canceling": "Annulation en cours...",
@@ -611,6 +616,9 @@
       }
     },
     "statusBanners": {
+      "freePlan": {
+        "active": "Plan Apprenti (Gratuit)"
+      },
       "freeTrial": {
         "active": "Essai Gratuit Actif (Plan Apprenti) - {{days}} jours restants",
         "expires": "L'essai expire le {{date}}"
@@ -651,6 +659,9 @@
       "errorLoadingUsage": "Échec du chargement des informations d'utilisation",
       "limitReached": "Vous avez atteint votre limite de dépense. Les messages peuvent être bloqués.",
       "approachingLimit": "Vous approchez de votre limite de dépense."
+    },
+    "upgradePrompt": {
+      "upgradeButton": "Voir les Plans"
     }
   },
   "affiliation": {
@@ -1110,6 +1121,10 @@
   "aiServices": {
     "title": "Services IA",
     "description": "Exploitez l'IA pour créer du contenu marketing personnalisé pour vos clients",
+    "upgradeRequired": {
+      "title": "Fonctionnalité Premium",
+      "description": "Les services IA sont disponibles pour les abonnés premium. Mettez à niveau votre plan pour accéder aux rapports de réunion, à la génération de documents et à la création d'images."
+    },
     "configureServices": "Configurer les Services",
     "serviceVisibilitySettings": "Paramètres de Visibilité des Services",
     "getStarted": "Commencer",

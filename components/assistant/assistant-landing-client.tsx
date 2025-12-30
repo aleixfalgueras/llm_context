@@ -15,6 +15,8 @@ import {ClientCombobox} from '@/components/ui/client-combobox'
 import {useTranslations} from '@/lib/translations/context'
 import {getClientContextFields} from '@/lib/utils/client-context-utils'
 import {ScrollArea} from '@/components/ui/scroll-area'
+import {useSubscriptionStatus} from '@/hooks/subscription/use-subscription-status'
+import {UpgradePrompt} from '@/components/subscription/upgrade-prompt'
 
 interface AssistantLandingClientProps {
   chats: Chat[]
@@ -26,6 +28,17 @@ export function AssistantLandingClient({ chats, clients }: AssistantLandingClien
   const t = useTranslations('assistant')
   const tContext = useTranslations('clientContext')
   const contextFields = useMemo(() => getClientContextFields(tContext), [tContext])
+  const { isFreeMode, subscription } = useSubscriptionStatus()
+
+  // Show upgrade prompt for free Apprentice users
+  if (!subscription.isLoading && isFreeMode()) {
+    return (
+      <UpgradePrompt
+        title={t('upgradeRequired.title')}
+        description={t('upgradeRequired.description')}
+      />
+    )
+  }
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
   const [clientContext, setClientContext] = useState<ClientContextSelection>(DEFAULT_CLIENT_CONTEXT)
   const [isCreatingChat, setIsCreatingChat] = useState(false)
