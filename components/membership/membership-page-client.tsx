@@ -86,7 +86,7 @@ export function MembershipPageClient({ resolvedFeatures }: MembershipPageClientP
                 onPlanAction={() => {}}
                 billingInterval={billingInterval}
                 showButton={false}
-                className="bg-gray-800/60 border-cian hover:shadow-lg hover:shadow-lavanda/20 transition-all duration-300"
+                className="dark bg-gray-800/60 border-cian hover:shadow-lg hover:shadow-lavanda/20 transition-all duration-300"
                 resolvedFeatures={resolvedFeatures[planId].features}
                 resolvedDescription={resolvedFeatures[planId].description}
               />
