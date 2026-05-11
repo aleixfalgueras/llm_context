@@ -31,6 +31,9 @@ yarn-error.log*
 .env.development
 .env.production
 
+# claude local settings (may contain sensitive data)
+.claude/settings.local.json
+
 # vercel
 .vercel
 
