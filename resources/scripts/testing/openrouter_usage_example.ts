@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: 'REDACTED_OPENROUTER_KEY',
+  apiKey: process.env.OPENROUTER_API_KEY,
 });
 
 async function streamingChatCompletionWithUsage(messages: { role: string; content: string; }[]) {
